@@ -3,11 +3,11 @@ package org.jumpmind.symmetric.is.core.config;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StructuredDataModelVersion extends AbstractVersion {
+public class StructuredModelVersion extends AbstractVersion {
 
-    List<StructuredDataAttribute> attributes = new ArrayList<StructuredDataAttribute>();
+    List<StructuredAttribute> attributes = new ArrayList<StructuredAttribute>();
     
-    public StructuredDataModelVersion add(StructuredDataAttribute attribute) {
+    public StructuredModelVersion add(StructuredAttribute attribute) {
         if (this.attributes.contains(attribute)) {
             this.attributes.remove(attribute);
         }
@@ -15,7 +15,7 @@ public class StructuredDataModelVersion extends AbstractVersion {
         return this;
     }
     
-    public StructuredDataModelVersion() {
+    public StructuredModelVersion() {
     }
         
 }

@@ -12,6 +12,6 @@ public abstract class AbstractObject {
 
     String createBy;
     
-    Folder folder;
+    String folderId;
     
 }
