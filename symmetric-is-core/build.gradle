@@ -1,1 +1,21 @@
 apply from: '../../symmetric-app-core/common.gradle'
+
+
+dependencies {
+    compile "org.jumpmind.symmetric:symmetric-jdbc:$symmetricVersion"
+    compile "commons-dbcp:commons-dbcp:$commonsDbcpVersion"
+    compile "commons-io:commons-io:$commonsIoVersion"
+    compile "jaxen:jaxen:$jaxenVersion"
+    compile "javax.mail:mail:$javaMailVersion"
+    compile "org.jdom:jdom2:$jdomVersion"
+    compile "javax.el:javax.el-api:3.0.0"
+    compile "com.h2database:h2:$h2Version"
+    compile "net.sourceforge.jtds:jtds:$jtdsVersion"
+    compile "org.apache.httpcomponents:httpclient:$httpComponentsVersion"
+    compile "org.apache.httpcomponents:httpmime:$httpComponentsVersion"
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
+    compile "org.slf4j:jul-to-slf4j:$slf4jVersion"
+    compile "org.slf4j:slf4j-log4j12:$slf4jVersion"
+    compile "org.slf4j:jcl-over-slf4j:$slf4jVersion"
+    compile "log4j:log4j:$log4jVersion"
+}
