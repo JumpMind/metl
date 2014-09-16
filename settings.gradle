@@ -1,0 +1,2 @@
+includeFlat 'symmetric-app-core', 'symmetric-ui-core'
+include 'symmetric-is-core', 'symmetric-is-agent', 'symmetric-is-ui'
