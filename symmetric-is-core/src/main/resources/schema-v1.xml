@@ -88,7 +88,7 @@
         <column name="create_by" type="VARCHAR" size="50"  description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50"  description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
-        <foreign-key foreignTable="structured_model_version" name="fk_cmpv_2_smv_2">
+        <foreign-key foreignTable="structured_model_version" name="fk_cmpv_2_smv_1">
             <reference local="input_structured_model_id" foreign="structured_model_id" />
             <reference local="input_version" foreign="version" />
         </foreign-key> 
@@ -97,7 +97,21 @@
             <reference local="output_version" foreign="version" />
         </foreign-key>                 
     </table>
-    
+
+    <table name="component_version_setting" description="">
+        <column name="component_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer"/>
+        <column name="version" type="BIGINT" required="true" primaryKey="true"  description="A version number" />
+        <column name="name" type="VARCHAR" size="255" required="true" description=""/>
+        <column name="value" type="VARCHAR" size="255" description=""/>
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50"  description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50"  description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
+        <foreign-key foreignTable="component_version" name="fk_cmpvs_2_cmv_1">
+            <reference local="component_id" foreign="component_id" />
+            <reference local="version" foreign="version" />
+        </foreign-key>                 
+    </table>    
     
 
 </database>
