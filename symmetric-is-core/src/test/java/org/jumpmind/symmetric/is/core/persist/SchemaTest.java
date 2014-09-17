@@ -2,8 +2,6 @@ package org.jumpmind.symmetric.is.core.persist;
 
 import java.io.File;
 
-import net.sourceforge.schemaspy.Main;
-
 import org.apache.commons.io.FileUtils;
 import org.jumpmind.db.io.DatabaseXmlUtil;
 import org.jumpmind.db.model.Database;
@@ -18,35 +16,31 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class SchemaTest {
-    
+
     IDatabasePlatform platform;
     ResettableBasicDataSource ds;
-    
+
     @Before
     public void setup() throws Exception {
         final String DB_DIR = "build/dbs";
         if (ds != null) {
-           ds.close();
+            ds.close();
         }
-        FileUtils.deleteDirectory(new File(DB_DIR));    
+        FileUtils.deleteDirectory(new File(DB_DIR));
         TypedProperties properties = new TypedProperties();
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_DRIVER, "org.h2.Driver");
-        properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_URL, "jdbc:h2:file:"+DB_DIR+"/testdb");
+        properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_URL, "jdbc:h2:file:"
+                + DB_DIR + "/testdb");
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_USER, "jumpmind");
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_PASSWORD, "jumpmind");
         ds = BasicDataSourceFactory.create(properties);
-        platform =  JdbcDatabasePlatformFactory.createNewPlatformInstance(ds, new SqlTemplateSettings(), false);
-        
+        platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(ds,
+                new SqlTemplateSettings(), false);
     }
 
     @Test
-    public void testCreateSchema() throws Exception {
+    public void createSchema() throws Exception {
         Database db = DatabaseXmlUtil.read(getClass().getResourceAsStream("/schema-v1.xml"));
         platform.createDatabase(db, false, false);
-        /*
-        <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="net.sourceforge.schemaspy.Main"/>
-        <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-t src/schemaspy/schemaspy.properties -u jumpmind -p jumpmind -o target/schemaspy -s PUBLIC"/>
-        */
-        Main.main(new String[] { "-t","src/test/resources/schemaspy.properties","-u","jumpmind","-p","jumpmind","-o","build/schemaspy","-s","PUBLIC"});
     }
 }

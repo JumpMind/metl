@@ -20,3 +20,8 @@ dependencies {
     compile "log4j:log4j:$log4jVersion"
     compile "org.jumpmind.symmetric.schemaspy:schemaspy:5.0.0"
 }
+
+task (schemaspy, dependsOn: 'classes', type: JavaExec) {
+    main = 'org.jumpmind.symmetric.is.core.persist.SchemaSpy'
+    classpath = sourceSets.test.runtimeClasspath
+}
