@@ -2,6 +2,8 @@ package org.jumpmind.symmetric.is.core.persist;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Types;
@@ -82,6 +84,20 @@ public class JdbcPersistenceManagerTest {
         
         Row row = getRow(1);
         assertEquals(date, row.get("last_update_time"));
+    }
+    
+    @Test
+    public void testDelete() {
+        Date date = new Date();        
+        A a = new A(999, date, "Hello");
+        assertTrue(manager.save(a));
+
+        assertNotNull(getRow(999));
+        
+        manager.delete(a);
+        
+        assertNull(getRow(999));
+
     }
 
 

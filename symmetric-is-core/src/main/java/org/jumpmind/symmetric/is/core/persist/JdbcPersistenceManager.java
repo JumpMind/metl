@@ -23,6 +23,7 @@ public class JdbcPersistenceManager implements IPersistenceManager {
         this.databasePlatform = databasePlatform;
     }
 
+    @Override
     public boolean save(Object object) {
         return save(object, null, null, camelCaseToUnderscores(object.getClass().getSimpleName()));
     }
@@ -36,6 +37,7 @@ public class JdbcPersistenceManager implements IPersistenceManager {
      * @param tableName
      * @return true if the object was created, false if the object was updated
      */
+    @Override
     public boolean save(Object object, String catalogName, String schemaName, String tableName) {
         if (update(object, catalogName, schemaName, tableName) == 0) {
             insert(object, catalogName, schemaName, tableName);
@@ -45,12 +47,22 @@ public class JdbcPersistenceManager implements IPersistenceManager {
         }
     }
 
+    @Override
     public int update(Object object, String catalogName, String schemaName, String tableName) {
         return dml(DmlType.UPDATE, object, catalogName, schemaName, tableName);
     }
 
+    @Override
     public void insert(Object object, String catalogName, String schemaName, String tableName) {
         dml(DmlType.INSERT, object, catalogName, schemaName, tableName);
+    }
+    
+    public boolean delete(Object object) {
+        return delete(object, null, null, camelCaseToUnderscores(object.getClass().getSimpleName()));
+    }
+    
+    public boolean delete(Object object, String catalogName, String schemaName, String tableName) {
+        return dml(DmlType.DELETE, object, catalogName, schemaName, tableName) > 0;
     }
 
     protected int dml(DmlType type, Object object, String catalogName, String schemaName,
