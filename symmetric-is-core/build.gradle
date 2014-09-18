@@ -22,6 +22,7 @@ dependencies {
 }
 
 task (schemaspy, dependsOn: 'classes', type: JavaExec) {
+    description 'Generates schema spy output for the SymmetricIS configuration data model'
     main = 'org.jumpmind.symmetric.is.core.persist.SchemaSpy'
     classpath = sourceSets.test.runtimeClasspath
 }

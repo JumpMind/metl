@@ -14,4 +14,8 @@ public abstract class AbstractObject {
     
     String folderId;
     
+    Date lastModifyTime;
+    
+    String lastModifyBy;
+    
 }

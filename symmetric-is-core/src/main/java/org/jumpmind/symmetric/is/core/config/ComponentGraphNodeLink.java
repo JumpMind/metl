@@ -2,8 +2,8 @@ package org.jumpmind.symmetric.is.core.config;
 
 public class ComponentGraphNodeLink {
 
-    VersionId sourceNodeId;
+    String sourceNodeId;
     
-    VersionId targetNodeId;
+    String targetNodeId;
     
 }
