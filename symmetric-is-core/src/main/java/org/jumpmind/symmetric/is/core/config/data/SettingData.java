@@ -1,12 +1,12 @@
-package org.jumpmind.symmetric.is.core.config;
+package org.jumpmind.symmetric.is.core.config.data;
 
-public class Setting {
+public class SettingData {
 
-    VersionId versionId;
+    String versionId;
     String name;
     String value;
     
-    public Setting(String name, String value) {
+    public SettingData(String name, String value) {
         this.name = name;
         this.value = value;
     }
@@ -35,7 +35,7 @@ public class Setting {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Setting other = (Setting) obj;
+        SettingData other = (SettingData) obj;
         if (name == null) {
             if (other.name != null)
                 return false;

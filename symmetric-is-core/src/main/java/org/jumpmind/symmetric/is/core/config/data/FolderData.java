@@ -1,6 +1,6 @@
-package org.jumpmind.symmetric.is.core.config;
+package org.jumpmind.symmetric.is.core.config.data;
 
-public class Folder {
+public class FolderData {
 
     public enum FolderType { COMPONENT, GRAPH, CONNECTION, AGENT }
     

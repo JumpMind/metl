@@ -1,21 +1,14 @@
 package org.jumpmind.symmetric.is.core.config;
 
-import java.util.Date;
+abstract public class AbstractObject<D> {
 
-public abstract class AbstractObject {
-
-    String id;
-
-    String name;
-
-    Date createTime;
-
-    String createBy;
+    protected D data;
     
-    String folderId;
+    public AbstractObject(D data) {
+        this.data = data;
+    }
     
-    Date lastModifyTime;
-    
-    String lastModifyBy;
-    
+    public D getData() {
+        return this.data;
+    }
 }

@@ -5,6 +5,7 @@ dependencies {
     compile "org.jumpmind.symmetric:symmetric-jdbc:$symmetricVersion"
     compile "commons-dbcp:commons-dbcp:$commonsDbcpVersion"
     compile "commons-io:commons-io:$commonsIoVersion"
+    compile "commons-beanutils:commons-beanutils:$commonsBeanUtils"
     compile "jaxen:jaxen:$jaxenVersion"
     compile "javax.mail:mail:$javaMailVersion"
     compile "org.jdom:jdom2:$jdomVersion"

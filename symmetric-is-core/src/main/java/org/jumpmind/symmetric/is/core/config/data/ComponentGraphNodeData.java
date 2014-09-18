@@ -1,14 +1,14 @@
-package org.jumpmind.symmetric.is.core.config;
+package org.jumpmind.symmetric.is.core.config.data;
 
 import java.util.Date;
 
-public class ComponentGraphNode {
+public class ComponentGraphNodeData {
 
     String id;
     
-    VersionId componentId;
+    String componentVersionId;
     
-    VersionId graphId;
+    String componentGraphVersionId;
     
     Date createTime;
 

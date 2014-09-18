@@ -1,11 +1,15 @@
 package org.jumpmind.symmetric.is.core.config;
 
+import org.jumpmind.symmetric.is.core.config.data.ComponentData;
 
+public class Component extends AbstractObject<ComponentData> {
 
-public class Component extends AbstractObject {
+    public Component() {
+        super(new ComponentData());
+    }
 
-    String type;
-    
-    boolean shared;
-    
+    public Component(ComponentData data) {
+        super(data);
+    }
+        
 }
