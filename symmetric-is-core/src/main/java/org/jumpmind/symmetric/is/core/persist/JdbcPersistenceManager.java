@@ -25,7 +25,7 @@ public class JdbcPersistenceManager implements IPersistenceManager {
 
     @Override
     public boolean save(Object object) {
-        return save(object, null, null, camelCaseToUnderscores(object.getClass().getSimpleName()));
+        return save(object, null, null, camelCaseToUnderScores(object.getClass().getSimpleName()));
     }
 
     /**
@@ -58,7 +58,7 @@ public class JdbcPersistenceManager implements IPersistenceManager {
     }
     
     public boolean delete(Object object) {
-        return delete(object, null, null, camelCaseToUnderscores(object.getClass().getSimpleName()));
+        return delete(object, null, null, camelCaseToUnderScores(object.getClass().getSimpleName()));
     }
     
     public boolean delete(Object object, String catalogName, String schemaName, String tableName) {
@@ -133,7 +133,7 @@ public class JdbcPersistenceManager implements IPersistenceManager {
         PropertyDescriptor[] pds = PropertyUtils.getPropertyDescriptors(object);
         for (int i = 0; i < pds.length; i++) {
             String propName = pds[i].getName();
-            Column column = table.getColumnWithName(camelCaseToUnderscores(propName));
+            Column column = table.getColumnWithName(camelCaseToUnderScores(propName));
             if (column != null) {
                 columnNames.put(propName, column);
             }
@@ -141,7 +141,7 @@ public class JdbcPersistenceManager implements IPersistenceManager {
         return columnNames;
     }
 
-    protected String camelCaseToUnderscores(String camelCaseName) {
+    protected String camelCaseToUnderScores(String camelCaseName) {
         StringBuilder underscoredName = new StringBuilder();
         for (int p = 0; p < camelCaseName.length(); p++) {
             char c = camelCaseName.charAt(p);

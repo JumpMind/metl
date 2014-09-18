@@ -4,6 +4,9 @@ abstract public class AbstractObject<D> {
 
     protected D data;
     
+    public AbstractObject() {
+    }
+    
     public AbstractObject(D data) {
         this.data = data;
     }
