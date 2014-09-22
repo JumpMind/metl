@@ -16,7 +16,10 @@ public class TestUtils {
 
     public static IDatabasePlatform createDatabasePlatform() throws Exception {
         final String DB_DIR = "build/dbs";
-        FileUtils.deleteDirectory(new File(DB_DIR));
+        File dir = new File(DB_DIR);
+        if (dir.exists()) {
+            FileUtils.deleteDirectory(new File(DB_DIR));
+        }
         TypedProperties properties = new TypedProperties();
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_DRIVER, "org.h2.Driver");
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_URL, "jdbc:h2:file:"

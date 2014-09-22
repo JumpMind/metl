@@ -15,7 +15,7 @@ import org.jumpmind.db.sql.DmlStatement;
 import org.jumpmind.db.sql.DmlStatement.DmlType;
 import org.jumpmind.db.sql.SqlException;
 
-public class JdbcPersistenceManager implements IPersistenceManager {
+public class JdbcPersistenceManager extends AbstractPersistenceManager {
 
     IDatabasePlatform databasePlatform;
 
