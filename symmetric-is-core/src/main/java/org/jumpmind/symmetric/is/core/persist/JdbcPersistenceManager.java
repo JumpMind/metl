@@ -7,12 +7,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.jumpmind.db.model.Column;
 import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.DmlStatement;
 import org.jumpmind.db.sql.DmlStatement.DmlType;
+import org.jumpmind.db.sql.Row;
 import org.jumpmind.db.sql.SqlException;
 
 public class JdbcPersistenceManager extends AbstractPersistenceManager {
@@ -23,18 +25,15 @@ public class JdbcPersistenceManager extends AbstractPersistenceManager {
         this.databasePlatform = databasePlatform;
     }
 
+    /**
+     * @return true if the object was created, false if the object was updated
+     */
     @Override
     public boolean save(Object object) {
         return save(object, null, null, camelCaseToUnderScores(object.getClass().getSimpleName()));
     }
 
     /**
-     * Save an object to a table
-     * 
-     * @param object
-     * @param catalogName
-     * @param schemaName
-     * @param tableName
      * @return true if the object was created, false if the object was updated
      */
     @Override
@@ -49,23 +48,97 @@ public class JdbcPersistenceManager extends AbstractPersistenceManager {
 
     @Override
     public int update(Object object, String catalogName, String schemaName, String tableName) {
-        return dml(DmlType.UPDATE, object, catalogName, schemaName, tableName);
+        return excecuteDml(DmlType.UPDATE, object, catalogName, schemaName, tableName);
     }
 
     @Override
     public void insert(Object object, String catalogName, String schemaName, String tableName) {
-        dml(DmlType.INSERT, object, catalogName, schemaName, tableName);
+        excecuteDml(DmlType.INSERT, object, catalogName, schemaName, tableName);
     }
-    
+
+    @Override
     public boolean delete(Object object) {
         return delete(object, null, null, camelCaseToUnderScores(object.getClass().getSimpleName()));
     }
-    
+
+    @Override
     public boolean delete(Object object, String catalogName, String schemaName, String tableName) {
-        return dml(DmlType.DELETE, object, catalogName, schemaName, tableName) > 0;
+        return excecuteDml(DmlType.DELETE, object, catalogName, schemaName, tableName) > 0;
     }
 
-    protected int dml(DmlType type, Object object, String catalogName, String schemaName,
+    @Override
+    public <T> List<T> find(Class<T> clazz, String catalogName, String schemaName, String tableName) {
+        try {
+            Table table = findTable(catalogName, schemaName, tableName);
+
+            T object = clazz.newInstance();
+
+            LinkedHashMap<String, Column> objectToTableMapping = mapObjectToTable(object, table);
+
+            Column[] columns = objectToTableMapping.values().toArray(
+                    new Column[objectToTableMapping.size()]);
+
+            DmlStatement statement = databasePlatform.createDmlStatement(DmlType.SELECT_ALL,
+                    table.getCatalog(), table.getSchema(), table.getName(), null, columns, null,
+                    null);
+            String sql = statement.getSql();
+
+            List<Row> rows = databasePlatform.getSqlTemplate().query(sql);
+            List<T> objects = new ArrayList<T>();
+
+            for (Row row : rows) {
+                object = clazz.newInstance();
+                Set<String> propertyNames = objectToTableMapping.keySet();
+                for (String propertyName : propertyNames) {
+                    Object value = row.get(objectToTableMapping.get(propertyName).getName());
+                    BeanUtils.copyProperty(object, propertyName, value);
+                }
+                objects.add(object);
+            }
+
+            return objects;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void refresh(Object object, String catalogName, String schemaName, String tableName) {
+        try {
+            Table table = findTable(catalogName, schemaName, tableName);
+
+            LinkedHashMap<String, Column> objectToTableMapping = mapObjectToTable(object, table);
+            LinkedHashMap<String, Object> objectValuesByColumnName = getObjectValuesByColumnName(
+                    object, objectToTableMapping);
+
+            Column[] columns = objectToTableMapping.values().toArray(
+                    new Column[objectToTableMapping.size()]);
+            List<Column> keys = new ArrayList<Column>(1);
+            for (Column column : columns) {
+                if (column.isPrimaryKey()) {
+                    keys.add(column);
+                }
+            }
+
+            DmlStatement statement = databasePlatform.createDmlStatement(DmlType.SELECT,
+                    table.getCatalog(), table.getSchema(), table.getName(),
+                    keys.toArray(new Column[keys.size()]), columns, null, null);
+            String sql = statement.getSql();
+            Object[] values = statement.getValueArray(objectValuesByColumnName);
+
+            Row row = databasePlatform.getSqlTemplate().queryForRow(sql, values);
+
+            Set<String> propertyNames = objectToTableMapping.keySet();
+            for (String propertyName : propertyNames) {
+                Object value = row.get(objectToTableMapping.get(propertyName).getName());
+                BeanUtils.copyProperty(object, propertyName, value);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    protected int excecuteDml(DmlType type, Object object, String catalogName, String schemaName,
             String tableName) {
         Table table = findTable(catalogName, schemaName, tableName);
 
