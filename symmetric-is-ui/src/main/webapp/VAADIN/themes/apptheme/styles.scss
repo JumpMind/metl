@@ -1,0 +1,11 @@
+@import "variables";
+@import "apptheme";
+
+.apptheme {
+   @include apptheme;
+}
+
+html {
+	width: 100px;
+	min-width: 100%;
+}

@@ -1,10 +1,11 @@
 package org.jumpmind.symmetric.is.core.config.data;
 
 import java.util.Date;
+import java.util.UUID;
 
 public abstract class AbstractData {
 
-    String id;
+    String id = UUID.randomUUID().toString();
 
     String name;
 
