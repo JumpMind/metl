@@ -4,6 +4,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.PreserveOnRefresh;
+import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.VaadinServletConfiguration;
@@ -13,6 +14,7 @@ import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -28,6 +30,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @Theme("apptheme")
 @Title("SymmetricIS")
 @PreserveOnRefresh
+@Push(transport = Transport.STREAMING)
 public class AppUI extends UI {
 
     private static final long serialVersionUID = 1L;

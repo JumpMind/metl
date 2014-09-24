@@ -97,7 +97,7 @@ public class AppConfig {
     @Bean
     @Scope(value = "singleton")
     public String tablePrefix() {
-        String tablePrefix = env.getProperty(EnvConstants.TABLE_PREFIX, "SYM");
+        String tablePrefix = env.getProperty(EnvConstants.TABLE_PREFIX, "SIS");
         return configDatabasePlatform().alterCaseToMatchDatabaseDefaultCase(tablePrefix);
     }
     
@@ -105,7 +105,7 @@ public class AppConfig {
     @Bean
     @Scope(value="singleton")
     ConfigDatabaseUpgrader configDatabaseUpgrader() {
-        return new ConfigDatabaseUpgrader("/schema-v1.xml", configDatabasePlatform(), true);
+        return new ConfigDatabaseUpgrader("/schema-v1.xml", configDatabasePlatform(), true, tablePrefix());
     }
 
 }

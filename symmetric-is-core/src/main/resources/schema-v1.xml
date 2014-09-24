@@ -104,8 +104,8 @@
     
     <table name="entity_relationship_attribute">
         <column name="entity_relationship_id" required="true" type="VARCHAR" size="128" primaryKey="true"  />
-        <column name="source_attribute_id" type="VARCHAR" size="128" primaryKey="true"  />
-        <column name="target_attribute_id" type="VARCHAR" size="128" primaryKey="true"  />
+        <column name="source_attribute_id" type="VARCHAR" size="128" required="true" primaryKey="true"  />
+        <column name="target_attribute_id" type="VARCHAR" size="128" required="true" primaryKey="true"  />
         <column name="create_by" type="VARCHAR" size="50" />
         <column name="create_time" type="TIMESTAMP" />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />

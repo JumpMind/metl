@@ -3,6 +3,7 @@ package org.jumpmind.symmetric.is.ui;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -104,8 +105,16 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         if (configFile.exists()) {
             properties = new TypedProperties(configFile);
         } else {
-            System.err.println("Could not find the " + configFile.getAbsolutePath()
-                    + " configuration file.  All of the system defaults will be used");
+            System.out.println("Could not find the " + configFile.getAbsolutePath()
+                    + " configuration file.  Looking on the classpath for " + configFile.getName());
+
+            InputStream is = getClass().getResourceAsStream("/" + configFile.getName());
+            if (is != null) {
+                properties = new TypedProperties(is);
+            } else {
+                System.err.println("Could not find any " + configFile.getName()
+                        + ".  Using all of the system defaults.");
+            }
         }
         return properties;
     }
