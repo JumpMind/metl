@@ -35,16 +35,16 @@ public class AppUI extends UI {
     CssLayout contentArea = new CssLayout();
 
     CssLayout menuArea = new CssLayout();
-    
+
     @Override
     protected void init(VaadinRequest request) {
-        
+
         HorizontalLayout root = new HorizontalLayout();
         root.setSizeFull();
         setContent(root);
-        
+
         Responsive.makeResponsive(this);
-        
+
         menuArea.setPrimaryStyleName("valo-menu");
 
         contentArea.setPrimaryStyleName("valo-content");
@@ -53,7 +53,7 @@ public class AppUI extends UI {
 
         root.addComponents(menuArea, contentArea);
         root.setExpandRatio(contentArea, 1);
-        
+
         final CssLayout menu = new CssLayout();
         CssLayout menuItemsLayout = new CssLayout();
         {
@@ -69,6 +69,8 @@ public class AppUI extends UI {
         menu.addComponent(top);
 
         final Button showMenu = new Button("Menu", new ClickListener() {
+            private static final long serialVersionUID = 1L;
+
             @Override
             public void buttonClick(final ClickEvent event) {
                 if (menu.getStyleName().contains("valo-menu-visible")) {
@@ -84,17 +86,16 @@ public class AppUI extends UI {
         showMenu.setIcon(FontAwesome.LIST);
         menu.addComponent(showMenu);
 
-        final Label title = new Label(
-                "<h3>JumpMind <strong>SymmetricIS</strong></h3>", ContentMode.HTML);
+        final Label title = new Label("<h3>JumpMind <strong>SymmetricIS</strong></h3>",
+                ContentMode.HTML);
         title.setSizeUndefined();
         top.addComponent(title);
         top.setExpandRatio(title, 1);
 
         final MenuBar settings = new MenuBar();
         settings.addStyleName("user-menu");
-        final MenuItem settingsItem = settings.addItem("nouser",
-                new ThemeResource("../images/profile-pic-300px.jpg"),
-                null);
+        final MenuItem settingsItem = settings.addItem("nouser", new ThemeResource(
+                "../images/profile-pic-300px.jpg"), null);
         settingsItem.addItem("Edit Profile", null);
         settingsItem.addItem("Preferences", null);
         settingsItem.addSeparator();
@@ -103,37 +104,38 @@ public class AppUI extends UI {
 
         menuItemsLayout.setPrimaryStyleName("valo-menuitems");
         menu.addComponent(menuItemsLayout);
-        
+
         addMenuSection("Manage", menuItemsLayout);
         addMenuItem("Agents", FontAwesome.GEARS, menuItemsLayout, "agents");
-        //addMenuItem("Sql Explorer", FontAwesome.DATABASE, menuItemsLayout, "agents");
-        
+        // addMenuItem("Sql Explorer", FontAwesome.DATABASE, menuItemsLayout,
+        // "agents");
+
         addMenuSection("Configure", menuItemsLayout);
         addMenuItem("Connections", FontAwesome.LINK, menuItemsLayout, "connections");
         addMenuItem("Models", FontAwesome.SITEMAP, menuItemsLayout, "models");
         addMenuItem("Components", FontAwesome.PUZZLE_PIECE, menuItemsLayout, "components");
         addMenuItem("Integrations", FontAwesome.SHARE, menuItemsLayout, "integrations");
 
-        
         menuArea.addComponent(menu);
-        
+
     }
-    
-    protected void addMenuSection (String caption, CssLayout menuItemsLayout) {
+
+    protected void addMenuSection(String caption, CssLayout menuItemsLayout) {
         Label label = new Label(caption, ContentMode.HTML);
         label.setPrimaryStyleName("valo-menu-subtitle");
         label.addStyleName("h4");
         label.setSizeUndefined();
         menuItemsLayout.addComponent(label);
     }
-    
-    protected void addMenuItem(String caption, FontAwesome icon, CssLayout menuItemsLayout, String viewName) {
+
+    protected void addMenuItem(String caption, FontAwesome icon, CssLayout menuItemsLayout,
+            String viewName) {
         final Button b = new Button(caption, new ClickListener() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public void buttonClick(final ClickEvent event) {
-                //navigator.navigateTo(item.getKey());
+                // navigator.navigateTo(item.getKey());
             }
         });
 

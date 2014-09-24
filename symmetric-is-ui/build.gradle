@@ -9,22 +9,25 @@ vaadin.manageWidgetset = false
 vaadin.manageDependencies = true
 vaadin.push = true 
 
-    dependencies {
-        compile project(":symmetric-app-core")
-        compile project(":symmetric-ui-core")
-        compile project(":symmetric-is-core")
-        compile project(":symmetric-is-agent")
-        compile "org.vaadin.addons:contextmenu:4.5"
-        //compile "com.vaadin:vaadin-push:$vaadinVersion"
-        //compile "com.vaadin:vaadin-server:$vaadinVersion"
-        //compile "com.vaadin:vaadin-themes:$vaadinVersion"
-        //compile "org.hibernate:hibernate-validator:5.1.0.Final"
+dependencies {
+    compile project(":symmetric-app-core")
+    compile project(":symmetric-ui-core")
+    compile project(":symmetric-is-core")
+    compile project(":symmetric-is-agent")
+    compile "org.vaadin.addons:contextmenu:4.5"
 
-        //providedCompile "com.vaadin:vaadin-client:$vaadinVersion"
-        //providedCompile "com.vaadin:vaadin-client-compiler:$vaadinVersion"        
-        //providedCompile "javax.servlet:javax.servlet-api:$servletVersion"
-        //providedCompile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
-        //providedCompile "org.eclipse.jetty:jetty-jmx:$jettyVersion"
-        //providedCompile "org.eclipse.jetty:jetty-annotations:$jettyVersion"
-        
-    }
+    compile "org.springframework:spring-webmvc:$springVersion"
+    
+    //compile "com.vaadin:vaadin-push:$vaadinVersion"
+    //compile "com.vaadin:vaadin-server:$vaadinVersion"
+    //compile "com.vaadin:vaadin-themes:$vaadinVersion"
+    //compile "org.hibernate:hibernate-validator:5.1.0.Final"
+
+    //providedCompile "com.vaadin:vaadin-client:$vaadinVersion"
+    //providedCompile "com.vaadin:vaadin-client-compiler:$vaadinVersion"        
+    //providedCompile "javax.servlet:javax.servlet-api:$servletVersion"
+    //providedCompile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
+    //providedCompile "org.eclipse.jetty:jetty-jmx:$jettyVersion"
+    //providedCompile "org.eclipse.jetty:jetty-annotations:$jettyVersion"
+    
+}

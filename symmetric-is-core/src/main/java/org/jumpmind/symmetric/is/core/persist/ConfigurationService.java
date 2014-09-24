@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.core.persist;
 
 import java.util.List;
 
+import org.jumpmind.symmetric.app.core.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.Component;
