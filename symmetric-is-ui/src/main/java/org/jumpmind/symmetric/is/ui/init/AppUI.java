@@ -1,24 +1,31 @@
-package org.jumpmind.symmetric.is.ui;
+package org.jumpmind.symmetric.is.ui.init;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.jumpmind.symmetric.is.ui.support.Category;
+import org.jumpmind.symmetric.is.ui.support.ViewLink;
+import org.jumpmind.symmetric.is.ui.support.ViewManager;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.vaadin.annotations.PreserveOnRefresh;
-import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
-import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -30,15 +37,17 @@ import com.vaadin.ui.themes.ValoTheme;
 @Theme("apptheme")
 @Title("SymmetricIS")
 @PreserveOnRefresh
-@Push(transport = Transport.STREAMING)
-public class AppUI extends UI {
+//@Push(transport = Transport.STREAMING)
+public class AppUI extends UI implements ViewChangeListener {
 
     private static final long serialVersionUID = 1L;
 
-    CssLayout contentArea = new CssLayout();
-
-    CssLayout menuArea = new CssLayout();
-
+    CssLayout menu;
+    
+    CssLayout menuItemsLayout;
+    
+    ViewManager viewManager;
+    
     @Override
     protected void init(VaadinRequest request) {
 
@@ -48,17 +57,22 @@ public class AppUI extends UI {
 
         Responsive.makeResponsive(this);
 
+        CssLayout menuArea = new CssLayout();       
         menuArea.setPrimaryStyleName("valo-menu");
 
+        CssLayout contentArea = new CssLayout();
         contentArea.setPrimaryStyleName("valo-content");
         contentArea.addStyleName("v-scrollable");
         contentArea.setSizeFull();
 
         root.addComponents(menuArea, contentArea);
         root.setExpandRatio(contentArea, 1);
-
-        final CssLayout menu = new CssLayout();
-        CssLayout menuItemsLayout = new CssLayout();
+        
+        viewManager = getWebApplicationContext().getBean(ViewManager.class);
+        viewManager.init(this, contentArea, this);
+        
+        menu = new CssLayout();
+        menuItemsLayout = new CssLayout();
         {
             menu.setId("testMenu");
         }
@@ -108,16 +122,15 @@ public class AppUI extends UI {
         menuItemsLayout.setPrimaryStyleName("valo-menuitems");
         menu.addComponent(menuItemsLayout);
 
-        addMenuSection("Manage", menuItemsLayout);
-        addMenuItem("Agents", FontAwesome.GEARS, menuItemsLayout, "agents");
-        // addMenuItem("Sql Explorer", FontAwesome.DATABASE, menuItemsLayout,
-        // "agents");
-
-        addMenuSection("Configure", menuItemsLayout);
-        addMenuItem("Connections", FontAwesome.LINK, menuItemsLayout, "connections");
-        addMenuItem("Models", FontAwesome.SITEMAP, menuItemsLayout, "models");
-        addMenuItem("Components", FontAwesome.PUZZLE_PIECE, menuItemsLayout, "components");
-        addMenuItem("Integrations", FontAwesome.SHARE, menuItemsLayout, "integrations");
+        Map<Category, List<ViewLink>> menuItemsByCategory = viewManager.getMenuItemsByCategory();
+        Set<Category> categories = menuItemsByCategory.keySet();
+        for (Category category : categories) {
+            addMenuSection(category.name(), menuItemsLayout);
+            List<ViewLink> items = menuItemsByCategory.get(category);
+            for (ViewLink menuView : items) {
+                addMenuItem(menuView.name(), menuView.icon(), menuItemsLayout, menuView.id());
+            }
+        }
 
         menuArea.addComponent(menu);
 
@@ -132,13 +145,14 @@ public class AppUI extends UI {
     }
 
     protected void addMenuItem(String caption, FontAwesome icon, CssLayout menuItemsLayout,
-            String viewName) {
+            final String viewName) {
         final Button b = new Button(caption, new ClickListener() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public void buttonClick(final ClickEvent event) {
-                // navigator.navigateTo(item.getKey());
+                viewManager.navigateTo(viewName);
+                event.getButton().addStyleName("selected");
             }
         });
 
@@ -147,18 +161,25 @@ public class AppUI extends UI {
         b.setIcon(icon);
         menuItemsLayout.addComponent(b);
     }
-
-    @WebServlet(value = "/*", asyncSupported = true)
-    @VaadinServletConfiguration(productionMode = false, ui = AppUI.class, widgetset = "org.jumpmind.symmetric.is.ui.AppWidgetSet")
-    public static class Servlet extends VaadinServlet {
-
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        protected void servletInitialized() throws ServletException {
-            super.servletInitialized();
-            getService().addSessionInitListener(new AppSessionInitListener());
-        }
+    
+    public WebApplicationContext getWebApplicationContext() {
+        return WebApplicationContextUtils.getRequiredWebApplicationContext(VaadinServlet
+                .getCurrent().getServletContext());
     }
+
+    @Override
+    public boolean beforeViewChange(final ViewChangeEvent event) {
+        return true;
+    }
+
+    @Override
+    public void afterViewChange(final ViewChangeEvent event) {
+        for (final Iterator<Component> it = menuItemsLayout.iterator(); it
+                .hasNext();) {
+            it.next().removeStyleName("selected");
+        }
+        menu.removeStyleName("valo-menu-visible");
+    }
+
 
 }

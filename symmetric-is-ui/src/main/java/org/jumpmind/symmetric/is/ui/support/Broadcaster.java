@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui;
+package org.jumpmind.symmetric.is.ui.support;
 
 import java.io.Serializable;
 import java.util.HashMap;

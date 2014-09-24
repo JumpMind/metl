@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui;
+package org.jumpmind.symmetric.is.ui.init;
 
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_CONNECTION_PROPERTIES;
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_DRIVER;

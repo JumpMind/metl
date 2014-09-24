@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui;
+package org.jumpmind.symmetric.is.ui.init;
 
 import javax.servlet.ServletException;
 

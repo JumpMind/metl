@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui;
+package org.jumpmind.symmetric.is.ui.init;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
@@ -15,6 +15,7 @@ import javax.servlet.ServletRegistration;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.app.core.ConfigDatabaseUpgrader;
 import org.jumpmind.symmetric.app.core.LogUtils;
+import org.jumpmind.symmetric.is.ui.support.Broadcaster;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.web.WebApplicationInitializer;
