@@ -7,7 +7,7 @@ vaadin.version = vaadinVersion
 vaadin.widgetset = 'org.jumpmind.symmetric.is.ui.AppWidgetSet'
 vaadin.manageWidgetset = false
 vaadin.manageDependencies = true
-vaadin.push = true 
+vaadin.push = true
 
 dependencies {
     compile project(":symmetric-app-core")
@@ -15,10 +15,11 @@ dependencies {
     compile project(":symmetric-is-core")
     compile project(":symmetric-is-agent")
     compile "org.vaadin.addons:contextmenu:4.5"
+    compile "com.cybercom:spring-ui-scope:0.0.2"
 
     compile "org.springframework:spring-webmvc:$springVersion"
     
-    //compile "com.vaadin:vaadin-push:$vaadinVersion"
+    compile "com.vaadin:vaadin-push:$vaadinVersion"
     //compile "com.vaadin:vaadin-server:$vaadinVersion"
     //compile "com.vaadin:vaadin-themes:$vaadinVersion"
     //compile "org.hibernate:hibernate-validator:5.1.0.Final"

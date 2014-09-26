@@ -24,7 +24,10 @@
     </category>
     <category name="org.springframework">
         <priority value="ERROR" />
-    </category>
+    </category>    
+    <category name="org.atmosphere.cpr">
+        <priority value="ERROR" />
+    </category>        
     <category name="com.vaadin.server.DefaultDeploymentConfiguration">
         <priority value="ERROR" />
     </category>    

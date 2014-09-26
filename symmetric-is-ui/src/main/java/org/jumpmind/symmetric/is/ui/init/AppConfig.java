@@ -41,6 +41,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import com.cybercom.vaadin.spring.UIScope;
+
 @Configuration
 @EnableTransactionManagement
 @EnableWebMvc
@@ -108,4 +110,8 @@ public class AppConfig {
         return new ConfigDatabaseUpgrader("/schema-v1.xml", configDatabasePlatform(), true, tablePrefix());
     }
 
+    @Bean 
+    static UIScope uiScope() {
+        return new UIScope();
+    }
 }
