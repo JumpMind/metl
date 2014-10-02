@@ -30,6 +30,9 @@ import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.security.SecurityServiceFactory;
 import org.jumpmind.symmetric.app.core.ConfigDatabaseUpgrader;
 import org.jumpmind.symmetric.app.core.EnvConstants;
+import org.jumpmind.symmetric.app.core.persist.IPersistenceManager;
+import org.jumpmind.symmetric.app.core.persist.JdbcPersistenceManager;
+import org.jumpmind.symmetric.is.core.persist.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,10 +109,24 @@ public class AppConfig {
 
     @Bean
     @Scope(value="singleton")
-    ConfigDatabaseUpgrader configDatabaseUpgrader() {
+    public ConfigDatabaseUpgrader configDatabaseUpgrader() {
         return new ConfigDatabaseUpgrader("/schema-v1.xml", configDatabasePlatform(), true, tablePrefix());
     }
 
+    @Bean
+    @Scope(value = "singleton")
+    public IPersistenceManager persistenceManager() {
+        IPersistenceManager manager = new JdbcPersistenceManager(configDatabasePlatform());
+        return manager;
+    }
+
+    @Bean
+    @Scope(value = "singleton")
+    public ConfigurationService configurationService() {
+        ConfigurationService service =  new ConfigurationService(persistenceManager(), tablePrefix());
+        return service;
+    }
+    
     @Bean 
     static UIScope uiScope() {
         return new UIScope();

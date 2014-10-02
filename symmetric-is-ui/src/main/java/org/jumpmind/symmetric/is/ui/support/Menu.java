@@ -1,14 +1,10 @@
-package org.jumpmind.symmetric.is.ui.init;
+package org.jumpmind.symmetric.is.ui.support;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.jumpmind.symmetric.is.ui.support.Category;
-import org.jumpmind.symmetric.is.ui.support.ViewLink;
-import org.jumpmind.symmetric.is.ui.support.ViewManager;
 
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -35,26 +31,23 @@ public class Menu extends CssLayout implements ViewChangeListener {
     CssLayout menuItemsLayout;
 
     ViewManager viewManager;
-    
+
     Map<String, Button> viewToButtonMapping;
-    
+
     public Menu(ViewManager viewManager) {
         setPrimaryStyleName("valo-menu");
-        
+
         this.viewManager = viewManager;
         this.viewManager.addViewChangeListener(this);
-        
+
         viewToButtonMapping = new HashMap<String, Button>();
-        
+
         menu = new CssLayout();
         menuItemsLayout = new CssLayout();
-//        {
-//            menu.setId("testMenu");
-//        }
 
         menu.addStyleName("valo-menu-part");
 
-        final HorizontalLayout top = new HorizontalLayout();
+        HorizontalLayout top = new HorizontalLayout();
         top.setWidth("100%");
         top.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         top.addStyleName("valo-menu-title");
@@ -78,8 +71,7 @@ public class Menu extends CssLayout implements ViewChangeListener {
         showMenu.setIcon(FontAwesome.LIST);
         menu.addComponent(showMenu);
 
-        final Label title = new Label("<h3>JumpMind <strong>SymmetricIS</strong></h3>",
-                ContentMode.HTML);
+        Label title = new Label("<h3>JumpMind's <strong>SymmetricIS</strong></h3>", ContentMode.HTML);
         title.setSizeUndefined();
         top.addComponent(title);
         top.setExpandRatio(title, 1);
@@ -107,9 +99,8 @@ public class Menu extends CssLayout implements ViewChangeListener {
             }
         }
 
-        addComponent(menu);        
+        addComponent(menu);
     }
-    
 
     protected void addMenuSection(String caption, CssLayout menuItemsLayout) {
         Label label = new Label(caption, ContentMode.HTML);
@@ -121,7 +112,7 @@ public class Menu extends CssLayout implements ViewChangeListener {
 
     protected void addMenuItem(String caption, FontAwesome icon, CssLayout menuItemsLayout,
             final String viewName) {
-        
+
         final Button b = new Button(caption, new ClickListener() {
             private static final long serialVersionUID = 1L;
 
@@ -136,7 +127,7 @@ public class Menu extends CssLayout implements ViewChangeListener {
         b.setPrimaryStyleName("valo-menu-item");
         b.setIcon(icon);
         menuItemsLayout.addComponent(b);
-        
+
         viewToButtonMapping.put(viewName, b);
     }
 
@@ -157,5 +148,4 @@ public class Menu extends CssLayout implements ViewChangeListener {
         }
     }
 
-    
 }
