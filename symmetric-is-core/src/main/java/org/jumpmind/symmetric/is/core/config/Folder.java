@@ -8,6 +8,8 @@ import org.jumpmind.symmetric.is.core.config.data.FolderType;
 
 public class Folder extends AbstractObject<FolderData> {
 
+    private static final long serialVersionUID = 1L;
+
     Folder parent;
     
     List<Folder> children = new ArrayList<Folder>();

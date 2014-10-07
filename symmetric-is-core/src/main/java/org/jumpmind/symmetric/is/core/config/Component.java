@@ -7,6 +7,7 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentData;
 
 public class Component extends AbstractObject<ComponentData> {
 
+    private static final long serialVersionUID = 1L;
     List<ComponentVersion> componentVersions;
     
     public Component() {

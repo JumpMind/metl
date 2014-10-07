@@ -7,6 +7,7 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentGraphVersionData;
 
 public class ComponentGraphVersion extends AbstractObject<ComponentGraphVersionData> {
 
+    private static final long serialVersionUID = 1L;
     List<ComponentGraphNode> componentGraphNodes;
 
     public ComponentGraphVersion() {

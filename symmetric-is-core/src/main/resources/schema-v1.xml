@@ -7,7 +7,7 @@
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="parent_folder_id" type="VARCHAR" size="128" description="A unique identifer" />
         <column name="name" type="VARCHAR" size="255" description="Name of the folder" />
-        <column name="type" type="VARCHAR" size="50" required="true" description="COMPONENT, GRAPH, CONNECTION, or AGENT" />
+        <column name="type" type="VARCHAR" size="50" required="true" description="COMPONENT, FLOW, CONNECTION, or AGENT" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -252,7 +252,7 @@
         </foreign-key>        
     </table>
 
-    <table name="component_graph" description="">
+    <table name="component_flow" description="">
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="name" type="VARCHAR" size="255" description="" />
         <column name="type" type="VARCHAR" size="50" required="true" description="" />
@@ -266,46 +266,46 @@
         </foreign-key>
     </table>
 
-    <table name="component_graph_version" description="">
+    <table name="component_flow_version" description="">
         <column name="version_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A version number" />
         <column name="version_name" type="VARCHAR" required="true" size="255" description="" />
-        <column name="component_graph_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
+        <column name="component_flow_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
-        <foreign-key foreignTable="component_graph" name="fk_cmpgv_2_cmpg">
-            <reference local="component_graph_id" foreign="id" />
+        <foreign-key foreignTable="component_flow" name="fk_cmpgv_2_cmpg">
+            <reference local="component_flow_id" foreign="id" />
         </foreign-key>
     </table>
 
-    <table name="component_graph_node" description="">
+    <table name="component_flow_node" description="">
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="component_graph_version_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
+        <column name="component_flow_version_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
         <column name="component_version_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
-        <foreign-key foreignTable="component_graph_version" name="fk_cgn_2_cgv">
-            <reference local="component_graph_version_id" foreign="version_id" />
+        <foreign-key foreignTable="component_flow_version" name="fk_cgn_2_cgv">
+            <reference local="component_flow_version_id" foreign="version_id" />
         </foreign-key>
         <foreign-key foreignTable="component_version" name="fk_cgn_2_cv">
             <reference local="component_version_id" foreign="version_id" />
         </foreign-key>
     </table>
     
-    <table name="component_graph_node_link" description="">
+    <table name="component_flow_node_link" description="">
         <column name="source_node_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="target_node_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
-        <foreign-key foreignTable="component_graph_node" name="fk_cgnl_2_cgn_s">
+        <foreign-key foreignTable="component_flow_node" name="fk_cgnl_2_cgn_s">
             <reference local="source_node_id" foreign="id" />
         </foreign-key>
-        <foreign-key foreignTable="component_graph_node" name="fk_cgnl_2_cgn_t">
+        <foreign-key foreignTable="component_flow_node" name="fk_cgnl_2_cgn_t">
             <reference local="target_node_id" foreign="id" />
         </foreign-key>
     </table>
@@ -338,13 +338,13 @@
     
     <table name="agent_deployment" description="">
         <column name="agent_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="component_graph_version_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="component_flow_version_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
-        <foreign-key foreignTable="component_graph_version" name="fk_agntd_2_cgv">
-            <reference local="component_graph_version_id" foreign="version_id" />
+        <foreign-key foreignTable="component_flow_version" name="fk_agntd_2_cgv">
+            <reference local="component_flow_version_id" foreign="version_id" />
         </foreign-key>
         <foreign-key foreignTable="agent" name="fk_agntd_2_agnt">
             <reference local="agent_id" foreign="id" />

@@ -9,7 +9,7 @@ import java.util.Set;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
 import org.jumpmind.symmetric.is.core.config.data.FolderType;
-import org.jumpmind.symmetric.is.core.persist.ConfigurationService;
+import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.is.ui.support.PromptDialog.IPromptListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,39 +19,44 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.TreeTable;
+import com.vaadin.ui.Tree;
+import com.vaadin.ui.Tree.CollapseEvent;
+import com.vaadin.ui.Tree.CollapseListener;
+import com.vaadin.ui.Tree.ExpandEvent;
+import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class AbstractFolderEditPanel extends VerticalLayout implements ClickListener,
+abstract public class AbstractFolderEditPanel extends VerticalLayout implements ClickListener,
         IPromptListener {
 
     private static final long serialVersionUID = 1L;
 
-    protected TreeTable treeTable;
+    protected Tree tree;
 
     protected Button addButton;
 
     protected Button delButton;
 
     @Autowired
-    protected ConfigurationService configurationService;
+    protected IConfigurationService configurationService;
 
     protected FolderType folderType;
 
-    protected String lastSelectedId;
+    protected Folder lastSelected;
 
     public AbstractFolderEditPanel(String title, FolderType folderType) {
         this.folderType = folderType;
 
-        setMargin(true);
+        setMargin(new MarginInfo(false, true, true, true));
         setSpacing(true);
         setSizeFull();
 
@@ -60,83 +65,119 @@ public class AbstractFolderEditPanel extends VerticalLayout implements ClickList
         addComponent(titleLabel);
 
         HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.setSpacing(true);
         addComponent(buttonLayout);
 
-        addButton = new Button(FontAwesome.PLUS);
-        addButton.setStyleName(ValoTheme.BUTTON_BORDERLESS);
+        addButton = new Button("Add");
+        addButton.setIcon(FontAwesome.FOLDER);
+        addButton.setStyleName(ValoTheme.BUTTON_LINK);
         addButton.addClickListener(this);
         buttonLayout.addComponent(addButton);
         buttonLayout.setComponentAlignment(addButton, Alignment.MIDDLE_LEFT);
 
-        delButton = new Button(FontAwesome.MINUS);
-        delButton.setStyleName(ValoTheme.BUTTON_BORDERLESS);
+        delButton = new Button("Delete");
+        delButton.setIcon(FontAwesome.FOLDER);
+        delButton.setStyleName(ValoTheme.BUTTON_LINK);
         delButton.setEnabled(false);
         delButton.addClickListener(this);
         buttonLayout.addComponent(delButton);
         buttonLayout.setComponentAlignment(delButton, Alignment.MIDDLE_LEFT);
 
-        this.treeTable = new TreeTable();
-        this.treeTable.setImmediate(true);
-        this.treeTable.setMultiSelect(true);
-        this.treeTable.setSelectable(true);
-        this.treeTable.addValueChangeListener(new ValueChangeListener() {
+        addButtonsRight(buttonLayout);
+
+        this.tree = new Tree();
+        this.tree.setImmediate(true);
+        this.tree.setMultiSelect(true);
+        this.tree.setSelectable(true);
+        this.tree.addValueChangeListener(new ValueChangeListener() {
 
             private static final long serialVersionUID = 1L;
 
             @SuppressWarnings("unchecked")
             @Override
             public void valueChange(ValueChangeEvent event) {
-                Set<String> selected = (Set<String>) treeTable.getValue();
+                Set<Folder> selected = (Set<Folder>) tree.getValue();
                 if (selected.size() > 0) {
-                    lastSelectedId = selected.iterator().next();
+                    lastSelected = selected.iterator().next();
                 } else {
-                    lastSelectedId = null;
+                    lastSelected = null;
                 }
                 delButton.setEnabled(selected.size() > 0);
             }
         });
-        this.treeTable.addItemClickListener(new ItemClickListener() {
+        this.tree.addItemClickListener(new ItemClickListener() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             public void itemClick(ItemClickEvent event) {
                 @SuppressWarnings("unchecked")
-                Set<String> selected = (Set<String>) treeTable.getValue();
+                Set<Folder> selected = (Set<Folder>) tree.getValue();
                 if (selected.size() > 0) {
-                    if (lastSelectedId != null && selected.iterator().next().equals(lastSelectedId)) {
-                        treeTable.setValue(new HashSet<String>());
+                    if (lastSelected != null && selected.iterator().next().equals(lastSelected)) {
+                        tree.setValue(new HashSet<Folder>());
                     }
                 }
             }
         });
-        this.treeTable.setSizeFull();
-        this.treeTable.addContainerProperty("name", String.class, null, "Name", null, null);
+        this.tree.addCollapseListener(new CollapseListener() {
 
-        addComponent(treeTable);
-        setExpandRatio(treeTable, 1);
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void nodeCollapse(CollapseEvent event) {
+                if (event.getItemId() instanceof Folder) {
+                    tree.setItemIcon(event.getItemId(), FontAwesome.FOLDER);
+                }
+            }
+        });
+        this.tree.addExpandListener(new ExpandListener() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void nodeExpand(ExpandEvent event) {
+                if (event.getItemId() instanceof Folder) {
+                    tree.setItemIcon(event.getItemId(), FontAwesome.FOLDER_OPEN);
+                }
+            }
+        });
+
+        addComponent(tree);
+        setExpandRatio(tree, 1);
+    }
+
+    protected void addButtonsRight(HorizontalLayout buttonLayout) {
     }
 
     @Override
     public boolean onOk(String content) {
         if (isNotBlank(content)) {
-            String parentId = null;
+            Folder parentFolder = null;
             @SuppressWarnings("unchecked")
-            Set<String> selectedIds = (Set<String>) treeTable.getValue();
+            Set<Folder> selectedIds = (Set<Folder>) tree.getValue();
             if (selectedIds != null && selectedIds.size() > 0) {
-                parentId = selectedIds.iterator().next();
+                parentFolder = selectedIds.iterator().next();
             }
             FolderData folderData = new FolderData();
             folderData.setName(content);
             folderData.setType(folderType.name());
-            folderData.setParentFolderId(parentId);
+            folderData.setParentFolderId(parentFolder != null ? parentFolder.getData().getId()
+                    : null);
+            Folder folder = new Folder(folderData);
+            folder.setParent(parentFolder);
+
             configurationService.save(new Folder(folderData));
+
             refresh();
-            treeTable.setCollapsed(parentId, false);
-            Set<String> selected = new HashSet<String>();
-            selected.add(folderData.getId());
-            treeTable.setValue(selected);
+
+            while (parentFolder != null) {
+                tree.expandItem(parentFolder);
+                parentFolder = parentFolder.getParent();
+            }
+
+            Set<Folder> selected = new HashSet<Folder>();
+            selected.add(folder);
+            tree.setValue(selected);
             return true;
         } else {
             return false;
@@ -168,14 +209,14 @@ public class AbstractFolderEditPanel extends VerticalLayout implements ClickList
 
     protected void deleteSelectedFolders() {
         @SuppressWarnings("unchecked")
-        Set<String> folderIds = (Set<String>) treeTable.getValue();
-        for (String folderId : folderIds) {
-            configurationService.deleteFolder(folderId);
+        Set<Folder> folderIds = (Set<Folder>) tree.getValue();
+        for (Folder folderId : folderIds) {
+            configurationService.deleteFolder(folderId.getData().getId());
         }
     }
 
     public void refresh() {
-        this.treeTable.removeAllItems();
+        this.tree.removeAllItems();
         List<Folder> folders = configurationService.findFolders(folderType);
         for (Folder folder : folders) {
             addChildFolder(folder);
@@ -183,17 +224,18 @@ public class AbstractFolderEditPanel extends VerticalLayout implements ClickList
     }
 
     protected void addChildFolder(Folder folder) {
-        String id = folder.getData().getId();
-        this.treeTable.addItem(new Object[] { folder.getData().getName() }, id);
+        this.tree.addItem(folder);
+        this.tree.setItemCaption(folder, folder.getData().getName());
+        this.tree.setItemIcon(folder, FontAwesome.FOLDER);
         if (folder.getParent() != null) {
-            this.treeTable.setParent(id, folder.getParent().getData().getId());
+            this.tree.setParent(folder, folder.getParent());
         }
         List<Folder> children = folder.getChildren();
         for (Folder child : children) {
             addChildFolder(child);
         }
         if (children.size() == 0) {
-            this.treeTable.setChildrenAllowed(id, false);
+            this.tree.setChildrenAllowed(folder, false);
         }
     }
 

@@ -18,7 +18,7 @@ import org.jumpmind.symmetric.is.core.config.StructuredModel;
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
 import org.jumpmind.symmetric.is.core.config.data.FolderType;
 
-public class ConfigurationService {
+public class ConfigurationService implements IConfigurationService {
 
     protected IPersistenceManager persistenceManager;
 
@@ -46,11 +46,13 @@ public class ConfigurationService {
     public void save(ComponentGraph component) {
     }
 
+    @Override
     public void save(Folder folder) {
         persistenceManager.save(folder.getData(), null, null, tableName(FolderData.class));
     }
 
     // TODO transactional
+    @Override
     public void deleteFolder(String folderId) {        
         Map<String, Object> byType = new HashMap<String, Object>();
         byType.put("parentFolderId", folderId);
@@ -63,6 +65,7 @@ public class ConfigurationService {
                 .delete(new FolderData(folderId), null, null, tableName(FolderData.class));
     }
 
+    @Override
     public List<Folder> findFolders(FolderType type) {
         Map<String, Object> byType = new HashMap<String, Object>();
         byType.put("type", type.name());

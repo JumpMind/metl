@@ -1,23 +1,12 @@
 package org.jumpmind.symmetric.is.core.config.data;
 
-import java.util.Date;
 
-public class ComponentGraphNodeData {
+public class ComponentGraphNodeData extends AbstractData {
 
-    String id;
-    
+    private static final long serialVersionUID = 1L;
+
     String componentVersionId;
     
     String componentGraphVersionId;
-    
-    Date createTime;
-
-    String createBy;
-    
-    String folderId;
-    
-    Date lastModifyTime;
-    
-    String lastModifyBy;
-    
+       
 }

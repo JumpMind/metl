@@ -1,9 +1,12 @@
 package org.jumpmind.symmetric.is.core.config.data;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
-public abstract class AbstractData {
+public abstract class AbstractData implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     String id = UUID.randomUUID().toString();
 
