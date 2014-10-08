@@ -17,14 +17,14 @@ import com.vaadin.ui.VerticalLayout;
 
 @Component
 @Scope(value = "ui")
-@ViewLink(category = Category.INTEGRATIONS, name = "Graphs", id = "graphs", icon = FontAwesome.SHARE_ALT, menuOrder = 10)
-public class GraphsView extends VerticalLayout implements View {
+@ViewLink(category = Category.INTEGRATIONS, name = "Flows", id = "flows", icon = FontAwesome.SHARE_ALT, menuOrder = 10)
+public class FlowView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;
    
     Diagram diagram;
     
-    public GraphsView() {
+    public FlowView() {
         setSizeFull();
         setMargin(true);
 

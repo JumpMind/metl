@@ -13,7 +13,7 @@ import com.vaadin.ui.VerticalLayout;
 @Component
 @Scope(value="ui")
 @ViewLink(category = Category.SHARED, name = "Components", id = "components", icon = FontAwesome.PUZZLE_PIECE, menuOrder = 20)
-public class ComponentsView extends VerticalLayout implements View {
+public class ComponentView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;
 

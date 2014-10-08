@@ -18,7 +18,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @Component
 @Scope(value = "ui")
 @ViewLink(category = Category.SHARED, name = "Connections", id = "connections", icon = FontAwesome.LINK, menuOrder = 10)
-public class ConnectionsView extends AbstractFolderEditPanel implements View {
+public class ConnectionView extends AbstractFolderEditPanel implements View {
 
     private static final long serialVersionUID = 1L;
 
@@ -26,7 +26,7 @@ public class ConnectionsView extends AbstractFolderEditPanel implements View {
     
     Button delConnectionButton;
     
-    public ConnectionsView() {
+    public ConnectionView() {
         super("Connections", FolderType.CONNECTION);
     }
 
