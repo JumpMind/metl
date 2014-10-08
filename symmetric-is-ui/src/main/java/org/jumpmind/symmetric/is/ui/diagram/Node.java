@@ -1,6 +1,8 @@
 package org.jumpmind.symmetric.is.ui.diagram;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Node implements Serializable {
@@ -11,8 +13,9 @@ public class Node implements Serializable {
     int width = 100;
     int x = 0;
     int y = 0;
-    String text;
+    String text;    
     String id = UUID.randomUUID().toString();
+    List<String> targetNodeIds = new ArrayList<String>();
 
     public Node(String text) {
         this.text = text;
@@ -69,4 +72,11 @@ public class Node implements Serializable {
         this.width = width;
     }
 
+    public void setTargetNodeIds(List<String> targetNodeIds) {
+        this.targetNodeIds = targetNodeIds;
+    }
+    
+    public List<String> getTargetNodeIds() {
+        return targetNodeIds;
+    }
 }

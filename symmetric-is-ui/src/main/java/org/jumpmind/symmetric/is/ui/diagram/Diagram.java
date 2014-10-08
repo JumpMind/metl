@@ -47,6 +47,37 @@ public class Diagram extends AbstractJavaScriptComponent {
                 }
             }
         });
+        
+        addFunction("onConnection", new JavaScriptFunction() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void call(JSONArray arguments) throws JSONException {
+                if (arguments.length() > 0) {
+                    Object obj = arguments.get(0);
+                    if (obj instanceof JSONObject) {
+                        JSONObject json = arguments.getJSONObject(0);
+                        String sourceNodeId = json.getString("sourceNodeId");
+                        String targetNodeId = json.getString("targetNodeId");
+                        boolean removed = json.getBoolean("removed");
+                        DiagramState state = getState();
+                        for (Node node : state.nodes) {
+                            if (node.getId().equals(sourceNodeId)) {
+                                if (!removed && !node.getTargetNodeIds().contains(targetNodeId)) {
+                                    node.getTargetNodeIds().add(targetNodeId);
+                                } else if (removed) {
+                                    node.getTargetNodeIds().remove(targetNodeId);
+                                }
+                                fireEvent(new ConnectionEvent(Diagram.this, sourceNodeId, targetNodeId, removed));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
     }
 
     public void addNode(Node node) {
