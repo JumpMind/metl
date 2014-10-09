@@ -19,7 +19,7 @@ public class AgentsView extends AbstractFolderEditPanel implements View {
     private static final long serialVersionUID = 1L;    
     
     public AgentsView() {
-        super("Agents", FolderType.AGENT);
+        super("Agents", FolderType.RUNTIME);
     }
     
     @Override

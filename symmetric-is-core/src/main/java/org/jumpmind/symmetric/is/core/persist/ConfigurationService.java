@@ -9,8 +9,8 @@ import org.jumpmind.symmetric.app.core.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.Component;
-import org.jumpmind.symmetric.is.core.config.ComponentGraph;
-import org.jumpmind.symmetric.is.core.config.ComponentGraphVersion;
+import org.jumpmind.symmetric.is.core.config.ComponentFlow;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
@@ -34,7 +34,7 @@ public class ConfigurationService implements IConfigurationService {
                 + clazz.getSimpleName().substring(0, clazz.getSimpleName().indexOf("Data"));
     }
 
-    public void save(ComponentGraphVersion graph) {
+    public void save(ComponentFlowVersion graph) {
     }
 
     public void save(ComponentVersion component) {
@@ -43,7 +43,7 @@ public class ConfigurationService implements IConfigurationService {
     public void save(Component component) {
     }
 
-    public void save(ComponentGraph component) {
+    public void save(ComponentFlow component) {
     }
 
     @Override
@@ -100,7 +100,7 @@ public class ConfigurationService implements IConfigurationService {
         return null;
     }
 
-    public List<ComponentGraph> findComponentGraphs(Folder folder) {
+    public List<ComponentFlow> findComponentGraphs(Folder folder) {
         return null;
     }
 

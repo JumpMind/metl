@@ -6,6 +6,8 @@ public class ComponentVersion extends AbstractObject<ComponentVersionData> {
 
     private static final long serialVersionUID = 1L;
 
+    Connection connection;
+    
     public ComponentVersion() {
     }
     
@@ -13,4 +15,8 @@ public class ComponentVersion extends AbstractObject<ComponentVersionData> {
         super(data);
     }
 
+    public Connection getConnection() {
+        return connection;
+    }
+    
 }

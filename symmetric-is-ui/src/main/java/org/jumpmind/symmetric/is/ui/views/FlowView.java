@@ -1,57 +1,56 @@
 package org.jumpmind.symmetric.is.ui.views;
 
+import org.jumpmind.symmetric.is.core.config.data.FolderType;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
-import org.jumpmind.symmetric.is.ui.diagram.Node;
+import org.jumpmind.symmetric.is.ui.support.AbstractFolderEditPanel;
 import org.jumpmind.symmetric.is.ui.support.Category;
 import org.jumpmind.symmetric.is.ui.support.ViewLink;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.Command;
+import com.vaadin.ui.MenuBar.MenuItem;
 
 @Component
 @Scope(value = "ui")
-@ViewLink(category = Category.INTEGRATIONS, name = "Flows", id = "flows", icon = FontAwesome.SHARE_ALT, menuOrder = 10)
-public class FlowView extends VerticalLayout implements View {
+@ViewLink(category = Category.DESIGN, name = "Flows", id = "flows", icon = FontAwesome.SHARE_ALT, menuOrder = 10)
+public class FlowView extends AbstractFolderEditPanel implements View {
 
     private static final long serialVersionUID = 1L;
    
     Diagram diagram;
     
+    MenuItem addFlowButton;
+    
     public FlowView() {
-        setSizeFull();
-        setMargin(true);
+        super("Flows", FolderType.DESIGN);
+    }
+    
+    @Override
+    protected void addToAddButton(MenuBar.MenuItem dropdown) {
+        addFlowButton = dropdown.addItem("Flow", FontAwesome.SHARE_ALT, new Command() {
 
-        Button button = new Button("Button");
-        button.addClickListener(new Button.ClickListener() {
             private static final long serialVersionUID = 1L;
 
-            public void buttonClick(ClickEvent event) {
-                diagram.addNode(new Node("Test " + diagram.getNodes().size()+1));
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
             }
         });
-        
-        HorizontalLayout buttons = new HorizontalLayout();
-        buttons.setMargin(true);
-        buttons.addComponent(button);
-
-        addComponent(buttons);
-        
-        diagram = new Diagram();
-        diagram.setSizeFull();
-        
-        addComponent(diagram);
-        setExpandRatio(diagram, 1);
+    }
+    
+    @Override
+    protected void treeSelectionChanged(ValueChangeEvent event) {
+        super.treeSelectionChanged(event);
     }
 
     @Override
     public void enter(ViewChangeEvent event) {
+        refresh();
     }
 
 }

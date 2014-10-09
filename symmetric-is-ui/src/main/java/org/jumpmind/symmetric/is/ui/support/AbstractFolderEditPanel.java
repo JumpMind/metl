@@ -26,6 +26,9 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.Command;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.CollapseEvent;
 import com.vaadin.ui.Tree.CollapseListener;
@@ -42,7 +45,7 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout implements 
 
     protected Tree tree;
 
-    protected Button addButton;
+    protected MenuBar addButton;
 
     protected Button delButton;
 
@@ -67,16 +70,12 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout implements 
         HorizontalLayout buttonLayout = new HorizontalLayout();
         addComponent(buttonLayout);
 
-        addButton = new Button("Add");
-        addButton.setIcon(FontAwesome.FOLDER);
-        addButton.setStyleName(ValoTheme.BUTTON_LINK);
-        addButton.addClickListener(this);
+        addButton = buildAddButton();
         buttonLayout.addComponent(addButton);
         buttonLayout.setComponentAlignment(addButton, Alignment.MIDDLE_LEFT);
 
         delButton = new Button("Delete");
-        delButton.setIcon(FontAwesome.FOLDER);
-        delButton.setStyleName(ValoTheme.BUTTON_LINK);
+        delButton.setStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
         delButton.setEnabled(false);
         delButton.addClickListener(this);
         buttonLayout.addComponent(delButton);
@@ -92,16 +91,9 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout implements 
 
             private static final long serialVersionUID = 1L;
 
-            @SuppressWarnings("unchecked")
             @Override
             public void valueChange(ValueChangeEvent event) {
-                Set<Folder> selected = (Set<Folder>) tree.getValue();
-                if (selected.size() > 0) {
-                    lastSelected = selected.iterator().next();
-                } else {
-                    lastSelected = null;
-                }
-                delButton.setEnabled(selected.size() > 0);
+                treeSelectionChanged(event);
             }
         });
         this.tree.addItemClickListener(new ItemClickListener() {
@@ -110,13 +102,7 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout implements 
 
             @Override
             public void itemClick(ItemClickEvent event) {
-                @SuppressWarnings("unchecked")
-                Set<Folder> selected = (Set<Folder>) tree.getValue();
-                if (selected.size() > 0) {
-                    if (lastSelected != null && selected.iterator().next().equals(lastSelected)) {
-                        tree.setValue(new HashSet<Folder>());
-                    }
-                }
+               unselectIfSelected();
             }
         });
         this.tree.addCollapseListener(new CollapseListener() {
@@ -144,6 +130,52 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout implements 
 
         addComponent(tree);
         setExpandRatio(tree, 1);
+    }
+    
+    protected void unselectIfSelected() {
+        @SuppressWarnings("unchecked")
+        Set<Object> selected = (Set<Object>) tree.getValue();
+        if (selected.size() > 0) {
+            if (lastSelected != null && selected.iterator().next().equals(lastSelected)) {
+                lastSelected = null;
+                tree.setValue(new HashSet<Object>());
+            }
+        }
+
+    }
+    
+    protected void treeSelectionChanged(ValueChangeEvent event) {
+        @SuppressWarnings("unchecked")
+        Set<Folder> selected = (Set<Folder>) tree.getValue();
+        if (selected.size() > 0) {
+            lastSelected = selected.iterator().next();
+        } else {
+            lastSelected = null;
+        }
+        delButton.setEnabled(selected.size() > 0);
+    }
+
+    private MenuBar buildAddButton() {
+        MenuBar addButton = new MenuBar();
+        addButton.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
+        MenuBar.MenuItem dropdown = addButton.addItem("Add", null);
+        dropdown.addItem("Folder", FontAwesome.FOLDER, new Command() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                PromptDialog prompt = new PromptDialog("Add Folder", "Please choose a folder name",
+                        AbstractFolderEditPanel.this);
+                UI.getCurrent().addWindow(prompt);
+            }
+        });
+        addToAddButton(dropdown);
+        return addButton;
+    }
+
+    protected void addToAddButton(MenuBar.MenuItem dropdown) {
+
     }
 
     protected void addButtonsRight(HorizontalLayout buttonLayout) {
@@ -187,11 +219,7 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout implements 
     @Override
     public void buttonClick(ClickEvent event) {
         Button button = event.getButton();
-        if (button == addButton) {
-            PromptDialog prompt = new PromptDialog("Add Folder", "Please choose a folder name",
-                    this);
-            UI.getCurrent().addWindow(prompt);
-        } else if (button == delButton) {
+        if (button == delButton) {
             ConfirmDialog.show("Delete Folder?", "Are you sure you want to delete the folder?",
                     new IConfirmListener() {
 

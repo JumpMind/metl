@@ -10,13 +10,20 @@ buildscript {
     }
 }
 
-
 repositories {
         flatDir dirs: 'src/lib'
 }
 
 apply plugin: 'war'
 apply plugin: fi.jasoft.plugin.GradleVaadinPlugin
+
+eclipse {
+    wtp {
+        component {
+            sourceDirs += file('src/test/resources')
+        }
+    }
+}
 
 vaadin.version = vaadinVersion
 vaadin.widgetset = 'org.jumpmind.symmetric.is.ui.AppWidgetSet'

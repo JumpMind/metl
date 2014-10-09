@@ -1,6 +1,6 @@
 package org.jumpmind.symmetric.is.core.config.data;
 
-public class ComponentGraphNodeLinkData {
+public class ComponentFlowNodeLinkData {
 
     String sourceNodeId;
     

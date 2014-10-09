@@ -1,6 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
-import org.jumpmind.symmetric.is.core.config.ComponentGraphVersion;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 
 public class AgentEngine {
 
@@ -14,15 +14,15 @@ public class AgentEngine {
         
     }
         
-    public void deploy(ComponentGraphVersion componentGraph) {
+    public void deploy(ComponentFlowVersion componentGraph) {
         
     }
     
-    public void undeploy(ComponentGraphVersion componentGraph) {
+    public void undeploy(ComponentFlowVersion componentGraph) {
         
     }
     
-    public ComponentGraphEngine getComponentGraphEngine(ComponentGraphVersion componentGraph) {
+    public ComponentGraphEngine getComponentGraphEngine(ComponentFlowVersion componentGraph) {
         return null;
     }
 

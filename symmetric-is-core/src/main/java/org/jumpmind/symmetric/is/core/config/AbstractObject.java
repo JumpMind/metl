@@ -7,6 +7,7 @@ import org.jumpmind.symmetric.is.core.config.data.AbstractData;
 abstract public class AbstractObject<D extends AbstractData> implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    
     protected D data;
     
     public AbstractObject() {
