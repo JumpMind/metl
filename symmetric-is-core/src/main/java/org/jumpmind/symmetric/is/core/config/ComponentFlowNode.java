@@ -10,9 +10,9 @@ public class ComponentFlowNode extends AbstractObject<ComponentFlowNodeData> {
     
     protected ComponentVersion componentVersion;
     
-    protected List<ComponentVersion> inputLinks;
+    protected List<ComponentFlowNode> inputLinks;
     
-    protected List<ComponentVersion> outputLinks;
+    protected List<ComponentFlowNode> outputLinks;
 
     public ComponentFlowNode() {
         this(new ComponentFlowNodeData());
@@ -30,19 +30,19 @@ public class ComponentFlowNode extends AbstractObject<ComponentFlowNodeData> {
         this.componentVersion = componentVersion;
     }
 
-    public List<ComponentVersion> getInputLinks() {
+    public List<ComponentFlowNode> getInputLinks() {
         return inputLinks;
     }
 
-    public void setInputLinks(List<ComponentVersion> inputLinks) {
+    public void setInputLinks(List<ComponentFlowNode> inputLinks) {
         this.inputLinks = inputLinks;
     }
 
-    public List<ComponentVersion> getOutputLinks() {
+    public List<ComponentFlowNode> getOutputLinks() {
         return outputLinks;
     }
 
-    public void setOutputLinks(List<ComponentVersion> outputLinks) {
+    public void setOutputLinks(List<ComponentFlowNode> outputLinks) {
         this.outputLinks = outputLinks;
     }
 

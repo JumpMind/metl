@@ -22,7 +22,7 @@ public class AgentEngine {
         
     }
     
-    public ComponentGraphEngine getComponentGraphEngine(ComponentFlowVersion componentGraph) {
+    public ComponentFlowCoordinator getComponentGraphEngine(ComponentFlowVersion componentGraph) {
         return null;
     }
 

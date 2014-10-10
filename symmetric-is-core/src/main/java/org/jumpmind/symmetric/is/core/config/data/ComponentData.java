@@ -7,5 +7,21 @@ public class ComponentData extends AbstractData {
     String type;
     
     boolean shared;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public boolean isShared() {
+        return shared;
+    }
+
+    public void setShared(boolean shared) {
+        this.shared = shared;
+    }       
     
 }

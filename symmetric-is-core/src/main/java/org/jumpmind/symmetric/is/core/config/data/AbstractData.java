@@ -10,8 +10,6 @@ public abstract class AbstractData implements Serializable {
 
     String id = UUID.randomUUID().toString();
 
-    String name;
-
     Date createTime;
 
     String createBy;
@@ -28,14 +26,6 @@ public abstract class AbstractData implements Serializable {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Date getCreateTime() {

@@ -8,15 +8,21 @@ public class ComponentVersion extends AbstractObject<ComponentVersionData> {
 
     Connection connection;
     
+    Component component;
+    
     public ComponentVersion() {
     }
     
-    public ComponentVersion(ComponentVersionData data) {
+    public ComponentVersion(Component component, ComponentVersionData data) {
         super(data);
     }
 
     public Connection getConnection() {
         return connection;
+    }
+    
+    public Component getComponent() {
+        return component;
     }
     
 }

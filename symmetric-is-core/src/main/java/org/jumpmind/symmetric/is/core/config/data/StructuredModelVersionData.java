@@ -5,6 +5,8 @@ import java.util.List;
 
 public class StructuredModelVersionData extends AbstractVersionData {
 
+    private static final long serialVersionUID = 1L;
+    
     List<StructuredAttributeData> attributes = new ArrayList<StructuredAttributeData>();
     
     public StructuredModelVersionData add(StructuredAttributeData attribute) {
