@@ -4,9 +4,9 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 
 public interface IComponentListener {
 
-    public void beforeHandle(IComponent runtime, Message<?> inputMessage,
+    public void beforeHandle(IComponent runtime, Message inputMessage,
             ComponentFlowNode inputLink);
 
-    public void afterHandle(IComponent runtime, Message<?> inputMessage, ComponentFlowNode sourceNode);
+    public void afterHandle(IComponent runtime, Message inputMessage, ComponentFlowNode sourceNode);
 
 }

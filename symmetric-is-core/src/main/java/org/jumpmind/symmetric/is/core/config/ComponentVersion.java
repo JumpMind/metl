@@ -1,8 +1,9 @@
 package org.jumpmind.symmetric.is.core.config;
 
 import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
+import org.jumpmind.symmetric.is.core.config.data.SettingData;
 
-public class ComponentVersion extends AbstractObject<ComponentVersionData> {
+public class ComponentVersion extends AbstractObjectWithSettings<ComponentVersionData> {
 
     private static final long serialVersionUID = 1L;
 
@@ -10,11 +11,10 @@ public class ComponentVersion extends AbstractObject<ComponentVersionData> {
     
     Component component;
     
-    public ComponentVersion() {
-    }
-    
-    public ComponentVersion(Component component, ComponentVersionData data) {
-        super(data);
+    public ComponentVersion(Component component, Connection connection, ComponentVersionData data, SettingData... settings) {
+        super(data, settings);
+        this.component = component;
+        this.connection = connection;
     }
 
     public Connection getConnection() {

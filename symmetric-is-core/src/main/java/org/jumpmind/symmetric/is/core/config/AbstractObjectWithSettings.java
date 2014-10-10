@@ -1,11 +1,13 @@
 package org.jumpmind.symmetric.is.core.config;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.config.data.AbstractData;
 import org.jumpmind.symmetric.is.core.config.data.SettingData;
+import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 
 public class AbstractObjectWithSettings<D extends AbstractData> extends AbstractObject<D> {
 
@@ -13,27 +15,22 @@ public class AbstractObjectWithSettings<D extends AbstractData> extends Abstract
     
     protected List<SettingData> settings;
     
-    public AbstractObjectWithSettings(SettingData... settings) {
-    }
-
-    protected void initSettings(Map<String, SettingDefinition> definitions, SettingData... settings) {
-        for (String name : definitions.keySet()) {
-            String defaultValue = definitions.get(name).defaultValue();
-            this.settings.add(new SettingData(name, defaultValue));
-        }
-
-        if (settings != null) {
-            for (SettingData setting : settings) {
-                this.settings.remove(setting);
-                this.settings.add(setting);
-            }
+    public AbstractObjectWithSettings(D data, SettingData... settings) {
+        super(data);
+        this.settings = new ArrayList<SettingData>();
+        for (SettingData settingData : settings) {
+            this.settings.add(settingData);
         }
     }
 
-
-
-    public TypedProperties toTypedProperties() {
+    public TypedProperties toTypedProperties(AbstractRuntimeObject object, boolean provided) {
         TypedProperties properties = new TypedProperties();
+
+        Map<String, SettingDefinition> definitions = object.getSettingDefinitions(provided);
+        for (String name : definitions.keySet()) {
+            properties.put(name, definitions.get(name).defaultValue());
+        }
+
         for (SettingData settingObject : settings) {
             properties.setProperty(settingObject.getName(), settingObject.getValue());
         }

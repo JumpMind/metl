@@ -13,16 +13,20 @@ public class ComponentFlowCoordinator {
     ComponentFlowVersion flow;
 
     Map<ComponentFlowNode, IComponent> endpointRuntimes = new HashMap<ComponentFlowNode, IComponent>();
-    
+
     Map<String, IConnection> connectionRuntimes = new HashMap<String, IConnection>();
 
     List<IComponentListener> runtimeListeners = new ArrayList<IComponentListener>();
 
     ComponentFactory componentFactory;
-    
-    public ComponentFlowCoordinator(ComponentFlowVersion flow, ComponentFactory componentFactory) {
+
+    ConnectionFactory connectionFactory;
+
+    public ComponentFlowCoordinator(ComponentFlowVersion flow, ComponentFactory componentFactory,
+            ConnectionFactory connectionFactory) {
         this.flow = flow;
         this.componentFactory = componentFactory;
+        this.connectionFactory = connectionFactory;
     }
 
     public void addComponentVersionRuntimeListener(IComponentListener listener) {
@@ -34,7 +38,7 @@ public class ComponentFlowCoordinator {
             List<ComponentFlowNode> all = flow.getComponentGraphNodes();
             for (ComponentFlowNode node : all) {
                 endpointRuntimes.put(node, componentFactory.create(node.getComponentVersion()));
-                endpointRuntimes.get(node).start(node, new NodeChain(node));
+                endpointRuntimes.get(node).start(connectionFactory, node, new NodeChain(node));
             }
         } catch (RuntimeException e) {
             throw e;
@@ -61,10 +65,11 @@ public class ComponentFlowCoordinator {
         return null;
     }
 
-    protected void doNext(ComponentFlowNode targetNode, Message<?> message, ComponentFlowNode sourceNode) {
+    protected void doNext(ComponentFlowNode targetNode, Message message,
+            ComponentFlowNode sourceNode) {
         // TODO execute in parallel/async if configured
         validateMessageStructureMatchesInputModel(message, targetNode);
-        IComponent runtime = endpointRuntimes.get(targetNode);
+        IComponent runtime = (IComponent) endpointRuntimes.get(targetNode);
         for (IComponentListener listener : runtimeListeners) {
             listener.beforeHandle(runtime, message, sourceNode);
         }
@@ -74,7 +79,8 @@ public class ComponentFlowCoordinator {
         }
     }
 
-    protected void validateMessageStructureMatchesInputModel(Message<?> message, ComponentFlowNode targetNode) {
+    protected void validateMessageStructureMatchesInputModel(Message message,
+            ComponentFlowNode targetNode) {
 
     }
 
@@ -89,10 +95,10 @@ public class ComponentFlowCoordinator {
         public NodeChain(ComponentFlowNode sourceNode) {
             this.sourceNode = sourceNode;
         }
-        
+
         @Override
-        public void doNext(Message<?> outputMessage, List<ComponentFlowNode> targetNodes) {
-            for (ComponentFlowNode targetNode : targetNodes) {
+        public void doNext(Message outputMessage) {
+            for (ComponentFlowNode targetNode : sourceNode.getOutputLinks()) {
                 validateOutputLink(sourceNode, targetNode);
                 ComponentFlowCoordinator.this.doNext(targetNode, outputMessage, sourceNode);
             }

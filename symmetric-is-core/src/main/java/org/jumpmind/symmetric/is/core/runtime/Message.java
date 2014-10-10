@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.jumpmind.util.LinkedCaseInsensitiveMap;
 
-public class Message<T extends Serializable> implements Serializable {
+public class Message implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
     
@@ -16,7 +16,7 @@ public class Message<T extends Serializable> implements Serializable {
     
     LinkedCaseInsensitiveMap<Object> header;
 
-    T payload;
+    Serializable payload;
 
     public LinkedCaseInsensitiveMap<Object> getHeader() {
         return header;
@@ -26,12 +26,21 @@ public class Message<T extends Serializable> implements Serializable {
         this.header = header;
     }
 
-    public T getPayload() {
-        return payload;
+    @SuppressWarnings("unchecked")
+    public <T extends Serializable> T getPayload() {
+        return (T)payload;
     }
 
-    public void setPayload(T payload) {
+    public <T extends Serializable> void setPayload(T payload) {
         this.payload = payload;
     }    
+    
+    public Message copy () {
+        try {
+            return (Message)this.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError();
+        }
+    }
     
 }

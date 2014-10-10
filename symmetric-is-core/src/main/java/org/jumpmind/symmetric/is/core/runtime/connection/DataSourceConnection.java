@@ -87,7 +87,7 @@ public class DataSourceConnection extends AbstractRuntimeObject implements IConn
     @Override
     public void start(Connection connection) {
         dataSource = BasicDataSourceFactory
-                .create(connection.toTypedProperties());
+                .create(connection.toTypedProperties(this, false));
     }
 
     @Override

@@ -4,10 +4,10 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 
 public interface IComponent {
 
-    public void start(ComponentFlowNode componentNode, IComponentFlowChain chain);
+    public void start(ConnectionFactory connectionFactory, ComponentFlowNode componentNode, IComponentFlowChain chain);
 
     public void stop();
 
-    public void handle(Message<?> inputMessage, ComponentFlowNode inputLink);
+    public void handle(Message inputMessage, ComponentFlowNode inputLink);
 
 }

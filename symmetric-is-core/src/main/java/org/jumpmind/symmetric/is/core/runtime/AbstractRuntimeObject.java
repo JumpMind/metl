@@ -25,7 +25,7 @@ public class AbstractRuntimeObject {
         return getSettingDefinitions(true);
     }
 
-    protected Map<String, SettingDefinition> getSettingDefinitions(boolean provided) {
+    public Map<String, SettingDefinition> getSettingDefinitions(boolean provided) {
         try {
             Class<?> clazz = getClass();
             List<Field> fields = new ArrayList<Field>();
