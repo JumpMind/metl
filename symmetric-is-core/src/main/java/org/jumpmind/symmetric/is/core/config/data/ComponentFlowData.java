@@ -5,8 +5,14 @@ public class ComponentFlowData extends AbstractData {
 
     private static final long serialVersionUID = 1L;
 
-    String type;
-    
-    boolean shared;
+    String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
     
 }

@@ -29,23 +29,23 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.CollapseEvent;
 import com.vaadin.ui.Tree.CollapseListener;
 import com.vaadin.ui.Tree.ExpandEvent;
 import com.vaadin.ui.Tree.ExpandListener;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-abstract public class AbstractFolderEditPanel extends VerticalLayout implements ClickListener,
-        IPromptListener {
+abstract public class AbstractFolderEditPanel extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 
     protected Tree tree;
 
-    protected MenuBar addButton;
+    protected MenuItem addButton;
 
     protected Button delButton;
 
@@ -54,7 +54,7 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout implements 
 
     protected FolderType folderType;
 
-    protected Folder lastSelected;
+    //protected Object lastSelected;
 
     public AbstractFolderEditPanel(String title, FolderType folderType) {
         this.folderType = folderType;
@@ -70,14 +70,14 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout implements 
         HorizontalLayout buttonLayout = new HorizontalLayout();
         addComponent(buttonLayout);
 
-        addButton = buildAddButton();
-        buttonLayout.addComponent(addButton);
-        buttonLayout.setComponentAlignment(addButton, Alignment.MIDDLE_LEFT);
+        MenuBar bar = buildAddButton();
+        buttonLayout.addComponent(bar);
+        buttonLayout.setComponentAlignment(bar, Alignment.MIDDLE_LEFT);
 
         delButton = new Button("Delete");
         delButton.setStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
         delButton.setEnabled(false);
-        delButton.addClickListener(this);
+        delButton.addClickListener(new DeleteButtonClickListener());
         buttonLayout.addComponent(delButton);
         buttonLayout.setComponentAlignment(delButton, Alignment.MIDDLE_LEFT);
 
@@ -102,7 +102,7 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout implements 
 
             @Override
             public void itemClick(ItemClickEvent event) {
-               unselectIfSelected();
+                unselectIfSelected();
             }
         });
         this.tree.addCollapseListener(new CollapseListener() {
@@ -123,7 +123,9 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout implements 
             @Override
             public void nodeExpand(ExpandEvent event) {
                 if (event.getItemId() instanceof Folder) {
-                    tree.setItemIcon(event.getItemId(), FontAwesome.FOLDER_OPEN);
+                    Folder folder = (Folder) event.getItemId();
+                    tree.setItemIcon(folder, FontAwesome.FOLDER_OPEN);
+                    folderExpanded(folder);
                 }
             }
         });
@@ -131,47 +133,60 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout implements 
         addComponent(tree);
         setExpandRatio(tree, 1);
     }
-    
-    protected void unselectIfSelected() {
+
+    protected Folder getSelectedFolder() {
         @SuppressWarnings("unchecked")
-        Set<Object> selected = (Set<Object>) tree.getValue();
-        if (selected.size() > 0) {
-            if (lastSelected != null && selected.iterator().next().equals(lastSelected)) {
-                lastSelected = null;
-                tree.setValue(new HashSet<Object>());
+        Set<Object> selectedIds = (Set<Object>) tree.getValue();
+        for (Object object : selectedIds) {
+            if (object instanceof Folder) {
+                return (Folder) object;
             }
         }
+        return null;
+    }
+
+    protected void folderExpanded(Folder folder) {
 
     }
-    
+
+    protected void unselectIfSelected() {
+//        @SuppressWarnings("unchecked")
+//        Set<Object> selected = (Set<Object>) tree.getValue();
+//        if (selected.size() > 0) {
+//            Object selectedObject = selected.iterator().next();
+//            if (selected.contains(lastSelected)) {
+//                tree.unselect(lastSelected);
+//                lastSelected = null;                
+//            } else {
+//                lastSelected = selectedObject;
+//            }
+//        }
+    }
+
     protected void treeSelectionChanged(ValueChangeEvent event) {
         @SuppressWarnings("unchecked")
-        Set<Folder> selected = (Set<Folder>) tree.getValue();
-        if (selected.size() > 0) {
-            lastSelected = selected.iterator().next();
-        } else {
-            lastSelected = null;
-        }
+        Set<Object> selected = (Set<Object>) tree.getValue();
+        Folder folder = getSelectedFolder();
+        addButton.setEnabled((folder == null && selected.size() == 0) || folder != null);
         delButton.setEnabled(selected.size() > 0);
     }
 
     private MenuBar buildAddButton() {
-        MenuBar addButton = new MenuBar();
-        addButton.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
-        MenuBar.MenuItem dropdown = addButton.addItem("Add", null);
-        dropdown.addItem("Folder", FontAwesome.FOLDER, new Command() {
+        MenuBar bar = new MenuBar();
+        bar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
+        MenuBar.MenuItem dropdown = bar.addItem("Add", null);
+        addButton = dropdown.addItem("Folder", FontAwesome.FOLDER, new Command() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
-                PromptDialog prompt = new PromptDialog("Add Folder", "Please choose a folder name",
-                        AbstractFolderEditPanel.this);
-                UI.getCurrent().addWindow(prompt);
+                PromptDialog.prompt("Add Folder", "Please choose a folder name",
+                        new NewFolderPromptListener());
             }
         });
         addToAddButton(dropdown);
-        return addButton;
+        return bar;
     }
 
     protected void addToAddButton(MenuBar.MenuItem dropdown) {
@@ -181,65 +196,16 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout implements 
     protected void addButtonsRight(HorizontalLayout buttonLayout) {
     }
 
-    @Override
-    public boolean onOk(String content) {
-        if (isNotBlank(content)) {
-            Folder parentFolder = null;
-            @SuppressWarnings("unchecked")
-            Set<Folder> selectedIds = (Set<Folder>) tree.getValue();
-            if (selectedIds != null && selectedIds.size() > 0) {
-                parentFolder = selectedIds.iterator().next();
-            }
-            FolderData folderData = new FolderData();
-            folderData.setName(content);
-            folderData.setType(folderType.name());
-            folderData.setParentFolderId(parentFolder != null ? parentFolder.getData().getId()
-                    : null);
-            Folder folder = new Folder(folderData);
-            folder.setParent(parentFolder);
-
-            configurationService.save(new Folder(folderData));
-
-            refresh();
-
-            while (parentFolder != null) {
-                tree.expandItem(parentFolder);
-                parentFolder = parentFolder.getParent();
-            }
-
-            Set<Folder> selected = new HashSet<Folder>();
-            selected.add(folder);
-            tree.setValue(selected);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public void buttonClick(ClickEvent event) {
-        Button button = event.getButton();
-        if (button == delButton) {
-            ConfirmDialog.show("Delete Folder?", "Are you sure you want to delete the folder?",
-                    new IConfirmListener() {
-
-                        private static final long serialVersionUID = 1L;
-
-                        @Override
-                        public boolean onOk() {
-                            deleteSelectedFolders();
-                            refresh();
-                            return true;
-                        }
-                    });
-        }
-    }
-
     protected void deleteSelectedFolders() {
         @SuppressWarnings("unchecked")
-        Set<Folder> folderIds = (Set<Folder>) tree.getValue();
-        for (Folder folderId : folderIds) {
-            configurationService.deleteFolder(folderId.getData().getId());
+        Set<Folder> folders = (Set<Folder>) tree.getValue();
+        for (Folder folder : folders) {
+            try {
+                configurationService.deleteFolder(folder.getData().getId());
+            } catch (Exception ex) {
+                Notification.show("Could not delete the \"" + folder.getData().getName()
+                        + "\" folder", Type.WARNING_MESSAGE);
+            }
         }
     }
 
@@ -262,8 +228,84 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout implements 
         for (Folder child : children) {
             addChildFolder(child);
         }
-        if (children.size() == 0) {
-            this.tree.setChildrenAllowed(folder, false);
+    }
+
+    protected void deleteTreeItem(Object object) {
+
+    }
+
+    class NewFolderPromptListener implements IPromptListener {
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public boolean onOk(String content) {
+            if (isNotBlank(content)) {
+                Folder parentFolder = null;
+                @SuppressWarnings("unchecked")
+                Set<Folder> selectedIds = (Set<Folder>) tree.getValue();
+                if (selectedIds != null && selectedIds.size() > 0) {
+                    parentFolder = selectedIds.iterator().next();
+                }
+                FolderData folderData = new FolderData();
+                folderData.setName(content);
+                folderData.setType(folderType.name());
+                folderData.setParentFolderId(parentFolder != null ? parentFolder.getData().getId()
+                        : null);
+                Folder folder = new Folder(folderData);
+                folder.setParent(parentFolder);
+
+                configurationService.save(new Folder(folderData));
+
+                refresh();
+
+                while (parentFolder != null) {
+                    tree.expandItem(parentFolder);
+                    parentFolder = parentFolder.getParent();
+                }
+
+                Set<Folder> selected = new HashSet<Folder>();
+                selected.add(folder);
+                tree.setValue(selected);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    class DeleteButtonClickListener implements ClickListener {
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public void buttonClick(ClickEvent event) {
+            Button button = event.getButton();
+            if (button == delButton) {
+                if (getSelectedFolder() != null) {
+                    ConfirmDialog.show("Delete Folder?",
+                            "Are you sure you want to delete the selected folders?",
+                            new IConfirmListener() {
+
+                                private static final long serialVersionUID = 1L;
+
+                                @Override
+                                public boolean onOk() {
+                                    deleteSelectedFolders();
+                                    refresh();
+                                    return true;
+                                }
+                            });
+                }
+
+                @SuppressWarnings("unchecked")
+                Set<Object> objects = (Set<Object>) tree.getValue();
+                for (Object object : objects) {
+                    if (!(object instanceof Folder)) {
+                        deleteTreeItem(object);
+                    }
+                }
+            }
         }
     }
 

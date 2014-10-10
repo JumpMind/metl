@@ -5,16 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.jumpmind.symmetric.app.core.persist.IPersistenceManager;
-import org.jumpmind.symmetric.is.core.config.Agent;
-import org.jumpmind.symmetric.is.core.config.AgentDeployment;
-import org.jumpmind.symmetric.is.core.config.Component;
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.config.ComponentVersion;
-import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
-import org.jumpmind.symmetric.is.core.config.StructuredModel;
+import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
 import org.jumpmind.symmetric.is.core.config.data.FolderType;
 
@@ -30,20 +25,13 @@ public class ConfigurationService implements IConfigurationService {
     }
 
     protected String tableName(Class<?> clazz) {
-        return tablePrefix + "_"
-                + clazz.getSimpleName().substring(0, clazz.getSimpleName().indexOf("Data"));
-    }
-
-    public void save(ComponentFlowVersion graph) {
-    }
-
-    public void save(ComponentVersion component) {
-    }
-
-    public void save(Component component) {
-    }
-
-    public void save(ComponentFlow component) {
+        StringBuilder name = new StringBuilder(tablePrefix);
+        String[] tokens = StringUtils.splitByCharacterTypeCamelCase(clazz.getSimpleName().substring(0, clazz.getSimpleName().indexOf("Data")));
+        for (String string : tokens) {
+            name.append("_");
+            name.append(string);
+        }
+        return name.toString();                
     }
 
     @Override
@@ -51,9 +39,14 @@ public class ConfigurationService implements IConfigurationService {
         persistenceManager.save(folder.getData(), null, null, tableName(FolderData.class));
     }
 
+    @Override
+    public void save(ComponentFlow flow) {
+        persistenceManager.save(flow.getData(), null, null, tableName(ComponentFlowData.class));
+    }
+
     // TODO transactional
     @Override
-    public void deleteFolder(String folderId) {        
+    public void deleteFolder(String folderId) {
         Map<String, Object> byType = new HashMap<String, Object>();
         byType.put("parentFolderId", folderId);
         List<FolderData> folderDatas = persistenceManager.find(FolderData.class, byType, null,
@@ -96,28 +89,21 @@ public class ConfigurationService implements IConfigurationService {
         return rootFolders;
     }
 
-    public List<Component> findComponents(Folder folder) {
-        return null;
+    public List<ComponentFlow> findComponentFlowsInFolder(Folder folder) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("folderId", folder.getData().getId());
+        List<ComponentFlowData> datas = persistenceManager.find(ComponentFlowData.class, params,
+                null, null, tableName(ComponentFlowData.class));
+        List<ComponentFlow> flows = new ArrayList<ComponentFlow>();
+        for (ComponentFlowData componentFlowData : datas) {
+            flows.add(new ComponentFlow(componentFlowData));
+        }
+        return flows;
     }
-
-    public List<ComponentFlow> findComponentGraphs(Folder folder) {
-        return null;
-    }
-
-    public List<StructuredModel> findStructuredModel(Folder folder) {
-        return null;
-    }
-
-    public List<Connection> findConnections(Folder foler) {
-        return null;
-    }
-
-    public List<Agent> findAgents(Folder folder) {
-        return null;
-    }
-
-    public List<AgentDeployment> findAgentDeployments(Agent agent) {
-        return null;
+    
+    @Override
+    public void deleteComponentFlow(ComponentFlow flow) {
+        persistenceManager.delete(flow.getData(), null, null, tableName(ComponentFlowData.class));
     }
 
 }

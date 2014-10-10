@@ -8,13 +8,13 @@ import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class PromptDialog extends Window {
 
@@ -62,7 +62,7 @@ public class PromptDialog extends Window {
         cancelButton.setClickShortcut(KeyCode.ESCAPE);
         cancelButton.addClickListener(new ClickListener() {
             private static final long serialVersionUID = 1L;
-           
+
             @Override
             public void buttonClick(ClickEvent event) {
                 UI.getCurrent().removeWindow(PromptDialog.this);
@@ -75,7 +75,7 @@ public class PromptDialog extends Window {
         okButton.setClickShortcut(KeyCode.ENTER);
         okButton.addClickListener(new ClickListener() {
             private static final long serialVersionUID = 1L;
-           
+
             @Override
             public void buttonClick(ClickEvent event) {
                 if (promptListener.onOk(field.getValue())) {
@@ -89,6 +89,11 @@ public class PromptDialog extends Window {
 
         field.focus();
 
+    }
+
+    public static void prompt(String caption, String message, IPromptListener listener) {
+        PromptDialog prompt = new PromptDialog(caption, message, listener);
+        UI.getCurrent().addWindow(prompt);
     }
 
     public static interface IPromptListener extends Serializable {
