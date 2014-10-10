@@ -7,6 +7,10 @@ import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
+import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
+import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 
 public class ComponentFlowCoordinator {
 
@@ -16,20 +20,20 @@ public class ComponentFlowCoordinator {
 
     Map<String, IConnection> connectionRuntimes = new HashMap<String, IConnection>();
 
-    List<IComponentListener> runtimeListeners = new ArrayList<IComponentListener>();
+    List<IComponentFlowListener> runtimeListeners = new ArrayList<IComponentFlowListener>();
 
-    ComponentFactory componentFactory;
+    IComponentFactory componentFactory;
 
-    ConnectionFactory connectionFactory;
+    IConnectionFactory connectionFactory;
 
-    public ComponentFlowCoordinator(ComponentFlowVersion flow, ComponentFactory componentFactory,
-            ConnectionFactory connectionFactory) {
+    public ComponentFlowCoordinator(ComponentFlowVersion flow, IComponentFactory componentFactory,
+            IConnectionFactory connectionFactory) {
         this.flow = flow;
         this.componentFactory = componentFactory;
         this.connectionFactory = connectionFactory;
     }
 
-    public void addComponentVersionRuntimeListener(IComponentListener listener) {
+    public void addComponentVersionRuntimeListener(IComponentFlowListener listener) {
         this.runtimeListeners.add(listener);
     }
 
@@ -70,11 +74,11 @@ public class ComponentFlowCoordinator {
         // TODO execute in parallel/async if configured
         validateMessageStructureMatchesInputModel(message, targetNode);
         IComponent runtime = (IComponent) endpointRuntimes.get(targetNode);
-        for (IComponentListener listener : runtimeListeners) {
+        for (IComponentFlowListener listener : runtimeListeners) {
             listener.beforeHandle(runtime, message, sourceNode);
         }
         runtime.handle(message, sourceNode);
-        for (IComponentListener listener : runtimeListeners) {
+        for (IComponentFlowListener listener : runtimeListeners) {
             listener.afterHandle(runtime, message, sourceNode);
         }
     }

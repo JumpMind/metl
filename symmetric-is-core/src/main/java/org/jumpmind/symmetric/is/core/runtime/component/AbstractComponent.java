@@ -3,11 +3,10 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
-import org.jumpmind.symmetric.is.core.runtime.ConnectionFactory;
-import org.jumpmind.symmetric.is.core.runtime.IComponent;
 import org.jumpmind.symmetric.is.core.runtime.IComponentFlowChain;
-import org.jumpmind.symmetric.is.core.runtime.IConnection;
 import org.jumpmind.symmetric.is.core.runtime.Message;
+import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
+import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 
 abstract public class AbstractComponent extends AbstractRuntimeObject implements IComponent {
 
@@ -17,10 +16,10 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     
     protected IConnection connection;
     
-    protected ConnectionFactory connectionFactory;
+    protected IConnectionFactory connectionFactory;
 
     @Override
-    public void start(ConnectionFactory connectionFactory, ComponentFlowNode componentNode, IComponentFlowChain chain) {
+    public void start(IConnectionFactory connectionFactory, ComponentFlowNode componentNode, IComponentFlowChain chain) {
         this.componentNode = componentNode;
         this.chain = chain;
         this.connectionFactory = connectionFactory;

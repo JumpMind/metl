@@ -6,9 +6,6 @@ import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
-import org.jumpmind.symmetric.is.core.runtime.ConnectionCategory;
-import org.jumpmind.symmetric.is.core.runtime.ConnectionDefinition;
-import org.jumpmind.symmetric.is.core.runtime.IConnection;
 
 @ConnectionDefinition(typeName="DataSource", connectionCategory=ConnectionCategory.DATASOURCE)
 public class DataSourceConnection extends AbstractRuntimeObject implements IConnection {

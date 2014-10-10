@@ -1,8 +1,8 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
-import static org.jumpmind.symmetric.is.core.runtime.ComponentSupports.OUTPUT_MESSAGE;
-import static org.jumpmind.symmetric.is.core.runtime.ComponentSupports.OUTPUT_MODEL;
-import static org.jumpmind.symmetric.is.core.runtime.ConnectionCategory.DATASOURCE;
+import static org.jumpmind.symmetric.is.core.runtime.component.ComponentSupports.OUTPUT_MESSAGE;
+import static org.jumpmind.symmetric.is.core.runtime.component.ComponentSupports.OUTPUT_MODEL;
+import static org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory.DATASOURCE;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -18,12 +18,11 @@ import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
-import org.jumpmind.symmetric.is.core.runtime.ComponentDefinition;
-import org.jumpmind.symmetric.is.core.runtime.ConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IComponentFlowChain;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.MessageManipulationStrategy;
+import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -54,7 +53,7 @@ public class DbReaderComponent extends AbstractComponent {
     protected boolean trimColumns = false;
 
     @Override
-    public void start(ConnectionFactory connectionFactory, ComponentFlowNode componentNode,
+    public void start(IConnectionFactory connectionFactory, ComponentFlowNode componentNode,
             IComponentFlowChain chain) {
         super.start(connectionFactory, componentNode, chain);
         applySettings();

@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.core.runtime;
+package org.jumpmind.symmetric.is.core.runtime.component;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -6,9 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
-import org.jumpmind.symmetric.is.core.runtime.component.DbReaderComponent;
 
-public class ComponentFactory {
+public class ComponentFactory implements IComponentFactory {
 
     Map<String, Class<? extends IComponent>> componentTypes = new LinkedHashMap<String, Class<? extends IComponent>>();
 
@@ -16,10 +15,12 @@ public class ComponentFactory {
         register(DbReaderComponent.class);
     }
 
+    @Override
     public List<String> getComponentTypes() {
         return new ArrayList<String>(componentTypes.keySet());
     }
 
+    @Override
     public void register(Class<? extends IComponent> clazz) {
         ComponentDefinition definition = clazz.getAnnotation(ComponentDefinition.class);
         if (definition != null) {
@@ -30,6 +31,7 @@ public class ComponentFactory {
         }
     }
 
+    @Override
     public IComponent create(ComponentVersion componentVersion) {
         try {
             String componentType = componentVersion.getComponent().getData().getType();

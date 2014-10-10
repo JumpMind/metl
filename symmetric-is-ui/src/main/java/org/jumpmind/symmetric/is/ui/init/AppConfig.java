@@ -34,6 +34,10 @@ import org.jumpmind.symmetric.app.core.persist.IPersistenceManager;
 import org.jumpmind.symmetric.app.core.persist.JdbcPersistenceManager;
 import org.jumpmind.symmetric.is.core.persist.ConfigurationService;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.runtime.component.ComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionFactory;
+import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,6 +131,19 @@ public class AppConfig {
         IConfigurationService service =  new ConfigurationService(persistenceManager(), tablePrefix());
         return service;
     }
+    
+    @Bean
+    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
+    public IComponentFactory componentFactory() {
+        return new ComponentFactory();
+    }
+    
+    @Bean
+    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
+    public IConnectionFactory connectionFactory() {
+        return new ConnectionFactory();
+    }
+
     
     @Bean 
     static UIScope uiScope() {
