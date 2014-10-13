@@ -8,15 +8,17 @@ import java.util.List;
 import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
+import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.config.data.FolderType;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.support.AbstractFolderEditPanel;
 import org.jumpmind.symmetric.is.ui.support.Category;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog;
-import org.jumpmind.symmetric.is.ui.support.PromptDialog;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog.IConfirmListener;
+import org.jumpmind.symmetric.is.ui.support.PromptDialog;
 import org.jumpmind.symmetric.is.ui.support.PromptDialog.IPromptListener;
 import org.jumpmind.symmetric.is.ui.support.ViewLink;
 import org.springframework.context.annotation.Scope;
@@ -84,13 +86,22 @@ public class FlowView extends AbstractFolderEditPanel implements View {
                 }
             }
         }
+        
         List<ComponentFlow> flows = configurationService.findComponentFlowsInFolder(folder);
         for (ComponentFlow flow : flows) {
             this.tree.addItem(flow);
             this.tree.setItemCaption(flow, flow.getData().getName());
             this.tree.setItemIcon(flow, FontAwesome.SHARE_ALT);
             this.tree.setParent(flow, folder);
-            this.tree.setChildrenAllowed(flow, false);
+            
+            List<ComponentFlowVersion> versions = flow.getComponentFlowVersions();
+            for (ComponentFlowVersion componentFlowVersion : versions) {
+                this.tree.addItem(componentFlowVersion);
+                this.tree.setItemCaption(componentFlowVersion, componentFlowVersion.getData().getVersionName());
+                this.tree.setItemIcon(componentFlowVersion, FontAwesome.FILE_TEXT);
+                this.tree.setParent(componentFlowVersion, flow);
+                this.tree.setChildrenAllowed(componentFlowVersion, false);
+            }
         }
     }
 
@@ -116,10 +127,18 @@ public class FlowView extends AbstractFolderEditPanel implements View {
                 data.setName(content);
                 data.setFolderId(folder.getData().getId());
 
-                ComponentFlow flow = new ComponentFlow(data);
+                ComponentFlow flow = new ComponentFlow(data);                                
 
                 configurationService.save(flow);
+                
+                ComponentFlowVersionData versionData = new ComponentFlowVersionData();
+                versionData.setVersionName("orig");
+                versionData.setComponentFlowId(data.getId());
+                
+                ComponentFlowVersion flowVersion = new ComponentFlowVersion(versionData);
 
+                configurationService.save(flowVersion);
+                
                 refresh();
 
                 while (folder != null) {

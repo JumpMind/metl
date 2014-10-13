@@ -8,8 +8,10 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.symmetric.app.core.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
+import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
 import org.jumpmind.symmetric.is.core.config.data.FolderType;
 
@@ -26,22 +28,13 @@ public class ConfigurationService implements IConfigurationService {
 
     protected String tableName(Class<?> clazz) {
         StringBuilder name = new StringBuilder(tablePrefix);
-        String[] tokens = StringUtils.splitByCharacterTypeCamelCase(clazz.getSimpleName().substring(0, clazz.getSimpleName().indexOf("Data")));
+        String[] tokens = StringUtils.splitByCharacterTypeCamelCase(clazz.getSimpleName()
+                .substring(0, clazz.getSimpleName().indexOf("Data")));
         for (String string : tokens) {
             name.append("_");
             name.append(string);
         }
-        return name.toString();                
-    }
-
-    @Override
-    public void save(Folder folder) {
-        persistenceManager.save(folder.getData(), null, null, tableName(FolderData.class));
-    }
-
-    @Override
-    public void save(ComponentFlow flow) {
-        persistenceManager.save(flow.getData(), null, null, tableName(ComponentFlowData.class));
+        return name.toString();
     }
 
     // TODO transactional
@@ -96,14 +89,55 @@ public class ConfigurationService implements IConfigurationService {
                 null, null, tableName(ComponentFlowData.class));
         List<ComponentFlow> flows = new ArrayList<ComponentFlow>();
         for (ComponentFlowData componentFlowData : datas) {
-            flows.add(new ComponentFlow(componentFlowData));
+            ComponentFlow flow = new ComponentFlow(componentFlowData);
+            flows.add(flow);
+
+            Map<String, Object> versionParams = new HashMap<String, Object>();
+            versionParams.put("componentFlowId", componentFlowData.getId());
+            List<ComponentFlowVersionData> versionDatas = persistenceManager.find(
+                    ComponentFlowVersionData.class, versionParams, null, null,
+                    tableName(ComponentFlowVersionData.class));
+            for (ComponentFlowVersionData versionData : versionDatas) {
+                ComponentFlowVersion version = new ComponentFlowVersion(versionData);
+                flow.getComponentFlowVersions().add(version);
+            }
+
         }
         return flows;
     }
-    
+
+    // TODO transactional
     @Override
     public void deleteComponentFlow(ComponentFlow flow) {
+        List<ComponentFlowVersion> versions = flow.getComponentFlowVersions();
+        for (ComponentFlowVersion componentFlowVersion : versions) {
+            deleteComponentFlowVersion(componentFlowVersion);
+        }
+
         persistenceManager.delete(flow.getData(), null, null, tableName(ComponentFlowData.class));
+
+    }
+
+    @Override
+    public void deleteComponentFlowVersion(ComponentFlowVersion flowVersion) {
+        persistenceManager.delete(flowVersion.getData(), null, null,
+                tableName(ComponentFlowVersionData.class));
+    }
+
+    @Override
+    public void save(Folder folder) {
+        persistenceManager.save(folder.getData(), null, null, tableName(FolderData.class));
+    }
+
+    @Override
+    public void save(ComponentFlow flow) {
+        persistenceManager.save(flow.getData(), null, null, tableName(ComponentFlowData.class));
+    }
+
+    @Override
+    public void save(ComponentFlowVersion flowVersion) {
+        persistenceManager.save(flowVersion.getData(), null, null,
+                tableName(ComponentFlowVersionData.class));
     }
 
 }

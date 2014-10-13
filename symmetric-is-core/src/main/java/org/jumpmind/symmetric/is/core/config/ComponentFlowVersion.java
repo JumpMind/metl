@@ -8,6 +8,7 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionData> {
 
     private static final long serialVersionUID = 1L;
+    
     List<ComponentFlowNode> componentGraphNodes;
 
     public ComponentFlowVersion() {

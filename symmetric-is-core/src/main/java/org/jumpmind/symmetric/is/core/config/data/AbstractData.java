@@ -14,8 +14,6 @@ public abstract class AbstractData implements Serializable {
 
     String createBy;
 
-    String folderId;
-
     Date lastModifyTime;
 
     String lastModifyBy;
@@ -42,14 +40,6 @@ public abstract class AbstractData implements Serializable {
 
     public void setCreateBy(String createBy) {
         this.createBy = createBy;
-    }
-
-    public String getFolderId() {
-        return folderId;
-    }
-
-    public void setFolderId(String folderId) {
-        this.folderId = folderId;
     }
 
     public Date getLastModifyTime() {
