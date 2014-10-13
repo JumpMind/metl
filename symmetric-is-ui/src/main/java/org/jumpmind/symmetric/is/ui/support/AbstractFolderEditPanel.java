@@ -12,6 +12,8 @@ import org.jumpmind.symmetric.is.core.config.data.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.is.ui.support.PromptDialog.IPromptListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -42,6 +44,8 @@ import com.vaadin.ui.themes.ValoTheme;
 abstract public class AbstractFolderEditPanel extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
+    
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
     protected Tree tree;
 

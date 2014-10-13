@@ -9,14 +9,17 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
 
     private static final long serialVersionUID = 1L;
     
+    ComponentFlow flow;
+    
     List<ComponentFlowNode> componentGraphNodes;
 
     public ComponentFlowVersion() {
-        this(new ComponentFlowVersionData());
+        this(new ComponentFlow(), new ComponentFlowVersionData());
     }
 
-    public ComponentFlowVersion(ComponentFlowVersionData data) {
+    public ComponentFlowVersion(ComponentFlow flow, ComponentFlowVersionData data) {
         super(data);
+        this.flow = flow;
         this.componentGraphNodes = new ArrayList<ComponentFlowNode>();
     }
 
@@ -26,6 +29,10 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
 
     public void setComponentGraphNodes(List<ComponentFlowNode> componentGraphNodes) {
         this.componentGraphNodes = componentGraphNodes;
+    }
+    
+    public ComponentFlow getFlow() {
+        return flow;
     }
 
 }

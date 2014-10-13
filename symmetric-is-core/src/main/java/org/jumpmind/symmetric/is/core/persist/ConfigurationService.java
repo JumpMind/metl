@@ -98,7 +98,7 @@ public class ConfigurationService implements IConfigurationService {
                     ComponentFlowVersionData.class, versionParams, null, null,
                     tableName(ComponentFlowVersionData.class));
             for (ComponentFlowVersionData versionData : versionDatas) {
-                ComponentFlowVersion version = new ComponentFlowVersion(versionData);
+                ComponentFlowVersion version = new ComponentFlowVersion(flow, versionData);
                 flow.getComponentFlowVersions().add(version);
             }
 

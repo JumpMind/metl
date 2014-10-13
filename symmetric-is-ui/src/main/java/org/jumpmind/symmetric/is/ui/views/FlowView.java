@@ -21,10 +21,14 @@ import org.jumpmind.symmetric.is.ui.support.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.is.ui.support.PromptDialog;
 import org.jumpmind.symmetric.is.ui.support.PromptDialog.IPromptListener;
 import org.jumpmind.symmetric.is.ui.support.ViewLink;
+import org.jumpmind.symmetric.is.ui.views.flows.EditFlowWindow;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.event.Action;
+import com.vaadin.event.Action.Handler;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
@@ -42,9 +46,13 @@ public class FlowView extends AbstractFolderEditPanel implements View {
     Diagram diagram;
 
     MenuItem addFlowButton;
+    
+    @Autowired
+    EditFlowWindow editFlowWindow;
 
     public FlowView() {
         super("Flows", FolderType.DESIGN);
+        tree.addActionHandler(new ActionHandler());
     }
 
     @Override
@@ -86,18 +94,19 @@ public class FlowView extends AbstractFolderEditPanel implements View {
                 }
             }
         }
-        
+
         List<ComponentFlow> flows = configurationService.findComponentFlowsInFolder(folder);
         for (ComponentFlow flow : flows) {
             this.tree.addItem(flow);
             this.tree.setItemCaption(flow, flow.getData().getName());
             this.tree.setItemIcon(flow, FontAwesome.SHARE_ALT);
             this.tree.setParent(flow, folder);
-            
+
             List<ComponentFlowVersion> versions = flow.getComponentFlowVersions();
             for (ComponentFlowVersion componentFlowVersion : versions) {
                 this.tree.addItem(componentFlowVersion);
-                this.tree.setItemCaption(componentFlowVersion, componentFlowVersion.getData().getVersionName());
+                this.tree.setItemCaption(componentFlowVersion, componentFlowVersion.getData()
+                        .getVersionName());
                 this.tree.setItemIcon(componentFlowVersion, FontAwesome.FILE_TEXT);
                 this.tree.setParent(componentFlowVersion, flow);
                 this.tree.setChildrenAllowed(componentFlowVersion, false);
@@ -127,18 +136,18 @@ public class FlowView extends AbstractFolderEditPanel implements View {
                 data.setName(content);
                 data.setFolderId(folder.getData().getId());
 
-                ComponentFlow flow = new ComponentFlow(data);                                
+                ComponentFlow flow = new ComponentFlow(data);
 
                 configurationService.save(flow);
-                
+
                 ComponentFlowVersionData versionData = new ComponentFlowVersionData();
                 versionData.setVersionName("orig");
                 versionData.setComponentFlowId(data.getId());
-                
-                ComponentFlowVersion flowVersion = new ComponentFlowVersion(versionData);
+
+                ComponentFlowVersion flowVersion = new ComponentFlowVersion(flow, versionData);
 
                 configurationService.save(flowVersion);
-                
+
                 refresh();
 
                 while (folder != null) {
@@ -171,6 +180,29 @@ public class FlowView extends AbstractFolderEditPanel implements View {
             configurationService.deleteComponentFlow(toDelete);
             refresh();
             return true;
+        }
+    }
+
+    class ActionHandler implements Handler {
+
+        private static final String ACTION_OPEN_FLOW = "Open Flow";
+        
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Action[] getActions(Object target, Object sender) {
+            if (target instanceof ComponentFlowVersion) {
+                return new Action[] { new Action(ACTION_OPEN_FLOW) };
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public void handleAction(Action action, Object sender, Object target) {
+            if (action.getCaption().equals(ACTION_OPEN_FLOW)) {
+                editFlowWindow.show((ComponentFlowVersion)target);
+            }
         }
     }
 
