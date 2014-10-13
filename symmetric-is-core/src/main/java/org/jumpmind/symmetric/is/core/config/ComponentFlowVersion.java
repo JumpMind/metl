@@ -11,7 +11,7 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
     
     ComponentFlow flow;
     
-    List<ComponentFlowNode> componentGraphNodes;
+    List<ComponentFlowNode> componentFlowNodes;
 
     public ComponentFlowVersion() {
         this(new ComponentFlow(), new ComponentFlowVersionData());
@@ -20,15 +20,24 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
     public ComponentFlowVersion(ComponentFlow flow, ComponentFlowVersionData data) {
         super(data);
         this.flow = flow;
-        this.componentGraphNodes = new ArrayList<ComponentFlowNode>();
+        this.componentFlowNodes = new ArrayList<ComponentFlowNode>();
+    }
+    
+    public ComponentFlowNode findComponentFlowNodeWithId(String id) {
+        for (ComponentFlowNode componentFlowNode : componentFlowNodes) {
+            if (componentFlowNode.getData().getId().equals(id)) {
+                return componentFlowNode;
+            }
+        }
+        return null;
     }
 
-    public List<ComponentFlowNode> getComponentGraphNodes() {
-        return componentGraphNodes;
+    public List<ComponentFlowNode> getComponentFlowNodes() {
+        return componentFlowNodes;
     }
 
-    public void setComponentGraphNodes(List<ComponentFlowNode> componentGraphNodes) {
-        this.componentGraphNodes = componentGraphNodes;
+    public void setComponentFlowNodes(List<ComponentFlowNode> componentGraphNodes) {
+        this.componentFlowNodes = componentGraphNodes;
     }
     
     public ComponentFlow getFlow() {

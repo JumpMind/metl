@@ -1,17 +1,25 @@
 package org.jumpmind.symmetric.is.core.persist;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.symmetric.app.core.persist.IPersistenceManager;
+import org.jumpmind.symmetric.is.core.config.AbstractObject;
+import org.jumpmind.symmetric.is.core.config.Component;
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.config.ComponentVersion;
 import org.jumpmind.symmetric.is.core.config.Folder;
+import org.jumpmind.symmetric.is.core.config.data.ComponentData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
+import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
+import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
 import org.jumpmind.symmetric.is.core.config.data.FolderType;
 
@@ -99,6 +107,7 @@ public class ConfigurationService implements IConfigurationService {
                     tableName(ComponentFlowVersionData.class));
             for (ComponentFlowVersionData versionData : versionDatas) {
                 ComponentFlowVersion version = new ComponentFlowVersion(flow, versionData);
+                refreshComponentFlowVersionRelations(version);
                 flow.getComponentFlowVersions().add(version);
             }
 
@@ -123,21 +132,62 @@ public class ConfigurationService implements IConfigurationService {
         persistenceManager.delete(flowVersion.getData(), null, null,
                 tableName(ComponentFlowVersionData.class));
     }
-
+    
     @Override
-    public void save(Folder folder) {
-        persistenceManager.save(folder.getData(), null, null, tableName(FolderData.class));
+    public void refresh(ComponentFlowVersion componentFlowVersion) {
+        persistenceManager.refresh(componentFlowVersion.getData(), null, null, tableName(componentFlowVersion.getData().getClass()));
+        refreshComponentFlowVersionRelations(componentFlowVersion);
+    }
+    
+    public ComponentVersion findComponentVersion(String id) {
+        ComponentVersionData componentVersionData = new ComponentVersionData();
+        componentVersionData.setId(id);
+        persistenceManager.refresh(componentVersionData, null, null, tableName(ComponentVersionData.class));
+        ComponentData componentData = new ComponentData();
+        componentData.setId(componentVersionData.getComponentId());
+        persistenceManager.refresh(componentData, null, null, tableName(ComponentData.class));
+        Component component = new Component(componentData);
+        // TODO read connection and settings
+        ComponentVersion version = new ComponentVersion(component, null, componentVersionData);
+        return version;
+    }
+    
+    private void refreshComponentFlowVersionRelations(ComponentFlowVersion componentFlowVersion) {
+        componentFlowVersion.getComponentFlowNodes().clear();
+        Map<String, Object> versionParams = new HashMap<String, Object>();
+        versionParams.put("componentFlowVersionId", componentFlowVersion.getData().getId());
+        List<ComponentFlowNodeData> datas = persistenceManager.find(
+                ComponentFlowNodeData.class, versionParams, null, null,
+                tableName(ComponentFlowNodeData.class));
+        for (ComponentFlowNodeData data : datas) {
+            ComponentFlowNode node = new ComponentFlowNode(findComponentVersion(data.getComponentVersionId()), data);
+            componentFlowVersion.getComponentFlowNodes().add(node);
+        }
+    }
+    
+    @Override
+    public void save(AbstractObject<?> obj) {
+        obj.getData().setLastModifyTime(new Date());
+        persistenceManager.save(obj.getData(), null, null, tableName(obj.getData().getClass()));
     }
 
-    @Override
-    public void save(ComponentFlow flow) {
-        persistenceManager.save(flow.getData(), null, null, tableName(ComponentFlowData.class));
-    }
-
+    // TODO transactional
     @Override
     public void save(ComponentFlowVersion flowVersion) {
-        persistenceManager.save(flowVersion.getData(), null, null,
-                tableName(ComponentFlowVersionData.class));
+        
+        save((AbstractObject<?>)flowVersion);
+        
+        List<ComponentFlowNode> componentFlowNodes = flowVersion.getComponentFlowNodes();
+        for (ComponentFlowNode componentFlowNode : componentFlowNodes) {
+            ComponentVersion version = componentFlowNode.getComponentVersion();
+            Component component = version.getComponent();
+            if (!component.getData().isShared()) {
+                save(component);
+                save(version);
+            }
+            save(componentFlowNode);
+        }
+                
     }
 
 }

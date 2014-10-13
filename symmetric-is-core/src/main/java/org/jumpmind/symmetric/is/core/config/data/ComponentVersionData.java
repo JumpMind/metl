@@ -7,6 +7,7 @@ public class ComponentVersionData extends AbstractVersionData {
     String inputModelVersiondId;
     String outputModelVersionId;
     String connectionId;
+    String componentId;
 
     public String getInputModelVersiondId() {
         return inputModelVersiondId;
@@ -30,6 +31,14 @@ public class ComponentVersionData extends AbstractVersionData {
 
     public void setConnectionId(String connectionId) {
         this.connectionId = connectionId;
+    }
+
+    public void setComponentId(String componentId) {
+        this.componentId = componentId;
+    }
+
+    public String getComponentId() {
+        return componentId;
     }
 
 }

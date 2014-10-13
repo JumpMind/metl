@@ -290,6 +290,8 @@
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="component_flow_version_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
         <column name="component_version_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
+        <column name="x" type="INTEGER" default="10" required="true" />
+        <column name="y" type="INTEGER" default="10" required="true" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />

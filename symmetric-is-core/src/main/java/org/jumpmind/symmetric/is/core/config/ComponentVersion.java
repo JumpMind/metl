@@ -15,6 +15,10 @@ public class ComponentVersion extends AbstractObjectWithSettings<ComponentVersio
         super(data, settings);
         this.component = component;
         this.connection = connection;
+        data.setComponentId(component.getData().getId());
+        if (connection != null) {
+            data.setConnectionId(connection.getData().getId());
+        }
     }
 
     public Connection getConnection() {

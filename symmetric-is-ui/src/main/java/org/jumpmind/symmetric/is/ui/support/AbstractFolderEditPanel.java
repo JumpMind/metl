@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.ui.support;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -106,7 +107,6 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout {
 
             @Override
             public void itemClick(ItemClickEvent event) {
-                unselectIfSelected();
             }
         });
         this.tree.addCollapseListener(new CollapseListener() {
@@ -137,6 +137,18 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout {
         addComponent(tree);
         setExpandRatio(tree, 1);
     }
+    
+    protected void removeAllNonFolderChildren(Folder folder) {
+        Collection<?> children = tree.getChildren(folder);
+        if (children != null) {
+            children = new HashSet<Object>(children);
+            for (Object child : children) {
+                if (!(child instanceof Folder)) {
+                    tree.removeItem(child);
+                }
+            }
+        }
+    }
 
     protected Folder getSelectedFolder() {
         @SuppressWarnings("unchecked")
@@ -151,20 +163,6 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout {
 
     protected void folderExpanded(Folder folder) {
 
-    }
-
-    protected void unselectIfSelected() {
-//        @SuppressWarnings("unchecked")
-//        Set<Object> selected = (Set<Object>) tree.getValue();
-//        if (selected.size() > 0) {
-//            Object selectedObject = selected.iterator().next();
-//            if (selected.contains(lastSelected)) {
-//                tree.unselect(lastSelected);
-//                lastSelected = null;                
-//            } else {
-//                lastSelected = selectedObject;
-//            }
-//        }
     }
 
     protected void treeSelectionChanged(ValueChangeEvent event) {

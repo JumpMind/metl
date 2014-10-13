@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
@@ -10,16 +11,12 @@ public class ComponentFlowNode extends AbstractObject<ComponentFlowNodeData> {
     
     protected ComponentVersion componentVersion;
     
-    protected List<ComponentFlowNode> inputLinks;
-    
     protected List<ComponentFlowNode> outputLinks;
 
-    public ComponentFlowNode() {
-        this(new ComponentFlowNodeData());
-    }
-
-    public ComponentFlowNode(ComponentFlowNodeData data) {
+    public ComponentFlowNode(ComponentVersion componentVersion, ComponentFlowNodeData data) {
         super(data);
+        this.componentVersion = componentVersion;
+        this.outputLinks = new ArrayList<ComponentFlowNode>();
     }
 
     public ComponentVersion getComponentVersion() {
@@ -30,22 +27,8 @@ public class ComponentFlowNode extends AbstractObject<ComponentFlowNodeData> {
         this.componentVersion = componentVersion;
     }
 
-    public List<ComponentFlowNode> getInputLinks() {
-        return inputLinks;
-    }
-
-    public void setInputLinks(List<ComponentFlowNode> inputLinks) {
-        this.inputLinks = inputLinks;
-    }
-
     public List<ComponentFlowNode> getOutputLinks() {
         return outputLinks;
     }
-
-    public void setOutputLinks(List<ComponentFlowNode> outputLinks) {
-        this.outputLinks = outputLinks;
-    }
-
-    
     
 }

@@ -39,7 +39,7 @@ public class ComponentFlowCoordinator {
 
     public void start() {
         try {
-            List<ComponentFlowNode> all = flow.getComponentGraphNodes();
+            List<ComponentFlowNode> all = flow.getComponentFlowNodes();
             for (ComponentFlowNode node : all) {
                 endpointRuntimes.put(node, componentFactory.create(node.getComponentVersion()));
                 endpointRuntimes.get(node).start(connectionFactory, node, new NodeChain(node));
@@ -52,7 +52,7 @@ public class ComponentFlowCoordinator {
     }
 
     public void stop() {
-        List<ComponentFlowNode> allNodes = flow.getComponentGraphNodes();
+        List<ComponentFlowNode> allNodes = flow.getComponentFlowNodes();
         for (ComponentFlowNode node : allNodes) {
             endpointRuntimes.get(node).stop();
         }

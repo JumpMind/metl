@@ -64,6 +64,7 @@ public class AppConfig {
     @Bean
     @Scope(value = "singleton")
     DataSource configDataSource() {
+        log.info("The current working directory is " + System.getProperty("user.dir"));
         log.info("The current environment is configured as "
                 + env.getProperty(PROPERTY_ENV, DEFAULT_PROPERTY_ENV)
                 + ".  This value can be changed in the application properties file using the "

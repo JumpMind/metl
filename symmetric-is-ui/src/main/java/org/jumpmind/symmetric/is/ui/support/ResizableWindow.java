@@ -1,20 +1,28 @@
 package org.jumpmind.symmetric.is.ui.support;
 
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog.IConfirmListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutAction.ModifierKey;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.window.WindowMode;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class ResizableWindow extends Window {
 
     private static final long serialVersionUID = 1L;
+    
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
     public ResizableWindow() {
         setModal(true);
@@ -39,17 +47,19 @@ public class ResizableWindow extends Window {
 
             @Override
             public void handleAction(Object sender, Object target) {
-                closeNoSave();
+                cancel();
             }
         });
     }
 
     @Override
     public void close() {
-        closeNoSave();
+        cancel();
     }
+    
+    protected void save() {}
 
-    protected void closeNoSave() {
+    protected void cancel() {
         ConfirmDialog.show("Close Window?", "Are you sure you want to close this window?",
                 new IConfirmListener() {
                     private static final long serialVersionUID = 1L;
@@ -60,6 +70,28 @@ public class ResizableWindow extends Window {
                         return true;
                     }
                 });
+    }
+    
+    protected HorizontalLayout buildButtonFooter() {
+        HorizontalLayout footer = new HorizontalLayout();
+
+        footer.setWidth("100%");
+        footer.setSpacing(true);
+        footer.addStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
+
+        Label footerText = new Label("");
+        footerText.setSizeUndefined();
+
+        Button saveButton = new Button("Save");
+        saveButton.addStyleName("primary");
+        saveButton.addClickListener(new SaveButtonListener());
+
+        Button cancelButton = new Button("Cancel");
+        cancelButton.addClickListener(new CancelButtonListener());
+
+        footer.addComponents(footerText, cancelButton, saveButton);
+        footer.setExpandRatio(footerText, 1);
+        return footer;
     }
 
     protected void resize(double percentOfBrowserSize, boolean showWindow) {
@@ -83,6 +115,17 @@ public class ResizableWindow extends Window {
             UI.getCurrent().addWindow(this);
         }
     }
+    
+    public class SaveButtonListener implements ClickListener {
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public void buttonClick(ClickEvent event) {
+            save();
+        }
+        
+    }
 
     public class CancelButtonListener implements ClickListener {
 
@@ -90,7 +133,7 @@ public class ResizableWindow extends Window {
 
         @Override
         public void buttonClick(ClickEvent event) {
-            closeNoSave();
+            cancel();
         }
         
     }

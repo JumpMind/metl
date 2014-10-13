@@ -2,10 +2,11 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
@@ -20,11 +21,11 @@ import org.jumpmind.symmetric.is.ui.support.ConfirmDialog;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.is.ui.support.PromptDialog;
 import org.jumpmind.symmetric.is.ui.support.PromptDialog.IPromptListener;
+import org.jumpmind.symmetric.is.ui.support.UiComponent;
 import org.jumpmind.symmetric.is.ui.support.ViewLink;
 import org.jumpmind.symmetric.is.ui.views.flows.EditFlowWindow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.event.Action;
@@ -35,8 +36,10 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.Window.CloseEvent;
+import com.vaadin.ui.Window.CloseListener;
 
-@Component
+@UiComponent
 @Scope(value = "ui")
 @ViewLink(category = Category.DESIGN, name = "Flows", id = "flows", icon = FontAwesome.SHARE_ALT, menuOrder = 10)
 public class FlowView extends AbstractFolderEditPanel implements View {
@@ -46,13 +49,27 @@ public class FlowView extends AbstractFolderEditPanel implements View {
     Diagram diagram;
 
     MenuItem addFlowButton;
-    
+
     @Autowired
     EditFlowWindow editFlowWindow;
 
     public FlowView() {
         super("Flows", FolderType.DESIGN);
         tree.addActionHandler(new ActionHandler());
+    }
+
+    @PostConstruct
+    protected void init() {
+        editFlowWindow.addCloseListener(new CloseListener() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void windowClose(CloseEvent e) {
+                ComponentFlowVersion componentFlowVersion = editFlowWindow.getComponentFlowVersion();
+                configurationService.refresh(componentFlowVersion);
+            }
+        });
     }
 
     @Override
@@ -85,16 +102,12 @@ public class FlowView extends AbstractFolderEditPanel implements View {
 
     @Override
     protected void folderExpanded(Folder folder) {
-        Collection<?> children = tree.getChildren(folder);
-        if (children != null) {
-            children = new HashSet<Object>(children);
-            for (Object child : children) {
-                if (!(child instanceof Folder)) {
-                    tree.removeItem(child);
-                }
-            }
-        }
+        super.folderExpanded(folder);
+        removeAllNonFolderChildren(folder);
+        addComponentFlowsToFolder(folder);
+    }
 
+    protected void addComponentFlowsToFolder(Folder folder) {
         List<ComponentFlow> flows = configurationService.findComponentFlowsInFolder(folder);
         for (ComponentFlow flow : flows) {
             this.tree.addItem(flow);
@@ -186,7 +199,7 @@ public class FlowView extends AbstractFolderEditPanel implements View {
     class ActionHandler implements Handler {
 
         private static final String ACTION_OPEN_FLOW = "Open Flow";
-        
+
         private static final long serialVersionUID = 1L;
 
         @Override
@@ -201,7 +214,7 @@ public class FlowView extends AbstractFolderEditPanel implements View {
         @Override
         public void handleAction(Action action, Object sender, Object target) {
             if (action.getCaption().equals(ACTION_OPEN_FLOW)) {
-                editFlowWindow.show((ComponentFlowVersion)target);
+                editFlowWindow.show((ComponentFlowVersion) target);
             }
         }
     }

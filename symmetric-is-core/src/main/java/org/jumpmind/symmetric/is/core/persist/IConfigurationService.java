@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.core.persist;
 
 import java.util.List;
 
+import org.jumpmind.symmetric.is.core.config.AbstractObject;
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.Folder;
@@ -17,12 +18,12 @@ public interface IConfigurationService {
     
     public List<ComponentFlow> findComponentFlowsInFolder(Folder folder);
     
-    public void deleteComponentFlowVersion(ComponentFlowVersion flowVersion);
+    public void deleteComponentFlowVersion(ComponentFlowVersion componentFlowVersion);
 
-    public void save(Folder folder);
+    public void save(ComponentFlowVersion componentFlowVersion);
     
-    public void save(ComponentFlow flow);
-    
-    public void save(ComponentFlowVersion flowVersion);
+    public void refresh(ComponentFlowVersion componentFlowVersion);
+
+    public abstract void save(AbstractObject<?> obj);
 
 }
