@@ -8,6 +8,7 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
 import org.jumpmind.symmetric.is.core.config.data.ComponentData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
+import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeLinkData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
@@ -92,7 +93,7 @@ public class EditFlowWindow extends ResizableWindow {
         return layout;
 
     }
-    
+
     public ComponentFlowVersion getComponentFlowVersion() {
         return componentFlowVersion;
     }
@@ -109,13 +110,13 @@ public class EditFlowWindow extends ResizableWindow {
         resize(.8, true);
 
     }
-    
+
     @Override
     protected void save() {
         configurationService.save(componentFlowVersion);
         UI.getCurrent().removeWindow(this);
     }
-    
+
     protected void populateComponentPalette() {
         componentLayout.removeAllComponents();
         List<String> componentTypes = componentFactory.getComponentTypes();
@@ -135,6 +136,8 @@ public class EditFlowWindow extends ResizableWindow {
         diagram.addListener(new DiagramChangedListener());
         flowLayout.addComponent(diagram);
 
+        List<ComponentFlowNodeLinkData> linkDatas = componentFlowVersion.getComponentFlowNodeLinkDatas();
+
         List<ComponentFlowNode> flowNodes = componentFlowVersion.getComponentFlowNodes();
         for (ComponentFlowNode flowNode : flowNodes) {
             Node node = new Node();
@@ -143,7 +146,15 @@ public class EditFlowWindow extends ResizableWindow {
             node.setX(flowNode.getData().getX());
             node.setY(flowNode.getData().getY());
             diagram.addNode(node);
+            
+            for (ComponentFlowNodeLinkData linkData : linkDatas) {
+                if (linkData.getSourceNodeId().equals(node.getId())) {
+                    node.getTargetNodeIds().add(linkData.getTargetNodeId());
+                }
+            }
+
         }
+        
 
     }
 
@@ -155,13 +166,22 @@ public class EditFlowWindow extends ResizableWindow {
             if (e instanceof NodeMovedEvent) {
                 NodeMovedEvent event = (NodeMovedEvent) e;
                 Node node = event.getNode();
-                ComponentFlowNode flowNode = componentFlowVersion.findComponentFlowNodeWithId(node.getId());
+                ComponentFlowNode flowNode = componentFlowVersion.findComponentFlowNodeWithId(node
+                        .getId());
                 if (flowNode != null) {
                     flowNode.getData().setX(node.getX());
                     flowNode.getData().setY(node.getY());
                 }
             } else if (e instanceof ConnectionEvent) {
-                //ConnectionEvent event = (ConnectionEvent) e;
+                ConnectionEvent event = (ConnectionEvent) e;
+                if (!event.isRemoved()) {
+                    componentFlowVersion.getComponentFlowNodeLinkDatas().add(
+                            new ComponentFlowNodeLinkData(event.getSourceNodeId(), event
+                                    .getTargetNodeId()));
+                } else {
+                    componentFlowVersion.removeComponentFlowNodeLinkData(event.getSourceNodeId(),
+                            event.getTargetNodeId());
+                }
             }
         }
     }

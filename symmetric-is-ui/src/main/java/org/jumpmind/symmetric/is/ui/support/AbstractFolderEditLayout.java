@@ -42,7 +42,7 @@ import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-abstract public class AbstractFolderEditPanel extends VerticalLayout {
+abstract public class AbstractFolderEditLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
     
@@ -59,9 +59,7 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout {
 
     protected FolderType folderType;
 
-    //protected Object lastSelected;
-
-    public AbstractFolderEditPanel(String title, FolderType folderType) {
+    public AbstractFolderEditLayout(String title, FolderType folderType) {
         this.folderType = folderType;
 
         setMargin(new MarginInfo(false, true, true, true));
@@ -170,7 +168,16 @@ abstract public class AbstractFolderEditPanel extends VerticalLayout {
         Set<Object> selected = (Set<Object>) tree.getValue();
         Folder folder = getSelectedFolder();
         addButton.setEnabled((folder == null && selected.size() == 0) || folder != null);
-        delButton.setEnabled(selected.size() > 0);
+        
+        boolean deleteEnabled = false;
+        for (Object object : selected) {
+            deleteEnabled |= isDeleteButtonEnabled(object);
+        }
+        delButton.setEnabled(deleteEnabled);
+    }
+    
+    protected boolean isDeleteButtonEnabled(Object selected) {
+        return selected instanceof Folder;        
     }
 
     private MenuBar buildAddButton() {

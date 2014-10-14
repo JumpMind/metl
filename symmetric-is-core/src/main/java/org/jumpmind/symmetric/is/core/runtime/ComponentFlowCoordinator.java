@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeLinkData;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
@@ -102,9 +103,13 @@ public class ComponentFlowCoordinator {
 
         @Override
         public void doNext(Message outputMessage) {
-            for (ComponentFlowNode targetNode : sourceNode.getOutputLinks()) {
-                validateOutputLink(sourceNode, targetNode);
-                ComponentFlowCoordinator.this.doNext(targetNode, outputMessage, sourceNode);
+            for (ComponentFlowNodeLinkData link : flow.getComponentFlowNodeLinkDatas()) {
+                if (link.getSourceNodeId().equals(sourceNode.getData().getId())) {
+                    ComponentFlowNode targetNode = flow.findComponentFlowNodeWithId(link
+                            .getTargetNodeId());
+                    validateOutputLink(sourceNode, targetNode);
+                    ComponentFlowCoordinator.this.doNext(targetNode, outputMessage, sourceNode);
+                }
             }
         }
 

@@ -15,7 +15,7 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.config.data.FolderType;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
-import org.jumpmind.symmetric.is.ui.support.AbstractFolderEditPanel;
+import org.jumpmind.symmetric.is.ui.support.AbstractFolderEditLayout;
 import org.jumpmind.symmetric.is.ui.support.Category;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog.IConfirmListener;
@@ -42,7 +42,7 @@ import com.vaadin.ui.Window.CloseListener;
 @UiComponent
 @Scope(value = "ui")
 @ViewLink(category = Category.DESIGN, name = "Flows", id = "flows", icon = FontAwesome.SHARE_ALT, menuOrder = 10)
-public class FlowView extends AbstractFolderEditPanel implements View {
+public class FlowView extends AbstractFolderEditLayout implements View {
 
     private static final long serialVersionUID = 1L;
 
@@ -66,10 +66,16 @@ public class FlowView extends AbstractFolderEditPanel implements View {
 
             @Override
             public void windowClose(CloseEvent e) {
-                ComponentFlowVersion componentFlowVersion = editFlowWindow.getComponentFlowVersion();
+                ComponentFlowVersion componentFlowVersion = editFlowWindow
+                        .getComponentFlowVersion();
                 configurationService.refresh(componentFlowVersion);
             }
         });
+    }
+
+    @Override
+    protected boolean isDeleteButtonEnabled(Object selected) {
+        return super.isDeleteButtonEnabled(selected) || selected instanceof ComponentFlow;
     }
 
     @Override

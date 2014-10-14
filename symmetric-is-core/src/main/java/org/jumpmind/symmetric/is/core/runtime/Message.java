@@ -19,11 +19,10 @@ public class Message implements Serializable, Cloneable {
     Serializable payload;
 
     public LinkedCaseInsensitiveMap<Object> getHeader() {
+        if (header == null) {
+            header = new LinkedCaseInsensitiveMap<Object>();
+        }
         return header;
-    }
-
-    public void setHeader(LinkedCaseInsensitiveMap<Object> header) {
-        this.header = header;
     }
 
     @SuppressWarnings("unchecked")
