@@ -11,13 +11,20 @@ public class ComponentFactory implements IComponentFactory {
 
     Map<String, Class<? extends IComponent>> componentTypes = new LinkedHashMap<String, Class<? extends IComponent>>();
 
+    Map<ComponentCategory, List<String>> componentTypesByCategory = new LinkedHashMap<ComponentCategory, List<String>>();
+
     public ComponentFactory() {
+        componentTypesByCategory.put(ComponentCategory.READER, new ArrayList<String>());
+        componentTypesByCategory.put(ComponentCategory.PROCESSOR, new ArrayList<String>());
+        componentTypesByCategory.put(ComponentCategory.WRITER, new ArrayList<String>());
+        componentTypesByCategory.put(ComponentCategory.SCHEDULER, new ArrayList<String>());
         register(DbReaderComponent.class);
+        register(NoOpProcessorComponent.class);
     }
 
     @Override
-    public List<String> getComponentTypes() {
-        return new ArrayList<String>(componentTypes.keySet());
+    public Map<ComponentCategory, List<String>> getComponentTypes() {
+        return componentTypesByCategory;
     }
 
     @Override
@@ -25,6 +32,12 @@ public class ComponentFactory implements IComponentFactory {
         ComponentDefinition definition = clazz.getAnnotation(ComponentDefinition.class);
         if (definition != null) {
             componentTypes.put(definition.typeName(), clazz);
+            List<String> types = componentTypesByCategory.get(definition.category());
+            if (types == null) {
+                types = new ArrayList<String>();
+                componentTypesByCategory.put(definition.category(), types);
+            }
+            types.add(definition.typeName());
         } else {
             throw new IllegalStateException("A component is required to define the "
                     + ComponentDefinition.class.getName() + " annotation");

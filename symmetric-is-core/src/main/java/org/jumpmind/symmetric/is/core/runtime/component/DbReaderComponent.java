@@ -29,7 +29,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
-@ComponentDefinition(typeName = "Database Reader", supports = { OUTPUT_MESSAGE, OUTPUT_MODEL }, connectionCategory = DATASOURCE)
+@ComponentDefinition(typeName = "Database Reader", category = ComponentCategory.READER, supports = {
+        OUTPUT_MESSAGE, OUTPUT_MODEL }, connectionCategory = DATASOURCE)
 public class DbReaderComponent extends AbstractComponent {
 
     @SettingDefinition(order = 0, required = true, type = Type.STRING, label = "Sql")

@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.event.ShortcutListener;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
@@ -42,10 +44,10 @@ import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-abstract public class AbstractFolderEditLayout extends VerticalLayout {
+abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
-    
+
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     protected Tree tree;
@@ -59,7 +61,7 @@ abstract public class AbstractFolderEditLayout extends VerticalLayout {
 
     protected FolderType folderType;
 
-    public AbstractFolderEditLayout(String title, FolderType folderType) {
+    public AbstractFolderNavigatorLayout(String title, FolderType folderType) {
         this.folderType = folderType;
 
         setMargin(new MarginInfo(false, true, true, true));
@@ -68,29 +70,34 @@ abstract public class AbstractFolderEditLayout extends VerticalLayout {
 
         Label titleLabel = new Label(title);
         titleLabel.addStyleName("h2");
+
+        this.tree = buildTree();
+
         addComponent(titleLabel);
+        addComponent(buildButtonLayout());
+        addComponent(tree);
+        setExpandRatio(tree, 1);
+    }
 
-        HorizontalLayout buttonLayout = new HorizontalLayout();
-        addComponent(buttonLayout);
+    protected Tree buildTree() {
+        final Tree tree = new Tree();
+        tree.setImmediate(true);
+        tree.setMultiSelect(true);
+        tree.setSelectable(true);
+        tree.addShortcutListener(new ShortcutListener("Enter", KeyCode.ENTER, null) {
+            
+            private static final long serialVersionUID = 1L;
 
-        MenuBar bar = buildAddButton();
-        buttonLayout.addComponent(bar);
-        buttonLayout.setComponentAlignment(bar, Alignment.MIDDLE_LEFT);
-
-        delButton = new Button("Delete");
-        delButton.setStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
-        delButton.setEnabled(false);
-        delButton.addClickListener(new DeleteButtonClickListener());
-        buttonLayout.addComponent(delButton);
-        buttonLayout.setComponentAlignment(delButton, Alignment.MIDDLE_LEFT);
-
-        addButtonsRight(buttonLayout);
-
-        this.tree = new Tree();
-        this.tree.setImmediate(true);
-        this.tree.setMultiSelect(true);
-        this.tree.setSelectable(true);
-        this.tree.addValueChangeListener(new ValueChangeListener() {
+            @Override
+            public void handleAction(Object sender, Object target) {
+                @SuppressWarnings("unchecked")
+                Set<Object> selectedIds = (Set<Object>) tree.getValue();
+                for (Object object : selectedIds) {
+                    itemClicked(object);
+                }
+            }
+        });
+        tree.addValueChangeListener(new ValueChangeListener() {
 
             private static final long serialVersionUID = 1L;
 
@@ -99,15 +106,18 @@ abstract public class AbstractFolderEditLayout extends VerticalLayout {
                 treeSelectionChanged(event);
             }
         });
-        this.tree.addItemClickListener(new ItemClickListener() {
+        tree.addItemClickListener(new ItemClickListener() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             public void itemClick(ItemClickEvent event) {
+                if (event.isDoubleClick()) {
+                    itemClicked(event.getItemId());
+                }
             }
         });
-        this.tree.addCollapseListener(new CollapseListener() {
+        tree.addCollapseListener(new CollapseListener() {
 
             private static final long serialVersionUID = 1L;
 
@@ -118,7 +128,7 @@ abstract public class AbstractFolderEditLayout extends VerticalLayout {
                 }
             }
         });
-        this.tree.addExpandListener(new ExpandListener() {
+        tree.addExpandListener(new ExpandListener() {
 
             private static final long serialVersionUID = 1L;
 
@@ -131,11 +141,38 @@ abstract public class AbstractFolderEditLayout extends VerticalLayout {
                 }
             }
         });
-
-        addComponent(tree);
-        setExpandRatio(tree, 1);
+        return tree;
     }
-    
+
+    protected void itemClicked(Object item) {
+    }
+
+    protected HorizontalLayout buildButtonLayout() {
+        HorizontalLayout buttonLayout = new HorizontalLayout();
+        addComponent(buttonLayout);
+
+        MenuBar bar = buildAddButton();
+        buttonLayout.addComponent(bar);
+        buttonLayout.setComponentAlignment(bar, Alignment.MIDDLE_LEFT);
+
+        addButtonsAfterAdd(buttonLayout);
+
+        delButton = createButton("Delete", false, new DeleteButtonClickListener());
+        buttonLayout.addComponent(delButton);
+        buttonLayout.setComponentAlignment(delButton, Alignment.MIDDLE_LEFT);
+
+        addButtonsRight(buttonLayout);
+        return buttonLayout;
+    }
+
+    protected Button createButton(String name, boolean enabled, ClickListener listener) {
+        Button button = new Button(name);
+        button.setStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+        button.setEnabled(enabled);
+        button.addClickListener(listener);
+        return button;
+    }
+
     protected void removeAllNonFolderChildren(Folder folder) {
         Collection<?> children = tree.getChildren(folder);
         if (children != null) {
@@ -159,6 +196,18 @@ abstract public class AbstractFolderEditLayout extends VerticalLayout {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
+    protected <T> T getSingleSelection(Class<T> clazz) {
+        Set<Object> selectedIds = (Set<Object>) tree.getValue();
+        if (selectedIds.size() == 1) {
+            Object obj = selectedIds.iterator().next();
+            if (clazz.isInstance(obj)) {
+                return (T) obj;
+            }
+        }
+        return null;
+    }
+
     protected void folderExpanded(Folder folder) {
 
     }
@@ -168,16 +217,16 @@ abstract public class AbstractFolderEditLayout extends VerticalLayout {
         Set<Object> selected = (Set<Object>) tree.getValue();
         Folder folder = getSelectedFolder();
         addButton.setEnabled((folder == null && selected.size() == 0) || folder != null);
-        
+
         boolean deleteEnabled = false;
         for (Object object : selected) {
             deleteEnabled |= isDeleteButtonEnabled(object);
         }
         delButton.setEnabled(deleteEnabled);
     }
-    
+
     protected boolean isDeleteButtonEnabled(Object selected) {
-        return selected instanceof Folder;        
+        return selected instanceof Folder;
     }
 
     private MenuBar buildAddButton() {
@@ -200,6 +249,9 @@ abstract public class AbstractFolderEditLayout extends VerticalLayout {
 
     protected void addToAddButton(MenuBar.MenuItem dropdown) {
 
+    }
+
+    protected void addButtonsAfterAdd(HorizontalLayout buttonLayout) {
     }
 
     protected void addButtonsRight(HorizontalLayout buttonLayout) {

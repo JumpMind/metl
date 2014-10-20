@@ -1,6 +1,5 @@
 package org.jumpmind.symmetric.is.ui.support;
 
-import org.jumpmind.symmetric.is.ui.support.ConfirmDialog.IConfirmListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,12 +9,12 @@ import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.window.WindowMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class ResizableWindow extends Window {
@@ -47,31 +46,11 @@ public class ResizableWindow extends Window {
 
             @Override
             public void handleAction(Object sender, Object target) {
-                cancel();
+                close();
             }
         });
     }
 
-    @Override
-    public void close() {
-        cancel();
-    }
-    
-    protected void save() {}
-
-    protected void cancel() {
-        ConfirmDialog.show("Close Window?", "Are you sure you want to close this window?",
-                new IConfirmListener() {
-                    private static final long serialVersionUID = 1L;
-
-                    @Override
-                    public boolean onOk() {
-                        UI.getCurrent().removeWindow(ResizableWindow.this);
-                        return true;
-                    }
-                });
-    }
-    
     protected HorizontalLayout buildButtonFooter() {
         HorizontalLayout footer = new HorizontalLayout();
 
@@ -82,16 +61,17 @@ public class ResizableWindow extends Window {
         Label footerText = new Label("");
         footerText.setSizeUndefined();
 
-        Button saveButton = new Button("Save");
-        saveButton.addStyleName("primary");
-        saveButton.addClickListener(new SaveButtonListener());
+        Button closeButton = new Button("Close");
+        closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        closeButton.addClickListener(new CloseButtonListener());
 
-        Button cancelButton = new Button("Cancel");
-        cancelButton.addClickListener(new CancelButtonListener());
-
-        footer.addComponents(footerText, cancelButton, saveButton);
+        footer.addComponents(footerText, closeButton);
         footer.setExpandRatio(footerText, 1);
         return footer;
+    }
+    
+    protected void grabFocus() {
+        this.focus();
     }
 
     protected void resize(double percentOfBrowserSize, boolean showWindow) {
@@ -113,27 +93,17 @@ public class ResizableWindow extends Window {
 
         if (showWindow && !UI.getCurrent().getWindows().contains(this)) {
             UI.getCurrent().addWindow(this);
+            grabFocus();
         }
-    }
-    
-    public class SaveButtonListener implements ClickListener {
+    }    
+
+    public class CloseButtonListener implements ClickListener {
 
         private static final long serialVersionUID = 1L;
 
         @Override
         public void buttonClick(ClickEvent event) {
-            save();
-        }
-        
-    }
-
-    public class CancelButtonListener implements ClickListener {
-
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public void buttonClick(ClickEvent event) {
-            cancel();
+            close();
         }
         
     }

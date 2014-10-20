@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,7 +16,7 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.config.data.FolderType;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
-import org.jumpmind.symmetric.is.ui.support.AbstractFolderEditLayout;
+import org.jumpmind.symmetric.is.ui.support.AbstractFolderNavigatorLayout;
 import org.jumpmind.symmetric.is.ui.support.Category;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog.IConfirmListener;
@@ -33,6 +34,11 @@ import com.vaadin.event.Action.Handler;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -42,13 +48,15 @@ import com.vaadin.ui.Window.CloseListener;
 @UiComponent
 @Scope(value = "ui")
 @ViewLink(category = Category.DESIGN, name = "Flows", id = "flows", icon = FontAwesome.SHARE_ALT, menuOrder = 10)
-public class FlowView extends AbstractFolderEditLayout implements View {
+public class FlowView extends AbstractFolderNavigatorLayout implements View {
 
     private static final long serialVersionUID = 1L;
 
     Diagram diagram;
 
     MenuItem addFlowButton;
+    
+    Button editButton;
 
     @Autowired
     EditFlowWindow editFlowWindow;
@@ -69,8 +77,34 @@ public class FlowView extends AbstractFolderEditLayout implements View {
                 ComponentFlowVersion componentFlowVersion = editFlowWindow
                         .getComponentFlowVersion();
                 configurationService.refresh(componentFlowVersion);
+                tree.focus();
             }
         });
+    }
+    
+    @Override
+    public void enter(ViewChangeEvent event) {
+        refresh();
+        tree.focus();
+        Collection<?> allItems = tree.getItemIds();
+        if (allItems.size() > 0) {
+            tree.select(allItems.iterator().next());
+        }
+    }
+    
+    @Override
+    protected void itemClicked(Object item) {
+        if (item instanceof ComponentFlowVersion) {
+            editFlowWindow.show((ComponentFlowVersion)item);
+        }
+    }
+    
+    @Override
+    protected void addButtonsAfterAdd(HorizontalLayout buttonLayout) {
+        // TODO should editButton be at the parent level?
+        editButton = createButton("Edit", false, new EditButtonClickListener());
+        buttonLayout.addComponent(editButton);
+        buttonLayout.setComponentAlignment(editButton, Alignment.MIDDLE_LEFT);
     }
 
     @Override
@@ -88,11 +122,7 @@ public class FlowView extends AbstractFolderEditLayout implements View {
     protected void treeSelectionChanged(ValueChangeEvent event) {
         super.treeSelectionChanged(event);
         addFlowButton.setEnabled(getSelectedFolder() != null);
-    }
-
-    @Override
-    public void enter(ViewChangeEvent event) {
-        refresh();
+        editButton.setEnabled(getSingleSelection(ComponentFlowVersion.class) != null);       
     }
 
     @Override
@@ -221,6 +251,20 @@ public class FlowView extends AbstractFolderEditLayout implements View {
         public void handleAction(Action action, Object sender, Object target) {
             if (action.getCaption().equals(ACTION_OPEN_FLOW)) {
                 editFlowWindow.show((ComponentFlowVersion) target);
+            }
+        }
+    }
+    
+    class EditButtonClickListener implements ClickListener {
+
+        private static final long serialVersionUID = 1L;
+
+
+        @Override
+        public void buttonClick(ClickEvent event) {
+            ComponentFlowVersion flowVersion = getSingleSelection(ComponentFlowVersion.class);
+            if (flowVersion != null) {
+                itemClicked(flowVersion);
             }
         }
     }

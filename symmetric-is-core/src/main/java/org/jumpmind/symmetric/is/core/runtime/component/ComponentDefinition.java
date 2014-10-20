@@ -13,6 +13,8 @@ public @interface ComponentDefinition {
 
     String typeName();
     
+    ComponentCategory category();
+    
     ComponentSupports[] supports();
     
     ConnectionCategory connectionCategory() default ConnectionCategory.NONE;

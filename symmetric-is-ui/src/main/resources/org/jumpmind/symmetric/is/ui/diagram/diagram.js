@@ -23,6 +23,7 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
     });
 
     this.layoutAll = function() {
+        instance.unbind("dblclick");
         instance.unbind("connection");
         instance.unbind("connectionDetached");
         var parentDiv = document.getElementById(state.id);
@@ -131,6 +132,13 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
             self.onConnection({
                 "sourceNodeId" : info.connection.sourceId,
                 "targetNodeId" : info.connection.targetId,
+                "removed" : true
+            });
+        });
+        instance.bind("dblclick", function(connection, originalEvent) {
+            self.onConnection({
+                "sourceNodeId" : connection.sourceId,
+                "targetNodeId" : connection.targetId,
                 "removed" : true
             });
         });

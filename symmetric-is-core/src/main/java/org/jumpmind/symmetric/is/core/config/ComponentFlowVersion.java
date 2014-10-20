@@ -49,16 +49,17 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
         return componentFlowNodeLinkDatas;
     }
 
-    public void removeComponentFlowNodeLinkData(String sourceNodeId, String targetNodeId) {
+    public ComponentFlowNodeLinkData removeComponentFlowNodeLinkData(String sourceNodeId, String targetNodeId) {
         Iterator<ComponentFlowNodeLinkData> i = componentFlowNodeLinkDatas.iterator();
         while (i.hasNext()) {
             ComponentFlowNodeLinkData link = i.next();
             if (link.getSourceNodeId().equals(sourceNodeId)
                     && link.getTargetNodeId().equals(targetNodeId)) {
                 i.remove();
+                return link;
             }
-
         }
+        return null;
     }
 
 }

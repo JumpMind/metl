@@ -128,6 +128,11 @@ public class ConfigurationService implements IConfigurationService {
         persistenceManager.delete(flow.getData(), null, null, tableName(ComponentFlowData.class));
 
     }
+    
+    @Override
+    public void deleteComponentFlowLink(ComponentFlowNodeLinkData link) {
+        persistenceManager.delete(link, null, null, tableName(ComponentFlowNodeLinkData.class));
+    }
 
     @Override
     public void deleteComponentFlowVersion(ComponentFlowVersion flowVersion) {
