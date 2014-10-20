@@ -49,6 +49,33 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
         return componentFlowNodeLinkDatas;
     }
 
+    
+    public ComponentFlowNode removeComponentFlowNode(ComponentFlowNode flowNode) {
+        Iterator<ComponentFlowNode> i = componentFlowNodes.iterator();
+        while (i.hasNext()) {
+            ComponentFlowNode node = i.next();
+            if (node.getData().getId().equals(flowNode.getData().getId())) {
+                i.remove();
+                return node;
+            }
+        }
+        return null;
+    }
+
+    public List<ComponentFlowNodeLinkData> removeComponentFlowNodeLinkDatas(String flowNodeId) {
+        List<ComponentFlowNodeLinkData> links = new ArrayList<ComponentFlowNodeLinkData>();
+        Iterator<ComponentFlowNodeLinkData> i = componentFlowNodeLinkDatas.iterator();
+        while (i.hasNext()) {
+            ComponentFlowNodeLinkData link = i.next();
+            if (link.getSourceNodeId().equals(flowNodeId)
+                    || link.getTargetNodeId().equals(flowNodeId)) {
+                i.remove();
+                links.add(link);
+            }
+        }
+        return links;
+    }
+
     public ComponentFlowNodeLinkData removeComponentFlowNodeLinkData(String sourceNodeId, String targetNodeId) {
         Iterator<ComponentFlowNodeLinkData> i = componentFlowNodeLinkDatas.iterator();
         while (i.hasNext()) {

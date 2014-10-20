@@ -46,6 +46,11 @@ public class ConfigurationService implements IConfigurationService {
         }
         return name.toString();
     }
+    
+    @Override
+    public void deleteComponentFlowNode(ComponentFlowNode flowNode) {
+        persistenceManager.delete(flowNode.getData(), null, null, tableName(flowNode.getData().getClass()));
+    }
 
     // TODO transactional
     @Override

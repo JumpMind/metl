@@ -18,17 +18,29 @@ import org.jumpmind.symmetric.is.ui.diagram.ConnectionEvent;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
+import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.symmetric.is.ui.support.ResizableWindow;
 import org.jumpmind.symmetric.is.ui.support.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
+import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Accordion;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.Command;
+import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -51,6 +63,14 @@ public class EditFlowWindow extends ResizableWindow {
 
     Accordion componentAccordian;
 
+    TabSheet tabs;
+
+    Tab palleteTab;
+
+    Tab propertiesTab;
+
+    VerticalLayout propertiesLayout;
+
     public EditFlowWindow() {
 
         VerticalLayout content = new VerticalLayout();
@@ -64,7 +84,14 @@ public class EditFlowWindow extends ResizableWindow {
         flowLayout = new VerticalLayout();
         flowLayout.setSizeFull();
 
-        splitPanel.addComponents(buildPalette(), flowLayout);
+        propertiesLayout = new VerticalLayout();
+
+        tabs = new TabSheet();
+        tabs.setSizeFull();
+        palleteTab = tabs.addTab(buildPalette(), "Design Palette");
+        propertiesTab = tabs.addTab(propertiesLayout, "Property Sheet");
+
+        splitPanel.addComponents(tabs, flowLayout);
 
         content.addComponent(splitPanel);
         content.setExpandRatio(splitPanel, 1);
@@ -131,6 +158,76 @@ public class EditFlowWindow extends ResizableWindow {
         }
     }
 
+    protected void refreshPropertiesForm(final ComponentFlowNode flowNode) {
+        propertiesLayout.removeAllComponents();
+
+        if (flowNode != null) {
+
+            HorizontalLayout actionLayout = new HorizontalLayout();
+            actionLayout.setWidth(100, Unit.PERCENTAGE);
+            propertiesLayout.addComponent(actionLayout);
+
+            MenuBar actionBar = new MenuBar();
+            actionBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
+            actionBar.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+            MenuItem actions = actionBar.addItem("Actions", null);
+            actions.addItem("Delete", new Command() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void menuSelected(MenuItem selectedItem) {
+                    // TODO all of this should go in the service and be
+                    // transactional
+                    List<ComponentFlowNodeLinkData> links = componentFlowVersion
+                            .removeComponentFlowNodeLinkDatas(flowNode.getData().getId());
+                    for (ComponentFlowNodeLinkData link : links) {
+                        configurationService.deleteComponentFlowLink(link);
+                    }
+
+                    ComponentFlowNode node = componentFlowVersion.removeComponentFlowNode(flowNode);
+                    configurationService.deleteComponentFlowNode(node);
+                    redrawFlow();
+                    refreshPropertiesForm(null);
+                    tabs.setSelectedTab(palleteTab);
+                }
+            });
+
+            actionLayout.addComponent(actionBar);
+            actionLayout.setComponentAlignment(actionBar, Alignment.MIDDLE_RIGHT);
+
+            FormLayout formLayout = new FormLayout();
+            formLayout.setWidth(100, Unit.PERCENTAGE);
+            formLayout.setMargin(false);
+            formLayout.addStyleName("light");
+
+            Label typeLabel = new Label();
+            typeLabel.setCaption("Type");
+            typeLabel.setValue(flowNode.getComponentVersion().getComponent().getData().getType());
+            formLayout.addComponent(typeLabel);
+
+            final TextField nameField = new TextField("Name");
+            nameField.setImmediate(true);
+            nameField.setNullRepresentation("");
+            nameField.addShortcutListener(new ShortcutListener("nameField", KeyCode.ENTER, null) {
+
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void handleAction(Object sender, Object target) {
+                    ComponentVersion version = flowNode.getComponentVersion();
+                    version.getData().setName(nameField.getValue());
+                    configurationService.save(version);
+                    redrawFlow();
+                }
+            });
+            nameField.setValue(flowNode.getComponentVersion().getData().getName());
+            formLayout.addComponent(nameField);
+
+            propertiesLayout.addComponent(formLayout);
+            propertiesLayout.setExpandRatio(formLayout, 1);
+        }
+    }
+
     protected void redrawFlow() {
         flowLayout.removeAllComponents();
 
@@ -144,7 +241,9 @@ public class EditFlowWindow extends ResizableWindow {
         List<ComponentFlowNode> flowNodes = componentFlowVersion.getComponentFlowNodes();
         for (ComponentFlowNode flowNode : flowNodes) {
             Node node = new Node();
-            node.setText(flowNode.getComponentVersion().getComponent().getData().getType());
+            String name = flowNode.getComponentVersion().getData().getName();
+            String type = flowNode.getComponentVersion().getComponent().getData().getType();
+            node.setText(name + "<br><i>" + type + "</i>");
             node.setId(flowNode.getData().getId());
             node.setX(flowNode.getData().getX());
             node.setY(flowNode.getData().getY());
@@ -160,12 +259,32 @@ public class EditFlowWindow extends ResizableWindow {
 
     }
 
+    private int countComponentsOfType(String type) {
+        int count = 0;
+        List<ComponentFlowNode> nodes = componentFlowVersion.getComponentFlowNodes();
+        for (ComponentFlowNode componentFlowNode : nodes) {
+            if (componentFlowNode.getComponentVersion().getComponent().getData().getType()
+                    .equals(type)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     class DiagramChangedListener implements Listener {
         private static final long serialVersionUID = 1L;
 
         @Override
         public void componentEvent(Event e) {
-            if (e instanceof NodeMovedEvent) {
+            if (e instanceof NodeSelectedEvent) {
+                NodeSelectedEvent event = (NodeSelectedEvent) e;
+                Node node = event.getNode();
+                ComponentFlowNode flowNode = componentFlowVersion.findComponentFlowNodeWithId(node
+                        .getId());
+                refreshPropertiesForm(flowNode);
+                tabs.setSelectedTab(propertiesTab);
+
+            } else if (e instanceof NodeMovedEvent) {
                 NodeMovedEvent event = (NodeMovedEvent) e;
                 Node node = event.getNode();
                 ComponentFlowNode flowNode = componentFlowVersion.findComponentFlowNodeWithId(node
@@ -210,12 +329,17 @@ public class EditFlowWindow extends ResizableWindow {
         @Override
         public void buttonClick(ClickEvent event) {
             Component component = new Component(new ComponentData(type, false));
+
             ComponentVersion componentVersion = new ComponentVersion(component, null,
                     new ComponentVersionData());
+            componentVersion.getData().setName(type + " " + (countComponentsOfType(type) + 1));
+
             ComponentFlowNodeData nodeData = new ComponentFlowNodeData(componentVersion.getData()
                     .getId(), componentFlowVersion.getData().getId());
             componentFlowVersion.getComponentFlowNodes().add(
                     new ComponentFlowNode(componentVersion, nodeData));
+
+            // TODO saving the entire flow for now, could save only the new node
             configurationService.save(componentFlowVersion);
             redrawFlow();
         }

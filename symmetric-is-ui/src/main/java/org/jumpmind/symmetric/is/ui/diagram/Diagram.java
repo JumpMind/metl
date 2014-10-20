@@ -21,6 +21,7 @@ public class Diagram extends AbstractJavaScriptComponent {
     public Diagram() {
         setPrimaryStyleName("diagram");
         setId(UUID.randomUUID().toString());
+
         addFunction("onNodeMoved", new JavaScriptFunction() {
 
             private static final long serialVersionUID = 1L;
@@ -37,9 +38,13 @@ public class Diagram extends AbstractJavaScriptComponent {
                         DiagramState state = getState();
                         for (Node node : state.nodes) {
                             if (node.getId().equals(id)) {
-                                node.setX(x);
-                                node.setY(y);
-                                fireEvent(new NodeMovedEvent(Diagram.this, node));
+                                if (node.getX() == x && node.getY() == y) {
+                                    fireEvent(new NodeSelectedEvent(Diagram.this, node));
+                                } else {
+                                    node.setX(x);
+                                    node.setY(y);
+                                    fireEvent(new NodeMovedEvent(Diagram.this, node));
+                                }
                                 break;
                             }
                         }
@@ -47,7 +52,7 @@ public class Diagram extends AbstractJavaScriptComponent {
                 }
             }
         });
-        
+
         addFunction("onConnection", new JavaScriptFunction() {
 
             private static final long serialVersionUID = 1L;
@@ -69,7 +74,8 @@ public class Diagram extends AbstractJavaScriptComponent {
                                 } else if (removed) {
                                     node.getTargetNodeIds().remove(targetNodeId);
                                 }
-                                fireEvent(new ConnectionEvent(Diagram.this, sourceNodeId, targetNodeId, removed));
+                                fireEvent(new ConnectionEvent(Diagram.this, sourceNodeId,
+                                        targetNodeId, removed));
                                 break;
                             }
                         }

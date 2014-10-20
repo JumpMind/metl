@@ -1,6 +1,8 @@
 window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
     var self = this;
     var state = this.getState();
+    this.startX = -1;
+    this.startY = -1;
     var instance = jsPlumb.getInstance({
         Endpoint : [ "Dot", {
             radius : 2
@@ -26,6 +28,7 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         instance.unbind("dblclick");
         instance.unbind("connection");
         instance.unbind("connectionDetached");
+
         var parentDiv = document.getElementById(state.id);
         while (parentDiv.firstChild) {
             parentDiv.removeChild(parentDiv.firstChild);
@@ -49,11 +52,11 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
             parentDiv.appendChild(nodeDiv);
             instance.draggable(nodeDiv, {
                 stop : function(event) {
-                    self.onNodeMoved({
-                        'id' : event.el.id,
-                        'x' : event.pos[0],
-                        'y' : event.pos[1]
-                    });
+                        self.onNodeMoved({
+                            'id' : event.el.id,
+                            'x' : event.pos[0],
+                            'y' : event.pos[1]
+                        });
                 }
             });
 
@@ -100,7 +103,7 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
                 }
             }
 
-            // initialise all '.w' elements as connection targets.
+            // initialize all '.w' elements as connection targets.
             instance.makeTarget(nodeDiv, {
                 dropOptions : {
                     hoverClass : "dragHover"
