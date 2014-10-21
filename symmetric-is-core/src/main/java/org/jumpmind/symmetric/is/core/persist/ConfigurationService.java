@@ -12,6 +12,7 @@ import org.jumpmind.symmetric.is.core.config.AbstractObject;
 import org.jumpmind.symmetric.is.core.config.Component;
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
 import org.jumpmind.symmetric.is.core.config.Folder;
@@ -46,10 +47,11 @@ public class ConfigurationService implements IConfigurationService {
         }
         return name.toString();
     }
-    
+
     @Override
     public void deleteComponentFlowNode(ComponentFlowNode flowNode) {
-        persistenceManager.delete(flowNode.getData(), null, null, tableName(flowNode.getData().getClass()));
+        persistenceManager.delete(flowNode.getData(), null, null, tableName(flowNode.getData()
+                .getClass()));
     }
 
     // TODO transactional
@@ -133,18 +135,19 @@ public class ConfigurationService implements IConfigurationService {
         persistenceManager.delete(flow.getData(), null, null, tableName(ComponentFlowData.class));
 
     }
-    
+
     @Override
-    public void deleteComponentFlowLink(ComponentFlowNodeLinkData link) {
-        persistenceManager.delete(link, null, null, tableName(ComponentFlowNodeLinkData.class));
+    public void deleteComponentFlowLink(ComponentFlowNodeLink link) {
+        persistenceManager.delete(link.getData(), null, null, tableName(ComponentFlowNodeLinkData.class));
     }
 
     @Override
     public void deleteComponentFlowVersion(ComponentFlowVersion flowVersion) {
 
-        List<ComponentFlowNodeLinkData> links = flowVersion.getComponentFlowNodeLinkDatas();
-        for (ComponentFlowNodeLinkData link : links) {
-            persistenceManager.delete(link, null, null, tableName(link.getClass()));
+        List<ComponentFlowNodeLink> links = flowVersion.getComponentFlowNodeLinks();
+        for (ComponentFlowNodeLink link : links) {
+            persistenceManager.delete(link.getData(), null, null, tableName(link.getData()
+                    .getClass()));
         }
         List<ComponentFlowNode> nodes = flowVersion.getComponentFlowNodes();
         for (ComponentFlowNode node : nodes) {
@@ -188,7 +191,7 @@ public class ConfigurationService implements IConfigurationService {
 
     private void refreshComponentFlowVersionRelations(ComponentFlowVersion componentFlowVersion) {
         componentFlowVersion.getComponentFlowNodes().clear();
-        componentFlowVersion.getComponentFlowNodeLinkDatas().clear();
+        componentFlowVersion.getComponentFlowNodeLinks().clear();
         Map<String, Object> versionParams = new HashMap<String, Object>();
         versionParams.put("componentFlowVersionId", componentFlowVersion.getData().getId());
         List<ComponentFlowNodeData> datas = persistenceManager.find(ComponentFlowNodeData.class,
@@ -201,9 +204,14 @@ public class ConfigurationService implements IConfigurationService {
             Map<String, Object> linkParams = new HashMap<String, Object>();
             linkParams.put("sourceNodeId", data.getId());
 
-            componentFlowVersion.getComponentFlowNodeLinkDatas().addAll(
-                    persistenceManager.find(ComponentFlowNodeLinkData.class, linkParams, null,
-                            null, tableName(ComponentFlowNodeLinkData.class)));
+            List<ComponentFlowNodeLinkData> dataLinks = persistenceManager.find(
+                    ComponentFlowNodeLinkData.class, linkParams, null, null,
+                    tableName(ComponentFlowNodeLinkData.class));
+            for (ComponentFlowNodeLinkData dataLink : dataLinks) {
+                componentFlowVersion.getComponentFlowNodeLinks().add(
+                        new ComponentFlowNodeLink(dataLink));
+                ;
+            }
         }
 
     }
@@ -237,10 +245,10 @@ public class ConfigurationService implements IConfigurationService {
             save(componentFlowNode);
         }
 
-        List<ComponentFlowNodeLinkData> linkDatas = flowVersion.getComponentFlowNodeLinkDatas();
-        for (ComponentFlowNodeLinkData linkData : linkDatas) {
-            linkData.setLastModifyTime(new Date());
-            persistenceManager.save(linkData, null, null, tableName(linkData.getClass()));
+        List<ComponentFlowNodeLink> links = flowVersion.getComponentFlowNodeLinks();
+        for (ComponentFlowNodeLink link : links) {
+            link.getData().setLastModifyTime(new Date());
+            persistenceManager.save(link, null, null, tableName(link.getData().getClass()));
         }
 
     }

@@ -200,7 +200,7 @@ public class FlowView extends AbstractFolderNavigatorLayout implements View {
                 refresh();
 
                 while (folder != null) {
-                    tree.expandItem(folder);
+                    tree.setCollapsed(folder, false);
                     folder = folder.getParent();
                 }
 

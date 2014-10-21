@@ -38,4 +38,9 @@ public class Folder extends AbstractObject<FolderData> {
         return folder.getData().getParentFolderId() != null &&
                 folder.getData().getParentFolderId().equals(getData().getId());        
     }
+    
+    @Override
+    public String toString() {
+        return getData().getName();
+    }
 }

@@ -2,16 +2,24 @@
 	
   @include valo;
 
+  .leftAligned.v-button {
+    text-align: left; 
+  }
+  
+  .v-table-cell-wrapper > .leftPad.v-label {
+    margin-left: 5px; 
+  }
+  
+  .v-table-caption-container {
+    min-height: 12px;
+  }
+  
   $color1: hsl(220, 5%, 38%);
   $color2: #5d73c0;
   $color3: #3dbc1a;
   $color4: #d2f4f3;
   $color5: #fe902a;
   $colors: $color1, $color2, $color3, $color4, $color5;
-
-  .leftAligned.v-button {
-    text-align: left; 
-  }
 
   .v-textfield-color1 {
     @include valo-textfield-style($background-color: $color1);
@@ -122,6 +130,8 @@
   
   .content-common,
   .content-labels {
-  	max-width: 800px;
+    max-width: 800px;
   }
+  
+
 }

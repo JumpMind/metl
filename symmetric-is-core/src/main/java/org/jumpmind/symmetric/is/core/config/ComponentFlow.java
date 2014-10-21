@@ -23,5 +23,10 @@ public class ComponentFlow extends AbstractObject<ComponentFlowData> {
     public List<ComponentFlowVersion> getComponentFlowVersions() {
         return componentFlowVersions;
     }
+    
+    @Override
+    public String toString() {
+        return getData().getName();
+    }
 
 }

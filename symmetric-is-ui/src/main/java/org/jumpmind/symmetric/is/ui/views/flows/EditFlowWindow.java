@@ -5,11 +5,11 @@ import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.config.Component;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
 import org.jumpmind.symmetric.is.core.config.data.ComponentData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeLinkData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentCategory;
@@ -178,9 +178,9 @@ public class EditFlowWindow extends ResizableWindow {
                 public void menuSelected(MenuItem selectedItem) {
                     // TODO all of this should go in the service and be
                     // transactional
-                    List<ComponentFlowNodeLinkData> links = componentFlowVersion
-                            .removeComponentFlowNodeLinkDatas(flowNode.getData().getId());
-                    for (ComponentFlowNodeLinkData link : links) {
+                    List<ComponentFlowNodeLink> links = componentFlowVersion
+                            .removeComponentFlowNodeLinks(flowNode.getData().getId());
+                    for (ComponentFlowNodeLink link : links) {
                         configurationService.deleteComponentFlowLink(link);
                     }
 
@@ -235,8 +235,7 @@ public class EditFlowWindow extends ResizableWindow {
         diagram.addListener(new DiagramChangedListener());
         flowLayout.addComponent(diagram);
 
-        List<ComponentFlowNodeLinkData> linkDatas = componentFlowVersion
-                .getComponentFlowNodeLinkDatas();
+        List<ComponentFlowNodeLink> links = componentFlowVersion.getComponentFlowNodeLinks();
 
         List<ComponentFlowNode> flowNodes = componentFlowVersion.getComponentFlowNodes();
         for (ComponentFlowNode flowNode : flowNodes) {
@@ -249,9 +248,9 @@ public class EditFlowWindow extends ResizableWindow {
             node.setY(flowNode.getData().getY());
             diagram.addNode(node);
 
-            for (ComponentFlowNodeLinkData linkData : linkDatas) {
-                if (linkData.getSourceNodeId().equals(node.getId())) {
-                    node.getTargetNodeIds().add(linkData.getTargetNodeId());
+            for (ComponentFlowNodeLink link : links) {
+                if (link.getData().getSourceNodeId().equals(node.getId())) {
+                    node.getTargetNodeIds().add(link.getData().getTargetNodeId());
                 }
             }
 
@@ -299,14 +298,13 @@ public class EditFlowWindow extends ResizableWindow {
             } else if (e instanceof ConnectionEvent) {
                 ConnectionEvent event = (ConnectionEvent) e;
                 if (!event.isRemoved()) {
-                    componentFlowVersion.getComponentFlowNodeLinkDatas().add(
-                            new ComponentFlowNodeLinkData(event.getSourceNodeId(), event
+                    componentFlowVersion.getComponentFlowNodeLinks().add(
+                            new ComponentFlowNodeLink(event.getSourceNodeId(), event
                                     .getTargetNodeId()));
                     configurationService.save(componentFlowVersion);
                 } else {
-                    ComponentFlowNodeLinkData link = componentFlowVersion
-                            .removeComponentFlowNodeLinkData(event.getSourceNodeId(),
-                                    event.getTargetNodeId());
+                    ComponentFlowNodeLink link = componentFlowVersion.removeComponentFlowNodeLink(
+                            event.getSourceNodeId(), event.getTargetNodeId());
                     if (link != null) {
                         configurationService.deleteComponentFlowLink(link);
                     }

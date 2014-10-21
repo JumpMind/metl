@@ -20,9 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
@@ -36,11 +36,13 @@ import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Tree;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.Tree.CollapseEvent;
 import com.vaadin.ui.Tree.CollapseListener;
 import com.vaadin.ui.Tree.ExpandEvent;
 import com.vaadin.ui.Tree.ExpandListener;
+import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -50,7 +52,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected Tree tree;
+    protected TreeTable tree;
 
     protected MenuItem addButton;
 
@@ -79,11 +81,23 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         setExpandRatio(tree, 1);
     }
 
-    protected Tree buildTree() {
-        final Tree tree = new Tree();
+    protected TreeTable buildTree() {
+        final TreeTable tree = new TreeTable();
+        tree.setSizeFull();
         tree.setImmediate(true);
         tree.setMultiSelect(true);
         tree.setSelectable(true);
+        tree.addGeneratedColumn("Name", new ColumnGenerator() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Object generateCell(Table source, Object itemId, Object columnId) {
+                Label label = new Label(itemId.toString());
+                label.addStyleName("leftPad");
+                return label;
+            }
+        });
         tree.addShortcutListener(new ShortcutListener("Enter", KeyCode.ENTER, null) {
             
             private static final long serialVersionUID = 1L;
@@ -248,7 +262,6 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
     }
 
     protected void addToAddButton(MenuBar.MenuItem dropdown) {
-
     }
 
     protected void addButtonsAfterAdd(HorizontalLayout buttonLayout) {
@@ -280,7 +293,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
     protected void addChildFolder(Folder folder) {
         this.tree.addItem(folder);
-        this.tree.setItemCaption(folder, folder.getData().getName());
+        //this.tree.setItemCaption(folder, folder.getData().getName());        
         this.tree.setItemIcon(folder, FontAwesome.FOLDER);
         if (folder.getParent() != null) {
             this.tree.setParent(folder, folder.getParent());
@@ -321,7 +334,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                 refresh();
 
                 while (parentFolder != null) {
-                    tree.expandItem(parentFolder);
+                    tree.setCollapsed(parentFolder, false);
                     parentFolder = parentFolder.getParent();
                 }
 

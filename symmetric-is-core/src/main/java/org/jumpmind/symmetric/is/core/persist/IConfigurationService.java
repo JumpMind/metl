@@ -5,9 +5,9 @@ import java.util.List;
 import org.jumpmind.symmetric.is.core.config.AbstractObject;
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.Folder;
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeLinkData;
 import org.jumpmind.symmetric.is.core.config.data.FolderType;
 
 public interface IConfigurationService {
@@ -20,7 +20,7 @@ public interface IConfigurationService {
     
     public void deleteComponentFlowNode(ComponentFlowNode flowNode);
     
-    public void deleteComponentFlowLink(ComponentFlowNodeLinkData link);
+    public void deleteComponentFlowLink(ComponentFlowNodeLink link);
     
     public List<ComponentFlow> findComponentFlowsInFolder(Folder folder);
     

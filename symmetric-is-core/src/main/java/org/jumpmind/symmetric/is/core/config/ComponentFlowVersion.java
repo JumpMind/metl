@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeLinkData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 
 public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionData> {
@@ -15,7 +14,7 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
 
     List<ComponentFlowNode> componentFlowNodes;
 
-    List<ComponentFlowNodeLinkData> componentFlowNodeLinkDatas;
+    List<ComponentFlowNodeLink> componentFlowNodeLinks;
 
     public ComponentFlowVersion() {
         this(new ComponentFlow(), new ComponentFlowVersionData());
@@ -25,7 +24,7 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
         super(data);
         this.flow = flow;
         this.componentFlowNodes = new ArrayList<ComponentFlowNode>();
-        this.componentFlowNodeLinkDatas = new ArrayList<ComponentFlowNodeLinkData>();
+        this.componentFlowNodeLinks = new ArrayList<ComponentFlowNodeLink>();
     }
 
     public ComponentFlowNode findComponentFlowNodeWithId(String id) {
@@ -45,8 +44,8 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
         return flow;
     }
 
-    public List<ComponentFlowNodeLinkData> getComponentFlowNodeLinkDatas() {
-        return componentFlowNodeLinkDatas;
+    public List<ComponentFlowNodeLink> getComponentFlowNodeLinks() {
+        return componentFlowNodeLinks;
     }
 
     
@@ -62,13 +61,13 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
         return null;
     }
 
-    public List<ComponentFlowNodeLinkData> removeComponentFlowNodeLinkDatas(String flowNodeId) {
-        List<ComponentFlowNodeLinkData> links = new ArrayList<ComponentFlowNodeLinkData>();
-        Iterator<ComponentFlowNodeLinkData> i = componentFlowNodeLinkDatas.iterator();
+    public List<ComponentFlowNodeLink> removeComponentFlowNodeLinks(String flowNodeId) {
+        List<ComponentFlowNodeLink> links = new ArrayList<ComponentFlowNodeLink>();
+        Iterator<ComponentFlowNodeLink> i = componentFlowNodeLinks.iterator();
         while (i.hasNext()) {
-            ComponentFlowNodeLinkData link = i.next();
-            if (link.getSourceNodeId().equals(flowNodeId)
-                    || link.getTargetNodeId().equals(flowNodeId)) {
+            ComponentFlowNodeLink link = i.next();
+            if (link.getData().getSourceNodeId().equals(flowNodeId)
+                    || link.getData().getTargetNodeId().equals(flowNodeId)) {
                 i.remove();
                 links.add(link);
             }
@@ -76,17 +75,22 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
         return links;
     }
 
-    public ComponentFlowNodeLinkData removeComponentFlowNodeLinkData(String sourceNodeId, String targetNodeId) {
-        Iterator<ComponentFlowNodeLinkData> i = componentFlowNodeLinkDatas.iterator();
+    public ComponentFlowNodeLink removeComponentFlowNodeLink(String sourceNodeId, String targetNodeId) {
+        Iterator<ComponentFlowNodeLink> i = componentFlowNodeLinks.iterator();
         while (i.hasNext()) {
-            ComponentFlowNodeLinkData link = i.next();
-            if (link.getSourceNodeId().equals(sourceNodeId)
-                    && link.getTargetNodeId().equals(targetNodeId)) {
+            ComponentFlowNodeLink link = i.next();
+            if (link.getData().getSourceNodeId().equals(sourceNodeId)
+                    && link.getData().getTargetNodeId().equals(targetNodeId)) {
                 i.remove();
                 return link;
             }
         }
         return null;
+    }
+    
+    @Override
+    public String toString() {
+        return getData().getVersionName();
     }
 
 }
