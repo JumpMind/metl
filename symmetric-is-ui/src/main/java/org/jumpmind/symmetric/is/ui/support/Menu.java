@@ -43,10 +43,9 @@ public class Menu extends CssLayout implements ViewChangeListener {
         viewToButtonMapping = new HashMap<String, Button>();
 
         menu = new CssLayout();
-        menuItemsLayout = new CssLayout();
-
         menu.addStyleName("valo-menu-part");
-
+        addComponent(menu);
+        
         HorizontalLayout top = new HorizontalLayout();
         top.setWidth("100%");
         top.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
@@ -86,6 +85,7 @@ public class Menu extends CssLayout implements ViewChangeListener {
         settingsItem.addItem("Sign Out", null);
         menu.addComponent(settings);
 
+        menuItemsLayout = new CssLayout();
         menuItemsLayout.setPrimaryStyleName("valo-menuitems");
         menu.addComponent(menuItemsLayout);
 
@@ -99,7 +99,6 @@ public class Menu extends CssLayout implements ViewChangeListener {
             }
         }
 
-        addComponent(menu);
     }
 
     protected void addMenuSection(String caption, CssLayout menuItemsLayout) {

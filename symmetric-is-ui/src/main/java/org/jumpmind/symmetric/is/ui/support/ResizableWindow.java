@@ -20,7 +20,7 @@ import com.vaadin.ui.themes.ValoTheme;
 public class ResizableWindow extends Window {
 
     private static final long serialVersionUID = 1L;
-    
+
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     public ResizableWindow() {
@@ -51,25 +51,38 @@ public class ResizableWindow extends Window {
         });
     }
 
-    protected HorizontalLayout buildButtonFooter() {
+    protected Button buildCloseButton() {
+        Button closeButton = new Button("Close");
+        closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        closeButton.addClickListener(new CloseButtonListener());
+        return closeButton;
+    }
+
+    protected HorizontalLayout buildButtonFooter(Button[] toTheLeftButtons, Button[] toTheRightButtons) {
         HorizontalLayout footer = new HorizontalLayout();
 
         footer.setWidth("100%");
         footer.setSpacing(true);
         footer.addStyleName(ValoTheme.WINDOW_BOTTOM_TOOLBAR);
 
+        if (toTheLeftButtons != null) {
+            footer.addComponents(toTheLeftButtons);
+        }
+        
         Label footerText = new Label("");
         footerText.setSizeUndefined();
 
-        Button closeButton = new Button("Close");
-        closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        closeButton.addClickListener(new CloseButtonListener());
-
-        footer.addComponents(footerText, closeButton);
+        footer.addComponents(footerText);
         footer.setExpandRatio(footerText, 1);
+
+        if (toTheRightButtons != null) {
+            footer.addComponents(toTheRightButtons);
+        }
+
+
         return footer;
     }
-    
+
     protected void grabFocus() {
         this.focus();
     }
@@ -95,7 +108,7 @@ public class ResizableWindow extends Window {
             UI.getCurrent().addWindow(this);
             grabFocus();
         }
-    }    
+    }
 
     public class CloseButtonListener implements ClickListener {
 
@@ -105,7 +118,7 @@ public class ResizableWindow extends Window {
         public void buttonClick(ClickEvent event) {
             close();
         }
-        
+
     }
 
 }

@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.ui.support;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -98,6 +99,22 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                 return label;
             }
         });
+        tree.addShortcutListener(new ShortcutListener("Delete", KeyCode.DELETE, null) {
+            
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void handleAction(Object sender, Object target) {
+                if (delButton.isEnabled()) {
+                    @SuppressWarnings("unchecked")
+                    Set<Object> selectedIds = (Set<Object>) tree.getValue();
+                    for (Object object : selectedIds) {
+                        deleteTreeItem(object);
+                    }                    
+                }
+            }
+        });
+        
         tree.addShortcutListener(new ShortcutListener("Enter", KeyCode.ENTER, null) {
             
             private static final long serialVersionUID = 1L;
@@ -157,6 +174,25 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         });
         return tree;
     }
+    
+    protected void expand(Folder folder, Object itemToSelect) {
+        List<Folder> toExpand = new ArrayList<Folder>();
+        toExpand.add(0, folder);
+        while (folder != null) {
+            folder = folder.getParent();
+            if (folder != null) {
+                toExpand.add(0, folder);
+            }
+        }
+        
+        for (Folder expandMe : toExpand) {
+            tree.setCollapsed(expandMe, false);
+        }
+        
+        tree.focus();
+        tree.select(itemToSelect);
+
+    }
 
     protected void itemClicked(Object item) {
     }
@@ -213,9 +249,9 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
     @SuppressWarnings("unchecked")
     protected <T> T getSingleSelection(Class<T> clazz) {
         Set<Object> selectedIds = (Set<Object>) tree.getValue();
-        if (selectedIds.size() == 1) {
+        if (selectedIds != null && selectedIds.size() == 1) {
             Object obj = selectedIds.iterator().next();
-            if (clazz.isInstance(obj)) {
+            if (obj !=null && clazz.isAssignableFrom(obj.getClass())) {
                 return (T) obj;
             }
         }
@@ -293,8 +329,8 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
     protected void addChildFolder(Folder folder) {
         this.tree.addItem(folder);
-        //this.tree.setItemCaption(folder, folder.getData().getName());        
         this.tree.setItemIcon(folder, FontAwesome.FOLDER);
+        this.tree.setCollapsed(folder, true);
         if (folder.getParent() != null) {
             this.tree.setParent(folder, folder.getParent());
         }

@@ -12,14 +12,16 @@ import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 public class AbstractObjectWithSettings<D extends AbstractData> extends AbstractObject<D> {
 
     private static final long serialVersionUID = 1L;
-    
+
     protected List<SettingData> settings;
-    
+
     public AbstractObjectWithSettings(D data, SettingData... settings) {
         super(data);
         this.settings = new ArrayList<SettingData>();
-        for (SettingData settingData : settings) {
-            this.settings.add(settingData);
+        if (settings != null) {
+            for (SettingData settingData : settings) {
+                this.settings.add(settingData);
+            }
         }
     }
 

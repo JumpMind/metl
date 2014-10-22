@@ -16,10 +16,6 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
 
     List<ComponentFlowNodeLink> componentFlowNodeLinks;
 
-    public ComponentFlowVersion() {
-        this(new ComponentFlow(), new ComponentFlowVersionData());
-    }
-
     public ComponentFlowVersion(ComponentFlow flow, ComponentFlowVersionData data) {
         super(data);
         this.flow = flow;

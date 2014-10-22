@@ -32,7 +32,6 @@ abstract public class AbstractObject<D extends AbstractData> implements Serializ
             return this.data.getId().equals(((AbstractObject<?>)obj).getData().getId());
         } else {
             return super.equals(obj);
-        }
-            
+        }            
     }
 }

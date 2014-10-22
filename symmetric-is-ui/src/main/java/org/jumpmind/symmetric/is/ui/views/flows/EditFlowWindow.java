@@ -95,7 +95,8 @@ public class EditFlowWindow extends ResizableWindow {
 
         content.addComponent(splitPanel);
         content.setExpandRatio(splitPanel, 1);
-        content.addComponent(buildButtonFooter());
+
+        content.addComponent(buildButtonFooter(null, new Button[] { buildCloseButton() }));
 
     }
 

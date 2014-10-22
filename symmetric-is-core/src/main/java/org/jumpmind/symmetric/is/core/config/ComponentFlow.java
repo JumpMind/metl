@@ -11,17 +11,19 @@ public class ComponentFlow extends AbstractObject<ComponentFlowData> {
     
     List<ComponentFlowVersion> componentFlowVersions;
     
-    public ComponentFlow() {
-        this(new ComponentFlowData());
-    }
+    Folder folder;
 
-    public ComponentFlow(ComponentFlowData data) {
+    public ComponentFlow(Folder folder, ComponentFlowData data) {
         super(data);
         componentFlowVersions = new ArrayList<ComponentFlowVersion>();
     }
     
     public List<ComponentFlowVersion> getComponentFlowVersions() {
         return componentFlowVersions;
+    }
+    
+    public Folder getFolder() {
+        return folder;
     }
     
     @Override

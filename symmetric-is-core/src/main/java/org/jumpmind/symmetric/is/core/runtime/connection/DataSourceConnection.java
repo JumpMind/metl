@@ -7,9 +7,11 @@ import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 
-@ConnectionDefinition(typeName="DataSource", connectionCategory=ConnectionCategory.DATASOURCE)
+@ConnectionDefinition(typeName=DataSourceConnection.TYPE, connectionCategory=ConnectionCategory.DATASOURCE)
 public class DataSourceConnection extends AbstractRuntimeObject implements IConnection {
 
+    public static final String TYPE = "Database";
+    
     @SettingDefinition(order = 0, required = true, type = Type.STRING, defaultValue = "org.h2.Driver", label = "Driver")
     public final static String DB_POOL_DRIVER = "db.driver";
 

@@ -15,6 +15,7 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
+import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.data.AbstractData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentData;
@@ -23,6 +24,7 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeLinkData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
+import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
 import org.jumpmind.symmetric.is.core.config.data.FolderType;
 
@@ -106,7 +108,7 @@ public class ConfigurationService implements IConfigurationService {
                 null, null, tableName(ComponentFlowData.class));
         List<ComponentFlow> flows = new ArrayList<ComponentFlow>();
         for (ComponentFlowData componentFlowData : datas) {
-            ComponentFlow flow = new ComponentFlow(componentFlowData);
+            ComponentFlow flow = new ComponentFlow(folder, componentFlowData);
             flows.add(flow);
 
             Map<String, Object> versionParams = new HashMap<String, Object>();
@@ -123,7 +125,27 @@ public class ConfigurationService implements IConfigurationService {
         }
         return flows;
     }
+    
+    public List<Connection> findConnectionsInFolder(Folder folder) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("folderId", folder.getData().getId());
+        List<ConnectionData> datas = persistenceManager.find(ConnectionData.class, params,
+                null, null, tableName(ConnectionData.class));
+        List<Connection> list = new ArrayList<Connection>();
+        for (ConnectionData data : datas) {
+            Connection obj = new Connection(folder, data);
+            list.add(obj);
+            
+            // TODO settings
+        }
+        return list;
+    }
 
+    @Override
+    public void deleteConnection(Connection connection) {
+        persistenceManager.delete(connection.getData(), null, null, tableName(ConnectionData.class));
+    }
+    
     // TODO transactional
     @Override
     public void deleteComponentFlow(ComponentFlow flow) {
@@ -166,6 +188,11 @@ public class ConfigurationService implements IConfigurationService {
         }
         persistenceManager.delete(flowVersion.getData(), null, null,
                 tableName(ComponentFlowVersionData.class));
+    }
+    
+    @Override
+    public void refresh(Connection connection) {
+        // TODO
     }
 
     @Override
@@ -248,7 +275,7 @@ public class ConfigurationService implements IConfigurationService {
         List<ComponentFlowNodeLink> links = flowVersion.getComponentFlowNodeLinks();
         for (ComponentFlowNodeLink link : links) {
             link.getData().setLastModifyTime(new Date());
-            persistenceManager.save(link, null, null, tableName(link.getData().getClass()));
+            persistenceManager.save(link.getData(), null, null, tableName(link.getData().getClass()));
         }
 
     }

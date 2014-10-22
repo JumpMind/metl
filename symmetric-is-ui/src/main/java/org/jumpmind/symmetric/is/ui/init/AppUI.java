@@ -8,10 +8,8 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import com.vaadin.annotations.JavaScript;
 import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Push;
-import com.vaadin.annotations.StyleSheet;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.server.DefaultErrorHandler;
@@ -28,8 +26,6 @@ import com.vaadin.ui.UI;
 @Title("SymmetricIS")
 @PreserveOnRefresh
 @Push
-@JavaScript("http://cdn.alloyui.com/2.5.0/aui/aui-min.js")
-@StyleSheet("http://cdn.alloyui.com/2.5.0/aui-css/css/bootstrap.min.css")
 public class AppUI extends UI {
 
     private static final long serialVersionUID = 1L;
