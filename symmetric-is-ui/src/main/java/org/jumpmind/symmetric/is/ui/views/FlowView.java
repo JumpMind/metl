@@ -2,10 +2,9 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -22,8 +21,8 @@ import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.support.AbstractFolderNavigatorLayout;
 import org.jumpmind.symmetric.is.ui.support.Category;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog;
-import org.jumpmind.symmetric.is.ui.support.IItemSavedListener;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog.IConfirmListener;
+import org.jumpmind.symmetric.is.ui.support.IItemSavedListener;
 import org.jumpmind.symmetric.is.ui.support.PromptDialog;
 import org.jumpmind.symmetric.is.ui.support.PromptDialog.IPromptListener;
 import org.jumpmind.symmetric.is.ui.support.UiComponent;
@@ -96,12 +95,22 @@ public class FlowView extends AbstractFolderNavigatorLayout implements View, IIt
 
     @Override
     public void enter(ViewChangeEvent event) {
-        refresh();
-        tree.focus();
-        Collection<?> allItems = tree.getItemIds();
-        if (allItems.size() > 0) {
-            tree.select(allItems.iterator().next());
+        
+        List<Object> expandedItems = new ArrayList<Object>();
+        Collection<?> items = tree.getItemIds();
+        for (Object object : items) {
+            if (!tree.isCollapsed(object)) {
+                expandedItems.add(object);
+            }
         }
+        
+        refresh();
+        
+        for (Object object : expandedItems) {
+           tree.setCollapsed(object, false); 
+        }
+        
+        tree.focus();
     }
 
     @Override
@@ -265,14 +274,8 @@ public class FlowView extends AbstractFolderNavigatorLayout implements View, IIt
 
                 refresh();
 
-                while (folder != null) {
-                    tree.setCollapsed(folder, false);
-                    folder = folder.getParent();
-                }
-
-                Set<Object> selected = new HashSet<Object>();
-                selected.add(flow);
-                tree.setValue(selected);
+                expand(folder, flow);
+                
                 return true;
             } else {
                 return false;

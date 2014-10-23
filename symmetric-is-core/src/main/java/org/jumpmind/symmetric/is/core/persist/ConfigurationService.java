@@ -25,8 +25,10 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeLinkData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
 import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
+import org.jumpmind.symmetric.is.core.config.data.ConnectionSettingData;
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
 import org.jumpmind.symmetric.is.core.config.data.FolderType;
+import org.jumpmind.symmetric.is.core.config.data.SettingData;
 
 public class ConfigurationService implements IConfigurationService {
 
@@ -125,27 +127,31 @@ public class ConfigurationService implements IConfigurationService {
         }
         return flows;
     }
-    
+
     public List<Connection> findConnectionsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("folderId", folder.getData().getId());
-        List<ConnectionData> datas = persistenceManager.find(ConnectionData.class, params,
-                null, null, tableName(ConnectionData.class));
+        List<ConnectionData> datas = persistenceManager.find(ConnectionData.class, params, null,
+                null, tableName(ConnectionData.class));
         List<Connection> list = new ArrayList<Connection>();
         for (ConnectionData data : datas) {
-            Connection obj = new Connection(folder, data);
-            list.add(obj);
-            
-            // TODO settings
+            Map<String, Object> settingParams = new HashMap<String, Object>();
+            settingParams.put("connectionId", data.getId());
+            List<ConnectionSettingData> settings = persistenceManager.find(
+                    ConnectionSettingData.class, settingParams, null, null,
+                    tableName(ConnectionSettingData.class));
+            list.add(new Connection(folder, data,
+                    settings.toArray(new SettingData[settings.size()])));
         }
         return list;
     }
 
     @Override
     public void deleteConnection(Connection connection) {
-        persistenceManager.delete(connection.getData(), null, null, tableName(ConnectionData.class));
+        persistenceManager
+                .delete(connection.getData(), null, null, tableName(ConnectionData.class));
     }
-    
+
     // TODO transactional
     @Override
     public void deleteComponentFlow(ComponentFlow flow) {
@@ -160,7 +166,8 @@ public class ConfigurationService implements IConfigurationService {
 
     @Override
     public void deleteComponentFlowLink(ComponentFlowNodeLink link) {
-        persistenceManager.delete(link.getData(), null, null, tableName(ComponentFlowNodeLinkData.class));
+        persistenceManager.delete(link.getData(), null, null,
+                tableName(ComponentFlowNodeLinkData.class));
     }
 
     @Override
@@ -189,7 +196,7 @@ public class ConfigurationService implements IConfigurationService {
         persistenceManager.delete(flowVersion.getData(), null, null,
                 tableName(ComponentFlowVersionData.class));
     }
-    
+
     @Override
     public void refresh(Connection connection) {
         // TODO
@@ -237,7 +244,6 @@ public class ConfigurationService implements IConfigurationService {
             for (ComponentFlowNodeLinkData dataLink : dataLinks) {
                 componentFlowVersion.getComponentFlowNodeLinks().add(
                         new ComponentFlowNodeLink(dataLink));
-                ;
             }
         }
 
@@ -248,16 +254,27 @@ public class ConfigurationService implements IConfigurationService {
     }
 
     @Override
+    public void save(Connection connection) {
+        save((AbstractObject<?>) connection);
+        List<SettingData> settings = connection.getSettings();
+        for (SettingData settingData : settings) {
+            save(settingData);
+        }
+    }
+
+    @Override
     public void save(AbstractObject<?> obj) {
-        obj.getData().setLastModifyTime(new Date());
-        persistenceManager.save(obj.getData(), null, null, tableName(obj.getData().getClass()));
+        save(obj.getData());
+    }
+
+    protected void save(AbstractData data) {
+        data.setLastModifyTime(new Date());
+        persistenceManager.save(data, null, null, tableName(data.getClass()));
     }
 
     // TODO transactional
     @Override
     public void save(ComponentFlowVersion flowVersion) {
-
-        // TODO need to diff saved versus new and delete the deleted
 
         save((AbstractObject<?>) flowVersion);
 
@@ -275,7 +292,8 @@ public class ConfigurationService implements IConfigurationService {
         List<ComponentFlowNodeLink> links = flowVersion.getComponentFlowNodeLinks();
         for (ComponentFlowNodeLink link : links) {
             link.getData().setLastModifyTime(new Date());
-            persistenceManager.save(link.getData(), null, null, tableName(link.getData().getClass()));
+            persistenceManager.save(link.getData(), null, null,
+                    tableName(link.getData().getClass()));
         }
 
     }

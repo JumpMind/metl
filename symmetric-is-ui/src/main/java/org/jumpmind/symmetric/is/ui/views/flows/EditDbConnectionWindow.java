@@ -1,8 +1,13 @@
 package org.jumpmind.symmetric.is.ui.views.flows;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection.DB_POOL_DRIVER;
+import static org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection.DB_POOL_PASSWORD;
+import static org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection.DB_POOL_URL;
+import static org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection.DB_POOL_USER;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
@@ -156,11 +161,11 @@ public class EditDbConnectionWindow extends ResizableWindow {
 
     @Autowired
     IConfigurationService configurationService;
-    
+
     IItemSavedListener itemSavedListener;
 
     Connection connection;
-    
+
     TextField nameField;
 
     ComboBox databaseType;
@@ -183,7 +188,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
         topLayout.addStyleName("v-scrollable");
         content.addComponent(topLayout);
         content.setExpandRatio(topLayout, 1);
-        
+
         FormLayout formLayout = new FormLayout();
         topLayout.addComponent(formLayout);
 
@@ -191,12 +196,15 @@ public class EditDbConnectionWindow extends ResizableWindow {
         nameField.setNullRepresentation("");
 
         databaseType = new ComboBox("Database Type");
-        
+
         databaseUrl = new TextField("Database Url");
+        databaseUrl.setNullRepresentation("");
         databaseUrl.setWidth(550, Unit.PIXELS);
-        
+
         userIdField = new TextField("Username");
+        userIdField.setNullRepresentation("");
         passwordField = new PasswordField("Password");
+        passwordField.setNullRepresentation("");
 
         for (String databaseName : databaseToDriverMap.keySet()) {
             databaseType.addItem(databaseName);
@@ -217,7 +225,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
                 }
             }
         });
-        
+
         formLayout.addComponent(nameField);
         formLayout.addComponent(databaseType);
         formLayout.addComponent(databaseUrl);
@@ -243,23 +251,41 @@ public class EditDbConnectionWindow extends ResizableWindow {
         databaseType.focus();
 
     }
-    
+
     public void show(Connection connection, IItemSavedListener itemSavedListener) {
-        
+
         this.connection = connection;
-        
+
         this.itemSavedListener = itemSavedListener;
-        
+
         nameField.setValue(connection.getData().getName());
+                
+        databaseType.setValue(findDatabaseType());
+        databaseUrl.setValue(connection.get(DB_POOL_URL));
+        userIdField.setValue(connection.get(DB_POOL_USER));
+        passwordField.setValue(connection.get(DB_POOL_PASSWORD));
 
         setCaption("Edit Connection");
 
         resize(.6, true);
-        
+
         nameField.focus();
 
     }
     
+    protected String findDatabaseType() {
+        String driver = connection.get(DB_POOL_DRIVER);
+        if (driver != null) {
+            Set<Map.Entry<String, String>> entries = databaseToDriverMap.entrySet();
+            for (Map.Entry<String, String> entry : entries) {
+                if (entry.getValue().equals(driver)) {
+                    return entry.getKey();
+                }
+            }
+        }
+        return "";
+    }
+
     public Connection getConnection() {
         return connection;
     }
@@ -315,26 +341,36 @@ public class EditDbConnectionWindow extends ResizableWindow {
         }
     }
 
+    protected void save() {
+        connection.getData().setType(DataSourceConnection.TYPE);
+        if (isBlank(nameField.getValue())) {
+            Notification.show("The name of the connection cannot be blank", Type.WARNING_MESSAGE);
+            return;
+        }
+        
+        
+
+        String type = (String)databaseType.getValue();
+        connection.getData().setName(nameField.getValue());
+        connection.put(DB_POOL_URL, databaseUrl.getValue());
+        connection.put(DB_POOL_DRIVER, databaseToDriverMap.get(type));
+        connection.put(DB_POOL_USER, userIdField.getValue());
+        connection.put(DB_POOL_PASSWORD, passwordField.getValue());
+        
+        configurationService.save(connection);
+
+        // do some validation
+        itemSavedListener.itemSaved(connection);
+        close();
+    }
+
     class SaveClickListener implements ClickListener {
 
         private static final long serialVersionUID = 1L;
 
         @Override
         public void buttonClick(ClickEvent event) {
-            
-            connection.getData().setType(DataSourceConnection.TYPE);
-            if (isBlank(nameField.getValue())) {
-                Notification.show("The name of the connection cannot be blank", Type.WARNING_MESSAGE);
-                return;
-            }
-            
-            connection.getData().setName(nameField.getValue());
-            
-            configurationService.save(connection);
-            
-            // do some validation
-            itemSavedListener.itemSaved(connection);
-            close();
+            save();
         }
 
     }

@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.config;
 
 import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
+import org.jumpmind.symmetric.is.core.config.data.ComponentVersionSettingData;
 import org.jumpmind.symmetric.is.core.config.data.SettingData;
 
 public class ComponentVersion extends AbstractObjectWithSettings<ComponentVersionData> {
@@ -27,6 +28,11 @@ public class ComponentVersion extends AbstractObjectWithSettings<ComponentVersio
     
     public Component getComponent() {
         return component;
+    }
+    
+    @Override
+    protected SettingData createSettingData() {
+        return new ComponentVersionSettingData(data.getId());
     }
     
 }

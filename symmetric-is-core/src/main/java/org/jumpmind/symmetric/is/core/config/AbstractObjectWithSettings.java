@@ -9,7 +9,7 @@ import org.jumpmind.symmetric.is.core.config.data.AbstractData;
 import org.jumpmind.symmetric.is.core.config.data.SettingData;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 
-public class AbstractObjectWithSettings<D extends AbstractData> extends AbstractObject<D> {
+abstract public class AbstractObjectWithSettings<D extends AbstractData> extends AbstractObject<D> {
 
     private static final long serialVersionUID = 1L;
 
@@ -24,6 +24,32 @@ public class AbstractObjectWithSettings<D extends AbstractData> extends Abstract
             }
         }
     }
+    
+    public void put(String name, String value) {
+        for (SettingData settingData : settings) {
+            if (name.equals(settingData.getName())) {
+                settingData.setValue(value);
+                return;
+            }
+        }
+        
+        SettingData settingData = createSettingData();
+        settingData.setName(name);
+        settingData.setValue(value);
+        settings.add(settingData);
+
+    }
+    
+    abstract protected SettingData createSettingData();
+    
+    public String get(String name) {
+        for (SettingData settingData : settings) {
+            if (name.equals(settingData.getName())) {
+                return settingData.getValue();
+            }
+        }
+        return null;
+    }
 
     public TypedProperties toTypedProperties(AbstractRuntimeObject object, boolean provided) {
         TypedProperties properties = new TypedProperties();
@@ -37,5 +63,9 @@ public class AbstractObjectWithSettings<D extends AbstractData> extends Abstract
             properties.setProperty(settingObject.getName(), settingObject.getValue());
         }
         return properties;
+    }
+    
+    public List<SettingData> getSettings() {
+        return settings;
     }
 }

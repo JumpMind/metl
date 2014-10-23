@@ -175,6 +175,14 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         return tree;
     }
     
+    protected void focusAndSelectFirstItem() {
+        tree.focus();
+        Collection<?> allItems = tree.getItemIds();
+        if (allItems.size() > 0) {
+            tree.select(allItems.iterator().next());
+        }
+    }
+    
     protected void expand(Folder folder, Object itemToSelect) {
         List<Folder> toExpand = new ArrayList<Folder>();
         toExpand.add(0, folder);

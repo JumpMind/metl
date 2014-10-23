@@ -1,10 +1,14 @@
 package org.jumpmind.symmetric.is.core.config.data;
 
-public class SettingData {
+public class SettingData extends AbstractData {
 
-    String versionId;
+    private static final long serialVersionUID = 1L;
+    
     String name;
     String value;
+    
+    public SettingData() {
+    }
     
     public SettingData(String name, String value) {
         this.name = name;
@@ -15,8 +19,16 @@ public class SettingData {
         return name;
     }
     
+    public void setName(String name) {
+        this.name = name;
+    }
+    
     public String getValue() {
         return value;
+    }
+    
+    public void setValue(String value) {
+        this.value = value;
     }
 
     @Override

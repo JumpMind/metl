@@ -31,12 +31,14 @@ public interface IConfigurationService {
     
     public void deleteComponentFlowVersion(ComponentFlowVersion componentFlowVersion);
 
-    public void save(ComponentFlowVersion componentFlowVersion);
-    
     public void refresh(ComponentFlowVersion componentFlowVersion);
     
     public void refresh(Connection connection);
+    
+    public void save(Connection connection);
 
     public abstract void save(AbstractObject<?> obj);
 
+    public void save(ComponentFlowVersion componentFlowVersion);
+    
 }

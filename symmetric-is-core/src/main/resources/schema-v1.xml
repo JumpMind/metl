@@ -217,7 +217,7 @@
         </foreign-key>        
     </table>
 
-    <table name="component_setting" description="">
+    <table name="component_version_setting" description="">
         <column name="component_version_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="name" type="VARCHAR" size="255" primaryKey="true" required="true" description="" />
         <column name="value" type="VARCHAR" size="255" description="" />
