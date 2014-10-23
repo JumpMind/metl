@@ -2,8 +2,6 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -95,22 +93,7 @@ public class FlowView extends AbstractFolderNavigatorLayout implements View, IIt
 
     @Override
     public void enter(ViewChangeEvent event) {
-        
-        List<Object> expandedItems = new ArrayList<Object>();
-        Collection<?> items = tree.getItemIds();
-        for (Object object : items) {
-            if (!tree.isCollapsed(object)) {
-                expandedItems.add(object);
-            }
-        }
-        
         refresh();
-        
-        for (Object object : expandedItems) {
-           tree.setCollapsed(object, false); 
-        }
-        
-        tree.focus();
     }
 
     @Override

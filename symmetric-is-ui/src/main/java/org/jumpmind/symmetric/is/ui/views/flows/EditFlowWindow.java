@@ -70,6 +70,8 @@ public class EditFlowWindow extends ResizableWindow {
     Tab propertiesTab;
 
     VerticalLayout propertiesLayout;
+    
+    Diagram diagram;
 
     public EditFlowWindow() {
 
@@ -83,6 +85,20 @@ public class EditFlowWindow extends ResizableWindow {
 
         flowLayout = new VerticalLayout();
         flowLayout.setSizeFull();
+        
+        HorizontalLayout actionLayout = new HorizontalLayout();
+        actionLayout.setWidth(100, Unit.PERCENTAGE);
+        flowLayout.addComponent(actionLayout);
+
+        MenuBar actionBar = new MenuBar();
+        actionBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
+        actionBar.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+        MenuItem actions = actionBar.addItem("", FontAwesome.COG, null);
+        actions.addItem("Deploy", FontAwesome.COGS, null);
+        actions.addItem("Execute", FontAwesome.PLAY, null);
+
+        actionLayout.addComponent(actionBar);
+        actionLayout.setComponentAlignment(actionBar, Alignment.MIDDLE_RIGHT);
 
         propertiesLayout = new VerticalLayout();
 
@@ -99,6 +115,8 @@ public class EditFlowWindow extends ResizableWindow {
         content.addComponent(buildButtonFooter(null, new Button[] { buildCloseButton() }));
 
     }
+    
+    
 
     protected VerticalLayout buildPalette() {
         VerticalLayout layout = new VerticalLayout();
@@ -171,7 +189,7 @@ public class EditFlowWindow extends ResizableWindow {
             MenuBar actionBar = new MenuBar();
             actionBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
             actionBar.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
-            MenuItem actions = actionBar.addItem("Actions", null);
+            MenuItem actions = actionBar.addItem("", FontAwesome.COG, null);
             actions.addItem("Delete", new Command() {
                 private static final long serialVersionUID = 1L;
 
@@ -230,11 +248,14 @@ public class EditFlowWindow extends ResizableWindow {
     }
 
     protected void redrawFlow() {
-        flowLayout.removeAllComponents();
+        if (diagram != null) {
+            flowLayout.removeComponent(diagram);
+        }
 
-        Diagram diagram = new Diagram();
+        diagram = new Diagram();
         diagram.addListener(new DiagramChangedListener());
         flowLayout.addComponent(diagram);
+        flowLayout.setExpandRatio(diagram, 1);
 
         List<ComponentFlowNodeLink> links = componentFlowVersion.getComponentFlowNodeLinks();
 

@@ -25,7 +25,6 @@ public class AgentsView extends AbstractFolderNavigatorLayout implements View {
     @Override
     public void enter(ViewChangeEvent event) {
         refresh();
-        focusAndSelectFirstItem();
     }
     
 

@@ -53,16 +53,18 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
+    @Autowired
+    protected IConfigurationService configurationService;
+
     protected TreeTable tree;
 
     protected MenuItem addButton;
 
     protected Button delButton;
 
-    @Autowired
-    protected IConfigurationService configurationService;
-
     protected FolderType folderType;
+
+    protected Set<Object> lastSelected;
 
     public AbstractFolderNavigatorLayout(String title, FolderType folderType) {
         this.folderType = folderType;
@@ -100,7 +102,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             }
         });
         tree.addShortcutListener(new ShortcutListener("Delete", KeyCode.DELETE, null) {
-            
+
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -110,13 +112,13 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                     Set<Object> selectedIds = (Set<Object>) tree.getValue();
                     for (Object object : selectedIds) {
                         deleteTreeItem(object);
-                    }                    
+                    }
                 }
             }
         });
-        
+
         tree.addShortcutListener(new ShortcutListener("Enter", KeyCode.ENTER, null) {
-            
+
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -132,8 +134,10 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
             private static final long serialVersionUID = 1L;
 
+            @SuppressWarnings("unchecked")
             @Override
             public void valueChange(ValueChangeEvent event) {
+                lastSelected = (Set<Object>) tree.getValue();
                 treeSelectionChanged(event);
             }
         });
@@ -143,6 +147,10 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
             @Override
             public void itemClick(ItemClickEvent event) {
+                if (lastSelected != null && lastSelected.contains(event.getItemId())) {
+                    log.info("unselected " + event.getItemId());
+                    tree.unselect(event.getItemId());
+                }
                 if (event.isDoubleClick()) {
                     itemClicked(event.getItemId());
                 }
@@ -174,7 +182,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         });
         return tree;
     }
-    
+
     protected void focusAndSelectFirstItem() {
         tree.focus();
         Collection<?> allItems = tree.getItemIds();
@@ -182,7 +190,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             tree.select(allItems.iterator().next());
         }
     }
-    
+
     protected void expand(Folder folder, Object itemToSelect) {
         List<Folder> toExpand = new ArrayList<Folder>();
         toExpand.add(0, folder);
@@ -192,11 +200,11 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                 toExpand.add(0, folder);
             }
         }
-        
+
         for (Folder expandMe : toExpand) {
             tree.setCollapsed(expandMe, false);
         }
-        
+
         tree.focus();
         tree.select(itemToSelect);
 
@@ -259,7 +267,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         Set<Object> selectedIds = (Set<Object>) tree.getValue();
         if (selectedIds != null && selectedIds.size() == 1) {
             Object obj = selectedIds.iterator().next();
-            if (obj !=null && clazz.isAssignableFrom(obj.getClass())) {
+            if (obj != null && clazz.isAssignableFrom(obj.getClass())) {
                 return (T) obj;
             }
         }
@@ -328,11 +336,29 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
     }
 
     public void refresh() {
+        @SuppressWarnings({ "unchecked" })
+        Set<Object> selected = (Set<Object>) tree.getValue();
+        List<Object> expandedItems = new ArrayList<Object>();
+        Collection<?> items = tree.getItemIds();
+        for (Object object : items) {
+            if (!tree.isCollapsed(object)) {
+                expandedItems.add(object);
+            }
+        }
+
         this.tree.removeAllItems();
         List<Folder> folders = configurationService.findFolders(folderType);
         for (Folder folder : folders) {
             addChildFolder(folder);
         }
+
+        for (Object object : expandedItems) {
+            tree.setCollapsed(object, false);
+        }
+
+        tree.focus();
+        tree.setValue(selected);
+
     }
 
     protected void addChildFolder(Folder folder) {
