@@ -3,6 +3,7 @@ package org.jumpmind.symmetric.is.core.persist;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.config.AbstractObject;
+import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
@@ -17,21 +18,27 @@ public interface IConfigurationService {
 
     public void deleteFolder(String folderId);
 
-    public void deleteComponentFlow(ComponentFlow flow);
+    public void delete(Agent agent);
     
-    public void deleteComponentFlowNode(ComponentFlowNode flowNode);
+    public void delete(ComponentFlow flow);
     
-    public void deleteComponentFlowLink(ComponentFlowNodeLink link);
+    public void delete(ComponentFlowNode flowNode);
     
-    public void deleteConnection(Connection connection);
+    public void delete(ComponentFlowNodeLink link);
+    
+    public void delete(Connection connection);
     
     public List<ComponentFlow> findComponentFlowsInFolder(Folder folder);
     
     public List<Connection> findConnectionsInFolder(Folder folder);
     
+    public List<Agent> findAgentsInFolder(Folder folder);
+    
     public void deleteComponentFlowVersion(ComponentFlowVersion componentFlowVersion);
 
     public void refresh(ComponentFlowVersion componentFlowVersion);
+    
+    public void refresh(Agent agent);
     
     public void refresh(Connection connection);
     

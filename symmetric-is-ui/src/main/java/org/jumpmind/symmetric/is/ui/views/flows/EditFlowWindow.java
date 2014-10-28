@@ -200,11 +200,11 @@ public class EditFlowWindow extends ResizableWindow {
                     List<ComponentFlowNodeLink> links = componentFlowVersion
                             .removeComponentFlowNodeLinks(flowNode.getData().getId());
                     for (ComponentFlowNodeLink link : links) {
-                        configurationService.deleteComponentFlowLink(link);
+                        configurationService.delete(link);
                     }
 
                     ComponentFlowNode node = componentFlowVersion.removeComponentFlowNode(flowNode);
-                    configurationService.deleteComponentFlowNode(node);
+                    configurationService.delete(node);
                     redrawFlow();
                     refreshPropertiesForm(null);
                     tabs.setSelectedTab(palleteTab);
@@ -328,7 +328,7 @@ public class EditFlowWindow extends ResizableWindow {
                     ComponentFlowNodeLink link = componentFlowVersion.removeComponentFlowNodeLink(
                             event.getSourceNodeId(), event.getTargetNodeId());
                     if (link != null) {
-                        configurationService.deleteComponentFlowLink(link);
+                        configurationService.delete(link);
                     }
 
                 }

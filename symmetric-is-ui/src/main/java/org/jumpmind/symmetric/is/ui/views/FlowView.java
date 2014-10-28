@@ -16,11 +16,9 @@ import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
 import org.jumpmind.symmetric.is.core.config.data.FolderType;
 import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
-import org.jumpmind.symmetric.is.ui.support.AbstractFolderNavigatorLayout;
 import org.jumpmind.symmetric.is.ui.support.Category;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog.IConfirmListener;
-import org.jumpmind.symmetric.is.ui.support.IItemSavedListener;
 import org.jumpmind.symmetric.is.ui.support.PromptDialog;
 import org.jumpmind.symmetric.is.ui.support.PromptDialog.IPromptListener;
 import org.jumpmind.symmetric.is.ui.support.UiComponent;
@@ -33,14 +31,7 @@ import org.springframework.context.annotation.Scope;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -50,7 +41,7 @@ import com.vaadin.ui.Window.CloseListener;
 @UiComponent
 @Scope(value = "ui")
 @ViewLink(category = Category.DESIGN, name = "Flows", id = "flows", icon = FontAwesome.SHARE_ALT, menuOrder = 10)
-public class FlowView extends AbstractFolderNavigatorLayout implements View, IItemSavedListener {
+public class FlowView extends AbstractFolderView {
 
     private static final long serialVersionUID = 1L;
 
@@ -61,8 +52,6 @@ public class FlowView extends AbstractFolderNavigatorLayout implements View, IIt
     MenuItem addFlowButton;
 
     MenuItem addConnectionsButton;
-
-    Button editButton;
 
     @Autowired
     EditFlowWindow editFlowWindow;
@@ -92,11 +81,6 @@ public class FlowView extends AbstractFolderNavigatorLayout implements View, IIt
     }
 
     @Override
-    public void enter(ViewChangeEvent event) {
-        refresh();
-    }
-
-    @Override
     protected void itemClicked(Object item) {
         if (item instanceof ComponentFlowVersion) {
             editFlowWindow.show((ComponentFlowVersion) item);
@@ -117,13 +101,6 @@ public class FlowView extends AbstractFolderNavigatorLayout implements View, IIt
             }
         }
         tree.focus();
-    }
-
-    @Override
-    protected void addButtonsAfterAdd(HorizontalLayout buttonLayout) {
-        editButton = createButton("Edit", false, new EditButtonClickListener());
-        buttonLayout.addComponent(editButton);
-        buttonLayout.setComponentAlignment(editButton, Alignment.MIDDLE_LEFT);
     }
 
     @Override
@@ -278,7 +255,7 @@ public class FlowView extends AbstractFolderNavigatorLayout implements View, IIt
 
         @Override
         public boolean onOk() {
-            configurationService.deleteComponentFlow(toDelete);
+            configurationService.delete(toDelete);
             refresh();
             expand(toDelete.getFolder(), toDelete.getFolder());
             return true;
@@ -297,7 +274,7 @@ public class FlowView extends AbstractFolderNavigatorLayout implements View, IIt
 
         @Override
         public boolean onOk() {
-            configurationService.deleteConnection(toDelete);
+            configurationService.delete(toDelete);
             refresh();
             expand(toDelete.getFolder(), toDelete.getFolder());
             return true;
@@ -323,19 +300,6 @@ public class FlowView extends AbstractFolderNavigatorLayout implements View, IIt
         public void handleAction(Action action, Object sender, Object target) {
             if (action.getCaption().equals(ACTION_OPEN_FLOW)) {
                 editFlowWindow.show((ComponentFlowVersion) target);
-            }
-        }
-    }
-
-    class EditButtonClickListener implements ClickListener {
-
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public void buttonClick(ClickEvent event) {
-            Object item = getSingleSelection(Object.class);
-            if (item != null) {
-                itemClicked(item);
             }
         }
     }

@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.symmetric.app.core.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.config.AbstractObject;
+import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.Component;
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
@@ -18,6 +19,8 @@ import org.jumpmind.symmetric.is.core.config.ComponentVersion;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.data.AbstractData;
+import org.jumpmind.symmetric.is.core.config.data.AgentData;
+import org.jumpmind.symmetric.is.core.config.data.AgentSettingData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
@@ -53,7 +56,7 @@ public class ConfigurationService implements IConfigurationService {
     }
 
     @Override
-    public void deleteComponentFlowNode(ComponentFlowNode flowNode) {
+    public void delete(ComponentFlowNode flowNode) {
         persistenceManager.delete(flowNode.getData(), null, null, tableName(flowNode.getData()
                 .getClass()));
     }
@@ -147,14 +150,43 @@ public class ConfigurationService implements IConfigurationService {
     }
 
     @Override
-    public void deleteConnection(Connection connection) {
-        persistenceManager
-                .delete(connection.getData(), null, null, tableName(ConnectionData.class));
+    public List<Agent> findAgentsInFolder(Folder folder) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("folderId", folder.getData().getId());
+        List<AgentData> datas = persistenceManager.find(AgentData.class, params, null, null,
+                tableName(AgentData.class));
+        List<Agent> list = new ArrayList<Agent>();
+        for (AgentData data : datas) {
+            Map<String, Object> settingParams = new HashMap<String, Object>();
+            settingParams.put("agentId", data.getId());
+            List<AgentSettingData> settings = persistenceManager.find(AgentSettingData.class,
+                    settingParams, null, null, tableName(AgentSettingData.class));
+            list.add(new Agent(folder, data, settings.toArray(new SettingData[settings.size()])));
+        }
+        return list;
+    }
+
+    @Override
+    public void delete(Connection connection) {
+        List<SettingData> settings = connection.getSettings();
+        for (SettingData settingData : settings) {
+            delete(settingData);
+        }
+        delete(connection.getData());
+    }
+    
+    @Override
+    public void delete(Agent agent) {
+        List<SettingData> settings = agent.getSettings();
+        for (SettingData settingData : settings) {
+            delete(settingData);
+        }
+        delete(agent.getData());
     }
 
     // TODO transactional
     @Override
-    public void deleteComponentFlow(ComponentFlow flow) {
+    public void delete(ComponentFlow flow) {
         List<ComponentFlowVersion> versions = flow.getComponentFlowVersions();
         for (ComponentFlowVersion componentFlowVersion : versions) {
             deleteComponentFlowVersion(componentFlowVersion);
@@ -165,7 +197,7 @@ public class ConfigurationService implements IConfigurationService {
     }
 
     @Override
-    public void deleteComponentFlowLink(ComponentFlowNodeLink link) {
+    public void delete(ComponentFlowNodeLink link) {
         persistenceManager.delete(link.getData(), null, null,
                 tableName(ComponentFlowNodeLinkData.class));
     }
@@ -199,14 +231,27 @@ public class ConfigurationService implements IConfigurationService {
 
     @Override
     public void refresh(Connection connection) {
-        // TODO
+        refresh((AbstractObject<?>) connection);
+
+        // TODO refresh settings
+    }
+
+    @Override
+    public void refresh(Agent agent) {
+        refresh((AbstractObject<?>) agent);
+
+        // TODO refresh settings
     }
 
     @Override
     public void refresh(ComponentFlowVersion componentFlowVersion) {
-        persistenceManager.refresh(componentFlowVersion.getData(), null, null,
-                tableName(componentFlowVersion.getData().getClass()));
+        refresh((AbstractObject<?>) componentFlowVersion);
         refreshComponentFlowVersionRelations(componentFlowVersion);
+    }
+
+    protected void refresh(AbstractObject<?> object) {
+        persistenceManager.refresh(object.getData(), null, null, tableName(object.getData()
+                .getClass()));
     }
 
     public ComponentVersion findComponentVersion(String id) {

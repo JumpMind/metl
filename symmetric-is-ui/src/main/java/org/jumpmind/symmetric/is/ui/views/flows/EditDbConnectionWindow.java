@@ -20,6 +20,7 @@ import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
 import org.jumpmind.symmetric.is.ui.support.IItemSavedListener;
 import org.jumpmind.symmetric.is.ui.support.ResizableWindow;
 import org.jumpmind.symmetric.is.ui.support.UiComponent;
+import org.jumpmind.symmetric.is.ui.support.UiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
@@ -193,6 +194,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
         topLayout.addComponent(formLayout);
 
         nameField = new TextField("Name");
+        nameField.setWidth(UiConstants.TEXTFIELD_WIDTH, Unit.PIXELS);
         nameField.setNullRepresentation("");
 
         databaseType = new ComboBox("Database Type");

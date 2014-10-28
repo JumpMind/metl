@@ -61,6 +61,8 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
     protected MenuItem addButton;
 
     protected Button delButton;
+    
+    protected Button editButton;
 
     protected FolderType folderType;
 
@@ -148,7 +150,6 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             @Override
             public void itemClick(ItemClickEvent event) {
                 if (lastSelected != null && lastSelected.contains(event.getItemId())) {
-                    log.info("unselected " + event.getItemId());
                     tree.unselect(event.getItemId());
                 }
                 if (event.isDoubleClick()) {
@@ -222,6 +223,11 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         buttonLayout.setComponentAlignment(bar, Alignment.MIDDLE_LEFT);
 
         addButtonsAfterAdd(buttonLayout);
+        
+        editButton = createButton("Edit", false, new EditButtonClickListener());
+        buttonLayout.addComponent(editButton);
+        buttonLayout.setComponentAlignment(editButton, Alignment.MIDDLE_LEFT);
+
 
         delButton = createButton("Delete", false, new DeleteButtonClickListener());
         buttonLayout.addComponent(delButton);
@@ -449,6 +455,20 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                         deleteTreeItem(object);
                     }
                 }
+            }
+        }
+    }
+    
+
+    class EditButtonClickListener implements ClickListener {
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public void buttonClick(ClickEvent event) {
+            Object item = getSingleSelection(Object.class);
+            if (item != null) {
+                itemClicked(item);
             }
         }
     }
