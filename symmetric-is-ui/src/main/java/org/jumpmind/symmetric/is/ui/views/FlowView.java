@@ -61,7 +61,7 @@ public class FlowView extends AbstractFolderView {
 
     public FlowView() {
         super("Flows", FolderType.DESIGN);
-        tree.addActionHandler(new ActionHandler());
+        treeTable.addActionHandler(new ActionHandler());
     }
 
     @PostConstruct
@@ -75,7 +75,7 @@ public class FlowView extends AbstractFolderView {
                 ComponentFlowVersion componentFlowVersion = editFlowWindow
                         .getComponentFlowVersion();
                 configurationService.refresh(componentFlowVersion);
-                tree.focus();
+                treeTable.focus();
             }
         });
     }
@@ -93,14 +93,14 @@ public class FlowView extends AbstractFolderView {
     public void itemSaved(Object item) {
         if (item instanceof Connection) {
             Connection connection = (Connection) item;
-            if (tree.containsId(item)) {
+            if (treeTable.containsId(item)) {
                 configurationService.refresh(connection);
             } else {
                 refresh();
                 expand(connection.getFolder(), item);
             }
         }
-        tree.focus();
+        treeTable.focus();
     }
 
     @Override
@@ -157,14 +157,14 @@ public class FlowView extends AbstractFolderView {
     protected void addConnectionsToFolder(Folder folder) {
         List<Connection> connections = configurationService.findConnectionsInFolder(folder);
         for (Connection connection : connections) {
-            this.tree.addItem(connection);
+            this.treeTable.addItem(connection);
             if (DataSourceConnection.TYPE.equals(connection.getData().getType())) {
-                this.tree.setItemIcon(connection, FontAwesome.DATABASE);
+                this.treeTable.setItemIcon(connection, FontAwesome.DATABASE);
             } else {
-                this.tree.setItemIcon(connection, GENERAL_CONNECTION_ICON);
+                this.treeTable.setItemIcon(connection, GENERAL_CONNECTION_ICON);
             }
-            this.tree.setChildrenAllowed(connection, false);
-            this.tree.setParent(connection, folder);
+            this.treeTable.setChildrenAllowed(connection, false);
+            this.treeTable.setParent(connection, folder);
         }
 
     }
@@ -172,18 +172,18 @@ public class FlowView extends AbstractFolderView {
     protected void addComponentFlowsToFolder(Folder folder) {
         List<ComponentFlow> flows = configurationService.findComponentFlowsInFolder(folder);
         for (ComponentFlow flow : flows) {
-            this.tree.addItem(flow);
-            this.tree.setItemIcon(flow, FontAwesome.SHARE_ALT);
-            this.tree.setParent(flow, folder);
+            this.treeTable.addItem(flow);
+            this.treeTable.setItemIcon(flow, FontAwesome.SHARE_ALT);
+            this.treeTable.setParent(flow, folder);
 
             List<ComponentFlowVersion> versions = flow.getComponentFlowVersions();
             for (ComponentFlowVersion componentFlowVersion : versions) {
-                this.tree.addItem(componentFlowVersion);
-                this.tree.setItemCaption(componentFlowVersion, componentFlowVersion.getData()
+                this.treeTable.addItem(componentFlowVersion);
+                this.treeTable.setItemCaption(componentFlowVersion, componentFlowVersion.getData()
                         .getVersionName());
-                this.tree.setItemIcon(componentFlowVersion, FontAwesome.FILE_TEXT);
-                this.tree.setParent(componentFlowVersion, flow);
-                this.tree.setChildrenAllowed(componentFlowVersion, false);
+                this.treeTable.setItemIcon(componentFlowVersion, FontAwesome.FILE_TEXT);
+                this.treeTable.setParent(componentFlowVersion, flow);
+                this.treeTable.setChildrenAllowed(componentFlowVersion, false);
             }
         }
     }

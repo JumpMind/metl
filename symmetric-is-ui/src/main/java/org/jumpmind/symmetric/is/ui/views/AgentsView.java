@@ -27,6 +27,9 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.Table.ColumnGenerator;
+import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 
@@ -56,9 +59,29 @@ public class AgentsView extends AbstractFolderView {
             public void windowClose(CloseEvent e) {
                 Agent agent = editAgentWindow.getAgent();
                 configurationService.refresh(agent);
-                tree.focus();
+                treeTable.focus();
             }
         });
+    }
+
+    @Override
+    protected TreeTable buildTree() {
+        TreeTable tree = super.buildTree();
+        tree.addGeneratedColumn("Host", new ColumnGenerator() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Object generateCell(Table source, Object itemId, Object columnId) {
+                if (itemId instanceof Agent) {
+                    Agent agent = (Agent) itemId;
+                    return agent.getData().getHost();
+                } else {
+                    return null;
+                }
+            }
+        });
+        return tree;
     }
 
     @Override
@@ -75,7 +98,7 @@ public class AgentsView extends AbstractFolderView {
             refresh();
             expand(agent.getFolder(), item);
         }
-        tree.focus();
+        treeTable.focus();
     }
 
     @Override
@@ -121,10 +144,10 @@ public class AgentsView extends AbstractFolderView {
     protected void addAgentsToFolder(Folder folder) {
         List<Agent> agents = configurationService.findAgentsInFolder(folder);
         for (Agent agent : agents) {
-            this.tree.addItem(agent);
-            this.tree.setItemIcon(agent, FontAwesome.GEAR);
-            this.tree.setChildrenAllowed(agent, false);
-            this.tree.setParent(agent, folder);
+            this.treeTable.addItem(agent);
+            this.treeTable.setItemIcon(agent, FontAwesome.GEAR);
+            this.treeTable.setChildrenAllowed(agent, false);
+            this.treeTable.setParent(agent, folder);
         }
 
     }

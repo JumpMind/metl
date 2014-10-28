@@ -56,7 +56,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
     @Autowired
     protected IConfigurationService configurationService;
 
-    protected TreeTable tree;
+    protected TreeTable treeTable;
 
     protected MenuItem addButton;
 
@@ -78,21 +78,21 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         Label titleLabel = new Label(title);
         titleLabel.addStyleName("h2");
 
-        this.tree = buildTree();
+        this.treeTable = buildTree();
 
         addComponent(titleLabel);
         addComponent(buildButtonLayout());
-        addComponent(tree);
-        setExpandRatio(tree, 1);
+        addComponent(treeTable);
+        setExpandRatio(treeTable, 1);
     }
 
     protected TreeTable buildTree() {
-        final TreeTable tree = new TreeTable();
-        tree.setSizeFull();
-        tree.setImmediate(true);
-        tree.setMultiSelect(true);
-        tree.setSelectable(true);
-        tree.addGeneratedColumn("Name", new ColumnGenerator() {
+        final TreeTable table = new TreeTable();
+        table.setSizeFull();
+        table.setImmediate(true);
+        table.setMultiSelect(true);
+        table.setSelectable(true);
+        table.addGeneratedColumn("Name", new ColumnGenerator() {
 
             private static final long serialVersionUID = 1L;
 
@@ -103,7 +103,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                 return label;
             }
         });
-        tree.addShortcutListener(new ShortcutListener("Delete", KeyCode.DELETE, null) {
+        table.addShortcutListener(new ShortcutListener("Delete", KeyCode.DELETE, null) {
 
             private static final long serialVersionUID = 1L;
 
@@ -111,7 +111,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             public void handleAction(Object sender, Object target) {
                 if (delButton.isEnabled()) {
                     @SuppressWarnings("unchecked")
-                    Set<Object> selectedIds = (Set<Object>) tree.getValue();
+                    Set<Object> selectedIds = (Set<Object>) table.getValue();
                     for (Object object : selectedIds) {
                         deleteTreeItem(object);
                     }
@@ -119,56 +119,56 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             }
         });
 
-        tree.addShortcutListener(new ShortcutListener("Enter", KeyCode.ENTER, null) {
+        table.addShortcutListener(new ShortcutListener("Enter", KeyCode.ENTER, null) {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             public void handleAction(Object sender, Object target) {
                 @SuppressWarnings("unchecked")
-                Set<Object> selectedIds = (Set<Object>) tree.getValue();
+                Set<Object> selectedIds = (Set<Object>) table.getValue();
                 for (Object object : selectedIds) {
                     itemClicked(object);
                 }
             }
         });
-        tree.addValueChangeListener(new ValueChangeListener() {
+        table.addValueChangeListener(new ValueChangeListener() {
 
             private static final long serialVersionUID = 1L;
 
             @SuppressWarnings("unchecked")
             @Override
             public void valueChange(ValueChangeEvent event) {
-                lastSelected = (Set<Object>) tree.getValue();
+                lastSelected = (Set<Object>) table.getValue();
                 treeSelectionChanged(event);
             }
         });
-        tree.addItemClickListener(new ItemClickListener() {
+        table.addItemClickListener(new ItemClickListener() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             public void itemClick(ItemClickEvent event) {
                 if (lastSelected != null && lastSelected.contains(event.getItemId())) {
-                    tree.unselect(event.getItemId());
+                    table.unselect(event.getItemId());
                 }
                 if (event.isDoubleClick()) {
                     itemClicked(event.getItemId());
                 }
             }
         });
-        tree.addCollapseListener(new CollapseListener() {
+        table.addCollapseListener(new CollapseListener() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             public void nodeCollapse(CollapseEvent event) {
                 if (event.getItemId() instanceof Folder) {
-                    tree.setItemIcon(event.getItemId(), FontAwesome.FOLDER);
+                    table.setItemIcon(event.getItemId(), FontAwesome.FOLDER);
                 }
             }
         });
-        tree.addExpandListener(new ExpandListener() {
+        table.addExpandListener(new ExpandListener() {
 
             private static final long serialVersionUID = 1L;
 
@@ -176,19 +176,19 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             public void nodeExpand(ExpandEvent event) {
                 if (event.getItemId() instanceof Folder) {
                     Folder folder = (Folder) event.getItemId();
-                    tree.setItemIcon(folder, FontAwesome.FOLDER_OPEN);
+                    table.setItemIcon(folder, FontAwesome.FOLDER_OPEN);
                     folderExpanded(folder);
                 }
             }
         });
-        return tree;
+        return table;
     }
 
     protected void focusAndSelectFirstItem() {
-        tree.focus();
-        Collection<?> allItems = tree.getItemIds();
+        treeTable.focus();
+        Collection<?> allItems = treeTable.getItemIds();
         if (allItems.size() > 0) {
-            tree.select(allItems.iterator().next());
+            treeTable.select(allItems.iterator().next());
         }
     }
 
@@ -203,11 +203,11 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         }
 
         for (Folder expandMe : toExpand) {
-            tree.setCollapsed(expandMe, false);
+            treeTable.setCollapsed(expandMe, false);
         }
 
-        tree.focus();
-        tree.select(itemToSelect);
+        treeTable.focus();
+        treeTable.select(itemToSelect);
 
     }
 
@@ -246,12 +246,12 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
     }
 
     protected void removeAllNonFolderChildren(Folder folder) {
-        Collection<?> children = tree.getChildren(folder);
+        Collection<?> children = treeTable.getChildren(folder);
         if (children != null) {
             children = new HashSet<Object>(children);
             for (Object child : children) {
                 if (!(child instanceof Folder)) {
-                    tree.removeItem(child);
+                    treeTable.removeItem(child);
                 }
             }
         }
@@ -259,7 +259,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
     protected Folder getSelectedFolder() {
         @SuppressWarnings("unchecked")
-        Set<Object> selectedIds = (Set<Object>) tree.getValue();
+        Set<Object> selectedIds = (Set<Object>) treeTable.getValue();
         for (Object object : selectedIds) {
             if (object instanceof Folder) {
                 return (Folder) object;
@@ -270,7 +270,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
     @SuppressWarnings("unchecked")
     protected <T> T getSingleSelection(Class<T> clazz) {
-        Set<Object> selectedIds = (Set<Object>) tree.getValue();
+        Set<Object> selectedIds = (Set<Object>) treeTable.getValue();
         if (selectedIds != null && selectedIds.size() == 1) {
             Object obj = selectedIds.iterator().next();
             if (obj != null && clazz.isAssignableFrom(obj.getClass())) {
@@ -286,7 +286,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
     protected void treeSelectionChanged(ValueChangeEvent event) {
         @SuppressWarnings("unchecked")
-        Set<Object> selected = (Set<Object>) tree.getValue();
+        Set<Object> selected = (Set<Object>) treeTable.getValue();
         Folder folder = getSelectedFolder();
         addButton.setEnabled((folder == null && selected.size() == 0) || folder != null);
 
@@ -330,7 +330,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
     protected void deleteSelectedFolders() {
         @SuppressWarnings("unchecked")
-        Set<Folder> folders = (Set<Folder>) tree.getValue();
+        Set<Folder> folders = (Set<Folder>) treeTable.getValue();
         for (Folder folder : folders) {
             try {
                 configurationService.deleteFolder(folder.getData().getId());
@@ -343,36 +343,36 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
     public void refresh() {
         @SuppressWarnings({ "unchecked" })
-        Set<Object> selected = (Set<Object>) tree.getValue();
+        Set<Object> selected = (Set<Object>) treeTable.getValue();
         List<Object> expandedItems = new ArrayList<Object>();
-        Collection<?> items = tree.getItemIds();
+        Collection<?> items = treeTable.getItemIds();
         for (Object object : items) {
-            if (!tree.isCollapsed(object)) {
+            if (!treeTable.isCollapsed(object)) {
                 expandedItems.add(object);
             }
         }
 
-        this.tree.removeAllItems();
+        this.treeTable.removeAllItems();
         List<Folder> folders = configurationService.findFolders(folderType);
         for (Folder folder : folders) {
             addChildFolder(folder);
         }
 
         for (Object object : expandedItems) {
-            tree.setCollapsed(object, false);
+            treeTable.setCollapsed(object, false);
         }
 
-        tree.focus();
-        tree.setValue(selected);
+        treeTable.focus();
+        treeTable.setValue(selected);
 
     }
 
     protected void addChildFolder(Folder folder) {
-        this.tree.addItem(folder);
-        this.tree.setItemIcon(folder, FontAwesome.FOLDER);
-        this.tree.setCollapsed(folder, true);
+        this.treeTable.addItem(folder);
+        this.treeTable.setItemIcon(folder, FontAwesome.FOLDER);
+        this.treeTable.setCollapsed(folder, true);
         if (folder.getParent() != null) {
-            this.tree.setParent(folder, folder.getParent());
+            this.treeTable.setParent(folder, folder.getParent());
         }
         List<Folder> children = folder.getChildren();
         for (Folder child : children) {
@@ -393,7 +393,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             if (isNotBlank(content)) {
                 Folder parentFolder = null;
                 @SuppressWarnings("unchecked")
-                Set<Folder> selectedIds = (Set<Folder>) tree.getValue();
+                Set<Folder> selectedIds = (Set<Folder>) treeTable.getValue();
                 if (selectedIds != null && selectedIds.size() > 0) {
                     parentFolder = selectedIds.iterator().next();
                 }
@@ -410,13 +410,13 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                 refresh();
 
                 while (parentFolder != null) {
-                    tree.setCollapsed(parentFolder, false);
+                    treeTable.setCollapsed(parentFolder, false);
                     parentFolder = parentFolder.getParent();
                 }
 
                 Set<Folder> selected = new HashSet<Folder>();
                 selected.add(folder);
-                tree.setValue(selected);
+                treeTable.setValue(selected);
                 return true;
             } else {
                 return false;
@@ -449,7 +449,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                 }
 
                 @SuppressWarnings("unchecked")
-                Set<Object> objects = (Set<Object>) tree.getValue();
+                Set<Object> objects = (Set<Object>) treeTable.getValue();
                 for (Object object : objects) {
                     if (!(object instanceof Folder)) {
                         deleteTreeItem(object);
