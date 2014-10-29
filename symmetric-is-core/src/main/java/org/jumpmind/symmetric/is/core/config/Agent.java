@@ -16,6 +16,14 @@ public class Agent extends AbstractObjectWithSettings<AgentData> {
         this.data.setFolderId(folder.getData().getId());
     }
     
+    public AgentStartMode getAgentStartMode() {
+        return data.getStartMode() == null ? AgentStartMode.MANUAL : AgentStartMode.valueOf(data.getStartMode());
+    }
+    
+    public AgentStatus getAgentStatus() {
+        return data.getStatus() == null ? AgentStatus.UNKNOWN : AgentStatus.valueOf(data.getStatus());
+    }
+    
     @Override
     protected SettingData createSettingData() {
         return new AgentSettingData();

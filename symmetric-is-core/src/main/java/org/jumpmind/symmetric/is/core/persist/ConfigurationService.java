@@ -18,6 +18,7 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
+import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.config.data.AbstractData;
 import org.jumpmind.symmetric.is.core.config.data.AgentData;
 import org.jumpmind.symmetric.is.core.config.data.AgentSettingData;
@@ -30,7 +31,6 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
 import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
 import org.jumpmind.symmetric.is.core.config.data.ConnectionSettingData;
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
-import org.jumpmind.symmetric.is.core.config.data.FolderType;
 import org.jumpmind.symmetric.is.core.config.data.SettingData;
 
 public class ConfigurationService implements IConfigurationService {
@@ -153,17 +153,45 @@ public class ConfigurationService implements IConfigurationService {
     public List<Agent> findAgentsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("folderId", folder.getData().getId());
+        return findAgents(params, folder);
+    }
+
+    @Override
+    public List<Agent> findAgentsForHost(String hostName) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("host", hostName);
+        return findAgents(params);
+    }
+
+    protected List<Agent> findAgents(Map<String, Object> params) {
+        return findAgents(params, null);
+    }
+
+    protected List<Agent> findAgents(Map<String, Object> params, Folder folder) {
         List<AgentData> datas = persistenceManager.find(AgentData.class, params, null, null,
                 tableName(AgentData.class));
         List<Agent> list = new ArrayList<Agent>();
+
+        Map<String, Folder> folderMapById = new HashMap<String, Folder>();
+        if (folder != null) {
+            folderMapById.put(folder.getData().getId(), folder);
+        } else {
+            List<Folder> folders = findFolders(FolderType.RUNTIME);
+            for (Folder folder2 : folders) {
+                folderMapById.put(folder2.getData().getId(), folder2);
+            }
+        }
+
         for (AgentData data : datas) {
             Map<String, Object> settingParams = new HashMap<String, Object>();
             settingParams.put("agentId", data.getId());
             List<AgentSettingData> settings = persistenceManager.find(AgentSettingData.class,
                     settingParams, null, null, tableName(AgentSettingData.class));
-            list.add(new Agent(folder, data, settings.toArray(new SettingData[settings.size()])));
+            list.add(new Agent(folderMapById.get(data.getFolderId()), data, settings
+                    .toArray(new SettingData[settings.size()])));
         }
         return list;
+
     }
 
     @Override
@@ -174,7 +202,7 @@ public class ConfigurationService implements IConfigurationService {
         }
         delete(connection.getData());
     }
-    
+
     @Override
     public void delete(Agent agent) {
         List<SettingData> settings = agent.getSettings();

@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.config.Folder;
+import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
-import org.jumpmind.symmetric.is.core.config.data.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.is.ui.support.PromptDialog.IPromptListener;
@@ -25,6 +25,7 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -61,7 +62,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
     protected MenuItem addButton;
 
     protected Button delButton;
-    
+
     protected Button editButton;
 
     protected FolderType folderType;
@@ -149,11 +150,13 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
             @Override
             public void itemClick(ItemClickEvent event) {
-                if (lastSelected != null && lastSelected.contains(event.getItemId())) {
-                    table.unselect(event.getItemId());
-                }
-                if (event.isDoubleClick()) {
-                    itemClicked(event.getItemId());
+                if (event.getButton() == MouseButton.LEFT) {
+                    if (lastSelected != null && lastSelected.contains(event.getItemId())) {
+                        table.unselect(event.getItemId());
+                    }
+                    if (event.isDoubleClick()) {
+                        itemClicked(event.getItemId());
+                    }
                 }
             }
         });
@@ -223,11 +226,10 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         buttonLayout.setComponentAlignment(bar, Alignment.MIDDLE_LEFT);
 
         addButtonsAfterAdd(buttonLayout);
-        
+
         editButton = createButton("Edit", false, new EditButtonClickListener());
         buttonLayout.addComponent(editButton);
         buttonLayout.setComponentAlignment(editButton, Alignment.MIDDLE_LEFT);
-
 
         delButton = createButton("Delete", false, new DeleteButtonClickListener());
         buttonLayout.addComponent(delButton);
@@ -458,7 +460,6 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             }
         }
     }
-    
 
     class EditButtonClickListener implements ClickListener {
 

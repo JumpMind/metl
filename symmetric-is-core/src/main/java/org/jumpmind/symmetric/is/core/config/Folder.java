@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
-import org.jumpmind.symmetric.is.core.config.data.FolderType;
 
 public class Folder extends AbstractObject<FolderData> {
 

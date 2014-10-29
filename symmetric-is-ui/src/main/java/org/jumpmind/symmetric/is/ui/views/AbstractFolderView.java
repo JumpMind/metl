@@ -1,6 +1,6 @@
 package org.jumpmind.symmetric.is.ui.views;
 
-import org.jumpmind.symmetric.is.core.config.data.FolderType;
+import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.ui.support.AbstractFolderNavigatorLayout;
 import org.jumpmind.symmetric.is.ui.support.IItemSavedListener;
 

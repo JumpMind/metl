@@ -10,7 +10,7 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
-import org.jumpmind.symmetric.is.core.config.data.FolderType;
+import org.jumpmind.symmetric.is.core.config.FolderType;
 
 public interface IConfigurationService {
 
@@ -33,6 +33,8 @@ public interface IConfigurationService {
     public List<Connection> findConnectionsInFolder(Folder folder);
     
     public List<Agent> findAgentsInFolder(Folder folder);
+    
+    public List<Agent> findAgentsForHost(String hostName);
     
     public void deleteComponentFlowVersion(ComponentFlowVersion componentFlowVersion);
 

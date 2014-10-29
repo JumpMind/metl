@@ -6,6 +6,10 @@
     text-align: left; 
   }
   
+  .centerAligned.v-button, .centerAligned.v-label {
+    text-align: center; 
+  }
+  
   .v-table-cell-wrapper > .leftPad.v-label {
     margin-left: 5px; 
   }

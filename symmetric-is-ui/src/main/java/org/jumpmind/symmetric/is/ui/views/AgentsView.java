@@ -8,8 +8,9 @@ import javax.annotation.PostConstruct;
 
 import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.Folder;
+import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.config.data.AgentData;
-import org.jumpmind.symmetric.is.core.config.data.FolderType;
+import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.ui.support.Category;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog;
 import org.jumpmind.symmetric.is.ui.support.ConfirmDialog.IConfirmListener;
@@ -18,12 +19,15 @@ import org.jumpmind.symmetric.is.ui.support.PromptDialog.IPromptListener;
 import org.jumpmind.symmetric.is.ui.support.UiComponent;
 import org.jumpmind.symmetric.is.ui.support.ViewLink;
 import org.jumpmind.symmetric.is.ui.views.agents.EditAgentWindow;
+import org.jumpmind.util.AppUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -42,6 +46,9 @@ public class AgentsView extends AbstractFolderView {
 
     @Autowired
     EditAgentWindow editAgentWindow;
+
+    @Autowired
+    IAgentManager agentManager;
 
     MenuItem addAgentButton;
 
@@ -67,6 +74,42 @@ public class AgentsView extends AbstractFolderView {
     @Override
     protected TreeTable buildTree() {
         TreeTable tree = super.buildTree();
+        tree.addGeneratedColumn("Local", new ColumnGenerator() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Object generateCell(Table source, Object itemId, Object columnId) {
+                if (itemId instanceof Agent) {
+                    Agent agent = (Agent) itemId;
+                    if (AppUtils.getHostName().equals(agent.getData().getHost())
+                            || AppUtils.getIpAddress().equals(agent.getData().getHost())) {
+                        Label label = new Label(FontAwesome.CHECK.getHtml(), ContentMode.HTML);
+                        label.addStyleName("centerAligned");
+                        return label;
+                    } 
+                }
+                return null;                
+            }
+        });
+        tree.setColumnWidth("Local", 50);
+
+        tree.addGeneratedColumn("Status", new ColumnGenerator() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Object generateCell(Table source, Object itemId, Object columnId) {
+                if (itemId instanceof Agent) {
+                    Agent agent = (Agent) itemId;
+                    return agent.getAgentStatus();
+                } else {
+                    return null;
+                }
+            }
+        });
+        tree.setColumnWidth("Status", 75);
+        
         tree.addGeneratedColumn("Host", new ColumnGenerator() {
 
             private static final long serialVersionUID = 1L;
@@ -81,6 +124,7 @@ public class AgentsView extends AbstractFolderView {
                 }
             }
         });
+        tree.setColumnExpandRatio("Host", 1);
         return tree;
     }
 
@@ -97,6 +141,7 @@ public class AgentsView extends AbstractFolderView {
             Agent agent = (Agent) item;
             refresh();
             expand(agent.getFolder(), item);
+            agentManager.refresh(agent);
         }
         treeTable.focus();
     }

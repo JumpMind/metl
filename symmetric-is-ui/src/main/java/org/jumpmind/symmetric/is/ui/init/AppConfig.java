@@ -34,6 +34,8 @@ import org.jumpmind.symmetric.app.core.persist.IPersistenceManager;
 import org.jumpmind.symmetric.app.core.persist.JdbcPersistenceManager;
 import org.jumpmind.symmetric.is.core.persist.ConfigurationService;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.runtime.AgentManager;
+import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionFactory;
@@ -111,12 +113,12 @@ public class AppConfig {
         String tablePrefix = env.getProperty(EnvConstants.TABLE_PREFIX, "SIS");
         return configDatabasePlatform().alterCaseToMatchDatabaseDefaultCase(tablePrefix);
     }
-    
 
     @Bean
-    @Scope(value="singleton")
+    @Scope(value = "singleton")
     public ConfigDatabaseUpgrader configDatabaseUpgrader() {
-        return new ConfigDatabaseUpgrader("/schema-v1.xml", configDatabasePlatform(), true, tablePrefix());
+        return new ConfigDatabaseUpgrader("/schema-v1.xml", configDatabasePlatform(), true,
+                tablePrefix());
     }
 
     @Bean
@@ -129,24 +131,31 @@ public class AppConfig {
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConfigurationService configurationService() {
-        IConfigurationService service =  new ConfigurationService(persistenceManager(), tablePrefix());
+        IConfigurationService service = new ConfigurationService(persistenceManager(),
+                tablePrefix());
         return service;
     }
-    
+
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IComponentFactory componentFactory() {
         return new ComponentFactory();
     }
-    
+
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConnectionFactory connectionFactory() {
         return new ConnectionFactory();
     }
 
-    
-    @Bean 
+    @Bean
+    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
+    public IAgentManager agentManager() {
+        IAgentManager agentManager = new AgentManager(configurationService());
+        return agentManager;
+    }
+
+    @Bean
     static UIScope uiScope() {
         return new UIScope();
     }
