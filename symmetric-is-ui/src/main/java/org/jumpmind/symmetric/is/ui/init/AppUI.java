@@ -4,7 +4,6 @@ import org.jumpmind.symmetric.is.ui.support.Menu;
 import org.jumpmind.symmetric.is.ui.support.ViewManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -16,6 +15,7 @@ import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
@@ -25,7 +25,7 @@ import com.vaadin.ui.UI;
 @Theme("apptheme")
 @Title("SymmetricIS")
 @PreserveOnRefresh
-@Push
+@Push(transport=Transport.WEBSOCKET)
 public class AppUI extends UI {
 
     private static final long serialVersionUID = 1L;
@@ -33,10 +33,6 @@ public class AppUI extends UI {
     private static Logger log = LoggerFactory.getLogger(AppUI.class);
 
     ViewManager viewManager;
-
-    static {
-        SLF4JBridgeHandler.install();
-    }
 
     @Override
     protected void init(VaadinRequest request) {

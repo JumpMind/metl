@@ -19,14 +19,13 @@ import org.jumpmind.symmetric.is.ui.support.PromptDialog.IPromptListener;
 import org.jumpmind.symmetric.is.ui.support.UiComponent;
 import org.jumpmind.symmetric.is.ui.support.ViewLink;
 import org.jumpmind.symmetric.is.ui.views.agents.EditAgentWindow;
-import org.jumpmind.util.AppUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
@@ -36,6 +35,7 @@ import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
+import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
@@ -82,8 +82,7 @@ public class AgentsView extends AbstractFolderView {
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 if (itemId instanceof Agent) {
                     Agent agent = (Agent) itemId;
-                    if (AppUtils.getHostName().equals(agent.getData().getHost())
-                            || AppUtils.getIpAddress().equals(agent.getData().getHost())) {
+                    if (agentManager.isAgentLocal(agent)) {
                         Label label = new Label(FontAwesome.CHECK.getHtml(), ContentMode.HTML);
                         label.addStyleName("centerAligned");
                         return label;
@@ -125,6 +124,25 @@ public class AgentsView extends AbstractFolderView {
             }
         });
         tree.setColumnExpandRatio("Host", 1);
+        
+        tree.addGeneratedColumn("Deployments", new ColumnGenerator() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Object generateCell(Table source, Object itemId, Object columnId) {
+                if (itemId instanceof Agent) {
+                    Agent agent = (Agent) itemId;
+                    Button button = new Button(Integer.toString(agent.getDeployments().size()));
+                    button.setWidth(100, Unit.PERCENTAGE);
+                    button.addStyleName(ValoTheme.BUTTON_LINK);
+                    return button;
+                } else {
+                    return null;
+                }
+            }
+        });
+        
         return tree;
     }
 
@@ -137,17 +155,13 @@ public class AgentsView extends AbstractFolderView {
 
     @Override
     public void itemSaved(Object item) {
-        if (item instanceof Agent) {
+        if (item instanceof Agent) {            
             Agent agent = (Agent) item;
+            agentManager.refresh(agent);
             refresh();
             expand(agent.getFolder(), item);
-            agentManager.refresh(agent);
         }
         treeTable.focus();
-    }
-
-    @Override
-    protected void addButtonsAfterAdd(HorizontalLayout buttonLayout) {
     }
 
     @Override
@@ -246,6 +260,7 @@ public class AgentsView extends AbstractFolderView {
 
         @Override
         public boolean onOk() {
+            agentManager.remove(toDelete);
             configurationService.delete(toDelete);
             refresh();
             expand(toDelete.getFolder(), toDelete.getFolder());

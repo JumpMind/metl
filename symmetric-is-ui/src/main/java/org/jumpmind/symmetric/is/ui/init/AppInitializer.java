@@ -64,8 +64,8 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     public void contextInitialized(ServletContextEvent sce) {
         WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce
                 .getServletContext());
-        initDatabase(ctx);
         LogUtils.initLogging(ctx);
+        initDatabase(ctx);
         initAgentRuntime(ctx);
     }
 

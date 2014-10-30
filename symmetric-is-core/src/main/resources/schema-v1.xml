@@ -14,9 +14,9 @@
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
         <foreign-key foreignTable="folder" name="fk_fldr_2_fldr">
             <reference local="parent_folder_id" foreign="id" />
-        </foreign-key>        
+        </foreign-key>
     </table>
-    
+
     <table name="model_format" description="">
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="type" type="VARCHAR" size="50" required="true" description="" />
@@ -44,7 +44,7 @@
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A version number" />
         <column name="version_name" type="VARCHAR" required="true" size="255" description="" />
         <column name="structured_model_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
-        <column name="model_format_id" type="VARCHAR" size="128" description="A unique identifer" />        
+        <column name="model_format_id" type="VARCHAR" size="128" description="A unique identifer" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -54,9 +54,9 @@
         </foreign-key>
         <foreign-key foreignTable="model_format" name="fk_smv_2_mf">
             <reference local="model_format_id" foreign="id" />
-        </foreign-key>        
+        </foreign-key>
     </table>
-    
+
     <table name="entity" description="">
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="structured_model_version_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A version number" />
@@ -68,11 +68,11 @@
         <foreign-key foreignTable="structured_model_version" name="fk_e_2_smv">
             <reference local="structured_model_version_id" foreign="id" />
         </foreign-key>
-    </table>    
-    
+    </table>
+
     <table name="entity_setting" description="">
         <column name="entity_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A version number" />
-        <column name="name" type="VARCHAR" size="255"  primaryKey="true" required="true" description="" />
+        <column name="name" type="VARCHAR" size="255" primaryKey="true" required="true" description="" />
         <column name="value" type="VARCHAR" size="255" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
@@ -81,7 +81,7 @@
         <foreign-key foreignTable="entity" name="fk_es_2_e">
             <reference local="entity_id" foreign="id" />
         </foreign-key>
-    </table>    
+    </table>
 
     <table name="attribute" description="">
         <column name="id" primaryKey="true" required="true" type="VARCHAR" size="128" />
@@ -95,12 +95,12 @@
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
         <foreign-key foreignTable="entity" name="fk_a_2_e">
             <reference local="entity_id" foreign="id" />
-        </foreign-key>        
+        </foreign-key>
         <foreign-key foreignTable="entity" name="fk_tea_2_e">
             <reference local="type_entity_id" foreign="id" />
         </foreign-key>
     </table>
-    
+
     <table name="attribute_setting" description="">
         <column name="attribute_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A version number" />
         <column name="name" type="VARCHAR" size="255" primaryKey="true" required="true" description="" />
@@ -112,8 +112,8 @@
         <foreign-key foreignTable="attribute" name="fk_as_2_a">
             <reference local="attribute_id" foreign="id" />
         </foreign-key>
-    </table>        
-    
+    </table>
+
     <table name="entity_relationship">
         <column name="id" primaryKey="true" required="true" type="VARCHAR" size="128" />
         <column name="name" required="true" type="VARCHAR" size="255" />
@@ -122,34 +122,34 @@
         <column name="create_by" type="VARCHAR" size="50" />
         <column name="create_time" type="TIMESTAMP" />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
-        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />        
-        <foreign-key foreignTable="entity" name="fk_er_2_e_1">        
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
+        <foreign-key foreignTable="entity" name="fk_er_2_e_1">
             <reference local="source_entity_id" foreign="id" />
         </foreign-key>
         <foreign-key foreignTable="entity" name="fk_er_2_e_2">
             <reference local="target_entity_id" foreign="id" />
-        </foreign-key>        
+        </foreign-key>
     </table>
-    
+
     <table name="entity_relationship_attribute">
-        <column name="entity_relationship_id" required="true" type="VARCHAR" size="128" primaryKey="true"  />
-        <column name="source_attribute_id" type="VARCHAR" size="128" required="true" primaryKey="true"  />
-        <column name="target_attribute_id" type="VARCHAR" size="128" required="true" primaryKey="true"  />
+        <column name="entity_relationship_id" required="true" type="VARCHAR" size="128" primaryKey="true" />
+        <column name="source_attribute_id" type="VARCHAR" size="128" required="true" primaryKey="true" />
+        <column name="target_attribute_id" type="VARCHAR" size="128" required="true" primaryKey="true" />
         <column name="create_by" type="VARCHAR" size="50" />
         <column name="create_time" type="TIMESTAMP" />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
-        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." /> 
-        <foreign-key foreignTable="entity_relationship" name="fk_era_2_er">        
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
+        <foreign-key foreignTable="entity_relationship" name="fk_era_2_er">
             <reference local="source_attribute_id" foreign="id" />
         </foreign-key>
-        <foreign-key foreignTable="attribute" name="fk_era_2_a_1">        
+        <foreign-key foreignTable="attribute" name="fk_era_2_a_1">
             <reference local="entity_relationship_id" foreign="id" />
         </foreign-key>
         <foreign-key foreignTable="attribute" name="fk_era_2_a_2">
             <reference local="target_attribute_id" foreign="id" />
-        </foreign-key>        
-    </table>    
-    
+        </foreign-key>
+    </table>
+
     <table name="connection" description="">
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="name" type="VARCHAR" size="255" description="" />
@@ -175,7 +175,7 @@
         <foreign-key foreignTable="connection" name="fk_cons_2_con">
             <reference local="connection_id" foreign="id" />
         </foreign-key>
-    </table>    
+    </table>
 
     <table name="component" description="">
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
@@ -194,7 +194,7 @@
     <table name="component_version" description="">
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A version number" />
         <column name="version_name" type="VARCHAR" required="true" size="255" description="" />
-        <column name="name" type="VARCHAR" size="255" description="" />        
+        <column name="name" type="VARCHAR" size="255" description="" />
         <column name="component_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
         <column name="input_model_version_id" type="VARCHAR" size="128" description="" />
         <column name="output_model_version_id" type="VARCHAR" size="128" description="" />
@@ -214,7 +214,7 @@
         </foreign-key>
         <foreign-key foreignTable="connection" name="fk_cmpv_2_con">
             <reference local="connection_id" foreign="id" />
-        </foreign-key>        
+        </foreign-key>
     </table>
 
     <table name="component_version_setting" description="">
@@ -229,12 +229,12 @@
             <reference local="component_version_id" foreign="id" />
         </foreign-key>
     </table>
-    
+
     <table name="model_format_attribute_setting" description="">
         <column name="format_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="attribute_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="name" type="VARCHAR" size="255" primaryKey="true" required="true" description="" />
-        <column name="value" type="VARCHAR" size="255" description="" />        
+        <column name="value" type="VARCHAR" size="255" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -244,13 +244,13 @@
         </foreign-key>
         <foreign-key foreignTable="attribute" name="fk_mfas_2_a">
             <reference local="attribute_id" foreign="id" />
-        </foreign-key>        
+        </foreign-key>
     </table>
-    
+
     <table name="model_format_setting" description="">
         <column name="format_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="name" type="VARCHAR" size="255" primaryKey="true" required="true" description="" />
-        <column name="value" type="VARCHAR" size="255" description="" />        
+        <column name="value" type="VARCHAR" size="255" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -258,7 +258,7 @@
         <foreign-key foreignTable="model_format" name="fk_mfs_2_mf">
             <reference local="format_id" foreign="id" />
         </foreign-key>
-    </table>    
+    </table>
 
     <table name="component_flow" description="">
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
@@ -303,7 +303,7 @@
             <reference local="component_version_id" foreign="id" />
         </foreign-key>
     </table>
-    
+
     <table name="component_flow_node_link" description="">
         <column name="source_node_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="target_node_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
@@ -318,7 +318,7 @@
             <reference local="target_node_id" foreign="id" />
         </foreign-key>
     </table>
-    
+
     <table name="agent" description="">
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="name" type="VARCHAR" size="255" description="" />
@@ -327,16 +327,16 @@
         <column name="start_mode" type="VARCHAR" size="255" description="" />
         <column name="status" type="VARCHAR" size="255" description="" />
         <column name="last_start_time" type="TIMESTAMP" description="" />
-        <column name="heartbeat_time" type="TIMESTAMP" description="" />                
+        <column name="heartbeat_time" type="TIMESTAMP" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
-        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />        
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
         <foreign-key foreignTable="folder" name="fk_agnt_2_fldr">
             <reference local="folder_id" foreign="id" />
         </foreign-key>
-    </table>    
-    
+    </table>
+
     <table name="agent_setting" description="">
         <column name="agent_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="name" type="VARCHAR" size="255" primaryKey="true" required="true" description="" />
@@ -348,11 +348,13 @@
         <foreign-key foreignTable="agent" name="fk_agnts_2_agnt">
             <reference local="agent_id" foreign="id" />
         </foreign-key>
-    </table>    
-    
+    </table>
+
     <table name="agent_deployment" description="">
         <column name="agent_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="component_flow_version_id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="start_mode" type="VARCHAR" size="255" description="" />
+        <column name="status" type="VARCHAR" size="255" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -363,6 +365,6 @@
         <foreign-key foreignTable="agent" name="fk_agntd_2_agnt">
             <reference local="agent_id" foreign="id" />
         </foreign-key>
-    </table>    
+    </table>
 
 </database>

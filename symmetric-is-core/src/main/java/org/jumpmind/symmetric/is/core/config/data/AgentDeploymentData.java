@@ -1,13 +1,52 @@
 package org.jumpmind.symmetric.is.core.config.data;
 
-import java.util.HashSet;
 
-public class AgentDeploymentData {
+public class AgentDeploymentData extends AbstractData {
+
+    private static final long serialVersionUID = 1L;
 
     String agentId;
     
-    String componentGraphVersionId;
+    String componentFlowVersionId;
     
-    HashSet<SettingData> settings;
+    String startMode;
+    
+    String status;
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
+
+    public String getComponentFlowVersionId() {
+        return componentFlowVersionId;
+    }
+
+    public void setComponentFlowVersionId(String componentFlowVersionId) {
+        this.componentFlowVersionId = componentFlowVersionId;
+    }
+
+    public String getStartMode() {
+        return startMode;
+    }
+
+    public void setStartMode(String startMode) {
+        this.startMode = startMode;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
+    
+    
+    
     
 }

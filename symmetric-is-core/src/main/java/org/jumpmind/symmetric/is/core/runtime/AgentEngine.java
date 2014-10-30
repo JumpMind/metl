@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
 import org.jumpmind.symmetric.is.core.config.Agent;
+import org.jumpmind.symmetric.is.core.config.AgentStatus;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.slf4j.Logger;
@@ -22,13 +23,21 @@ public class AgentEngine {
         this.agent = agent;
         this.configurationService = configurationService;
     }
+    
+    public void setAgent(Agent agent) {
+        this.agent = agent;
+    }
 
     public void start() {
+        agent.setAgentStatus(AgentStatus.RUNNING);
+        configurationService.save(agent);
         started = true;
-        log.info("Agent '{}' has been started", agent);
+        log.info("Agent '{}' has been started", agent);        
     }
 
     public void stop() {
+        agent.setAgentStatus(AgentStatus.STOPPED);
+        configurationService.save(agent);
         started = false;
         log.info("Agent '{}' has been stopped", agent);
     }

@@ -27,11 +27,6 @@ import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
@@ -46,7 +41,6 @@ import com.vaadin.ui.Tree.ExpandEvent;
 import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
 
 abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
@@ -61,9 +55,9 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
     protected MenuItem addButton;
 
-    protected Button delButton;
+    protected MenuItem delButton;
 
-    protected Button editButton;
+    protected MenuItem editButton;
 
     protected FolderType folderType;
 
@@ -104,6 +98,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                 return label;
             }
         });
+        table.setColumnWidth("Name", 150);
         table.addShortcutListener(new ShortcutListener("Delete", KeyCode.DELETE, null) {
 
             private static final long serialVersionUID = 1L;
@@ -211,40 +206,25 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
         treeTable.focus();
         treeTable.select(itemToSelect);
-
     }
 
     protected void itemClicked(Object item) {
     }
 
-    protected HorizontalLayout buildButtonLayout() {
-        HorizontalLayout buttonLayout = new HorizontalLayout();
-        addComponent(buttonLayout);
-
-        MenuBar bar = buildAddButton();
-        buttonLayout.addComponent(bar);
-        buttonLayout.setComponentAlignment(bar, Alignment.MIDDLE_LEFT);
-
-        addButtonsAfterAdd(buttonLayout);
-
-        editButton = createButton("Edit", false, new EditButtonClickListener());
-        buttonLayout.addComponent(editButton);
-        buttonLayout.setComponentAlignment(editButton, Alignment.MIDDLE_LEFT);
-
-        delButton = createButton("Delete", false, new DeleteButtonClickListener());
-        buttonLayout.addComponent(delButton);
-        buttonLayout.setComponentAlignment(delButton, Alignment.MIDDLE_LEFT);
-
-        addButtonsRight(buttonLayout);
-        return buttonLayout;
+    protected MenuBar buildButtonLayout() {
+        MenuBar menuBar = new MenuBar();
+        addComponent(menuBar);
+        buildAddButton(menuBar);
+        editButton = createButton(menuBar, "Edit", false, new EditButtonClickListener());
+        delButton = createButton(menuBar, "Delete", false, new DeleteButtonClickListener());
+        addButtonsRight(menuBar);
+        return menuBar;
     }
 
-    protected Button createButton(String name, boolean enabled, ClickListener listener) {
-        Button button = new Button(name);
-        button.setStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
-        button.setEnabled(enabled);
-        button.addClickListener(listener);
-        return button;
+    protected MenuItem createButton(MenuBar menuBar, String name, boolean enabled, Command listener) {
+        MenuItem item = menuBar.addItem(name, listener);
+        item.setEnabled(enabled);
+        return item;
     }
 
     protected void removeAllNonFolderChildren(Folder folder) {
@@ -303,9 +283,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         return selected instanceof Folder;
     }
 
-    private MenuBar buildAddButton() {
-        MenuBar bar = new MenuBar();
-        bar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
+    private void buildAddButton(MenuBar bar) {
         MenuBar.MenuItem dropdown = bar.addItem("Add", null);
         addButton = dropdown.addItem("Folder", FontAwesome.FOLDER, new Command() {
 
@@ -318,16 +296,12 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             }
         });
         addToAddButton(dropdown);
-        return bar;
     }
 
-    protected void addToAddButton(MenuBar.MenuItem dropdown) {
+    protected void addToAddButton(MenuItem dropdown) {
     }
 
-    protected void addButtonsAfterAdd(HorizontalLayout buttonLayout) {
-    }
-
-    protected void addButtonsRight(HorizontalLayout buttonLayout) {
+    protected void addButtonsRight(MenuBar menuBar) {
     }
 
     protected void deleteSelectedFolders() {
@@ -426,47 +400,44 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         }
     }
 
-    class DeleteButtonClickListener implements ClickListener {
+    class DeleteButtonClickListener implements Command {
 
         private static final long serialVersionUID = 1L;
 
         @Override
-        public void buttonClick(ClickEvent event) {
-            Button button = event.getButton();
-            if (button == delButton) {
-                if (getSelectedFolder() != null) {
-                    ConfirmDialog.show("Delete Folder?",
-                            "Are you sure you want to delete the selected folders?",
-                            new IConfirmListener() {
+        public void menuSelected(MenuItem selectedItem) {
+            if (getSelectedFolder() != null) {
+                ConfirmDialog.show("Delete Folder?",
+                        "Are you sure you want to delete the selected folders?",
+                        new IConfirmListener() {
 
-                                private static final long serialVersionUID = 1L;
+                            private static final long serialVersionUID = 1L;
 
-                                @Override
-                                public boolean onOk() {
-                                    deleteSelectedFolders();
-                                    refresh();
-                                    return true;
-                                }
-                            });
-                }
+                            @Override
+                            public boolean onOk() {
+                                deleteSelectedFolders();
+                                refresh();
+                                return true;
+                            }
+                        });
+            }
 
-                @SuppressWarnings("unchecked")
-                Set<Object> objects = (Set<Object>) treeTable.getValue();
-                for (Object object : objects) {
-                    if (!(object instanceof Folder)) {
-                        deleteTreeItem(object);
-                    }
+            @SuppressWarnings("unchecked")
+            Set<Object> objects = (Set<Object>) treeTable.getValue();
+            for (Object object : objects) {
+                if (!(object instanceof Folder)) {
+                    deleteTreeItem(object);
                 }
             }
         }
     }
 
-    class EditButtonClickListener implements ClickListener {
+    class EditButtonClickListener implements Command {
 
         private static final long serialVersionUID = 1L;
 
         @Override
-        public void buttonClick(ClickEvent event) {
+        public void menuSelected(MenuItem selectedItem) {
             Object item = getSingleSelection(Object.class);
             if (item != null) {
                 itemClicked(item);

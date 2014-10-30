@@ -103,6 +103,8 @@ public class EditFlowWindow extends ResizableWindow {
         propertiesLayout = new VerticalLayout();
 
         tabs = new TabSheet();
+        tabs.addStyleName(ValoTheme.TABSHEET_COMPACT_TABBAR);
+        tabs.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
         tabs.setSizeFull();
         palleteTab = tabs.addTab(buildPalette(), "Design Palette");
         propertiesTab = tabs.addTab(propertiesLayout, "Property Sheet");
