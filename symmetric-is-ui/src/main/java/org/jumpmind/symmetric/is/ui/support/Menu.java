@@ -77,7 +77,7 @@ public class Menu extends CssLayout implements ViewChangeListener {
 
         final MenuBar settings = new MenuBar();
         settings.addStyleName("user-menu");
-        final MenuItem settingsItem = settings.addItem("nouser", new ThemeResource(
+        final MenuItem settingsItem = settings.addItem("Admin", new ThemeResource(
                 "../images/profile-pic-300px.jpg"), null);
         settingsItem.addItem("Edit Profile", null);
         settingsItem.addItem("Preferences", null);

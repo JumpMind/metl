@@ -18,6 +18,7 @@ import org.jumpmind.symmetric.is.ui.support.PromptDialog;
 import org.jumpmind.symmetric.is.ui.support.PromptDialog.IPromptListener;
 import org.jumpmind.symmetric.is.ui.support.UiComponent;
 import org.jumpmind.symmetric.is.ui.support.ViewLink;
+import org.jumpmind.symmetric.is.ui.views.agents.EditAgentDeploymentsWindow;
 import org.jumpmind.symmetric.is.ui.views.agents.EditAgentWindow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -26,6 +27,8 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
@@ -44,6 +47,9 @@ public class AgentsView extends AbstractFolderView {
 
     private static final long serialVersionUID = 1L;
 
+    @Autowired
+    EditAgentDeploymentsWindow editAgentDeploymentsWindow;
+    
     @Autowired
     EditAgentWindow editAgentWindow;
 
@@ -133,7 +139,7 @@ public class AgentsView extends AbstractFolderView {
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 if (itemId instanceof Agent) {
                     Agent agent = (Agent) itemId;
-                    Button button = new Button(Integer.toString(agent.getDeployments().size()));
+                    Button button = new Button(Integer.toString(agent.getDeployments().size()), new EditAgentDeploymentsClickListener(agent));
                     button.setWidth(100, Unit.PERCENTAGE);
                     button.addStyleName(ValoTheme.BUTTON_LINK);
                     return button;
@@ -209,6 +215,21 @@ public class AgentsView extends AbstractFolderView {
             this.treeTable.setParent(agent, folder);
         }
 
+    }
+    
+    class EditAgentDeploymentsClickListener implements ClickListener {
+        private static final long serialVersionUID = 1L;
+        
+        Agent agent;
+        
+        public EditAgentDeploymentsClickListener(Agent agent) {
+            this.agent = agent;
+        }
+        
+        @Override
+        public void buttonClick(ClickEvent event) {
+            editAgentDeploymentsWindow.show(agent, AgentsView.this);
+        }
     }
 
     class AddAgentCommand implements Command {

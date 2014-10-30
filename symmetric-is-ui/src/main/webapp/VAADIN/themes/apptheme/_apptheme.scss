@@ -101,7 +101,6 @@
     @include valo-slider-indicator-style($background-color: #dcdc1e);
   }
 
-
   .v-panel-caption-color1 {
     @include valo-panel-caption-style($background-color: $color1);
   }
@@ -135,6 +134,10 @@
   .content-common,
   .content-labels {
     max-width: 800px;
+  }
+  
+  .v-table .v-selected .v-button-caption {
+    color: #fff;
   }
   
 
