@@ -43,7 +43,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @UiComponent
 @Scope(value = "ui")
 @ViewLink(category = Category.RUNTIME, name = "Agents", id = "agents", icon = FontAwesome.GEARS, menuOrder = 10)
-public class AgentsView extends AbstractFolderView {
+public class AgentView extends AbstractFolderView {
 
     private static final long serialVersionUID = 1L;
 
@@ -58,7 +58,7 @@ public class AgentsView extends AbstractFolderView {
 
     MenuItem addAgentButton;
 
-    public AgentsView() {
+    public AgentView() {
         super("Agents", FolderType.RUNTIME);
     }
 
@@ -228,7 +228,7 @@ public class AgentsView extends AbstractFolderView {
         
         @Override
         public void buttonClick(ClickEvent event) {
-            editAgentDeploymentsWindow.show(agent, AgentsView.this);
+            editAgentDeploymentsWindow.show(agent, AgentView.this);
         }
     }
 

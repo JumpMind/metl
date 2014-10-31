@@ -35,6 +35,9 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.Table.ColumnGenerator;
+import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 
@@ -78,6 +81,32 @@ public class FlowView extends AbstractFolderView {
                 treeTable.focus();
             }
         });
+    }
+    
+    @Override
+    protected TreeTable buildTree() {
+        TreeTable table = super.buildTree();
+        table.addGeneratedColumn("Artifact Type", new ColumnGenerator() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Object generateCell(Table source, Object itemId, Object columnId) {
+                if (itemId instanceof ComponentFlow) {
+                    return "Flow";
+                } else if (itemId instanceof ComponentFlowVersion) {
+                    return "Flow Version";
+                } else if (itemId instanceof Connection) {
+                    return "Connection";
+                } else {
+                    return null;
+                }
+            }
+        });
+        
+        table.setColumnExpandRatio("Artifact Type", 1);
+        
+        return table;
     }
 
     @Override

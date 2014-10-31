@@ -29,7 +29,6 @@ public class EditAgentDeploymentsWindow extends ResizableWindow {
     Agent agent;
 
     public EditAgentDeploymentsWindow() {
-
         VerticalLayout content = new VerticalLayout();
         content.setSizeFull();
         setContent(content);
@@ -50,7 +49,6 @@ public class EditAgentDeploymentsWindow extends ResizableWindow {
         VerticalLayout layout = new VerticalLayout();
         layout.setMargin(true);
         layout.setSizeFull();
-        layout.addStyleName("v-scrollable");
 
         return layout;
     }

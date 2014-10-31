@@ -1,14 +1,33 @@
 ## TODO
 
-* consistent menu - right click?
-* after delete leave tree expanded on refresh
-* listener for selection for diagram
-* property sheet for components
-* delete component and connector on diagram
-* account for deletes in save(flowversion)
-* drag and drop
-* version support
-* add componentflownodelink to wrap data object??
-* cleanup and unit test runtimes
-
-* transactional save/deletes - use spring or use symmetric?
+Deploy a component flow
+  - ui
+  - enable/disable
+  - component flow manager
+Execute a component flow
+  - manually run
+  - logging
+  - execution table
+Implement Components
+ - Scheduler
+ - Database Writer
+ - Database Reader
+ - File Writer
+ - File Reader 
+Clean up configurationService.  
+Authentication and Authorization. User and Roles.
+ - lock down features
+ - lock down folders
+Version a component flow
+Lock a component flow version
+Search
+ - Component Pallete
+ - Flows
+ - Agents
+General
+ - drag and drop
+ - unit test runtimes
+ 
+Questions
+ - Should "Agent" be renamed to "Environment"
+ - ConfigurationService - Use spring or symmetric-db?
