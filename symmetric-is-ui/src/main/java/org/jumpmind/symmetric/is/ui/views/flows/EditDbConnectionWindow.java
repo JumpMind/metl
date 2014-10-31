@@ -17,7 +17,7 @@ import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
-import org.jumpmind.symmetric.is.ui.support.IItemSavedListener;
+import org.jumpmind.symmetric.is.ui.support.IItemUpdatedListener;
 import org.jumpmind.symmetric.is.ui.support.ResizableWindow;
 import org.jumpmind.symmetric.is.ui.support.UiComponent;
 import org.jumpmind.symmetric.is.ui.support.UiConstants;
@@ -163,7 +163,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
     @Autowired
     IConfigurationService configurationService;
 
-    IItemSavedListener itemSavedListener;
+    IItemUpdatedListener itemSavedListener;
 
     Connection connection;
 
@@ -254,7 +254,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
 
     }
 
-    public void show(Connection connection, IItemSavedListener itemSavedListener) {
+    public void show(Connection connection, IItemUpdatedListener itemSavedListener) {
 
         this.connection = connection;
 
@@ -362,7 +362,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
         configurationService.save(connection);
 
         // do some validation
-        itemSavedListener.itemSaved(connection);
+        itemSavedListener.itemUpdated(connection);
         close();
     }
 

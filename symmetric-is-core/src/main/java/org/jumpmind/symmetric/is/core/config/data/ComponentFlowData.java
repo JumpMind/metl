@@ -8,7 +8,14 @@ public class ComponentFlowData extends AbstractData {
     String name;
     
     String folderId;
+    
+    public ComponentFlowData(String id) {
+        this.id = id;
+    }
 
+    public ComponentFlowData() {
+    }
+    
     public String getName() {
         return name;
     }

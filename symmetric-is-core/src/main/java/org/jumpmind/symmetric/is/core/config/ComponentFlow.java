@@ -18,6 +18,10 @@ public class ComponentFlow extends AbstractObject<ComponentFlowData> {
         componentFlowVersions = new ArrayList<ComponentFlowVersion>();
     }
     
+    public String getName() {
+        return data.getName();
+    }
+    
     public List<ComponentFlowVersion> getComponentFlowVersions() {
         return componentFlowVersions;
     }

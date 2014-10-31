@@ -13,13 +13,13 @@ public class Agent extends AbstractObjectWithSettings<AgentData> {
 
     Folder folder;
     
-    List<AgentDeployment> deployments;
+    List<AgentDeployment> agentDeployments;
     
     public Agent(Folder folder, AgentData data, SettingData... settings) {
         super(data, settings);
         this.folder = folder;
         this.data.setFolderId(folder.getData().getId());
-        this.deployments = new ArrayList<AgentDeployment>();
+        this.agentDeployments = new ArrayList<AgentDeployment>();
     }
     
     public AgentStartMode getAgentStartMode() {
@@ -48,12 +48,12 @@ public class Agent extends AbstractObjectWithSettings<AgentData> {
         return data.getName();
     }
     
-    public List<AgentDeployment> getDeployments() {
-        return deployments;
+    public List<AgentDeployment> getAgentDeployments() {
+        return agentDeployments;
     }
     
-    public void setDeployments(List<AgentDeployment> agentDeployments) {
-        this.deployments = agentDeployments;
+    public void setAgentDeployments(List<AgentDeployment> agentDeployments) {
+        this.agentDeployments = agentDeployments;
     }
     
 }

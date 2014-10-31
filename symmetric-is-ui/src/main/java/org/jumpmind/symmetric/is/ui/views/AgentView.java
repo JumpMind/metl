@@ -139,7 +139,7 @@ public class AgentView extends AbstractFolderView {
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 if (itemId instanceof Agent) {
                     Agent agent = (Agent) itemId;
-                    Button button = new Button(Integer.toString(agent.getDeployments().size()), new EditAgentDeploymentsClickListener(agent));
+                    Button button = new Button(Integer.toString(agent.getAgentDeployments().size()), new EditAgentDeploymentsClickListener(agent));
                     button.setWidth(100, Unit.PERCENTAGE);
                     button.addStyleName(ValoTheme.BUTTON_LINK);
                     return button;
@@ -160,7 +160,7 @@ public class AgentView extends AbstractFolderView {
     }
 
     @Override
-    public void itemSaved(Object item) {
+    public void itemUpdated(Object item) {
         if (item instanceof Agent) {            
             Agent agent = (Agent) item;
             agentManager.refresh(agent);

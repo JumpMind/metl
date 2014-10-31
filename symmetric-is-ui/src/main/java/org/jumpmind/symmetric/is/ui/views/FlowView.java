@@ -119,7 +119,7 @@ public class FlowView extends AbstractFolderView {
     }
 
     @Override
-    public void itemSaved(Object item) {
+    public void itemUpdated(Object item) {
         if (item instanceof Connection) {
             Connection connection = (Connection) item;
             if (treeTable.containsId(item)) {

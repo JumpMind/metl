@@ -2,12 +2,12 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.ui.support.AbstractFolderNavigatorLayout;
-import org.jumpmind.symmetric.is.ui.support.IItemSavedListener;
+import org.jumpmind.symmetric.is.ui.support.IItemUpdatedListener;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 
-abstract public class AbstractFolderView extends AbstractFolderNavigatorLayout implements View, IItemSavedListener {
+abstract public class AbstractFolderView extends AbstractFolderNavigatorLayout implements View, IItemUpdatedListener {
 
     private static final long serialVersionUID = 1L;
 

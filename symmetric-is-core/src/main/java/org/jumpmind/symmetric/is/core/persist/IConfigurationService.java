@@ -8,6 +8,7 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlow;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
@@ -49,5 +50,7 @@ public interface IConfigurationService {
     public abstract void save(AbstractObject<?> obj);
 
     public void save(ComponentFlowVersion componentFlowVersion);
+    
+    public List<ComponentFlowVersionSummary> findUndeployedComponentFlowVersionSummary(String agentId);
     
 }

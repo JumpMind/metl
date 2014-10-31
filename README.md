@@ -1,9 +1,10 @@
-## TODO
+## Backlog
 
 Deploy a component flow
-  - ui
+  - UI
   - enable/disable
-  - component flow manager
+  - Override settings
+  - component flow manager 
 
 Execute a component flow
   - manually run
@@ -16,12 +17,17 @@ Implement Components
  - Database Reader
  - File Writer
  - File Reader 
-
+ 
 Clean up configurationService.  
+
+Support Models
+ - UI
 
 Authentication and Authorization. User and Roles.
  - lock down features
  - lock down folders
+
+SQL Explorer
 
 Version a component flow
 
@@ -36,6 +42,7 @@ General
  - drag and drop
  - unit test runtimes
  
-Questions
+Questions ??
  - Should "Agent" be renamed to "Environment"
  - ConfigurationService - Use spring or symmetric-db?
+ -  show deployments in agent view tree

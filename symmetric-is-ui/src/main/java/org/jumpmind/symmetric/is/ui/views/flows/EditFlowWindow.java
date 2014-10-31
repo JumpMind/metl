@@ -148,7 +148,7 @@ public class EditFlowWindow extends ResizableWindow {
     public void show(ComponentFlowVersion componentFlowVersion) {
         this.componentFlowVersion = componentFlowVersion;
 
-        setCaption("Edit Flow: " + componentFlowVersion.getFlow().getData().getName());
+        setCaption("Edit Flow: " + componentFlowVersion.getComponentFlow().getData().getName());
 
         populateComponentPalette();
 

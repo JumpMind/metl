@@ -3,7 +3,7 @@ package org.jumpmind.symmetric.is.ui.views.agents;
 import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.AgentStartMode;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.ui.support.IItemSavedListener;
+import org.jumpmind.symmetric.is.ui.support.IItemUpdatedListener;
 import org.jumpmind.symmetric.is.ui.support.ResizableWindow;
 import org.jumpmind.symmetric.is.ui.support.UiComponent;
 import org.jumpmind.symmetric.is.ui.support.UiConstants;
@@ -32,7 +32,7 @@ public class EditAgentWindow extends ResizableWindow {
     @Autowired
     IConfigurationService configurationService;
 
-    IItemSavedListener itemSavedListener;
+    IItemUpdatedListener itemSavedListener;
 
     Agent agent;
 
@@ -107,7 +107,7 @@ public class EditAgentWindow extends ResizableWindow {
         return layout;
     }
 
-    public void show(Agent agent, IItemSavedListener itemSavedListener) {
+    public void show(Agent agent, IItemUpdatedListener itemSavedListener) {
         this.agent = agent;
         this.itemSavedListener = itemSavedListener;
         nameField.setValue(agent.getData().getName());
@@ -128,7 +128,7 @@ public class EditAgentWindow extends ResizableWindow {
         configurationService.save(agent);
 
         // do some validation
-        itemSavedListener.itemSaved(agent);
+        itemSavedListener.itemUpdated(agent);
 
         close();
     }

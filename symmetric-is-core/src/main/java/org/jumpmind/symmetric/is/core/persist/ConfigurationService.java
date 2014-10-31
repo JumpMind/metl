@@ -7,20 +7,27 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.jumpmind.db.platform.IDatabasePlatform;
+import org.jumpmind.db.sql.ISqlRowMapper;
+import org.jumpmind.db.sql.ISqlTemplate;
+import org.jumpmind.db.sql.Row;
 import org.jumpmind.symmetric.app.core.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.config.AbstractObject;
 import org.jumpmind.symmetric.is.core.config.Agent;
+import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.Component;
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.config.data.AbstractData;
 import org.jumpmind.symmetric.is.core.config.data.AgentData;
+import org.jumpmind.symmetric.is.core.config.data.AgentDeploymentData;
 import org.jumpmind.symmetric.is.core.config.data.AgentSettingData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
@@ -39,9 +46,13 @@ public class ConfigurationService implements IConfigurationService {
 
     protected String tablePrefix;
 
-    public ConfigurationService(IPersistenceManager persistenceManager, String tablePrefix) {
+    protected IDatabasePlatform databasePlatform;
+
+    public ConfigurationService(IDatabasePlatform databasePlatform,
+            IPersistenceManager persistenceManager, String tablePrefix) {
         this.persistenceManager = persistenceManager;
         this.tablePrefix = tablePrefix;
+        this.databasePlatform = databasePlatform;
     }
 
     protected String tableName(Class<?> clazz) {
@@ -187,8 +198,17 @@ public class ConfigurationService implements IConfigurationService {
             settingParams.put("agentId", data.getId());
             List<AgentSettingData> settings = persistenceManager.find(AgentSettingData.class,
                     settingParams, null, null, tableName(AgentSettingData.class));
-            list.add(new Agent(folderMapById.get(data.getFolderId()), data, settings
-                    .toArray(new SettingData[settings.size()])));
+            Agent agent = new Agent(folderMapById.get(data.getFolderId()), data, settings
+                    .toArray(new SettingData[settings.size()]));
+            list.add(agent);
+            
+            List<AgentDeploymentData> deploymentDatas = persistenceManager.find(AgentDeploymentData.class, settingParams, null, null, tableName(AgentDeploymentData.class));
+            for (AgentDeploymentData agentDeploymentData : deploymentDatas) {
+                ComponentFlowVersion componentFlowVersion = new ComponentFlowVersion(null,
+                        new ComponentFlowVersionData(agentDeploymentData.getComponentFlowVersionId()));
+                refresh(componentFlowVersion);
+                agent.getAgentDeployments().add(new AgentDeployment(componentFlowVersion, agentDeploymentData));
+            }
         }
         return list;
 
@@ -297,6 +317,13 @@ public class ConfigurationService implements IConfigurationService {
     }
 
     private void refreshComponentFlowVersionRelations(ComponentFlowVersion componentFlowVersion) {
+        ComponentFlow flow = componentFlowVersion.getComponentFlow();
+        if (flow == null) {
+            flow = new ComponentFlow(null, new ComponentFlowData(componentFlowVersion.getData().getComponentFlowId()));
+            componentFlowVersion.setComponentFlow(flow);
+        }
+        refresh(flow);
+        
         componentFlowVersion.getComponentFlowNodes().clear();
         componentFlowVersion.getComponentFlowNodeLinks().clear();
         Map<String, Object> versionParams = new HashMap<String, Object>();
@@ -369,6 +396,31 @@ public class ConfigurationService implements IConfigurationService {
                     tableName(link.getData().getClass()));
         }
 
+    }
+
+    @Override
+    public List<ComponentFlowVersionSummary> findUndeployedComponentFlowVersionSummary(
+            String agentId) {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        return template
+                .query(String
+                        .format("select cf.name as name, cfv.version_name as version_name, f.name as folder_name, cfv.id as id from "
+                                + "%1$s_component_flow_version cfv inner join "
+                                + "%1$s_component_flow cf on cf.id=cfv.component_flow_id inner join "
+                                + "%1$s_folder f on f.id=cf.folder_id "
+                                + "where cf.id not in (select component_flow_id from %1$s_component_flow_version where id in "
+                                + "(select component_flow_version_id from %1$s_agent_deployment where agent_id=?))",
+                                tablePrefix), new ISqlRowMapper<ComponentFlowVersionSummary>() {
+                    @Override
+                    public ComponentFlowVersionSummary mapRow(Row row) {
+                        ComponentFlowVersionSummary summary = new ComponentFlowVersionSummary();
+                        summary.setName(row.getString("name"));
+                        summary.setId(row.getString("id"));
+                        summary.setFolderName(row.getString("folder_name"));
+                        summary.setVersionName(row.getString("version_name"));
+                        return summary;
+                    }
+                }, agentId);
     }
 
 }

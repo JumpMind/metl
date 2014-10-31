@@ -62,6 +62,8 @@ public class AppConfig {
 
     @Autowired
     Environment env;
+    
+    IDatabasePlatform databasePlatform;
 
     @Bean
     @Scope(value = "singleton")
@@ -103,8 +105,11 @@ public class AppConfig {
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IDatabasePlatform configDatabasePlatform() {
-        return JdbcDatabasePlatformFactory.createNewPlatformInstance(configDataSource(),
-                new SqlTemplateSettings(), true);
+        if (databasePlatform == null) {
+            databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(configDataSource(),
+                    new SqlTemplateSettings(), true); 
+        }
+        return databasePlatform;
     }
 
     @Bean
@@ -131,7 +136,7 @@ public class AppConfig {
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConfigurationService configurationService() {
-        IConfigurationService service = new ConfigurationService(persistenceManager(),
+        IConfigurationService service = new ConfigurationService(configDatabasePlatform(), persistenceManager(),
                 tablePrefix());
         return service;
     }
