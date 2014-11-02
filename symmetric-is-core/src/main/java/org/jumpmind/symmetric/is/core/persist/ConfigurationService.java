@@ -398,6 +398,8 @@ public class ConfigurationService implements IConfigurationService {
 
     }
 
+    // TODO subclass off of ConfigurationService with ConfigurationSqlService and put this there.
+    // put sql in a json or xml file
     @Override
     public List<ComponentFlowVersionSummary> findUndeployedComponentFlowVersionSummary(
             String agentId) {
