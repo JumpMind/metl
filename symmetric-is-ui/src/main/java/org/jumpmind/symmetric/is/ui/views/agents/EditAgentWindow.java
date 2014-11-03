@@ -154,21 +154,5 @@ public class EditAgentWindow extends ResizableWindow {
         }
 
     }
-    
-    public static void main(String[] args) {
-        String value = "عععععععععععععع";
-        System.out.println("size of " + value + " is " + value.length() + ".  The number of bytes is " + value.getBytes().length);
-        value = substring(value, 10);
-        System.out.println("size of " + value + " is " + value.length() + ".  The number of bytes is " + value.getBytes().length);
-    }
-    
-    public static String substring(String value, int maxBytes) {
-        StringBuilder ret = new StringBuilder();
-        for(int i = 0;i < value.length(); i++) {
-            if((maxBytes -= value.substring(i, i+1).getBytes().length) < 0) break;
-            ret.append(value.charAt(i));
-        }
-        return ret.toString();
-     }
 
 }

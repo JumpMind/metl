@@ -65,11 +65,15 @@ public class ConfigurationService implements IConfigurationService {
         }
         return name.toString();
     }
+    
+    @Override
+    public void delete(AgentDeployment agentDeployment) {
+        delete(agentDeployment.getData());
+    }
 
     @Override
     public void delete(ComponentFlowNode flowNode) {
-        persistenceManager.delete(flowNode.getData(), null, null, tableName(flowNode.getData()
-                .getClass()));
+        delete(flowNode.getData());
     }
 
     // TODO transactional

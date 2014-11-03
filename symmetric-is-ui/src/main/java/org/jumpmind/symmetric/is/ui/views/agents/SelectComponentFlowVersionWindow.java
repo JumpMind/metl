@@ -1,11 +1,13 @@
 package org.jumpmind.symmetric.is.ui.views.agents;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.ui.support.IItemUpdatedListener;
+import org.jumpmind.symmetric.is.ui.support.MultiSelectTable;
 import org.jumpmind.symmetric.is.ui.support.ResizableWindow;
 import org.jumpmind.symmetric.is.ui.support.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +20,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -42,7 +43,7 @@ public class SelectComponentFlowVersionWindow extends ResizableWindow {
 
     MenuItem deployButton;
 
-    Table table;
+    MultiSelectTable table;
 
     public SelectComponentFlowVersionWindow() {
         VerticalLayout content = new VerticalLayout();
@@ -72,9 +73,7 @@ public class SelectComponentFlowVersionWindow extends ResizableWindow {
         searchField.setInputPrompt("Search Flows");
         layout.addComponent(searchField);
 
-        table = new Table();
-        table.setMultiSelect(true);
-        table.setSelectable(true);
+        table = new MultiSelectTable();
         container = new BeanItemContainer<ComponentFlowVersionSummary>(
                 ComponentFlowVersionSummary.class);
         table.setContainerDataSource(container);
@@ -100,6 +99,7 @@ public class SelectComponentFlowVersionWindow extends ResizableWindow {
         this.container.removeAllItems();
         this.container.addAll(configurationService.findUndeployedComponentFlowVersionSummary(agent
                 .getData().getId()));
+        this.table.setValue(new HashSet<ComponentFlowVersionSummary>());
         resize(.5, true);
     }
 
@@ -108,9 +108,8 @@ public class SelectComponentFlowVersionWindow extends ResizableWindow {
     }
 
     protected void done() {
-        @SuppressWarnings("unchecked")
-        Set<ComponentFlowVersionSummary> selectedFlows = (Set<ComponentFlowVersionSummary>) table
-                .getValue();
+        Set<ComponentFlowVersionSummary> selectedFlows = table
+                .getSelected();
         itemUpdatedListener.itemUpdated(selectedFlows);
         close();
     }

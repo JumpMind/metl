@@ -10,11 +10,11 @@ public abstract class AbstractData implements Serializable {
 
     String id = UUID.randomUUID().toString();
 
-    Date createTime;
+    Date createTime = new Date();
 
     String createBy;
 
-    Date lastModifyTime;
+    Date lastModifyTime = new Date();
 
     String lastModifyBy;
 

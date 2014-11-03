@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.jumpmind.symmetric.is.core.config.AbstractObject;
 import org.jumpmind.symmetric.is.core.config.Agent;
+import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
@@ -20,6 +21,8 @@ public interface IConfigurationService {
     public void deleteFolder(String folderId);
 
     public void delete(Agent agent);
+    
+    public void delete(AgentDeployment agentDeployment);
     
     public void delete(ComponentFlow flow);
     

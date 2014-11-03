@@ -10,11 +10,14 @@ import org.jumpmind.symmetric.is.core.config.data.AgentDeploymentData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.ui.support.IItemUpdatedListener;
+import org.jumpmind.symmetric.is.ui.support.MultiSelectTable;
 import org.jumpmind.symmetric.is.ui.support.ResizableWindow;
 import org.jumpmind.symmetric.is.ui.support.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
@@ -24,7 +27,6 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -49,6 +51,8 @@ public class EditAgentDeploymentsWindow extends ResizableWindow {
     MenuItem undeployButton;
 
     MenuItem deployButton;
+    
+    MultiSelectTable table;
 
     public EditAgentDeploymentsWindow() {
         VerticalLayout content = new VerticalLayout();
@@ -78,14 +82,26 @@ public class EditAgentDeploymentsWindow extends ResizableWindow {
         undeployButton = menuBar.addItem("Undeploy", FontAwesome.UPLOAD, new UnDeployCommand());
         undeployButton.setEnabled(false);
 
-        Table table = new Table();
+        table = new MultiSelectTable();
+        table.addValueChangeListener(new ValueChangeListener() {
+            
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                @SuppressWarnings("unchecked")
+                Set<AgentDeployment> deployments = (Set<AgentDeployment>)table.getValue();
+                undeployButton.setEnabled(deployments != null && deployments.size() > 0);
+            }
+        });
         container = new BeanItemContainer<AgentDeployment>(AgentDeployment.class);
         table.setContainerDataSource(container);
         table.setSizeFull();
 
         table.setColumnHeader("name", "Name");
+        table.setColumnHeader("createTime", "Time Deployed");
 
-        table.setVisibleColumns("name");
+        table.setVisibleColumns("name", "createTime");        
 
         layout.addComponent(table);
         layout.setExpandRatio(table, 1);
@@ -145,6 +161,12 @@ public class EditAgentDeploymentsWindow extends ResizableWindow {
 
         @Override
         public void menuSelected(MenuItem selectedItem) {
+            Set<AgentDeployment> deploymentsSelected = table.getSelected();
+            for (AgentDeployment agentDeployment : deploymentsSelected) {
+                configurationService.delete(agentDeployment);
+                agent.getAgentDeployments().remove(agentDeployment);
+                container.removeItem(agentDeployment);
+            }
         }
     }
 

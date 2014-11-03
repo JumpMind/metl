@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.config;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import org.jumpmind.symmetric.is.core.config.data.AbstractData;
 
@@ -20,6 +21,39 @@ abstract public class AbstractObject<D extends AbstractData> implements Serializ
     public D getData() {
         return this.data;
     }
+    
+    public Date getCreateTime() {
+        return data.getCreateTime();
+    }
+
+    public void setCreateTime(Date createTime) {
+        data.setCreateTime(createTime);
+    }
+
+    public String getCreateBy() {
+        return data.getCreateBy();
+    }
+
+    public void setCreateBy(String createBy) {
+        data.setCreateBy(createBy);
+    }
+
+    public Date getLastModifyTime() {
+        return data.getLastModifyTime();
+    }
+
+    public void setLastModifyTime(Date lastModifyTime) {
+        data.setLastModifyTime(lastModifyTime);
+    }
+
+    public String getLastModifyBy() {
+        return data.getLastModifyBy();
+    }
+
+    public void setLastModifyBy(String lastModifyBy) {
+        data.setLastModifyBy(lastModifyBy);
+    }
+
     
     @Override
     public int hashCode() {
