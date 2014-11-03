@@ -12,5 +12,7 @@ public interface IAgentManager {
     
     public boolean isAgentLocal(Agent agent);
     
+    public void start();
+    
     
 }

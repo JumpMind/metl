@@ -19,6 +19,14 @@ public class Component extends AbstractObject<ComponentData> {
         this.componentVersions = new ArrayList<ComponentVersion>();
     }
     
+    public String getType() {
+        return data.getType();
+    }
+
+    public boolean isShared() {
+        return data.isShared();
+    }
+    
     public List<ComponentVersion> getComponentVersions() {
         return componentVersions;
     }

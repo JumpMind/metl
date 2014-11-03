@@ -31,7 +31,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
@@ -311,7 +310,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             try {
                 configurationService.deleteFolder(folder.getData().getId());
             } catch (Exception ex) {
-                Notification.show("Could not delete the \"" + folder.getData().getName()
+                UiUtils.notify("Could not delete the \"" + folder.getData().getName()
                         + "\" folder", Type.WARNING_MESSAGE);
             }
         }

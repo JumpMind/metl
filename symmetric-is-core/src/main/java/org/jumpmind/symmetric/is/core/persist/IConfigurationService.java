@@ -32,6 +32,10 @@ public interface IConfigurationService {
     
     public void delete(Connection connection);
     
+    public boolean isDeployed(ComponentFlowVersion componentFlowVersion);
+    
+    public boolean isDeployed(ComponentFlow componentFlow);
+    
     public List<ComponentFlow> findComponentFlowsInFolder(Folder folder);
     
     public List<Connection> findConnectionsInFolder(Folder folder);

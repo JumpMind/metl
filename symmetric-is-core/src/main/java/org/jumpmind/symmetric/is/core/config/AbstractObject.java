@@ -22,6 +22,10 @@ abstract public class AbstractObject<D extends AbstractData> implements Serializ
         return this.data;
     }
     
+    public String getId() {
+        return data.getId();
+    }
+    
     public Date getCreateTime() {
         return data.getCreateTime();
     }

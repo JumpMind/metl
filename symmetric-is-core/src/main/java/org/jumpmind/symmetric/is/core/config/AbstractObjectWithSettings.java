@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.core.config;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +51,15 @@ abstract public class AbstractObjectWithSettings<D extends AbstractData> extends
             }
         }
         return null;
+    }
+    
+    public boolean getBoolean(String name) {
+        String value = get(name);
+        if (isBlank(value)) {
+            return false;
+        } else {
+            return Boolean.parseBoolean(value);
+        }
     }
 
     public TypedProperties toTypedProperties(AbstractRuntimeObject object, boolean provided) {

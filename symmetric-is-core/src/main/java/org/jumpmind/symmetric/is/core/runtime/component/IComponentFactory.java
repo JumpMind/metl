@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
+import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 
 public interface IComponentFactory {
 
@@ -12,5 +13,7 @@ public interface IComponentFactory {
     public void register(Class<? extends IComponent> clazz);
 
     public Map<ComponentCategory, List<String>> getComponentTypes();
+    
+    public Map<String, SettingDefinition> getSettingDefinitionsForComponentType(String type);
 
 }

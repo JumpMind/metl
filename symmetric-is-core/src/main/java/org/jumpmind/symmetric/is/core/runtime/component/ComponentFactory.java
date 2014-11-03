@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
+import org.jumpmind.symmetric.is.core.config.SettingDefinition;
+import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 
 public class ComponentFactory implements IComponentFactory {
 
@@ -62,4 +64,11 @@ public class ComponentFactory implements IComponentFactory {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public Map<String, SettingDefinition> getSettingDefinitionsForComponentType(String componentType) {
+        Class<? extends IComponent> clazz = componentTypes.get(componentType);
+        return AbstractRuntimeObject.getSettingDefinitions(clazz, false);
+    }
+    
 }

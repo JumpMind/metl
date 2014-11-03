@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.jumpmind.symmetric.is.core.config.Agent;
@@ -28,8 +27,7 @@ public class AgentManager implements IAgentManager {
         this.configurationService = configurationService;
     }
 
-    @PostConstruct
-    protected void init() {
+    public void start() {
         Set<Agent> agents = new HashSet<Agent>(configurationService.findAgentsForHost(AppUtils
                 .getHostName()));
         agents.addAll(configurationService.findAgentsForHost(AppUtils.getIpAddress()));

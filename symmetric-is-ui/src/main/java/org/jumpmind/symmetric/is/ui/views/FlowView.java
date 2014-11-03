@@ -82,7 +82,7 @@ public class FlowView extends AbstractFolderView {
             }
         });
     }
-    
+
     @Override
     protected TreeTable buildTree() {
         TreeTable table = super.buildTree();
@@ -103,9 +103,9 @@ public class FlowView extends AbstractFolderView {
                 }
             }
         });
-        
+
         table.setColumnExpandRatio("Artifact Type", 1);
-        
+
         return table;
     }
 
@@ -134,8 +134,15 @@ public class FlowView extends AbstractFolderView {
 
     @Override
     protected boolean isDeleteButtonEnabled(Object selected) {
-        return super.isDeleteButtonEnabled(selected) || selected instanceof ComponentFlow
-                || selected instanceof Connection;
+        boolean enabled = false;
+        if (selected instanceof ComponentFlow) {
+            ComponentFlow flow = (ComponentFlow) selected;
+            if (!configurationService.isDeployed(flow)) {
+                enabled |= true;
+            }
+        }
+        enabled |= super.isDeleteButtonEnabled(selected) || selected instanceof Connection;
+        return enabled;
     }
 
     @Override
@@ -264,7 +271,7 @@ public class FlowView extends AbstractFolderView {
                 refresh();
 
                 expand(folder, flow);
-                
+
                 return true;
             } else {
                 return false;

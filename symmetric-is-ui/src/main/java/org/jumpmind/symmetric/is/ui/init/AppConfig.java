@@ -32,7 +32,7 @@ import org.jumpmind.symmetric.app.core.ConfigDatabaseUpgrader;
 import org.jumpmind.symmetric.app.core.EnvConstants;
 import org.jumpmind.symmetric.app.core.persist.IPersistenceManager;
 import org.jumpmind.symmetric.app.core.persist.JdbcPersistenceManager;
-import org.jumpmind.symmetric.is.core.persist.ConfigurationService;
+import org.jumpmind.symmetric.is.core.persist.ConfigurationSqlService;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.AgentManager;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
@@ -136,7 +136,7 @@ public class AppConfig {
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConfigurationService configurationService() {
-        IConfigurationService service = new ConfigurationService(configDatabasePlatform(), persistenceManager(),
+        IConfigurationService service = new ConfigurationSqlService(configDatabasePlatform(), persistenceManager(),
                 tablePrefix());
         return service;
     }

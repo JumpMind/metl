@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.ui.init;
 
 import org.jumpmind.symmetric.is.ui.support.Menu;
+import org.jumpmind.symmetric.is.ui.support.UiUtils;
 import org.jumpmind.symmetric.is.ui.support.ViewManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,6 @@ import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.UI;
 
@@ -44,7 +44,7 @@ public class AppUI extends UI {
             @Override
             public void error(com.vaadin.server.ErrorEvent event) {
                 Throwable ex = event.getThrowable();
-                Notification.show("Error",
+                UiUtils.notify("Error",
                         "An unexpected error occurred.  Please check the log file for details.",
                         Type.ERROR_MESSAGE);
                 if (ex != null) {

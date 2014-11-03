@@ -2,12 +2,15 @@ package org.jumpmind.symmetric.is.ui.views.flows;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.config.Component;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
+import org.jumpmind.symmetric.is.core.config.SettingDefinition;
+import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.config.data.ComponentData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
@@ -32,6 +35,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
@@ -70,7 +74,7 @@ public class EditFlowWindow extends ResizableWindow {
     Tab propertiesTab;
 
     VerticalLayout propertiesLayout;
-    
+
     Diagram diagram;
 
     public EditFlowWindow() {
@@ -85,7 +89,7 @@ public class EditFlowWindow extends ResizableWindow {
 
         flowLayout = new VerticalLayout();
         flowLayout.setSizeFull();
-        
+
         HorizontalLayout actionLayout = new HorizontalLayout();
         actionLayout.setWidth(100, Unit.PERCENTAGE);
         flowLayout.addComponent(actionLayout);
@@ -117,8 +121,6 @@ public class EditFlowWindow extends ResizableWindow {
         content.addComponent(buildButtonFooter(null, new Button[] { buildCloseButton() }));
 
     }
-    
-    
 
     protected VerticalLayout buildPalette() {
         VerticalLayout layout = new VerticalLayout();
@@ -243,6 +245,57 @@ public class EditFlowWindow extends ResizableWindow {
             });
             nameField.setValue(flowNode.getComponentVersion().getData().getName());
             formLayout.addComponent(nameField);
+
+            ComponentVersion version = flowNode.getComponentVersion();
+            Map<String, SettingDefinition> settings = componentFactory
+                    .getSettingDefinitionsForComponentType(version.getComponent().getType());
+            Set<String> keys = settings.keySet();
+            for (String key : keys) {
+                SettingDefinition definition = settings.get(key);
+                boolean required = definition.required();
+                String description = "Represents the " + key + " setting";
+                Type type = definition.type();
+                switch (type) {
+                    case BOOLEAN:
+                        CheckBox checkBox = new CheckBox(definition.label());
+                        checkBox.setImmediate(true);
+                        checkBox.setValue(version.getBoolean(key));
+                        checkBox.setRequired(required);
+                        checkBox.setDescription(description);
+                        formLayout.addComponent(checkBox);
+                        break;
+                    case CHOICE:
+                        break;
+                    case DB_CONNECTION:
+                        break;
+                    case PASSWORD:
+                        break;
+                    case INTEGER:
+                        TextField integerField = new TextField(definition.label());
+                        integerField.setConverter(Integer.class);
+                        integerField.setImmediate(true);
+                        integerField.setNullRepresentation("");
+                        integerField.setValue(version.get(key));
+                        integerField.setRequired(required);
+                        integerField.setDescription(description);
+                        formLayout.addComponent(integerField);
+                        break;
+                    case STRING:
+                        TextField textField = new TextField(definition.label());
+                        textField.setImmediate(true);
+                        textField.setNullRepresentation("");
+                        textField.setValue(version.get(key));
+                        textField.setRequired(required);
+                        textField.setDescription(description);
+                        formLayout.addComponent(textField);
+                        break;
+                    case XML:
+                        break;
+                    default:
+                        break;
+
+                }
+            }
 
             propertiesLayout.addComponent(formLayout);
             propertiesLayout.setExpandRatio(formLayout, 1);

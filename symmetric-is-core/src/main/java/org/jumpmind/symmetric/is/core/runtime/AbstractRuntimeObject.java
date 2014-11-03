@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class AbstractRuntimeObject {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     public Map<String, SettingDefinition> getSettingDefinitions() {
         return getSettingDefinitions(false);
     }
@@ -26,8 +26,11 @@ public class AbstractRuntimeObject {
     }
 
     public Map<String, SettingDefinition> getSettingDefinitions(boolean provided) {
+        return getSettingDefinitions(getClass(), provided);
+    }
+
+    public static Map<String, SettingDefinition> getSettingDefinitions(Class<?> clazz, boolean provided) {
         try {
-            Class<?> clazz = getClass();
             List<Field> fields = new ArrayList<Field>();
             if (clazz != null) {
                 do {
@@ -43,8 +46,10 @@ public class AbstractRuntimeObject {
                             String property = (String) field.get(null);
                             map.put(property, definition);
                         }
+                    } catch (RuntimeException e) {
+                        throw e;
                     } catch (Exception e) {
-                        log.error(e.getMessage(), e);
+                        throw new RuntimeException(e);
                     }
                 }
 

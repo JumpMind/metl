@@ -15,6 +15,7 @@ import javax.servlet.ServletRegistration;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.app.core.ConfigDatabaseUpgrader;
 import org.jumpmind.symmetric.app.core.LogUtils;
+import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.ui.support.Broadcaster;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
@@ -70,6 +71,8 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     }
 
     protected void initAgentRuntime(WebApplicationContext ctx) {
+        IAgentManager agentManger = ctx.getBean(IAgentManager.class);
+        agentManger.start();
     }
 
     protected void initDatabase(WebApplicationContext ctx) {
