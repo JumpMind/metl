@@ -29,6 +29,7 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeLinkData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
+import org.jumpmind.symmetric.is.core.config.data.ComponentVersionSettingData;
 import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
 import org.jumpmind.symmetric.is.core.config.data.ConnectionSettingData;
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
@@ -295,9 +296,17 @@ abstract class AbstractConfigurationService implements IConfigurationService {
         componentData.setId(componentVersionData.getComponentId());
         persistenceManager.refresh(componentData, null, null, tableName(ComponentData.class));
         Component component = new Component(componentData);
-        // TODO read connection, models and settings
-        ComponentVersion version = new ComponentVersion(component, null, componentVersionData);
-        return version;
+
+        // TODO read connections and models
+
+        Map<String, Object> versionParams = new HashMap<String, Object>();
+        versionParams.put("componentVersionId", componentVersionData.getId());
+        List<ComponentVersionSettingData> settings = persistenceManager.find(
+                ComponentVersionSettingData.class, versionParams, null, null,
+                tableName(ComponentVersionSettingData.class));
+        
+        return new ComponentVersion(component, null, componentVersionData,
+                settings.toArray(new SettingData[settings.size()]));
     }
 
     private void refreshComponentFlowVersionRelations(ComponentFlowVersion componentFlowVersion) {
@@ -352,7 +361,8 @@ abstract class AbstractConfigurationService implements IConfigurationService {
         save(obj.getData());
     }
 
-    protected void save(AbstractData data) {
+    @Override
+    public void save(AbstractData data) {
         data.setLastModifyTime(new Date());
         persistenceManager.save(data, null, null, tableName(data.getClass()));
     }

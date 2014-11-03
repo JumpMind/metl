@@ -44,6 +44,20 @@ abstract public class AbstractObjectWithSettings<D extends AbstractData> extends
     
     abstract protected SettingData createSettingData();
     
+    
+    public SettingData findSetting(String name) {
+        for (SettingData settingData : settings) {
+            if (name.equals(settingData.getName())) {
+                return settingData;
+            }
+        }
+        
+        SettingData settingData = createSettingData();
+        settingData.setName(name);
+        settings.add(settingData);
+        return settingData;
+    }
+    
     public String get(String name) {
         for (SettingData settingData : settings) {
             if (name.equals(settingData.getName())) {

@@ -14,6 +14,7 @@ import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.config.data.ComponentData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
+import org.jumpmind.symmetric.is.core.config.data.SettingData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentCategory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
@@ -27,6 +28,8 @@ import org.jumpmind.symmetric.is.ui.support.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
@@ -84,7 +87,7 @@ public class EditFlowWindow extends ResizableWindow {
         setContent(content);
 
         HorizontalSplitPanel splitPanel = new HorizontalSplitPanel();
-        splitPanel.setSplitPosition(260, Unit.PIXELS);
+        splitPanel.setSplitPosition(350, Unit.PIXELS);
         splitPanel.setSizeFull();
 
         flowLayout = new VerticalLayout();
@@ -246,22 +249,33 @@ public class EditFlowWindow extends ResizableWindow {
             nameField.setValue(flowNode.getComponentVersion().getData().getName());
             formLayout.addComponent(nameField);
 
-            ComponentVersion version = flowNode.getComponentVersion();
+            final ComponentVersion version = flowNode.getComponentVersion();
             Map<String, SettingDefinition> settings = componentFactory
                     .getSettingDefinitionsForComponentType(version.getComponent().getType());
             Set<String> keys = settings.keySet();
-            for (String key : keys) {
-                SettingDefinition definition = settings.get(key);
+            for (final String key : keys) {
+                final SettingDefinition definition = settings.get(key);
                 boolean required = definition.required();
                 String description = "Represents the " + key + " setting";
                 Type type = definition.type();
                 switch (type) {
                     case BOOLEAN:
-                        CheckBox checkBox = new CheckBox(definition.label());
+                        final CheckBox checkBox = new CheckBox(definition.label());
                         checkBox.setImmediate(true);
                         checkBox.setValue(version.getBoolean(key));
                         checkBox.setRequired(required);
                         checkBox.setDescription(description);
+                        checkBox.addValueChangeListener(new ValueChangeListener() {
+                            
+                            private static final long serialVersionUID = 1L;
+
+                            @Override
+                            public void valueChange(ValueChangeEvent event) {
+                                SettingData data = version.findSetting(key);
+                                data.setValue(checkBox.getValue().toString());
+                                configurationService.save(data);
+                            }
+                        });
                         formLayout.addComponent(checkBox);
                         break;
                     case CHOICE:

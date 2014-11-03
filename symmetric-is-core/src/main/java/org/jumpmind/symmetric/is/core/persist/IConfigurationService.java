@@ -13,6 +13,7 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
+import org.jumpmind.symmetric.is.core.config.data.AbstractData;
 
 public interface IConfigurationService {
 
@@ -55,6 +56,8 @@ public interface IConfigurationService {
     public void save(Connection connection);
 
     public abstract void save(AbstractObject<?> obj);
+    
+    public abstract void save(AbstractData obj);
 
     public void save(ComponentFlowVersion componentFlowVersion);
     
