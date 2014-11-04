@@ -23,6 +23,7 @@ import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
+import org.jumpmind.symmetric.is.ui.support.ImmediateUpdateTextField;
 import org.jumpmind.symmetric.is.ui.support.ResizableWindow;
 import org.jumpmind.symmetric.is.ui.support.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,8 @@ import org.springframework.context.annotation.Scope;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.event.FieldEvents.BlurEvent;
+import com.vaadin.event.FieldEvents.BlurListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
@@ -39,6 +42,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
@@ -234,16 +238,18 @@ public class EditFlowWindow extends ResizableWindow {
             final TextField nameField = new TextField("Name");
             nameField.setImmediate(true);
             nameField.setNullRepresentation("");
+            nameField.addBlurListener(new BlurListener() {                
+                private static final long serialVersionUID = 1L;                
+                @Override
+                public void blur(BlurEvent event) {
+                    saveName(nameField, flowNode);
+                }
+            });
             nameField.addShortcutListener(new ShortcutListener("nameField", KeyCode.ENTER, null) {
-
                 private static final long serialVersionUID = 1L;
-
                 @Override
                 public void handleAction(Object sender, Object target) {
-                    ComponentVersion version = flowNode.getComponentVersion();
-                    version.getData().setName(nameField.getValue());
-                    configurationService.save(version);
-                    redrawFlow();
+                    saveName(nameField, flowNode);
                 }
             });
             nameField.setValue(flowNode.getComponentVersion().getData().getName());
@@ -271,9 +277,7 @@ public class EditFlowWindow extends ResizableWindow {
 
                             @Override
                             public void valueChange(ValueChangeEvent event) {
-                                SettingData data = version.findSetting(key);
-                                data.setValue(checkBox.getValue().toString());
-                                configurationService.save(data);
+                                saveSetting(key, checkBox, version);
                             }
                         });
                         formLayout.addComponent(checkBox);
@@ -285,19 +289,25 @@ public class EditFlowWindow extends ResizableWindow {
                     case PASSWORD:
                         break;
                     case INTEGER:
-                        TextField integerField = new TextField(definition.label());
+                        ImmediateUpdateTextField integerField = new ImmediateUpdateTextField(definition.label()) {
+                            private static final long serialVersionUID = 1L;
+                            protected void save() {
+                                saveSetting(key, this, version);
+                            };
+                        };
                         integerField.setConverter(Integer.class);
-                        integerField.setImmediate(true);
-                        integerField.setNullRepresentation("");
                         integerField.setValue(version.get(key));
                         integerField.setRequired(required);
                         integerField.setDescription(description);
                         formLayout.addComponent(integerField);
                         break;
                     case STRING:
-                        TextField textField = new TextField(definition.label());
-                        textField.setImmediate(true);
-                        textField.setNullRepresentation("");
+                        ImmediateUpdateTextField textField = new ImmediateUpdateTextField(definition.label()) {
+                            private static final long serialVersionUID = 1L;
+                            protected void save() {
+                                saveSetting(key, this, version);
+                            };
+                        };
                         textField.setValue(version.get(key));
                         textField.setRequired(required);
                         textField.setDescription(description);
@@ -314,6 +324,19 @@ public class EditFlowWindow extends ResizableWindow {
             propertiesLayout.addComponent(formLayout);
             propertiesLayout.setExpandRatio(formLayout, 1);
         }
+    }
+    
+    protected void saveSetting(String key, Field<?> field, ComponentVersion version) {
+        SettingData data = version.findSetting(key);
+        data.setValue(field.getValue() != null ? field.getValue().toString(): null);
+        configurationService.save(data);
+    }
+    
+    protected void saveName(TextField nameField, ComponentFlowNode flowNode) {
+        ComponentVersion version = flowNode.getComponentVersion();
+        version.getData().setName(nameField.getValue());
+        configurationService.save(version);
+        redrawFlow();
     }
 
     protected void redrawFlow() {
