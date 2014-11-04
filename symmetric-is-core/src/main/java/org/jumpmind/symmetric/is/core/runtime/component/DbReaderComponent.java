@@ -33,7 +33,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
         OUTPUT_MESSAGE, OUTPUT_MODEL }, connectionCategory = DATASOURCE)
 public class DbReaderComponent extends AbstractComponent {
 
-    @SettingDefinition(order = 0, required = true, type = Type.STRING, label = "Sql")
+    @SettingDefinition(order = 0, required = true, type = Type.SQL, label = "Sql")
     public final static String SQL = "db.reader.sql";
 
     @SettingDefinition(order = 10, required = true, type = Type.INTEGER, defaultValue = "1", label = "Rows Per Message")

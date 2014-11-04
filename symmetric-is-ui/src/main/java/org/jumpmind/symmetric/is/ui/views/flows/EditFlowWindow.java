@@ -1,5 +1,8 @@
 package org.jumpmind.symmetric.is.ui.views.flows;
 
+import static org.apache.commons.lang.StringUtils.abbreviate;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +28,7 @@ import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.symmetric.is.ui.support.ImmediateUpdateTextField;
 import org.jumpmind.symmetric.is.ui.support.ResizableWindow;
+import org.jumpmind.symmetric.is.ui.support.SqlEntryWindow;
 import org.jumpmind.symmetric.is.ui.support.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -157,13 +161,15 @@ public class EditFlowWindow extends ResizableWindow {
     public void show(ComponentFlowVersion componentFlowVersion) {
         this.componentFlowVersion = componentFlowVersion;
 
-        setCaption("Edit Flow: " + componentFlowVersion.getComponentFlow().getData().getName());
+        setCaption("Edit Flow - Name: " + componentFlowVersion.getComponentFlow().getData().getName() + ", Version: " + componentFlowVersion.getVersion());
 
         populateComponentPalette();
 
         redrawFlow();
+        
+        tabs.setSelectedTab(palleteTab);
 
-        resize(.8, true);
+        showAtSize(.8);
 
     }
 
@@ -284,7 +290,29 @@ public class EditFlowWindow extends ResizableWindow {
                         break;
                     case CHOICE:
                         break;
-                    case DB_CONNECTION:
+                    case SQL:
+                        HorizontalLayout layout = new HorizontalLayout();
+                        layout.setCaption(definition.label());
+                        final Button button = new Button(buttonValue(version.get(key)));
+                        button.addStyleName(ValoTheme.BUTTON_LINK);
+                        button.addClickListener(new ClickListener() {                            
+                            private static final long serialVersionUID = 1L;
+                            @Override
+                            public void buttonClick(ClickEvent event) {
+                                SqlEntryWindow window = new SqlEntryWindow(version.get(key)) {
+                                    private static final long serialVersionUID = 1L;
+                                    @Override
+                                    protected boolean onClose() {
+                                        saveSetting(key, editor, version);
+                                        button.setCaption(buttonValue(version.get(key)));
+                                        return super.onClose();
+                                    }
+                                };
+                                window.showAtSize(.5);
+                            }
+                        });
+                        layout.addComponent(button);
+                        formLayout.addComponent(layout);
                         break;
                     case PASSWORD:
                         break;
@@ -324,6 +352,10 @@ public class EditFlowWindow extends ResizableWindow {
             propertiesLayout.addComponent(formLayout);
             propertiesLayout.setExpandRatio(formLayout, 1);
         }
+    }
+    
+    protected String buttonValue(String value) {
+        return isNotBlank(value) ? abbreviate(value, 30) : "Click to edit";
     }
     
     protected void saveSetting(String key, Field<?> field, ComponentVersion version) {

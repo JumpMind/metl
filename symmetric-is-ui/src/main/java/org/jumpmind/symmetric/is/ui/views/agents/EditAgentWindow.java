@@ -113,7 +113,7 @@ public class EditAgentWindow extends ResizableWindow {
         nameField.setValue(agent.getData().getName());
         hostField.setValue(agent.getData().getHost());
         agentStartModeCombo.setValue(agent.getAgentStartMode());
-        resize(.6, true);
+        showAtSize(.6);
         nameField.focus();
     }
 

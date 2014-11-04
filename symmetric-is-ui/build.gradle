@@ -36,8 +36,8 @@ dependencies {
     compile project(":symmetric-ui-core")
     compile project(":symmetric-is-core")
     compile project(":symmetric-is-agent")
-    compile "org.vaadin.addons:contextmenu:4.5"
     compile "com.cybercom:spring-ui-scope:0.0.2"
+    compile "org.vaadin.addons:aceeditor:0.8.12"
     compile "org.springframework:spring-webmvc:$springVersion"
     
     compile "com.vaadin:vaadin-push:$vaadinVersion"

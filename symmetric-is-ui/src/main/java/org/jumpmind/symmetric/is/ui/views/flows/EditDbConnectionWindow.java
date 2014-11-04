@@ -269,7 +269,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
 
         setCaption("Edit Connection");
 
-        resize(.6, true);
+        showAtSize(.6);
 
         nameField.focus();
 

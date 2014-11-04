@@ -1,14 +1,35 @@
 package org.jumpmind.symmetric.is.ui.support;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.vaadin.aceeditor.AceEditor;
+
 import com.vaadin.server.Page;
+import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.Position;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.themes.ValoTheme;
 
 public final class UiUtils {
 
+    final static Logger log = LoggerFactory.getLogger(UiUtils.class);
+    
     private UiUtils() {
+    }
+    
+    public static AceEditor createAceEditor() {
+        AceEditor editor = new AceEditor();
+        editor.setImmediate(true);
+        String acePath = VaadinServlet.getCurrent().getServletContext().getContextPath() + "/ace";
+        editor.setThemePath(acePath);
+        editor.setModePath(acePath);
+        editor.setWorkerPath(acePath);
+        editor.setTextChangeEventMode(TextChangeEventMode.EAGER);
+        editor.setHighlightActiveLine(true);
+        editor.setShowPrintMargin(false);
+        return editor;
     }
     
     public static void notify(String message) {

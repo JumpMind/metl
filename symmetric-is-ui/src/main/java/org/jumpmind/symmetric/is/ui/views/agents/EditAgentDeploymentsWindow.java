@@ -115,7 +115,7 @@ public class EditAgentDeploymentsWindow extends ResizableWindow {
         setCaption("Agent Deployments for '" + agent.toString() + "'");
         container.removeAllItems();
         container.addAll(agent.getAgentDeployments());
-        resize(.6, true);
+        showAtSize(.6);
     }
 
     public Agent getAgent() {

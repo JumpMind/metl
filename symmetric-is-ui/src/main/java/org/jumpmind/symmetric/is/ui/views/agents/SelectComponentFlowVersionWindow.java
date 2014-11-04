@@ -100,7 +100,7 @@ public class SelectComponentFlowVersionWindow extends ResizableWindow {
         this.container.addAll(configurationService.findUndeployedComponentFlowVersionSummary(agent
                 .getData().getId()));
         this.table.setValue(new HashSet<ComponentFlowVersionSummary>());
-        resize(.5, true);
+        showAtSize(.5);
     }
 
     public Agent getAgent() {

@@ -14,6 +14,7 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -22,10 +23,17 @@ public class ResizableWindow extends Window {
     private static final long serialVersionUID = 1L;
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
+    
+    protected VerticalLayout content;
 
     public ResizableWindow() {
         setModal(true);
         setResizable(true);
+        
+        content = new VerticalLayout();
+        content.setSizeFull();
+        setContent(content);
+        
         addShortcutListener(new ShortcutListener("Maximize", KeyCode.M,
                 new int[] { ModifierKey.CTRL }) {
 
@@ -58,7 +66,7 @@ public class ResizableWindow extends Window {
         return closeButton;
     }
 
-    protected HorizontalLayout buildButtonFooter(Button[] toTheLeftButtons, Button[] toTheRightButtons) {
+    protected HorizontalLayout buildButtonFooter(Button[] toTheLeftButtons, Button... toTheRightButtons) {
         HorizontalLayout footer = new HorizontalLayout();
 
         footer.setWidth("100%");
@@ -86,8 +94,10 @@ public class ResizableWindow extends Window {
     protected void grabFocus() {
         this.focus();
     }
+    
+    protected boolean onClose() { return true;}
 
-    protected void resize(double percentOfBrowserSize, boolean showWindow) {
+    public void showAtSize(double percentOfBrowserSize) {
         Page page = Page.getCurrent();
 
         setWindowMode(WindowMode.NORMAL);
@@ -104,10 +114,11 @@ public class ResizableWindow extends Window {
         setPositionX(x);
         setPositionY(y);
 
-        if (showWindow && !UI.getCurrent().getWindows().contains(this)) {
+        if (!UI.getCurrent().getWindows().contains(this)) {
             UI.getCurrent().addWindow(this);
             grabFocus();
         }
+        center();
     }
 
     public class CloseButtonListener implements ClickListener {
@@ -116,7 +127,9 @@ public class ResizableWindow extends Window {
 
         @Override
         public void buttonClick(ClickEvent event) {
-            close();
+            if (onClose()) {
+                close();
+            }
         }
 
     }
