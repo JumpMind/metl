@@ -42,6 +42,11 @@ abstract public class AbstractObjectWithSettings<D extends AbstractData> extends
 
     }
     
+    @SuppressWarnings("unchecked")
+    public void setSettings(List<? extends SettingData> settings) {
+        this.settings = (List<SettingData>)settings;
+    }
+    
     abstract protected SettingData createSettingData();
     
     

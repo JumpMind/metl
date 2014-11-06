@@ -71,4 +71,10 @@ public class ComponentFactory implements IComponentFactory {
         return AbstractRuntimeObject.getSettingDefinitions(clazz, false);
     }
     
+    @Override
+    public ComponentDefinition getComponentDefinitionForComponentType(String componentType) {
+        Class<? extends IComponent> clazz = componentTypes.get(componentType);
+        return clazz.getAnnotation(ComponentDefinition.class);
+    }
+    
 }

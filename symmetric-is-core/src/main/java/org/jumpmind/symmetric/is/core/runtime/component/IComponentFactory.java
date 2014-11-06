@@ -14,6 +14,8 @@ public interface IComponentFactory {
 
     public Map<ComponentCategory, List<String>> getComponentTypes();
     
-    public Map<String, SettingDefinition> getSettingDefinitionsForComponentType(String type);
+    public Map<String, SettingDefinition> getSettingDefinitionsForComponentType(String componentType);
+    
+    public ComponentDefinition getComponentDefinitionForComponentType(String componentType);
 
 }

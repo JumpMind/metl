@@ -10,15 +10,25 @@ public class Connection extends AbstractObjectWithSettings<ConnectionData> {
 
     Folder folder;
 
+    public Connection(ConnectionData data) {
+        this(null, data);
+    }
+
     public Connection(Folder folder, ConnectionData data, SettingData... settings) {
         super(data, settings);
-        this.folder = folder;
-        data.setFolderId(folder.getData().getId());
+        setFolder(folder);
     }
 
     @Override
     public String toString() {
         return getData().getName();
+    }
+
+    public void setFolder(Folder folder) {
+        this.folder = folder;
+        if (folder != null) {
+            data.setFolderId(folder.getData().getId());
+        }
     }
 
     public Folder getFolder() {

@@ -34,7 +34,9 @@ import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
 import org.jumpmind.symmetric.is.core.config.data.ConnectionSettingData;
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
 import org.jumpmind.symmetric.is.core.config.data.SettingData;
+import org.jumpmind.symmetric.is.core.util.NameValue;
 
+// TODO make methods transactional
 abstract class AbstractConfigurationService implements IConfigurationService {
 
     IPersistenceManager persistenceManager;
@@ -45,12 +47,24 @@ abstract class AbstractConfigurationService implements IConfigurationService {
 
     protected abstract String tableName(Class<?> clazz);
 
+    protected <T> List<T> find(Class<T> clazz, Map<String, Object> params) {
+        return persistenceManager.find(clazz, params, null, null, tableName(clazz));
+    }
+
+    protected <T> T findOne(Class<T> clazz, Map<String, Object> params) {
+        List<T> all = persistenceManager.find(clazz, params, null, null, tableName(clazz));
+        if (all.size() > 0) {
+            return all.get(0);
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public void delete(AgentDeployment agentDeployment) {
         delete(agentDeployment.getData());
     }
 
-    // TODO transactional
     @Override
     public void delete(ComponentFlowVersion componentFlowVersion, ComponentFlowNode flowNode) {
         List<ComponentFlowNodeLink> links = componentFlowVersion
@@ -63,13 +77,11 @@ abstract class AbstractConfigurationService implements IConfigurationService {
         delete(flowNode.getData());
     }
 
-    // TODO transactional
     @Override
     public void deleteFolder(String folderId) {
         Map<String, Object> byType = new HashMap<String, Object>();
         byType.put("parentFolderId", folderId);
-        List<FolderData> folderDatas = persistenceManager.find(FolderData.class, byType, null,
-                null, tableName(FolderData.class));
+        List<FolderData> folderDatas = find(FolderData.class, byType);
         for (FolderData folderData : folderDatas) {
             deleteFolder(folderData.getId());
         }
@@ -81,8 +93,7 @@ abstract class AbstractConfigurationService implements IConfigurationService {
     public List<Folder> findFolders(FolderType type) {
         Map<String, Object> byType = new HashMap<String, Object>();
         byType.put("type", type.name());
-        List<FolderData> folderDatas = persistenceManager.find(FolderData.class, byType, null,
-                null, tableName(FolderData.class));
+        List<FolderData> folderDatas = find(FolderData.class, byType);
 
         List<Folder> allFolders = new ArrayList<Folder>();
         for (FolderData folderData : folderDatas) {
@@ -111,8 +122,7 @@ abstract class AbstractConfigurationService implements IConfigurationService {
     public List<ComponentFlow> findComponentFlowsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("folderId", folder.getData().getId());
-        List<ComponentFlowData> datas = persistenceManager.find(ComponentFlowData.class, params,
-                null, null, tableName(ComponentFlowData.class));
+        List<ComponentFlowData> datas = find(ComponentFlowData.class, params);
         List<ComponentFlow> flows = new ArrayList<ComponentFlow>();
         for (ComponentFlowData componentFlowData : datas) {
             ComponentFlow flow = new ComponentFlow(folder, componentFlowData);
@@ -120,9 +130,8 @@ abstract class AbstractConfigurationService implements IConfigurationService {
 
             Map<String, Object> versionParams = new HashMap<String, Object>();
             versionParams.put("componentFlowId", componentFlowData.getId());
-            List<ComponentFlowVersionData> versionDatas = persistenceManager.find(
-                    ComponentFlowVersionData.class, versionParams, null, null,
-                    tableName(ComponentFlowVersionData.class));
+            List<ComponentFlowVersionData> versionDatas = find(ComponentFlowVersionData.class,
+                    versionParams);
             for (ComponentFlowVersionData versionData : versionDatas) {
                 ComponentFlowVersion version = new ComponentFlowVersion(flow, versionData);
                 refreshComponentFlowVersionRelations(version);
@@ -136,15 +145,40 @@ abstract class AbstractConfigurationService implements IConfigurationService {
     public List<Connection> findConnectionsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("folderId", folder.getData().getId());
-        List<ConnectionData> datas = persistenceManager.find(ConnectionData.class, params, null,
-                null, tableName(ConnectionData.class));
+        List<ConnectionData> datas = find(ConnectionData.class, params);
+        return buildConnection(folder, datas);
+    }
+
+    @Override
+    public List<Connection> findConnectionsByTypes(String... types) {
+        List<Connection> list = new ArrayList<Connection>();
+        if (types != null) {
+            for (String type : types) {
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put("type", type);
+                List<ConnectionData> datas = find(ConnectionData.class, params);
+                list = buildConnection(null, datas);
+            }
+        }
+        return list;
+    }
+
+    protected List<Connection> buildConnection(Folder folder, List<ConnectionData> datas) {
+        return buildConnection(folder, datas.toArray(new ConnectionData[datas.size()]));
+    }
+
+    protected List<Connection> buildConnection(Folder folder, ConnectionData... datas) {
         List<Connection> list = new ArrayList<Connection>();
         for (ConnectionData data : datas) {
+            if (folder == null) {
+                Map<String, Object> folderParams = new HashMap<String, Object>();
+                folderParams.put("id", data.getFolderId());
+                folder = new Folder(findOne(FolderData.class, folderParams));
+            }
+
             Map<String, Object> settingParams = new HashMap<String, Object>();
             settingParams.put("connectionId", data.getId());
-            List<ConnectionSettingData> settings = persistenceManager.find(
-                    ConnectionSettingData.class, settingParams, null, null,
-                    tableName(ConnectionSettingData.class));
+            List<ConnectionSettingData> settings = find(ConnectionSettingData.class, settingParams);
             list.add(new Connection(folder, data,
                     settings.toArray(new SettingData[settings.size()])));
         }
@@ -227,7 +261,6 @@ abstract class AbstractConfigurationService implements IConfigurationService {
         delete(agent.getData());
     }
 
-    // TODO transactional
     @Override
     public void delete(ComponentFlow flow) {
         List<ComponentFlowVersion> versions = flow.getComponentFlowVersions();
@@ -271,10 +304,30 @@ abstract class AbstractConfigurationService implements IConfigurationService {
     }
 
     @Override
+    public Connection findConnection(String id) {
+        Connection connection = null;
+        ConnectionData data = findOne(ConnectionData.class, new NameValue("id", id));
+        if (data != null) {
+            connection = new Connection(data);
+            refresh(connection);
+        }
+        return connection;
+    }
+
+    @Override
     public void refresh(Connection connection) {
         refresh((AbstractObject<?>) connection);
 
-        // TODO refresh settings
+        ConnectionData data = connection.getData();
+        Map<String, Object> folderParams = new HashMap<String, Object>();
+        folderParams.put("id", data.getFolderId());
+        connection.setFolder(new Folder(findOne(FolderData.class, folderParams)));
+
+        Map<String, Object> settingParams = new HashMap<String, Object>();
+        settingParams.put("connectionId", data.getId());
+        List<? extends SettingData> settings = find(ConnectionSettingData.class, settingParams);
+        connection.setSettings(settings);
+
     }
 
     @Override
@@ -307,13 +360,11 @@ abstract class AbstractConfigurationService implements IConfigurationService {
 
         // TODO read connections and models
 
-        Map<String, Object> versionParams = new HashMap<String, Object>();
-        versionParams.put("componentVersionId", componentVersionData.getId());
-        List<ComponentVersionSettingData> settings = persistenceManager.find(
-                ComponentVersionSettingData.class, versionParams, null, null,
-                tableName(ComponentVersionSettingData.class));
+        List<ComponentVersionSettingData> settings = find(ComponentVersionSettingData.class,
+                new NameValue("componentVersionId", componentVersionData.getId()));
 
-        return new ComponentVersion(component, null, componentVersionData,
+        return new ComponentVersion(component,
+                findConnection(componentVersionData.getConnectionId()), componentVersionData,
                 settings.toArray(new SettingData[settings.size()]));
     }
 
@@ -383,10 +434,9 @@ abstract class AbstractConfigurationService implements IConfigurationService {
             save(component);
             save(version);
         }
-        save((AbstractObject<?>)componentFlowNode);
+        save((AbstractObject<?>) componentFlowNode);
     }
 
-    // TODO transactional
     @Override
     public void save(ComponentFlowVersion flowVersion) {
 

@@ -11,8 +11,9 @@ import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
 
 public class ConnectionFactory implements IConnectionFactory {
 
-    
     Map<String, Class<? extends IConnection>> connectionTypes = new LinkedHashMap<String, Class<? extends IConnection>>();
+
+    Map<ConnectionCategory, List<String>> categoryToTypeMapping = new LinkedHashMap<ConnectionCategory, List<String>>();
 
     public ConnectionFactory() {
         register(DataSourceConnection.class);
@@ -22,12 +23,23 @@ public class ConnectionFactory implements IConnectionFactory {
     public List<String> getConnectionTypes() {
         return new ArrayList<String>(connectionTypes.keySet());
     }
+    
+    @Override
+    public List<String> getConnectionTypes(ConnectionCategory category) {
+        return categoryToTypeMapping.get(category);
+    }
 
     @Override
     public void register(Class<? extends IConnection> clazz) {
         ConnectionDefinition definition = clazz.getAnnotation(ConnectionDefinition.class);
         if (definition != null) {
             connectionTypes.put(definition.typeName(), clazz);
+            List<String> types = categoryToTypeMapping.get(definition.connectionCategory());
+            if (types == null) {
+                types = new ArrayList<String>();
+                categoryToTypeMapping.put(definition.connectionCategory(), types);
+            }
+            types.add(definition.typeName());
         } else {
             throw new IllegalStateException("A connection is required to define the "
                     + ConnectionDefinition.class.getName() + " annotation");
@@ -52,5 +64,5 @@ public class ConnectionFactory implements IConnectionFactory {
             throw new RuntimeException(e);
         }
     }
-    
+
 }

@@ -39,7 +39,11 @@ public interface IConfigurationService {
     
     public List<ComponentFlow> findComponentFlowsInFolder(Folder folder);
     
+    public Connection findConnection(String id);
+    
     public List<Connection> findConnectionsInFolder(Folder folder);
+    
+    public List<Connection> findConnectionsByTypes(String ... types);
     
     public List<Agent> findAgentsInFolder(Folder folder);
     

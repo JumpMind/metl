@@ -7,11 +7,14 @@ import java.util.Set;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
+import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.config.data.SettingData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.ui.support.ImmediateUpdateTextField;
 import org.jumpmind.symmetric.is.ui.support.SqlField;
 
@@ -43,14 +46,17 @@ public class ComponentSettingsSheet extends VerticalLayout {
     IComponentSettingsChangedListener componentSettingsChangedListener;
 
     IComponentFactory componentFactory;
+    
+    IConnectionFactory connectionFactory;
 
     public ComponentSettingsSheet() {
     }
 
-    protected void show(IComponentFactory componentFactory,
+    protected void show(IComponentFactory componentFactory, IConnectionFactory connectionFactory,
             IConfigurationService configurationService, ComponentFlowVersion componentFlowVersion,
             IComponentSettingsChangedListener componentSettingsChangedListener) {
         this.componentFactory = componentFactory;
+        this.connectionFactory = connectionFactory;
         this.componentSettingsChangedListener = componentSettingsChangedListener;
         this.configurationService = configurationService;
         this.componentFlowVersion = componentFlowVersion;
@@ -84,8 +90,10 @@ public class ComponentSettingsSheet extends VerticalLayout {
         formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
 
         addNodeCombo(formLayout, flowNode);
-
+        
         if (flowNode != null) {
+            ComponentVersion version = flowNode.getComponentVersion();
+            
             MenuItem actions = actionBar.addItem("", FontAwesome.COG, null);
             actions.addItem("Delete", new Command() {
                 private static final long serialVersionUID = 1L;
@@ -97,14 +105,15 @@ public class ComponentSettingsSheet extends VerticalLayout {
                     componentSettingsChangedListener.componentSettingsChanges(flowNode, true);
                 }
             });
-
+            
             TextField typeLabel = new TextField();
             typeLabel.setCaption("Type");
             typeLabel.setValue(flowNode.getComponentVersion().getComponent().getData().getType());
             typeLabel.setReadOnly(true);
             formLayout.addComponent(typeLabel);
+            
+            addConnectionCombo(formLayout, version);
 
-            ComponentVersion version = flowNode.getComponentVersion();
             Map<String, SettingDefinition> settings = componentFactory
                     .getSettingDefinitionsForComponentType(version.getComponent().getType());
             Set<String> keys = settings.keySet();
@@ -115,6 +124,33 @@ public class ComponentSettingsSheet extends VerticalLayout {
         }
         addComponent(formLayout);
         setExpandRatio(formLayout, 1);
+    }
+    
+    protected void addConnectionCombo(FormLayout formLayout, final ComponentVersion version) {
+        ComponentDefinition componentDefintion = componentFactory.getComponentDefinitionForComponentType(version.getComponent().getType());
+        if (componentDefintion.connectionCategory() != null) {
+            final ComboBox connectionsCombo = new ComboBox("Connection");                
+            connectionsCombo.setImmediate(true);
+            connectionsCombo.setRequired(true);
+            List<String> types = connectionFactory.getConnectionTypes(componentDefintion.connectionCategory());
+            List<Connection> connections = configurationService.findConnectionsByTypes(types.toArray(new String[types.size()]));
+            for (Connection connection : connections) {
+                connectionsCombo.addItem(connection);
+            }
+            
+            connectionsCombo.setValue(version.getConnection());
+            
+            connectionsCombo.addValueChangeListener(new ValueChangeListener() {                    
+                private static final long serialVersionUID = 1L;
+                @Override
+                public void valueChange(ValueChangeEvent event) {
+                    version.setConnection((Connection)connectionsCombo.getValue());
+                    configurationService.save(version);
+                }
+            });
+            
+            formLayout.addComponent(connectionsCombo);
+        }
     }
 
     protected void addNodeCombo(FormLayout formLayout, final ComponentFlowNode flowNode) {
@@ -208,6 +244,8 @@ public class ComponentSettingsSheet extends VerticalLayout {
                 break;
             case SQL:
                 final SqlField sqlField = new SqlField();
+                sqlField.setRequired(required);
+                sqlField.setDescription(description);
                 sqlField.setValue(version.get(key));
                 sqlField.setCaption(definition.label());
                 sqlField.addValueChangeListener(new ValueChangeListener() {

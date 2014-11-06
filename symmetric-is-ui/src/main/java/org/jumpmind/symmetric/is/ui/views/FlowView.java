@@ -126,6 +126,7 @@ public class FlowView extends AbstractFolderView {
                 configurationService.refresh(connection);
             } else {
                 refresh();
+                treeTable.unselect(connection.getFolder());
                 expand(connection.getFolder(), item);
             }
         }

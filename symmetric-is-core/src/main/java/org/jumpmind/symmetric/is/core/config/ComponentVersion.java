@@ -30,6 +30,11 @@ public class ComponentVersion extends AbstractObjectWithSettings<ComponentVersio
         this.data.setName(name);
     }
     
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+        this.data.setConnectionId(connection.getId());
+    }
+    
     public Connection getConnection() {
         return connection;
     }

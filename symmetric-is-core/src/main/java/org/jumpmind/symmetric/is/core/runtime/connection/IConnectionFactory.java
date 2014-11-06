@@ -11,5 +11,7 @@ public interface IConnectionFactory {
     public void register(Class<? extends IConnection> clazz);
 
     public List<String> getConnectionTypes();
+    
+    public List<String> getConnectionTypes(ConnectionCategory category);
 
 }

@@ -14,6 +14,7 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentCategory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.ui.diagram.ConnectionEvent;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
@@ -52,6 +53,9 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
 
     @Autowired
     IComponentFactory componentFactory;
+
+    @Autowired
+    IConnectionFactory connectionFactory;
 
     ComponentFlowVersion componentFlowVersion;
 
@@ -127,7 +131,7 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
 
         populateComponentPalette();
 
-        this.componentSettingsSheet.show(componentFactory, configurationService,
+        this.componentSettingsSheet.show(componentFactory, connectionFactory, configurationService,
                 componentFlowVersion, this);
 
         redrawFlow();
@@ -289,21 +293,21 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
 
             ComponentVersion componentVersion = new ComponentVersion(component, null,
                     new ComponentVersionData());
-            
+
             componentVersion.setName(type + " " + (countComponentsOfType(type) + 1));
 
             ComponentFlowNodeData nodeData = new ComponentFlowNodeData(componentVersion.getData()
                     .getId(), componentFlowVersion.getData().getId());
-            
+
             ComponentFlowNode componentFlowNode = new ComponentFlowNode(componentVersion, nodeData);
             componentFlowVersion.getComponentFlowNodes().add(componentFlowNode);
 
             configurationService.save(componentFlowNode);
-            
+
             redrawFlow();
-            
+
             componentSettingsSheet.refresh(componentFlowNode);
-            
+
             tabs.setSelectedTab(componentSettingsSheet);
         }
     }
