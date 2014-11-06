@@ -97,7 +97,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                 return label;
             }
         });
-        table.setColumnWidth("Name", 150);
+        table.setColumnWidth("Name", 175);
         table.addShortcutListener(new ShortcutListener("Delete", KeyCode.DELETE, null) {
 
             private static final long serialVersionUID = 1L;

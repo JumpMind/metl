@@ -50,8 +50,16 @@ abstract class AbstractConfigurationService implements IConfigurationService {
         delete(agentDeployment.getData());
     }
 
+    // TODO transactional
     @Override
-    public void delete(ComponentFlowNode flowNode) {
+    public void delete(ComponentFlowVersion componentFlowVersion, ComponentFlowNode flowNode) {
+        List<ComponentFlowNodeLink> links = componentFlowVersion
+                .removeComponentFlowNodeLinks(flowNode.getData().getId());
+        for (ComponentFlowNodeLink link : links) {
+            delete(link);
+        }
+
+        componentFlowVersion.removeComponentFlowNode(flowNode);
         delete(flowNode.getData());
     }
 

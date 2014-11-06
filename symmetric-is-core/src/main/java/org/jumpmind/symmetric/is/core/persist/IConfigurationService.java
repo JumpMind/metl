@@ -27,7 +27,7 @@ public interface IConfigurationService {
     
     public void delete(ComponentFlow flow);
     
-    public void delete(ComponentFlowNode flowNode);
+    public void delete(ComponentFlowVersion flow, ComponentFlowNode flowNode);
     
     public void delete(ComponentFlowNodeLink link);
     

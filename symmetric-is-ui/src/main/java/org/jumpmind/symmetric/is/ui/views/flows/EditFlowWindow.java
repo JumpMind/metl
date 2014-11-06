@@ -1,23 +1,16 @@
 package org.jumpmind.symmetric.is.ui.views.flows;
 
-import static org.apache.commons.lang.StringUtils.abbreviate;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.config.Component;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
-import org.jumpmind.symmetric.is.core.config.SettingDefinition;
-import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.config.data.ComponentData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
-import org.jumpmind.symmetric.is.core.config.data.SettingData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentCategory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
@@ -26,33 +19,21 @@ import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
-import org.jumpmind.symmetric.is.ui.support.ImmediateUpdateTextField;
 import org.jumpmind.symmetric.is.ui.support.ResizableWindow;
-import org.jumpmind.symmetric.is.ui.support.SqlEntryWindow;
 import org.jumpmind.symmetric.is.ui.support.UiComponent;
+import org.jumpmind.symmetric.is.ui.views.flows.ComponentSettingsSheet.IComponentSettingsChangedListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.event.FieldEvents.BlurEvent;
-import com.vaadin.event.FieldEvents.BlurListener;
-import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.Tab;
@@ -62,7 +43,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-public class EditFlowWindow extends ResizableWindow {
+public class EditFlowWindow extends ResizableWindow implements IComponentSettingsChangedListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -84,7 +65,7 @@ public class EditFlowWindow extends ResizableWindow {
 
     Tab propertiesTab;
 
-    VerticalLayout propertiesLayout;
+    ComponentSettingsSheet componentSettingsSheet;
 
     Diagram diagram;
 
@@ -115,14 +96,14 @@ public class EditFlowWindow extends ResizableWindow {
         actionLayout.addComponent(actionBar);
         actionLayout.setComponentAlignment(actionBar, Alignment.MIDDLE_RIGHT);
 
-        propertiesLayout = new VerticalLayout();
+        componentSettingsSheet = new ComponentSettingsSheet();
 
         tabs = new TabSheet();
         tabs.addStyleName(ValoTheme.TABSHEET_COMPACT_TABBAR);
         tabs.addStyleName(ValoTheme.TABSHEET_PADDED_TABBAR);
         tabs.setSizeFull();
         palleteTab = tabs.addTab(buildPalette(), "Design Palette");
-        propertiesTab = tabs.addTab(propertiesLayout, "Property Sheet");
+        propertiesTab = tabs.addTab(componentSettingsSheet, "Property Sheet");
 
         splitPanel.addComponents(tabs, flowLayout);
 
@@ -133,6 +114,35 @@ public class EditFlowWindow extends ResizableWindow {
 
     }
 
+    public ComponentFlowVersion getComponentFlowVersion() {
+        return componentFlowVersion;
+    }
+
+    public void show(ComponentFlowVersion componentFlowVersion) {
+        this.componentFlowVersion = componentFlowVersion;
+
+        setCaption("Edit Flow - Name: "
+                + componentFlowVersion.getComponentFlow().getData().getName() + ", Version: "
+                + componentFlowVersion.getVersion());
+
+        populateComponentPalette();
+
+        this.componentSettingsSheet.show(componentFactory, configurationService,
+                componentFlowVersion, this);
+
+        redrawFlow();
+
+        tabs.setSelectedTab(palleteTab);
+
+        showAtSize(.8);
+
+    }
+    
+    @Override
+    public void componentSettingsChanges(ComponentFlowNode node, boolean deleted) {
+        redrawFlow();
+    }
+    
     protected VerticalLayout buildPalette() {
         VerticalLayout layout = new VerticalLayout();
         layout.setMargin(true);
@@ -151,25 +161,6 @@ public class EditFlowWindow extends ResizableWindow {
         layout.addComponent(componentAccordian);
         layout.setExpandRatio(componentAccordian, 1);
         return layout;
-
-    }
-
-    public ComponentFlowVersion getComponentFlowVersion() {
-        return componentFlowVersion;
-    }
-
-    public void show(ComponentFlowVersion componentFlowVersion) {
-        this.componentFlowVersion = componentFlowVersion;
-
-        setCaption("Edit Flow - Name: " + componentFlowVersion.getComponentFlow().getData().getName() + ", Version: " + componentFlowVersion.getVersion());
-
-        populateComponentPalette();
-
-        redrawFlow();
-        
-        tabs.setSelectedTab(palleteTab);
-
-        showAtSize(.8);
 
     }
 
@@ -192,183 +183,6 @@ public class EditFlowWindow extends ResizableWindow {
                 }
             }
         }
-    }
-
-    protected void refreshPropertiesForm(final ComponentFlowNode flowNode) {
-        propertiesLayout.removeAllComponents();
-
-        if (flowNode != null) {
-
-            HorizontalLayout actionLayout = new HorizontalLayout();
-            actionLayout.setWidth(100, Unit.PERCENTAGE);
-            propertiesLayout.addComponent(actionLayout);
-
-            MenuBar actionBar = new MenuBar();
-            actionBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
-            actionBar.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
-            MenuItem actions = actionBar.addItem("", FontAwesome.COG, null);
-            actions.addItem("Delete", new Command() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public void menuSelected(MenuItem selectedItem) {
-                    // TODO all of this should go in the service and be
-                    // transactional
-                    List<ComponentFlowNodeLink> links = componentFlowVersion
-                            .removeComponentFlowNodeLinks(flowNode.getData().getId());
-                    for (ComponentFlowNodeLink link : links) {
-                        configurationService.delete(link);
-                    }
-
-                    ComponentFlowNode node = componentFlowVersion.removeComponentFlowNode(flowNode);
-                    configurationService.delete(node);
-                    redrawFlow();
-                    refreshPropertiesForm(null);
-                    tabs.setSelectedTab(palleteTab);
-                }
-            });
-
-            actionLayout.addComponent(actionBar);
-            actionLayout.setComponentAlignment(actionBar, Alignment.MIDDLE_RIGHT);
-
-            FormLayout formLayout = new FormLayout();
-            formLayout.setWidth(100, Unit.PERCENTAGE);
-            formLayout.setMargin(false);
-            formLayout.addStyleName("light");
-
-            Label typeLabel = new Label();
-            typeLabel.setCaption("Type");
-            typeLabel.setValue(flowNode.getComponentVersion().getComponent().getData().getType());
-            formLayout.addComponent(typeLabel);
-
-            final TextField nameField = new TextField("Name");
-            nameField.setImmediate(true);
-            nameField.setNullRepresentation("");
-            nameField.addBlurListener(new BlurListener() {                
-                private static final long serialVersionUID = 1L;                
-                @Override
-                public void blur(BlurEvent event) {
-                    saveName(nameField, flowNode);
-                }
-            });
-            nameField.addShortcutListener(new ShortcutListener("nameField", KeyCode.ENTER, null) {
-                private static final long serialVersionUID = 1L;
-                @Override
-                public void handleAction(Object sender, Object target) {
-                    saveName(nameField, flowNode);
-                }
-            });
-            nameField.setValue(flowNode.getComponentVersion().getData().getName());
-            formLayout.addComponent(nameField);
-
-            final ComponentVersion version = flowNode.getComponentVersion();
-            Map<String, SettingDefinition> settings = componentFactory
-                    .getSettingDefinitionsForComponentType(version.getComponent().getType());
-            Set<String> keys = settings.keySet();
-            for (final String key : keys) {
-                final SettingDefinition definition = settings.get(key);
-                boolean required = definition.required();
-                String description = "Represents the " + key + " setting";
-                Type type = definition.type();
-                switch (type) {
-                    case BOOLEAN:
-                        final CheckBox checkBox = new CheckBox(definition.label());
-                        checkBox.setImmediate(true);
-                        checkBox.setValue(version.getBoolean(key));
-                        checkBox.setRequired(required);
-                        checkBox.setDescription(description);
-                        checkBox.addValueChangeListener(new ValueChangeListener() {
-                            
-                            private static final long serialVersionUID = 1L;
-
-                            @Override
-                            public void valueChange(ValueChangeEvent event) {
-                                saveSetting(key, checkBox, version);
-                            }
-                        });
-                        formLayout.addComponent(checkBox);
-                        break;
-                    case CHOICE:
-                        break;
-                    case SQL:
-                        HorizontalLayout layout = new HorizontalLayout();
-                        layout.setCaption(definition.label());
-                        final Button button = new Button(buttonValue(version.get(key)));
-                        button.addStyleName(ValoTheme.BUTTON_LINK);
-                        button.addClickListener(new ClickListener() {                            
-                            private static final long serialVersionUID = 1L;
-                            @Override
-                            public void buttonClick(ClickEvent event) {
-                                SqlEntryWindow window = new SqlEntryWindow(version.get(key)) {
-                                    private static final long serialVersionUID = 1L;
-                                    @Override
-                                    protected boolean onClose() {
-                                        saveSetting(key, editor, version);
-                                        button.setCaption(buttonValue(version.get(key)));
-                                        return super.onClose();
-                                    }
-                                };
-                                window.showAtSize(.5);
-                            }
-                        });
-                        layout.addComponent(button);
-                        formLayout.addComponent(layout);
-                        break;
-                    case PASSWORD:
-                        break;
-                    case INTEGER:
-                        ImmediateUpdateTextField integerField = new ImmediateUpdateTextField(definition.label()) {
-                            private static final long serialVersionUID = 1L;
-                            protected void save() {
-                                saveSetting(key, this, version);
-                            };
-                        };
-                        integerField.setConverter(Integer.class);
-                        integerField.setValue(version.get(key));
-                        integerField.setRequired(required);
-                        integerField.setDescription(description);
-                        formLayout.addComponent(integerField);
-                        break;
-                    case STRING:
-                        ImmediateUpdateTextField textField = new ImmediateUpdateTextField(definition.label()) {
-                            private static final long serialVersionUID = 1L;
-                            protected void save() {
-                                saveSetting(key, this, version);
-                            };
-                        };
-                        textField.setValue(version.get(key));
-                        textField.setRequired(required);
-                        textField.setDescription(description);
-                        formLayout.addComponent(textField);
-                        break;
-                    case XML:
-                        break;
-                    default:
-                        break;
-
-                }
-            }
-
-            propertiesLayout.addComponent(formLayout);
-            propertiesLayout.setExpandRatio(formLayout, 1);
-        }
-    }
-    
-    protected String buttonValue(String value) {
-        return isNotBlank(value) ? abbreviate(value, 30) : "Click to edit";
-    }
-    
-    protected void saveSetting(String key, Field<?> field, ComponentVersion version) {
-        SettingData data = version.findSetting(key);
-        data.setValue(field.getValue() != null ? field.getValue().toString(): null);
-        configurationService.save(data);
-    }
-    
-    protected void saveName(TextField nameField, ComponentFlowNode flowNode) {
-        ComponentVersion version = flowNode.getComponentVersion();
-        version.getData().setName(nameField.getValue());
-        configurationService.save(version);
-        redrawFlow();
     }
 
     protected void redrawFlow() {
@@ -426,7 +240,7 @@ public class EditFlowWindow extends ResizableWindow {
                 Node node = event.getNode();
                 ComponentFlowNode flowNode = componentFlowVersion.findComponentFlowNodeWithId(node
                         .getId());
-                refreshPropertiesForm(flowNode);
+                componentSettingsSheet.refresh(flowNode);
                 tabs.setSelectedTab(propertiesTab);
 
             } else if (e instanceof NodeMovedEvent) {
@@ -438,7 +252,6 @@ public class EditFlowWindow extends ResizableWindow {
                     flowNode.getData().setX(node.getX());
                     flowNode.getData().setY(node.getY());
                 }
-
                 configurationService.save(componentFlowVersion);
 
             } else if (e instanceof ConnectionEvent) {

@@ -22,6 +22,10 @@ public class ComponentVersion extends AbstractObjectWithSettings<ComponentVersio
         }
     }
 
+    public String getName() {
+        return data.getName();
+    }
+    
     public Connection getConnection() {
         return connection;
     }

@@ -36,13 +36,13 @@ public class DbReaderComponent extends AbstractComponent {
     @SettingDefinition(order = 0, required = true, type = Type.SQL, label = "Sql")
     public final static String SQL = "db.reader.sql";
 
-    @SettingDefinition(order = 10, required = true, type = Type.INTEGER, defaultValue = "1", label = "Rows Per Message")
+    @SettingDefinition(order = 10, required = true, type = Type.INTEGER, defaultValue = "1", label = "Rows/Msg")
     public final static String ROWS_PER_MESSAGE = "db.reader.rows.per.message";
 
     @SettingDefinition(order = 10, required = true, type = Type.BOOLEAN, defaultValue = "false", label = "Trim Columns")
     public final static String TRIM_COLUMNS = "db.reader.trim.columns";
 
-    @SettingDefinition(order = 200, type = Type.CHOICE, choices = { "REPLACE", "ENHANCE" }, defaultValue = "REPLACE", label = "Message Manipulation Strategy")
+    @SettingDefinition(order = 200, type = Type.CHOICE, choices = { "REPLACE", "ENHANCE" }, defaultValue = "REPLACE", label = "Msg Strategy")
     public final static String MESSAGE_MANIPULATION_STRATEGY = "db.reader.message.manipulation.strategy";
 
     protected String sql;

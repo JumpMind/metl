@@ -58,13 +58,17 @@ abstract public class AbstractObjectWithSettings<D extends AbstractData> extends
         return settingData;
     }
     
-    public String get(String name) {
+    public String get(String name, String defaultValue) {
         for (SettingData settingData : settings) {
             if (name.equals(settingData.getName())) {
                 return settingData.getValue();
             }
         }
-        return null;
+        return defaultValue;
+    }
+    
+    public String get(String name) {
+        return get(name, null);
     }
     
     public boolean getBoolean(String name) {
