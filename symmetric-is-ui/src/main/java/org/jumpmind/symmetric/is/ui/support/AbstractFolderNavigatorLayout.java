@@ -204,6 +204,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         }
 
         treeTable.focus();
+        treeTable.unselect(folder);
         treeTable.select(itemToSelect);
     }
 

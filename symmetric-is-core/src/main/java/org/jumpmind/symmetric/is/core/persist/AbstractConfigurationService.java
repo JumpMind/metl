@@ -312,7 +312,7 @@ abstract class AbstractConfigurationService implements IConfigurationService {
         List<ComponentVersionSettingData> settings = persistenceManager.find(
                 ComponentVersionSettingData.class, versionParams, null, null,
                 tableName(ComponentVersionSettingData.class));
-        
+
         return new ComponentVersion(component, null, componentVersionData,
                 settings.toArray(new SettingData[settings.size()]));
     }
@@ -375,6 +375,17 @@ abstract class AbstractConfigurationService implements IConfigurationService {
         persistenceManager.save(data, null, null, tableName(data.getClass()));
     }
 
+    @Override
+    public void save(ComponentFlowNode componentFlowNode) {
+        ComponentVersion version = componentFlowNode.getComponentVersion();
+        Component component = version.getComponent();
+        if (!component.getData().isShared()) {
+            save(component);
+            save(version);
+        }
+        save((AbstractObject<?>)componentFlowNode);
+    }
+
     // TODO transactional
     @Override
     public void save(ComponentFlowVersion flowVersion) {
@@ -383,12 +394,6 @@ abstract class AbstractConfigurationService implements IConfigurationService {
 
         List<ComponentFlowNode> componentFlowNodes = flowVersion.getComponentFlowNodes();
         for (ComponentFlowNode componentFlowNode : componentFlowNodes) {
-            ComponentVersion version = componentFlowNode.getComponentVersion();
-            Component component = version.getComponent();
-            if (!component.getData().isShared()) {
-                save(component);
-                save(version);
-            }
             save(componentFlowNode);
         }
 

@@ -54,6 +54,8 @@ public interface IConfigurationService {
     public void refresh(Connection connection);
     
     public void save(Connection connection);
+    
+    public void save(ComponentFlowNode flowNode);
 
     public abstract void save(AbstractObject<?> obj);
     

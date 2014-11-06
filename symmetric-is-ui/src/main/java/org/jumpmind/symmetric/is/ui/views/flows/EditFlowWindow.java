@@ -137,12 +137,12 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
         showAtSize(.8);
 
     }
-    
+
     @Override
     public void componentSettingsChanges(ComponentFlowNode node, boolean deleted) {
         redrawFlow();
     }
-    
+
     protected VerticalLayout buildPalette() {
         VerticalLayout layout = new VerticalLayout();
         layout.setMargin(true);
@@ -289,16 +289,22 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
 
             ComponentVersion componentVersion = new ComponentVersion(component, null,
                     new ComponentVersionData());
-            componentVersion.getData().setName(type + " " + (countComponentsOfType(type) + 1));
+            
+            componentVersion.setName(type + " " + (countComponentsOfType(type) + 1));
 
             ComponentFlowNodeData nodeData = new ComponentFlowNodeData(componentVersion.getData()
                     .getId(), componentFlowVersion.getData().getId());
-            componentFlowVersion.getComponentFlowNodes().add(
-                    new ComponentFlowNode(componentVersion, nodeData));
+            
+            ComponentFlowNode componentFlowNode = new ComponentFlowNode(componentVersion, nodeData);
+            componentFlowVersion.getComponentFlowNodes().add(componentFlowNode);
 
-            // TODO saving the entire flow for now, could save only the new node
-            configurationService.save(componentFlowVersion);
+            configurationService.save(componentFlowNode);
+            
             redrawFlow();
+            
+            componentSettingsSheet.refresh(componentFlowNode);
+            
+            tabs.setSelectedTab(componentSettingsSheet);
         }
     }
 

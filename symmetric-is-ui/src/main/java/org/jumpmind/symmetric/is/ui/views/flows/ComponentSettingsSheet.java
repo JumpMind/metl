@@ -119,46 +119,46 @@ public class ComponentSettingsSheet extends VerticalLayout {
 
     protected void addNodeCombo(FormLayout formLayout, final ComponentFlowNode flowNode) {
         List<ComponentFlowNode> allNodes = componentFlowVersion.getComponentFlowNodes();
-        final ComboBox nameField = new ComboBox("Name");
-        nameField.setNewItemsAllowed(true);
-        nameField.setNullSelectionAllowed(false);
-        nameField.setImmediate(true);
+        final ComboBox nodeNameCombo = new ComboBox("Name");
+        nodeNameCombo.setNewItemsAllowed(true);
+        nodeNameCombo.setNullSelectionAllowed(false);
+        nodeNameCombo.setImmediate(true);
         for (ComponentFlowNode node : allNodes) {
-            nameField.addItem(node.getId());
-            nameField.setItemCaption(node.getId(), node.getComponentVersion().getName());
+            nodeNameCombo.addItem(node.getId());
+            nodeNameCombo.setItemCaption(node.getId(), node.getComponentVersion().getName());
         }
 
         if (flowNode != null) {
-            nameField.setValue(flowNode.getId());
+            nodeNameCombo.setValue(flowNode.getId());
 
-            nameField.addValueChangeListener(new ValueChangeListener() {
+            nodeNameCombo.addValueChangeListener(new ValueChangeListener() {
                 private static final long serialVersionUID = 1L;
 
                 @Override
                 public void valueChange(ValueChangeEvent event) {
                     List<ComponentFlowNode> allNodes = componentFlowVersion.getComponentFlowNodes();
                     for (ComponentFlowNode node : allNodes) {
-                        if (node.getId().equals(nameField.getValue())) {
+                        if (node.getId().equals(nodeNameCombo.getValue())) {
                             refresh(node);
                         }
                     }
                 }
             });
-            nameField.setNewItemHandler(new NewItemHandler() {
+            nodeNameCombo.setNewItemHandler(new NewItemHandler() {
                 private static final long serialVersionUID = 1L;
 
                 @Override
                 public void addNewItem(String newItemCaption) {
                     flowNode.getComponentVersion().getData().setName(newItemCaption);
-                    nameField.setItemCaption(flowNode.getId(), newItemCaption);
-                    saveName(nameField, flowNode);
+                    nodeNameCombo.setItemCaption(flowNode.getId(), newItemCaption);
+                    saveName(nodeNameCombo, flowNode);
                 }
             });
 
         } else {
-            nameField.setEnabled(false);
+            nodeNameCombo.setEnabled(false);
         }
-        formLayout.addComponent(nameField);
+        formLayout.addComponent(nodeNameCombo);
     }
 
     protected void addSettingField(final String key, final SettingDefinition definition,
