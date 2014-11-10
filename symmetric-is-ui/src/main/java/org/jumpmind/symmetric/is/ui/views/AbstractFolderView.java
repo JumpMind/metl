@@ -2,7 +2,7 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.ui.support.AbstractFolderNavigatorLayout;
-import org.jumpmind.symmetric.is.ui.support.IItemUpdatedListener;
+import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;

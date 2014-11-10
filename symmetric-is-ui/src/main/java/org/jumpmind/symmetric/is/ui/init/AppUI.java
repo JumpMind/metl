@@ -1,8 +1,8 @@
 package org.jumpmind.symmetric.is.ui.init;
 
 import org.jumpmind.symmetric.is.ui.support.Menu;
-import org.jumpmind.symmetric.is.ui.support.UiUtils;
 import org.jumpmind.symmetric.is.ui.support.ViewManager;
+import org.jumpmind.symmetric.ui.common.UiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;

@@ -20,9 +20,9 @@ import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
-import org.jumpmind.symmetric.is.ui.support.ResizableWindow;
-import org.jumpmind.symmetric.is.ui.support.UiComponent;
 import org.jumpmind.symmetric.is.ui.views.flows.ComponentSettingsSheet.IComponentSettingsChangedListener;
+import org.jumpmind.symmetric.ui.common.ResizableWindow;
+import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 

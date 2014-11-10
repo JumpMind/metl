@@ -17,11 +17,11 @@ import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
-import org.jumpmind.symmetric.is.ui.support.IItemUpdatedListener;
-import org.jumpmind.symmetric.is.ui.support.ResizableWindow;
-import org.jumpmind.symmetric.is.ui.support.UiComponent;
-import org.jumpmind.symmetric.is.ui.support.UiConstants;
-import org.jumpmind.symmetric.is.ui.support.UiUtils;
+import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
+import org.jumpmind.symmetric.ui.common.ResizableWindow;
+import org.jumpmind.symmetric.ui.common.UiComponent;
+import org.jumpmind.symmetric.ui.common.UiConstants;
+import org.jumpmind.symmetric.ui.common.UiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 

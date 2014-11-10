@@ -15,8 +15,8 @@ import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
-import org.jumpmind.symmetric.is.ui.support.ImmediateUpdateTextField;
-import org.jumpmind.symmetric.is.ui.support.SqlField;
+import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
+import org.jumpmind.symmetric.ui.common.SqlField;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;

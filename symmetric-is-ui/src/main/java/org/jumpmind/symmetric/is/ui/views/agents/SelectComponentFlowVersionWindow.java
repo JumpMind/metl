@@ -6,10 +6,10 @@ import java.util.Set;
 import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.ui.support.IItemUpdatedListener;
-import org.jumpmind.symmetric.is.ui.support.MultiSelectTable;
-import org.jumpmind.symmetric.is.ui.support.ResizableWindow;
-import org.jumpmind.symmetric.is.ui.support.UiComponent;
+import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
+import org.jumpmind.symmetric.ui.common.MultiSelectTable;
+import org.jumpmind.symmetric.ui.common.ResizableWindow;
+import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
