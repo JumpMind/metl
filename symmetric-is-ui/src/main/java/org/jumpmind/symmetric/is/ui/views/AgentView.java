@@ -12,7 +12,7 @@ import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.config.data.AgentData;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.ui.support.Category;
-import org.jumpmind.symmetric.is.ui.support.ViewLink;
+import org.jumpmind.symmetric.is.ui.support.MenuLink;
 import org.jumpmind.symmetric.is.ui.views.agents.EditAgentDeploymentsWindow;
 import org.jumpmind.symmetric.is.ui.views.agents.EditAgentWindow;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
@@ -42,7 +42,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-@ViewLink(category = Category.RUNTIME, name = "Agents", id = "agents", icon = FontAwesome.GEARS, menuOrder = 10)
+@MenuLink(category = Category.RUNTIME, name = "Agents", id = "agents", icon = FontAwesome.GEARS, menuOrder = 10)
 public class AgentView extends AbstractFolderView {
 
     private static final long serialVersionUID = 1L;

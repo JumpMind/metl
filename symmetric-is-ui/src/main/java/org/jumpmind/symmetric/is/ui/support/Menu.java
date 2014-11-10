@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jumpmind.symmetric.is.ui.init.AppUI;
+
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.BrowserWindowOpener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -33,7 +36,7 @@ public class Menu extends CssLayout implements ViewChangeListener {
     ViewManager viewManager;
 
     Map<String, Button> viewToButtonMapping;
-
+    
     public Menu(ViewManager viewManager) {
         setPrimaryStyleName("valo-menu");
 
@@ -89,13 +92,13 @@ public class Menu extends CssLayout implements ViewChangeListener {
         menuItemsLayout.setPrimaryStyleName("valo-menuitems");
         menu.addComponent(menuItemsLayout);
 
-        Map<Category, List<ViewLink>> menuItemsByCategory = viewManager.getMenuItemsByCategory();
+        Map<Category, List<MenuLink>> menuItemsByCategory = viewManager.getMenuItemsByCategory();
         Set<Category> categories = menuItemsByCategory.keySet();
         for (Category category : categories) {
             addMenuSection(category.name(), menuItemsLayout);
-            List<ViewLink> items = menuItemsByCategory.get(category);
-            for (ViewLink menuView : items) {
-                addMenuItem(menuView.name(), menuView.icon(), menuItemsLayout, menuView.id());
+            List<MenuLink> links = menuItemsByCategory.get(category);
+            for (MenuLink menuLink : links) {
+                addMenuItem(menuLink, menuItemsLayout);
             }
         }
 
@@ -109,25 +112,31 @@ public class Menu extends CssLayout implements ViewChangeListener {
         menuItemsLayout.addComponent(label);
     }
 
-    protected void addMenuItem(String caption, FontAwesome icon, CssLayout menuItemsLayout,
-            final String viewName) {
+    protected void addMenuItem(final MenuLink menuLink, CssLayout menuItemsLayout) {
 
-        final Button b = new Button(caption, new ClickListener() {
-            private static final long serialVersionUID = 1L;
+        final Button b = new Button(menuLink.name());
+        if (menuLink.uiClass().equals(AppUI.class)) {
+            b.addClickListener(new ClickListener() {
+                private static final long serialVersionUID = 1L;
 
-            @Override
-            public void buttonClick(final ClickEvent event) {
-                viewManager.navigateTo(viewName);
-                event.getButton().addStyleName("selected");
-            }
-        });
+                @Override
+                public void buttonClick(final ClickEvent event) {
+                    viewManager.navigateTo(menuLink.id());
+                    event.getButton().addStyleName("selected");
+                }
+            });
+        } else {
+            BrowserWindowOpener opener = new BrowserWindowOpener(menuLink.uiClass());
+            opener.setWindowName(menuLink.id());
+            opener.extend(b);
+        }
 
         b.setHtmlContentAllowed(true);
         b.setPrimaryStyleName("valo-menu-item");
-        b.setIcon(icon);
+        b.setIcon(menuLink.icon());
         menuItemsLayout.addComponent(b);
 
-        viewToButtonMapping.put(viewName, b);
+        viewToButtonMapping.put(menuLink.id(), b);
     }
 
     @Override

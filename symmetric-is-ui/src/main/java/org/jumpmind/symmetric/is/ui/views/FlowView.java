@@ -17,7 +17,7 @@ import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
 import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.support.Category;
-import org.jumpmind.symmetric.is.ui.support.ViewLink;
+import org.jumpmind.symmetric.is.ui.support.MenuLink;
 import org.jumpmind.symmetric.is.ui.views.flows.EditDbConnectionWindow;
 import org.jumpmind.symmetric.is.ui.views.flows.EditFlowWindow;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
@@ -29,8 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
 import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.event.Action;
-import com.vaadin.event.Action.Handler;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
@@ -43,7 +41,7 @@ import com.vaadin.ui.Window.CloseListener;
 
 @UiComponent
 @Scope(value = "ui")
-@ViewLink(category = Category.DESIGN, name = "Flows", id = "flows", icon = FontAwesome.SHARE_ALT, menuOrder = 10)
+@MenuLink(category = Category.DESIGN, name = "Flows", id = "flows", icon = FontAwesome.SHARE_ALT, menuOrder = 10)
 public class FlowView extends AbstractFolderView {
 
     private static final long serialVersionUID = 1L;
@@ -64,7 +62,6 @@ public class FlowView extends AbstractFolderView {
 
     public FlowView() {
         super("Flows", FolderType.DESIGN);
-        treeTable.addActionHandler(new ActionHandler());
     }
 
     @PostConstruct
@@ -315,29 +312,6 @@ public class FlowView extends AbstractFolderView {
             refresh();
             expand(toDelete.getFolder(), toDelete.getFolder());
             return true;
-        }
-    }
-
-    class ActionHandler implements Handler {
-
-        private static final String ACTION_OPEN_FLOW = "Open Flow";
-
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public Action[] getActions(Object target, Object sender) {
-            if (target instanceof ComponentFlowVersion) {
-                return new Action[] { new Action(ACTION_OPEN_FLOW) };
-            } else {
-                return null;
-            }
-        }
-
-        @Override
-        public void handleAction(Action action, Object sender, Object target) {
-            if (action.getCaption().equals(ACTION_OPEN_FLOW)) {
-                editFlowWindow.show((ComponentFlowVersion) target);
-            }
         }
     }
 

@@ -4,15 +4,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.jumpmind.symmetric.is.ui.init.AppUI;
+
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.UI;
 
 @Target({java.lang.annotation.ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ViewLink {
+public @interface MenuLink {
     
     String id();
     
     String name();
+    
+    Class<? extends UI> uiClass() default AppUI.class;
     
     Category category() default Category.OTHER;
     

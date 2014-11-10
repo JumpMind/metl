@@ -41,8 +41,8 @@ public class ViewManager implements Serializable {
         navigator.setErrorView(new PageNotFoundView(this));
         if (views != null) {
             for (View view : views) {
-                ViewLink menu = (ViewLink) view.getClass().getAnnotation(ViewLink.class);
-                if (menu != null) {
+                MenuLink menu = (MenuLink) view.getClass().getAnnotation(MenuLink.class);
+                if (menu != null && menu.uiClass().equals(AppUI.class)) {
                     if (isBlank(defaultView)) {
                         defaultView = menu.id();
                     }
@@ -56,22 +56,22 @@ public class ViewManager implements Serializable {
         this.navigator.addViewChangeListener(listener);
     }
 
-    public Map<Category, List<ViewLink>> getMenuItemsByCategory() {
-        LinkedHashMap<Category, List<ViewLink>> menuItemsByCategory = new LinkedHashMap<Category, List<ViewLink>>();
+    public Map<Category, List<MenuLink>> getMenuItemsByCategory() {
+        LinkedHashMap<Category, List<MenuLink>> menuItemsByCategory = new LinkedHashMap<Category, List<MenuLink>>();
         Category[] categories = Category.values();
         for (Category category : categories) {
-            List<ViewLink> viewsByCategory = new ArrayList<ViewLink>();
+            List<MenuLink> viewsByCategory = new ArrayList<MenuLink>();
             for (View view : views) {
-                ViewLink menu = (ViewLink) view.getClass().getAnnotation(ViewLink.class);
+                MenuLink menu = (MenuLink) view.getClass().getAnnotation(MenuLink.class);
                 if (menu != null) {
                     if (menu.category() == category) {
                         viewsByCategory.add(menu);
                     }
                 }
             }
-            Collections.sort(viewsByCategory, new Comparator<ViewLink>() {
+            Collections.sort(viewsByCategory, new Comparator<MenuLink>() {
                 @Override
-                public int compare(ViewLink o1, ViewLink o2) {
+                public int compare(MenuLink o1, MenuLink o2) {
                     return new Integer(o1.menuOrder()).compareTo(new Integer(o2.menuOrder()));
                 }
             });
