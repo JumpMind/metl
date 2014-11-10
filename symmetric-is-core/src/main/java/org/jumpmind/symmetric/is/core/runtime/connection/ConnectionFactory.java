@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.config.Connection;
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionDefinition;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
 
 public class ConnectionFactory implements IConnectionFactory {
 

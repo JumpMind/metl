@@ -16,8 +16,8 @@ import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_TEST
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_URL;
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_USER;
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_VALIDATION_QUERY;
-import static org.jumpmind.symmetric.app.core.EnvConstants.DEFAULT_PROPERTY_ENV;
-import static org.jumpmind.symmetric.app.core.EnvConstants.PROPERTY_ENV;
+import static org.jumpmind.symmetric.app.common.EnvConstants.DEFAULT_PROPERTY_ENV;
+import static org.jumpmind.symmetric.app.common.EnvConstants.PROPERTY_ENV;
 
 import javax.sql.DataSource;
 
@@ -28,10 +28,10 @@ import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.security.SecurityServiceFactory;
-import org.jumpmind.symmetric.app.core.ConfigDatabaseUpgrader;
-import org.jumpmind.symmetric.app.core.EnvConstants;
-import org.jumpmind.symmetric.app.core.persist.IPersistenceManager;
-import org.jumpmind.symmetric.app.core.persist.JdbcPersistenceManager;
+import org.jumpmind.symmetric.app.common.ConfigDatabaseUpgrader;
+import org.jumpmind.symmetric.app.common.EnvConstants;
+import org.jumpmind.symmetric.app.common.persist.IPersistenceManager;
+import org.jumpmind.symmetric.app.common.persist.JdbcPersistenceManager;
 import org.jumpmind.symmetric.is.core.persist.ConfigurationSqlService;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.AgentManager;

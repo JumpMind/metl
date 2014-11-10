@@ -1,8 +1,8 @@
-apply from: '../../symmetric-app-core/common.gradle'
+apply from: '../common.gradle'
 
 
 dependencies {
-    compile project(":symmetric-app-core")   
+    compile "org.jumpmind.symmetric:symmetric-app-common:1.0.0-SNAPSHOT"
     compile "jaxen:jaxen:$jaxenVersion"
     compile "javax.mail:mail:$javaMailVersion"
     compile "org.jdom:jdom2:$jdomVersion"
