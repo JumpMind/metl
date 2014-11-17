@@ -62,8 +62,16 @@ public class AppConfig {
 
     @Autowired
     Environment env;
-    
+
     IDatabasePlatform databasePlatform;
+
+    IConfigurationService configurationService;
+
+    IComponentFactory componentFactory;
+
+    IConnectionFactory connectionFactory;
+
+    IPersistenceManager persistenceManager;
 
     @Bean
     @Scope(value = "singleton")
@@ -106,8 +114,8 @@ public class AppConfig {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IDatabasePlatform configDatabasePlatform() {
         if (databasePlatform == null) {
-            databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(configDataSource(),
-                    new SqlTemplateSettings(), true); 
+            databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(
+                    configDataSource(), new SqlTemplateSettings(), true);
         }
         return databasePlatform;
     }
@@ -129,34 +137,45 @@ public class AppConfig {
     @Bean
     @Scope(value = "singleton")
     public IPersistenceManager persistenceManager() {
-        IPersistenceManager manager = new JdbcPersistenceManager(configDatabasePlatform());
-        return manager;
+        if (persistenceManager == null) {
+            persistenceManager = new JdbcPersistenceManager(configDatabasePlatform());
+        }
+        return persistenceManager;
     }
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConfigurationService configurationService() {
-        IConfigurationService service = new ConfigurationSqlService(configDatabasePlatform(), persistenceManager(),
-                tablePrefix());
-        return service;
+        if (configurationService == null) {
+            configurationService = new ConfigurationSqlService(configDatabasePlatform(),
+                    persistenceManager(), tablePrefix());
+        }
+        return configurationService;
     }
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IComponentFactory componentFactory() {
-        return new ComponentFactory();
+        if (componentFactory == null) {
+            componentFactory = new ComponentFactory();
+        }
+        return componentFactory;
     }
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConnectionFactory connectionFactory() {
-        return new ConnectionFactory();
+        if (connectionFactory == null) {
+            connectionFactory = new ConnectionFactory();
+        }
+        return connectionFactory;
     }
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IAgentManager agentManager() {
-        IAgentManager agentManager = new AgentManager(configurationService());
+        IAgentManager agentManager = new AgentManager(configurationService(), componentFactory(),
+                connectionFactory());
         return agentManager;
     }
 

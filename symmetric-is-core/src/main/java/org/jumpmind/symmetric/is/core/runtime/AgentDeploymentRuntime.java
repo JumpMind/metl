@@ -5,17 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 
-public class ComponentFlowCoordinator {
+public class AgentDeploymentRuntime {
 
-    ComponentFlowVersion flow;
+    AgentDeployment deployment;
 
     Map<ComponentFlowNode, IComponent> endpointRuntimes = new HashMap<ComponentFlowNode, IComponent>();
 
@@ -27,9 +27,9 @@ public class ComponentFlowCoordinator {
 
     IConnectionFactory connectionFactory;
 
-    public ComponentFlowCoordinator(ComponentFlowVersion flow, IComponentFactory componentFactory,
+    public AgentDeploymentRuntime(AgentDeployment deployment, IComponentFactory componentFactory,
             IConnectionFactory connectionFactory) {
-        this.flow = flow;
+        this.deployment = deployment;
         this.componentFactory = componentFactory;
         this.connectionFactory = connectionFactory;
     }
@@ -40,7 +40,8 @@ public class ComponentFlowCoordinator {
 
     public void start() {
         try {
-            List<ComponentFlowNode> all = flow.getComponentFlowNodes();
+            List<ComponentFlowNode> all = deployment.getComponentFlowVersion()
+                    .getComponentFlowNodes();
             for (ComponentFlowNode node : all) {
                 endpointRuntimes.put(node, componentFactory.create(node.getComponentVersion()));
                 endpointRuntimes.get(node).start(connectionFactory, node, new NodeChain(node));
@@ -53,7 +54,8 @@ public class ComponentFlowCoordinator {
     }
 
     public void stop() {
-        List<ComponentFlowNode> allNodes = flow.getComponentFlowNodes();
+        List<ComponentFlowNode> allNodes = deployment.getComponentFlowVersion()
+                .getComponentFlowNodes();
         for (ComponentFlowNode node : allNodes) {
             endpointRuntimes.get(node).stop();
         }
@@ -103,12 +105,13 @@ public class ComponentFlowCoordinator {
 
         @Override
         public void doNext(Message outputMessage) {
-            for (ComponentFlowNodeLink link : flow.getComponentFlowNodeLinks()) {
+            for (ComponentFlowNodeLink link : deployment.getComponentFlowVersion()
+                    .getComponentFlowNodeLinks()) {
                 if (link.getData().getSourceNodeId().equals(sourceNode.getData().getId())) {
-                    ComponentFlowNode targetNode = flow.findComponentFlowNodeWithId(link
-                            .getData().getTargetNodeId());
+                    ComponentFlowNode targetNode = deployment.getComponentFlowVersion()
+                            .findComponentFlowNodeWithId(link.getData().getTargetNodeId());
                     validateOutputLink(sourceNode, targetNode);
-                    ComponentFlowCoordinator.this.doNext(targetNode, outputMessage, sourceNode);
+                    AgentDeploymentRuntime.this.doNext(targetNode, outputMessage, sourceNode);
                 }
             }
         }

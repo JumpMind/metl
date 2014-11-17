@@ -11,6 +11,8 @@ import javax.annotation.PreDestroy;
 import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.AgentStartMode;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.util.AppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +23,17 @@ public class AgentManager implements IAgentManager {
 
     IConfigurationService configurationService;
 
+    IComponentFactory componentFactory;
+
+    IConnectionFactory connectionFactory;
+
     Map<Agent, AgentEngine> engines = new HashMap<Agent, AgentEngine>();
 
-    public AgentManager(IConfigurationService configurationService) {
+    public AgentManager(IConfigurationService configurationService,
+            IComponentFactory componentFactory, IConnectionFactory connectionFactory) {
         this.configurationService = configurationService;
+        this.componentFactory = componentFactory;
+        this.connectionFactory = connectionFactory;
     }
 
     public void start() {
@@ -55,7 +64,8 @@ public class AgentManager implements IAgentManager {
     }
 
     protected AgentEngine createAndStartEngine(Agent agent) {
-        AgentEngine engine = new AgentEngine(agent, configurationService);
+        AgentEngine engine = new AgentEngine(agent, configurationService, componentFactory,
+                connectionFactory);
         engines.put(agent, engine);
         if (agent.getAgentStartMode() == AgentStartMode.AUTO) {
             engine.start();

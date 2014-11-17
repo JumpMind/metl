@@ -19,5 +19,9 @@ public class AgentDeployment extends AbstractObject<AgentDeploymentData> {
     public String getName() {
         return componentFlowVersion.getComponentFlow().getData().getName();
     }
+    
+    public ComponentFlowVersion getComponentFlowVersion() {
+        return componentFlowVersion;
+    }
 
 }

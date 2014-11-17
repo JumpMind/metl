@@ -3,15 +3,7 @@ package org.jumpmind.symmetric.is.ui.init;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.sql.DataSource;
-
 import org.jumpmind.db.platform.IDatabasePlatform;
-import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
-import org.jumpmind.db.sql.SqlTemplateSettings;
-import org.jumpmind.symmetric.is.core.config.Connection;
-import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.ui.common.AbstractSpringUI;
 import org.jumpmind.symmetric.ui.sqlexplorer.IDb;
 import org.jumpmind.symmetric.ui.sqlexplorer.IDbProvider;
@@ -50,24 +42,12 @@ public class SqlUI extends AbstractSpringUI {
                     public List<IDb> getDatabases() {
                         if (dbs == null) {
                             dbs = new ArrayList<IDb>();
-                            WebApplicationContext ctx = getWebApplicationContext();
-                            final IConfigurationService configurationService = ctx
-                                    .getBean(IConfigurationService.class);
-                            final IConnectionFactory connectionFactory = ctx
-                                    .getBean(IConnectionFactory.class);
-                            final DataSource configDS = ctx.getBean(DataSource.class);
+                            final WebApplicationContext ctx = getWebApplicationContext();
                             dbs.add(new IDb() {
-
-                                IDatabasePlatform platform;
-
                                 @Override
                                 public IDatabasePlatform getPlatform() {
-                                    if (platform == null) {
-                                        platform = JdbcDatabasePlatformFactory
-                                                .createNewPlatformInstance(configDS,
-                                                        new SqlTemplateSettings(), false);
-                                    }
-                                    return platform;
+                                        IDatabasePlatform platform = ctx.getBean(IDatabasePlatform.class);
+                                        return platform;
                                 }
 
                                 @Override
@@ -76,33 +56,38 @@ public class SqlUI extends AbstractSpringUI {
                                 }
                             });
 
-                            List<String> types = connectionFactory
-                                    .getConnectionTypes(ConnectionCategory.DATASOURCE);
-                            List<Connection> connections = configurationService
-                                    .findConnectionsByTypes(types.toArray(new String[types.size()]));
-                            for (final Connection connection : connections) {
-                                dbs.add(new IDb() {
-
-                                    IDatabasePlatform platform;
-
-                                    @Override
-                                    public IDatabasePlatform getPlatform() {
-                                        if (platform == null) {
-                                            DataSource dataSource = connectionFactory.create(
-                                                    connection).reference();
-                                            platform = JdbcDatabasePlatformFactory
-                                                    .createNewPlatformInstance(dataSource,
-                                                            new SqlTemplateSettings(), false);
-                                        }
-                                        return platform;
-                                    }
-
-                                    @Override
-                                    public String getName() {
-                                        return connection.getData().getName();
-                                    }
-                                });
-                            }
+//                            final IConfigurationService configurationService = ctx
+//                                    .getBean(IConfigurationService.class);
+//                            final IConnectionFactory connectionFactory = ctx
+//                                    .getBean(IConnectionFactory.class);
+//                            
+//                            List<String> types = connectionFactory
+//                                    .getConnectionTypes(ConnectionCategory.DATASOURCE);
+//                            List<Connection> connections = configurationService
+//                                    .findConnectionsByTypes(types.toArray(new String[types.size()]));
+//                            for (final Connection connection : connections) {
+//                                dbs.add(new IDb() {
+//
+//                                    IDatabasePlatform platform;
+//
+//                                    @Override
+//                                    public IDatabasePlatform getPlatform() {
+//                                        if (platform == null) {
+//                                            DataSource dataSource = connectionFactory.create(
+//                                                    connection).reference();
+//                                            platform = JdbcDatabasePlatformFactory
+//                                                    .createNewPlatformInstance(dataSource,
+//                                                            new SqlTemplateSettings(), false);
+//                                        }
+//                                        return platform;
+//                                    }
+//
+//                                    @Override
+//                                    public String getName() {
+//                                        return connection.getData().getName();
+//                                    }
+//                                });
+//                            }
                         }
                         return dbs;
                     }

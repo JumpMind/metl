@@ -195,6 +195,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
     protected void expand(Folder folder, Object itemToSelect) {
         List<Folder> toExpand = new ArrayList<Folder>();
         toExpand.add(0, folder);
+        treeTable.unselect(folder);
         while (folder != null) {
             folder = folder.getParent();
             if (folder != null) {
@@ -206,8 +207,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             treeTable.setCollapsed(expandMe, false);
         }
 
-        treeTable.focus();
-        treeTable.unselect(folder);
+        treeTable.focus();        
         treeTable.select(itemToSelect);
     }
 
