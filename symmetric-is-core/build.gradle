@@ -2,7 +2,14 @@ apply from: '../common.gradle'
 
 
 dependencies {
-    compile "org.jumpmind.symmetric:symmetric-app-common:1.0.0-SNAPSHOT"
+    compile "org.springframework:spring-context:$springVersion"
+    compile "org.jumpmind.symmetric:symmetric-util:$symmetricVersion"
+    compile "org.jumpmind.symmetric:symmetric-db:$symmetricVersion"
+    compile "org.jumpmind.symmetric:symmetric-jdbc:$symmetricVersion"
+    compile "org.jumpmind.symmetric:symmetric-io:$symmetricVersion"
+    compile "commons-lang:commons-lang:$commonsLangVersion"
+    compile "commons-dbcp:commons-dbcp:$commonsDbcpVersion"
+    compile "commons-io:commons-io:$commonsIoVersion"
     compile "jaxen:jaxen:$jaxenVersion"
     compile "javax.mail:mail:$javaMailVersion"
     compile "org.jdom:jdom2:$jdomVersion"

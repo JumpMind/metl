@@ -12,10 +12,10 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
+import org.jumpmind.db.util.ConfigDatabaseUpgrader;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.symmetric.app.common.ConfigDatabaseUpgrader;
-import org.jumpmind.symmetric.app.common.LogUtils;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
+import org.jumpmind.symmetric.is.core.util.LogUtils;
 import org.jumpmind.symmetric.is.ui.support.Broadcaster;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;

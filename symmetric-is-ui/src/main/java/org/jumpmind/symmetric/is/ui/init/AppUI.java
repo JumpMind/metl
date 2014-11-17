@@ -2,64 +2,35 @@ package org.jumpmind.symmetric.is.ui.init;
 
 import org.jumpmind.symmetric.is.ui.support.Menu;
 import org.jumpmind.symmetric.is.ui.support.ViewManager;
-import org.jumpmind.symmetric.ui.common.UiUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.jumpmind.symmetric.ui.common.AbstractSpringUI;
 
 import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
-import com.vaadin.server.DefaultErrorHandler;
-import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.UI;
 
 @Theme("apptheme")
 @Title("SymmetricIS")
 @PreserveOnRefresh
 @Push(transport=Transport.WEBSOCKET)
-public class AppUI extends UI {
+public class AppUI extends AbstractSpringUI {
 
     private static final long serialVersionUID = 1L;
-
-    private static Logger log = LoggerFactory.getLogger(AppUI.class);
 
     ViewManager viewManager;
 
     @Override
     protected void init(VaadinRequest request) {
 
-        setErrorHandler(new DefaultErrorHandler() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void error(com.vaadin.server.ErrorEvent event) {
-                Throwable ex = event.getThrowable();
-                UiUtils.notify("Error",
-                        "An unexpected error occurred.  Please check the log file for details.",
-                        Type.ERROR_MESSAGE);
-                if (ex != null) {
-                    log.error(ex.getMessage(), ex);
-                } else {
-                    log.error("An unexpected error occurred");
-                }
-            }
-        });
-
+        super.init(request);
+        
         HorizontalLayout root = new HorizontalLayout();
         root.setSizeFull();
         setContent(root);
-
-        Responsive.makeResponsive(this);
 
         CssLayout contentArea = new CssLayout();
         contentArea.setPrimaryStyleName("valo-content");
@@ -74,11 +45,6 @@ public class AppUI extends UI {
         root.addComponents(menu, contentArea);
         root.setExpandRatio(contentArea, 1);
 
-    }
-
-    public WebApplicationContext getWebApplicationContext() {
-        return WebApplicationContextUtils.getRequiredWebApplicationContext(VaadinServlet
-                .getCurrent().getServletContext());
     }
 
 }

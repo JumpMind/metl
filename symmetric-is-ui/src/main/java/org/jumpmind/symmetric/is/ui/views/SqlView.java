@@ -12,7 +12,7 @@ import com.vaadin.server.FontAwesome;
 
 @UiComponent
 @Scope("ui")
-@MenuLink(id="sqlexplorer", category=Category.RUNTIME, menuOrder=20, uiClass=SqlUI.class, name = "Sql Explorer", icon=FontAwesome.SHARE_SQUARE_O)
+@MenuLink(id="sqlexplorer", category=Category.RUNTIME, menuOrder=20, uiClass=SqlUI.class, name = "Sql Explorer", icon=FontAwesome.DATABASE)
 public class SqlView implements View {
 
     private static final long serialVersionUID = 1L;

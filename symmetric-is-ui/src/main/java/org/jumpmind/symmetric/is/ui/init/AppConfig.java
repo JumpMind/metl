@@ -16,22 +16,21 @@ import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_TEST
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_URL;
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_USER;
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_VALIDATION_QUERY;
-import static org.jumpmind.symmetric.app.common.EnvConstants.DEFAULT_PROPERTY_ENV;
-import static org.jumpmind.symmetric.app.common.EnvConstants.PROPERTY_ENV;
+import static org.jumpmind.symmetric.is.core.util.EnvConstants.DEFAULT_PROPERTY_ENV;
+import static org.jumpmind.symmetric.is.core.util.EnvConstants.PROPERTY_ENV;
 
 import javax.sql.DataSource;
 
 import org.h2.Driver;
+import org.jumpmind.db.persist.JdbcPersistenceManager;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
+import org.jumpmind.db.util.ConfigDatabaseUpgrader;
+import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.security.SecurityServiceFactory;
-import org.jumpmind.symmetric.app.common.ConfigDatabaseUpgrader;
-import org.jumpmind.symmetric.app.common.EnvConstants;
-import org.jumpmind.symmetric.app.common.persist.IPersistenceManager;
-import org.jumpmind.symmetric.app.common.persist.JdbcPersistenceManager;
 import org.jumpmind.symmetric.is.core.persist.ConfigurationSqlService;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.AgentManager;
@@ -40,6 +39,7 @@ import org.jumpmind.symmetric.is.core.runtime.component.ComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.is.core.util.EnvConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

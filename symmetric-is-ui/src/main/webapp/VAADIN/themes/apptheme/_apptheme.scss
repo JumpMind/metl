@@ -18,5 +18,39 @@
   .v-table-caption-container {
     min-height: 12px;
   }
+  
+  .v-table .v-selected .v-button-caption {
+    color: #fff;
+  }
+  
+  .valo-menu-subtitle {
+     color: $v-focus-color;
+  }
+    
+  .v-menubar:focus:after {
+     border-color: #b2b2b2;
+     box-shadow: none;
+  }
+    
+  .v-panel-caption, .v-window-outerheader, .v-window-header, .v-window-maximizebox, .v-window-closebox, .v-menubar > .v-menubar-menuitem-checked {
+     background: $v-focus-color;
+     color: white;
+  }
+    
+  .v-loading-indicator[style*="none"]:before {
+    display: none;
+  }
+
+  .v-loading-indicator-delay:before,
+  .v-loading-indicator-wait:before {
+      content: "";
+      position: fixed;
+      background: rgba(0,0,0,.5);
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: auto;
+  }  
 
 }

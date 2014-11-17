@@ -50,7 +50,9 @@ public class ConnectionFactory implements IConnectionFactory {
             String connectionType = connection.getData().getType();
             Class<? extends IConnection> clazz = connectionTypes.get(connectionType);
             if (clazz != null) {
-                return clazz.newInstance();
+                IConnection runtime = clazz.newInstance();
+                runtime.start(connection);
+                return runtime;
             } else {
                 throw new IllegalStateException(
                         "Could not find a class associated with the connection type of "
