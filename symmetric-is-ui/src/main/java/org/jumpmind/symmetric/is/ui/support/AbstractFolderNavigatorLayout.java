@@ -36,6 +36,7 @@ import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.Tree.CollapseEvent;
 import com.vaadin.ui.Tree.CollapseListener;
@@ -131,9 +132,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             }
         });
         table.addValueChangeListener(new ValueChangeListener() {
-
             private static final long serialVersionUID = 1L;
-
             @SuppressWarnings("unchecked")
             @Override
             public void valueChange(ValueChangeEvent event) {
@@ -142,9 +141,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             }
         });
         table.addItemClickListener(new ItemClickListener() {
-
             private static final long serialVersionUID = 1L;
-
             @Override
             public void itemClick(ItemClickEvent event) {
                 if (event.getButton() == MouseButton.LEFT) {
@@ -158,9 +155,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             }
         });
         table.addCollapseListener(new CollapseListener() {
-
             private static final long serialVersionUID = 1L;
-
             @Override
             public void nodeCollapse(CollapseEvent event) {
                 if (event.getItemId() instanceof Folder) {
@@ -169,9 +164,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             }
         });
         table.addExpandListener(new ExpandListener() {
-
             private static final long serialVersionUID = 1L;
-
             @Override
             public void nodeExpand(ExpandEvent event) {
                 if (event.getItemId() instanceof Folder) {
@@ -179,6 +172,18 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                     table.setItemIcon(folder, FontAwesome.FOLDER_OPEN);
                     folderExpanded(folder);
                 }
+            }
+        });
+        table.setCellStyleGenerator(new CellStyleGenerator() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public String getStyle(Table source, Object itemId, Object propertyId) {
+                if (itemId instanceof Folder && "Name".equals(propertyId)) {
+                    return "folder";
+                } else {
+                    return null;    
+                }
+                
             }
         });
         return table;
