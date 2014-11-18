@@ -7,6 +7,8 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.symmetric.is.core.config.Agent;
+import org.jumpmind.symmetric.is.core.config.AgentDeployment;
+import org.jumpmind.symmetric.is.core.config.DeploymentStatus;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.config.data.AgentData;
@@ -107,7 +109,13 @@ public class AgentView extends AbstractFolderView {
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 if (itemId instanceof Agent) {
                     Agent agent = (Agent) itemId;
-                    return agent.getAgentStatus();
+                    List<AgentDeployment> deployments = agent.getAgentDeployments();
+                    for (AgentDeployment deployment : deployments) {
+                        if (deployment.getStatus() == DeploymentStatus.ERROR) {
+                            return DeploymentStatus.ERROR.toString();
+                        }
+                    }
+                    return agent.getAgentStatus().toString();
                 } else {
                     return null;
                 }

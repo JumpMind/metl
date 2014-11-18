@@ -1,17 +1,18 @@
 package org.jumpmind.symmetric.is.core.config.data;
 
-
 public class AgentDeploymentData extends AbstractData {
 
     private static final long serialVersionUID = 1L;
 
     String agentId;
-    
+
     String componentFlowVersionId;
-    
+
     String startMode;
-    
+
     String status;
+
+    String message;
 
     public String getAgentId() {
         return agentId;
@@ -44,9 +45,13 @@ public class AgentDeploymentData extends AbstractData {
     public void setStatus(String status) {
         this.status = status;
     }
-    
-    
-    
-    
-    
+
+    public void setMessage(String errorMessage) {
+        this.message = errorMessage;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
 }

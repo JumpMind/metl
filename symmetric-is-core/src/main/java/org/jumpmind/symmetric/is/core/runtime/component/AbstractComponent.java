@@ -4,6 +4,7 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.symmetric.is.core.runtime.IComponentFlowChain;
+import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
@@ -17,9 +18,12 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     protected IConnection connection;
     
     protected IConnectionFactory connectionFactory;
+    
+    protected IExecutionTracker executionTracker;
 
     @Override
-    public void start(IConnectionFactory connectionFactory, ComponentFlowNode componentNode, IComponentFlowChain chain) {
+    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory, ComponentFlowNode componentNode, IComponentFlowChain chain) {
+        this.executionTracker = executionTracker;
         this.componentNode = componentNode;
         this.chain = chain;
         this.connectionFactory = connectionFactory;

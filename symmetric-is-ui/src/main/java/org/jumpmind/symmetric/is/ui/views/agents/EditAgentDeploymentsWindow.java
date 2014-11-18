@@ -99,9 +99,11 @@ public class EditAgentDeploymentsWindow extends ResizableWindow {
         table.setSizeFull();
 
         table.setColumnHeader("name", "Name");
+        table.setColumnHeader("status", "Status");
+        table.setColumnHeader("message", "Message");
         table.setColumnHeader("createTime", "Time Deployed");
 
-        table.setVisibleColumns("name", "createTime");        
+        table.setVisibleColumns("name", "status", "message", "createTime");        
 
         layout.addComponent(table);
         layout.setExpandRatio(table, 1);

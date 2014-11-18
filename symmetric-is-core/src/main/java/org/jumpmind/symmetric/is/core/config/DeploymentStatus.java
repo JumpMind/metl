@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.config;
 
-public enum AgentStatus {
+public enum DeploymentStatus {
+
     RUNNING, STOPPED, ERROR, UNKNOWN
 }

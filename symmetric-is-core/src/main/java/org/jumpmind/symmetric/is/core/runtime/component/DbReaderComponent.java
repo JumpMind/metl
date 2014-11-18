@@ -20,6 +20,7 @@ import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IComponentFlowChain;
+import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.MessageManipulationStrategy;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
@@ -45,18 +46,18 @@ public class DbReaderComponent extends AbstractComponent {
     @SettingDefinition(order = 200, type = Type.CHOICE, choices = { "REPLACE", "ENHANCE" }, defaultValue = "REPLACE", label = "Msg Strategy")
     public final static String MESSAGE_MANIPULATION_STRATEGY = "db.reader.message.manipulation.strategy";
 
-    protected String sql;
+    String sql;
 
-    protected long rowsPerMessage;
+    long rowsPerMessage;
 
-    protected MessageManipulationStrategy messageManipulationStrategy = MessageManipulationStrategy.REPLACE;
+    MessageManipulationStrategy messageManipulationStrategy = MessageManipulationStrategy.REPLACE;
 
-    protected boolean trimColumns = false;
+    boolean trimColumns = false;
 
     @Override
-    public void start(IConnectionFactory connectionFactory, ComponentFlowNode componentNode,
-            IComponentFlowChain chain) {
-        super.start(connectionFactory, componentNode, chain);
+    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory,
+            ComponentFlowNode componentNode, IComponentFlowChain chain) {
+        super.start(executionTracker, connectionFactory, componentNode, chain);
         applySettings();
     }
 

@@ -5,18 +5,15 @@ import org.jumpmind.symmetric.is.ui.support.ViewManager;
 import org.jumpmind.symmetric.ui.common.AbstractSpringUI;
 
 import com.vaadin.annotations.PreserveOnRefresh;
-import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 
 @Theme("apptheme")
 @Title("SymmetricIS")
 @PreserveOnRefresh
-@Push(transport=Transport.WEBSOCKET)
 public class AppUI extends AbstractSpringUI {
 
     private static final long serialVersionUID = 1L;

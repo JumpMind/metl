@@ -16,12 +16,20 @@ public class AgentDeployment extends AbstractObject<AgentDeploymentData> {
         this.componentFlowVersion = componentFlowVersion;
     }
     
+    public DeploymentStatus getStatus() {
+        return DeploymentStatus.valueOf(data.getStatus());
+    }
+    
     public String getName() {
         return componentFlowVersion.getComponentFlow().getData().getName();
     }
     
     public ComponentFlowVersion getComponentFlowVersion() {
         return componentFlowVersion;
+    }
+    
+    public String getMessage() {
+        return data.getMessage();
     }
 
 }

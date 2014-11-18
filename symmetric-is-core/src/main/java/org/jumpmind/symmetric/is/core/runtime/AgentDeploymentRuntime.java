@@ -1,9 +1,11 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
-import java.util.ArrayList;
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
@@ -21,21 +23,18 @@ public class AgentDeploymentRuntime {
 
     Map<String, IConnection> connectionRuntimes = new HashMap<String, IConnection>();
 
-    List<IComponentFlowListener> runtimeListeners = new ArrayList<IComponentFlowListener>();
-
     IComponentFactory componentFactory;
 
     IConnectionFactory connectionFactory;
 
+    IExecutionTracker executionTracker;
+
     public AgentDeploymentRuntime(AgentDeployment deployment, IComponentFactory componentFactory,
-            IConnectionFactory connectionFactory) {
+            IConnectionFactory connectionFactory, IExecutionTracker executionTracker) {
+        this.executionTracker = executionTracker;
         this.deployment = deployment;
         this.componentFactory = componentFactory;
         this.connectionFactory = connectionFactory;
-    }
-
-    public void addComponentVersionRuntimeListener(IComponentFlowListener listener) {
-        this.runtimeListeners.add(listener);
     }
 
     public void start() {
@@ -44,7 +43,8 @@ public class AgentDeploymentRuntime {
                     .getComponentFlowNodes();
             for (ComponentFlowNode node : all) {
                 endpointRuntimes.put(node, componentFactory.create(node.getComponentVersion()));
-                endpointRuntimes.get(node).start(connectionFactory, node, new NodeChain(node));
+                endpointRuntimes.get(node).start(executionTracker, connectionFactory, node,
+                        new NodeChain(node));
             }
         } catch (RuntimeException e) {
             throw e;
@@ -74,16 +74,9 @@ public class AgentDeploymentRuntime {
 
     protected void doNext(ComponentFlowNode targetNode, Message message,
             ComponentFlowNode sourceNode) {
-        // TODO execute in parallel/async if configured
         validateMessageStructureMatchesInputModel(message, targetNode);
         IComponent runtime = (IComponent) endpointRuntimes.get(targetNode);
-        for (IComponentFlowListener listener : runtimeListeners) {
-            listener.beforeHandle(runtime, message, sourceNode);
-        }
         runtime.handle(message, sourceNode);
-        for (IComponentFlowListener listener : runtimeListeners) {
-            listener.afterHandle(runtime, message, sourceNode);
-        }
     }
 
     protected void validateMessageStructureMatchesInputModel(Message message,
@@ -105,17 +98,32 @@ public class AgentDeploymentRuntime {
 
         @Override
         public void doNext(Message outputMessage) {
+            boolean isFirst = false;
+            MessageHeader header = outputMessage.getHeader();
+            String executionId = header.getExecutionId();
+            if (isBlank(executionId)) {
+                executionId = UUID.randomUUID().toString();
+                header.setExecutionId(executionId);
+                executionTracker.beforeFlow(executionId);
+                isFirst = true;
+            }
+
             for (ComponentFlowNodeLink link : deployment.getComponentFlowVersion()
                     .getComponentFlowNodeLinks()) {
                 if (link.getData().getSourceNodeId().equals(sourceNode.getData().getId())) {
                     ComponentFlowNode targetNode = deployment.getComponentFlowVersion()
                             .findComponentFlowNodeWithId(link.getData().getTargetNodeId());
                     validateOutputLink(sourceNode, targetNode);
+                    executionTracker.beforeHandle(executionId, targetNode.getComponentVersion());
                     AgentDeploymentRuntime.this.doNext(targetNode, outputMessage, sourceNode);
+                    executionTracker.afterHandle(executionId, targetNode.getComponentVersion());
                 }
             }
-        }
 
+            if (isFirst) {
+                executionTracker.afterFlow(executionId);
+            }
+        }
     }
 
 }

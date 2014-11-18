@@ -22,6 +22,7 @@ public class ComponentFactory implements IComponentFactory {
         componentTypesByCategory.put(ComponentCategory.SCHEDULER, new ArrayList<String>());
         register(DbReaderComponent.class);
         register(NoOpProcessorComponent.class);
+        register(SchedulerComponent.class);
     }
 
     @Override

@@ -28,14 +28,10 @@ import org.springframework.context.annotation.Scope;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Accordion;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.TextField;
@@ -85,20 +81,6 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
 
         flowLayout = new VerticalLayout();
         flowLayout.setSizeFull();
-
-        HorizontalLayout actionLayout = new HorizontalLayout();
-        actionLayout.setWidth(100, Unit.PERCENTAGE);
-        flowLayout.addComponent(actionLayout);
-
-        MenuBar actionBar = new MenuBar();
-        actionBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
-        actionBar.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
-        MenuItem actions = actionBar.addItem("", FontAwesome.COG, null);
-        actions.addItem("Deploy", FontAwesome.COGS, null);
-        actions.addItem("Execute", FontAwesome.PLAY, null);
-
-        actionLayout.addComponent(actionBar);
-        actionLayout.setComponentAlignment(actionBar, Alignment.MIDDLE_RIGHT);
 
         componentSettingsSheet = new ComponentSettingsSheet();
 

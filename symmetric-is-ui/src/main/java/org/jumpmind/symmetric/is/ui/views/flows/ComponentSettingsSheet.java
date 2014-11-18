@@ -14,6 +14,7 @@ import org.jumpmind.symmetric.is.core.config.data.SettingData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.symmetric.ui.common.SqlField;
@@ -46,7 +47,7 @@ public class ComponentSettingsSheet extends VerticalLayout {
     IComponentSettingsChangedListener componentSettingsChangedListener;
 
     IComponentFactory componentFactory;
-    
+
     IConnectionFactory connectionFactory;
 
     public ComponentSettingsSheet() {
@@ -90,10 +91,10 @@ public class ComponentSettingsSheet extends VerticalLayout {
         formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
 
         addNodeCombo(formLayout, flowNode);
-        
+
         if (flowNode != null) {
             ComponentVersion version = flowNode.getComponentVersion();
-            
+
             MenuItem actions = actionBar.addItem("", FontAwesome.COG, null);
             actions.addItem("Delete", new Command() {
                 private static final long serialVersionUID = 1L;
@@ -105,13 +106,13 @@ public class ComponentSettingsSheet extends VerticalLayout {
                     componentSettingsChangedListener.componentSettingsChanges(flowNode, true);
                 }
             });
-            
+
             TextField typeLabel = new TextField();
             typeLabel.setCaption("Type");
             typeLabel.setValue(flowNode.getComponentVersion().getComponent().getData().getType());
             typeLabel.setReadOnly(true);
             formLayout.addComponent(typeLabel);
-            
+
             addConnectionCombo(formLayout, version);
 
             Map<String, SettingDefinition> settings = componentFactory
@@ -125,30 +126,38 @@ public class ComponentSettingsSheet extends VerticalLayout {
         addComponent(formLayout);
         setExpandRatio(formLayout, 1);
     }
-    
+
     protected void addConnectionCombo(FormLayout formLayout, final ComponentVersion version) {
-        ComponentDefinition componentDefintion = componentFactory.getComponentDefinitionForComponentType(version.getComponent().getType());
-        if (componentDefintion.connectionCategory() != null) {
-            final ComboBox connectionsCombo = new ComboBox("Connection");                
+        ComponentDefinition componentDefintion = componentFactory
+                .getComponentDefinitionForComponentType(version.getComponent().getType());
+        if (componentDefintion.connectionCategory() != null
+                && componentDefintion.connectionCategory() != ConnectionCategory.NONE) {
+            final ComboBox connectionsCombo = new ComboBox("Connection");
             connectionsCombo.setImmediate(true);
             connectionsCombo.setRequired(true);
-            List<String> types = connectionFactory.getConnectionTypes(componentDefintion.connectionCategory());
-            List<Connection> connections = configurationService.findConnectionsByTypes(types.toArray(new String[types.size()]));
-            for (Connection connection : connections) {
-                connectionsCombo.addItem(connection);
+            List<String> types = connectionFactory.getConnectionTypes(componentDefintion
+                    .connectionCategory());
+            if (types != null) {
+                List<Connection> connections = configurationService.findConnectionsByTypes(types
+                        .toArray(new String[types.size()]));
+                if (connections != null) {
+                    for (Connection connection : connections) {
+                        connectionsCombo.addItem(connection);
+                    }
+
+                    connectionsCombo.setValue(version.getConnection());
+                }
             }
-            
-            connectionsCombo.setValue(version.getConnection());
-            
-            connectionsCombo.addValueChangeListener(new ValueChangeListener() {                    
+            connectionsCombo.addValueChangeListener(new ValueChangeListener() {
                 private static final long serialVersionUID = 1L;
+
                 @Override
                 public void valueChange(ValueChangeEvent event) {
-                    version.setConnection((Connection)connectionsCombo.getValue());
+                    version.setConnection((Connection) connectionsCombo.getValue());
                     configurationService.save(version);
                 }
             });
-            
+
             formLayout.addComponent(connectionsCombo);
         }
     }
