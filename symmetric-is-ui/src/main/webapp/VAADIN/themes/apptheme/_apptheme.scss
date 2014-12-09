@@ -28,6 +28,48 @@
     color: #fff;
   }
   
+      .v-table-header {
+        background-image: -webkit-linear-gradient(#DEDEDE, #E0E0E0);
+        background-image: -moz-linear-gradient(#DEDEDE, #E0E0E0);
+        background-image: linear-gradient(#DEDEDE, #E0E0E0);
+        font-weight: bold;
+    }
+    
+    .v-table .v-selected .v-button-caption {
+        color: #fff;
+    }
+
+    .v-table-column-selector {
+        top: -4px;
+        right: -4px;
+        color: $v-focus-color;
+    }
+
+    .v-table-header-wrap .v-table-column-selector {
+        opacity: 1;
+        filter: none ;
+        -webkit-transition-delay: 100ms;
+        -moz-transition-delay: 100ms;
+        transition-delay: 100ms;
+    }
+  
+  
+     .v-panel-noborder, .v-panel-noborder > .v-panel-captionwrap, .v-panel-caption-noborder {
+        border-radius: 0px;
+    }
+    
+    .v-menubar-noborder {
+        border-radius: 0px;
+        border: 0px;
+    }
+    
+    .v-menubar-noborder > .v-menubar-menuitem,  
+    .v-menubar-noborder > .v-menubar-menuitem:first-child,
+    .v-menubar-noborder > .v-menubar-menuitem:last-child {
+        border-radius: 0px;
+        border-width: 0 0 0 0;
+    }  
+  
   .valo-menu-subtitle {
      color: $v-focus-color;
   }
@@ -37,25 +79,79 @@
      box-shadow: none;
   }
     
-  .v-panel-caption, .v-window-outerheader, .v-window-header, .v-window-maximizebox, .v-window-closebox, .v-menubar > .v-menubar-menuitem-checked {
-     background: $v-focus-color;
-     color: white;
-  }
+    .h1, .h2, .h3 {
+       font-weight: normal;
+    }
     
-  .v-loading-indicator[style*="none"]:before {
-    display: none;
-  }
+    .v-label-color {
+        color: $v-focus-color;
+    }
 
-  .v-loading-indicator-delay:before,
-  .v-loading-indicator-wait:before {
-      content: "";
-      position: fixed;
-      background: rgba(0,0,0,.5);
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      pointer-events: auto;
-  }  
+    .valo-menu-subtitle {
+       color: $v-focus-color;
+    }
+        
+    .v-menubar:focus:after {
+       border-color: #b2b2b2;
+       box-shadow: none;
+    }
+    
+    .v-panel-caption, .v-window-outerheader, .v-window-header, .v-window-maximizebox, .v-window-closebox, .v-menubar > .v-menubar-menuitem-checked {
+       background: $v-focus-color;
+       color: white;
+    }
+
+    .v-panel-caption-form, .v-panel-caption-help {
+        background-image: -webkit-linear-gradient(#DEDEDE, #E0E0E0);
+        background-image: -moz-linear-gradient(#DEDEDE, #E0E0E0);
+        background-image: linear-gradient(#DEDEDE, #E0E0E0);
+        color: #474747;
+        font: 12px/29px "Roboto", sans-serif;
+        font-weight: bold;
+    }
+    
+    .v-contextmenu .gwt-MenuItem-selected, .v-filterselect-suggestpopup .gwt-MenuItem-selected {
+        color: #474747;
+        background-color: #DEDEDE;
+        background-image: -webkit-linear-gradient(#DEDEDE, #E0E0E0);
+        background-image: -moz-linear-gradient(#DEDEDE, #E0E0E0);
+        background-image: linear-gradient(#DEDEDE, #E0E0E0);
+    }
+    
+    .v-menubar-popup .v-menubar-menuitem-selected {
+        color: #474747;
+        background-color: #DEDEDE;
+        background-image: -webkit-linear-gradient(#DEDEDE, #E0E0E0);
+        background-image: -moz-linear-gradient(#DEDEDE, #E0E0E0);
+        background-image: linear-gradient(#DEDEDE, #E0E0E0);
+    }
+    
+    .v-loading-indicator[style*="none"]:before {
+      display: none;
+    }
+
+    .v-loading-indicator-delay:before,
+    .v-loading-indicator-wait:before {
+        content: "";
+        position: fixed;
+        background: rgba(0,0,0,.5);
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: auto;
+    }
+    
+        .ace_marker-layer .errormarker {
+        border-bottom: 2px dotted red;
+        position: absolute;
+    }
+    
+    .aceeditor-suggestpopup-description {
+        background: lightgray;
+        width: 400px;
+    }
+    
+    
 
 }

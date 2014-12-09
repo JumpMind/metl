@@ -69,7 +69,7 @@ public class AgentEngine {
     public synchronized void stop() {
         if (started && !stopping) {
             stopping = true;
-            List<AgentDeployment> deployments = agent.getAgentDeployments();
+            List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(agent.getAgentDeployments());
             for (AgentDeployment deployment : deployments) {
                 undeploy(deployment);
             }
