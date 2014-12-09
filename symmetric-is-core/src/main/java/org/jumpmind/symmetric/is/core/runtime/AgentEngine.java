@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,10 +50,11 @@ public class AgentEngine {
     }
 
     public synchronized void start() {
-        if (!started && !starting) {            
+        if (!started && !starting) {
             starting = true;
             log.info("Agent '{}' is being started", agent);
-            List<AgentDeployment> deployments = agent.getAgentDeployments();
+            List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(
+                    agent.getAgentDeployments());
             for (AgentDeployment deployment : deployments) {
                 deploy(deployment);
             }

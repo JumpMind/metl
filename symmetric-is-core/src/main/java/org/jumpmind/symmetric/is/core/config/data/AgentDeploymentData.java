@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.core.config.data;
 
+import org.jumpmind.symmetric.is.core.config.DeploymentStatus;
+
 public class AgentDeploymentData extends AbstractData {
 
     private static final long serialVersionUID = 1L;
@@ -10,7 +12,7 @@ public class AgentDeploymentData extends AbstractData {
 
     String startMode;
 
-    String status;
+    String status = DeploymentStatus.UNKNOWN.name();
 
     String message;
 

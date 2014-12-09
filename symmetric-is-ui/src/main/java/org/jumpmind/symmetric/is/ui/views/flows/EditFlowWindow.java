@@ -105,25 +105,7 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
         content.setExpandRatio(splitPanel, 1);
 
         content.addComponent(buildButtonFooter(null, new Button[] { buildCloseButton() }));
-
-    }
-
-    public ComponentFlowVersion getComponentFlowVersion() {
-        return componentFlowVersion;
-    }
-
-    public void show(final ComponentFlowVersion componentFlowVersion) {
-        this.componentFlowVersion = componentFlowVersion;
-
-        setCaption("Edit Flow - Name: "
-                + componentFlowVersion.getComponentFlow().getData().getName() + ", Version: "
-                + componentFlowVersion.getVersion());
-
-        populateComponentPalette();
-
-        this.componentSettingsSheet.show(componentFactory, connectionFactory, configurationService,
-                componentFlowVersion, this);
-
+        
         HorizontalLayout actionLayout = new HorizontalLayout();
         actionLayout.setMargin(true);
         actionLayout.setWidth(100, Unit.PERCENTAGE);
@@ -143,6 +125,24 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
 
         actionLayout.addComponent(actionBar);
         actionLayout.setComponentAlignment(actionBar, Alignment.MIDDLE_RIGHT);
+
+    }
+
+    public ComponentFlowVersion getComponentFlowVersion() {
+        return componentFlowVersion;
+    }
+
+    public void show(final ComponentFlowVersion componentFlowVersion) {
+        this.componentFlowVersion = componentFlowVersion;
+
+        setCaption("Edit Flow - Name: "
+                + componentFlowVersion.getComponentFlow().getData().getName() + ", Version: "
+                + componentFlowVersion.getVersion());
+
+        populateComponentPalette();
+
+        this.componentSettingsSheet.show(componentFactory, connectionFactory, configurationService,
+                componentFlowVersion, this);
 
         redrawFlow();
 

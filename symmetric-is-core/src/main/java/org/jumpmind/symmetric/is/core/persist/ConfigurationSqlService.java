@@ -88,7 +88,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         return template
                 .query(String
-                        .format("select a.name as name, a.host_name as version_name, f.name as folder_name, a.id as id from "
+                        .format("select a.name as name, a.host as host, f.name as folder_name, a.id as id from "
                                 + "%1$s_agent a inner join "
                                 + "%1$s_folder f on f.id=a.folder_id "
                                 + "where a.id not in (select agent_id from %1$s_agent_deployment where component_flow_version_id = ?)",
@@ -99,7 +99,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                         summary.setName(row.getString("name"));
                         summary.setId(row.getString("id"));
                         summary.setFolderName(row.getString("folder_name"));
-                        summary.setHostName(row.getString("host_name"));
+                        summary.setHost(row.getString("host"));
                         return summary;
                     }
                 }, componentFlowVersionId);

@@ -67,16 +67,15 @@ public class SelectAgentsWindow extends ResizableWindow {
         layout.addComponent(searchField);
 
         table = new MultiSelectTable();
-        container = new BeanItemContainer<AgentSummary>(
-                AgentSummary.class);
+        container = new BeanItemContainer<AgentSummary>(AgentSummary.class);
         table.setContainerDataSource(container);
         table.setSizeFull();
 
         table.setColumnHeader("name", "Agent Name");
-        table.setColumnHeader("hostName", "Host Name");
+        table.setColumnHeader("host", "Host Name");
         table.setColumnHeader("folderName", "Folder Name");
 
-        table.setVisibleColumns("name", "hostName", "folderName");
+        table.setVisibleColumns("name", "host", "folderName");
         table.setColumnExpandRatio("folderName", 1);
 
         layout.addComponent(table);
@@ -95,9 +94,8 @@ public class SelectAgentsWindow extends ResizableWindow {
     }
 
     protected void done() {
-        Set<ComponentFlowVersionSummary> selectedFlows = table
-                .getSelected();
-        itemUpdatedListener.itemUpdated(selectedFlows);
+        Set<AgentSummary> agents = table.getSelected();
+        itemUpdatedListener.itemUpdated(agents);
         close();
     }
 

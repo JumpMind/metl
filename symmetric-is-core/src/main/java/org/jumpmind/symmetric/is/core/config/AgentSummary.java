@@ -10,7 +10,7 @@ public class AgentSummary implements Serializable {
 
     String name;
 
-    String hostName;
+    String host;
 
     String folderName;
 
@@ -33,12 +33,12 @@ public class AgentSummary implements Serializable {
         this.name = name;
     }
 
-    public String getHostName() {
-        return hostName;
+    public String getHost() {
+        return host;
     }
 
-    public void setHostName(String hostName) {
-        this.hostName = hostName;
+    public void setHost(String hostName) {
+        this.host = hostName;
     }
 
     public void setFolderName(String folderName) {
