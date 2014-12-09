@@ -8,6 +8,7 @@ import org.jumpmind.db.sql.ISqlRowMapper;
 import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.persist.IPersistenceManager;
+import org.jumpmind.symmetric.is.core.config.AgentSummary;
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
@@ -81,4 +82,26 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                 }, agentId);
     }
 
+    
+    @Override
+    public List<AgentSummary> findUndeployedAgentsFor(String componentFlowVersionId) {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        return template
+                .query(String
+                        .format("select a.name as name, a.host_name as version_name, f.name as folder_name, a.id as id from "
+                                + "%1$s_agent a inner join "
+                                + "%1$s_folder f on f.id=a.folder_id "
+                                + "where a.id not in (select agent_id from %1$s_agent_deployment where component_flow_version_id = ?)",
+                                tablePrefix), new ISqlRowMapper<AgentSummary>() {
+                    @Override
+                    public AgentSummary mapRow(Row row) {
+                        AgentSummary summary = new AgentSummary();
+                        summary.setName(row.getString("name"));
+                        summary.setId(row.getString("id"));
+                        summary.setFolderName(row.getString("folder_name"));
+                        summary.setHostName(row.getString("host_name"));
+                        return summary;
+                    }
+                }, componentFlowVersionId);
+    }
 }

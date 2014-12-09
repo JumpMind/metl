@@ -16,14 +16,14 @@ import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.ui.common.ConfirmDialog;
+import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.symmetric.ui.common.SqlField;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractSelect.NewItemHandler;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
@@ -76,14 +76,14 @@ public class ComponentSettingsSheet extends VerticalLayout {
         }
 
         HorizontalLayout actionLayout = new HorizontalLayout();
+        actionLayout.setMargin(true);
         actionLayout.setWidth(100, Unit.PERCENTAGE);
         addComponent(actionLayout);
 
         MenuBar actionBar = new MenuBar();
-        actionBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
-        actionBar.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+        actionBar.addStyleName(ValoTheme.MENUBAR_SMALL);
+        actionBar.setWidth(100, Unit.PERCENTAGE);
         actionLayout.addComponent(actionBar);
-        actionLayout.setComponentAlignment(actionBar, Alignment.MIDDLE_RIGHT);
 
         FormLayout formLayout = new FormLayout();
         formLayout.setWidth(100, Unit.PERCENTAGE);
@@ -95,15 +95,24 @@ public class ComponentSettingsSheet extends VerticalLayout {
         if (flowNode != null) {
             ComponentVersion version = flowNode.getComponentVersion();
 
-            MenuItem actions = actionBar.addItem("", FontAwesome.COG, null);
-            actions.addItem("Delete", new Command() {
+            actionBar.addItem("Delete", new Command() {
                 private static final long serialVersionUID = 1L;
 
                 @Override
                 public void menuSelected(MenuItem selectedItem) {
-                    configurationService.delete(componentFlowVersion, flowNode);
-                    refresh(null);
-                    componentSettingsChangedListener.componentSettingsChanges(flowNode, true);
+                    ConfirmDialog.show("Delete?", String.format(
+                            "Are you sure you want to delete the '%s' component?",
+                            componentFlowVersion.getName()), new IConfirmListener() {
+                        private static final long serialVersionUID = 1L;
+                        @Override
+                        public boolean onOk() {
+                            configurationService.delete(componentFlowVersion, flowNode);
+                            refresh(null);
+                            componentSettingsChangedListener.componentSettingsChanges(flowNode,
+                                    true);
+                            return true;
+                        }
+                    });
                 }
             });
 

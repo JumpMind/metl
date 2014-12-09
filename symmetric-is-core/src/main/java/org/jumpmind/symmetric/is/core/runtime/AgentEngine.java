@@ -49,8 +49,9 @@ public class AgentEngine {
     }
 
     public synchronized void start() {
-        if (!started && !starting) {
+        if (!started && !starting) {            
             starting = true;
+            log.info("Agent '{}' is being started", agent);
             List<AgentDeployment> deployments = agent.getAgentDeployments();
             for (AgentDeployment deployment : deployments) {
                 deploy(deployment);
@@ -85,11 +86,15 @@ public class AgentEngine {
 
     public void deploy(AgentDeployment deployment) {
         try {
+            List<AgentDeployment> deployments = agent.getAgentDeployments();
+            deployments.remove(deployment);
+            deployments.add(deployment);
             AgentDeploymentRuntime coordinator = new AgentDeploymentRuntime(deployment,
                     componentFactory, connectionFactory, new ExecutionTracker(deployment));
             coordinators.put(deployment, coordinator);
             coordinator.start();
             deployment.getData().setStatus(DeploymentStatus.RUNNING.name());
+            deployment.getData().setMessage("");
             log.info("Flow '{}' has been deployed", deployment.getComponentFlowVersion().getName());
         } catch (Exception e) {
             log.warn("Failed to start '{}'", deployment.getComponentFlowVersion().getName(), e);
@@ -100,6 +105,7 @@ public class AgentEngine {
     }
 
     public void undeploy(AgentDeployment deployment) {
+        agent.getAgentDeployments().remove(deployment);
         AgentDeploymentRuntime coordinator = coordinators.get(deployment);
         if (coordinator != null) {
             try {
@@ -107,6 +113,7 @@ public class AgentEngine {
                 log.info("Flow '{}' has been undeployed", deployment.getComponentFlowVersion()
                         .getName());
                 deployment.getData().setStatus(DeploymentStatus.STOPPED.name());
+                deployment.getData().setMessage("");
                 configurationService.save(deployment.getData());
             } catch (Exception e) {
                 log.warn("Failed to stop '{}'", deployment.getComponentFlowVersion().getName(), e);

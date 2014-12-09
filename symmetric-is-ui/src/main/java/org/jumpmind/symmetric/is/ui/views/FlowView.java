@@ -41,7 +41,7 @@ import com.vaadin.ui.Window.CloseListener;
 
 @UiComponent
 @Scope(value = "ui")
-@MenuLink(category = Category.DESIGN, name = "Flows", id = "flows", icon = FontAwesome.SHARE_ALT, menuOrder = 10)
+@MenuLink(category = Category.DESIGN, name = "Flows", id = "flows", icon = FontAwesome.SHARE_ALT, menuOrder = 10, useAsDefault=true)
 public class FlowView extends AbstractFolderView {
 
     private static final long serialVersionUID = 1L;

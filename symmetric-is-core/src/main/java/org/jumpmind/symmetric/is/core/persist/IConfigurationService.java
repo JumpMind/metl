@@ -5,6 +5,7 @@ import java.util.List;
 import org.jumpmind.symmetric.is.core.config.AbstractObject;
 import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
+import org.jumpmind.symmetric.is.core.config.AgentSummary;
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
@@ -49,6 +50,8 @@ public interface IConfigurationService {
     
     public List<Agent> findAgentsForHost(String hostName);
     
+    public List<AgentDeployment> findAgentDeploymentsFor(ComponentFlowVersion componentFlowVersion);
+    
     public void deleteComponentFlowVersion(ComponentFlowVersion componentFlowVersion);
 
     public void refresh(ComponentFlowVersion componentFlowVersion);
@@ -68,5 +71,7 @@ public interface IConfigurationService {
     public void save(ComponentFlowVersion componentFlowVersion);
     
     public List<ComponentFlowVersionSummary> findUndeployedComponentFlowVersionSummary(String agentId);
+    
+    public List<AgentSummary> findUndeployedAgentsFor(String componentFlowVersionId);
     
 }

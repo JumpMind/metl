@@ -61,35 +61,6 @@ abstract class AbstractConfigurationService implements IConfigurationService {
     }
 
     @Override
-    public void delete(AgentDeployment agentDeployment) {
-        delete(agentDeployment.getData());
-    }
-
-    @Override
-    public void delete(ComponentFlowVersion componentFlowVersion, ComponentFlowNode flowNode) {
-        List<ComponentFlowNodeLink> links = componentFlowVersion
-                .removeComponentFlowNodeLinks(flowNode.getData().getId());
-        for (ComponentFlowNodeLink link : links) {
-            delete(link);
-        }
-
-        componentFlowVersion.removeComponentFlowNode(flowNode);
-        delete(flowNode.getData());
-    }
-
-    @Override
-    public void deleteFolder(String folderId) {
-        Map<String, Object> byType = new HashMap<String, Object>();
-        byType.put("parentFolderId", folderId);
-        List<FolderData> folderDatas = find(FolderData.class, byType);
-        for (FolderData folderData : folderDatas) {
-            deleteFolder(folderData.getId());
-        }
-        persistenceManager
-                .delete(new FolderData(folderId), null, null, tableName(FolderData.class));
-    }
-
-    @Override
     public List<Folder> findFolders(FolderType type) {
         Map<String, Object> byType = new HashMap<String, Object>();
         byType.put("type", type.name());
@@ -163,28 +134,6 @@ abstract class AbstractConfigurationService implements IConfigurationService {
         return list;
     }
 
-    protected List<Connection> buildConnection(Folder folder, List<ConnectionData> datas) {
-        return buildConnection(folder, datas.toArray(new ConnectionData[datas.size()]));
-    }
-
-    protected List<Connection> buildConnection(Folder folder, ConnectionData... datas) {
-        List<Connection> list = new ArrayList<Connection>();
-        for (ConnectionData data : datas) {
-            if (folder == null) {
-                Map<String, Object> folderParams = new HashMap<String, Object>();
-                folderParams.put("id", data.getFolderId());
-                folder = new Folder(findOne(FolderData.class, folderParams));
-            }
-
-            Map<String, Object> settingParams = new HashMap<String, Object>();
-            settingParams.put("connectionId", data.getId());
-            List<ConnectionSettingData> settings = find(ConnectionSettingData.class, settingParams);
-            list.add(new Connection(folder, data,
-                    settings.toArray(new SettingData[settings.size()])));
-        }
-        return list;
-    }
-
     @Override
     public List<Agent> findAgentsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
@@ -241,6 +190,101 @@ abstract class AbstractConfigurationService implements IConfigurationService {
         }
         return list;
 
+    }
+
+    @Override
+    public List<AgentDeployment> findAgentDeploymentsFor(ComponentFlowVersion componentFlowVersion) {
+        List<AgentDeploymentData> deploymentDatas = persistenceManager.find(
+                AgentDeploymentData.class, new NameValue("componentFlowVersionId",
+                        componentFlowVersion.getId()), null, null,
+                tableName(AgentDeploymentData.class));
+        List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(deploymentDatas.size());
+        for (AgentDeploymentData agentDeploymentData : deploymentDatas) {
+            deployments.add(new AgentDeployment(componentFlowVersion, agentDeploymentData));
+        }
+        return deployments;
+    }
+
+    @Override
+    public Connection findConnection(String id) {
+        Connection connection = null;
+        ConnectionData data = findOne(ConnectionData.class, new NameValue("id", id));
+        if (data != null) {
+            connection = new Connection(data);
+            refresh(connection);
+        }
+        return connection;
+    }
+
+    public ComponentVersion findComponentVersion(String id) {
+        ComponentVersionData componentVersionData = new ComponentVersionData();
+        componentVersionData.setId(id);
+        persistenceManager.refresh(componentVersionData, null, null,
+                tableName(ComponentVersionData.class));
+        ComponentData componentData = new ComponentData();
+        componentData.setId(componentVersionData.getComponentId());
+        persistenceManager.refresh(componentData, null, null, tableName(ComponentData.class));
+        Component component = new Component(componentData);
+
+        // TODO read models
+
+        List<ComponentVersionSettingData> settings = find(ComponentVersionSettingData.class,
+                new NameValue("componentVersionId", componentVersionData.getId()));
+
+        return new ComponentVersion(component,
+                findConnection(componentVersionData.getConnectionId()), componentVersionData,
+                settings.toArray(new SettingData[settings.size()]));
+    }
+
+    protected List<Connection> buildConnection(Folder folder, List<ConnectionData> datas) {
+        return buildConnection(folder, datas.toArray(new ConnectionData[datas.size()]));
+    }
+
+    protected List<Connection> buildConnection(Folder folder, ConnectionData... datas) {
+        List<Connection> list = new ArrayList<Connection>();
+        for (ConnectionData data : datas) {
+            if (folder == null) {
+                Map<String, Object> folderParams = new HashMap<String, Object>();
+                folderParams.put("id", data.getFolderId());
+                folder = new Folder(findOne(FolderData.class, folderParams));
+            }
+
+            Map<String, Object> settingParams = new HashMap<String, Object>();
+            settingParams.put("connectionId", data.getId());
+            List<ConnectionSettingData> settings = find(ConnectionSettingData.class, settingParams);
+            list.add(new Connection(folder, data,
+                    settings.toArray(new SettingData[settings.size()])));
+        }
+        return list;
+    }
+
+    @Override
+    public void delete(AgentDeployment agentDeployment) {
+        delete(agentDeployment.getData());
+    }
+
+    @Override
+    public void delete(ComponentFlowVersion componentFlowVersion, ComponentFlowNode flowNode) {
+        List<ComponentFlowNodeLink> links = componentFlowVersion
+                .removeComponentFlowNodeLinks(flowNode.getData().getId());
+        for (ComponentFlowNodeLink link : links) {
+            delete(link);
+        }
+
+        componentFlowVersion.removeComponentFlowNode(flowNode);
+        delete(flowNode.getData());
+    }
+
+    @Override
+    public void deleteFolder(String folderId) {
+        Map<String, Object> byType = new HashMap<String, Object>();
+        byType.put("parentFolderId", folderId);
+        List<FolderData> folderDatas = find(FolderData.class, byType);
+        for (FolderData folderData : folderDatas) {
+            deleteFolder(folderData.getId());
+        }
+        persistenceManager
+                .delete(new FolderData(folderId), null, null, tableName(FolderData.class));
     }
 
     @Override
@@ -303,15 +347,8 @@ abstract class AbstractConfigurationService implements IConfigurationService {
         delete(flowVersion.getData());
     }
 
-    @Override
-    public Connection findConnection(String id) {
-        Connection connection = null;
-        ConnectionData data = findOne(ConnectionData.class, new NameValue("id", id));
-        if (data != null) {
-            connection = new Connection(data);
-            refresh(connection);
-        }
-        return connection;
+    protected void delete(AbstractData data) {
+        persistenceManager.delete(data, null, null, tableName(data.getClass()));
     }
 
     @Override
@@ -348,26 +385,6 @@ abstract class AbstractConfigurationService implements IConfigurationService {
                 .getClass()));
     }
 
-    public ComponentVersion findComponentVersion(String id) {
-        ComponentVersionData componentVersionData = new ComponentVersionData();
-        componentVersionData.setId(id);
-        persistenceManager.refresh(componentVersionData, null, null,
-                tableName(ComponentVersionData.class));
-        ComponentData componentData = new ComponentData();
-        componentData.setId(componentVersionData.getComponentId());
-        persistenceManager.refresh(componentData, null, null, tableName(ComponentData.class));
-        Component component = new Component(componentData);
-
-        // TODO read connections and models
-
-        List<ComponentVersionSettingData> settings = find(ComponentVersionSettingData.class,
-                new NameValue("componentVersionId", componentVersionData.getId()));
-
-        return new ComponentVersion(component,
-                findConnection(componentVersionData.getConnectionId()), componentVersionData,
-                settings.toArray(new SettingData[settings.size()]));
-    }
-
     private void refreshComponentFlowVersionRelations(ComponentFlowVersion componentFlowVersion) {
         ComponentFlow flow = componentFlowVersion.getComponentFlow();
         if (flow == null) {
@@ -400,10 +417,6 @@ abstract class AbstractConfigurationService implements IConfigurationService {
             }
         }
 
-    }
-
-    protected void delete(AbstractData data) {
-        persistenceManager.delete(data, null, null, tableName(data.getClass()));
     }
 
     @Override

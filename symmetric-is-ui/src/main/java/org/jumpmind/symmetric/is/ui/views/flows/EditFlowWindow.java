@@ -28,10 +28,15 @@ import org.springframework.context.annotation.Scope;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Accordion;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.Command;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.TextField;
@@ -52,6 +57,9 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
 
     @Autowired
     IConnectionFactory connectionFactory;
+    
+    @Autowired
+    EditFlowDeploymentsWindow flowDeploymentsWindow;
 
     ComponentFlowVersion componentFlowVersion;
 
@@ -104,7 +112,7 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
         return componentFlowVersion;
     }
 
-    public void show(ComponentFlowVersion componentFlowVersion) {
+    public void show(final ComponentFlowVersion componentFlowVersion) {
         this.componentFlowVersion = componentFlowVersion;
 
         setCaption("Edit Flow - Name: "
@@ -115,6 +123,26 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
 
         this.componentSettingsSheet.show(componentFactory, connectionFactory, configurationService,
                 componentFlowVersion, this);
+
+        HorizontalLayout actionLayout = new HorizontalLayout();
+        actionLayout.setMargin(true);
+        actionLayout.setWidth(100, Unit.PERCENTAGE);
+        flowLayout.addComponent(actionLayout);
+
+        MenuBar actionBar = new MenuBar();
+        actionBar.setWidth(100, Unit.PERCENTAGE);
+        actionBar.addStyleName(ValoTheme.MENUBAR_SMALL);
+
+        actionBar.addItem("Deploy", null, new Command() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                flowDeploymentsWindow.show(componentFlowVersion);
+            }
+        });
+
+        actionLayout.addComponent(actionBar);
+        actionLayout.setComponentAlignment(actionBar, Alignment.MIDDLE_RIGHT);
 
         redrawFlow();
 
@@ -218,7 +246,6 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
 
     class DiagramChangedListener implements Listener {
         private static final long serialVersionUID = 1L;
-
         @Override
         public void componentEvent(Event e) {
             if (e instanceof NodeSelectedEvent) {

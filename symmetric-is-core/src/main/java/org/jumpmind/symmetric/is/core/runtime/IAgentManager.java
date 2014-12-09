@@ -10,6 +10,8 @@ public interface IAgentManager {
     
     public AgentEngine getAgentEngine(Agent agent);
     
+    public AgentEngine getAgentEngine(String agentId);
+    
     public boolean isAgentLocal(Agent agent);
     
     public void start();

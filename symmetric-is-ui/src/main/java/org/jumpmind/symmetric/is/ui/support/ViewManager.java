@@ -43,7 +43,7 @@ public class ViewManager implements Serializable {
             for (View view : views) {
                 MenuLink menu = (MenuLink) view.getClass().getAnnotation(MenuLink.class);
                 if (menu != null && menu.uiClass().equals(AppUI.class)) {
-                    if (isBlank(defaultView)) {
+                    if (isBlank(defaultView) && menu.useAsDefault()) {
                         defaultView = menu.id();
                     }
                     navigator.addView(menu.id(), view);

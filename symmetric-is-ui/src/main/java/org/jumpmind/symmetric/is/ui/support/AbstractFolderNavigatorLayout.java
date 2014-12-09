@@ -133,6 +133,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         });
         table.addValueChangeListener(new ValueChangeListener() {
             private static final long serialVersionUID = 1L;
+
             @SuppressWarnings("unchecked")
             @Override
             public void valueChange(ValueChangeEvent event) {
@@ -142,6 +143,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         });
         table.addItemClickListener(new ItemClickListener() {
             private static final long serialVersionUID = 1L;
+
             @Override
             public void itemClick(ItemClickEvent event) {
                 if (event.getButton() == MouseButton.LEFT) {
@@ -156,6 +158,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         });
         table.addCollapseListener(new CollapseListener() {
             private static final long serialVersionUID = 1L;
+
             @Override
             public void nodeCollapse(CollapseEvent event) {
                 if (event.getItemId() instanceof Folder) {
@@ -165,6 +168,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         });
         table.addExpandListener(new ExpandListener() {
             private static final long serialVersionUID = 1L;
+
             @Override
             public void nodeExpand(ExpandEvent event) {
                 if (event.getItemId() instanceof Folder) {
@@ -176,14 +180,15 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         });
         table.setCellStyleGenerator(new CellStyleGenerator() {
             private static final long serialVersionUID = 1L;
+
             @Override
             public String getStyle(Table source, Object itemId, Object propertyId) {
                 if (itemId instanceof Folder && "Name".equals(propertyId)) {
                     return "folder";
                 } else {
-                    return null;    
+                    return null;
                 }
-                
+
             }
         });
         return table;
@@ -212,7 +217,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             treeTable.setCollapsed(expandMe, false);
         }
 
-        treeTable.focus();        
+        treeTable.focus();
         treeTable.select(itemToSelect);
     }
 
@@ -314,13 +319,16 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
     protected void deleteSelectedFolders() {
         @SuppressWarnings("unchecked")
-        Set<Folder> folders = (Set<Folder>) treeTable.getValue();
-        for (Folder folder : folders) {
-            try {
-                configurationService.deleteFolder(folder.getData().getId());
-            } catch (Exception ex) {
-                UiUtils.notify("Could not delete the \"" + folder.getData().getName()
-                        + "\" folder", Type.WARNING_MESSAGE);
+        Set<Object> selected = (Set<Object>) treeTable.getValue();
+        for (Object obj : selected) {
+            if (obj instanceof Folder) {
+                Folder folder = (Folder) obj;
+                try {
+                    configurationService.deleteFolder(folder.getData().getId());
+                } catch (Exception ex) {
+                    UiUtils.notify("Could not delete the \"" + folder.getData().getName()
+                            + "\" folder", Type.WARNING_MESSAGE);
+                }
             }
         }
     }

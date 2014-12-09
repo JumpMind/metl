@@ -111,4 +111,15 @@ public class AgentManager implements IAgentManager {
         return engines.get(agent);
     }
 
+    @Override
+    public AgentEngine getAgentEngine(String agentId) {
+        Set<Agent> agents = engines.keySet();
+        for (Agent agent : agents) {
+            if (agent.getId().equals(agentId)) {
+                return getAgentEngine(agent);
+            }
+        }
+        return null;
+    }
+
 }
