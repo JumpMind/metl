@@ -8,6 +8,7 @@ import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
 abstract public class AbstractComponent extends AbstractRuntimeObject implements IComponent {
 
@@ -20,8 +21,16 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     protected IConnectionFactory connectionFactory;
     
     protected IExecutionTracker executionTracker;
-
+    
     @Override
+    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    }
+    
+    @Override
+    public void start(IExecutionTracker tracker, IConnectionFactory connectionFactory,
+            ComponentFlowNode componentNode) {
+    }
+
     public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory, ComponentFlowNode componentNode, IComponentFlowChain chain) {
         this.executionTracker = executionTracker;
         this.componentNode = componentNode;
@@ -48,7 +57,6 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
         }
     }
 
-    @Override
     public void handle(Message inputMessage,
             ComponentFlowNode inputLink) {
         chain.doNext(inputMessage);

@@ -43,8 +43,8 @@ public class AgentDeploymentRuntime {
                     .getComponentFlowNodes();
             for (ComponentFlowNode node : all) {
                 endpointRuntimes.put(node, componentFactory.create(node.getComponentVersion()));
-                endpointRuntimes.get(node).start(executionTracker, connectionFactory, node,
-                        new NodeChain(node));
+//                endpointRuntimes.get(node).start(executionTracker, connectionFactory, node,
+//                        new NodeChain(node));
             }
         } catch (RuntimeException e) {
             throw e;
@@ -76,7 +76,7 @@ public class AgentDeploymentRuntime {
             ComponentFlowNode sourceNode) {
         validateMessageStructureMatchesInputModel(message, targetNode);
         IComponent runtime = (IComponent) endpointRuntimes.get(targetNode);
-        runtime.handle(message, sourceNode);
+        //runtime.handle(message, sourceNode);
     }
 
     protected void validateMessageStructureMatchesInputModel(Message message,

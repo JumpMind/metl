@@ -91,10 +91,10 @@ public class AgentEngine {
             List<AgentDeployment> deployments = agent.getAgentDeployments();
             deployments.remove(deployment);
             deployments.add(deployment);
-            AgentDeploymentRuntime coordinator = new AgentDeploymentRuntime(deployment,
+            AgentDeploymentRuntime runtime = new AgentDeploymentRuntime(deployment,
                     componentFactory, connectionFactory, new ExecutionTracker(deployment));
-            coordinators.put(deployment, coordinator);
-            coordinator.start();
+            coordinators.put(deployment, runtime);
+            runtime.start();
             deployment.getData().setStatus(DeploymentStatus.RUNNING.name());
             deployment.getData().setMessage("");
             log.info("Flow '{}' has been deployed", deployment.getComponentFlowVersion().getName());
