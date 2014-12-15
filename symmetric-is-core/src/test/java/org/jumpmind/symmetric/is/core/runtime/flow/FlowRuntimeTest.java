@@ -29,12 +29,20 @@ public class FlowRuntimeTest {
     IConfigurationService configurationService;
     ExecutorService threadService;
     
+    Folder folder;
+    Agent agent;
+    
+    
     @Before
     public void setup() throws Exception {
+    	
     	componentFactory = new ComponentFactory();
     	connectionFactory = new ConnectionFactory();
     	threadService = Executors.newFixedThreadPool(5);
     	configurationService = null;
+    	
+    	folder = TestUtils.createFolder("Test Folder");
+    	agent = TestUtils.createAgent("TestAgent", folder);
     }
     
     @After
@@ -44,9 +52,7 @@ public class FlowRuntimeTest {
     @Test
     public void simpleTwoNodeNoOp() throws Exception {
     	
-    	Folder folder = TestUtils.createFolder("Simple Two Node NoOp");
     	ComponentFlowVersion flow = createSimpleTwoNodeNoOpFlow(folder);
-    	Agent agent = TestUtils.createAgent("TestAgent", folder);    	
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);	
     	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, connectionFactory, 
     			new ExecutionTracker(deployment), threadService);
@@ -54,6 +60,19 @@ public class FlowRuntimeTest {
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Node").getNumberInboundMessages());
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Node").getNumberInboundMessages());
+    }
+    
+    @Test
+    public void singleSrcToTwoTarget() throws Exception {
+    	ComponentFlowVersion flow = createSrcToTwoTargetFlow(folder);
+    	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
+    	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, connectionFactory, 
+    			new ExecutionTracker(deployment), threadService);
+    	flowRuntime.start();
+    	flowRuntime.waitForFlowCompletion();
+    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Node").getNumberInboundMessages());
+    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Node 1").getNumberInboundMessages());
+    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Node 2").getNumberInboundMessages());    	
     }
     
     private ComponentFlowVersion createSimpleTwoNodeNoOpFlow(Folder folder) {
@@ -66,7 +85,20 @@ public class FlowRuntimeTest {
     	TestUtils.addNodeToComponentFlow(flow, targetNoOpNode);
 
     	return flow;
-    	
     }
 
+    private ComponentFlowVersion createSrcToTwoTargetFlow(Folder folder) {
+
+    	ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
+    	ComponentFlowNode srcNoOpNode = TestUtils.createNoOpProcessorComponentFlowNode(flow, "Src Node", folder);
+    	ComponentFlowNode targetNoOpNode1 = TestUtils.createNoOpProcessorComponentFlowNode(flow, "Target Node 1", folder);
+    	ComponentFlowNode targetNoOpNode2 = TestUtils.createNoOpProcessorComponentFlowNode(flow, "Target Node 2", folder);    	
+    	flow.getComponentFlowNodeLinks().add(TestUtils.createComponentLink(srcNoOpNode, targetNoOpNode1));
+    	flow.getComponentFlowNodeLinks().add(TestUtils.createComponentLink(srcNoOpNode, targetNoOpNode2));
+    	TestUtils.addNodeToComponentFlow(flow, srcNoOpNode);
+    	TestUtils.addNodeToComponentFlow(flow, targetNoOpNode1);
+    	TestUtils.addNodeToComponentFlow(flow, targetNoOpNode2);
+    	
+    	return flow;   	
+    } 
 }
