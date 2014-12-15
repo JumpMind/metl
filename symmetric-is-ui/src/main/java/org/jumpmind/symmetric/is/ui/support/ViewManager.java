@@ -89,5 +89,9 @@ public class ViewManager implements Serializable {
     public void navigateToDefault() {
         navigateTo(defaultView);
     }
+    
+    public String getDefaultView() {
+        return defaultView;
+    }
 
 }

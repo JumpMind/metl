@@ -9,7 +9,7 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.VerticalLayout;
 
 @Theme("apptheme")
 @Title("SymmetricIS")
@@ -25,7 +25,7 @@ public class AppUI extends AbstractSpringUI {
 
         super.init(request);
         
-        HorizontalLayout root = new HorizontalLayout();
+        VerticalLayout root = new VerticalLayout();
         root.setSizeFull();
         setContent(root);
 

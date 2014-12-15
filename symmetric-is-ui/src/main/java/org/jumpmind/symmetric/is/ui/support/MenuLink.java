@@ -19,7 +19,7 @@ public @interface MenuLink {
     
     Class<? extends UI> uiClass() default AppUI.class;
     
-    Category category() default Category.OTHER;
+    Category category() default Category.DESIGN;
     
     int menuOrder() default 10;
     
