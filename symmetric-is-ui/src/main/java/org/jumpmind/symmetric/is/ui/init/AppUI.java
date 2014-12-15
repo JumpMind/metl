@@ -1,8 +1,10 @@
 package org.jumpmind.symmetric.is.ui.init;
 
-import org.jumpmind.symmetric.is.ui.support.Menu;
+import org.jumpmind.symmetric.is.ui.support.DesignAgentSelect;
+import org.jumpmind.symmetric.is.ui.support.TopBar;
 import org.jumpmind.symmetric.is.ui.support.ViewManager;
 import org.jumpmind.symmetric.ui.common.AbstractSpringUI;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Theme;
@@ -34,10 +36,13 @@ public class AppUI extends AbstractSpringUI {
         contentArea.addStyleName("v-scrollable");
         contentArea.setSizeFull();
 
-        viewManager = getWebApplicationContext().getBean(ViewManager.class);
+        WebApplicationContext ctx = getWebApplicationContext();
+        viewManager = ctx.getBean(ViewManager.class);
         viewManager.init(this, contentArea);
+        
+        DesignAgentSelect designAgentSelect = ctx.getBean(DesignAgentSelect.class);
 
-        Menu menu = new Menu(viewManager);
+        TopBar menu = new TopBar(viewManager, designAgentSelect);
 
         root.addComponents(menu, contentArea);
         root.setExpandRatio(contentArea, 1);

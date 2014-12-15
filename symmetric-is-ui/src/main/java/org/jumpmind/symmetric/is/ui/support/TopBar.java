@@ -16,7 +16,7 @@ import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 
-public class Menu extends HorizontalLayout implements ViewChangeListener {
+public class TopBar extends HorizontalLayout implements ViewChangeListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -25,12 +25,17 @@ public class Menu extends HorizontalLayout implements ViewChangeListener {
     ViewManager viewManager;
 
     Map<String, MenuItem> viewToButtonMapping;
-    
+
     List<MenuItem> categoryItems = new ArrayList<MenuBar.MenuItem>();
 
-    public Menu(ViewManager vm) {
+    DesignAgentSelect designAgentSelect;
 
+    public TopBar(ViewManager vm, DesignAgentSelect das) {
+        setWidth(100, Unit.PERCENTAGE);
+        setSpacing(true);
         setMargin(new MarginInfo(true, true, false, true));
+
+        this.designAgentSelect = das;
         this.viewManager = vm;
         this.viewManager.addViewChangeListener(this);
 
@@ -39,18 +44,21 @@ public class Menu extends HorizontalLayout implements ViewChangeListener {
         menuBar = new MenuBar();
         addComponent(menuBar);
         setComponentAlignment(menuBar, Alignment.MIDDLE_LEFT);
+        
+        addComponent(designAgentSelect);
+        setComponentAlignment(designAgentSelect, Alignment.MIDDLE_RIGHT);
 
-        Map<Category, List<MenuLink>> menuItemsByCategory = viewManager.getMenuItemsByCategory();
+        Map<Category, List<TopBarLink>> menuItemsByCategory = viewManager.getMenuItemsByCategory();
         Set<Category> categories = menuItemsByCategory.keySet();
         for (Category category : categories) {
-            List<MenuLink> links = menuItemsByCategory.get(category);
+            List<TopBarLink> links = menuItemsByCategory.get(category);
             MenuItem categoryItem = null;
             if (links.size() > 1) {
                 categoryItem = menuBar.addItem(category.name(), null);
                 categoryItem.setCheckable(true);
                 categoryItems.add(categoryItem);
             }
-            for (final MenuLink menuLink : links) {
+            for (final TopBarLink menuLink : links) {
                 Command command = new Command() {
 
                     private static final long serialVersionUID = 1L;
@@ -74,7 +82,7 @@ public class Menu extends HorizontalLayout implements ViewChangeListener {
         }
 
     }
-    
+
     protected void uncheckAll() {
         for (MenuItem menuItem : categoryItems) {
             menuItem.setChecked(false);
@@ -91,15 +99,16 @@ public class Menu extends HorizontalLayout implements ViewChangeListener {
 
     @Override
     public void afterViewChange(final ViewChangeEvent event) {
-       String view = event.getViewName();
-       if (isBlank(view)) {
-           view = viewManager.getDefaultView();
-       }
+        String view = event.getViewName();
+        if (isBlank(view)) {
+            view = viewManager.getDefaultView();
+        }
         MenuItem menuItem = viewToButtonMapping.get(view);
         if (menuItem != null) {
             uncheckAll();
             menuItem.setChecked(true);
         }
+        designAgentSelect.refresh();
     }
 
 }

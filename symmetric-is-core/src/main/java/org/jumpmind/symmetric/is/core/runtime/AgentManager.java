@@ -37,12 +37,17 @@ public class AgentManager implements IAgentManager {
     }
 
     public void start() {
-        Set<Agent> agents = new HashSet<Agent>(configurationService.findAgentsForHost(AppUtils
-                .getHostName()));
-        agents.addAll(configurationService.findAgentsForHost(AppUtils.getIpAddress()));
+        Set<Agent> agents = getLocalAgents();
         for (Agent agent : agents) {
             createAndStartEngine(agent);
         }
+    }
+
+    public Set<Agent> getLocalAgents() {
+        Set<Agent> agents = new HashSet<Agent>(configurationService.findAgentsForHost(AppUtils
+                .getHostName()));
+        agents.addAll(configurationService.findAgentsForHost(AppUtils.getIpAddress()));
+        return agents;
     }
 
     @PreDestroy

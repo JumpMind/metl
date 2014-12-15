@@ -16,7 +16,7 @@ import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.ui.support.AbstractFolderNavigatorLayout;
 import org.jumpmind.symmetric.is.ui.support.Category;
-import org.jumpmind.symmetric.is.ui.support.MenuLink;
+import org.jumpmind.symmetric.is.ui.support.TopBarLink;
 import org.jumpmind.symmetric.is.ui.views.agents.EditAgentDeploymentsWindow;
 import org.jumpmind.symmetric.is.ui.views.agents.EditAgentWindow;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
@@ -51,7 +51,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-@MenuLink(category = Category.MANAGE, name = "Manage", id = "manage", icon = FontAwesome.GEARS, menuOrder = 10)
+@TopBarLink(category = Category.MANAGE, name = "Manage", id = "manage", icon = FontAwesome.GEARS, menuOrder = 10)
 public class ManageView extends HorizontalLayout implements View {
 
     private static final long serialVersionUID = 1L;

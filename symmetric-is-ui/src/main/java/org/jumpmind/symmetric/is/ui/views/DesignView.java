@@ -21,7 +21,7 @@ import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.support.AbstractFolderNavigatorLayout;
 import org.jumpmind.symmetric.is.ui.support.Category;
-import org.jumpmind.symmetric.is.ui.support.MenuLink;
+import org.jumpmind.symmetric.is.ui.support.TopBarLink;
 import org.jumpmind.symmetric.is.ui.views.flows.EditDbConnectionWindow;
 import org.jumpmind.symmetric.is.ui.views.flows.EditFlowLayout;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
@@ -48,7 +48,7 @@ import com.vaadin.ui.TreeTable;
 
 @UiComponent
 @Scope(value = "ui")
-@MenuLink(category = Category.DESIGN, name = "Design", id = "design", icon = FontAwesome.SHARE_ALT, menuOrder = 10, useAsDefault = true)
+@TopBarLink(category = Category.DESIGN, name = "Design", id = "design", icon = FontAwesome.SHARE_ALT, menuOrder = 10, useAsDefault = true)
 public class DesignView extends HorizontalLayout implements View {
 
     private static final long serialVersionUID = 1L;

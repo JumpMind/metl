@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.symmetric.is.ui.support.Category;
-import org.jumpmind.symmetric.is.ui.support.MenuLink;
+import org.jumpmind.symmetric.is.ui.support.TopBarLink;
 import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.jumpmind.symmetric.ui.sqlexplorer.IDb;
 import org.jumpmind.symmetric.ui.sqlexplorer.IDbProvider;
@@ -20,7 +20,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
 @Scope("ui")
-@MenuLink(id="explore", category=Category.EXPLORE, menuOrder=20, name = "Explore", icon=FontAwesome.DATABASE)
+@TopBarLink(id="explore", category=Category.EXPLORE, menuOrder=20, name = "Explore", icon=FontAwesome.DATABASE)
 public class SqlView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;

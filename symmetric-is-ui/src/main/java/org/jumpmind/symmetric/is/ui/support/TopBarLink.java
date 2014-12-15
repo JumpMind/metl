@@ -11,7 +11,7 @@ import com.vaadin.ui.UI;
 
 @Target({java.lang.annotation.ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MenuLink {
+public @interface TopBarLink {
     
     String id();
     
