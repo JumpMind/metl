@@ -79,7 +79,7 @@ public class NodeRuntime implements Runnable {
         		}
         	}        	
         } catch (Exception ex) {
-        	//TODO: notify the flowruntime that we have an error and let it gracefully shut things down
+        	//TODO: notify the flow runtime that we have an error and let it gracefully shut things down
             error = ex;
         }
     }
