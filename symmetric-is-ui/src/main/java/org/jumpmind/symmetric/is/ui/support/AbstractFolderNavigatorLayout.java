@@ -227,11 +227,12 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
     protected Component buildButtonLayout() {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setSpacing(true);
-        //layout.setWidth(100, Unit.PERCENTAGE);
+
         MenuBar menuBar = new MenuBar();
         layout.addComponent(menuBar);
         layout.setComponentAlignment(menuBar, Alignment.MIDDLE_LEFT);
         buildAddButton(menuBar);
+        
         Component[] comps = addAfterAddButton();
         for (Component c : comps) {
             layout.addComponent(c);
@@ -247,15 +248,19 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         
         editButton = createButton("Edit", false, new EditButtonClickListener());
         layout.addComponent(editButton);
+        layout.setComponentAlignment(editButton, Alignment.MIDDLE_LEFT);
+        
         comps = addAfterEditButton();
         for (Component c : comps) {
             layout.addComponent(c);
             layout.setComponentAlignment(c, Alignment.MIDDLE_LEFT);
         }
+                
         delButton = createButton("Delete", false, new DeleteButtonClickListener());
         layout.addComponent(delButton);
         layout.setComponentAlignment(delButton, Alignment.MIDDLE_LEFT);
-        comps = addAfterEditDelete();
+        
+        comps = addAfterEditDelete();        
         for (Component c : comps) {
             layout.addComponent(c);
             layout.setComponentAlignment(c, Alignment.MIDDLE_LEFT);
