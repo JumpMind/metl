@@ -79,10 +79,12 @@ public class NodeRuntime implements Runnable {
         		}
         	}        	
         } catch (Exception ex) {
-        	//TODO: notify te flowruntime that we have an error and let it gracefully shut things down
+        	//TODO: notify the flow runtime that we have an error and let it gracefully shut things down
             error = ex;
         }
     }
+    
+    
 
     public void stop() throws InterruptedException {
         this.inQueue.clear();
