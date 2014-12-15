@@ -11,6 +11,8 @@ public interface IComponent {
     public void start(IExecutionTracker tracker, IConnectionFactory connectionFactory, ComponentFlowNode componentNode);
 
     public void stop();
+    
+    public ComponentStatistics getComponentStatistcics();
 
     public void handle(Message inputMessage, IMessageTarget messageTarget);
 

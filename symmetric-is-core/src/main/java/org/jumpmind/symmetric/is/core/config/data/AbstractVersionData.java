@@ -10,10 +10,12 @@ public abstract class AbstractVersionData extends AbstractData {
     String versionName = UUID.randomUUID().toString();
 
     public void setVersionName(String versionName) {
+    	
         this.versionName = versionName;
     }
 
     public String getVersionName() {
+    	
         return versionName;
     }
 

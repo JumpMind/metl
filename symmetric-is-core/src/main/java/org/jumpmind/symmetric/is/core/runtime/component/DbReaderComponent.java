@@ -19,11 +19,11 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IComponentFlowChain;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.MessageManipulationStrategy;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -56,8 +56,8 @@ public class DbReaderComponent extends AbstractComponent {
 
     @Override
     public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory,
-            ComponentFlowNode componentNode, IComponentFlowChain chain) {
-        super.start(executionTracker, connectionFactory, componentNode, chain);
+            ComponentFlowNode componentNode) {
+        super.start(executionTracker, connectionFactory, componentNode);
         applySettings();
     }
 
@@ -127,13 +127,15 @@ public class DbReaderComponent extends AbstractComponent {
                     payload.addAll(records.values());
 
                     if (payload.size() >= rowsPerMessage) {
-                        chain.doNext(message);
+                        //chain.doNext(message);
+                    	//TODO: COME BACK AND CLEAN THIS UP
                         message = null;
                     }
                 }
 
                 if (message != null) {
-                    chain.doNext(message);
+                	//TODO: COME BACK AND CLEAN THIS UP
+                    //chain.doNext(message);
                 }
 
                 return null;
@@ -178,5 +180,17 @@ public class DbReaderComponent extends AbstractComponent {
         }
         return columnEntityHints;
     }
+
+	@Override
+	public void handle(Message inputMessage, IMessageTarget messageTarget) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public ComponentStatistics getComponentStatistcics() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

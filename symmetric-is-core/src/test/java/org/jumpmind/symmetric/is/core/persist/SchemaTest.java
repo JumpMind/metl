@@ -4,6 +4,7 @@ import org.jumpmind.db.io.DatabaseXmlUtil;
 import org.jumpmind.db.model.Database;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.util.ResettableBasicDataSource;
+import org.jumpmind.symmetric.is.core.utils.TestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

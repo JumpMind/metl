@@ -3,38 +3,23 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
-import org.jumpmind.symmetric.is.core.runtime.IComponentFlowChain;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
-import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
 abstract public class AbstractComponent extends AbstractRuntimeObject implements IComponent {
 
-    protected IComponentFlowChain chain;
-    
-    protected ComponentFlowNode componentNode;
-    
+    protected ComponentFlowNode componentNode;    
     protected IConnection connection;
-    
     protected IConnectionFactory connectionFactory;
-    
     protected IExecutionTracker executionTracker;
-    
-    @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
-    }
-    
-    @Override
-    public void start(IExecutionTracker tracker, IConnectionFactory connectionFactory,
-            ComponentFlowNode componentNode) {
-    }
+    protected ComponentStatistics componentStatistics;
 
-    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory, ComponentFlowNode componentNode, IComponentFlowChain chain) {
-        this.executionTracker = executionTracker;
+    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory, ComponentFlowNode componentNode) {
+        this.componentStatistics = new ComponentStatistics();
+    	this.executionTracker = executionTracker;
         this.componentNode = componentNode;
-        this.chain = chain;
         this.connectionFactory = connectionFactory;
 
         Connection connection = componentNode.getComponentVersion().getConnection();
@@ -59,7 +44,13 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
 
     public void handle(Message inputMessage,
             ComponentFlowNode inputLink) {
-        chain.doNext(inputMessage);
+    	//TODO: look at this - I don't think we should do anything here (we should always make the implementer override
+    	//remove when we revamp DbReaderComponent
+        //chain.doNext(inputMessage);
+    }
+    
+    public ComponentStatistics getComponentStatistics() {
+    	return componentStatistics;
     }
 
 }
