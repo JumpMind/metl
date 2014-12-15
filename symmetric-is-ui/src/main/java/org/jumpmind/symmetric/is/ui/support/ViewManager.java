@@ -41,7 +41,7 @@ public class ViewManager implements Serializable {
         navigator.setErrorView(new PageNotFoundView(this));
         if (views != null) {
             for (View view : views) {
-                MenuLink menu = (MenuLink) view.getClass().getAnnotation(MenuLink.class);
+                TopBarLink menu = (TopBarLink) view.getClass().getAnnotation(TopBarLink.class);
                 if (menu != null && menu.uiClass().equals(AppUI.class)) {
                     if (isBlank(defaultView) && menu.useAsDefault()) {
                         defaultView = menu.id();
@@ -56,22 +56,22 @@ public class ViewManager implements Serializable {
         this.navigator.addViewChangeListener(listener);
     }
 
-    public Map<Category, List<MenuLink>> getMenuItemsByCategory() {
-        LinkedHashMap<Category, List<MenuLink>> menuItemsByCategory = new LinkedHashMap<Category, List<MenuLink>>();
+    public Map<Category, List<TopBarLink>> getMenuItemsByCategory() {
+        LinkedHashMap<Category, List<TopBarLink>> menuItemsByCategory = new LinkedHashMap<Category, List<TopBarLink>>();
         Category[] categories = Category.values();
         for (Category category : categories) {
-            List<MenuLink> viewsByCategory = new ArrayList<MenuLink>();
+            List<TopBarLink> viewsByCategory = new ArrayList<TopBarLink>();
             for (View view : views) {
-                MenuLink menu = (MenuLink) view.getClass().getAnnotation(MenuLink.class);
+                TopBarLink menu = (TopBarLink) view.getClass().getAnnotation(TopBarLink.class);
                 if (menu != null) {
                     if (menu.category() == category) {
                         viewsByCategory.add(menu);
                     }
                 }
             }
-            Collections.sort(viewsByCategory, new Comparator<MenuLink>() {
+            Collections.sort(viewsByCategory, new Comparator<TopBarLink>() {
                 @Override
-                public int compare(MenuLink o1, MenuLink o2) {
+                public int compare(TopBarLink o1, TopBarLink o2) {
                     return new Integer(o1.menuOrder()).compareTo(new Integer(o2.menuOrder()));
                 }
             });
@@ -88,6 +88,10 @@ public class ViewManager implements Serializable {
     
     public void navigateToDefault() {
         navigateTo(defaultView);
+    }
+    
+    public String getDefaultView() {
+        return defaultView;
     }
 
 }

@@ -21,45 +21,29 @@ import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.symmetric.is.ui.views.flows.ComponentSettingsSheet.IComponentSettingsChangedListener;
-import org.jumpmind.symmetric.ui.common.ResizableWindow;
-import org.jumpmind.symmetric.ui.common.UiComponent;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Accordion;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.Command;
-import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-@UiComponent
-@Scope(value = "ui")
-public class EditFlowWindow extends ResizableWindow implements IComponentSettingsChangedListener {
+public class EditFlowLayout extends VerticalLayout implements IComponentSettingsChangedListener {
 
     private static final long serialVersionUID = 1L;
 
-    @Autowired
     IConfigurationService configurationService;
 
-    @Autowired
     IComponentFactory componentFactory;
 
-    @Autowired
     IConnectionFactory connectionFactory;
-    
-    @Autowired
-    EditFlowDeploymentsWindow flowDeploymentsWindow;
 
     ComponentFlowVersion componentFlowVersion;
 
@@ -77,11 +61,15 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
 
     Diagram diagram;
 
-    public EditFlowWindow() {
+    public EditFlowLayout(ComponentFlowVersion componentFlowVersion,
+            IConfigurationService configurationService, IComponentFactory componentFactory,
+            IConnectionFactory connectionFactory) {
 
-        VerticalLayout content = new VerticalLayout();
-        content.setSizeFull();
-        setContent(content);
+        this.configurationService = configurationService;
+        this.componentFactory = componentFactory;
+        this.connectionFactory = connectionFactory;
+
+        VerticalLayout content = this;
 
         HorizontalSplitPanel splitPanel = new HorizontalSplitPanel();
         splitPanel.setSplitPosition(350, Unit.PIXELS);
@@ -104,35 +92,11 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
         content.addComponent(splitPanel);
         content.setExpandRatio(splitPanel, 1);
 
-        content.addComponent(buildButtonFooter(null, new Button[] { buildCloseButton() }));
-        
         HorizontalLayout actionLayout = new HorizontalLayout();
         actionLayout.setMargin(true);
         actionLayout.setWidth(100, Unit.PERCENTAGE);
         flowLayout.addComponent(actionLayout);
 
-        MenuBar actionBar = new MenuBar();
-        actionBar.setWidth(100, Unit.PERCENTAGE);
-        actionBar.addStyleName(ValoTheme.MENUBAR_SMALL);
-
-        actionBar.addItem("Deploy", null, new Command() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                flowDeploymentsWindow.show(componentFlowVersion);
-            }
-        });
-
-        actionLayout.addComponent(actionBar);
-        actionLayout.setComponentAlignment(actionBar, Alignment.MIDDLE_RIGHT);
-
-    }
-
-    public ComponentFlowVersion getComponentFlowVersion() {
-        return componentFlowVersion;
-    }
-
-    public void show(final ComponentFlowVersion componentFlowVersion) {
         this.componentFlowVersion = componentFlowVersion;
 
         setCaption("Edit Flow - Name: "
@@ -148,8 +112,10 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
 
         tabs.setSelectedTab(palleteTab);
 
-        showAtSize(.8);
+    }
 
+    public ComponentFlowVersion getComponentFlowVersion() {
+        return componentFlowVersion;
     }
 
     @Override
@@ -246,6 +212,7 @@ public class EditFlowWindow extends ResizableWindow implements IComponentSetting
 
     class DiagramChangedListener implements Listener {
         private static final long serialVersionUID = 1L;
+
         @Override
         public void componentEvent(Event e) {
             if (e instanceof NodeSelectedEvent) {

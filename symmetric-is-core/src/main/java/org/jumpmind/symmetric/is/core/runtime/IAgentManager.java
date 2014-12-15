@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
+import java.util.Set;
+
 import org.jumpmind.symmetric.is.core.config.Agent;
 
 public interface IAgentManager {
@@ -15,6 +17,8 @@ public interface IAgentManager {
     public boolean isAgentLocal(Agent agent);
     
     public void start();
+    
+    public Set<Agent> getLocalAgents();
     
     
 }

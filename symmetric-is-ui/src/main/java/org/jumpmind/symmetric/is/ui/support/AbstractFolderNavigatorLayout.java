@@ -19,7 +19,6 @@ import org.jumpmind.symmetric.ui.common.PromptDialog.IPromptListener;
 import org.jumpmind.symmetric.ui.common.UiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -29,7 +28,6 @@ import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
@@ -51,7 +49,6 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Autowired
     protected IConfigurationService configurationService;
 
     protected TreeTable treeTable;
@@ -66,19 +63,16 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
     protected Set<Object> lastSelected;
 
-    public AbstractFolderNavigatorLayout(String title, FolderType folderType) {
+    public AbstractFolderNavigatorLayout(FolderType folderType,
+            IConfigurationService configurationService) {
         this.folderType = folderType;
-
-        setMargin(new MarginInfo(false, true, true, true));
+        this.configurationService = configurationService;
+        setMargin(true);
         setSpacing(true);
         setSizeFull();
 
-        Label titleLabel = new Label(title);
-        titleLabel.addStyleName("h2");
-
         this.treeTable = buildTree();
 
-        addComponent(titleLabel);
         addComponent(buildButtonLayout());
         addComponent(treeTable);
         setExpandRatio(treeTable, 1);

@@ -11,7 +11,7 @@ import com.vaadin.ui.UI;
 
 @Target({java.lang.annotation.ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MenuLink {
+public @interface TopBarLink {
     
     String id();
     
@@ -19,7 +19,7 @@ public @interface MenuLink {
     
     Class<? extends UI> uiClass() default AppUI.class;
     
-    Category category() default Category.OTHER;
+    Category category() default Category.DESIGN;
     
     int menuOrder() default 10;
     
