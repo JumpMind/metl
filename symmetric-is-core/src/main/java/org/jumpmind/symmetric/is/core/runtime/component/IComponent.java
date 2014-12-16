@@ -15,5 +15,9 @@ public interface IComponent {
     public ComponentStatistics getComponentStatistcics();
 
     public void handle(Message inputMessage, IMessageTarget messageTarget);
+    
+    public ComponentFlowNode getComponentFlowNode();
+    
+    public void setComponentFlowNode(ComponentFlowNode componentFlowNode);
 
 }

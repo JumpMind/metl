@@ -55,8 +55,8 @@ public class FlowRuntime {
         
         //create a node runtime for every component in the flow
         for (ComponentFlowNode componentFlowNode : nodes) {
-            NodeRuntime nodeRuntime = new NodeRuntime(componentFlowNode,
-                    componentFactory.create(componentFlowNode.getComponentVersion()));
+            NodeRuntime nodeRuntime = new NodeRuntime(
+            		componentFactory.create(componentFlowNode));
             nodeRuntimes.put(componentFlowNode.getId(), nodeRuntime);
         }
 

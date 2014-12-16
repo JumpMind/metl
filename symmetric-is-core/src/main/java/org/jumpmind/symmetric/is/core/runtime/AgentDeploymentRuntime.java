@@ -1,15 +1,11 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
@@ -42,7 +38,7 @@ public class AgentDeploymentRuntime {
             List<ComponentFlowNode> all = deployment.getComponentFlowVersion()
                     .getComponentFlowNodes();
             for (ComponentFlowNode node : all) {
-                endpointRuntimes.put(node, componentFactory.create(node.getComponentVersion()));
+                endpointRuntimes.put(node, componentFactory.create(node));
 //                endpointRuntimes.get(node).start(executionTracker, connectionFactory, node,
 //                        new NodeChain(node));
             }
@@ -72,13 +68,6 @@ public class AgentDeploymentRuntime {
         return null;
     }
 
-    protected void doNext(ComponentFlowNode targetNode, Message message,
-            ComponentFlowNode sourceNode) {
-        validateMessageStructureMatchesInputModel(message, targetNode);
-        IComponent runtime = (IComponent) endpointRuntimes.get(targetNode);
-        //runtime.handle(message, sourceNode);
-    }
-
     protected void validateMessageStructureMatchesInputModel(Message message,
             ComponentFlowNode targetNode) {
 
@@ -98,31 +87,31 @@ public class AgentDeploymentRuntime {
 
         @Override
         public void doNext(Message outputMessage) {
-            boolean isFirst = false;
-            MessageHeader header = outputMessage.getHeader();
-            String executionId = header.getExecutionId();
-            if (isBlank(executionId)) {
-                executionId = UUID.randomUUID().toString();
-                header.setExecutionId(executionId);
-                executionTracker.beforeFlow(executionId);
-                isFirst = true;
-            }
-
-            for (ComponentFlowNodeLink link : deployment.getComponentFlowVersion()
-                    .getComponentFlowNodeLinks()) {
-                if (link.getData().getSourceNodeId().equals(sourceNode.getData().getId())) {
-                    ComponentFlowNode targetNode = deployment.getComponentFlowVersion()
-                            .findComponentFlowNodeWithId(link.getData().getTargetNodeId());
-                    validateOutputLink(sourceNode, targetNode);
-                    executionTracker.beforeHandle(executionId, targetNode.getComponentVersion());
-                    AgentDeploymentRuntime.this.doNext(targetNode, outputMessage, sourceNode);
-                    executionTracker.afterHandle(executionId, targetNode.getComponentVersion());
-                }
-            }
-
-            if (isFirst) {
-                executionTracker.afterFlow(executionId);
-            }
+//            boolean isFirst = false;
+//            MessageHeader header = outputMessage.getHeader();
+//            String executionId = header.getExecutionId();
+//            if (isBlank(executionId)) {
+//                executionId = UUID.randomUUID().toString();
+//                header.setExecutionId(executionId);
+//                executionTracker.beforeFlow(executionId);
+//                isFirst = true;
+//            }
+//
+//            for (ComponentFlowNodeLink link : deployment.getComponentFlowVersion()
+//                    .getComponentFlowNodeLinks()) {
+//                if (link.getData().getSourceNodeId().equals(sourceNode.getData().getId())) {
+//                    ComponentFlowNode targetNode = deployment.getComponentFlowVersion()
+//                            .findComponentFlowNodeWithId(link.getData().getTargetNodeId());
+//                    validateOutputLink(sourceNode, targetNode);
+//                    executionTracker.beforeHandle(executionId, targetNode.getComponentVersion());
+//                    AgentDeploymentRuntime.this.doNext(targetNode, outputMessage, sourceNode);
+//                    executionTracker.afterHandle(executionId, targetNode.getComponentVersion());
+//                }
+//            }
+//
+//            if (isFirst) {
+//                executionTracker.afterFlow(executionId);
+//            }
         }
     }
 

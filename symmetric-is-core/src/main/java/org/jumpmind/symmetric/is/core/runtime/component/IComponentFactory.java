@@ -3,12 +3,12 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.symmetric.is.core.config.ComponentVersion;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 
 public interface IComponentFactory {
 
-    public IComponent create(ComponentVersion componentVersion);
+    public IComponent create(ComponentFlowNode componentFlowNode);
 
     public void register(Class<? extends IComponent> clazz);
 

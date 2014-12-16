@@ -32,7 +32,6 @@ public class FlowRuntimeTest {
     Folder folder;
     Agent agent;
     
-    
     @Before
     public void setup() throws Exception {
     	

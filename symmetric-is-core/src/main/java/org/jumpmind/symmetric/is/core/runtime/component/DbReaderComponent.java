@@ -62,7 +62,7 @@ public class DbReaderComponent extends AbstractComponent {
     }
 
     @Override
-    public void handle(final Message inputMessage, final ComponentFlowNode sourceNode) {
+    public void handle(final Message inputMessage, final IMessageTarget messageTarget) {
         final String filteredSql = filterSql(inputMessage);
         DataSource dataSource = this.connectionFactory.create(
                 componentNode.getComponentVersion().getConnection()).reference();
@@ -180,12 +180,6 @@ public class DbReaderComponent extends AbstractComponent {
         }
         return columnEntityHints;
     }
-
-	@Override
-	public void handle(Message inputMessage, IMessageTarget messageTarget) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public ComponentStatistics getComponentStatistcics() {

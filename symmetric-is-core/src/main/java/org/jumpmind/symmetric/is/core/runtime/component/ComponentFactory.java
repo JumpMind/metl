@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.symmetric.is.core.config.ComponentVersion;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 
@@ -48,12 +48,14 @@ public class ComponentFactory implements IComponentFactory {
     }
 
     @Override
-    public IComponent create(ComponentVersion componentVersion) {
+    public IComponent create(ComponentFlowNode componentFlowNode) {
         try {
-            String componentType = componentVersion.getComponent().getData().getType();
+            String componentType = componentFlowNode.getComponentVersion().getComponent().getData().getType();
             Class<? extends IComponent> clazz = componentTypes.get(componentType);
             if (clazz != null) {
-                return clazz.newInstance();
+            	IComponent component = clazz.newInstance();
+            	component.setComponentFlowNode(componentFlowNode);
+                return component;
             } else {
                 throw new IllegalStateException(
                         "Could not find a class associated with the component type of "

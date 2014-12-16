@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
@@ -27,13 +26,9 @@ public class NodeRuntime implements Runnable {
     IComponent component;
 
     List<NodeRuntime> targetNodeRuntimes;
-    
-    //TODO: can we get rid of this in lieu of the component itself?
-    ComponentFlowNode componentFlowNode;
 
-    public NodeRuntime(ComponentFlowNode componentFlowNode, IComponent component) {
+    public NodeRuntime(IComponent component) {
         this.component = component;
-        this.componentFlowNode = componentFlowNode;
         inQueue = new LinkedBlockingQueue<Message>(capacity);
     }
 
@@ -54,7 +49,7 @@ public class NodeRuntime implements Runnable {
     }
     
     public void start(IExecutionTracker tracker, IConnectionFactory connectionFactory) {
-        component.start(tracker, connectionFactory, componentFlowNode);
+        component.start(tracker, connectionFactory, component.getComponentFlowNode());
     }
 
     @Override

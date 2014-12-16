@@ -4,7 +4,6 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
-import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 
@@ -41,16 +40,17 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
             this.connection.stop();
         }
     }
-
-    public void handle(Message inputMessage,
-            ComponentFlowNode inputLink) {
-    	//TODO: look at this - I don't think we should do anything here (we should always make the implementer override
-    	//remove when we revamp DbReaderComponent
-        //chain.doNext(inputMessage);
-    }
     
     public ComponentStatistics getComponentStatistics() {
     	return componentStatistics;
+    }
+    
+    public ComponentFlowNode getComponentFlowNode() {
+    	return this.componentNode;
+    }
+    
+    public void setComponentFlowNode(ComponentFlowNode componentNode) {
+    	this.componentNode = componentNode;
     }
 
 }
