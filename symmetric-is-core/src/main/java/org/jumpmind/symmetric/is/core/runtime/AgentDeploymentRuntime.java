@@ -52,7 +52,7 @@ public class AgentDeploymentRuntime {
     public void stop() {
         List<ComponentFlowNode> allNodes = deployment.getComponentFlowVersion()
                 .getComponentFlowNodes();
-        for (ComponentFlowNode node : allNodes) {
+        for (ComponentFlowNode node : allNodes) {            
             endpointRuntimes.get(node).stop();
         }
         endpointRuntimes.clear();

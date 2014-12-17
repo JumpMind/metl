@@ -1,7 +1,22 @@
+  @mixin valo-loading-bar {
+  
+  .v-loading-indicator, .v-loading-indicator-delay, .v-loading-indicator-wait {  
+       width: 100%;  
+       height: 100%;  
+       margin: 0;  
+       background-attachment: fixed;   
+       opacity: .6;  
+       -ms-filter: alpha(opacity=80);  
+       filter: alpha(opacity=80);  
+       z-index: 99999;
+       background: #fff url(../valo/shared/img/spinner.gif) no-repeat 50%;
+  }
+}
+  
 @mixin apptheme {
 	
   @include valo;
-
+  
   .leftAligned.v-button {
     text-align: left; 
     padding-left: 5px;
@@ -126,23 +141,8 @@
         background-image: linear-gradient(#DEDEDE, #E0E0E0);
     }
     
-    .v-loading-indicator[style*="none"]:before {
-      display: none;
-    }
-
-    .v-loading-indicator-delay:before,
-    .v-loading-indicator-wait:before {
-        content: "";
-        position: fixed;
-        background: rgba(0,0,0,.5);
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        pointer-events: auto;
-    }
     
-        .ace_marker-layer .errormarker {
+    .ace_marker-layer .errormarker {
         border-bottom: 2px dotted red;
         position: absolute;
     }
@@ -152,7 +152,7 @@
         width: 400px;
     }
     
-        .vrule {
+    .vrule {
         height: 100%;
         border-left: 1px solid #c0c0c0;
         margin-left: 5px;

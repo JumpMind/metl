@@ -21,6 +21,7 @@ import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.symmetric.is.ui.views.flows.ComponentSettingsSheet.IComponentSettingsChangedListener;
+import org.jumpmind.symmetric.ui.common.IUiPanel;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Accordion;
@@ -35,7 +36,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class EditFlowLayout extends VerticalLayout implements IComponentSettingsChangedListener {
+public class EditFlowLayout extends VerticalLayout implements IComponentSettingsChangedListener, IUiPanel {
 
     private static final long serialVersionUID = 1L;
 
@@ -112,6 +113,15 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
 
         tabs.setSelectedTab(palleteTab);
 
+    }
+    
+    @Override
+    public void showing() {
+    }
+    
+    @Override
+    public boolean closing() {
+        return true;
     }
 
     public ComponentFlowVersion getComponentFlowVersion() {

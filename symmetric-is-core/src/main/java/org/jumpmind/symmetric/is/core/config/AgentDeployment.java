@@ -32,4 +32,8 @@ public class AgentDeployment extends AbstractObject<AgentDeploymentData> {
         return data.getMessage();
     }
 
+    @Override
+    public String toString() {
+        return componentFlowVersion.getName();
+    }
 }

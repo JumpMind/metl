@@ -3,22 +3,29 @@ package org.jumpmind.symmetric.is.ui.views;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
 import org.jumpmind.symmetric.is.core.config.DeploymentStatus;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.config.data.AgentData;
+import org.jumpmind.symmetric.is.core.config.data.AgentDeploymentData;
+import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.runtime.AgentEngine;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.ui.support.AbstractFolderNavigatorLayout;
 import org.jumpmind.symmetric.is.ui.support.Category;
 import org.jumpmind.symmetric.is.ui.support.TopBarLink;
 import org.jumpmind.symmetric.is.ui.views.agents.EditAgentDeploymentsWindow;
 import org.jumpmind.symmetric.is.ui.views.agents.EditAgentWindow;
+import org.jumpmind.symmetric.is.ui.views.agents.SelectComponentFlowVersionWindow;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
@@ -34,7 +41,6 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
@@ -47,7 +53,6 @@ import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
-import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
@@ -55,27 +60,32 @@ import com.vaadin.ui.themes.ValoTheme;
 public class ManageView extends HorizontalLayout implements View {
 
     private static final long serialVersionUID = 1L;
-    
+
+    static final FontAwesome DEPLOYMENT_ICON = FontAwesome.CUBE;
+
     protected MainTab mainTab;
-    
+
     @Autowired
     EditAgentDeploymentsWindow editAgentDeploymentsWindow;
-    
+
     @Autowired
     EditAgentWindow editAgentWindow;
 
     @Autowired
+    SelectComponentFlowVersionWindow selectComponentFlowVersionWindow;
+
+    @Autowired
     IAgentManager agentManager;
-    
+
     @Autowired
     IConfigurationService configurationService;
-    
+
     protected TabbedApplicationPanel tabSheet;
-    
+
     public ManageView() {
         setSizeFull();
     }
-    
+
     @PostConstruct
     protected void init() {
         setMargin(true);
@@ -84,7 +94,7 @@ public class ManageView extends HorizontalLayout implements View {
         tabSheet.setMainTab("Agents", FontAwesome.FOLDER_OPEN_O, mainTab);
         addComponent(tabSheet);
     }
-    
+
     @Override
     public void enter(ViewChangeEvent event) {
         mainTab.refresh();
@@ -95,6 +105,8 @@ public class ManageView extends HorizontalLayout implements View {
         private static final long serialVersionUID = 1L;
 
         MenuItem addAgentButton;
+
+        MenuItem addDeploymentButton;
 
         public MainTab() {
             super(FolderType.RUNTIME, ManageView.this.configurationService);
@@ -130,9 +142,9 @@ public class ManageView extends HorizontalLayout implements View {
                             Label label = new Label(FontAwesome.CHECK.getHtml(), ContentMode.HTML);
                             label.addStyleName("centerAligned");
                             return label;
-                        } 
+                        }
                     }
-                    return null;                
+                    return null;
                 }
             });
             tree.setColumnWidth("Local", 50);
@@ -158,7 +170,7 @@ public class ManageView extends HorizontalLayout implements View {
                 }
             });
             tree.setColumnWidth("Status", 75);
-            
+
             tree.addGeneratedColumn("Host", new ColumnGenerator() {
 
                 private static final long serialVersionUID = 1L;
@@ -174,7 +186,7 @@ public class ManageView extends HorizontalLayout implements View {
                 }
             });
             tree.setColumnExpandRatio("Host", 1);
-            
+
             tree.addGeneratedColumn("Deployments", new ColumnGenerator() {
 
                 private static final long serialVersionUID = 1L;
@@ -183,16 +195,13 @@ public class ManageView extends HorizontalLayout implements View {
                 public Object generateCell(Table source, Object itemId, Object columnId) {
                     if (itemId instanceof Agent) {
                         Agent agent = (Agent) itemId;
-                        Button button = new Button(Integer.toString(agent.getAgentDeployments().size()), new EditAgentDeploymentsClickListener(agent));
-                        button.setWidth(100, Unit.PERCENTAGE);
-                        button.addStyleName(ValoTheme.BUTTON_LINK);
-                        return button;
+                        return agent.getAgentDeployments().size();
                     } else {
                         return null;
                     }
                 }
             });
-            
+
             return tree;
         }
 
@@ -205,7 +214,7 @@ public class ManageView extends HorizontalLayout implements View {
 
         @Override
         public void itemUpdated(Object item) {
-            if (item instanceof Agent) {            
+            if (item instanceof Agent) {
                 Agent agent = (Agent) item;
                 agentManager.refresh(agent);
                 refresh();
@@ -216,13 +225,25 @@ public class ManageView extends HorizontalLayout implements View {
 
         @Override
         protected boolean isDeleteButtonEnabled(Object selected) {
-            return super.isDeleteButtonEnabled(selected) || selected instanceof Agent;
+            boolean enabled = super.isDeleteButtonEnabled(selected);
+            if (selected instanceof Agent) {
+                Agent agent = (Agent) selected;
+                enabled = agent.getAgentDeployments().size() == 0;
+            } else if (selected instanceof AgentDeployment) {
+                enabled = true;
+            }
+            return enabled;
         }
 
         @Override
         protected void addToAddButton(MenuBar.MenuItem dropdown) {
             addAgentButton = dropdown.addItem("Agent", FontAwesome.GEAR, new AddAgentCommand());
             addAgentButton.setEnabled(false);
+
+            addDeploymentButton = dropdown.addItem("Deployment", DEPLOYMENT_ICON,
+                    new AddDeploymentCommand());
+            addDeploymentButton.setEnabled(false);
+
         }
 
         @Override
@@ -230,7 +251,9 @@ public class ManageView extends HorizontalLayout implements View {
             super.treeSelectionChanged(event);
             boolean folderSelected = getSelectedFolder() != null;
             addAgentButton.setEnabled(folderSelected);
-            editButton.setEnabled(getSingleSelection(Agent.class) != null);
+            boolean agentSelected = getSingleSelection(Agent.class) != null;
+            editButton.setEnabled(agentSelected);
+            addDeploymentButton.setEnabled(agentSelected);
         }
 
         @Override
@@ -238,8 +261,13 @@ public class ManageView extends HorizontalLayout implements View {
             if (object instanceof Agent) {
                 Agent agent = (Agent) object;
                 ConfirmDialog.show("Delete Agent?", "Are you sure you want to delete the "
-                        + agent.getData().getName() + " agent?", new DeleteAgentConfirmationListener(
-                        agent));
+                        + agent.getData().getName() + " agent?",
+                        new DeleteAgentConfirmationListener(agent));
+            } else if (object instanceof AgentDeployment) {
+                AgentDeployment agent = (AgentDeployment) object;
+                ConfirmDialog.show("Delete Deployment?", "Are you sure you want to delete the "
+                        + agent + " deployment?", new DeleteDeploymentConfirmationListener(agent));
+
             }
         }
 
@@ -255,21 +283,29 @@ public class ManageView extends HorizontalLayout implements View {
             for (Agent agent : agents) {
                 this.treeTable.addItem(agent);
                 this.treeTable.setItemIcon(agent, FontAwesome.GEAR);
-                this.treeTable.setChildrenAllowed(agent, false);
+                this.treeTable.setChildrenAllowed(agent, agent.getAgentDeployments().size() > 0);
                 this.treeTable.setParent(agent, folder);
+
+                List<AgentDeployment> deployments = agent.getAgentDeployments();
+                for (AgentDeployment agentDeployment : deployments) {
+                    this.treeTable.addItem(agentDeployment);
+                    this.treeTable.setItemIcon(agentDeployment, DEPLOYMENT_ICON);
+                    this.treeTable.setParent(agentDeployment, agent);
+                    this.treeTable.setChildrenAllowed(agentDeployment, false);
+                }
             }
 
         }
-        
+
         class EditAgentDeploymentsClickListener implements ClickListener {
             private static final long serialVersionUID = 1L;
-            
+
             Agent agent;
-            
+
             public EditAgentDeploymentsClickListener(Agent agent) {
                 this.agent = agent;
             }
-            
+
             @Override
             public void buttonClick(ClickEvent event) {
                 editAgentDeploymentsWindow.show(agent, MainTab.this);
@@ -283,6 +319,41 @@ public class ManageView extends HorizontalLayout implements View {
             public void menuSelected(MenuItem selectedItem) {
                 PromptDialog.prompt("Add Agent", "Please provide a name for the new Agent",
                         new NewAgentNamePromptListener());
+            }
+        }
+
+        class AddDeploymentCommand implements Command, IItemUpdatedListener {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                Agent agent = getSingleSelection(Agent.class);
+                if (agent != null) {
+                    selectComponentFlowVersionWindow.show(agent, this);
+                }
+            }
+
+            @Override
+            public void itemUpdated(Object item) {
+                Agent agent = getSingleSelection(Agent.class);
+                @SuppressWarnings("unchecked")
+                Set<ComponentFlowVersionSummary> selectedFlows = (Set<ComponentFlowVersionSummary>) item;
+                for (ComponentFlowVersionSummary componentFlowVersionSummary : selectedFlows) {
+                    AgentDeploymentData data = new AgentDeploymentData();
+                    data.setAgentId(agent.getData().getId());
+                    data.setComponentFlowVersionId(componentFlowVersionSummary.getId());
+                    ComponentFlowVersion componentFlowVersion = new ComponentFlowVersion(null,
+                            new ComponentFlowVersionData(componentFlowVersionSummary.getId()));
+                    configurationService.refresh(componentFlowVersion);
+                    AgentDeployment agentDeployment = new AgentDeployment(componentFlowVersion,
+                            data);
+                    configurationService.save(agentDeployment);
+                    agent.getAgentDeployments().add(agentDeployment);
+
+                    refresh();
+
+                    expand(agent.getFolder(), agent);
+                }
             }
         }
 
@@ -329,6 +400,30 @@ public class ManageView extends HorizontalLayout implements View {
                 configurationService.delete(toDelete);
                 refresh();
                 expand(toDelete.getFolder(), toDelete.getFolder());
+                return true;
+            }
+        }
+
+        class DeleteDeploymentConfirmationListener implements IConfirmListener {
+
+            AgentDeployment toDelete;
+
+            private static final long serialVersionUID = 1L;
+
+            public DeleteDeploymentConfirmationListener(AgentDeployment toDelete) {
+                this.toDelete = toDelete;
+            }
+
+            @Override
+            public boolean onOk() {
+                configurationService.delete(toDelete);
+                Agent agent = findObjectInTreeWithId(toDelete.getData().getAgentId());
+                AgentEngine engine = agentManager.getAgentEngine(agent);
+                if (engine != null) {
+                    engine.undeploy(toDelete);
+                }
+                refresh();
+                expand(agent.getFolder(), agent);
                 return true;
             }
         }

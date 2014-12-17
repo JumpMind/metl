@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jumpmind.symmetric.is.core.config.AbstractObject;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
@@ -284,6 +285,20 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                 }
             }
         }
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected <T extends AbstractObject<?>> T findObjectInTreeWithId(String id) {
+        Collection<?> itemIds = treeTable.getItemIds();
+        for (Object itemId : itemIds) {
+            if (itemId instanceof AbstractObject<?>) {
+                AbstractObject<?> object = (AbstractObject<?>)itemId;
+                if (object.getId().equals(id)) {
+                    return (T)object;
+                }
+            }
+        }
+        return null;
     }
 
     protected Folder getSelectedFolder() {
