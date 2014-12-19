@@ -8,11 +8,11 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
 public interface IComponent {
 
-    public void start(IExecutionTracker tracker, IConnectionFactory connectionFactory, ComponentFlowNode componentNode);
+    public void start(IExecutionTracker tracker, IConnectionFactory connectionFactory);
 
     public void stop();
     
-    public ComponentStatistics getComponentStatistcics();
+    public ComponentStatistics getComponentStatistics();
 
     public void handle(Message inputMessage, IMessageTarget messageTarget);
     

@@ -13,11 +13,6 @@ public class SchedulerComponent extends AbstractComponent {
 		
 	}
 
-	@Override
-	public ComponentStatistics getComponentStatistcics() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	//TODO: THIS SHOULD COMPLETELY GO AWAY
 	

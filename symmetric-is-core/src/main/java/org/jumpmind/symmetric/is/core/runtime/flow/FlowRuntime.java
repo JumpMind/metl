@@ -53,14 +53,14 @@ public class FlowRuntime {
         ComponentFlowVersion componentFlowVersion = deployment.getComponentFlowVersion();
         List<ComponentFlowNode> nodes = componentFlowVersion.getComponentFlowNodes();
         
-        //create a node runtime for every component in the flow
+        /* create a node runtime for every component in the flow */
         for (ComponentFlowNode componentFlowNode : nodes) {
             NodeRuntime nodeRuntime = new NodeRuntime(
             		componentFactory.create(componentFlowNode));
             nodeRuntimes.put(componentFlowNode.getId(), nodeRuntime);
         }
 
-        //for each node runtime, set their list of target node runtimes
+        /* for each node runtime, set their list of target node runtimes */
         for (String nodeId : nodeRuntimes.keySet()) {
             List<NodeRuntime> targetNodeRuntimes = new ArrayList<NodeRuntime>();
             List<ComponentFlowNodeLink> links = componentFlowVersion.getComponentFlowNodeLinks();
@@ -78,19 +78,19 @@ public class FlowRuntime {
         	nodeRuntime.setStartNode(true);
         }
         
-        //each node is started as a thread
+        /* each node is started as a thread */
         for (NodeRuntime nodeRuntime : nodeRuntimes.values()) {
             threadService.execute(nodeRuntime);
         }
 
-        //start up each node runtime
+        /* start up each node runtime */
         for (NodeRuntime nodeRuntime : nodeRuntimes.values()) {
             nodeRuntime.start(executionTracker, connectionFactory);
         }
         
         Message startMessage = new Message();
         // TODO set parameters on start message
-        //for each start node (node that has no input msgs), send a start message to that node
+        /* for each start node (node that has no input msgs), send a start message to that node */
         for (NodeRuntime nodeRuntime : startNodes) {
             nodeRuntime.put(startMessage);
         }
@@ -127,6 +127,6 @@ public class FlowRuntime {
     }
     
     public ComponentStatistics getComponentStatistics(String componentFlowNodeId) {
-    	return nodeRuntimes.get(componentFlowNodeId).getComponent().getComponentStatistcics();
+    	return nodeRuntimes.get(componentFlowNodeId).getComponent().getComponentStatistics();
     }
 }

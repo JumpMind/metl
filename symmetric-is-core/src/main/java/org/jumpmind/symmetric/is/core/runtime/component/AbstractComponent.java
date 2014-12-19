@@ -15,10 +15,9 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     protected IExecutionTracker executionTracker;
     protected ComponentStatistics componentStatistics;
 
-    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory, ComponentFlowNode componentNode) {
+    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory) {
         this.componentStatistics = new ComponentStatistics();
     	this.executionTracker = executionTracker;
-        this.componentNode = componentNode;
         this.connectionFactory = connectionFactory;
 
         Connection connection = componentNode.getComponentVersion().getConnection();
@@ -34,7 +33,6 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
         }
     }
 
-    @Override
     public void stop() {
         if (this.connection != null) {
             this.connection.stop();

@@ -49,7 +49,7 @@ public class NodeRuntime implements Runnable {
     }
     
     public void start(IExecutionTracker tracker, IConnectionFactory connectionFactory) {
-        component.start(tracker, connectionFactory, component.getComponentFlowNode());
+        component.start(tracker, connectionFactory);
     }
 
     @Override

@@ -18,8 +18,4 @@ public class NoOpProcessorComponent extends AbstractComponent {
 		messageTarget.put(new ShutdownMessage());
 	}
 
-	@Override
-	public ComponentStatistics getComponentStatistcics() {
-		return super.getComponentStatistics();
-	}
 }

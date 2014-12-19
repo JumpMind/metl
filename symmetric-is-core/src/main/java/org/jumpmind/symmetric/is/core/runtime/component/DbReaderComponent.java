@@ -15,13 +15,13 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.MessageManipulationStrategy;
+import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.springframework.dao.DataAccessException;
@@ -55,9 +55,8 @@ public class DbReaderComponent extends AbstractComponent {
     boolean trimColumns = false;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory,
-            ComponentFlowNode componentNode) {
-        super.start(executionTracker, connectionFactory, componentNode);
+    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory) {
+        super.start(executionTracker, connectionFactory);
         applySettings();
     }
 
@@ -127,17 +126,15 @@ public class DbReaderComponent extends AbstractComponent {
                     payload.addAll(records.values());
 
                     if (payload.size() >= rowsPerMessage) {
-                        //chain.doNext(message);
-                    	//TODO: COME BACK AND CLEAN THIS UP
+                        messageTarget.put(message);
                         message = null;
                     }
                 }
 
                 if (message != null) {
-                	//TODO: COME BACK AND CLEAN THIS UP
-                    //chain.doNext(message);
+                	messageTarget.put(message);
                 }
-
+                messageTarget.put(new ShutdownMessage());
                 return null;
             }
         });
@@ -166,6 +163,7 @@ public class DbReaderComponent extends AbstractComponent {
         }
     }
 
+    //TODO: Should be able to get rid of this
     protected Map<Integer, String> getSqlColumnEntityHints(String sql) {
         Map<Integer, String> columnEntityHints = new HashMap<Integer, String>();
         String columns = sql.substring(sql.toLowerCase().indexOf("select ") + 7, sql.toLowerCase()
@@ -180,11 +178,5 @@ public class DbReaderComponent extends AbstractComponent {
         }
         return columnEntityHints;
     }
-
-	@Override
-	public ComponentStatistics getComponentStatistcics() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 }
