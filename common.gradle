@@ -24,11 +24,13 @@ import org.apache.tools.ant.filters.ReplaceTokens
         javaMailVersion = '1.4.7'
         jdomVersion = '2.0.5'
         springVersion = '4.0.2.RELEASE'
-        symmetricVersion = '3.7.0-SNAPSHOT'
+        symmetricVersion = '3.7.1'
         servletVersion = '3.0.1'
         h2Version = '1.3.175'        
         mysqlVersion = '5.1.29'
         jtdsVersion = '1.3.1'
+        mockitoVersion = '1.9.5'
+        powerMockVersion = '1.5.3'
                 
         env = System.getenv()                
     }
