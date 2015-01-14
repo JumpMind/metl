@@ -9,7 +9,6 @@ import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.Folder;
-import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.ExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
@@ -26,7 +25,6 @@ public class FlowRuntimeTest {
     IDatabasePlatform platform;
     IComponentFactory componentFactory;
     IConnectionFactory connectionFactory;
-    IConfigurationService configurationService;
     ExecutorService threadService;
     
     Folder folder;
@@ -38,7 +36,6 @@ public class FlowRuntimeTest {
     	componentFactory = new ComponentFactory();
     	connectionFactory = new ConnectionFactory();
     	threadService = Executors.newFixedThreadPool(5);
-    	configurationService = null;
     	
     	folder = TestUtils.createFolder("Test Folder");
     	agent = TestUtils.createAgent("TestAgent", folder);

@@ -1,17 +1,7 @@
 package org.jumpmind.symmetric.is.core.utils;
 
-import java.io.File;
 import java.util.Date;
 
-import javax.sql.DataSource;
-
-import org.apache.commons.io.FileUtils;
-import org.jumpmind.db.platform.IDatabasePlatform;
-import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
-import org.jumpmind.db.sql.SqlTemplateSettings;
-import org.jumpmind.db.util.BasicDataSourceFactory;
-import org.jumpmind.db.util.BasicDataSourcePropertyConstants;
-import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.Component;
@@ -34,23 +24,6 @@ import org.jumpmind.symmetric.is.core.config.data.SettingData;
 import org.jumpmind.symmetric.is.core.runtime.component.NoOpProcessorComponent;
 
 public class TestUtils {
-
-    public static IDatabasePlatform createDatabasePlatform() throws Exception {
-        final String DB_DIR = "build/dbs";
-        File dir = new File(DB_DIR);
-        if (dir.exists()) {
-            FileUtils.deleteDirectory(new File(DB_DIR));
-        }
-        TypedProperties properties = new TypedProperties();
-        properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_DRIVER, "org.h2.Driver");
-        properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_URL, "jdbc:h2:file:"
-                + DB_DIR + "/testdb");
-        properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_USER, "jumpmind");
-        properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_PASSWORD, "jumpmind");
-        DataSource ds = BasicDataSourceFactory.create(properties);
-        return JdbcDatabasePlatformFactory.createNewPlatformInstance(ds, new SqlTemplateSettings(),
-                false);
-    }
     
     public static Folder createFolder(String name) {
     	
@@ -85,8 +58,8 @@ public class TestUtils {
     public static ComponentFlowNode createNoOpProcessorComponentFlowNode(ComponentFlowVersion flowVersion, 
     		String name, Folder folder) {
 
-    	Component component = createComponent(NoOpProcessorComponent.type, false);
-    	ComponentVersion componentVersion = createComponentVersion(component, name, null, null);
+    	Component component = createComponent(NoOpProcessorComponent.TYPE, false);
+    	ComponentVersion componentVersion = createComponentVersion(component, name, null, (SettingData[]) null);
     	ComponentFlowNodeData data = new ComponentFlowNodeData();
     	data.setComponentFlowVersionId(flowVersion.getId());
     	data.setComponentVersionId(componentVersion.getId());
@@ -118,7 +91,7 @@ public class TestUtils {
 //    	data.setStartMode(startMode);
 //    	data.setStatus(status);
     	
-    	Agent agent = new Agent(folder, data, null);
+    	Agent agent = new Agent(folder, data, (SettingData[]) null);
     	
     	return agent;
     }
@@ -159,7 +132,7 @@ public class TestUtils {
     	return componentFlow;
     }
     
-    private static Component createComponent(String type, boolean shared) {
+    public static Component createComponent(String type, boolean shared) {
 
     	ComponentData data = new ComponentData(type, shared);
     	Component component = new Component(data);
@@ -171,7 +144,7 @@ public class TestUtils {
     	return component;
     }
     
-    private static ComponentVersion createComponentVersion(Component component, 
+    public static ComponentVersion createComponentVersion(Component component, 
     		String name, Connection connection, SettingData... settings) {
     	
     	ComponentVersionData data = new ComponentVersionData();

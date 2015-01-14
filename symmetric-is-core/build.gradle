@@ -19,7 +19,10 @@ dependencies {
     compile "org.apache.httpcomponents:httpclient:$httpComponentsVersion"
     compile "org.apache.httpcomponents:httpmime:$httpComponentsVersion"
     compile "org.jumpmind.symmetric.schemaspy:schemaspy:5.0.0"
-    
+    testCompile "org.mockito:mockito-all:$mockitoVersion"
+    testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
+    testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"
+
 }
 
 task (schemaspy, dependsOn: 'classes', type: JavaExec) {

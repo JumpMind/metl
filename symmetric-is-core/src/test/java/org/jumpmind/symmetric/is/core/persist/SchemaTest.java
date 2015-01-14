@@ -4,7 +4,7 @@ import org.jumpmind.db.io.DatabaseXmlUtil;
 import org.jumpmind.db.model.Database;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.util.ResettableBasicDataSource;
-import org.jumpmind.symmetric.is.core.utils.TestUtils;
+import org.jumpmind.symmetric.is.core.utils.DbTestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +15,7 @@ public class SchemaTest {
 
     @Before
     public void setup() throws Exception {
-        platform = TestUtils.createDatabasePlatform();
+        platform = DbTestUtils.createDatabasePlatform();
     }
     
     @After
