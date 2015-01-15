@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -40,7 +41,7 @@ public class EditAgentWindow extends ResizableWindow {
 
     TextField hostField;
     
-    ComboBox agentStartModeCombo;
+    AbstractSelect agentStartModeCombo;
 
     public EditAgentWindow() {
         setCaption("Edit Agent");

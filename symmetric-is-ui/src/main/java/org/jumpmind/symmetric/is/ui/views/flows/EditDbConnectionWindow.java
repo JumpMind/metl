@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Scope;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -169,7 +170,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
 
     TextField nameField;
 
-    ComboBox databaseType;
+    AbstractSelect databaseType;
 
     TextField databaseUrl;
 

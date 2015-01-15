@@ -54,6 +54,8 @@ public class DesignView extends HorizontalLayout implements View {
     private static final long serialVersionUID = 1L;
 
     static final FontAwesome GENERAL_CONNECTION_ICON = FontAwesome.BOLT;
+    
+    static final FontAwesome FLOW_ICON = FontAwesome.SHARE_ALT;
 
     @Autowired
     EditDbConnectionWindow editDbConnectionWindow;
@@ -134,7 +136,7 @@ public class DesignView extends HorizontalLayout implements View {
             if (item instanceof ComponentFlowVersion) {
                 EditFlowLayout editFlowLayout = new EditFlowLayout((ComponentFlowVersion) item,
                         configurationService, componentFactory, connectionFactory);
-                tabSheet.addCloseableTab(editFlowLayout.getCaption(), FontAwesome.SITEMAP,
+                tabSheet.addCloseableTab(editFlowLayout.getCaption(), FLOW_ICON,
                         editFlowLayout);
             } else if (item instanceof Connection) {
                 editDbConnectionWindow.show((Connection) item, this);
@@ -171,7 +173,7 @@ public class DesignView extends HorizontalLayout implements View {
 
         @Override
         protected void addToAddButton(MenuBar.MenuItem dropdown) {
-            addFlowButton = dropdown.addItem("Flow", FontAwesome.SHARE_ALT, new AddFlowCommand());
+            addFlowButton = dropdown.addItem("Flow", FLOW_ICON, new AddFlowCommand());
             addFlowButton.setEnabled(false);
 
             addConnectionsButton = dropdown.addItem("Connections", GENERAL_CONNECTION_ICON, null);
@@ -233,7 +235,7 @@ public class DesignView extends HorizontalLayout implements View {
             List<ComponentFlow> flows = configurationService.findComponentFlowsInFolder(folder);
             for (ComponentFlow flow : flows) {
                 this.treeTable.addItem(flow);
-                this.treeTable.setItemIcon(flow, FontAwesome.SHARE_ALT);
+                this.treeTable.setItemIcon(flow, FLOW_ICON);
                 this.treeTable.setParent(flow, folder);
 
                 List<ComponentFlowVersion> versions = flow.getComponentFlowVersions();

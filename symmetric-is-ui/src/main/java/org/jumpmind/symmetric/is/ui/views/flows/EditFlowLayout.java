@@ -100,7 +100,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
 
         this.componentFlowVersion = componentFlowVersion;
 
-        setCaption("Edit Flow - Name: "
+        setCaption("Name: "
                 + componentFlowVersion.getComponentFlow().getData().getName() + ", Version: "
                 + componentFlowVersion.getVersion());
 
