@@ -83,7 +83,11 @@ public class DbReaderComponent extends AbstractComponent {
              * is started by another component, then loop for all records in the input message
              */
 	        for (int i=0;i<=recordCount;i++) {
-		        setParamsFromInboundMsgAndRec(paramMap, inputMessage,payload.get(i));
+	        	if (payload != null) {
+	        		setParamsFromInboundMsgAndRec(paramMap, inputMessage,payload.get(i));
+	        	} else {
+	        		setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
+	        	}
 		        template.query(sql, paramMap, new ResultSetExtractor<Object>() {
 		            @Override
 		            public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
@@ -170,7 +174,9 @@ public class DbReaderComponent extends AbstractComponent {
     	 */
     	paramMap.clear();
     	paramMap.putAll(getParamsFromHeader(inputMessage));
-    	paramMap.putAll(getParamsFromDetailRecord(dataRecord));    
+    	if (dataRecord != null) {
+    		paramMap.putAll(getParamsFromDetailRecord(dataRecord));
+    	}
     }
 
     protected Map<String, Object> getParamsFromHeader(final Message inputMessage) {
