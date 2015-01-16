@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.ui.support;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.jumpmind.symmetric.ui.common.CommonUiUtils.createSeparator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,7 +18,7 @@ import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.ui.common.PromptDialog;
 import org.jumpmind.symmetric.ui.common.PromptDialog.IPromptListener;
-import org.jumpmind.symmetric.ui.common.UiUtils;
+import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -240,10 +241,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             layout.setComponentAlignment(c, Alignment.MIDDLE_LEFT);
         }
         
-        Label separator = new Label(" ");
-        separator.setStyleName("vrule");
-        separator.setHeight(100, Unit.PERCENTAGE);
-        separator.setWidthUndefined();
+        Label separator = createSeparator();
         layout.addComponent(separator);
         layout.setComponentAlignment(separator, Alignment.MIDDLE_LEFT);
         
@@ -384,7 +382,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                 try {
                     configurationService.deleteFolder(folder.getData().getId());
                 } catch (Exception ex) {
-                    UiUtils.notify("Could not delete the \"" + folder.getData().getName()
+                    CommonUiUtils.notify("Could not delete the \"" + folder.getData().getName()
                             + "\" folder", Type.WARNING_MESSAGE);
                 }
             }

@@ -21,6 +21,7 @@ import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.support.AbstractFolderNavigatorLayout;
 import org.jumpmind.symmetric.is.ui.support.Category;
+import org.jumpmind.symmetric.is.ui.support.DesignAgentSelect;
 import org.jumpmind.symmetric.is.ui.support.TopBarLink;
 import org.jumpmind.symmetric.is.ui.views.flows.EditDbConnectionWindow;
 import org.jumpmind.symmetric.is.ui.views.flows.EditFlowLayout;
@@ -68,6 +69,9 @@ public class DesignView extends HorizontalLayout implements View {
 
     @Autowired
     IConnectionFactory connectionFactory;
+    
+    @Autowired
+    DesignAgentSelect designAgentSelect;
 
     protected TabbedApplicationPanel tabSheet;
     
@@ -135,7 +139,7 @@ public class DesignView extends HorizontalLayout implements View {
         protected void itemClicked(Object item) {
             if (item instanceof ComponentFlowVersion) {
                 EditFlowLayout editFlowLayout = new EditFlowLayout((ComponentFlowVersion) item,
-                        configurationService, componentFactory, connectionFactory);
+                        configurationService, componentFactory, connectionFactory, designAgentSelect);
                 tabSheet.addCloseableTab(editFlowLayout.getCaption(), FLOW_ICON,
                         editFlowLayout);
             } else if (item instanceof Connection) {

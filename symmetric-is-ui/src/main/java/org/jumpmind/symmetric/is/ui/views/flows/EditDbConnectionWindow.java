@@ -21,7 +21,7 @@ import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
 import org.jumpmind.symmetric.ui.common.ResizableWindow;
 import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.jumpmind.symmetric.ui.common.UiConstants;
-import org.jumpmind.symmetric.ui.common.UiUtils;
+import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
@@ -298,10 +298,10 @@ public class EditDbConnectionWindow extends ResizableWindow {
         String databaseName = (String) databaseType.getValue();
         try {
             if (!databaseUrl.getValue().toString().startsWith("jdbc:")) {
-                UiUtils.notify("Incorrect URL format", Type.WARNING_MESSAGE);
+                CommonUiUtils.notify("Incorrect URL format", Type.WARNING_MESSAGE);
                 return false;
             } else if (StringUtils.isBlank(databaseName)) {
-                UiUtils.notify("Please choose a database type", Type.WARNING_MESSAGE);
+                CommonUiUtils.notify("Please choose a database type", Type.WARNING_MESSAGE);
                 return false;
             } else {
                 BasicDataSourceFactory.prepareDriver(databaseToDriverMap.get(databaseName));
@@ -316,7 +316,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
                 c.close();
                 ds.close();
                 if (showSuccessNotification) {
-                    UiUtils.notify("Connection Successful", Type.HUMANIZED_MESSAGE);
+                    CommonUiUtils.notify("Connection Successful", Type.HUMANIZED_MESSAGE);
                 }
                 return true;
             }
@@ -328,11 +328,11 @@ public class EditDbConnectionWindow extends ResizableWindow {
             if (showFailureNotification) {
                 if (rootCause.getMessage().startsWith("No suitable driver")
                         || rootCause instanceof ClassNotFoundException) {
-                    UiUtils.notify(
+                    CommonUiUtils.notify(
                             "Please check that the database driver is correctly installed",
                             Type.WARNING_MESSAGE);
                 } else {
-                    UiUtils.notify(rootCause.getMessage(), Type.WARNING_MESSAGE);
+                    CommonUiUtils.notify(rootCause.getMessage(), Type.WARNING_MESSAGE);
                     log.warn(
                             "Unsuccessful attempt to connect to a database using url: "
                                     + databaseUrl.getValue() + " with driver: "
@@ -347,7 +347,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
     protected void save() {
         connection.getData().setType(DataSourceConnection.TYPE);
         if (isBlank(nameField.getValue())) {
-            UiUtils.notify("The name of the connection cannot be blank", Type.WARNING_MESSAGE);
+            CommonUiUtils.notify("The name of the connection cannot be blank", Type.WARNING_MESSAGE);
             return;
         }
         

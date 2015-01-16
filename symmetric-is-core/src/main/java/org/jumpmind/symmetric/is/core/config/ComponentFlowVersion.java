@@ -116,7 +116,7 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
     
     @Override
     public String toString() {
-        return getData().getVersionName();
+        return getName() + ":" + getData().getVersionName();
     }
 
 }

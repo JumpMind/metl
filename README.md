@@ -1,7 +1,5 @@
 ## Backlog
 
-- Integrate new component model into agent manager
-- Implement scheduling at the flow version level
 - Support deploy and execute from the flow design page
 - Support agent properties
 - Flow diagram

@@ -1,5 +1,10 @@
 package org.jumpmind.symmetric.is.ui.views.flows;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.jumpmind.symmetric.ui.common.CommonUiUtils.createComboBox;
+import static org.jumpmind.symmetric.ui.common.CommonUiUtils.createSeparator;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +13,7 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
+import org.jumpmind.symmetric.is.core.config.StartType;
 import org.jumpmind.symmetric.is.core.config.data.ComponentData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
@@ -20,15 +26,22 @@ import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
+import org.jumpmind.symmetric.is.ui.support.DesignAgentSelect;
 import org.jumpmind.symmetric.is.ui.views.flows.ComponentSettingsSheet.IComponentSettingsChangedListener;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
+import org.springframework.scheduling.support.CronSequenceGenerator;
+import org.vaadin.maddon.layouts.MHorizontalLayout;
 
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Accordion;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.Tab;
@@ -36,7 +49,8 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class EditFlowLayout extends VerticalLayout implements IComponentSettingsChangedListener, IUiPanel {
+public class EditFlowLayout extends VerticalLayout implements IComponentSettingsChangedListener,
+        IUiPanel {
 
     private static final long serialVersionUID = 1L;
 
@@ -62,13 +76,25 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
 
     Diagram diagram;
 
+    Button deployButton;
+
+    Button executeButton;
+
+    AbstractSelect startType;
+
+    TextField startExpression;
+
+    DesignAgentSelect designAgentSelect;
+
     public EditFlowLayout(ComponentFlowVersion componentFlowVersion,
             IConfigurationService configurationService, IComponentFactory componentFactory,
-            IConnectionFactory connectionFactory) {
+            IConnectionFactory connectionFactory, DesignAgentSelect designAgentSelect) {
 
+        this.componentFlowVersion = componentFlowVersion;
         this.configurationService = configurationService;
         this.componentFactory = componentFactory;
         this.connectionFactory = connectionFactory;
+        this.designAgentSelect = designAgentSelect;
 
         VerticalLayout content = this;
 
@@ -93,16 +119,64 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
         content.addComponent(splitPanel);
         content.setExpandRatio(splitPanel, 1);
 
-        HorizontalLayout actionLayout = new HorizontalLayout();
-        actionLayout.setMargin(true);
-        actionLayout.setWidth(100, Unit.PERCENTAGE);
+        MHorizontalLayout actionLayout = new MHorizontalLayout().withMargin(true).withSpacing(true);
         flowLayout.addComponent(actionLayout);
 
-        this.componentFlowVersion = componentFlowVersion;
+        deployButton = new Button("Deploy");
 
-        setCaption("Name: "
-                + componentFlowVersion.getComponentFlow().getData().getName() + ", Version: "
-                + componentFlowVersion.getVersion());
+        executeButton = new Button("Execute");
+
+        startExpression = new TextField("Cron Expression");
+        startExpression.setVisible(componentFlowVersion.getStartType() == StartType.SCHEDULED_CRON);
+        startExpression.setImmediate(true);
+        startExpression.setTextChangeTimeout(500);
+        startExpression.setTextChangeEventMode(TextChangeEventMode.LAZY);
+        startExpression.setValue(componentFlowVersion.getStartExpression());
+        startExpression.addValueChangeListener(new ValueChangeListener() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                if (validateCron()) {
+                    EditFlowLayout.this.componentFlowVersion.getData().setStartExpression(
+                            startExpression.getValue());
+                    EditFlowLayout.this.configurationService
+                            .save(EditFlowLayout.this.componentFlowVersion);
+                }
+            }
+        });
+
+        startType = createComboBox("Start Type");
+        startType.setWidth(12, Unit.EM);
+        startType.addItems(Arrays.asList(StartType.values()));
+        startType.setValue(componentFlowVersion.getStartType());
+        startType.addValueChangeListener(new ValueChangeListener() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                if (startType.getValue() == StartType.SCHEDULED_CRON) {
+                    if (!validateCron()) {
+                        startExpression.setValue("0 0 * * * *");
+                    }
+                    startExpression.setVisible(true);
+                } else {
+                    startExpression.setVisible(false);
+                }
+
+                EditFlowLayout.this.componentFlowVersion.getData().setStartType(
+                        startType.getValue().toString());
+                EditFlowLayout.this.configurationService
+                        .save(EditFlowLayout.this.componentFlowVersion);
+            }
+        });
+
+        actionLayout
+                .add(deployButton, executeButton, createSeparator(), startType, startExpression);
+        actionLayout.alignAll(Alignment.BOTTOM_LEFT);
+
+        setCaption("Name: " + componentFlowVersion.getComponentFlow().getData().getName()
+                + ", Version: " + componentFlowVersion.getVersion());
 
         populateComponentPalette();
 
@@ -114,11 +188,23 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
         tabs.setSelectedTab(palleteTab);
 
     }
-    
+
+    protected boolean validateCron() {
+        try {
+            if (isNotBlank(startExpression.getValue())) {
+                new CronSequenceGenerator(startExpression.getValue());
+                return true;
+            }
+        } catch (IllegalArgumentException ex) {
+        }
+        return false;
+
+    }
+
     @Override
     public void showing() {
     }
-    
+
     @Override
     public boolean closing() {
         return true;

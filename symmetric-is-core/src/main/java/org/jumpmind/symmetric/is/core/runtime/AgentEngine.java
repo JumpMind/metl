@@ -68,13 +68,7 @@ public class AgentEngine {
         if (!started && !starting) {
             starting = true;
             log.info("Agent '{}' is being started", agent);
-            List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(
-                    agent.getAgentDeployments());
-            for (AgentDeployment deployment : deployments) {
-                deploy(deployment);
-            }
-            agent.setAgentStatus(AgentStatus.RUNNING);
-            configurationService.save(agent);
+            
 
             executorService = Executors.newCachedThreadPool(new ThreadFactory() {
                 final AtomicInteger threadNumber = new AtomicInteger(1);
@@ -99,6 +93,14 @@ public class AgentEngine {
                     .replace(' ', '-').replace('_', '-'));
             this.taskScheduler.setPoolSize(10);
             this.taskScheduler.initialize();
+            
+            List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(
+                    agent.getAgentDeployments());
+            for (AgentDeployment deployment : deployments) {
+                deploy(deployment);
+            }
+            agent.setAgentStatus(AgentStatus.RUNNING);
+            configurationService.save(agent);
 
             started = true;
             starting = false;
@@ -143,6 +145,8 @@ public class AgentEngine {
             List<AgentDeployment> deployments = agent.getAgentDeployments();
             deployments.remove(deployment);
             deployments.add(deployment);
+            
+            log.info("Deploying '{}' to '{}'", deployment.getComponentFlowVersion().toString(), agent.getData().getName());
             final FlowRuntime runtime = new FlowRuntime(deployment, componentFactory,
                     connectionFactory, new ExecutionTracker(deployment), executorService);
             coordinators.put(deployment, runtime);
@@ -153,9 +157,8 @@ public class AgentEngine {
             } else {
                 if (deployment.getComponentFlowVersion().getStartType() == StartType.SCHEDULED_CRON) {
                     String cron = deployment.getComponentFlowVersion().getStartExpression();
-                    log.info("Scheduling with a cron expression of '{}' for '{}':{}", new Object[] {
-                            cron, deployment.getComponentFlowVersion().getName(),
-                            deployment.getComponentFlowVersion().getId() });
+                    log.info("Scheduling with a cron expression of '{}' for '{}'", new Object[] {
+                            cron, deployment.getComponentFlowVersion().toString() });
 
                     ScheduledFuture<?> future = this.taskScheduler.schedule(new Runnable() {
 
