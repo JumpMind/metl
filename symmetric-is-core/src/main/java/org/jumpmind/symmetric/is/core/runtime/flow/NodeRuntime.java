@@ -17,8 +17,8 @@ public class NodeRuntime implements Runnable {
     boolean running = true;
 
     boolean startNode = false;
-    
-	// TODO make this a setting for component
+
+    // TODO make this a setting for component
     int capacity = 10000;
 
     Exception error;
@@ -33,12 +33,12 @@ public class NodeRuntime implements Runnable {
     }
 
     public boolean isStartNode() {
-		return startNode;
-	}
+        return startNode;
+    }
 
-	public void setStartNode(boolean startNode) {
-		this.startNode = startNode;
-	}
+    public void setStartNode(boolean startNode) {
+        this.startNode = startNode;
+    }
 
     public void setTargetNodeRuntimes(List<NodeRuntime> targetNodeRuntimes) {
         this.targetNodeRuntimes = targetNodeRuntimes;
@@ -47,7 +47,7 @@ public class NodeRuntime implements Runnable {
     protected void put(Message message) throws InterruptedException {
         inQueue.put(message);
     }
-    
+
     public void start(IExecutionTracker tracker, IConnectionFactory connectionFactory) {
         component.start(tracker, connectionFactory);
     }
@@ -55,54 +55,60 @@ public class NodeRuntime implements Runnable {
     @Override
     public void run() {
         try {
-        	
-        	MessageTarget target = new MessageTarget();        	
-        	/* if we are a start node (don't have any input links), we'll only get 
-        	a single message which is the start message sent by the flow runtime
-        	to kick things off.  If we have input links, we must loop until we get
-        	a shutdown message from one of our sources */
-        	if (startNode) {
-        		component.handle(inQueue.take(), target);
-        	} else {
-        		while (running) {
-                    Message inputMessage = inQueue.take();
-                    if (!(inputMessage instanceof ShutdownMessage)) {
-                        component.handle(inputMessage, target);
-                    } else {
-                    	running = false;
+
+            MessageTarget target = new MessageTarget();
+            /*
+             * if we are a start node (don't have any input links), we'll only
+             * get a single message which is the start message sent by the flow
+             * runtime to kick things off. If we have input links, we must loop
+             * until we get a shutdown message from one of our sources
+             */
+            while (running) {
+                Message inputMessage = inQueue.take();
+                if (inputMessage instanceof ShutdownMessage) {
+                    for (NodeRuntime targetNodeRuntime : targetNodeRuntimes) {
+                        targetNodeRuntime.put(inputMessage);
                     }
-        		}
-        	}        	
+                    running = false;
+                } else {
+                    component.handle(inputMessage, target);
+                }
+            }
         } catch (Exception ex) {
-        	//TODO: notify the flow runtime that we have an error and let it gracefully shut things down
+            // TODO: notify the flow runtime that we have an error and let it
+            // gracefully shut things down
             error = ex;
         }
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 
     public void stop() throws InterruptedException {
         this.inQueue.clear();
         this.inQueue.put(new ShutdownMessage());
     }
-    
+
     public IComponent getComponent() {
-    	return this.component;
+        return this.component;
     }
 
     class MessageTarget implements IMessageTarget {
         @Override
         public void put(Message message) {
-            for (NodeRuntime targetRuntime : targetNodeRuntimes) {            	
+            for (NodeRuntime targetRuntime : targetNodeRuntimes) {
                 try {
-					targetRuntime.put(message);
-				} catch (Exception e) {
-					if (e instanceof RuntimeException) {
-						throw (RuntimeException) e;
-					} else {
-						throw new RuntimeException(e);
-					}
-				}
+                    targetRuntime.put(message);
+                } catch (Exception e) {
+                    if (e instanceof RuntimeException) {
+                        throw (RuntimeException) e;
+                    } else {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         }
     }
-    
+
 }

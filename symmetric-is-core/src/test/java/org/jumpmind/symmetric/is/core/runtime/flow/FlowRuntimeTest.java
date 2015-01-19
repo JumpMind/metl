@@ -43,6 +43,7 @@ public class FlowRuntimeTest {
     
     @After
     public void tearDown() throws Exception {
+        threadService.shutdown();
     }
 
     @Test
@@ -53,6 +54,7 @@ public class FlowRuntimeTest {
     	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, connectionFactory, 
     			new ExecutionTracker(deployment), threadService);
     	flowRuntime.start();
+    	flowRuntime.stop();
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Node").getNumberInboundMessages());
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Node").getNumberInboundMessages());
@@ -65,6 +67,7 @@ public class FlowRuntimeTest {
     	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, connectionFactory, 
     			new ExecutionTracker(deployment), threadService);
     	flowRuntime.start();
+    	flowRuntime.stop();
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Node").getNumberInboundMessages());
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Node 1").getNumberInboundMessages());

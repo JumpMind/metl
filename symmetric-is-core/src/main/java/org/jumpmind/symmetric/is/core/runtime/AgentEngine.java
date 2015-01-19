@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import org.jumpmind.symmetric.is.core.runtime.flow.FlowRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.support.CronSequenceGenerator;
 import org.springframework.scheduling.support.CronTrigger;
 
 public class AgentEngine {
@@ -140,7 +142,7 @@ public class AgentEngine {
         return started;
     }
 
-    public void deploy(AgentDeployment deployment) {
+    public void deploy(final AgentDeployment deployment) {
         try {
             List<AgentDeployment> deployments = agent.getAgentDeployments();
             deployments.remove(deployment);
@@ -157,16 +159,18 @@ public class AgentEngine {
             } else {
                 if (deployment.getComponentFlowVersion().getStartType() == StartType.SCHEDULED_CRON) {
                     String cron = deployment.getComponentFlowVersion().getStartExpression();
-                    log.info("Scheduling with a cron expression of '{}' for '{}'", new Object[] {
-                            cron, deployment.getComponentFlowVersion().toString() });
+                    log.info("Scheduling '{}' on '{}' with a cron expression of '{}'  The next run time should be at: {}", new Object[] {
+                            deployment.getComponentFlowVersion().toString(), agent.getData().getName(), cron, new CronSequenceGenerator(cron).next(new Date()) });
 
                     ScheduledFuture<?> future = this.taskScheduler.schedule(new Runnable() {
 
                         @Override
                         public void run() {
                             try {
+                                log.info("Scheduled '{}' on '{}' is running",  deployment.getComponentFlowVersion().toString(), agent.getData().getName());
                                 runtime.start();
                                 runtime.waitForFlowCompletion();
+                                log.info("Scheduled '{}' on '{}' is finished",  deployment.getComponentFlowVersion().toString(), agent.getData().getName());
                             } catch (Exception e) {
                                 log.error("Error while waiting for the flow to complete", e);
                             }

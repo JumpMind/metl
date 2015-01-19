@@ -1,11 +1,11 @@
 package org.jumpmind.symmetric.is.core.runtime.flow;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
@@ -13,11 +13,13 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
+import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentStatistics;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.util.AppUtils;
 
 public class FlowRuntime {
 
@@ -48,15 +50,14 @@ public class FlowRuntime {
     }
 
     public void start() throws InterruptedException {
-    	
+
         this.nodeRuntimes = new HashMap<String, NodeRuntime>();
         ComponentFlowVersion componentFlowVersion = deployment.getComponentFlowVersion();
         List<ComponentFlowNode> nodes = componentFlowVersion.getComponentFlowNodes();
-        
+
         /* create a node runtime for every component in the flow */
         for (ComponentFlowNode componentFlowNode : nodes) {
-            NodeRuntime nodeRuntime = new NodeRuntime(
-            		componentFactory.create(componentFlowNode));
+            NodeRuntime nodeRuntime = new NodeRuntime(componentFactory.create(componentFlowNode));
             nodeRuntimes.put(componentFlowNode.getId(), nodeRuntime);
         }
 
@@ -75,9 +76,9 @@ public class FlowRuntime {
 
         List<NodeRuntime> startNodes = findStartNodes();
         for (NodeRuntime nodeRuntime : startNodes) {
-        	nodeRuntime.setStartNode(true);
+            nodeRuntime.setStartNode(true);
         }
-        
+
         /* each node is started as a thread */
         for (NodeRuntime nodeRuntime : nodeRuntimes.values()) {
             threadService.execute(nodeRuntime);
@@ -87,22 +88,38 @@ public class FlowRuntime {
         for (NodeRuntime nodeRuntime : nodeRuntimes.values()) {
             nodeRuntime.start(executionTracker, connectionFactory);
         }
-        
+
         Message startMessage = new Message();
         // TODO set parameters on start message
-        /* for each start node (node that has no input msgs), send a start message to that node */
+        /*
+         * for each start node (node that has no input msgs), send a start
+         * message to that node
+         */
         for (NodeRuntime nodeRuntime : startNodes) {
             nodeRuntime.put(startMessage);
         }
     }
 
-    /* created for unit testing only to keep main thread alive until child threads complete */
+    /*
+     * Waiting until all nodes have exited
+     */
     public void waitForFlowCompletion() throws InterruptedException {
-    	threadService.shutdown();
-    	//TODO: parameterize timeout
-    	threadService.awaitTermination(60, TimeUnit.MINUTES);    	
+        boolean foundRunning = true;
+        while (foundRunning) {
+            foundRunning = false;
+            Collection<NodeRuntime> allNodes = nodeRuntimes.values();
+            for (NodeRuntime nodeRuntime : allNodes) {
+                if (nodeRuntime.isRunning()) {
+                    foundRunning = true;
+                }
+            }
+            
+            if (foundRunning) {
+               AppUtils.sleep(500);
+            }
+        }
     }
-    
+
     protected List<NodeRuntime> findStartNodes() {
         List<NodeRuntime> starterNodes = new ArrayList<NodeRuntime>();
         for (String nodeId : nodeRuntimes.keySet()) {
@@ -114,7 +131,7 @@ public class FlowRuntime {
                     isTargetNode = true;
                 }
             }
-            
+
             if (!isTargetNode) {
                 starterNodes.add(nodeRuntimes.get(nodeId));
             }
@@ -122,11 +139,15 @@ public class FlowRuntime {
         return starterNodes;
     }
 
-    public void stop() {
+    public void stop() throws InterruptedException {
+        List<NodeRuntime> startNodes = findStartNodes();
+        for (NodeRuntime nodeRuntime : startNodes) {
+            nodeRuntime.put(new ShutdownMessage());
+        }
 
     }
-    
+
     public ComponentStatistics getComponentStatistics(String componentFlowNodeId) {
-    	return nodeRuntimes.get(componentFlowNodeId).getComponent().getComponentStatistics();
+        return nodeRuntimes.get(componentFlowNodeId).getComponent().getComponentStatistics();
     }
 }
