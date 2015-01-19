@@ -6,9 +6,7 @@ import java.util.Set;
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.AgentSummary;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.config.data.AgentDeploymentData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.runtime.AgentEngine;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
 import org.jumpmind.symmetric.ui.common.MultiSelectTable;
@@ -138,16 +136,7 @@ public class EditFlowDeploymentsWindow extends ResizableWindow {
                 @SuppressWarnings("unchecked")
                 Set<AgentSummary> selected = (Set<AgentSummary>) item;
                 for (AgentSummary summary : selected) {
-                    AgentDeploymentData data = new AgentDeploymentData();
-                    data.setAgentId(summary.getId());
-                    data.setComponentFlowVersionId(componentFlowVersion.getId());
-                    AgentDeployment agentDeployment = new AgentDeployment(componentFlowVersion, data);
-                    configurationService.save(agentDeployment);                    
-                    container.addBean(agentDeployment);
-                    AgentEngine engine = agentManager.getAgentEngine(summary.getId());
-                    if (engine != null) {
-                        engine.deploy(agentDeployment);
-                    }
+                    container.addBean(agentManager.deploy(summary.getId(), componentFlowVersion));
                 }
             }
         }
@@ -160,11 +149,7 @@ public class EditFlowDeploymentsWindow extends ResizableWindow {
         public void menuSelected(MenuItem selectedItem) {
             Set<AgentDeployment> deploymentsSelected = table.getSelected();
             for (AgentDeployment agentDeployment : deploymentsSelected) {
-                configurationService.delete(agentDeployment);
-                AgentEngine engine = agentManager.getAgentEngine(agentDeployment.getId());
-                if (engine != null) {
-                    engine.undeploy(agentDeployment);
-                }
+                agentManager.undeploy(agentDeployment);
                 container.removeItem(agentDeployment);
             }
         }

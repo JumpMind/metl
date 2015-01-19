@@ -24,7 +24,7 @@ public class DesignAgentSelect extends ComboBox {
     public DesignAgentSelect() {
         setNewItemsAllowed(false);
         setWidth(16, Unit.EM);
-        setInputPrompt("Design Time Agent");
+        setInputPrompt("Choose Design Time Agent");
     }
     
     @PostConstruct

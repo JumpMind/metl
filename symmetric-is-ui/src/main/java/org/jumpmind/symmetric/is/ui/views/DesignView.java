@@ -15,6 +15,7 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
@@ -55,7 +56,7 @@ public class DesignView extends HorizontalLayout implements View {
     private static final long serialVersionUID = 1L;
 
     static final FontAwesome GENERAL_CONNECTION_ICON = FontAwesome.BOLT;
-    
+
     static final FontAwesome FLOW_ICON = FontAwesome.SHARE_ALT;
 
     @Autowired
@@ -69,12 +70,15 @@ public class DesignView extends HorizontalLayout implements View {
 
     @Autowired
     IConnectionFactory connectionFactory;
-    
+
+    @Autowired
+    IAgentManager agentManager;
+
     @Autowired
     DesignAgentSelect designAgentSelect;
 
     protected TabbedApplicationPanel tabSheet;
-    
+
     protected MainTab mainTab;
 
     public DesignView() {
@@ -138,10 +142,10 @@ public class DesignView extends HorizontalLayout implements View {
         @Override
         protected void itemClicked(Object item) {
             if (item instanceof ComponentFlowVersion) {
-                EditFlowLayout editFlowLayout = new EditFlowLayout((ComponentFlowVersion) item,
-                        configurationService, componentFactory, connectionFactory, designAgentSelect);
-                tabSheet.addCloseableTab(editFlowLayout.getCaption(), FLOW_ICON,
-                        editFlowLayout);
+                EditFlowLayout editFlowLayout = new EditFlowLayout(agentManager,
+                        (ComponentFlowVersion) item, configurationService, componentFactory,
+                        connectionFactory, designAgentSelect);
+                tabSheet.addCloseableTab(editFlowLayout.getCaption(), FLOW_ICON, editFlowLayout);
             } else if (item instanceof Connection) {
                 editDbConnectionWindow.show((Connection) item, this);
             }
