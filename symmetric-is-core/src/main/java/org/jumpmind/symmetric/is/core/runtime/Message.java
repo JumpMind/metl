@@ -6,9 +6,13 @@ public class Message implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
     
-    MessageHeader header = new MessageHeader();
+    MessageHeader header;
 
     Serializable payload;
+    
+    public Message(String originatingNodeId) {
+        this.header = new MessageHeader(originatingNodeId);
+    }
 
     public MessageHeader getHeader() {
         return header;

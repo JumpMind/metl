@@ -101,7 +101,7 @@ public class DbReaderComponent extends AbstractComponent {
 		                        if (messageManipulationStrategy == MessageManipulationStrategy.ENHANCE) {
 		                            message = inputMessage.copy();
 		                        } else {
-		                            message = new Message();
+		                            message = new Message(componentNode.getId());
 		                            message.setPayload(new ArrayList<EntityData>());
 		                        }
 		                    }
@@ -159,10 +159,6 @@ public class DbReaderComponent extends AbstractComponent {
          * if this was a shutdown message, we're done
          * in both cases send shutdown message to next node, otherwise keep listening
          */
-        if (inputMessage instanceof StartupMessage ||
-        		inputMessage instanceof ShutdownMessage) {
-        	messageTarget.put(new ShutdownMessage());
-        }
     }
 
     protected void setParamsFromInboundMsgAndRec(Map<String, Object> paramMap, 

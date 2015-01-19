@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime.flow;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -16,8 +17,6 @@ public class NodeRuntime implements Runnable {
 
     boolean running = true;
 
-    boolean startNode = false;
-
     // TODO make this a setting for component
     int capacity = 10000;
 
@@ -27,21 +26,23 @@ public class NodeRuntime implements Runnable {
 
     List<NodeRuntime> targetNodeRuntimes;
 
+    List<NodeRuntime> sourceNodeRuntimes;
+
     public NodeRuntime(IComponent component) {
         this.component = component;
         inQueue = new LinkedBlockingQueue<Message>(capacity);
     }
 
     public boolean isStartNode() {
-        return startNode;
-    }
-
-    public void setStartNode(boolean startNode) {
-        this.startNode = startNode;
+        return sourceNodeRuntimes == null || sourceNodeRuntimes.size() == 0;
     }
 
     public void setTargetNodeRuntimes(List<NodeRuntime> targetNodeRuntimes) {
         this.targetNodeRuntimes = targetNodeRuntimes;
+    }
+
+    public void setSourceNodeRuntimes(List<NodeRuntime> sourceNodeRuntimes) {
+        this.sourceNodeRuntimes = sourceNodeRuntimes;
     }
 
     protected void put(Message message) throws InterruptedException {
@@ -66,12 +67,23 @@ public class NodeRuntime implements Runnable {
             while (running) {
                 Message inputMessage = inQueue.take();
                 if (inputMessage instanceof ShutdownMessage) {
-                    for (NodeRuntime targetNodeRuntime : targetNodeRuntimes) {
-                        targetNodeRuntime.put(inputMessage);
+                    String fromNodeId = inputMessage.getHeader().getOriginatingNodeId();
+                    removeSourceNodeRuntime(fromNodeId);
+                    /*
+                     * When all of the source node runtimes have been removed or
+                     * when the shutdown message comes from myself, then go
+                     * ahead and shutdown
+                     */
+                    if (fromNodeId == null || sourceNodeRuntimes == null
+                            || sourceNodeRuntimes.size() == 0
+                            || fromNodeId.equals(component.getComponentFlowNode().getId())) {
+                        shutdown();
                     }
-                    running = false;
                 } else {
                     component.handle(inputMessage, target);
+                    if (isStartNode()) {
+                        shutdown();
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -81,13 +93,32 @@ public class NodeRuntime implements Runnable {
         }
     }
 
+    private void removeSourceNodeRuntime(String nodeId) {
+        if (sourceNodeRuntimes != null) {
+            Iterator<NodeRuntime> it = sourceNodeRuntimes.iterator();
+            while (it.hasNext()) {
+                NodeRuntime sourceRuntime = (NodeRuntime) it.next();
+                if (sourceRuntime.getComponent().getComponentFlowNode().getId().equals(nodeId)) {
+                    it.remove();
+                }
+            }
+        }
+    }
+
+    private void shutdown() throws InterruptedException {
+        for (NodeRuntime targetNodeRuntime : targetNodeRuntimes) {
+            targetNodeRuntime.put(new ShutdownMessage(component.getComponentFlowNode().getId()));
+        }
+        running = false;
+    }
+
     public boolean isRunning() {
         return running;
     }
 
     public void stop() throws InterruptedException {
         this.inQueue.clear();
-        this.inQueue.put(new ShutdownMessage());
+        this.inQueue.put(new ShutdownMessage(component.getComponentFlowNode().getId()));
     }
 
     public IComponent getComponent() {
