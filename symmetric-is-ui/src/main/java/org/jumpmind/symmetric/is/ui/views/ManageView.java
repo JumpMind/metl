@@ -18,7 +18,6 @@ import org.jumpmind.symmetric.is.core.config.data.AgentData;
 import org.jumpmind.symmetric.is.core.config.data.AgentDeploymentData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.runtime.AgentEngine;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.ui.support.AbstractFolderNavigatorLayout;
 import org.jumpmind.symmetric.is.ui.support.Category;
@@ -416,12 +415,9 @@ public class ManageView extends HorizontalLayout implements View {
 
             @Override
             public boolean onOk() {
+                agentManager.undeploy(toDelete);
                 configurationService.delete(toDelete);
                 Agent agent = findObjectInTreeWithId(toDelete.getData().getAgentId());
-                AgentEngine engine = agentManager.getAgentEngine(agent);
-                if (engine != null) {
-                    engine.undeploy(toDelete);
-                }
                 refresh();
                 expand(agent.getFolder(), agent);
                 return true;

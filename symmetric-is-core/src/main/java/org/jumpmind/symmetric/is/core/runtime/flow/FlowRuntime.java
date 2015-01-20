@@ -50,7 +50,6 @@ public class FlowRuntime {
     }
 
     public void start() throws InterruptedException {
-
         this.nodeRuntimes = new HashMap<String, NodeRuntime>();
         ComponentFlowVersion componentFlowVersion = deployment.getComponentFlowVersion();
         List<ComponentFlowNode> nodes = componentFlowVersion.getComponentFlowNodes();
@@ -62,11 +61,11 @@ public class FlowRuntime {
         }
 
         List<ComponentFlowNodeLink> links = componentFlowVersion.getComponentFlowNodeLinks();
-        
+
         /* for each node runtime, set their list of target node runtimes */
         for (String nodeId : nodeRuntimes.keySet()) {
             List<NodeRuntime> targetNodeRuntimes = new ArrayList<NodeRuntime>();
-            List<NodeRuntime> sourceNodeRuntimes = new ArrayList<NodeRuntime>();            
+            List<NodeRuntime> sourceNodeRuntimes = new ArrayList<NodeRuntime>();
             for (ComponentFlowNodeLink componentFlowNodeLink : links) {
                 if (nodeId.equals(componentFlowNodeLink.getData().getSourceNodeId())) {
                     targetNodeRuntimes.add(nodeRuntimes.get(componentFlowNodeLink.getData()
@@ -108,20 +107,20 @@ public class FlowRuntime {
      * Waiting until all nodes have exited
      */
     public void waitForFlowCompletion() throws InterruptedException {
-        boolean foundRunning = true;
-        while (foundRunning) {
-            foundRunning = false;
-            Collection<NodeRuntime> allNodes = nodeRuntimes.values();
-            for (NodeRuntime nodeRuntime : allNodes) {
-                if (nodeRuntime.isRunning()) {
-                    foundRunning = true;
-                }
-            }
-            
-            if (foundRunning) {
-               AppUtils.sleep(500);
+        while (isRunning()) {
+            AppUtils.sleep(500);
+        }
+    }
+
+    public boolean isRunning() {
+        boolean running = false;
+        Collection<NodeRuntime> allNodes = nodeRuntimes.values();
+        for (NodeRuntime nodeRuntime : allNodes) {
+            if (nodeRuntime.isRunning()) {
+                running = true;
             }
         }
+        return running;
     }
 
     protected List<NodeRuntime> findStartNodes() {
@@ -144,11 +143,13 @@ public class FlowRuntime {
     }
 
     public void stop() throws InterruptedException {
-        List<NodeRuntime> startNodes = findStartNodes();
-        for (NodeRuntime nodeRuntime : startNodes) {
-            nodeRuntime.put(new ShutdownMessage(nodeRuntime.getComponent().getComponentFlowNode().getId()));
+        if (isRunning()) {
+            List<NodeRuntime> startNodes = findStartNodes();
+            for (NodeRuntime nodeRuntime : startNodes) {
+                nodeRuntime.put(new ShutdownMessage(nodeRuntime.getComponent()
+                        .getComponentFlowNode().getId()));
+            }
         }
-
     }
 
     public ComponentStatistics getComponentStatistics(String componentFlowNodeId) {
