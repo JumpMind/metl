@@ -411,7 +411,9 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         }
 
         treeTable.focus();
-        treeTable.setValue(selected);
+        if (treeTable.containsId(selected)) {
+          treeTable.setValue(selected);
+        }
 
     }
 

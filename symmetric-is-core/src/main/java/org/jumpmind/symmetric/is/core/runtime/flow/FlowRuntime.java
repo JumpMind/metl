@@ -114,10 +114,12 @@ public class FlowRuntime {
 
     public boolean isRunning() {
         boolean running = false;
-        Collection<NodeRuntime> allNodes = nodeRuntimes.values();
-        for (NodeRuntime nodeRuntime : allNodes) {
-            if (nodeRuntime.isRunning()) {
-                running = true;
+        if (nodeRuntimes != null) {
+            Collection<NodeRuntime> allNodes = nodeRuntimes.values();
+            for (NodeRuntime nodeRuntime : allNodes) {
+                if (nodeRuntime.isRunning()) {
+                    running = true;
+                }
             }
         }
         return running;

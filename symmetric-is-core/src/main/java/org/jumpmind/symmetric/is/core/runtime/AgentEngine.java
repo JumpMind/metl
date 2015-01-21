@@ -208,9 +208,6 @@ public class AgentEngine {
                 coordinator.stop();
                 log.info("Flow '{}' has been undeployed", deployment.getComponentFlowVersion()
                         .getName());
-                deployment.getData().setStatus(DeploymentStatus.STOPPED.name());
-                deployment.getData().setMessage("");
-                configurationService.save(deployment.getData());
             } catch (Exception e) {
                 log.warn("Failed to stop '{}'", deployment.getComponentFlowVersion().getName(), e);
             }

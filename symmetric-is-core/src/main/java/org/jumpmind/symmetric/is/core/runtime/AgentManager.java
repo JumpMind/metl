@@ -48,11 +48,11 @@ public class AgentManager implements IAgentManager {
     
     @Override
     public void undeploy(AgentDeployment agentDeployment) {
-        configurationService.delete(agentDeployment);
-        AgentEngine engine = getAgentEngine(agentDeployment.getId());
+        AgentEngine engine = getAgentEngine(agentDeployment.getData().getAgentId());
         if (engine != null) {
             engine.undeploy(agentDeployment);
         }
+        configurationService.delete(agentDeployment);
     }
     
     @Override
