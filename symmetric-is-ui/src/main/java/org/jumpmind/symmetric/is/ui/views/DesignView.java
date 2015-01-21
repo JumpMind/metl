@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -201,14 +202,14 @@ public class DesignView extends HorizontalLayout implements View {
         }
 
         @Override
-        protected void deleteTreeItem(Object object) {
-            if (object instanceof ComponentFlow) {
-                ComponentFlow flow = (ComponentFlow) object;
+        protected void deleteTreeItems(Collection<Object> objects) {
+            if (objects instanceof ComponentFlow) {
+                ComponentFlow flow = (ComponentFlow) objects;
                 ConfirmDialog.show("Delete Flow?", "Are you sure you want to delete the "
                         + flow.getData().getName() + " flow?", new DeleteFlowConfirmationListener(
                         flow));
-            } else if (object instanceof Connection) {
-                Connection connection = (Connection) object;
+            } else if (objects instanceof Connection) {
+                Connection connection = (Connection) objects;
                 ConfirmDialog.show("Delete Connection?", "Are you sure you want to delete the "
                         + connection.getData().getName() + " connection?",
                         new DeleteConnectionConfirmationListener(connection));

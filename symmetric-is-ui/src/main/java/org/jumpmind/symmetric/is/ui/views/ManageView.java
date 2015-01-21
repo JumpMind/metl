@@ -2,6 +2,8 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -256,17 +258,23 @@ public class ManageView extends HorizontalLayout implements View {
         }
 
         @Override
-        protected void deleteTreeItem(Object object) {
-            if (object instanceof Agent) {
-                Agent agent = (Agent) object;
-                ConfirmDialog.show("Delete Agent?", "Are you sure you want to delete the "
-                        + agent.getData().getName() + " agent?",
-                        new DeleteAgentConfirmationListener(agent));
-            } else if (object instanceof AgentDeployment) {
-                AgentDeployment agent = (AgentDeployment) object;
-                ConfirmDialog.show("Delete Deployment?", "Are you sure you want to delete the "
-                        + agent + " deployment?", new DeleteDeploymentConfirmationListener(agent));
+        protected void deleteTreeItems(final Collection<Object> objects) {
+            if (objects.size() > 0) {
+                Iterator<Object> i = objects.iterator();
+                Object object = i.next();
+                i.remove();
+                if (object instanceof Agent) {
+                    Agent agent = (Agent) objects;
+                    ConfirmDialog.show("Delete Agent?", "Are you sure you want to delete the "
+                            + agent.getData().getName() + " agent?",
+                            new DeleteAgentConfirmationListener(agent, objects));
+                } else if (object instanceof AgentDeployment) {
+                    AgentDeployment deployment = (AgentDeployment) objects;
+                    ConfirmDialog.show("Delete Deployment?", "Are you sure you want to delete the "
+                            + deployment + " deployment?", new DeleteDeploymentConfirmationListener(
+                            deployment, objects));
 
+                }
             }
         }
 
@@ -387,9 +395,11 @@ public class ManageView extends HorizontalLayout implements View {
 
             Agent toDelete;
 
+            Collection<Object> alsoDelete;
+
             private static final long serialVersionUID = 1L;
 
-            public DeleteAgentConfirmationListener(Agent toDelete) {
+            public DeleteAgentConfirmationListener(Agent toDelete, Collection<Object> alsoDelete) {
                 this.toDelete = toDelete;
             }
 
@@ -399,6 +409,7 @@ public class ManageView extends HorizontalLayout implements View {
                 configurationService.delete(toDelete);
                 refresh();
                 expand(toDelete.getFolder(), toDelete.getFolder());
+                deleteTreeItems(alsoDelete);
                 return true;
             }
         }
@@ -407,9 +418,12 @@ public class ManageView extends HorizontalLayout implements View {
 
             AgentDeployment toDelete;
 
+            Collection<Object> alsoDelete;
+
             private static final long serialVersionUID = 1L;
 
-            public DeleteDeploymentConfirmationListener(AgentDeployment toDelete) {
+            public DeleteDeploymentConfirmationListener(AgentDeployment toDelete,
+                    Collection<Object> alsoDelete) {
                 this.toDelete = toDelete;
             }
 
@@ -420,6 +434,7 @@ public class ManageView extends HorizontalLayout implements View {
                 Agent agent = findObjectInTreeWithId(toDelete.getData().getAgentId());
                 refresh();
                 expand(agent.getFolder(), agent);
+                deleteTreeItems(alsoDelete);
                 return true;
             }
         }

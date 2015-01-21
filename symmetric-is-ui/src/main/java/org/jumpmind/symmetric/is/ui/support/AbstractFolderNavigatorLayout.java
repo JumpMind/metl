@@ -111,11 +111,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             @Override
             public void handleAction(Object sender, Object target) {
                 if (delButton.isEnabled()) {
-                    @SuppressWarnings("unchecked")
-                    Set<Object> selectedIds = (Set<Object>) table.getValue();
-                    for (Object object : selectedIds) {
-                        deleteTreeItem(object);
-                    }
+                   handleDelete();
                 }
             }
         });
@@ -430,8 +426,38 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
         }
     }
 
-    protected void deleteTreeItem(Object object) {
+    protected void deleteTreeItems(Collection<Object> objects) {
 
+    }
+    
+    protected void handleDelete() {
+        if (getSelectedFolder() != null) {
+            ConfirmDialog.show("Delete Folder?",
+                    "Are you sure you want to delete the selected folders?",
+                    new IConfirmListener() {
+
+                        private static final long serialVersionUID = 1L;
+
+                        @Override
+                        public boolean onOk() {
+                            deleteSelectedFolders();
+                            refresh();
+                            return true;
+                        }
+                    });
+        }
+
+        @SuppressWarnings("unchecked")
+        Set<Object> objects = (Set<Object>) treeTable.getValue();
+        Collection<Object> noFolders = new HashSet<Object>();
+        for (Object object : objects) {
+            if (!(object instanceof Folder)) {
+                noFolders.add(object);
+            }
+        }
+        if (noFolders.size() > 0) {
+            deleteTreeItems(noFolders);
+        }
     }
 
     class NewFolderPromptListener implements IPromptListener {
@@ -480,29 +506,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
 
         @Override
         public void buttonClick(ClickEvent event) {
-            if (getSelectedFolder() != null) {
-                ConfirmDialog.show("Delete Folder?",
-                        "Are you sure you want to delete the selected folders?",
-                        new IConfirmListener() {
-
-                            private static final long serialVersionUID = 1L;
-
-                            @Override
-                            public boolean onOk() {
-                                deleteSelectedFolders();
-                                refresh();
-                                return true;
-                            }
-                        });
-            }
-
-            @SuppressWarnings("unchecked")
-            Set<Object> objects = (Set<Object>) treeTable.getValue();
-            for (Object object : objects) {
-                if (!(object instanceof Folder)) {
-                    deleteTreeItem(object);
-                }
-            }
+            handleDelete();
         }
     }
 
