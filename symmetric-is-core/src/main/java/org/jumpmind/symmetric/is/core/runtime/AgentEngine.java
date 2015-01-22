@@ -51,9 +51,9 @@ public class AgentEngine {
 
     IConnectionFactory connectionFactory;
 
-    ExecutorService executorService;
+    ExecutorService componentFlowNodesExecutionThreads;
 
-    ThreadPoolTaskScheduler taskScheduler;
+    ThreadPoolTaskScheduler componentFlowExecutionScheduler;
 
     public AgentEngine(Agent agent, IConfigurationService configurationService,
             IComponentFactory componentFactory, IConnectionFactory connectionFactory) {
@@ -73,14 +73,14 @@ public class AgentEngine {
             starting = true;
             log.info("Agent '{}' is being started", agent);
 
-            executorService = Executors.newCachedThreadPool(new ThreadFactory() {
+            componentFlowNodesExecutionThreads = Executors.newCachedThreadPool(new ThreadFactory() {
                 final AtomicInteger threadNumber = new AtomicInteger(1);
                 final String namePrefix = agent.getData().getName().toLowerCase().replace(' ', '-')
                         .replace('_', '-');
 
                 public Thread newThread(Runnable r) {
                     Thread t = new Thread(r);
-                    t.setName(namePrefix + threadNumber.getAndIncrement());
+                    t.setName(namePrefix + "-node-" + threadNumber.getAndIncrement());
                     if (t.isDaemon()) {
                         t.setDaemon(false);
                     }
@@ -91,11 +91,12 @@ public class AgentEngine {
                 }
             });
 
-            this.taskScheduler = new ThreadPoolTaskScheduler();
-            this.taskScheduler.setThreadNamePrefix(agent.getData().getName().toLowerCase()
-                    .replace(' ', '-').replace('_', '-'));
-            this.taskScheduler.setPoolSize(10);
-            this.taskScheduler.initialize();
+            this.componentFlowExecutionScheduler = new ThreadPoolTaskScheduler();
+            this.componentFlowExecutionScheduler.setThreadNamePrefix(agent.getData().getName().toLowerCase()
+                    .replace(' ', '-').replace('_', '-') + "-job-");
+            /* Threads are not pre-created.  Set this plenty big so we don't run out of threads */
+            this.componentFlowExecutionScheduler.setPoolSize(100);
+            this.componentFlowExecutionScheduler.initialize();
 
             List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(
                     agent.getAgentDeployments());
@@ -117,7 +118,7 @@ public class AgentEngine {
             List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(
                     agent.getAgentDeployments());
             for (AgentDeployment deployment : deployments) {
-                undeploy(deployment);
+                stop(deployment);
             }
 
             agent.setAgentStatus(AgentStatus.STOPPED);
@@ -125,14 +126,14 @@ public class AgentEngine {
             started = false;
             stopping = false;
 
-            if (taskScheduler != null) {
-                this.taskScheduler.destroy();
-                this.taskScheduler = null;
+            if (componentFlowExecutionScheduler != null) {
+                this.componentFlowExecutionScheduler.destroy();
+                this.componentFlowExecutionScheduler = null;
             }
 
-            if (executorService != null) {
-                this.executorService.shutdownNow();
-                this.executorService = null;
+            if (componentFlowNodesExecutionThreads != null) {
+                this.componentFlowNodesExecutionThreads.shutdownNow();
+                this.componentFlowNodesExecutionThreads = null;
             }
 
             log.info("Agent '{}' has been stopped", agent);
@@ -168,7 +169,7 @@ public class AgentEngine {
             log.info("Deploying '{}' to '{}'", deployment.getComponentFlowVersion().toString(),
                     agent.getData().getName());
             final FlowRuntime runtime = new FlowRuntime(deployment, componentFactory,
-                    connectionFactory, new ExecutionTracker(deployment), executorService);
+                    connectionFactory, new ExecutionTracker(deployment), componentFlowNodesExecutionThreads);
             coordinators.put(deployment, runtime);
 
             if (deployment.getComponentFlowVersion().getStartType() == StartType.ON_DEPLOY) {
@@ -183,7 +184,7 @@ public class AgentEngine {
                                     agent.getData().getName(), cron,
                                     new CronSequenceGenerator(cron).next(new Date()) });
 
-                    ScheduledFuture<?> future = this.taskScheduler.schedule(new Runnable() {
+                    ScheduledFuture<?> future = this.componentFlowExecutionScheduler.schedule(new Runnable() {
 
                         @Override
                         public void run() {
@@ -217,8 +218,8 @@ public class AgentEngine {
         }
         configurationService.save(deployment.getData());
     }
-
-    public void undeploy(AgentDeployment deployment) {
+    
+    protected void stop(AgentDeployment deployment) {
         agent.getAgentDeployments().remove(deployment);
 
         ScheduledFuture<?> future = scheduled.get(deployment);
@@ -236,10 +237,12 @@ public class AgentEngine {
             } catch (Exception e) {
                 log.warn("Failed to stop '{}'", deployment.getComponentFlowVersion().getName(), e);
             }
-        }
-        
-        configurationService.delete(deployment);
+        }        
+    }
 
+    public void undeploy(AgentDeployment deployment) {
+        stop(deployment);
+        configurationService.delete(deployment);
     }
 
     protected FlowRuntime getComponentFlowCoordinator(AgentDeployment deployment) {
