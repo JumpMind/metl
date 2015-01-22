@@ -1,13 +1,14 @@
-package org.jumpmind.symmetric.is.ui.views.flows;
+package org.jumpmind.symmetric.is.ui.views.manage;
 
-import java.util.List;
 import java.util.Set;
 
+import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
-import org.jumpmind.symmetric.is.core.config.AgentSummary;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
+import org.jumpmind.symmetric.is.core.config.data.AgentDeploymentData;
+import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
 import org.jumpmind.symmetric.ui.common.MultiSelectTable;
 import org.jumpmind.symmetric.ui.common.ResizableWindow;
@@ -20,6 +21,8 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
@@ -29,7 +32,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-public class EditFlowDeploymentsWindow extends ResizableWindow {
+public class EditAgentDeploymentsWindow extends ResizableWindow {
 
     private static final long serialVersionUID = 1L;
 
@@ -37,12 +40,11 @@ public class EditFlowDeploymentsWindow extends ResizableWindow {
     IConfigurationService configurationService;
 
     @Autowired
-    SelectAgentsWindow selectAgentsWindow;
-    
-    @Autowired
-    IAgentManager agentManager;
+    SelectComponentFlowVersionWindow selectComponentFlowVersionWindow;
 
-    ComponentFlowVersion componentFlowVersion;
+    IItemUpdatedListener itemUpdatedListener;
+
+    Agent agent;
 
     BeanItemContainer<AgentDeployment> container;
 
@@ -52,7 +54,7 @@ public class EditFlowDeploymentsWindow extends ResizableWindow {
     
     MultiSelectTable table;
 
-    public EditFlowDeploymentsWindow() {
+    public EditAgentDeploymentsWindow() {
         VerticalLayout content = new VerticalLayout();
         content.setSizeFull();
         setContent(content);
@@ -61,7 +63,7 @@ public class EditFlowDeploymentsWindow extends ResizableWindow {
         content.addComponent(comp);
         content.setExpandRatio(comp, 1);
 
-        Button closeButton = new Button("Close", new CloseButtonListener());
+        Button closeButton = new Button("Close", new CloseClickListener());
         closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
 
         content.addComponent(buildButtonFooter(new Button[0], new Button[] { closeButton }));
@@ -109,17 +111,22 @@ public class EditFlowDeploymentsWindow extends ResizableWindow {
         return layout;
     }
 
-    public void show(ComponentFlowVersion componentFlowVersion) {
-        this.componentFlowVersion = componentFlowVersion;
-        setCaption("Agent Deployments for '" + componentFlowVersion.getName() + "'");
-        container.removeAllItems();        
-        List<AgentDeployment> deployments = configurationService.findAgentDeploymentsFor(componentFlowVersion);
-        container.addAll(deployments);
+    public void show(Agent agent, IItemUpdatedListener itemUpdatedListener) {
+        this.agent = agent;
+        this.itemUpdatedListener = itemUpdatedListener;
+        setCaption("Agent Deployments for '" + agent.toString() + "'");
+        container.removeAllItems();
+        container.addAll(agent.getAgentDeployments());
         showAtSize(.6);
     }
 
-    public ComponentFlowVersion getComponentFlowVersion() {
-        return componentFlowVersion;
+    public Agent getAgent() {
+        return agent;
+    }
+
+    protected void done() {
+        itemUpdatedListener.itemUpdated(agent);
+        close();
     }
 
     class DeployCommand implements Command, IItemUpdatedListener {
@@ -127,16 +134,25 @@ public class EditFlowDeploymentsWindow extends ResizableWindow {
 
         @Override
         public void menuSelected(MenuItem selectedItem) {
-            selectAgentsWindow.show(componentFlowVersion.getId(), this);
+            selectComponentFlowVersionWindow.show(agent, this);
         }
 
         @Override
         public void itemUpdated(Object item) {
             if (item instanceof Set) {
                 @SuppressWarnings("unchecked")
-                Set<AgentSummary> selected = (Set<AgentSummary>) item;
-                for (AgentSummary summary : selected) {
-                    container.addBean(agentManager.deploy(summary.getId(), componentFlowVersion));
+                Set<ComponentFlowVersionSummary> selectedFlows = (Set<ComponentFlowVersionSummary>) item;
+                for (ComponentFlowVersionSummary componentFlowVersionSummary : selectedFlows) {
+                    AgentDeploymentData data = new AgentDeploymentData();
+                    data.setAgentId(agent.getData().getId());
+                    data.setComponentFlowVersionId(componentFlowVersionSummary.getId());
+                    ComponentFlowVersion componentFlowVersion = new ComponentFlowVersion(null,
+                            new ComponentFlowVersionData(componentFlowVersionSummary.getId()));
+                    configurationService.refresh(componentFlowVersion);
+                    AgentDeployment agentDeployment = new AgentDeployment(componentFlowVersion, data);
+                    configurationService.save(agentDeployment);
+                    agent.getAgentDeployments().add(agentDeployment);
+                    container.addBean(agentDeployment);
                 }
             }
         }
@@ -149,12 +165,21 @@ public class EditFlowDeploymentsWindow extends ResizableWindow {
         public void menuSelected(MenuItem selectedItem) {
             Set<AgentDeployment> deploymentsSelected = table.getSelected();
             for (AgentDeployment agentDeployment : deploymentsSelected) {
-                agentManager.undeploy(agentDeployment);
+                configurationService.delete(agentDeployment);
+                agent.getAgentDeployments().remove(agentDeployment);
                 container.removeItem(agentDeployment);
             }
         }
     }
 
+    class CloseClickListener implements ClickListener {
+        private static final long serialVersionUID = 1L;
 
+        @Override
+        public void buttonClick(ClickEvent event) {
+            done();
+        }
+
+    }
 
 }

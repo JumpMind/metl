@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui.views.flows;
+package org.jumpmind.symmetric.is.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.jumpmind.symmetric.ui.common.CommonUiUtils.createComboBox;
@@ -31,7 +31,7 @@ import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.symmetric.is.ui.support.DesignAgentSelect;
-import org.jumpmind.symmetric.is.ui.views.flows.ComponentSettingsSheet.IComponentSettingsChangedListener;
+import org.jumpmind.symmetric.is.ui.views.design.ComponentSettingsSheet.IComponentSettingsChangedListener;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,7 +166,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
                     AgentEngine engine = EditFlowLayout.this.agentManager
                             .getAgentEngine(agentDeployment.getData().getAgentId());
                     engine.undeploy(agentDeployment);
-                    engine.deploy(agentDeployment);
+                    engine.deploy(agentDeployment.getComponentFlowVersion());
                 } else {
                     Agent agent = (Agent) EditFlowLayout.this.designAgentSelect.getValue();
                     if (agent != null) {

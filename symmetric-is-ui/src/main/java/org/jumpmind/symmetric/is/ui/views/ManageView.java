@@ -17,16 +17,15 @@ import org.jumpmind.symmetric.is.core.config.DeploymentStatus;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.config.data.AgentData;
-import org.jumpmind.symmetric.is.core.config.data.AgentDeploymentData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.ui.support.AbstractFolderNavigatorLayout;
 import org.jumpmind.symmetric.is.ui.support.Category;
 import org.jumpmind.symmetric.is.ui.support.TopBarLink;
-import org.jumpmind.symmetric.is.ui.views.agents.EditAgentDeploymentsWindow;
-import org.jumpmind.symmetric.is.ui.views.agents.EditAgentWindow;
-import org.jumpmind.symmetric.is.ui.views.agents.SelectComponentFlowVersionWindow;
+import org.jumpmind.symmetric.is.ui.views.manage.EditAgentDeploymentsWindow;
+import org.jumpmind.symmetric.is.ui.views.manage.EditAgentWindow;
+import org.jumpmind.symmetric.is.ui.views.manage.SelectComponentFlowVersionWindow;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
@@ -259,17 +258,17 @@ public class ManageView extends HorizontalLayout implements View {
 
         @Override
         protected void deleteTreeItems(final Collection<Object> objects) {
-            if (objects.size() > 0) {
+            if (objects != null && objects.size() > 0) {
                 Iterator<Object> i = objects.iterator();
                 Object object = i.next();
                 i.remove();
                 if (object instanceof Agent) {
-                    Agent agent = (Agent) objects;
+                    Agent agent = (Agent) object;
                     ConfirmDialog.show("Delete Agent?", "Are you sure you want to delete the "
                             + agent.getData().getName() + " agent?",
                             new DeleteAgentConfirmationListener(agent, objects));
                 } else if (object instanceof AgentDeployment) {
-                    AgentDeployment deployment = (AgentDeployment) objects;
+                    AgentDeployment deployment = (AgentDeployment) object;
                     ConfirmDialog.show("Delete Deployment?", "Are you sure you want to delete the "
                             + deployment + " deployment?", new DeleteDeploymentConfirmationListener(
                             deployment, objects));
@@ -346,19 +345,11 @@ public class ManageView extends HorizontalLayout implements View {
                 @SuppressWarnings("unchecked")
                 Set<ComponentFlowVersionSummary> selectedFlows = (Set<ComponentFlowVersionSummary>) item;
                 for (ComponentFlowVersionSummary componentFlowVersionSummary : selectedFlows) {
-                    AgentDeploymentData data = new AgentDeploymentData();
-                    data.setAgentId(agent.getData().getId());
-                    data.setComponentFlowVersionId(componentFlowVersionSummary.getId());
                     ComponentFlowVersion componentFlowVersion = new ComponentFlowVersion(null,
                             new ComponentFlowVersionData(componentFlowVersionSummary.getId()));
                     configurationService.refresh(componentFlowVersion);
-                    AgentDeployment agentDeployment = new AgentDeployment(componentFlowVersion,
-                            data);
-                    configurationService.save(agentDeployment);
-                    agent.getAgentDeployments().add(agentDeployment);
-
+                    agentManager.deploy(agent.getId(), componentFlowVersion);
                     refresh();
-
                     expand(agent.getFolder(), agent);
                 }
             }
@@ -401,6 +392,7 @@ public class ManageView extends HorizontalLayout implements View {
 
             public DeleteAgentConfirmationListener(Agent toDelete, Collection<Object> alsoDelete) {
                 this.toDelete = toDelete;
+                this.alsoDelete = alsoDelete;
             }
 
             @Override
@@ -425,6 +417,7 @@ public class ManageView extends HorizontalLayout implements View {
             public DeleteDeploymentConfirmationListener(AgentDeployment toDelete,
                     Collection<Object> alsoDelete) {
                 this.toDelete = toDelete;
+                this.alsoDelete = alsoDelete;
             }
 
             @Override

@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui.views.flows;
+package org.jumpmind.symmetric.is.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection.DB_POOL_DRIVER;

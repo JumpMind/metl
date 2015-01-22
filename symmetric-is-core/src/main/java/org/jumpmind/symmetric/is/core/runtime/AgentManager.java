@@ -12,7 +12,6 @@ import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.AgentStartMode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.config.data.AgentDeploymentData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
@@ -52,21 +51,16 @@ public class AgentManager implements IAgentManager {
         if (engine != null) {
             engine.undeploy(agentDeployment);
         }
-        configurationService.delete(agentDeployment);
     }
     
     @Override
     public AgentDeployment deploy(String agentId, ComponentFlowVersion componentFlowVersion) {
-        AgentDeploymentData data = new AgentDeploymentData();
-        data.setAgentId(agentId);
-        data.setComponentFlowVersionId(componentFlowVersion.getId());
-        AgentDeployment agentDeployment = new AgentDeployment(componentFlowVersion, data);
-        configurationService.save(agentDeployment);                    
+        AgentDeployment deployment = null;
         AgentEngine engine = getAgentEngine(agentId);
         if (engine != null) {
-            engine.deploy(agentDeployment);
+            deployment = engine.deploy(componentFlowVersion);
         }
-        return agentDeployment;
+        return deployment;
     }
 
     public Set<Agent> getLocalAgents() {

@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui.views.agents;
+package org.jumpmind.symmetric.is.ui.views.manage;
 
 import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.AgentStartMode;

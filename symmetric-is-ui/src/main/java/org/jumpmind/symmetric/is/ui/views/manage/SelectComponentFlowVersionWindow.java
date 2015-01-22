@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui.views.agents;
+package org.jumpmind.symmetric.is.ui.views.manage;
 
 import java.util.HashSet;
 import java.util.Set;
