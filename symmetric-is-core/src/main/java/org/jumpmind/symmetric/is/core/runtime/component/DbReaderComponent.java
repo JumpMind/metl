@@ -63,9 +63,7 @@ public class DbReaderComponent extends AbstractComponent {
     @Override
     public void handle(final Message inputMessage, final IMessageTarget messageTarget) {
     	    	
-        DataSource dataSource = this.connectionFactory.create(
-                componentNode.getComponentVersion().getConnection()).reference();
-        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(dataSource);
+        NamedParameterJdbcTemplate template = getJdbcTemplate();
         Map<String, Object> paramMap = new HashMap<String, Object>();
         
         int recordCount=0;
@@ -165,6 +163,12 @@ public class DbReaderComponent extends AbstractComponent {
         }
     }
 
+    protected NamedParameterJdbcTemplate getJdbcTemplate() {
+    	
+        return new NamedParameterJdbcTemplate((DataSource) this.connection.reference());
+    }
+    
+    
     protected void setParamsFromInboundMsgAndRec(Map<String, Object> paramMap, 
     		final Message inputMessage, final EntityData dataRecord) {
 
