@@ -1,8 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 
 import java.io.Serializable;
 import java.sql.Types;
@@ -28,7 +26,6 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
 import org.jumpmind.symmetric.is.core.config.data.SettingData;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
@@ -121,19 +118,6 @@ public class DbReaderComponentTest {
 		assertEquals(new Integer(5),inputParamMap.get("param2"));
 		assertEquals("fghij", inputParamMap.get("param3"));
 		assertEquals(new Integer(7),inputParamMap.get("param4"));
-	}
-	
-	@Test
-	public void testShutdownPassthrough() throws Exception {
-		
-		DbReaderComponent reader = spy(new DbReaderComponent());
-		doReturn(null).when(reader).getJdbcTemplate();
-		Message shutdownMessage = new ShutdownMessage();
-		MessageTarget target = new MessageTarget();
-		reader.handle(shutdownMessage, target);
-		
-		assertEquals(1,target.getTargetMessageCount());
-		assertEquals(true,target.getMessage(0) instanceof ShutdownMessage);		
 	}
 	
 //	@Test

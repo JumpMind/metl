@@ -66,97 +66,96 @@ public class DbReaderComponent extends AbstractComponent {
         NamedParameterJdbcTemplate template = getJdbcTemplate();
         Map<String, Object> paramMap = new HashMap<String, Object>();
         
-        int recordCount=0;
+        int recordCount=1;
         ArrayList<EntityData> payload = null;
-        if (!(inputMessage instanceof StartupMessage) &&
-        		!(inputMessage instanceof ShutdownMessage)) {
+        if (! (inputMessage instanceof StartupMessage)) {
         	payload = inputMessage.getPayload();
         	recordCount = payload.size();
         }
         
-        if (!(inputMessage instanceof ShutdownMessage)) {
-            /*
-             * A reader can be started by a startup message (if it has no input links) or it 
-             * can be started by another component that sends messages to it.  If the reader
-             * is started by another component, then loop for all records in the input message
-             */
-	        for (int i=0;i<=recordCount;i++) {
-	        	if (payload != null) {
-	        		setParamsFromInboundMsgAndRec(paramMap, inputMessage,payload.get(i));
-	        	} else {
-	        		setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
-	        	}
-		        template.query(sql, paramMap, new ResultSetExtractor<Object>() {
-		            @Override
-		            public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
-		                Map<Integer, String> sqlEntityHints = getSqlColumnEntityHints(sql);
-		                ResultSetMetaData meta = rs.getMetaData();
-		                int count = meta.getColumnCount();
-		
-		                Message message = null;
-		                while (rs.next()) {
-		                    if (message == null) {
-		                        if (messageManipulationStrategy == MessageManipulationStrategy.ENHANCE) {
-		                            message = inputMessage.copy();
-		                        } else {
-		                            message = new Message(componentNode.getId());
-		                            message.setPayload(new ArrayList<EntityData>());
-		                        }
-		                    }
-		                    Map<String, EntityData> records = new LinkedCaseInsensitiveMap<EntityData>(1);
-		                    for (int i = 1; i <= count; i++) {
-		                        String columnName = meta.getColumnName(i);
-		                        String tableName = meta.getTableName(i);
-		                        if (sqlEntityHints.containsKey(i)) {
-		                            String hint = sqlEntityHints.get(i);
-		                            if (hint.indexOf(".") != -1) {
-		                                tableName = hint.substring(0, hint.indexOf("."));
-		                                columnName = hint.substring(hint.indexOf(".") + 1);
-		                            } else {
-		                                tableName = hint;
-		                            }
-		                        }
-		                        if (StringUtils.isBlank(tableName)) {
-		                            throw new SQLException(
-		                                    "The table name could not be determined while mapping a database record to an EntitiesRow. "
-		                                            + "Try using hints to specify a column's table name as part of the SQL query.");
-		                        }
-		
-		                        EntityData record = records.get(tableName);
-		                        if (record == null) {
-		                            record = new EntityData(tableName);
-		                            records.put(tableName, record);
-		                        }
-		
-		                        Object value = JdbcUtils.getResultSetValue(rs, i);
-		                        if (trimColumns && value instanceof String) {
-		                            value = value.toString().trim();
-		                        }
-		                        record.put(columnName, value);
-		                    }
-		
-		                    ArrayList<EntityData> payload = inputMessage.getPayload();
-		                    payload.addAll(records.values());
-		
-		                    if (payload.size() >= rowsPerMessage) {
-		                        messageTarget.put(message);
-		                        message = null;
-		                    }
-		                }
-		
-		                if (message != null) {
-		                	messageTarget.put(message);
-		                }
-		                return null;
-		            } /* end while for each result set msg from query */
-		        });
-	        } /* for record count within message */
-        } /* if not input message instance of shutdown message */
+        /*
+         * A reader can be started by a startup message (if it has no input links) or it 
+         * can be started by another component that sends messages to it.  If the reader
+         * is started by another component, then loop for all records in the input message
+         */
+        for (int i=0;i<recordCount;i++) {
+        	if (payload != null && payload.size() > i) {
+        		setParamsFromInboundMsgAndRec(paramMap, inputMessage,payload.get(i));
+        	} else {
+        		setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
+        	}
+	        template.query(sql, paramMap, new ResultSetExtractor<Object>() {
+	            @Override
+	            public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
+	                Map<Integer, String> sqlEntityHints = getSqlColumnEntityHints(sql);
+	                ResultSetMetaData meta = rs.getMetaData();
+	                int count = meta.getColumnCount();
+	
+	                Message message = null;
+	                while (rs.next()) {
+	                    if (message == null) {
+	                        if (messageManipulationStrategy == MessageManipulationStrategy.ENHANCE) {
+	                            message = inputMessage.copy();
+	                        } else {
+	                            message = new Message(componentNode.getId());
+	                            message.setPayload(new ArrayList<EntityData>());
+	                        }
+	                    }
+	                    Map<String, EntityData> records = new LinkedCaseInsensitiveMap<EntityData>(1);
+	                    for (int i = 1; i <= count; i++) {
+	                        String columnName = meta.getColumnName(i);
+	                        String tableName = meta.getTableName(i);
+	                        if (sqlEntityHints.containsKey(i)) {
+	                            String hint = sqlEntityHints.get(i);
+	                            if (hint.indexOf(".") != -1) {
+	                                tableName = hint.substring(0, hint.indexOf("."));
+	                                columnName = hint.substring(hint.indexOf(".") + 1);
+	                            } else {
+	                                tableName = hint;
+	                            }
+	                        }
+	                        if (StringUtils.isBlank(tableName)) {
+	                            throw new SQLException(
+	                                    "The table name could not be determined while mapping a database record to an EntitiesRow. "
+	                                            + "Try using hints to specify a column's table name as part of the SQL query.");
+	                        }
+	
+	                        EntityData record = records.get(tableName);
+	                        if (record == null) {
+	                            record = new EntityData(tableName);
+	                            records.put(tableName, record);
+	                        }
+	
+	                        Object value = JdbcUtils.getResultSetValue(rs, i);
+	                        if (trimColumns && value instanceof String) {
+	                            value = value.toString().trim();
+	                        }
+	                        record.put(columnName, value);
+	                    }
+	
+	                    ArrayList<EntityData> payload = inputMessage.getPayload();
+	                    payload.addAll(records.values());
+	
+	                    if (payload.size() >= rowsPerMessage) {
+	                        messageTarget.put(message);
+	                        message = null;
+	                    }
+	                }
+	
+	                if (message != null) {
+	                	messageTarget.put(message);
+	                }
+	                return null;
+	            } /* end while for each result set msg from query */
+	        });
+        } /* for record count within message */
         /*
          * if this was a startup message, we've done everything we needed to do
-         * if this was a shutdown message, we're done
-         * in both cases send shutdown message to next node, otherwise keep listening
+         * send a shutdown message
          */
+        if (inputMessage instanceof StartupMessage) {
+        	messageTarget.put(new ShutdownMessage(this.getComponentFlowNode().getId()));
+        }
     }
 
     protected NamedParameterJdbcTemplate getJdbcTemplate() {
