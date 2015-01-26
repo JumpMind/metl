@@ -1,48 +1,47 @@
 ## Backlog
 
-Deploy a component flow
-  - UI
-  - enable/disable
-  - Override settings
-  - component flow manager 
-
-Execute a component flow
-  - manually run
+- Execution Manager
+  - Add an ExecutionService to manage persistence of execution tables
+  - Add method to request execution - insert into execution
+    - Used by scheduler, web service, and manual execution
+    - Pre-inserts row for each flow node into execution_node
+  - Add background service that:
+    - Starts deployments based on requested executions
+    - Assume (for now) executions for a single deployment do NOT run concurrently
+    - Detects if execution's status is not complete and flow is not currently executing (scenario when node is killed during execution).  Abort.
+    - Queries running flows and writes execution, node and log information to the database on a regular basis
+  - Add log level to flow version
+- Execution UI
+    - Manage View - Add a "View" button that enables when a Deployment is selected opens:
+      - View Execution History Tab - Shows execution history double click to open "Execution Tab"
+    - "Run Now" button on Edit Flow Page opens "Execution Tab"
+    - "Execution Tab"
+      - Show Status
+      - Show "Cancel" button if currently running
+      - Top split panel list of nodes with statistics
+      - Bottom split panel list of log messages for highlighted node  
+- Support agent properties
+- Flow diagram
+  - when connecting two components, validate
+  - better styling
+- Execute a component flow
   - logging
   - execution table
-
-Implement Components
- - Scheduler
- - Database Writer
- - Database Reader
- - File Writer
- - File Reader 
- 
-Clean up configurationService.  
-
-Support Models
- - UI
-
-Authentication and Authorization. User and Roles.
- - lock down features
- - lock down folders
-
-SQL Explorer
-
-Version a component flow
-
-Lock a component flow version
-
-Search
- - Component Pallete
- - Flows
- - Agents
-
-General
- - drag and drop
- - unit test runtimes
- 
-Questions ??
- - Should "Agent" be renamed to "Environment"
- - ConfigurationService - Use spring or symmetric-db?
- -  show deployments in agent view tree
+- Transactions in configurationService
+- Import & Export configuration
+- Support Models
+  - UI
+- Authentication and Authorization. User and Roles.
+  - lock down features
+  - lock down folders
+- SQL Explorer
+  - Show deployed connections
+- Version a component flow
+- Lock a component flow version
+- Search
+  - Component Pallete
+  - Flows
+  - Agents
+- General
+  - drag and drop
+  - unit test runtimes

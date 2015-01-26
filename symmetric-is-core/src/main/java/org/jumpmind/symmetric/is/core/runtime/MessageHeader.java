@@ -13,9 +13,23 @@ public class MessageHeader implements Serializable, Cloneable {
     int sequenceNumber;
 
     boolean lastMessage;
+    
+    String originatingNodeId;
 
     Map<String, Serializable> parameters = new HashMap<String, Serializable>();
+    
+    public MessageHeader(String originatingNodeId) {
+        this.originatingNodeId = originatingNodeId;
+    }
 
+    public void setOriginatingNodeId(String originatingNodeId) {
+        this.originatingNodeId = originatingNodeId;
+    }
+    
+    public String getOriginatingNodeId() {
+        return originatingNodeId;
+    }
+    
     public String getExecutionId() {
         return executionId;
     }

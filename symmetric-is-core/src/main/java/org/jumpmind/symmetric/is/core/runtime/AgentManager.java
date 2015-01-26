@@ -9,7 +9,9 @@ import java.util.Set;
 import javax.annotation.PreDestroy;
 
 import org.jumpmind.symmetric.is.core.config.Agent;
+import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.AgentStartMode;
+import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
@@ -41,6 +43,24 @@ public class AgentManager implements IAgentManager {
         for (Agent agent : agents) {
             createAndStartEngine(agent);
         }
+    }
+    
+    @Override
+    public void undeploy(AgentDeployment agentDeployment) {
+        AgentEngine engine = getAgentEngine(agentDeployment.getData().getAgentId());
+        if (engine != null) {
+            engine.undeploy(agentDeployment);
+        }
+    }
+    
+    @Override
+    public AgentDeployment deploy(String agentId, ComponentFlowVersion componentFlowVersion) {
+        AgentDeployment deployment = null;
+        AgentEngine engine = getAgentEngine(agentId);
+        if (engine != null) {
+            deployment = engine.deploy(componentFlowVersion);
+        }
+        return deployment;
     }
 
     public Set<Agent> getLocalAgents() {

@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -15,15 +16,17 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.support.AbstractFolderNavigatorLayout;
 import org.jumpmind.symmetric.is.ui.support.Category;
+import org.jumpmind.symmetric.is.ui.support.DesignAgentSelect;
 import org.jumpmind.symmetric.is.ui.support.TopBarLink;
-import org.jumpmind.symmetric.is.ui.views.flows.EditDbConnectionWindow;
-import org.jumpmind.symmetric.is.ui.views.flows.EditFlowLayout;
+import org.jumpmind.symmetric.is.ui.views.design.EditDbConnectionWindow;
+import org.jumpmind.symmetric.is.ui.views.design.EditFlowLayout;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
@@ -55,6 +58,8 @@ public class DesignView extends HorizontalLayout implements View {
 
     static final FontAwesome GENERAL_CONNECTION_ICON = FontAwesome.BOLT;
 
+    static final FontAwesome FLOW_ICON = FontAwesome.SHARE_ALT;
+
     @Autowired
     EditDbConnectionWindow editDbConnectionWindow;
 
@@ -67,8 +72,14 @@ public class DesignView extends HorizontalLayout implements View {
     @Autowired
     IConnectionFactory connectionFactory;
 
+    @Autowired
+    IAgentManager agentManager;
+
+    @Autowired
+    DesignAgentSelect designAgentSelect;
+
     protected TabbedApplicationPanel tabSheet;
-    
+
     protected MainTab mainTab;
 
     public DesignView() {
@@ -132,10 +143,10 @@ public class DesignView extends HorizontalLayout implements View {
         @Override
         protected void itemClicked(Object item) {
             if (item instanceof ComponentFlowVersion) {
-                EditFlowLayout editFlowLayout = new EditFlowLayout((ComponentFlowVersion) item,
-                        configurationService, componentFactory, connectionFactory);
-                tabSheet.addCloseableTab(editFlowLayout.getCaption(), FontAwesome.SITEMAP,
-                        editFlowLayout);
+                EditFlowLayout editFlowLayout = new EditFlowLayout(agentManager,
+                        (ComponentFlowVersion) item, configurationService, componentFactory,
+                        connectionFactory, designAgentSelect);
+                tabSheet.addCloseableTab(editFlowLayout.getCaption(), FLOW_ICON, editFlowLayout);
             } else if (item instanceof Connection) {
                 editDbConnectionWindow.show((Connection) item, this);
             }
@@ -171,7 +182,7 @@ public class DesignView extends HorizontalLayout implements View {
 
         @Override
         protected void addToAddButton(MenuBar.MenuItem dropdown) {
-            addFlowButton = dropdown.addItem("Flow", FontAwesome.SHARE_ALT, new AddFlowCommand());
+            addFlowButton = dropdown.addItem("Flow", FLOW_ICON, new AddFlowCommand());
             addFlowButton.setEnabled(false);
 
             addConnectionsButton = dropdown.addItem("Connections", GENERAL_CONNECTION_ICON, null);
@@ -191,14 +202,14 @@ public class DesignView extends HorizontalLayout implements View {
         }
 
         @Override
-        protected void deleteTreeItem(Object object) {
-            if (object instanceof ComponentFlow) {
-                ComponentFlow flow = (ComponentFlow) object;
+        protected void deleteTreeItems(Collection<Object> objects) {
+            if (objects instanceof ComponentFlow) {
+                ComponentFlow flow = (ComponentFlow) objects;
                 ConfirmDialog.show("Delete Flow?", "Are you sure you want to delete the "
                         + flow.getData().getName() + " flow?", new DeleteFlowConfirmationListener(
                         flow));
-            } else if (object instanceof Connection) {
-                Connection connection = (Connection) object;
+            } else if (objects instanceof Connection) {
+                Connection connection = (Connection) objects;
                 ConfirmDialog.show("Delete Connection?", "Are you sure you want to delete the "
                         + connection.getData().getName() + " connection?",
                         new DeleteConnectionConfirmationListener(connection));
@@ -233,7 +244,7 @@ public class DesignView extends HorizontalLayout implements View {
             List<ComponentFlow> flows = configurationService.findComponentFlowsInFolder(folder);
             for (ComponentFlow flow : flows) {
                 this.treeTable.addItem(flow);
-                this.treeTable.setItemIcon(flow, FontAwesome.SHARE_ALT);
+                this.treeTable.setItemIcon(flow, FLOW_ICON);
                 this.treeTable.setParent(flow, folder);
 
                 List<ComponentFlowVersion> versions = flow.getComponentFlowVersions();

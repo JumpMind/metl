@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui.views.flows;
+package org.jumpmind.symmetric.is.ui.views.design;
 
 import java.util.HashSet;
 import java.util.Set;

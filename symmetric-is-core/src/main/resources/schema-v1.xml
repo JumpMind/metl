@@ -276,6 +276,8 @@
     <table name="component_flow_version" description="">
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A version number" />
         <column name="version_name" type="VARCHAR" required="true" size="255" description="" />
+        <column name="start_type" type="VARCHAR" default="AUTO" required="true" size="128" description="" />
+        <column name="start_expression" type="VARCHAR" size="255" description="" />
         <column name="component_flow_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
@@ -371,21 +373,23 @@
     
     <table name="execution" description="">
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="deployment_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
-        <column name="status" type="VARCHAR" size="255" description="" />
-        <column name="request_component_version_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
+        <column name="agent_deployment_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
+        <column name="status" type="VARCHAR" required="true" default="REQUESTED" size="255" description="" />
+        <column name="start_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="end_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />               
     </table>    
     
-     <table name="execution_component" description="">
+     <table name="execution_node" description="">
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="execution_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
-        <column name="execution_order" type="INTEGER" default="0" required="true" />
         <column name="component_version_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
         <column name="status" type="VARCHAR" size="255" description="" />
+        <column name="messages_received" type="INTEGER" default="0" required="true" />
+        <column name="messages_produced" type="INTEGER" default="0" required="true" />
         <column name="start_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="end_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
     </table>        
@@ -398,7 +402,7 @@
 
     <table name="execution_log" description="">
        <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
-       <column name="execution_component_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
+       <column name="execution_node_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
        <column name="category" type="VARCHAR" size="255" required="true" description="" />
        <column name="level" type="VARCHAR" size="255" required="true" description="" />
        <column name="message" type="VARCHAR" size="4000" required="true" description="" />       

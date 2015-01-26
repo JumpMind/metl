@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.core.config;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -59,7 +61,6 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
     public List<ComponentFlowNodeLink> getComponentFlowNodeLinks() {
         return componentFlowNodeLinks;
     }
-
     
     public ComponentFlowNode removeComponentFlowNode(ComponentFlowNode flowNode) {
         Iterator<ComponentFlowNode> i = componentFlowNodes.iterator();
@@ -100,9 +101,22 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
         return null;
     }
     
+    public StartType getStartType() {
+        String type = data.getStartType();
+        if (isBlank(type)) {
+            return StartType.MANUAL;
+        } else {
+            return StartType.valueOf(type);
+        }
+    }
+    
+    public String getStartExpression() {
+        return data.getStartExpression();
+    }
+    
     @Override
     public String toString() {
-        return getData().getVersionName();
+        return getName() + ":" + getData().getVersionName();
     }
 
 }

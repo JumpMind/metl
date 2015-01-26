@@ -1,17 +1,27 @@
-package org.jumpmind.symmetric.is.ui.views.flows;
+package org.jumpmind.symmetric.is.ui.views.design;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.jumpmind.symmetric.ui.common.CommonUiUtils.createComboBox;
+import static org.jumpmind.symmetric.ui.common.CommonUiUtils.createSeparator;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.jumpmind.symmetric.is.core.config.Agent;
+import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.Component;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
+import org.jumpmind.symmetric.is.core.config.StartType;
 import org.jumpmind.symmetric.is.core.config.data.ComponentData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.runtime.AgentEngine;
+import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentCategory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
@@ -20,31 +30,48 @@ import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
-import org.jumpmind.symmetric.is.ui.views.flows.ComponentSettingsSheet.IComponentSettingsChangedListener;
+import org.jumpmind.symmetric.is.ui.support.DesignAgentSelect;
+import org.jumpmind.symmetric.is.ui.views.design.ComponentSettingsSheet.IComponentSettingsChangedListener;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.support.CronSequenceGenerator;
+import org.vaadin.maddon.layouts.MHorizontalLayout;
 
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Accordion;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.Command;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class EditFlowLayout extends VerticalLayout implements IComponentSettingsChangedListener, IUiPanel {
+public class EditFlowLayout extends VerticalLayout implements IComponentSettingsChangedListener,
+        IUiPanel {
 
     private static final long serialVersionUID = 1L;
+
+    Logger log = LoggerFactory.getLogger(getClass());
 
     IConfigurationService configurationService;
 
     IComponentFactory componentFactory;
 
     IConnectionFactory connectionFactory;
+
+    IAgentManager agentManager;
 
     ComponentFlowVersion componentFlowVersion;
 
@@ -62,15 +89,45 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
 
     Diagram diagram;
 
-    public EditFlowLayout(ComponentFlowVersion componentFlowVersion,
-            IConfigurationService configurationService, IComponentFactory componentFactory,
-            IConnectionFactory connectionFactory) {
+    MenuItem actionsButton;
 
+    MenuItem deployButton;
+
+    MenuItem undeployButton;
+
+    MenuItem executeButton;
+
+    AbstractSelect startType;
+
+    TextField startExpression;
+
+    DesignAgentSelect designAgentSelect;
+
+    ValueChangeListener designAgentListener;
+
+    public EditFlowLayout(IAgentManager agentManager, ComponentFlowVersion componentFlowVersion,
+            IConfigurationService configurationService, IComponentFactory componentFactory,
+            IConnectionFactory connectionFactory, DesignAgentSelect designAgentSelect) {
+
+        this.agentManager = agentManager;
+        this.componentFlowVersion = componentFlowVersion;
         this.configurationService = configurationService;
         this.componentFactory = componentFactory;
         this.connectionFactory = connectionFactory;
+        this.designAgentSelect = designAgentSelect;
 
         VerticalLayout content = this;
+
+        this.designAgentListener = new ValueChangeListener() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                configActions();
+            }
+        };
+
+        designAgentSelect.addValueChangeListener(this.designAgentListener);
 
         HorizontalSplitPanel splitPanel = new HorizontalSplitPanel();
         splitPanel.setSplitPosition(350, Unit.PIXELS);
@@ -93,16 +150,108 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
         content.addComponent(splitPanel);
         content.setExpandRatio(splitPanel, 1);
 
-        HorizontalLayout actionLayout = new HorizontalLayout();
-        actionLayout.setMargin(true);
-        actionLayout.setWidth(100, Unit.PERCENTAGE);
+        MHorizontalLayout actionLayout = new MHorizontalLayout().withMargin(true).withSpacing(true);
         flowLayout.addComponent(actionLayout);
 
-        this.componentFlowVersion = componentFlowVersion;
+        MenuBar actionBar = new MenuBar();
+        actionsButton = actionBar.addItem("Actions", null);
 
-        setCaption("Edit Flow - Name: "
-                + componentFlowVersion.getComponentFlow().getData().getName() + ", Version: "
-                + componentFlowVersion.getVersion());
+        deployButton = actionsButton.addItem("Deploy", new Command() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                AgentDeployment agentDeployment = findAgentDeployment();
+                if (agentDeployment != null) {
+                    AgentEngine engine = EditFlowLayout.this.agentManager
+                            .getAgentEngine(agentDeployment.getData().getAgentId());
+                    engine.undeploy(agentDeployment);
+                    engine.deploy(agentDeployment.getComponentFlowVersion());
+                } else {
+                    Agent agent = (Agent) EditFlowLayout.this.designAgentSelect.getValue();
+                    if (agent != null) {
+                        EditFlowLayout.this.agentManager.deploy(agent.getId(),
+                                EditFlowLayout.this.componentFlowVersion);
+                    }
+                }
+                configActions();
+            }
+        });
+
+        undeployButton = actionsButton.addItem("Undeploy", new Command() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                AgentDeployment agentDeployment = findAgentDeployment();
+                if (agentDeployment != null) {
+                    EditFlowLayout.this.agentManager.undeploy(agentDeployment);
+                }
+                configActions();
+            }
+        });
+
+        actionsButton.addSeparator();
+
+        executeButton = actionsButton.addItem("Run Now", new Command() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+
+            }
+        });
+
+        startExpression = new TextField("Cron Expression");
+        startExpression.setVisible(componentFlowVersion.getStartType() == StartType.SCHEDULED_CRON);
+        startExpression.setImmediate(true);
+        startExpression.setTextChangeTimeout(500);
+        startExpression.setTextChangeEventMode(TextChangeEventMode.LAZY);
+        startExpression.setValue(componentFlowVersion.getStartExpression());
+        startExpression.addValueChangeListener(new ValueChangeListener() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                if (validateCron()) {
+                    EditFlowLayout.this.componentFlowVersion.getData().setStartExpression(
+                            startExpression.getValue());
+                    EditFlowLayout.this.configurationService
+                            .save(EditFlowLayout.this.componentFlowVersion);
+                }
+            }
+        });
+
+        startType = createComboBox("Start Type");
+        startType.setWidth(12, Unit.EM);
+        startType.addItems(Arrays.asList(StartType.values()));
+        startType.setValue(componentFlowVersion.getStartType());
+        startType.addValueChangeListener(new ValueChangeListener() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                if (startType.getValue() == StartType.SCHEDULED_CRON) {
+                    if (!validateCron()) {
+                        startExpression.setValue("0 0 * * * *");
+                    }
+                    startExpression.setVisible(true);
+                } else {
+                    startExpression.setVisible(false);
+                }
+
+                EditFlowLayout.this.componentFlowVersion.getData().setStartType(
+                        startType.getValue().toString());
+                EditFlowLayout.this.configurationService
+                        .save(EditFlowLayout.this.componentFlowVersion);
+            }
+        });
+
+        actionLayout.add(actionBar, createSeparator(), startType, startExpression);
+        actionLayout.alignAll(Alignment.BOTTOM_LEFT);
+
+        setCaption("Name: " + componentFlowVersion.getComponentFlow().getData().getName()
+                + ", Version: " + componentFlowVersion.getVersion());
 
         populateComponentPalette();
 
@@ -113,12 +262,69 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
 
         tabs.setSelectedTab(palleteTab);
 
+        configActions();
+
     }
-    
+
+    protected AgentDeployment findAgentDeployment() {
+        Agent agent = (Agent) designAgentSelect.getValue();
+        if (agent != null) {
+            List<AgentDeployment> deployments = configurationService
+                    .findAgentDeploymentsFor(componentFlowVersion);
+            for (AgentDeployment agentDeployment : deployments) {
+                if (agentDeployment.getData().getAgentId().equals(agent.getData().getId())) {
+                    return agentDeployment;
+                }
+            }
+        }
+        return null;
+
+    }
+
+    @Override
+    public void detach() {
+        super.detach();
+        log.info("Removing design agent listener");
+        this.designAgentSelect.removeValueChangeListener(this.designAgentListener);
+    }
+
+    protected void configActions() {
+        Agent agent = (Agent) designAgentSelect.getValue();
+        if (agent != null) {
+            actionsButton.setEnabled(true);
+            undeployButton.setEnabled(false);
+            executeButton.setEnabled(false);
+            actionsButton.setDescription("");
+            deployButton.setText("Deploy");
+
+            AgentDeployment agentDeployment = findAgentDeployment();
+            if (agentDeployment != null) {
+                deployButton.setText("Redeploy");
+                undeployButton.setEnabled(true);
+                executeButton.setEnabled(true);
+            }
+        } else {
+            actionsButton.setEnabled(false);
+            actionsButton.setDescription("Select a Design Time Agent");
+        }
+    }
+
+    protected boolean validateCron() {
+        try {
+            if (isNotBlank(startExpression.getValue())) {
+                new CronSequenceGenerator(startExpression.getValue());
+                return true;
+            }
+        } catch (IllegalArgumentException ex) {
+        }
+        return false;
+
+    }
+
     @Override
     public void showing() {
     }
-    
+
     @Override
     public boolean closing() {
         return true;

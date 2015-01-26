@@ -43,6 +43,7 @@ public class FlowRuntimeTest {
     
     @After
     public void tearDown() throws Exception {
+        threadService.shutdown();
     }
 
     @Test
@@ -71,6 +72,19 @@ public class FlowRuntimeTest {
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Node 2").getNumberInboundMessages());    	
     }
     
+    @Test
+    public void twoSrcOneTarget() throws Exception {
+        ComponentFlowVersion flow = createTwoSrcToOneTargetFlow(folder);
+        AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
+        FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, connectionFactory, 
+                new ExecutionTracker(deployment), threadService);
+        flowRuntime.start();
+        flowRuntime.waitForFlowCompletion();
+        Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Node 1").getNumberInboundMessages());
+        Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Node 2").getNumberInboundMessages());
+        Assert.assertEquals(2, flowRuntime.getComponentStatistics("Target Node").getNumberInboundMessages());     
+    }
+    
     private ComponentFlowVersion createSimpleTwoNodeNoOpFlow(Folder folder) {
 
     	ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
@@ -96,5 +110,20 @@ public class FlowRuntimeTest {
     	TestUtils.addNodeToComponentFlow(flow, targetNoOpNode2);
     	
     	return flow;   	
+    } 
+    
+    private ComponentFlowVersion createTwoSrcToOneTargetFlow(Folder folder) {
+
+        ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
+        ComponentFlowNode srcNoOpNode1 = TestUtils.createNoOpProcessorComponentFlowNode(flow, "Src Node 1", folder);
+        ComponentFlowNode srcNoOpNode2 = TestUtils.createNoOpProcessorComponentFlowNode(flow, "Src Node 2", folder);
+        ComponentFlowNode targetNoOpNode = TestUtils.createNoOpProcessorComponentFlowNode(flow, "Target Node", folder);
+        flow.getComponentFlowNodeLinks().add(TestUtils.createComponentLink(srcNoOpNode1, targetNoOpNode));
+        flow.getComponentFlowNodeLinks().add(TestUtils.createComponentLink(srcNoOpNode2, targetNoOpNode));
+        TestUtils.addNodeToComponentFlow(flow, srcNoOpNode1);
+        TestUtils.addNodeToComponentFlow(flow, srcNoOpNode2);
+        TestUtils.addNodeToComponentFlow(flow, targetNoOpNode);
+        
+        return flow;    
     } 
 }

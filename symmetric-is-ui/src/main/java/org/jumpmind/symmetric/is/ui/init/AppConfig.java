@@ -32,7 +32,9 @@ import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.security.SecurityServiceFactory;
 import org.jumpmind.symmetric.is.core.persist.ConfigurationSqlService;
+import org.jumpmind.symmetric.is.core.persist.ExecutionSqlService;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.core.runtime.AgentManager;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentFactory;
@@ -72,6 +74,8 @@ public class AppConfig {
     IConnectionFactory connectionFactory;
 
     IPersistenceManager persistenceManager;
+    
+    IExecutionService executionService;
 
     @Bean
     @Scope(value = "singleton")
@@ -152,6 +156,16 @@ public class AppConfig {
         }
         return configurationService;
     }
+    
+    @Bean
+    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
+    public IExecutionService executionService() {
+        if (executionService == null) {
+            executionService = new ExecutionSqlService(configDatabasePlatform(),
+                    persistenceManager(), tablePrefix());
+        }
+        return executionService;
+    }    
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)

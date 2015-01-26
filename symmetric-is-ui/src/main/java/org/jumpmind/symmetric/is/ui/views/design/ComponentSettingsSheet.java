@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui.views.flows;
+package org.jumpmind.symmetric.is.ui.views.design;
 
 import java.util.List;
 import java.util.Map;
@@ -23,15 +23,16 @@ import org.jumpmind.symmetric.ui.common.SqlField;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.AbstractSelect.NewItemHandler;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.Command;
-import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -80,10 +81,6 @@ public class ComponentSettingsSheet extends VerticalLayout {
         actionLayout.setWidth(100, Unit.PERCENTAGE);
         addComponent(actionLayout);
 
-        MenuBar actionBar = new MenuBar();
-        actionBar.addStyleName(ValoTheme.MENUBAR_SMALL);
-        actionBar.setWidth(100, Unit.PERCENTAGE);
-        actionLayout.addComponent(actionBar);
 
         FormLayout formLayout = new FormLayout();
         formLayout.setWidth(100, Unit.PERCENTAGE);
@@ -95,11 +92,11 @@ public class ComponentSettingsSheet extends VerticalLayout {
         if (flowNode != null) {
             ComponentVersion version = flowNode.getComponentVersion();
 
-            actionBar.addItem("Delete", new Command() {
-                private static final long serialVersionUID = 1L;
-
+            Button deleteButton = new Button("Delete");
+            deleteButton.addClickListener(new ClickListener() {
+                private static final long serialVersionUID = 1L;                
                 @Override
-                public void menuSelected(MenuItem selectedItem) {
+                public void buttonClick(ClickEvent event) {
                     ConfirmDialog.show("Delete?", String.format(
                             "Are you sure you want to delete the '%s' component?",
                             componentFlowVersion.getName()), new IConfirmListener() {
@@ -115,6 +112,7 @@ public class ComponentSettingsSheet extends VerticalLayout {
                     });
                 }
             });
+            actionLayout.addComponent(deleteButton);
 
             TextField typeLabel = new TextField();
             typeLabel.setCaption("Type");
@@ -141,7 +139,7 @@ public class ComponentSettingsSheet extends VerticalLayout {
                 .getComponentDefinitionForComponentType(version.getComponent().getType());
         if (componentDefintion.connectionCategory() != null
                 && componentDefintion.connectionCategory() != ConnectionCategory.NONE) {
-            final ComboBox connectionsCombo = new ComboBox("Connection");
+            final AbstractSelect connectionsCombo = new ComboBox("Connection");
             connectionsCombo.setImmediate(true);
             connectionsCombo.setRequired(true);
             List<String> types = connectionFactory.getConnectionTypes(componentDefintion
@@ -173,7 +171,7 @@ public class ComponentSettingsSheet extends VerticalLayout {
 
     protected void addNodeCombo(FormLayout formLayout, final ComponentFlowNode flowNode) {
         List<ComponentFlowNode> allNodes = componentFlowVersion.getComponentFlowNodes();
-        final ComboBox nodeNameCombo = new ComboBox("Name");
+        final AbstractSelect nodeNameCombo = new ComboBox("Name");
         nodeNameCombo.setNewItemsAllowed(true);
         nodeNameCombo.setNullSelectionAllowed(false);
         nodeNameCombo.setImmediate(true);
@@ -240,7 +238,7 @@ public class ComponentSettingsSheet extends VerticalLayout {
                 formLayout.addComponent(checkBox);
                 break;
             case CHOICE:
-                final ComboBox choice = new ComboBox(definition.label());
+                final AbstractSelect choice = new ComboBox(definition.label());
                 choice.setImmediate(true);
                 String[] choices = definition.choices();
                 for (String c : choices) {
@@ -318,7 +316,7 @@ public class ComponentSettingsSheet extends VerticalLayout {
 
     }
 
-    protected void saveName(ComboBox nameField, ComponentFlowNode flowNode) {
+    protected void saveName(AbstractSelect nameField, ComponentFlowNode flowNode) {
         ComponentVersion version = flowNode.getComponentVersion();
         version.getData().setName((String) nameField.getItemCaption(nameField.getValue()));
         configurationService.save(version);
