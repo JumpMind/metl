@@ -1,23 +1,32 @@
 package org.jumpmind.symmetric.is.core.config.data;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class ModelVersionData extends AbstractVersionData {
 
     private static final long serialVersionUID = 1L;
     
-    List<ModelAttributeData> attributes = new ArrayList<ModelAttributeData>();
+    String versionName;
     
-    public ModelVersionData add(ModelAttributeData attribute) {
-        if (this.attributes.contains(attribute)) {
-            this.attributes.remove(attribute);
-        }
-        this.attributes.add(attribute);
-        return this;
-    }
+    String modelId;
     
-    public ModelVersionData() {
-    }
-        
+    String modelFormatId;
+    
+	public String getVersionName() {
+		return versionName;
+	}
+	public void setVersionName(String versionName) {
+		this.versionName = versionName;
+	}
+	public String getModelId() {
+		return modelId;
+	}
+	public void setModelId(String modelId) {
+		this.modelId = modelId;
+	}
+	public String getModelFormatId() {
+		return modelFormatId;
+	}
+	public void setModelFormatId(String modelFormatId) {
+		this.modelFormatId = modelFormatId;
+	}
 }
