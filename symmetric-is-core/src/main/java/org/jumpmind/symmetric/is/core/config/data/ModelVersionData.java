@@ -3,13 +3,13 @@ package org.jumpmind.symmetric.is.core.config.data;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StructuredModelVersionData extends AbstractVersionData {
+public class ModelVersionData extends AbstractVersionData {
 
     private static final long serialVersionUID = 1L;
     
-    List<StructuredAttributeData> attributes = new ArrayList<StructuredAttributeData>();
+    List<ModelAttributeData> attributes = new ArrayList<ModelAttributeData>();
     
-    public StructuredModelVersionData add(StructuredAttributeData attribute) {
+    public ModelVersionData add(ModelAttributeData attribute) {
         if (this.attributes.contains(attribute)) {
             this.attributes.remove(attribute);
         }
@@ -17,7 +17,7 @@ public class StructuredModelVersionData extends AbstractVersionData {
         return this;
     }
     
-    public StructuredModelVersionData() {
+    public ModelVersionData() {
     }
         
 }

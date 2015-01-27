@@ -1,6 +1,6 @@
 package org.jumpmind.symmetric.is.core.config.data;
 
-public class StructuredModelData extends AbstractData {
+public class ModelData extends AbstractData {
 
     private static final long serialVersionUID = 1L;
 

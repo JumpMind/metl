@@ -2,7 +2,7 @@ package org.jumpmind.symmetric.is.core.config.data;
 
 import org.jumpmind.symmetric.is.core.config.DataType;
 
-public class StructuredAttributeData {
+public class ModelAttributeData {
 
     String id;
     
