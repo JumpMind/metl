@@ -133,7 +133,7 @@ public class DbReaderComponent extends AbstractComponent {
 	                        record.put(columnName, value);
 	                    }
 	
-	                    ArrayList<EntityData> payload = inputMessage.getPayload();
+	                    ArrayList<EntityData> payload = message.getPayload();
 	                    payload.addAll(records.values());
 	
 	                    if (payload.size() >= rowsPerMessage) {

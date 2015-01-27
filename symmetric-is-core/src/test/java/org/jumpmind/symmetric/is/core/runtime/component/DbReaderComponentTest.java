@@ -21,13 +21,17 @@ import org.jumpmind.symmetric.is.core.config.Component;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
+import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
+import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
 import org.jumpmind.symmetric.is.core.config.data.SettingData;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.Message;
+import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionFactory;
+import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.utils.DbTestUtils;
@@ -38,18 +42,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-
 @RunWith(PowerMockRunner.class)
 public class DbReaderComponentTest {
 
 	private static IConnectionFactory connectionFactory;
-	private static ComponentFlowNode flowNode;
 	private static IDatabasePlatform platform;
 	private static ComponentFlowNode readerComponentFlowNode;
-
-	//	private static IComponentFactory componentFactory;
-//	private static ExecutorService threadService;
-//	private static NodeRuntime readerNodeRuntime;
     
 	@BeforeClass
 	public static void setup() throws Exception {
@@ -57,11 +55,6 @@ public class DbReaderComponentTest {
 		connectionFactory = new ConnectionFactory();
 		platform = createPlatformAndTestDatabase();
 		readerComponentFlowNode = createReaderComponentFlowNode();		
-
-		//    	componentFactory = new ComponentFactory();
-//    	threadService = Executors.newFixedThreadPool(5);
-
-//	    readerNodeRuntime = new NodeRuntime(componentFactory.create(readerComponentFlowNode));
 	}	
 	
     @After
@@ -120,20 +113,47 @@ public class DbReaderComponentTest {
 		assertEquals(new Integer(7),inputParamMap.get("param4"));
 	}
 	
-//	@Test
-//	public void testReaderFlowFromStartupMsg() throws Exception {
-//
-//	}
-//   
-//	@Test
-//	public void testReaderFlowFromSingleContentMsg() throws Exception {
-//		   
-//	}
-//	   
-//	@Test
-//	public void testReaderFlowFromMultipleContentMsgs() throws Exception {
-//		   
-//	}
+	@Test
+	public void testReaderFlowFromStartupMsg() throws Exception {
+
+		DbReaderComponent reader = new DbReaderComponent();
+		reader.setComponentFlowNode(readerComponentFlowNode);
+		reader.start(null, connectionFactory);
+		Message msg = new StartupMessage();
+		MessageTarget msgTarget = new MessageTarget();
+		reader.handle(msg, msgTarget);
+				
+		/* 3 messages, 3 rows - 2 rows in msg 1, 1 row in msg 2, shutdown msg */
+		assertEquals(3,msgTarget.getTargetMessageCount());
+		ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
+		assertEquals("test row 1",payload.get(0).get("COL2"));
+		assertEquals(true,msgTarget.getMessage(2) instanceof ShutdownMessage);
+	}
+   
+	@Test
+	public void testReaderFlowFromSingleContentMsg() throws Exception {
+		   
+		DbReaderComponent reader = new DbReaderComponent();
+		reader.setComponentFlowNode(readerComponentFlowNode);
+		reader.start(null, connectionFactory);
+		Message message = new Message("fake node id");
+        message.setPayload(new ArrayList<EntityData>());
+        ArrayList<EntityData> payload = message.getPayload();
+        EntityData fakeRec = new EntityData("fake");
+        payload.add(fakeRec);
+		MessageTarget msgTarget = new MessageTarget();
+		reader.handle(message, msgTarget);
+		
+		/* 2 messages, 3 rows - 2 rows in msg 1, 1 row in msg 2, no shutdown yet */
+		assertEquals(2,msgTarget.getTargetMessageCount());
+		payload = msgTarget.getMessage(0).getPayload();
+		assertEquals("test row 1",payload.get(0).get("COL2"));
+	}
+	   
+	@Test
+	public void testReaderFlowFromMultipleContentMsgs() throws Exception {
+		   
+	}
 
 	
 	private static ComponentFlowNode createReaderComponentFlowNode() {
@@ -144,6 +164,7 @@ public class DbReaderComponentTest {
     	Component component = TestUtils.createComponent(DbReaderComponent.TYPE, false);
     	SettingData[] settingData = createReaderSettings();
     	ComponentVersion componentVersion = TestUtils.createComponentVersion(component, name, null, settingData);
+    	componentVersion.setConnection(createConnection(createConnectionSettings()));
     	ComponentFlowNodeData data = new ComponentFlowNodeData();
     	data.setComponentFlowVersionId(flow.getId());
     	data.setComponentVersionId(componentVersion.getId());
@@ -157,11 +178,34 @@ public class DbReaderComponentTest {
 	 	return readerComponent;
 	}
 	
+	private static Connection createConnection(SettingData[] settingsData) {
+		
+		ConnectionData connectionData = new ConnectionData();
+		Folder folder = TestUtils.createFolder("Test Folder Connection");
+		connectionData.setName("Test Connection");
+		connectionData.setFolderId("Test Folder Connection");
+		connectionData.setType(DataSourceConnection.TYPE);
+		Connection connection = new Connection(folder, connectionData, settingsData);
+		
+		return connection;
+	}
+	
 	private static SettingData[] createReaderSettings() {
 		
 		SettingData[] settingData = new SettingData[2];
-		settingData[0] = new SettingData(DbReaderComponent.SQL,"select * From test_table_1");
+		settingData[0] = new SettingData(DbReaderComponent.SQL,"select * From test_table_1 order by col1");
 		settingData[1] = new SettingData(DbReaderComponent.ROWS_PER_MESSAGE,"2");
+		
+		return settingData;
+	}
+	
+	private static SettingData[] createConnectionSettings() {
+		
+		SettingData[] settingData = new SettingData[4];
+		settingData[0] = new SettingData(DataSourceConnection.DB_POOL_DRIVER,"org.h2.Driver");
+		settingData[1] = new SettingData(DataSourceConnection.DB_POOL_URL,"jdbc:h2:file:build/dbs/testdb");
+		settingData[2] = new SettingData(DataSourceConnection.DB_POOL_USER,"jumpmind");
+		settingData[3] = new SettingData(DataSourceConnection.DB_POOL_PASSWORD,"jumpmind");
 		
 		return settingData;
 	}
@@ -202,6 +246,9 @@ public class DbReaderComponentTest {
 		ISqlTemplate template = platform.getSqlTemplate();
 		DmlStatement statement = platform.createDmlStatement(DmlType.INSERT, database.findTable("test_table_1"), null);
 		template.update(statement.getSql(), statement.getValueArray(new Object[] {1,"test row 1",7.7}, new Object[] {1}));
+		template.update(statement.getSql(), statement.getValueArray(new Object[] {2,"test row 2",8.8}, new Object[] {1}));
+		template.update(statement.getSql(), statement.getValueArray(new Object[] {3,"test row 3",9.9}, new Object[] {1}));
+
 	}
 	
    class MessageTarget implements IMessageTarget {
