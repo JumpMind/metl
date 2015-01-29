@@ -1,5 +1,5 @@
 package org.jumpmind.symmetric.is.core.config;
 
-public class StructuredModel {
+public class Model {
 
 }
