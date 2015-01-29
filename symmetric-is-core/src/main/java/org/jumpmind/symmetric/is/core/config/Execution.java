@@ -6,6 +6,13 @@ public class Execution extends AbstractObject<ExecutionData> {
 
     private static final long serialVersionUID = 1L;
 
+    public Execution(ExecutionStatus status, String agentDeploymentId) {
+        this.data = new ExecutionData();
+        this.data.setAgentDeploymentId(agentDeploymentId);
+        setExecutionStatus(status);
+        
+    }
+    
     public void setExecutionStatus(ExecutionStatus status) {
         data.setStatus(status.name());
     }

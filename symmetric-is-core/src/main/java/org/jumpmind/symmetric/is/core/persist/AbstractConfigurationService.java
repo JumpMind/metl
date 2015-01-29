@@ -19,7 +19,6 @@ import org.jumpmind.symmetric.is.core.config.ComponentVersion;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
-import org.jumpmind.symmetric.is.core.config.data.AbstractData;
 import org.jumpmind.symmetric.is.core.config.data.AgentData;
 import org.jumpmind.symmetric.is.core.config.data.AgentDeploymentData;
 import org.jumpmind.symmetric.is.core.config.data.AgentSettingData;
@@ -37,27 +36,10 @@ import org.jumpmind.symmetric.is.core.config.data.SettingData;
 import org.jumpmind.symmetric.is.core.util.NameValue;
 
 // TODO make methods transactional
-abstract class AbstractConfigurationService implements IConfigurationService {
+abstract class AbstractConfigurationService extends AbstractService implements IConfigurationService {
 
-    IPersistenceManager persistenceManager;
-
-    AbstractConfigurationService(IPersistenceManager persistenceManager) {
-        this.persistenceManager = persistenceManager;
-    }
-
-    protected abstract String tableName(Class<?> clazz);
-
-    protected <T> List<T> find(Class<T> clazz, Map<String, Object> params) {
-        return persistenceManager.find(clazz, params, null, null, tableName(clazz));
-    }
-
-    protected <T> T findOne(Class<T> clazz, Map<String, Object> params) {
-        List<T> all = persistenceManager.find(clazz, params, null, null, tableName(clazz));
-        if (all.size() > 0) {
-            return all.get(0);
-        } else {
-            return null;
-        }
+    AbstractConfigurationService(IPersistenceManager persistenceManager, String tablePrefix) {
+        super(persistenceManager, tablePrefix);
     }
 
     @Override
@@ -347,10 +329,6 @@ abstract class AbstractConfigurationService implements IConfigurationService {
         delete(flowVersion.getData());
     }
 
-    protected void delete(AbstractData data) {
-        persistenceManager.delete(data, null, null, tableName(data.getClass()));
-    }
-
     @Override
     public void refresh(Connection connection) {
         refresh((AbstractObject<?>) connection);
@@ -378,11 +356,6 @@ abstract class AbstractConfigurationService implements IConfigurationService {
     public void refresh(ComponentFlowVersion componentFlowVersion) {
         refresh((AbstractObject<?>) componentFlowVersion);
         refreshComponentFlowVersionRelations(componentFlowVersion);
-    }
-
-    protected void refresh(AbstractObject<?> object) {
-        persistenceManager.refresh(object.getData(), null, null, tableName(object.getData()
-                .getClass()));
     }
 
     private void refreshComponentFlowVersionRelations(ComponentFlowVersion componentFlowVersion) {
@@ -426,17 +399,6 @@ abstract class AbstractConfigurationService implements IConfigurationService {
         for (SettingData settingData : settings) {
             save(settingData);
         }
-    }
-
-    @Override
-    public void save(AbstractObject<?> obj) {
-        save(obj.getData());
-    }
-
-    @Override
-    public void save(AbstractData data) {
-        data.setLastModifyTime(new Date());
-        persistenceManager.save(data, null, null, tableName(data.getClass()));
     }
 
     @Override

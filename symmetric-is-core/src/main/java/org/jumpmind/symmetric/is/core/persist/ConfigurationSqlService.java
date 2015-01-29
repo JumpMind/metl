@@ -2,7 +2,6 @@ package org.jumpmind.symmetric.is.core.persist;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.ISqlRowMapper;
 import org.jumpmind.db.sql.ISqlTemplate;
@@ -15,27 +14,12 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
 
 public class ConfigurationSqlService extends AbstractConfigurationService {
 
-    String tablePrefix;
-
     IDatabasePlatform databasePlatform;
 
     public ConfigurationSqlService(IDatabasePlatform databasePlatform,
             IPersistenceManager persistenceManager, String tablePrefix) {
-        super(persistenceManager);
+        super(persistenceManager, tablePrefix);
         this.databasePlatform = databasePlatform;
-        this.tablePrefix = tablePrefix;
-    }
-
-    @Override
-    protected String tableName(Class<?> clazz) {
-        StringBuilder name = new StringBuilder(tablePrefix);
-        String[] tokens = StringUtils.splitByCharacterTypeCamelCase(clazz.getSimpleName()
-                .substring(0, clazz.getSimpleName().indexOf("Data")));
-        for (String string : tokens) {
-            name.append("_");
-            name.append(string);
-        }
-        return name.toString();
     }
 
     @Override
