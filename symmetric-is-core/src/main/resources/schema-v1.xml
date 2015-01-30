@@ -30,6 +30,7 @@
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
         <column name="name" type="VARCHAR" size="255" description="" />
         <column name="type" type="VARCHAR" size="50" required="true" description="RELATIONAL" />
+        <column name="shared" type="BOOLEANINT" size="1" default="0" description="Indicator as to whether this is a shared model." />
         <column name="folder_id" type="VARCHAR" size="128" required="true" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
@@ -153,6 +154,7 @@
 
     <table name="component" description="">
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="name" type="VARCHAR" size="255" required="true" description="A user defined name for the component" />
         <column name="type" type="VARCHAR" size="50" required="true" description="" />
         <column name="folder_id" type="VARCHAR" size="128" description="" />
         <column name="shared" type="BOOLEANINT" size="1" default="0" description="Indicator as to whether this is a shared component." />
@@ -168,7 +170,6 @@
     <table name="component_version" description="">
         <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A version number" />
         <column name="version_name" type="VARCHAR" required="true" size="255" description="" />
-        <column name="name" type="VARCHAR" size="255" description="" />
         <column name="component_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
         <column name="input_model_version_id" type="VARCHAR" size="128" description="" />
         <column name="output_model_version_id" type="VARCHAR" size="128" description="" />
