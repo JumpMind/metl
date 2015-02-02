@@ -8,6 +8,8 @@ public class ComponentData extends AbstractData {
     
     boolean shared;
 
+    String name;
+
     public ComponentData() {
     }
         
@@ -32,5 +34,13 @@ public class ComponentData extends AbstractData {
     public void setShared(boolean shared) {
         this.shared = shared;
     }       
+
+    public void setName(String name) {
+        this.name = name;
+    }
     
+    public String getName() {
+        return name;
+    }
+
 }

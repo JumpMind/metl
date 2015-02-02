@@ -31,7 +31,7 @@ public class ExecutionSqlService extends AbstractExecutionService {
         ExecutionData data = execution.getData();
 
         ISqlTemplate template = databasePlatform.getSqlTemplate();
-        if (1 == template.update(sql, data.getId(), data.getAgentDeploymentId(), data.getStatus(),
+        if (1 <= template.update(sql, data.getId(), data.getAgentDeploymentId(), data.getStatus(),
                 data.getCreateTime(), data.getCreateBy(), data.getLastModifyTime(),
                 data.getLastModifyBy())) {
             return execution;

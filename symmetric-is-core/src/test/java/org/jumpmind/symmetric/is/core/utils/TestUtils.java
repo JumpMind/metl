@@ -59,7 +59,7 @@ public class TestUtils {
     		String name, Folder folder) {
 
     	Component component = createComponent(NoOpProcessorComponent.TYPE, false);
-    	ComponentVersion componentVersion = createComponentVersion(component, name, null, (SettingData[]) null);
+    	ComponentVersion componentVersion = createComponentVersion(component, null, (SettingData[]) null);
     	ComponentFlowNodeData data = new ComponentFlowNodeData();
     	data.setComponentFlowVersionId(flowVersion.getId());
     	data.setComponentVersionId(componentVersion.getId());
@@ -140,19 +140,19 @@ public class TestUtils {
     	component.setCreateTime(new Date());
     	component.setLastModifyBy("Test");
     	component.setCreateTime(new Date());
+    	component.setName("Test");
     	
     	return component;
     }
     
     public static ComponentVersion createComponentVersion(Component component, 
-    		String name, Connection connection, SettingData... settings) {
+    		Connection connection, SettingData... settings) {
     	
     	ComponentVersionData data = new ComponentVersionData();
     	data.setComponentId(component.getId());
     	data.setCreateBy("Test");
     	data.setCreateTime(new Date());
-    	data.setId(name);
-    	data.setName(name);
+    	data.setId("Test");
     	data.setLastModifyBy("Test");
     	data.setLastModifyTime(new Date());
     	//TODO: allow passing in of a model

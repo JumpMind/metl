@@ -32,7 +32,7 @@ public class ExecutionTracker implements IExecutionTracker {
     public void beforeHandle(String executionId, ComponentVersion componentVersion) {
         String msg = String.format(
                 "started component execution: %s,  for deployment: %s,  component: %s:%s",
-                executionId, deployment.getId(), componentVersion.getName(),
+                executionId, deployment.getId(), componentVersion.getComponent().getName(),
                 componentVersion.getId());
         log.info(msg);
     }
@@ -41,7 +41,7 @@ public class ExecutionTracker implements IExecutionTracker {
     public void afterHandle(String executionId, ComponentVersion componentVersion) {
         String msg = String.format(
                 "finished component execution: %s,  for deployment: %s,  component: %s:%s",
-                executionId, deployment.getId(), componentVersion.getName(),
+                executionId, deployment.getId(), componentVersion.getComponent().getName(),
                 componentVersion.getId());
         log.info(msg);
     }
@@ -51,7 +51,7 @@ public class ExecutionTracker implements IExecutionTracker {
             String category, String output) {
         String msg = String
                 .format("log output from execution: %s, for deployment: %s,  component: %s:%s,  category: %s,  output: %s",
-                        executionId, deployment.getId(), componentVersion.getName(),
+                        executionId, deployment.getId(), componentVersion.getComponent().getName(),
                         componentVersion.getId(), category, output);
         switch (level) {
             case DEBUG:
