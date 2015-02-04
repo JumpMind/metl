@@ -106,10 +106,6 @@ public interface IConfigurationService {
     
     public void save(ModelEntity modelEntity);
     
-    public void save(ModelAttribute modelAttribute);
-    
     public void save(ModelEntityRelationship modelEntityRelationship);
-    
-    public void save(ModelAttributeRelationship modelAttributeRelationship);
 
 }

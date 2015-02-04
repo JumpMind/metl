@@ -39,8 +39,10 @@ import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
 import org.jumpmind.symmetric.is.core.config.data.ConnectionSettingData;
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
 import org.jumpmind.symmetric.is.core.config.data.ModelAttributeData;
+import org.jumpmind.symmetric.is.core.config.data.ModelAttributeRelationshipData;
 import org.jumpmind.symmetric.is.core.config.data.ModelData;
 import org.jumpmind.symmetric.is.core.config.data.ModelEntityData;
+import org.jumpmind.symmetric.is.core.config.data.ModelEntityRelationshipData;
 import org.jumpmind.symmetric.is.core.config.data.ModelVersionData;
 import org.jumpmind.symmetric.is.core.config.data.SettingData;
 import org.jumpmind.symmetric.is.core.util.NameValue;
@@ -575,9 +577,9 @@ abstract class AbstractConfigurationService extends AbstractService implements
 	public void refresh(ModelEntity modelEntity) {
 
 		refresh((AbstractObject<?>) modelEntity);
-		modelEntity.getModelAttributes().clear();
 		Map<String, Object> entityParams = new HashMap<String, Object>();
-		entityParams.put("modelEntityId", modelEntity.getData().getId());
+		entityParams.put("entityId", modelEntity.getData().getId());
+		modelEntity.getModelAttributes().clear();
 		List<ModelAttributeData> attributeDatas = persistenceManager.find(
 				ModelAttributeData.class, entityParams, null, null,
 				tableName(ModelAttributeData.class));
@@ -586,6 +588,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
 					null, attributeData);
 			refresh(modelAttribute);
 			modelEntity.getModelAttributes().add(modelAttribute);
+		}
+		modelEntity.getModelEntityRelationships().clear();
+		List<ModelEntityRelationshipData> entityRelationshipDatas = persistenceManager.find(ModelEntityRelationshipData.class,
+				entityParams, null, null, tableName(ModelEntityRelationshipData.class));
+		for (ModelEntityRelationshipData entityRelationshipData : entityRelationshipDatas) {
+			ModelEntityRelationship modelEntityRelationship = new ModelEntityRelationship(entityRelationshipData);
+			refresh(modelEntityRelationship);
+			modelEntity.getModelEntityRelationships().add(modelEntityRelationship);
 		}
 	}
 
@@ -596,38 +606,55 @@ abstract class AbstractConfigurationService extends AbstractService implements
     
 	@Override
     public void refresh(ModelEntityRelationship modelEntityRelationship) {
-    	
+		
     	refresh((AbstractObject<?>) modelEntityRelationship);
+		Map<String, Object> entityRelationshipParams = new HashMap<String, Object>();
+		entityRelationshipParams.put("entityRelationshipId", modelEntityRelationship.getData().getId());
+		modelEntityRelationship.getAttributeRelationships().clear();
+		List<ModelAttributeRelationshipData> attributeRelationshipDatas = persistenceManager.find(
+				ModelAttributeRelationshipData.class, entityRelationshipParams, null, null,
+				tableName(ModelAttributeData.class));
+		for (ModelAttributeRelationshipData attributeRelationshipData : attributeRelationshipDatas) {
+			ModelAttributeRelationship modelAttributeRelationship = new ModelAttributeRelationship(attributeRelationshipData);
+			refresh(modelAttributeRelationship);
+			modelEntityRelationship.getAttributeRelationships().add(modelAttributeRelationship);
+		}
     }
     
 	@Override
     public void refresh(ModelAttributeRelationship modelAttributeRelationship) {
+		
     	refresh((AbstractObject<?>) modelAttributeRelationship);
     }
     
 	@Override
     public void save(ModelVersion modelVersion) {
-    	
+		
+		save((AbstractObject<?>) modelVersion);
+		for (ModelEntity entity:modelVersion.getModelEntities()) {
+			save(entity);
+		}
     }
     
 	@Override
     public void save(ModelEntity modelEntity) {
-    	
-    }
-    
-	@Override
-    public void save(ModelAttribute modelAttribute) {
-    	
+
+		save((AbstractObject<?>) modelEntity);
+		for (ModelAttribute attribute:modelEntity.getModelAttributes()) {
+			save(attribute);
+		}
+		for (ModelEntityRelationship entityRelationship:modelEntity.getModelEntityRelationships()) {
+			save(entityRelationship);
+		}    	
     }
     
 	@Override
     public void save(ModelEntityRelationship modelEntityRelationship) {
-    	
-    }
-    
-	@Override
-    public void save(ModelAttributeRelationship modelAttributeRelationship) {
-    	
+
+		save((AbstractObject<?>) modelEntityRelationship);
+		for (ModelAttributeRelationship attributeRelationship:modelEntityRelationship.getAttributeRelationships()) {
+			save(attributeRelationship);
+		}
     }
 
 }
