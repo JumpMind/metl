@@ -14,6 +14,12 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
+import org.jumpmind.symmetric.is.core.config.Model;
+import org.jumpmind.symmetric.is.core.config.ModelAttribute;
+import org.jumpmind.symmetric.is.core.config.ModelAttributeRelationship;
+import org.jumpmind.symmetric.is.core.config.ModelEntity;
+import org.jumpmind.symmetric.is.core.config.ModelEntityRelationship;
+import org.jumpmind.symmetric.is.core.config.ModelVersion;
 import org.jumpmind.symmetric.is.core.config.data.AbstractData;
 
 public interface IConfigurationService {
@@ -74,4 +80,36 @@ public interface IConfigurationService {
     
     public List<AgentSummary> findUndeployedAgentsFor(String componentFlowVersionId);
     
+    public void delete(Model model);
+    
+    public void delete(ModelVersion modelVersion);
+    
+    public void delete(ModelEntity modelEntity);
+    
+    public void delete(ModelAttribute modelAttribute);
+    
+    public void delete(ModelEntityRelationship modelEntityRelationship);
+    
+    public void delete(ModelAttributeRelationship modelAttributeRelationship);
+    
+    public void refresh(ModelVersion modelVersion);
+    
+    public void refresh(ModelEntity modelEntity);
+    
+    public void refresh(ModelAttribute modelAttribute);
+    
+    public void refresh(ModelEntityRelationship modelEntityRelationship);
+    
+    public void refresh(ModelAttributeRelationship modelAttributeRelationship);
+    
+    public void save(ModelVersion modelVersion);
+    
+    public void save(ModelEntity modelEntity);
+    
+    public void save(ModelAttribute modelAttribute);
+    
+    public void save(ModelEntityRelationship modelEntityRelationship);
+    
+    public void save(ModelAttributeRelationship modelAttributeRelationship);
+
 }

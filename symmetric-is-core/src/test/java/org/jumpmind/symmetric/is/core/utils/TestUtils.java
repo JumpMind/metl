@@ -144,24 +144,25 @@ public class TestUtils {
     	return component;
     }
     
-    public static ComponentVersion createComponentVersion(Component component, 
-    		String name, Connection connection, SettingData... settings) {
-    	
-    	ComponentVersionData data = new ComponentVersionData();
-    	data.setComponentId(component.getId());
-    	data.setCreateBy("Test");
-    	data.setCreateTime(new Date());
-    	data.setId(name);
-    	data.setName(name);
-    	data.setLastModifyBy("Test");
-    	data.setLastModifyTime(new Date());
-    	//TODO: allow passing in of a model
-    	data.setInputModelVersiondId(null);
-    	data.setOutputModelVersionId(null);
-    	
-    	ComponentVersion componentVersion = new ComponentVersion(component, connection, data, settings);
-    	
-    	return componentVersion;	
-    }
-    
+	public static ComponentVersion createComponentVersion(Component component,
+			String name, Connection connection, SettingData... settings) {
+
+		ComponentVersionData data = new ComponentVersionData();
+		data.setComponentId(component.getId());
+		data.setCreateBy("Test");
+		data.setCreateTime(new Date());
+		data.setId(name);
+		data.setName(name);
+		data.setLastModifyBy("Test");
+		data.setLastModifyTime(new Date());
+		// TODO: allow passing in of a model
+		data.setInputModelVersiondId(null);
+		data.setOutputModelVersionId(null);
+
+		ComponentVersion componentVersion = new ComponentVersion(component,
+				connection, null, null, data, settings);
+
+		return componentVersion;
+	}
+
 }

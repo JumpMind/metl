@@ -7,23 +7,14 @@ import org.jumpmind.symmetric.is.core.config.data.ModelEntityData;
 public class ModelEntity extends AbstractObject<ModelEntityData> {
 
     private static final long serialVersionUID = 1L;
-
-    ModelVersion modelVersion;
-    
+ 
     List<ModelAttribute> modelAttributes;
+    
+    List<ModelEntityRelationship> modelEntityRelationships;
     
     public ModelEntity(ModelVersion modelVersion, ModelEntityData data) {
     	super(data);
-    	this.modelVersion = modelVersion;
     	data.setModelVersionId(modelVersion.getId());
-    }
-    
-    public ModelVersion getModelVersion() {
-    	return modelVersion;
-    }
-    
-    public void setModelVersion(ModelVersion modelVersion) {
-    	this.modelVersion = modelVersion;
     }
     
     public String getName() {
@@ -36,5 +27,9 @@ public class ModelEntity extends AbstractObject<ModelEntityData> {
 
     public List<ModelAttribute> getModelAttributes() {
     	return modelAttributes;
+    }
+    
+    public List<ModelEntityRelationship> getModelEntityRelationships() {
+    	return modelEntityRelationships;
     }
 }

@@ -12,6 +12,13 @@ public class ModelData extends AbstractData {
     
     boolean shared;
 
+    public ModelData(String id) {
+        this.id = id;
+    }
+
+    public ModelData() {
+    }
+ 
 	public String getName() {
 		return name;
 	}
