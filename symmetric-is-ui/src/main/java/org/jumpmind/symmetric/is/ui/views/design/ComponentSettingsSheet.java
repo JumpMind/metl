@@ -177,7 +177,7 @@ public class ComponentSettingsSheet extends VerticalLayout {
         nodeNameCombo.setImmediate(true);
         for (ComponentFlowNode node : allNodes) {
             nodeNameCombo.addItem(node.getId());
-            nodeNameCombo.setItemCaption(node.getId(), node.getComponentVersion().getName());
+            nodeNameCombo.setItemCaption(node.getId(), node.getComponentVersion().getComponent().getName());
         }
 
         if (flowNode != null) {
@@ -201,7 +201,7 @@ public class ComponentSettingsSheet extends VerticalLayout {
 
                 @Override
                 public void addNewItem(String newItemCaption) {
-                    flowNode.getComponentVersion().getData().setName(newItemCaption);
+                    flowNode.getComponentVersion().getComponent().setName(newItemCaption);
                     nodeNameCombo.setItemCaption(flowNode.getId(), newItemCaption);
                     saveName(nodeNameCombo, flowNode);
                 }
@@ -318,7 +318,7 @@ public class ComponentSettingsSheet extends VerticalLayout {
 
     protected void saveName(AbstractSelect nameField, ComponentFlowNode flowNode) {
         ComponentVersion version = flowNode.getComponentVersion();
-        version.getData().setName((String) nameField.getItemCaption(nameField.getValue()));
+        version.getComponent().setName((String) nameField.getItemCaption(nameField.getValue()));
         configurationService.save(version);
         componentSettingsChangedListener.componentSettingsChanges(flowNode, false);
     }

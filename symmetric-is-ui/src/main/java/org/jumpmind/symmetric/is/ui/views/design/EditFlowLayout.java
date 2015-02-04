@@ -20,7 +20,7 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.runtime.AgentEngine;
+import org.jumpmind.symmetric.is.core.runtime.AgentRuntime;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentCategory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
@@ -163,8 +163,8 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
             public void menuSelected(MenuItem selectedItem) {
                 AgentDeployment agentDeployment = findAgentDeployment();
                 if (agentDeployment != null) {
-                    AgentEngine engine = EditFlowLayout.this.agentManager
-                            .getAgentEngine(agentDeployment.getData().getAgentId());
+                    AgentRuntime engine = EditFlowLayout.this.agentManager
+                            .getAgentRuntime(agentDeployment.getData().getAgentId());
                     engine.undeploy(agentDeployment);
                     engine.deploy(agentDeployment.getComponentFlowVersion());
                 } else {
@@ -198,7 +198,12 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
-
+                AgentDeployment deployment = findAgentDeployment();
+                if (deployment != null) {
+                    AgentRuntime runtime = EditFlowLayout.this.agentManager
+                            .getAgentRuntime(deployment.getData().getAgentId());
+                    runtime.scheduleNow(deployment);
+                }
             }
         });
 
@@ -301,7 +306,10 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
             if (agentDeployment != null) {
                 deployButton.setText("Redeploy");
                 undeployButton.setEnabled(true);
-                executeButton.setEnabled(true);
+
+                if (agentDeployment.getComponentFlowVersion().getStartType() == StartType.MANUAL) {
+                    executeButton.setEnabled(true);
+                }
             }
         } else {
             actionsButton.setEnabled(false);
@@ -396,7 +404,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
         List<ComponentFlowNode> flowNodes = componentFlowVersion.getComponentFlowNodes();
         for (ComponentFlowNode flowNode : flowNodes) {
             Node node = new Node();
-            String name = flowNode.getComponentVersion().getData().getName();
+            String name = flowNode.getComponentVersion().getComponent().getName();
             String type = flowNode.getComponentVersion().getComponent().getData().getType();
             node.setText(name + "<br><i>" + type + "</i>");
             node.setId(flowNode.getData().getId());
@@ -486,7 +494,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
             ComponentVersion componentVersion = new ComponentVersion(component, null,
                     null,null,new ComponentVersionData());
 
-            componentVersion.setName(type + " " + (countComponentsOfType(type) + 1));
+            component.setName(type + " " + (countComponentsOfType(type) + 1));
 
             ComponentFlowNodeData nodeData = new ComponentFlowNodeData(componentVersion.getData()
                     .getId(), componentFlowVersion.getData().getId());

@@ -4,7 +4,6 @@ public class ComponentVersionData extends AbstractVersionData {
 
     private static final long serialVersionUID = 1L;
 
-    String name;
     String inputModelVersiondId;
     String outputModelVersionId;
     String connectionId;
@@ -40,13 +39,5 @@ public class ComponentVersionData extends AbstractVersionData {
 
     public String getComponentId() {
         return componentId;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    public String getName() {
-        return name;
     }
 }

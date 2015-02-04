@@ -8,13 +8,13 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 
 public interface IAgentManager {
 
-    public AgentEngine refresh(Agent agent);
+    public AgentRuntime refresh(Agent agent);
     
     public void remove(Agent agent);
     
-    public AgentEngine getAgentEngine(Agent agent);
+    public AgentRuntime getAgentRuntime(Agent agent);
     
-    public AgentEngine getAgentEngine(String agentId);
+    public AgentRuntime getAgentRuntime(String agentId);
     
     public boolean isAgentLocal(Agent agent);
     

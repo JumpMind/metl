@@ -29,7 +29,7 @@ public class AgentManager implements IAgentManager {
 
     IConnectionFactory connectionFactory;
 
-    Map<Agent, AgentEngine> engines = new HashMap<Agent, AgentEngine>();
+    Map<Agent, AgentRuntime> engines = new HashMap<Agent, AgentRuntime>();
 
     public AgentManager(IConfigurationService configurationService,
             IComponentFactory componentFactory, IConnectionFactory connectionFactory) {
@@ -41,13 +41,13 @@ public class AgentManager implements IAgentManager {
     public void start() {
         Set<Agent> agents = getLocalAgents();
         for (Agent agent : agents) {
-            createAndStartEngine(agent);
+            createAndStartRuntime(agent);
         }
     }
     
     @Override
     public void undeploy(AgentDeployment agentDeployment) {
-        AgentEngine engine = getAgentEngine(agentDeployment.getData().getAgentId());
+        AgentRuntime engine = getAgentRuntime(agentDeployment.getData().getAgentId());
         if (engine != null) {
             engine.undeploy(agentDeployment);
         }
@@ -56,7 +56,7 @@ public class AgentManager implements IAgentManager {
     @Override
     public AgentDeployment deploy(String agentId, ComponentFlowVersion componentFlowVersion) {
         AgentDeployment deployment = null;
-        AgentEngine engine = getAgentEngine(agentId);
+        AgentRuntime engine = getAgentRuntime(agentId);
         if (engine != null) {
             deployment = engine.deploy(componentFlowVersion);
         }
@@ -72,10 +72,10 @@ public class AgentManager implements IAgentManager {
 
     @PreDestroy
     protected void destroy() {
-        Collection<AgentEngine> all = engines.values();
-        for (AgentEngine agentEngine : all) {
-            if (agentEngine.isStarted()) {
-                agentEngine.stop();
+        Collection<AgentRuntime> all = engines.values();
+        for (AgentRuntime runtime : all) {
+            if (runtime.isStarted()) {
+                runtime.stop();
             }
         }
     }
@@ -88,8 +88,8 @@ public class AgentManager implements IAgentManager {
                 || AppUtils.getIpAddress().equals(hostName);
     }
 
-    protected AgentEngine createAndStartEngine(Agent agent) {
-        AgentEngine engine = new AgentEngine(agent, configurationService, componentFactory,
+    protected AgentRuntime createAndStartRuntime(Agent agent) {
+        AgentRuntime engine = new AgentRuntime(agent, configurationService, componentFactory,
                 connectionFactory);
         engines.put(agent, engine);
         if (agent.getAgentStartMode() == AgentStartMode.AUTO) {
@@ -103,11 +103,11 @@ public class AgentManager implements IAgentManager {
     }
 
     @Override
-    public AgentEngine refresh(Agent agent) {
-        AgentEngine engine = engines.get(agent);
+    public AgentRuntime refresh(Agent agent) {
+        AgentRuntime engine = engines.get(agent);
         if (isAgentLocal(agent)) {
             if (engine == null) {
-                engine = createAndStartEngine(agent);
+                engine = createAndStartRuntime(agent);
             } else {
                 engine.setAgent(agent);
                 engine.stop();
@@ -124,24 +124,24 @@ public class AgentManager implements IAgentManager {
 
     @Override
     public void remove(Agent agent) {
-        AgentEngine engine = engines.get(agent);
-        if (engine != null) {
-            engine.stop();
+        AgentRuntime runtime = engines.get(agent);
+        if (runtime != null) {
+            runtime.stop();
             engines.remove(agent);
         }
     }
 
     @Override
-    public AgentEngine getAgentEngine(Agent agent) {
+    public AgentRuntime getAgentRuntime(Agent agent) {
         return engines.get(agent);
     }
 
     @Override
-    public AgentEngine getAgentEngine(String agentId) {
+    public AgentRuntime getAgentRuntime(String agentId) {
         Set<Agent> agents = engines.keySet();
         for (Agent agent : agents) {
             if (agent.getId().equals(agentId)) {
-                return getAgentEngine(agent);
+                return getAgentRuntime(agent);
             }
         }
         return null;

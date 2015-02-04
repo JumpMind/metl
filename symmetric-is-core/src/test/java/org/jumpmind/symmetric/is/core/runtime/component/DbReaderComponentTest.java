@@ -158,19 +158,17 @@ public class DbReaderComponentTest {
 	
 	private static ComponentFlowNode createReaderComponentFlowNode() {
 		
-		final String name="Test Reader 1";		
 	 	Folder folder = TestUtils.createFolder("Test Folder");
     	ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);	 	
     	Component component = TestUtils.createComponent(DbReaderComponent.TYPE, false);
     	SettingData[] settingData = createReaderSettings();
-    	ComponentVersion componentVersion = TestUtils.createComponentVersion(component, name, null, settingData);
+    	ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null, settingData);
     	componentVersion.setConnection(createConnection(createConnectionSettings()));
     	ComponentFlowNodeData data = new ComponentFlowNodeData();
     	data.setComponentFlowVersionId(flow.getId());
     	data.setComponentVersionId(componentVersion.getId());
     	data.setCreateBy("Test");
     	data.setCreateTime(new Date());
-    	data.setId(name);
     	data.setLastModifyBy("Test");
     	data.setLastModifyTime(new Date());
     	ComponentFlowNode readerComponent = new ComponentFlowNode(componentVersion, data);

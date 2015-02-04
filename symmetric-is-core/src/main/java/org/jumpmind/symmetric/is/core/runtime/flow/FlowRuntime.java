@@ -48,6 +48,10 @@ public class FlowRuntime {
         this.connectionFactory = connectionFactory;
         this.threadService = threadService;
     }
+    
+    public AgentDeployment getDeployment() {
+        return deployment;
+    }
 
     public void start() throws InterruptedException {
         this.nodeRuntimes = new HashMap<String, NodeRuntime>();

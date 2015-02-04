@@ -13,6 +13,15 @@ public class Component extends AbstractObject<ComponentData> {
     public Component() {
         super(new ComponentData());
     }
+    
+
+    public String getName() {
+        return data.getName();
+    }
+    
+    public void setName(String name) {
+        this.data.setName(name);
+    }
 
     public Component(ComponentData data) {
         super(data);
