@@ -92,6 +92,8 @@ public interface IConfigurationService {
     
     public void delete(ModelAttributeRelationship modelAttributeRelationship);
     
+    public void refresh(Model model);
+    
     public void refresh(ModelVersion modelVersion);
     
     public void refresh(ModelEntity modelEntity);

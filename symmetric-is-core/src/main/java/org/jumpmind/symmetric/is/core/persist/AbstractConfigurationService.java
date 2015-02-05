@@ -226,30 +226,30 @@ abstract class AbstractConfigurationService extends AbstractService implements
 		componentVersionData.setId(id);
 		persistenceManager.refresh(componentVersionData, null, null,
 				tableName(ComponentVersionData.class));
-		
+
 		ComponentData componentData = new ComponentData();
 		componentData.setId(componentVersionData.getComponentId());
 		persistenceManager.refresh(componentData, null, null,
 				tableName(ComponentData.class));
 		Component component = new Component(componentData);
 
-		ModelVersion inputModelVersion = findModelVersion(componentVersionData.getInputModelVersiondId());
-		ModelVersion outputModelVersion = findModelVersion(componentVersionData.getOutputModelVersionId());
-		
+		ModelVersion inputModelVersion = findModelVersion(componentVersionData
+				.getInputModelVersiondId());
+		ModelVersion outputModelVersion = findModelVersion(componentVersionData
+				.getOutputModelVersionId());
+
 		List<ComponentVersionSettingData> settings = find(
 				ComponentVersionSettingData.class, new NameValue(
 						"componentVersionId", componentVersionData.getId()));
 
 		return new ComponentVersion(component,
 				findConnection(componentVersionData.getConnectionId()),
-				inputModelVersion, outputModelVersion,
-				componentVersionData, settings.toArray(new SettingData[settings
-						.size()]));
+				inputModelVersion, outputModelVersion, componentVersionData,
+				settings.toArray(new SettingData[settings.size()]));
 	}
-	
+
 	public ModelVersion findModelVersion(String id) {
-		
-		
+
 		return null;
 	}
 
@@ -386,6 +386,16 @@ abstract class AbstractConfigurationService extends AbstractService implements
 		List<? extends SettingData> settings = find(
 				ConnectionSettingData.class, settingParams);
 		connection.setSettings(settings);
+	}
+
+	@Override
+	public void refresh(Model model) {
+		refresh((AbstractObject<?>) model);
+
+		ModelData data = model.getData();
+		Map<String, Object> folderParams = new HashMap<String, Object>();
+		folderParams.put("id", data.getFolderId());
+		model.setFolder(new Folder(findOne(FolderData.class, folderParams)));
 	}
 
 	@Override
@@ -548,7 +558,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
 		persistenceManager.delete(modelAttributeRelationship.getData(), null,
 				null, tableName(ModelAttributeRelationship.class));
 	}
-	
+
 	@Override
 	public void refresh(ModelVersion modelVersion) {
 
@@ -572,7 +582,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
 			modelVersion.getModelEntities().add(modelEntity);
 		}
 	}
-    
+
 	@Override
 	public void refresh(ModelEntity modelEntity) {
 
@@ -590,71 +600,79 @@ abstract class AbstractConfigurationService extends AbstractService implements
 			modelEntity.getModelAttributes().add(modelAttribute);
 		}
 		modelEntity.getModelEntityRelationships().clear();
-		List<ModelEntityRelationshipData> entityRelationshipDatas = persistenceManager.find(ModelEntityRelationshipData.class,
-				entityParams, null, null, tableName(ModelEntityRelationshipData.class));
+		List<ModelEntityRelationshipData> entityRelationshipDatas = persistenceManager
+				.find(ModelEntityRelationshipData.class, entityParams, null,
+						null, tableName(ModelEntityRelationshipData.class));
 		for (ModelEntityRelationshipData entityRelationshipData : entityRelationshipDatas) {
-			ModelEntityRelationship modelEntityRelationship = new ModelEntityRelationship(entityRelationshipData);
+			ModelEntityRelationship modelEntityRelationship = new ModelEntityRelationship(
+					entityRelationshipData);
 			refresh(modelEntityRelationship);
-			modelEntity.getModelEntityRelationships().add(modelEntityRelationship);
+			modelEntity.getModelEntityRelationships().add(
+					modelEntityRelationship);
 		}
 	}
 
 	@Override
-    public void refresh(ModelAttribute modelAttribute) {
-    	refresh((AbstractObject<?>) modelAttribute);
-    }
-    
+	public void refresh(ModelAttribute modelAttribute) {
+		refresh((AbstractObject<?>) modelAttribute);
+	}
+
 	@Override
-    public void refresh(ModelEntityRelationship modelEntityRelationship) {
-		
-    	refresh((AbstractObject<?>) modelEntityRelationship);
+	public void refresh(ModelEntityRelationship modelEntityRelationship) {
+
+		refresh((AbstractObject<?>) modelEntityRelationship);
 		Map<String, Object> entityRelationshipParams = new HashMap<String, Object>();
-		entityRelationshipParams.put("entityRelationshipId", modelEntityRelationship.getData().getId());
+		entityRelationshipParams.put("entityRelationshipId",
+				modelEntityRelationship.getData().getId());
 		modelEntityRelationship.getAttributeRelationships().clear();
-		List<ModelAttributeRelationshipData> attributeRelationshipDatas = persistenceManager.find(
-				ModelAttributeRelationshipData.class, entityRelationshipParams, null, null,
-				tableName(ModelAttributeData.class));
+		List<ModelAttributeRelationshipData> attributeRelationshipDatas = persistenceManager
+				.find(ModelAttributeRelationshipData.class,
+						entityRelationshipParams, null, null,
+						tableName(ModelAttributeData.class));
 		for (ModelAttributeRelationshipData attributeRelationshipData : attributeRelationshipDatas) {
-			ModelAttributeRelationship modelAttributeRelationship = new ModelAttributeRelationship(attributeRelationshipData);
+			ModelAttributeRelationship modelAttributeRelationship = new ModelAttributeRelationship(
+					attributeRelationshipData);
 			refresh(modelAttributeRelationship);
-			modelEntityRelationship.getAttributeRelationships().add(modelAttributeRelationship);
+			modelEntityRelationship.getAttributeRelationships().add(
+					modelAttributeRelationship);
 		}
-    }
-    
+	}
+
 	@Override
-    public void refresh(ModelAttributeRelationship modelAttributeRelationship) {
-		
-    	refresh((AbstractObject<?>) modelAttributeRelationship);
-    }
-    
+	public void refresh(ModelAttributeRelationship modelAttributeRelationship) {
+
+		refresh((AbstractObject<?>) modelAttributeRelationship);
+	}
+
 	@Override
-    public void save(ModelVersion modelVersion) {
-		
+	public void save(ModelVersion modelVersion) {
+
 		save((AbstractObject<?>) modelVersion);
-		for (ModelEntity entity:modelVersion.getModelEntities()) {
+		for (ModelEntity entity : modelVersion.getModelEntities()) {
 			save(entity);
 		}
-    }
-    
+	}
+
 	@Override
-    public void save(ModelEntity modelEntity) {
+	public void save(ModelEntity modelEntity) {
 
 		save((AbstractObject<?>) modelEntity);
-		for (ModelAttribute attribute:modelEntity.getModelAttributes()) {
+		for (ModelAttribute attribute : modelEntity.getModelAttributes()) {
 			save(attribute);
 		}
-		for (ModelEntityRelationship entityRelationship:modelEntity.getModelEntityRelationships()) {
+		for (ModelEntityRelationship entityRelationship : modelEntity
+				.getModelEntityRelationships()) {
 			save(entityRelationship);
-		}    	
-    }
-    
+		}
+	}
+
 	@Override
-    public void save(ModelEntityRelationship modelEntityRelationship) {
+	public void save(ModelEntityRelationship modelEntityRelationship) {
 
 		save((AbstractObject<?>) modelEntityRelationship);
-		for (ModelAttributeRelationship attributeRelationship:modelEntityRelationship.getAttributeRelationships()) {
+		for (ModelAttributeRelationship attributeRelationship : modelEntityRelationship
+				.getAttributeRelationships()) {
 			save(attributeRelationship);
 		}
-    }
-
+	}
 }

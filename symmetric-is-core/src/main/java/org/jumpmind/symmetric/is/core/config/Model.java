@@ -8,6 +8,9 @@ import org.jumpmind.symmetric.is.core.config.data.ModelData;
 public class Model extends AbstractObject<ModelData> {
 
     private static final long serialVersionUID = 1L;
+    
+    Folder folder;
+    
     List<ModelVersion> modelVersions;
     
     public Model() {
@@ -19,7 +22,24 @@ public class Model extends AbstractObject<ModelData> {
         this.modelVersions = new ArrayList<ModelVersion>();
     }
     
-    public String getName() {
+    public Model(Folder folder, ModelData data) {
+        super(data);
+        this.modelVersions = new ArrayList<ModelVersion>();
+        setFolder(folder);
+    }
+    
+    public Folder getFolder() {
+		return folder;
+	}
+
+	public void setFolder(Folder folder) {
+		this.folder = folder;
+        if (folder != null) {
+            data.setFolderId(folder.getData().getId());
+        }
+	}
+
+	public String getName() {
     	return data.getName();
     }
     
