@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.persist;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -58,15 +59,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
 	@Override
 	public List<Folder> findFolders(FolderType type) {
-		Map<String, Object> byType = new HashMap<String, Object>();
-		byType.put("type", type.name());
-		List<FolderData> folderDatas = find(FolderData.class, byType);
-
-		List<Folder> allFolders = new ArrayList<Folder>();
-		for (FolderData folderData : folderDatas) {
-			allFolders.add(new Folder(folderData));
-		}
-
+		Collection<Folder> allFolders = foldersById(type).values();
 		List<Folder> rootFolders = new ArrayList<Folder>();
 		for (Folder folder : allFolders) {
 			boolean foundAParent = false;
@@ -85,6 +78,19 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
 		return rootFolders;
 	}
+	
+    public Map<String, Folder> foldersById(FolderType type) {
+        Map<String, Object> byType = new HashMap<String, Object>();
+        byType.put("type", type.name());
+        List<FolderData> folderDatas = find(FolderData.class, byType);
+
+        Map<String, Folder> all = new HashMap<String, Folder>();
+        for (FolderData folderData : folderDatas) {
+            all.put(folderData.getId(), new Folder(folderData));
+        }        
+        return all;
+    }
+	
 
 	public List<ComponentFlow> findComponentFlowsInFolder(Folder folder) {
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -158,10 +164,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
 		if (folder != null) {
 			folderMapById.put(folder.getData().getId(), folder);
 		} else {
-			List<Folder> folders = findFolders(FolderType.RUNTIME);
-			for (Folder folder2 : folders) {
-				folderMapById.put(folder2.getData().getId(), folder2);
-			}
+		    folderMapById = foldersById(FolderType.RUNTIME);
 		}
 
 		for (AgentData data : datas) {
