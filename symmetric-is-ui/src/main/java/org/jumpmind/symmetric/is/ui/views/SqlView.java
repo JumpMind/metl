@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Scope;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
@@ -30,7 +31,7 @@ public class SqlView extends VerticalLayout implements View {
     
     public SqlView() {
         setSizeFull();
-        setMargin(true);
+        setMargin(new MarginInfo(true, false, false, false));
         SqlExplorer explorer = new SqlExplorer(System.getProperty("java.io.tmpdir"),
                 new IDbProvider() {
                     List<IDb> dbs;
