@@ -10,42 +10,45 @@ public class Folder extends AbstractObject<FolderData> {
     private static final long serialVersionUID = 1L;
 
     Folder parent;
-    
+
     List<Folder> children = new ArrayList<Folder>();
-    
+
     public Folder(FolderData data) {
         super(data);
     }
-    
+
     public FolderType getFolderType() {
         return FolderType.valueOf(getData().getType());
     }
-    
+
     public List<Folder> getChildren() {
         return children;
     }
-    
+
     public void setParent(Folder parent) {
         this.parent = parent;
+        if (parent != null) {
+            data.setParentFolderId(parent.getId());
+        }
     }
-    
+
     public Folder getParent() {
         return parent;
     }
-    
+
     public boolean isParentOf(Folder folder) {
-        return folder.getData().getParentFolderId() != null &&
-                folder.getData().getParentFolderId().equals(getData().getId());        
+        return folder.getData().getParentFolderId() != null
+                && folder.getData().getParentFolderId().equals(getData().getId());
     }
-    
+
     public void setName(String name) {
         this.data.setName(name);
     }
-    
+
     public String getName() {
         return this.data.getName();
     }
-    
+
     @Override
     public String toString() {
         return getName();

@@ -29,7 +29,7 @@ public class DesignView extends HorizontalLayout implements View {
     @Autowired
     IConfigurationService configurationService;
     
-    DesignNavigator designNavigator;
+    AbstractFolderNavigator designNavigator;
     
     @PostConstruct
     protected void init() {
