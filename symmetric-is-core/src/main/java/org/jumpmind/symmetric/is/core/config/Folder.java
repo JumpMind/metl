@@ -38,8 +38,16 @@ public class Folder extends AbstractObject<FolderData> {
                 folder.getData().getParentFolderId().equals(getData().getId());        
     }
     
+    public void setName(String name) {
+        this.data.setName(name);
+    }
+    
+    public String getName() {
+        return this.data.getName();
+    }
+    
     @Override
     public String toString() {
-        return getData().getName();
+        return getName();
     }
 }

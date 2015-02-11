@@ -44,6 +44,13 @@ public class ComponentVersion extends
 		return component;
 	}
 
+    public void setName(String name) {
+    }
+    
+    public String getName() {
+        return this.component.getName();
+    }
+    
 	@Override
 	protected SettingData createSettingData() {
 		return new ComponentVersionSettingData(data.getId());

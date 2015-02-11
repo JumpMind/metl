@@ -20,5 +20,12 @@ public class ComponentFlowNode extends AbstractObject<ComponentFlowNodeData> {
     public void setComponentVersion(ComponentVersion componentVersion) {
         this.componentVersion = componentVersion;
     }
+    
+    public void setName(String name) {
+    }
+    
+    public String getName() {
+        return this.componentVersion.getComponent().getName();
+    }
 
 }

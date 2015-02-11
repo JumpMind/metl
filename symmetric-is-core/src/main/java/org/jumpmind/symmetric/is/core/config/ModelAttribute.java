@@ -24,4 +24,11 @@ public class ModelAttribute extends AbstractObject<ModelAttributeData> {
 		this.typeEntity = typeEntity;
 	}
 	
+    public void setName(String name) {
+        this.data.setName(name);
+    }
+    
+    public String getName() {
+        return this.data.getName();
+    }
 }

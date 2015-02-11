@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jumpmind.symmetric.is.core.config.AbstractObject;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
@@ -16,16 +17,22 @@ import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.FieldEvents.BlurEvent;
+import com.vaadin.event.FieldEvents.BlurListener;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.DefaultFieldFactory;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -33,8 +40,8 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.CellStyleGenerator;
-import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.Table.ColumnHeaderMode;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree.CollapseEvent;
 import com.vaadin.ui.Tree.CollapseListener;
 import com.vaadin.ui.Tree.ExpandEvent;
@@ -57,6 +64,7 @@ public class DesignNavigator extends Panel {
     FolderType folderType;
     TreeTable treeTable;
     Set<Object> lastSelected;
+    Folder editFolderMode;
 
     public DesignNavigator(FolderType folderType, IConfigurationService configurationService) {
 
@@ -141,20 +149,34 @@ public class DesignNavigator extends Panel {
         final TreeTable table = new TreeTable();
         table.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
         table.setSizeFull();
+        table.setCacheRate(100);
+        table.setPageLength(100);
         table.setImmediate(true);
-        table.setMultiSelect(true);
+        //table.setMultiSelect(true);
         table.setSelectable(true);
-        table.addGeneratedColumn("name", new ColumnGenerator() {
-
-            private static final long serialVersionUID = 1L;
-
+        table.setEditable(true);
+        table.setContainerDataSource(new BeanItemContainer<AbstractObject<?>>(AbstractObject.class));
+        table.setTableFieldFactory(new DefaultFieldFactory() {
             @Override
-            public Object generateCell(Table source, Object itemId, Object columnId) {
-                Label label = new Label(itemId.toString());
-                label.addStyleName("leftPad");
-                return label;
+            public Field<?> createField(Container container, Object itemId, Object propertyId,
+                    Component uiContext) {
+                if (editFolderMode != null && editFolderMode.equals(itemId)) {
+                    TextField field = (TextField)super.createField(container, itemId, propertyId, uiContext);
+                    field.focus();
+                    field.addBlurListener(new BlurListener() {                        
+                        @Override
+                        public void blur(BlurEvent event) {
+                            editFolderMode = null;
+                            table.refreshRowCache();
+                        }
+                    });
+                    return field;
+                } else {
+                    return null;
+                }
             }
         });
+        table.setVisibleColumns(new Object[] { "name" });
         table.setColumnExpandRatio("name", 1);
         table.addShortcutListener(new ShortcutListener("Delete", KeyCode.DELETE, null) {
 
@@ -174,20 +196,24 @@ public class DesignNavigator extends Panel {
 
             @Override
             public void handleAction(Object sender, Object target) {
-                @SuppressWarnings("unchecked")
-                Set<Object> selectedIds = (Set<Object>) table.getValue();
+                Set<Object> selectedIds = getTableValues();
                 for (Object object : selectedIds) {
-                    itemClicked(object);
+                    if (object instanceof Folder) {
+                        editFolderMode = (Folder)object;
+                        table.refreshRowCache();
+                    } else {
+                       itemDoubleClicked(object);
+                    }
                 }
             }
         });
         table.addValueChangeListener(new ValueChangeListener() {
             private static final long serialVersionUID = 1L;
 
-            @SuppressWarnings("unchecked")
             @Override
             public void valueChange(ValueChangeEvent event) {
-                lastSelected = (Set<Object>) table.getValue();
+                lastSelected = getTableValues();
+                table.refreshRowCache();
                 treeSelectionChanged(event);
             }
         });
@@ -201,7 +227,12 @@ public class DesignNavigator extends Panel {
                         table.unselect(event.getItemId());
                     }
                     if (event.isDoubleClick()) {
-                        itemClicked(event.getItemId());
+                        if (event.getItemId() instanceof Folder) {
+                            editFolderMode = (Folder)event.getItemId();
+                            table.refreshRowCache();
+                        } else {
+                        itemDoubleClicked(event.getItemId());
+                        }
                     }
                 }
             }
@@ -241,15 +272,30 @@ public class DesignNavigator extends Panel {
 
             }
         });
+
         return table;
     }
+    
+    @SuppressWarnings("unchecked")
+    protected Set<Object> getTableValues() {
+        Set<Object> selectedIds = null;
+        Object obj = treeTable.getValue();
+        if (obj instanceof Set) {
+            selectedIds = (Set<Object>)obj;
+        } else {
+            selectedIds = new HashSet<Object>(1);
+            if (obj != null) {
+                selectedIds.add(obj);
+            }
+        }
+        return selectedIds;
+    }
 
-    protected void itemClicked(Object item) {
+    protected void itemDoubleClicked(Object item) {
     }
 
     protected Folder getSelectedFolder() {
-        @SuppressWarnings("unchecked")
-        Set<Object> selectedIds = (Set<Object>) treeTable.getValue();
+        Set<Object> selectedIds = getTableValues();
         for (Object object : selectedIds) {
             if (object instanceof Folder) {
                 return (Folder) object;
@@ -260,7 +306,7 @@ public class DesignNavigator extends Panel {
 
     @SuppressWarnings("unchecked")
     protected <T> T getSingleSelection(Class<T> clazz) {
-        Set<Object> selectedIds = (Set<Object>) treeTable.getValue();
+        Set<Object> selectedIds = getTableValues();
         if (selectedIds != null && selectedIds.size() == 1) {
             Object obj = selectedIds.iterator().next();
             if (obj != null && clazz.isAssignableFrom(obj.getClass())) {
@@ -275,11 +321,9 @@ public class DesignNavigator extends Panel {
     }
 
     protected void treeSelectionChanged(ValueChangeEvent event) {
-        @SuppressWarnings("unchecked")
-        Set<Object> selected = (Set<Object>) treeTable.getValue();
+        Set<Object> selected = getTableValues();
         Folder folder = getSelectedFolder();
-        boolean enabled = (folder == null && selected.size() == 0) ||
-                 folder != null;
+        boolean enabled = (folder == null && selected.size() == 0) || folder != null;
         newFolder.setEnabled(enabled);
 
         boolean deleteEnabled = false;
@@ -310,8 +354,7 @@ public class DesignNavigator extends Panel {
                     });
         }
 
-        @SuppressWarnings("unchecked")
-        Set<Object> objects = (Set<Object>) treeTable.getValue();
+        Set<Object> objects = getTableValues();
         Collection<Object> noFolders = new HashSet<Object>();
         for (Object object : objects) {
             if (!(object instanceof Folder)) {
@@ -324,8 +367,7 @@ public class DesignNavigator extends Panel {
     }
 
     protected void deleteSelectedFolders() {
-        @SuppressWarnings("unchecked")
-        Set<Object> selected = (Set<Object>) treeTable.getValue();
+        Set<Object> selected = getTableValues();
         for (Object obj : selected) {
             if (obj instanceof Folder) {
                 Folder folder = (Folder) obj;
@@ -340,8 +382,7 @@ public class DesignNavigator extends Panel {
     }
 
     public void refresh() {
-        @SuppressWarnings({ "unchecked" })
-        Set<Object> selected = (Set<Object>) treeTable.getValue();
+        Set<Object> selected = getTableValues();
         List<Object> expandedItems = new ArrayList<Object>();
         Collection<?> items = treeTable.getItemIds();
         for (Object object : items) {

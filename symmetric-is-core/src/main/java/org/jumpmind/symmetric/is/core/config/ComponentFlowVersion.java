@@ -34,10 +34,6 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
         return null;
     }
     
-    public String getName() {
-        return componentFlow.getData().getName();
-    }
-    
     public String getVersion() {
         return data.getVersionName();
     }
@@ -60,6 +56,13 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
 
     public List<ComponentFlowNodeLink> getComponentFlowNodeLinks() {
         return componentFlowNodeLinks;
+    }
+    
+    public void setName(String name) {
+    }
+    
+    public String getName() {
+        return componentFlow.getData().getName();
     }
     
     public ComponentFlowNode removeComponentFlowNode(ComponentFlowNode flowNode) {

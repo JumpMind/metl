@@ -20,4 +20,11 @@ public class Execution extends AbstractObject<ExecutionData> {
     public ExecutionStatus getExecutionStatus() {
         return ExecutionStatus.valueOf(data.getStatus());
     }
+    
+    public void setName(String name) {
+    }
+    
+    public String getName() {
+        return this.data.getId();
+    }
 }

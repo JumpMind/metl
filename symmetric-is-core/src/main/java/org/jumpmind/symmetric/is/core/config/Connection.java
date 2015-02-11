@@ -23,6 +23,14 @@ public class Connection extends AbstractObjectWithSettings<ConnectionData> {
     public String toString() {
         return getData().getName();
     }
+    
+    public void setName(String name) {
+        this.data.setName(name);
+    }
+    
+    public String getName() {
+        return this.data.getName();
+    }
 
     public void setFolder(Folder folder) {
         this.folder = folder;

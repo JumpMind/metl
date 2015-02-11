@@ -31,6 +31,10 @@
     text-align: center; 
   }
   
+  .v-table-cell-wrapper > span.v-icon.FontAwesome {
+    padding-right: 10px;
+  }
+  
   .v-table-cell-wrapper > .leftPad.v-label {
     margin-left: 5px; 
   }

@@ -43,6 +43,14 @@ public class Agent extends AbstractObjectWithSettings<AgentData> {
         return folder;
     }
     
+    public void setName(String name) {
+        this.data.setName(name);
+    }
+    
+    public String getName() {
+        return this.data.getName();
+    }
+    
     @Override
     public String toString() {
         return data.getName();

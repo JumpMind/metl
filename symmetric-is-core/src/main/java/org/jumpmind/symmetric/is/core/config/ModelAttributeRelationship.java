@@ -44,5 +44,12 @@ public class ModelAttributeRelationship extends AbstractObject<ModelAttributeRel
 	public void setTargetAttribute(ModelAttribute targetAttribute) {
 		this.targetAttribute = targetAttribute;
 	}
+	
+    public void setName(String name) {
+    }
+    
+    public String getName() {
+        return sourceAttribute.getName() + " to " + targetAttribute.getName();
+    }
     
 }

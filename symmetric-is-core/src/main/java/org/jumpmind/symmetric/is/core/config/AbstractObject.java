@@ -57,6 +57,10 @@ abstract public class AbstractObject<D extends AbstractData> implements Serializ
     public void setLastModifyBy(String lastModifyBy) {
         data.setLastModifyBy(lastModifyBy);
     }
+    
+    abstract public void setName(String name);
+    
+    abstract public String getName();
 
     
     @Override

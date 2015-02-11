@@ -24,4 +24,11 @@ public class ModelFormat extends AbstractObjectWithSettings<ModelFormatData> {
     protected SettingData createSettingData() {
         return new ConnectionSettingData(data.getId());
     }
+    
+    public void setName(String name) {
+    }
+    
+    public String getName() {
+        return this.data.getId();
+    }
 }

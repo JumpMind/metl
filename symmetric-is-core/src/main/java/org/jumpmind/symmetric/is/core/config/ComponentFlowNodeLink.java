@@ -13,5 +13,12 @@ public class ComponentFlowNodeLink extends AbstractObject<ComponentFlowNodeLinkD
     public ComponentFlowNodeLink(ComponentFlowNodeLinkData data) {
         super(data);
     }
+    
+    public void setName(String name) {        
+    }
+    
+    public String getName() {
+        return this.data.getSourceNodeId() + " to " + this.data.getTargetNodeId();
+    }
 
 }

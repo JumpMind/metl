@@ -39,8 +39,12 @@ public class Model extends AbstractObject<ModelData> {
         }
 	}
 
-	public String getName() {
-    	return data.getName();
+    public void setName(String name) {
+        this.data.setName(name);
+    }
+    
+    public String getName() {
+        return this.data.getName();
     }
     
     public String getType() {

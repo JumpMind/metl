@@ -15,12 +15,16 @@ public class ModelEntityRelationship extends AbstractObject<ModelEntityRelations
     	super(data);
     }
     
-    public String getName() {
-    	return data.getName();
-    }
-    
 	public List<ModelAttributeRelationship> getAttributeRelationships() {
 		return attributeRelationships;
 	}
+	
+    public void setName(String name) {
+        this.data.setName(name);
+    }
+    
+    public String getName() {
+        return this.data.getName();
+    }
     
 }

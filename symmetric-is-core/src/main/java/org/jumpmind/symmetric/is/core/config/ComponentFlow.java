@@ -18,16 +18,20 @@ public class ComponentFlow extends AbstractObject<ComponentFlowData> {
         componentFlowVersions = new ArrayList<ComponentFlowVersion>();
     }
     
-    public String getName() {
-        return data.getName();
-    }
-    
     public List<ComponentFlowVersion> getComponentFlowVersions() {
         return componentFlowVersions;
     }
     
     public Folder getFolder() {
         return folder;
+    }
+    
+    public void setName(String name) {
+        this.data.setName(name);
+    }
+    
+    public String getName() {
+        return this.data.getName();
     }
     
     @Override

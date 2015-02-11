@@ -46,6 +46,13 @@ public class ModelVersion extends AbstractObject<ModelVersionData> {
     	return modelEntities;
     }
     
+    public void setName(String name) {
+    }
+    
+    public String getName() {
+        return this.model.getName() + " " + data.getVersionName();
+    }
+    
     //TODO: add model format classes
 //    public void setModelFormat(ModelFormat modelFormat) {
 //        this.modelFormat = modelFormat;
