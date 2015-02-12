@@ -18,5 +18,9 @@ final public class Icons {
     public static final FontAwesome MODEL = FontAwesome.SITEMAP;
     
     public static final FontAwesome DELETE = FontAwesome.TRASH_O;
+    
+    public static final FontAwesome FLOW_VERSION = FontAwesome.FILE_TEXT;
+    
+    public static final FontAwesome DATABASE = FontAwesome.DATABASE;
 
 }

@@ -63,7 +63,7 @@ abstract public class AbstractFolderNavigator extends Panel {
     protected FolderType folderType;
     protected TreeTable treeTable;
     Set<Object> lastSelected;
-    Folder folderBeingEdited;
+    AbstractObject<?> itemBeingEdited;
 
     public AbstractFolderNavigator(FolderType folderType, IConfigurationService configurationService) {
 
@@ -196,10 +196,10 @@ abstract public class AbstractFolderNavigator extends Panel {
                 Set<Object> selectedIds = getTableValues();
                 for (Object object : selectedIds) {
                     if (object instanceof Folder) {
-                        if (folderBeingEdited != null) {
-                            finishEditingFolder();
+                        if (itemBeingEdited != null) {
+                            finishEditingItem();
                         } else {
-                            folderBeingEdited = (Folder) object;
+                            itemBeingEdited = (Folder) object;
                             table.refreshRowCache();
                         }
                     } else {
@@ -229,7 +229,7 @@ abstract public class AbstractFolderNavigator extends Panel {
                     }
                     if (event.isDoubleClick()) {
                         if (event.getItemId() instanceof Folder) {
-                            folderBeingEdited = (Folder) event.getItemId();
+                            itemBeingEdited = (Folder) event.getItemId();
                             table.refreshRowCache();
                         } else {
                             itemDoubleClicked(event.getItemId());
@@ -277,26 +277,32 @@ abstract public class AbstractFolderNavigator extends Panel {
         return table;
     }
 
-    protected void finishEditingFolder() {
-        if (folderBeingEdited != null) {
-            configurationService.save(folderBeingEdited);
-            folderBeingEdited = null;
+    protected void startEditingItem(AbstractObject<?> obj) {
+        if (obj.isSettingNameAllowed()) {
+            itemBeingEdited = obj;
+            treeTable.refreshRowCache();
+        }
+    }
+
+    protected void finishEditingItem() {
+        if (itemBeingEdited != null) {
+            configurationService.save(itemBeingEdited);
+            itemBeingEdited = null;
             treeTable.refreshRowCache();
             treeTable.focus();
         }
     }
 
-    protected void abortEditingFolder() {
-        if (folderBeingEdited != null) {
-            // configurationService.save(folderBeingEdited);
-            folderBeingEdited = null;
+    protected void abortEditingItem() {
+        if (itemBeingEdited != null) {
+            itemBeingEdited = null;
             refresh();
             treeTable.focus();
         }
     }
 
     protected Field<?> createEditableNavigatorField(Object itemId) {
-        if (folderBeingEdited != null && folderBeingEdited.equals(itemId)) {
+        if (itemBeingEdited != null && itemBeingEdited.equals(itemId)) {
             final EnableFocusTextField field = new EnableFocusTextField();
             field.setImmediate(true);
             field.addFocusListener(new FocusListener() {
@@ -313,7 +319,7 @@ abstract public class AbstractFolderNavigator extends Panel {
 
                 @Override
                 public void handleAction(Object sender, Object target) {
-                    abortEditingFolder();
+                    abortEditingItem();
                 }
             });
             field.addShortcutListener(new ShortcutListener("Enter", KeyCode.ENTER, null) {
@@ -322,13 +328,13 @@ abstract public class AbstractFolderNavigator extends Panel {
 
                 @Override
                 public void handleAction(Object sender, Object target) {
-                    finishEditingFolder();
+                    finishEditingItem();
                 }
             });
             field.addBlurListener(new BlurListener() {
                 @Override
                 public void blur(BlurEvent event) {
-                    finishEditingFolder();
+                    finishEditingItem();
                 }
             });
             return field;
@@ -456,10 +462,9 @@ abstract public class AbstractFolderNavigator extends Panel {
             parentFolder = parentFolder.getParent();
         }
 
-        folderBeingEdited = folder;
-        treeTable.refreshRowCache();
+        startEditingItem(folder);
     }
-
+       
     protected void addChildFolder(Folder folder) {
         this.treeTable.addItem(folder);
         this.treeTable.setItemIcon(folder, FontAwesome.FOLDER);

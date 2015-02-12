@@ -53,4 +53,9 @@ public class Folder extends AbstractObject<FolderData> {
     public String toString() {
         return getName();
     }
+    
+    @Override
+    public boolean isSettingNameAllowed() {
+        return true;
+    }
 }

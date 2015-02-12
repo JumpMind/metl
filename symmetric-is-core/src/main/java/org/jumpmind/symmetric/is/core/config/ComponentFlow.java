@@ -39,4 +39,9 @@ public class ComponentFlow extends AbstractObject<ComponentFlowData> {
         return getData().getName();
     }
 
+    @Override
+    public boolean isSettingNameAllowed() {
+        return true;
+    }
+
 }
