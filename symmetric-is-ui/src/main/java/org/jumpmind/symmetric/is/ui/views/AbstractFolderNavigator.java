@@ -45,7 +45,6 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.ColumnHeaderMode;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree.CollapseEvent;
 import com.vaadin.ui.Tree.CollapseListener;
 import com.vaadin.ui.Tree.ExpandEvent;
@@ -87,7 +86,7 @@ abstract public class AbstractFolderNavigator extends Panel {
     }
 
     abstract protected void addMenuButtons(MenuBar leftMenuBar, MenuBar rightMenuBar);
-    
+
     public void refresh() {
         Set<Object> selected = getTableValues();
         List<Object> expandedItems = new ArrayList<Object>();
@@ -155,6 +154,10 @@ abstract public class AbstractFolderNavigator extends Panel {
 
     protected TreeTable buildTreeTable() {
         final TreeTable table = new TreeTable();
+        table.addStyleName(ValoTheme.TREETABLE_NO_HORIZONTAL_LINES);
+        table.addStyleName(ValoTheme.TREETABLE_NO_STRIPES);
+        table.addStyleName(ValoTheme.TREETABLE_NO_VERTICAL_LINES);
+        table.addStyleName(ValoTheme.TREETABLE_BORDERLESS);
         table.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
         table.setSizeFull();
         table.setCacheRate(100);
@@ -167,36 +170,7 @@ abstract public class AbstractFolderNavigator extends Panel {
             @Override
             public Field<?> createField(Container container, Object itemId, Object propertyId,
                     Component uiContext) {
-                if (folderBeingEdited != null && folderBeingEdited.equals(itemId)) {
-                    final EnableFocusTextField field = new EnableFocusTextField();
-                    field.setImmediate(true);
-                    field.addFocusListener(new FocusListener() {
-                        
-                        @Override
-                        public void focus(FocusEvent event) {
-                            field.setFocusAllowed(false);
-                            field.selectAll();
-                            field.setFocusAllowed(true);
-                        }
-                    });
-                    field.focus();                    
-                    field.addShortcutListener(new ShortcutListener("", KeyCode.ESCAPE, null) {
-
-                        @Override
-                        public void handleAction(Object sender, Object target) {
-                            abortEditingFolder();
-                        }
-                    });
-                    field.addBlurListener(new BlurListener() {
-                        @Override
-                        public void blur(BlurEvent event) {
-                            finishEditingFolder();
-                        }
-                    });
-                    return field;
-                } else {
-                    return null;
-                }
+                return createEditableNavigatorField(itemId);
             }
         });
         table.setVisibleColumns(new Object[] { "name" });
@@ -321,6 +295,48 @@ abstract public class AbstractFolderNavigator extends Panel {
         }
     }
 
+    protected Field<?> createEditableNavigatorField(Object itemId) {
+        if (folderBeingEdited != null && folderBeingEdited.equals(itemId)) {
+            final EnableFocusTextField field = new EnableFocusTextField();
+            field.setImmediate(true);
+            field.addFocusListener(new FocusListener() {
+
+                @Override
+                public void focus(FocusEvent event) {
+                    field.setFocusAllowed(false);
+                    field.selectAll();
+                    field.setFocusAllowed(true);
+                }
+            });
+            field.focus();
+            field.addShortcutListener(new ShortcutListener("", KeyCode.ESCAPE, null) {
+
+                @Override
+                public void handleAction(Object sender, Object target) {
+                    abortEditingFolder();
+                }
+            });
+            field.addShortcutListener(new ShortcutListener("Enter", KeyCode.ENTER, null) {
+
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void handleAction(Object sender, Object target) {
+                    finishEditingFolder();
+                }
+            });
+            field.addBlurListener(new BlurListener() {
+                @Override
+                public void blur(BlurEvent event) {
+                    finishEditingFolder();
+                }
+            });
+            return field;
+        } else {
+            return null;
+        }
+    }
+
     @SuppressWarnings("unchecked")
     protected Set<Object> getTableValues() {
         Set<Object> selectedIds = null;
@@ -399,8 +415,9 @@ abstract public class AbstractFolderNavigator extends Panel {
                                     try {
                                         configurationService.deleteFolder(folder.getData().getId());
                                     } catch (Exception ex) {
-                                        CommonUiUtils.notify("Could not delete the \"" + folder.getData().getName()
-                                                + "\" folder", Type.WARNING_MESSAGE);
+                                        CommonUiUtils.notify("Could not delete the \""
+                                                + folder.getData().getName() + "\" folder",
+                                                Type.WARNING_MESSAGE);
                                     }
                                 }
                             }
@@ -458,6 +475,18 @@ abstract public class AbstractFolderNavigator extends Panel {
 
     protected void deleteTreeItems(Collection<Object> objects) {
 
+    }
+
+    protected void removeAllNonFolderChildren(Folder folder) {
+        Collection<?> children = treeTable.getChildren(folder);
+        if (children != null) {
+            children = new HashSet<Object>(children);
+            for (Object child : children) {
+                if (!(child instanceof Folder)) {
+                    treeTable.removeItem(child);
+                }
+            }
+        }
     }
 
 }

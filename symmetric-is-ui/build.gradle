@@ -1,4 +1,4 @@
-apply from: '../common.gradle'
+apply from: '../symmetric-is-assemble/common.gradle'
 
 buildscript {
     repositories {
