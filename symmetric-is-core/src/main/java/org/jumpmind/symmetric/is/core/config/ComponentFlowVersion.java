@@ -59,10 +59,11 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
     }
     
     public void setName(String name) {
+        data.setVersionName(name);
     }
     
     public String getName() {
-        return componentFlow.getData().getName();
+        return data.getVersionName();
     }
     
     public ComponentFlowNode removeComponentFlowNode(ComponentFlowNode flowNode) {
@@ -122,4 +123,8 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
         return getName() + ":" + getData().getVersionName();
     }
 
+    @Override
+    public boolean isSettingNameAllowed() {
+        return true;
+    }
 }

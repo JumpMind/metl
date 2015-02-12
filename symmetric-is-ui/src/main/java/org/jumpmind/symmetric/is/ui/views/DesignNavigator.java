@@ -13,6 +13,7 @@ import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
 import org.jumpmind.symmetric.is.ui.support.Icons;
 
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -53,6 +54,15 @@ public class DesignNavigator extends AbstractFolderNavigator {
             }
         });
         newModel.setDescription("New Model");
+    }
+    
+    @Override
+    protected void selectionChanged(ValueChangeEvent event) {
+        super.selectionChanged(event);
+        boolean enabled = getSelectedFolder() != null && itemBeingEdited == null;
+        newFlow.setEnabled(enabled);
+        newConnection.setEnabled(enabled);
+        newModel.setEnabled(enabled);        
     }
 
     @Override

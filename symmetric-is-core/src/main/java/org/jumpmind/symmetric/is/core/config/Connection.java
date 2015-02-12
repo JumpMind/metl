@@ -48,4 +48,8 @@ public class Connection extends AbstractObjectWithSettings<ConnectionData> {
         return new ConnectionSettingData(data.getId());
     }
 
+    @Override
+    public boolean isSettingNameAllowed() {
+        return true;
+    }
 }

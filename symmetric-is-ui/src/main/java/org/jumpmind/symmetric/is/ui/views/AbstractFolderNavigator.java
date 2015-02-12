@@ -64,6 +64,8 @@ abstract public class AbstractFolderNavigator extends Panel {
     protected TreeTable treeTable;
     Set<Object> lastSelected;
     AbstractObject<?> itemBeingEdited;
+    AbstractObject<?> itemClicked;
+    long itemClickTimeInMs;
 
     public AbstractFolderNavigator(FolderType folderType, IConfigurationService configurationService) {
 
@@ -88,7 +90,7 @@ abstract public class AbstractFolderNavigator extends Panel {
     abstract protected void addMenuButtons(MenuBar leftMenuBar, MenuBar rightMenuBar);
 
     public void refresh() {
-        Set<Object> selected = getTableValues();
+        Object selected = treeTable.getValue(); 
         List<Object> expandedItems = new ArrayList<Object>();
         Collection<?> items = treeTable.getItemIds();
         for (Object object : items) {
@@ -195,16 +197,7 @@ abstract public class AbstractFolderNavigator extends Panel {
             public void handleAction(Object sender, Object target) {
                 Set<Object> selectedIds = getTableValues();
                 for (Object object : selectedIds) {
-                    if (object instanceof Folder) {
-                        if (itemBeingEdited != null) {
-                            finishEditingItem();
-                        } else {
-                            itemBeingEdited = (Folder) object;
-                            table.refreshRowCache();
-                        }
-                    } else {
-                        itemDoubleClicked(object);
-                    }
+                    openItem(object);
                 }
             }
         });
@@ -214,8 +207,7 @@ abstract public class AbstractFolderNavigator extends Panel {
             @Override
             public void valueChange(ValueChangeEvent event) {
                 lastSelected = getTableValues();
-                table.refreshRowCache();
-                treeSelectionChanged(event);
+                selectionChanged(event);
             }
         });
         table.addItemClickListener(new ItemClickListener() {
@@ -224,15 +216,20 @@ abstract public class AbstractFolderNavigator extends Panel {
             @Override
             public void itemClick(ItemClickEvent event) {
                 if (event.getButton() == MouseButton.LEFT) {
-                    if (lastSelected != null && lastSelected.contains(event.getItemId())) {
-                        table.unselect(event.getItemId());
-                    }
                     if (event.isDoubleClick()) {
-                        if (event.getItemId() instanceof Folder) {
-                            itemBeingEdited = (Folder) event.getItemId();
-                            table.refreshRowCache();
-                        } else {
-                            itemDoubleClicked(event.getItemId());
+                        abortEditingItem();
+                        openItem(event.getItemId());
+                        itemClicked = null;
+                    } else {
+                        if (itemClicked != null && itemClicked.equals(event.getItemId())) {
+                            if (System.currentTimeMillis()-itemClickTimeInMs > 600) {
+                               startEditingItem(itemClicked);
+                            } else {
+                                itemClicked = null;
+                            }
+                        } else if (event.getItemId() instanceof AbstractObject<?>) {
+                            itemClicked = (AbstractObject<?>) event.getItemId();
+                            itemClickTimeInMs = System.currentTimeMillis();
                         }
                     }
                 }
@@ -286,18 +283,23 @@ abstract public class AbstractFolderNavigator extends Panel {
 
     protected void finishEditingItem() {
         if (itemBeingEdited != null) {
+            Object selected = itemBeingEdited;
             configurationService.save(itemBeingEdited);
             itemBeingEdited = null;
             treeTable.refreshRowCache();
             treeTable.focus();
+            treeTable.setValue(selected);
         }
     }
 
     protected void abortEditingItem() {
         if (itemBeingEdited != null) {
+            Object selected = itemBeingEdited;
             itemBeingEdited = null;
+            itemClicked = null;
             refresh();
             treeTable.focus();
+            treeTable.setValue(selected);
         }
     }
 
@@ -358,7 +360,7 @@ abstract public class AbstractFolderNavigator extends Panel {
         return selectedIds;
     }
 
-    protected void itemDoubleClicked(Object item) {
+    protected void openItem(Object item) {
     }
 
     protected Folder getSelectedFolder() {
@@ -387,10 +389,10 @@ abstract public class AbstractFolderNavigator extends Panel {
 
     }
 
-    protected void treeSelectionChanged(ValueChangeEvent event) {
+    protected void selectionChanged(ValueChangeEvent event) {
         Set<Object> selected = getTableValues();
         Folder folder = getSelectedFolder();
-        boolean enabled = (folder == null && selected.size() == 0) || folder != null;
+        boolean enabled = itemBeingEdited == null && ((folder == null && selected.size() == 0) || folder != null);
         newFolder.setEnabled(enabled);
 
         boolean deleteEnabled = false;
@@ -464,7 +466,7 @@ abstract public class AbstractFolderNavigator extends Panel {
 
         startEditingItem(folder);
     }
-       
+
     protected void addChildFolder(Folder folder) {
         this.treeTable.addItem(folder);
         this.treeTable.setItemIcon(folder, FontAwesome.FOLDER);
