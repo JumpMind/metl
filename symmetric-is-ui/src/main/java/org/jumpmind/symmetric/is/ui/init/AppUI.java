@@ -1,8 +1,8 @@
 package org.jumpmind.symmetric.is.ui.init;
 
-import org.jumpmind.symmetric.is.ui.support.DesignAgentSelect;
-import org.jumpmind.symmetric.is.ui.support.TopBar;
-import org.jumpmind.symmetric.is.ui.support.ViewManager;
+import org.jumpmind.symmetric.is.ui.common.DesignAgentSelect;
+import org.jumpmind.symmetric.is.ui.common.TopBar;
+import org.jumpmind.symmetric.is.ui.common.ViewManager;
 import org.jumpmind.symmetric.ui.common.AbstractSpringUI;
 import org.springframework.web.context.WebApplicationContext;
 

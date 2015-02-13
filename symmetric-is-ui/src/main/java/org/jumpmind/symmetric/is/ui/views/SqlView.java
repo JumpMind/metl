@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
-import org.jumpmind.symmetric.is.ui.support.Category;
-import org.jumpmind.symmetric.is.ui.support.TopBarLink;
+import org.jumpmind.symmetric.is.ui.common.Category;
+import org.jumpmind.symmetric.is.ui.common.TopBarLink;
 import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.jumpmind.symmetric.ui.sqlexplorer.IDb;
 import org.jumpmind.symmetric.ui.sqlexplorer.IDbProvider;

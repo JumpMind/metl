@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.config.Connection;
+import org.jumpmind.symmetric.is.core.config.SettingDefinition;
+import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 
 public class ConnectionFactory implements IConnectionFactory {
 
@@ -63,6 +65,13 @@ public class ConnectionFactory implements IConnectionFactory {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    @Override
+    public Map<String, SettingDefinition> getSettingDefinitionsForConnectionType(
+            String connectionType) {
+        Class<? extends IConnection> clazz = connectionTypes.get(connectionType);
+        return AbstractRuntimeObject.getSettingDefinitions(clazz, false);
     }
 
 }

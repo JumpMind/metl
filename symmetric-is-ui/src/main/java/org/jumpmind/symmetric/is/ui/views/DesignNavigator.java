@@ -11,7 +11,7 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
 import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
-import org.jumpmind.symmetric.is.ui.support.Icons;
+import org.jumpmind.symmetric.is.ui.common.Icons;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.ui.MenuBar;
@@ -37,15 +37,18 @@ public class DesignNavigator extends AbstractFolderNavigator {
                 addNewFlow();
             }
         });
-        newFlow.setDescription("New Flow");
+        newFlow.setDescription("Add Flow");
 
-        newConnection = leftMenuBar.addItem("", Icons.GENERAL_CONNECTION, new Command() {
-
+        newConnection = leftMenuBar.addItem("", Icons.GENERAL_CONNECTION, null);
+        newConnection.setDescription("Add Connection");
+        
+        MenuItem newDbConnection = newConnection.addItem("Add Database", Icons.DATABASE, new Command() {
+            
             @Override
             public void menuSelected(MenuItem selectedItem) {
             }
         });
-        newConnection.setDescription("New Connection");
+        newDbConnection.setDescription("Add Database Connection");
 
         newModel = leftMenuBar.addItem("", Icons.MODEL, new Command() {
 
@@ -53,7 +56,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
             public void menuSelected(MenuItem selectedItem) {
             }
         });
-        newModel.setDescription("New Model");
+        newModel.setDescription("Add Model");
     }
     
     @Override

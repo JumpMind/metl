@@ -4,8 +4,10 @@ import javax.annotation.PostConstruct;
 
 import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.ui.support.Category;
-import org.jumpmind.symmetric.is.ui.support.TopBarLink;
+import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.is.ui.common.Category;
+import org.jumpmind.symmetric.is.ui.common.TopBarLink;
 import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -29,7 +31,15 @@ public class DesignView extends HorizontalLayout implements View {
     @Autowired
     IConfigurationService configurationService;
     
-    AbstractFolderNavigator designNavigator;
+    @Autowired 
+    IComponentFactory componentFactory;
+    
+    @Autowired
+    IConnectionFactory connectionFactory;
+    
+    DesignNavigator designNavigator;
+    
+    DesignPropertySheet propertySheet;
     
     @PostConstruct
     protected void init() {
@@ -38,7 +48,7 @@ public class DesignView extends HorizontalLayout implements View {
 
         HorizontalSplitPanel rightSplit = new HorizontalSplitPanel();
         rightSplit.setSizeFull();
-        rightSplit.setSplitPosition(250, Unit.PIXELS, true);
+        rightSplit.setSplitPosition(300, Unit.PIXELS, true);
         
 
         HorizontalSplitPanel leftSplit = new HorizontalSplitPanel();
@@ -57,7 +67,11 @@ public class DesignView extends HorizontalLayout implements View {
         leftSplit.setFirstComponent(leftTopBottomSplit);
         leftSplit.setSecondComponent(new TabSheet());
         rightSplit.setFirstComponent(leftSplit);
-        rightSplit.setSecondComponent(new DesignPropertySheet());
+        
+        propertySheet = new DesignPropertySheet(componentFactory, configurationService, connectionFactory);
+        designNavigator.addValueChangeListener(propertySheet);
+        
+        rightSplit.setSecondComponent(propertySheet);
         
         addComponent(rightSplit);
     }

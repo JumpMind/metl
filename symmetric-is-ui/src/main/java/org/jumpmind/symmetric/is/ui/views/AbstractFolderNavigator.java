@@ -11,8 +11,8 @@ import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.config.data.FolderData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.ui.support.EnableFocusTextField;
-import org.jumpmind.symmetric.is.ui.support.Icons;
+import org.jumpmind.symmetric.is.ui.common.EnableFocusTextField;
+import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
@@ -85,6 +85,10 @@ abstract public class AbstractFolderNavigator extends Panel {
         treeTable = buildTreeTable();
         content.addComponent(treeTable);
         content.setExpandRatio(treeTable, 1);
+    }
+    
+    public void addValueChangeListener(ValueChangeListener listener) {
+        this.treeTable.addValueChangeListener(listener);
     }
 
     abstract protected void addMenuButtons(MenuBar leftMenuBar, MenuBar rightMenuBar);
@@ -172,7 +176,7 @@ abstract public class AbstractFolderNavigator extends Panel {
             @Override
             public Field<?> createField(Container container, Object itemId, Object propertyId,
                     Component uiContext) {
-                return createEditableNavigatorField(itemId);
+                return buildEditableNavigatorField(itemId);
             }
         });
         table.setVisibleColumns(new Object[] { "name" });
@@ -303,9 +307,10 @@ abstract public class AbstractFolderNavigator extends Panel {
         }
     }
 
-    protected Field<?> createEditableNavigatorField(Object itemId) {
+    protected Field<?> buildEditableNavigatorField(Object itemId) {
         if (itemBeingEdited != null && itemBeingEdited.equals(itemId)) {
             final EnableFocusTextField field = new EnableFocusTextField();
+            field.addStyleName(ValoTheme.TEXTFIELD_SMALL);
             field.setImmediate(true);
             field.addFocusListener(new FocusListener() {
 

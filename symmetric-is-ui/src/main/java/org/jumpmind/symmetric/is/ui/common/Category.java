@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui.support;
+package org.jumpmind.symmetric.is.ui.common;
 
 public enum Category {
 
