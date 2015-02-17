@@ -51,6 +51,14 @@ public class ComponentVersion extends
         return this.component.getName();
     }
     
+    public ModelVersion getInputModelVersion() {
+    	return inputModelVersion;
+    }
+    
+    public ModelVersion getOutputModelVersion() {
+    	return outputModelVersion;
+    }
+    
 	@Override
 	protected SettingData createSettingData() {
 		return new ComponentVersionSettingData(data.getId());

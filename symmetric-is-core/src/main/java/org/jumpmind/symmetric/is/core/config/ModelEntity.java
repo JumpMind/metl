@@ -1,14 +1,16 @@
 package org.jumpmind.symmetric.is.core.config;
 
 import java.util.List;
+import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.config.data.ModelEntityData;
+import org.jumpmind.util.LinkedCaseInsensitiveMap;
 
 public class ModelEntity extends AbstractObject<ModelEntityData> {
 
     private static final long serialVersionUID = 1L;
  
-    List<ModelAttribute> modelAttributes;
+    Map<String, ModelAttribute> modelAttributes;
     
     List<ModelEntityRelationship> modelEntityRelationships;
     
@@ -25,11 +27,18 @@ public class ModelEntity extends AbstractObject<ModelEntityData> {
     	data.setName(name);
     }
 
-    public List<ModelAttribute> getModelAttributes() {
+    public Map<String, ModelAttribute> getModelAttributes() {
+    	if (modelAttributes == null) {
+    		modelAttributes = new LinkedCaseInsensitiveMap<ModelAttribute>();
+    	}
     	return modelAttributes;
     }
     
     public List<ModelEntityRelationship> getModelEntityRelationships() {
     	return modelEntityRelationships;
+    }
+    
+    public boolean attributeExists(String attributeName) {
+    	return modelAttributes.containsKey(attributeName);
     }
 }

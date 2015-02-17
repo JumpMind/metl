@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.config.AbstractObject;
@@ -502,17 +504,15 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
 		persistenceManager.delete(model.getData(), null, null,
 				tableName(ModelData.class));
-
 	}
 
 	@Override
 	public void delete(ModelVersion modelVersion) {
 
-		List<ModelEntity> entities = modelVersion.getModelEntities();
-		for (ModelEntity entity : entities) {
-			delete(entity);
-		}
-
+		Iterator<Entry<String, ModelEntity>> itr = modelVersion.getModelEntities().entrySet().iterator();
+		while(itr.hasNext()) {
+			delete(itr.next().getValue());
+		}		
 		persistenceManager.delete(modelVersion.getData(), null, null,
 				tableName(ModelVersionData.class));
 	}
@@ -520,15 +520,15 @@ abstract class AbstractConfigurationService extends AbstractService implements
 	@Override
 	public void delete(ModelEntity modelEntity) {
 
-		List<ModelEntityRelationship> entityRelationships = modelEntity
-				.getModelEntityRelationships();
-		for (ModelEntityRelationship entityRelationship : entityRelationships) {
-			delete(entityRelationship);
+		Iterator<ModelEntityRelationship> itrr = modelEntity
+				.getModelEntityRelationships().iterator();
+		while(itrr.hasNext()) {
+			delete(itrr.next());
 		}
-
-		List<ModelAttribute> attributes = modelEntity.getModelAttributes();
-		for (ModelAttribute attribute : attributes) {
-			delete(attribute);
+		
+		Iterator<Entry<String, ModelAttribute>> itra = modelEntity.getModelAttributes().entrySet().iterator();
+		while (itra.hasNext()) {
+			delete(itra.next().getValue());
 		}
 
 		persistenceManager.delete(modelEntity.getData(), null, null,
@@ -545,12 +545,10 @@ abstract class AbstractConfigurationService extends AbstractService implements
 	@Override
 	public void delete(ModelEntityRelationship modelEntityRelationship) {
 
-		List<ModelAttributeRelationship> attributeRelationships = modelEntityRelationship
-				.getAttributeRelationships();
-		for (ModelAttributeRelationship attributeRelationship : attributeRelationships) {
-			delete(attributeRelationship);
+		Iterator<ModelAttributeRelationship> itr = modelEntityRelationship.getAttributeRelationships().iterator();
+		while (itr.hasNext()) {
+			delete(itr.next());
 		}
-
 		persistenceManager.delete(modelEntityRelationship.getData(), null,
 				null, tableName(ModelEntityRelationship.class));
 	}
@@ -582,7 +580,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
 		for (ModelEntityData entityData : entityDatas) {
 			ModelEntity modelEntity = new ModelEntity(modelVersion, entityData);
 			refresh(modelEntity);
-			modelVersion.getModelEntities().add(modelEntity);
+			modelVersion.getModelEntities().put(modelEntity.getName(), modelEntity);
 		}
 	}
 
@@ -600,7 +598,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
 			ModelAttribute modelAttribute = new ModelAttribute(modelEntity,
 					null, attributeData);
 			refresh(modelAttribute);
-			modelEntity.getModelAttributes().add(modelAttribute);
+			modelEntity.getModelAttributes().put(modelAttribute.getName(), modelAttribute);
 		}
 		modelEntity.getModelEntityRelationships().clear();
 		List<ModelEntityRelationshipData> entityRelationshipDatas = persistenceManager
@@ -651,21 +649,25 @@ abstract class AbstractConfigurationService extends AbstractService implements
 	public void save(ModelVersion modelVersion) {
 
 		save((AbstractObject<?>) modelVersion);
-		for (ModelEntity entity : modelVersion.getModelEntities()) {
-			save(entity);
-		}
+		
+		Iterator<Entry<String, ModelEntity>> itr = modelVersion.getModelEntities().entrySet().iterator();
+		while(itr.hasNext()) {
+			save(itr.next().getValue());
+		}		
 	}
 
 	@Override
 	public void save(ModelEntity modelEntity) {
 
 		save((AbstractObject<?>) modelEntity);
-		for (ModelAttribute attribute : modelEntity.getModelAttributes()) {
-			save(attribute);
+		
+		Iterator<Entry<String, ModelAttribute>> itra = modelEntity.getModelAttributes().entrySet().iterator();
+		while (itra.hasNext()) {
+			save(itra.next().getValue());
 		}
-		for (ModelEntityRelationship entityRelationship : modelEntity
-				.getModelEntityRelationships()) {
-			save(entityRelationship);
+		Iterator<ModelEntityRelationship> itrr = modelEntity.getModelEntityRelationships().iterator();
+		while (itrr.hasNext()) {
+			save(itrr.next());
 		}
 	}
 

@@ -1,8 +1,9 @@
 package org.jumpmind.symmetric.is.core.config;
 
-import java.util.List;
+import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.config.data.ModelVersionData;
+import org.jumpmind.util.LinkedCaseInsensitiveMap;
 
 public class ModelVersion extends AbstractObject<ModelVersionData> {
 
@@ -12,7 +13,7 @@ public class ModelVersion extends AbstractObject<ModelVersionData> {
     
     ModelFormat modelFormat;
     
-    List<ModelEntity> modelEntities;
+    Map<String, ModelEntity> modelEntities;
     
     public ModelVersion(Model model, ModelFormat modelFormat, ModelVersionData data) {
         super(data);
@@ -42,7 +43,10 @@ public class ModelVersion extends AbstractObject<ModelVersionData> {
         return model;
     }
     
-    public List<ModelEntity> getModelEntities() {
+    public Map<String, ModelEntity> getModelEntities() {
+    	if (modelEntities == null) {
+    		modelEntities = new LinkedCaseInsensitiveMap<ModelEntity>();
+    	}
     	return modelEntities;
     }
     
@@ -51,6 +55,14 @@ public class ModelVersion extends AbstractObject<ModelVersionData> {
     
     public String getName() {
         return this.model.getName() + " " + data.getVersionName();
+    }
+    
+    public boolean entityAttributeExists(String entityName, String attributeName) {
+    	ModelEntity entity = modelEntities.get(entityName);
+    	if (entity != null) {
+    		return entity.attributeExists(attributeName);
+    	}
+    	return false;
     }
     
     //TODO: add model format classes
