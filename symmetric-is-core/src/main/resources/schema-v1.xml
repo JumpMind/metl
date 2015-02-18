@@ -22,7 +22,7 @@
         <column name="name" type="VARCHAR" size="255" description=""/>
         <column name="type" type="VARCHAR" size="50" required="true" description="" />
         <column name="shared" type="BOOLEANINT" size="1" default="0" description="Indicator as to whether this is a shared model." />
-        <column name="folder_id" type="VARCHAR" size="128" required="true" />
+        <column name="folder_id" type="VARCHAR" size="128"/>
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -54,7 +54,7 @@
         <column name="name" type="VARCHAR" size="255" description="" />
         <column name="type" type="VARCHAR" size="50" required="true" description="RELATIONAL" />
         <column name="shared" type="BOOLEANINT" size="1" default="0" description="Indicator as to whether this is a shared model." />
-        <column name="folder_id" type="VARCHAR" size="128" required="true" />
+        <column name="folder_id" type="VARCHAR" size="128"/>
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />

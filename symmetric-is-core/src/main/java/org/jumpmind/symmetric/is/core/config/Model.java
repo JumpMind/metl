@@ -19,12 +19,10 @@ public class Model extends AbstractObject<ModelData> {
 
     public Model(ModelData data) {
         super(data);
-        this.modelVersions = new ArrayList<ModelVersion>();
     }
     
     public Model(Folder folder, ModelData data) {
         super(data);
-        this.modelVersions = new ArrayList<ModelVersion>();
         setFolder(folder);
     }
     
@@ -56,11 +54,10 @@ public class Model extends AbstractObject<ModelData> {
     }
     
     public List<ModelVersion> getModelVersions() {
+    	if (modelVersions == null) {
+    		modelVersions = new ArrayList<ModelVersion>();
+    	}
         return modelVersions;
     }
     
-    public void setModelVersions(List<ModelVersion> modelVersions) {
-        this.modelVersions = modelVersions;
-    }
-        
 }
