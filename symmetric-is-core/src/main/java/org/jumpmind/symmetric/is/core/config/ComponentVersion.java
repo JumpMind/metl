@@ -16,7 +16,7 @@ public class ComponentVersion extends
 	ModelVersion inputModelVersion;
 
 	ModelVersion outputModelVersion;
-
+	
 	public ComponentVersion(Component component, Connection connection,
 			ModelVersion inputModelVersion, ModelVersion outputModelVersion,
 			ComponentVersionData data, SettingData... settings) {

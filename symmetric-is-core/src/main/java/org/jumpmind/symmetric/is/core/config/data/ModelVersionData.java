@@ -8,9 +8,7 @@ public class ModelVersionData extends AbstractVersionData {
     String versionName;
     
     String modelId;
-    
-    String modelFormatId;
-    
+        
 	public String getVersionName() {
 		return versionName;
 	}
@@ -22,11 +20,5 @@ public class ModelVersionData extends AbstractVersionData {
 	}
 	public void setModelId(String modelId) {
 		this.modelId = modelId;
-	}
-	public String getModelFormatId() {
-		return modelFormatId;
-	}
-	public void setModelFormatId(String modelFormatId) {
-		this.modelFormatId = modelFormatId;
 	}
 }

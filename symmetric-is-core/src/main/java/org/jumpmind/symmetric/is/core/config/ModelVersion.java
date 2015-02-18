@@ -11,19 +11,12 @@ public class ModelVersion extends AbstractObject<ModelVersionData> {
 
     Model model;
     
-    ModelFormat modelFormat;
-    
     Map<String, ModelEntity> modelEntities;
     
-    public ModelVersion(Model model, ModelFormat modelFormat, ModelVersionData data) {
+    public ModelVersion(Model model, ModelVersionData data) {
         super(data);
         this.model = model;
-        this.modelFormat = modelFormat;
         data.setModelId(model.getData().getId());
-        //TODO: add model format classes
-//        if (modelFormat != null) {
-//            data.setModelFormatId(modelFormat.getData().getId());
-//        }
     }
 
     public String getVersionName() {
@@ -64,15 +57,5 @@ public class ModelVersion extends AbstractObject<ModelVersionData> {
     	}
     	return false;
     }
-    
-    //TODO: add model format classes
-//    public void setModelFormat(ModelFormat modelFormat) {
-//        this.modelFormat = modelFormat;
-//        this.data.setModelFormatId(modelFormat.getId());
-//    }
-//    
-//    public ModelFormat getModelFormat() {
-//        return modelFormat;
-//    }
-        
+       
 }

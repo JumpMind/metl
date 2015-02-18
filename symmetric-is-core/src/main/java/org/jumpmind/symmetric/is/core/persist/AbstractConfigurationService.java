@@ -118,6 +118,29 @@ abstract class AbstractConfigurationService extends AbstractService implements
 		return flows;
 	}
 
+	public List<Model> findModelsInFolder(Folder folder) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("folderId", folder.getData().getId());
+		List<ModelData> datas = find(ModelData.class, params);
+		List<Model> models = new ArrayList<Model>();
+		for (ModelData modelData : datas) {
+			Model model = new Model(folder, modelData);
+			
+			Map<String, Object> versionParams = new HashMap<String, Object>();
+			versionParams.put("modelId",model.getId());
+			List<ModelVersionData> versionDatas = find(ModelVersionData.class, versionParams);
+			for (ModelVersionData versionData:versionDatas) {
+				ModelVersion modelVersion = new ModelVersion(model, versionData);
+				refreshModelVersionRelations(modelVersion);
+				model.getModelVersions().add(modelVersion);
+			}
+			models.add(model);
+		}
+		
+		return models;
+	}
+	
+	
 	public List<Connection> findConnectionsInFolder(Folder folder) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("folderId", folder.getData().getId());
@@ -255,9 +278,34 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
 	public ModelVersion findModelVersion(String id) {
 
-		return null;
+		ModelVersionData modelVersionData = new ModelVersionData();
+		modelVersionData.setId(id);
+		persistenceManager.refresh(modelVersionData, null, null,
+				tableName(ModelVersionData.class));
+		ModelData modelData = new ModelData();
+		modelData.setId(modelVersionData.getId());
+		persistenceManager.refresh(modelData, null, null, tableName(ModelData.class));
+		Model model = new Model(modelData);
+		ModelVersion modelVersion = new ModelVersion(model, modelVersionData);
+		return refreshModelVersionRelations(modelVersion);
 	}
 
+	public ModelVersion refreshModelVersionRelations(ModelVersion modelVersion) {
+		
+		modelVersion.getModelEntities().clear();
+		Map<String, Object> versionParams = new HashMap<String, Object>();
+		versionParams.put("modelVersionId", modelVersion.getData().getId());
+		List<ModelEntityData> entityDatas = persistenceManager.find(
+				ModelEntityData.class, versionParams, null, null,
+				tableName(ModelEntityData.class));
+		for (ModelEntityData entityData : entityDatas) {
+			ModelEntity modelEntity = new ModelEntity(modelVersion, entityData);
+			refresh(modelEntity);
+			modelVersion.getModelEntities().put(modelEntity.getName(), modelEntity);
+		}
+		return modelVersion;
+	}
+	
 	protected List<Connection> buildConnection(Folder folder,
 			List<ConnectionData> datas) {
 		return buildConnection(folder,
@@ -564,24 +612,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
 	public void refresh(ModelVersion modelVersion) {
 
 		refresh((AbstractObject<?>) modelVersion);
-		Model model = modelVersion.getModel();
-		if (model == null) {
-			model = new Model(new ModelData(modelVersion.getData().getId()));
-			modelVersion.setModel(model);
-		}
-		refresh(model);
-
-		modelVersion.getModelEntities().clear();
-		Map<String, Object> versionParams = new HashMap<String, Object>();
-		versionParams.put("modelVersionId", modelVersion.getData().getId());
-		List<ModelEntityData> entityDatas = persistenceManager.find(
-				ModelEntityData.class, versionParams, null, null,
-				tableName(ModelEntityData.class));
-		for (ModelEntityData entityData : entityDatas) {
-			ModelEntity modelEntity = new ModelEntity(modelVersion, entityData);
-			refresh(modelEntity);
-			modelVersion.getModelEntities().put(modelEntity.getName(), modelEntity);
-		}
+		refreshModelVersionRelations(modelVersion);
 	}
 
 	@Override
