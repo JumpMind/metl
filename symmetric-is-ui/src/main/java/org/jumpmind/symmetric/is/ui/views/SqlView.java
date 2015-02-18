@@ -81,7 +81,7 @@ public class SqlView extends VerticalLayout implements View {
                             //
                             // @Override
                             // public String getName() {
-                            // return connection.getData().getName();
+                            // return connection.getName();
                             // }
                             // });
                             // }

@@ -71,11 +71,11 @@ public class FlowRuntime {
             List<NodeRuntime> targetNodeRuntimes = new ArrayList<NodeRuntime>();
             List<NodeRuntime> sourceNodeRuntimes = new ArrayList<NodeRuntime>();
             for (ComponentFlowNodeLink componentFlowNodeLink : links) {
-                if (nodeId.equals(componentFlowNodeLink.getData().getSourceNodeId())) {
-                    targetNodeRuntimes.add(nodeRuntimes.get(componentFlowNodeLink.getData()
+                if (nodeId.equals(componentFlowNodeLink.getSourceNodeId())) {
+                    targetNodeRuntimes.add(nodeRuntimes.get(componentFlowNodeLink
                             .getTargetNodeId()));
-                } else if (nodeId.equals(componentFlowNodeLink.getData().getTargetNodeId())) {
-                    sourceNodeRuntimes.add(nodeRuntimes.get(componentFlowNodeLink.getData()
+                } else if (nodeId.equals(componentFlowNodeLink.getTargetNodeId())) {
+                    sourceNodeRuntimes.add(nodeRuntimes.get(componentFlowNodeLink
                             .getSourceNodeId()));
                 }
             }
@@ -136,7 +136,7 @@ public class FlowRuntime {
                     .getComponentFlowNodeLinks();
             boolean isTargetNode = false;
             for (ComponentFlowNodeLink componentFlowNodeLink : links) {
-                if (nodeId.equals(componentFlowNodeLink.getData().getTargetNodeId())) {
+                if (nodeId.equals(componentFlowNodeLink.getTargetNodeId())) {
                     isTargetNode = true;
                 }
             }

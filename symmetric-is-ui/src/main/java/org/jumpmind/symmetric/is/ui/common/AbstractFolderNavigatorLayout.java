@@ -12,13 +12,12 @@ import java.util.Set;
 import org.jumpmind.symmetric.is.core.config.AbstractObject;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
-import org.jumpmind.symmetric.is.core.config.data.FolderData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.ui.common.PromptDialog;
 import org.jumpmind.symmetric.ui.common.PromptDialog.IPromptListener;
-import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -282,11 +281,11 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
     }
     
     @SuppressWarnings("unchecked")
-    protected <T extends AbstractObject<?>> T findObjectInTreeWithId(String id) {
+    protected <T extends AbstractObject> T findObjectInTreeWithId(String id) {
         Collection<?> itemIds = treeTable.getItemIds();
         for (Object itemId : itemIds) {
-            if (itemId instanceof AbstractObject<?>) {
-                AbstractObject<?> object = (AbstractObject<?>)itemId;
+            if (itemId instanceof AbstractObject) {
+                AbstractObject object = (AbstractObject)itemId;
                 if (object.getId().equals(id)) {
                     return (T)object;
                 }
@@ -376,9 +375,9 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
             if (obj instanceof Folder) {
                 Folder folder = (Folder) obj;
                 try {
-                    configurationService.deleteFolder(folder.getData().getId());
+                    configurationService.deleteFolder(folder.getId());
                 } catch (Exception ex) {
-                    CommonUiUtils.notify("Could not delete the \"" + folder.getData().getName()
+                    CommonUiUtils.notify("Could not delete the \"" + folder.getName()
                             + "\" folder", Type.WARNING_MESSAGE);
                 }
             }
@@ -473,15 +472,14 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                 if (selectedIds != null && selectedIds.size() > 0) {
                     parentFolder = selectedIds.iterator().next();
                 }
-                FolderData folderData = new FolderData();
+                Folder folderData = new Folder();
                 folderData.setName(content);
                 folderData.setType(folderType.name());
-                folderData.setParentFolderId(parentFolder != null ? parentFolder.getData().getId()
+                folderData.setParentFolderId(parentFolder != null ? parentFolder.getId()
                         : null);
-                Folder folder = new Folder(folderData);
-                folder.setParent(parentFolder);
+                folderData.setParent(parentFolder);
 
-                configurationService.save(new Folder(folderData));
+                configurationService.save(folderData);
 
                 refresh();
 
@@ -491,7 +489,7 @@ abstract public class AbstractFolderNavigatorLayout extends VerticalLayout {
                 }
 
                 Set<Folder> selected = new HashSet<Folder>();
-                selected.add(folder);
+                selected.add(folderData);
                 treeTable.setValue(selected);
                 return true;
             } else {

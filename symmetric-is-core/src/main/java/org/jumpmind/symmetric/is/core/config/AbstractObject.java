@@ -2,60 +2,23 @@ package org.jumpmind.symmetric.is.core.config;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.UUID;
 
-import org.jumpmind.symmetric.is.core.config.data.AbstractData;
-
-abstract public class AbstractObject<D extends AbstractData> implements Serializable {
+abstract public class AbstractObject implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    protected D data;
+    String id = UUID.randomUUID().toString();
+
+    Date createTime = new Date();
+
+    String createBy;
+
+    Date lastModifyTime = new Date();
+
+    String lastModifyBy;
     
     public AbstractObject() {
-    }
-    
-    public AbstractObject(D data) {
-        this.data = data;
-    }
-    
-    public D getData() {
-        return this.data;
-    }
-    
-    public String getId() {
-        return data.getId();
-    }
-    
-    public Date getCreateTime() {
-        return data.getCreateTime();
-    }
-
-    public void setCreateTime(Date createTime) {
-        data.setCreateTime(createTime);
-    }
-
-    public String getCreateBy() {
-        return data.getCreateBy();
-    }
-
-    public void setCreateBy(String createBy) {
-        data.setCreateBy(createBy);
-    }
-
-    public Date getLastModifyTime() {
-        return data.getLastModifyTime();
-    }
-
-    public void setLastModifyTime(Date lastModifyTime) {
-        data.setLastModifyTime(lastModifyTime);
-    }
-
-    public String getLastModifyBy() {
-        return data.getLastModifyBy();
-    }
-
-    public void setLastModifyBy(String lastModifyBy) {
-        data.setLastModifyBy(lastModifyBy);
     }
     
     abstract public void setName(String name);
@@ -66,17 +29,62 @@ abstract public class AbstractObject<D extends AbstractData> implements Serializ
         return false;
     }
     
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(String createBy) {
+        this.createBy = createBy;
+    }
+
+    public Date getLastModifyTime() {
+        return lastModifyTime;
+    }
+
+    public void setLastModifyTime(Date lastModifyTime) {
+        this.lastModifyTime = lastModifyTime;
+    }
+
+    public String getLastModifyBy() {
+        return lastModifyBy;
+    }
+
+    public void setLastModifyBy(String lastModifyBy) {
+        this.lastModifyBy = lastModifyBy;
+    }
+    
     @Override
     public int hashCode() {
-        return this.data.getId().hashCode();
+        return id.hashCode();
     }
     
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof AbstractObject<?>) {
-            return this.data.getId().equals(((AbstractObject<?>)obj).getData().getId());
+        if (obj instanceof AbstractObject && obj.getClass().equals(getClass())) {
+            return id.equals(((AbstractObject)obj).getId());
         } else {
             return super.equals(obj);
         }            
+    }
+    
+    @Override
+    public String toString() {
+        return getName();
     }
 }

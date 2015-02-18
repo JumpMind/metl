@@ -7,9 +7,9 @@ import java.util.Set;
 import org.jumpmind.symmetric.is.core.config.AbstractObjectWithSettings;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
 import org.jumpmind.symmetric.is.core.config.Connection;
+import org.jumpmind.symmetric.is.core.config.Setting;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
-import org.jumpmind.symmetric.is.core.config.data.SettingData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
@@ -63,7 +63,7 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
             for (String key : keys) {
                 SettingDefinition definition = settings.get(key);
                 if (obj instanceof AbstractObjectWithSettings) {
-                    addSettingField(key, definition, (AbstractObjectWithSettings<?>) obj,
+                    addSettingField(key, definition, (AbstractObjectWithSettings) obj,
                             formLayout);
                 }
             }
@@ -78,7 +78,7 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
                     .getType());
         } else if (obj instanceof Connection) {
             Connection connection = (Connection) obj;
-            return connectionFactory.getSettingDefinitionsForConnectionType(connection.getData()
+            return connectionFactory.getSettingDefinitionsForConnectionType(connection
                     .getType());
         } else {
             return new HashMap<String, SettingDefinition>();
@@ -86,7 +86,7 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
     }
 
     protected void addSettingField(final String key, final SettingDefinition definition,
-            final AbstractObjectWithSettings<?> obj, FormLayout formLayout) {
+            final AbstractObjectWithSettings obj, FormLayout formLayout) {
         boolean required = definition.required();
         String description = "Represents the " + key + " setting";
         Type type = definition.type();
@@ -187,8 +187,8 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
 
     }
 
-    protected void saveSetting(String key, Field<?> field, AbstractObjectWithSettings<?> obj) {
-        SettingData data = obj.findSetting(key);
+    protected void saveSetting(String key, Field<?> field, AbstractObjectWithSettings obj) {
+        Setting data = obj.findSetting(key);
         data.setValue(field.getValue() != null ? field.getValue().toString() : null);
         configurationService.save(data);
         // componentSettingsChangedListener.componentSettingsChanges(flowNode,

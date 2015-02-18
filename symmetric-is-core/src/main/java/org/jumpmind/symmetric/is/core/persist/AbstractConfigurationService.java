@@ -15,13 +15,17 @@ import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.config.AbstractObject;
 import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
+import org.jumpmind.symmetric.is.core.config.AgentSetting;
 import org.jumpmind.symmetric.is.core.config.Component;
 import org.jumpmind.symmetric.is.core.config.ComponentFlow;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
+import org.jumpmind.symmetric.is.core.config.ComponentVersionSetting;
 import org.jumpmind.symmetric.is.core.config.Connection;
+import org.jumpmind.symmetric.is.core.config.ConnectionSetting;
+import org.jumpmind.symmetric.is.core.config.DeprecatedAbstractObject;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.config.Model;
@@ -30,26 +34,13 @@ import org.jumpmind.symmetric.is.core.config.ModelAttributeRelationship;
 import org.jumpmind.symmetric.is.core.config.ModelEntity;
 import org.jumpmind.symmetric.is.core.config.ModelEntityRelationship;
 import org.jumpmind.symmetric.is.core.config.ModelVersion;
-import org.jumpmind.symmetric.is.core.config.data.AgentData;
-import org.jumpmind.symmetric.is.core.config.data.AgentDeploymentData;
-import org.jumpmind.symmetric.is.core.config.data.AgentSettingData;
-import org.jumpmind.symmetric.is.core.config.data.ComponentData;
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeLinkData;
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
-import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
-import org.jumpmind.symmetric.is.core.config.data.ComponentVersionSettingData;
-import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
-import org.jumpmind.symmetric.is.core.config.data.ConnectionSettingData;
-import org.jumpmind.symmetric.is.core.config.data.FolderData;
+import org.jumpmind.symmetric.is.core.config.Setting;
 import org.jumpmind.symmetric.is.core.config.data.ModelAttributeData;
 import org.jumpmind.symmetric.is.core.config.data.ModelAttributeRelationshipData;
 import org.jumpmind.symmetric.is.core.config.data.ModelData;
 import org.jumpmind.symmetric.is.core.config.data.ModelEntityData;
 import org.jumpmind.symmetric.is.core.config.data.ModelEntityRelationshipData;
 import org.jumpmind.symmetric.is.core.config.data.ModelVersionData;
-import org.jumpmind.symmetric.is.core.config.data.SettingData;
 import org.jumpmind.symmetric.is.core.util.NameValue;
 
 // TODO make methods transactional
@@ -85,41 +76,37 @@ abstract class AbstractConfigurationService extends AbstractService implements
     public Map<String, Folder> foldersById(FolderType type) {
         Map<String, Object> byType = new HashMap<String, Object>();
         byType.put("type", type.name());
-        List<FolderData> folderDatas = find(FolderData.class, byType);
+        List<Folder> folders = find(Folder.class, byType);
 
         Map<String, Folder> all = new HashMap<String, Folder>();
-        for (FolderData folderData : folderDatas) {
-            all.put(folderData.getId(), new Folder(folderData));
+        for (Folder folder : folders) {
+            all.put(folder.getId(), folder);
         }
         return all;
     }
 
     public List<ComponentFlow> findComponentFlowsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("folderId", folder.getData().getId());
-        List<ComponentFlowData> datas = find(ComponentFlowData.class, params);
-        List<ComponentFlow> flows = new ArrayList<ComponentFlow>();
-        for (ComponentFlowData componentFlowData : datas) {
-            ComponentFlow flow = new ComponentFlow(folder, componentFlowData);
-            flows.add(flow);
-
+        params.put("folderId", folder.getId());
+        List<ComponentFlow> flows = find(ComponentFlow.class, params);
+        for (ComponentFlow flow : flows) {
+            flow.setFolder(folder);
             Map<String, Object> versionParams = new HashMap<String, Object>();
-            versionParams.put("componentFlowId", componentFlowData.getId());
-            List<ComponentFlowVersionData> versionDatas = find(ComponentFlowVersionData.class,
+            versionParams.put("componentFlowId", flow.getId());
+            List<ComponentFlowVersion> versionDatas = find(ComponentFlowVersion.class,
                     versionParams);
-            for (ComponentFlowVersionData versionData : versionDatas) {
-                ComponentFlowVersion version = new ComponentFlowVersion(flow, versionData);
+            for (ComponentFlowVersion version : versionDatas) {
+                version.setComponentFlow(flow);
                 refreshComponentFlowVersionRelations(version);
                 flow.getComponentFlowVersions().add(version);
             }
-
         }
         return flows;
     }
 
     public List<Model> findModelsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("folderId", folder.getData().getId());
+        params.put("folderId", folder.getId());
         List<ModelData> datas = find(ModelData.class, params);
         List<Model> models = new ArrayList<Model>();
         for (ModelData modelData : datas) {
@@ -141,8 +128,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     public List<Connection> findConnectionsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("folderId", folder.getData().getId());
-        List<ConnectionData> datas = find(ConnectionData.class, params);
+        params.put("folderId", folder.getId());
+        List<Connection> datas = find(Connection.class, params);
         return buildConnection(folder, datas);
     }
 
@@ -153,7 +140,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
             for (String type : types) {
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("type", type);
-                List<ConnectionData> datas = find(ConnectionData.class, params);
+                List<Connection> datas = find(Connection.class, params);
                 list = buildConnection(null, datas);
             }
         }
@@ -163,7 +150,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public List<Agent> findAgentsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("folderId", folder.getData().getId());
+        params.put("folderId", folder.getId());
         return findAgents(params, folder);
     }
 
@@ -179,36 +166,31 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     protected List<Agent> findAgents(Map<String, Object> params, Folder folder) {
-        List<AgentData> datas = persistenceManager.find(AgentData.class, params, null, null,
-                tableName(AgentData.class));
-        List<Agent> list = new ArrayList<Agent>();
-
+        List<Agent> list = persistenceManager.find(Agent.class, params, null, null,
+                tableName(Agent.class));
         Map<String, Folder> folderMapById = new HashMap<String, Folder>();
         if (folder != null) {
-            folderMapById.put(folder.getData().getId(), folder);
+            folderMapById.put(folder.getId(), folder);
         } else {
             folderMapById = foldersById(FolderType.RUNTIME);
         }
 
-        for (AgentData data : datas) {
+        for (Agent agent : list) {
             Map<String, Object> settingParams = new HashMap<String, Object>();
-            settingParams.put("agentId", data.getId());
-            List<AgentSettingData> settings = persistenceManager.find(AgentSettingData.class,
-                    settingParams, null, null, tableName(AgentSettingData.class));
-            Agent agent = new Agent(folderMapById.get(data.getFolderId()), data,
-                    settings.toArray(new SettingData[settings.size()]));
-            list.add(agent);
+            settingParams.put("agentId", agent.getId());
+            List<AgentSetting> settings = persistenceManager.find(AgentSetting.class,
+                    settingParams, null, null, tableName(AgentSetting.class));
+            agent.setFolder(folderMapById.get(agent.getFolderId()));
+            agent.setSettings(settings);
 
-            List<AgentDeploymentData> deploymentDatas = persistenceManager.find(
-                    AgentDeploymentData.class, settingParams, null, null,
-                    tableName(AgentDeploymentData.class));
-            for (AgentDeploymentData agentDeploymentData : deploymentDatas) {
-                ComponentFlowVersion componentFlowVersion = new ComponentFlowVersion(null,
-                        new ComponentFlowVersionData(
-                                agentDeploymentData.getComponentFlowVersionId()));
+            List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class,
+                    settingParams, null, null, tableName(AgentDeployment.class));
+            for (AgentDeployment agentDeployment : deployments) {
+                ComponentFlowVersion componentFlowVersion = new ComponentFlowVersion(null);
+                componentFlowVersion.setId(agentDeployment.getComponentFlowVersionId());
                 refresh(componentFlowVersion);
-                agent.getAgentDeployments().add(
-                        new AgentDeployment(componentFlowVersion, agentDeploymentData));
+                agentDeployment.setComponentFlowVersion(componentFlowVersion);
+                agent.getAgentDeployments().add(agentDeployment);
             }
         }
         return list;
@@ -216,60 +198,52 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public List<AgentDeployment> findAgentDeploymentsFor(ComponentFlowVersion componentFlowVersion) {
-        List<AgentDeploymentData> deploymentDatas = persistenceManager.find(
-                AgentDeploymentData.class, new NameValue("componentFlowVersionId",
-                        componentFlowVersion.getId()), null, null,
-                tableName(AgentDeploymentData.class));
-        List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(deploymentDatas.size());
-        for (AgentDeploymentData agentDeploymentData : deploymentDatas) {
-            deployments.add(new AgentDeployment(componentFlowVersion, agentDeploymentData));
+        List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class,
+                new NameValue("componentFlowVersionId", componentFlowVersion.getId()), null, null,
+                tableName(AgentDeployment.class));
+        for (AgentDeployment deployment : deployments) {
+            deployment.setComponentFlowVersion(componentFlowVersion);
         }
         return deployments;
     }
 
     @Override
     public Connection findConnection(String id) {
-        Connection connection = null;
-        ConnectionData data = findOne(ConnectionData.class, new NameValue("id", id));
-        if (data != null) {
-            connection = new Connection(data);
+        Connection connection = findOne(Connection.class, new NameValue("id", id));
+        if (connection != null) {
             refresh(connection);
         }
         return connection;
     }
 
     public ComponentVersion findComponentVersion(String id) {
+        ComponentVersion componentVersion = new ComponentVersion();
+        componentVersion.setId(id);
+        persistenceManager.refresh(componentVersion, null, null, tableName(ComponentVersion.class));
 
-        ComponentVersionData componentVersionData = new ComponentVersionData();
-        componentVersionData.setId(id);
-        persistenceManager.refresh(componentVersionData, null, null,
-                tableName(ComponentVersionData.class));
+        componentVersion.setComponent(findOne(Component.class,
+                new NameValue("id", componentVersion.getComponentId())));
 
-        ComponentData componentData = new ComponentData();
-        componentData.setId(componentVersionData.getComponentId());
-        persistenceManager.refresh(componentData, null, null, tableName(ComponentData.class));
-        Component component = new Component(componentData);
-
-        ModelVersion inputModelVersion = null;
-        if (isNotBlank(componentVersionData.getInputModelVersiondId())) {
-            inputModelVersion = findModelVersion(componentVersionData.getInputModelVersiondId());
+        if (isNotBlank(componentVersion.getInputModelVersiondId())) {
+            componentVersion.setInputModelVersion(findModelVersion(componentVersion
+                    .getInputModelVersiondId()));
         }
-        ModelVersion outputModelVersion = null;
-        if (isNotBlank(componentVersionData.getOutputModelVersionId())) {
-            outputModelVersion = findModelVersion(componentVersionData.getOutputModelVersionId());
+        if (isNotBlank(componentVersion.getOutputModelVersionId())) {
+            componentVersion.setOutputModelVersion(findModelVersion(componentVersion
+                    .getOutputModelVersionId()));
         }
 
-        List<ComponentVersionSettingData> settings = find(ComponentVersionSettingData.class,
-                new NameValue("componentVersionId", componentVersionData.getId()));
+        List<ComponentVersionSetting> settings = find(ComponentVersionSetting.class, new NameValue(
+                "componentVersionId", componentVersion.getId()));
+        componentVersion.setSettings(settings);
 
-        return new ComponentVersion(component,
-                findConnection(componentVersionData.getConnectionId()), inputModelVersion,
-                outputModelVersion, componentVersionData, settings.toArray(new SettingData[settings
-                        .size()]));
+        componentVersion.setConnection(findConnection(componentVersion.getConnectionId()));
+
+        return componentVersion;
+
     }
 
     public ModelVersion findModelVersion(String id) {
-
         ModelVersionData modelVersionData = new ModelVersionData();
         modelVersionData.setId(id);
         persistenceManager.refresh(modelVersionData, null, null, tableName(ModelVersionData.class));
@@ -285,7 +259,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
         modelVersion.getModelEntities().clear();
         Map<String, Object> versionParams = new HashMap<String, Object>();
-        versionParams.put("modelVersionId", modelVersion.getData().getId());
+        versionParams.put("modelVersionId", modelVersion.getId());
         List<ModelEntityData> entityDatas = persistenceManager.find(ModelEntityData.class,
                 versionParams, null, null, tableName(ModelEntityData.class));
         for (ModelEntityData entityData : entityDatas) {
@@ -296,73 +270,73 @@ abstract class AbstractConfigurationService extends AbstractService implements
         return modelVersion;
     }
 
-    protected List<Connection> buildConnection(Folder folder, List<ConnectionData> datas) {
-        return buildConnection(folder, datas.toArray(new ConnectionData[datas.size()]));
+    protected List<Connection> buildConnection(Folder folder, List<Connection> datas) {
+        return buildConnection(folder, datas.toArray(new Connection[datas.size()]));
     }
 
-    protected List<Connection> buildConnection(Folder folder, ConnectionData... datas) {
+    protected List<Connection> buildConnection(Folder folder, Connection... connections) {
         List<Connection> list = new ArrayList<Connection>();
-        for (ConnectionData data : datas) {
+        for (Connection connection : connections) {
             if (folder == null) {
                 Map<String, Object> folderParams = new HashMap<String, Object>();
-                folderParams.put("id", data.getFolderId());
-                folder = new Folder(findOne(FolderData.class, folderParams));
+                folderParams.put("id", connection.getFolderId());
+                folder = findOne(Folder.class, folderParams);
             }
 
             Map<String, Object> settingParams = new HashMap<String, Object>();
-            settingParams.put("connectionId", data.getId());
-            List<ConnectionSettingData> settings = find(ConnectionSettingData.class, settingParams);
-            list.add(new Connection(folder, data,
-                    settings.toArray(new SettingData[settings.size()])));
+            settingParams.put("connectionId", connection.getId());
+            List<ConnectionSetting> settings = find(ConnectionSetting.class, settingParams);
+            connection.setSettings(settings);
+            connection.setFolder(folder);
+            list.add(connection);
         }
         return list;
     }
 
     @Override
     public void delete(AgentDeployment agentDeployment) {
-        delete(agentDeployment.getData());
+        delete(agentDeployment);
     }
 
     @Override
     public void delete(ComponentFlowVersion componentFlowVersion, ComponentFlowNode flowNode) {
         List<ComponentFlowNodeLink> links = componentFlowVersion
-                .removeComponentFlowNodeLinks(flowNode.getData().getId());
+                .removeComponentFlowNodeLinks(flowNode.getId());
         for (ComponentFlowNodeLink link : links) {
             delete(link);
         }
 
         componentFlowVersion.removeComponentFlowNode(flowNode);
-        delete(flowNode.getData());
+        delete(flowNode);
     }
 
     @Override
     public void deleteFolder(String folderId) {
         Map<String, Object> byType = new HashMap<String, Object>();
         byType.put("parentFolderId", folderId);
-        List<FolderData> folderDatas = find(FolderData.class, byType);
-        for (FolderData folderData : folderDatas) {
+        List<Folder> folderDatas = find(Folder.class, byType);
+        for (Folder folderData : folderDatas) {
             deleteFolder(folderData.getId());
         }
-        persistenceManager
-                .delete(new FolderData(folderId), null, null, tableName(FolderData.class));
+        persistenceManager.delete(new Folder(folderId), null, null, tableName(Folder.class));
     }
 
     @Override
     public void delete(Connection connection) {
-        List<SettingData> settings = connection.getSettings();
-        for (SettingData settingData : settings) {
+        List<Setting> settings = connection.getSettings();
+        for (Setting settingData : settings) {
             delete(settingData);
         }
-        delete(connection.getData());
+        delete(connection);
     }
 
     @Override
     public void delete(Agent agent) {
-        List<SettingData> settings = agent.getSettings();
-        for (SettingData settingData : settings) {
+        List<Setting> settings = agent.getSettings();
+        for (Setting settingData : settings) {
             delete(settingData);
         }
-        delete(agent.getData());
+        delete(agent);
     }
 
     @Override
@@ -372,14 +346,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
             deleteComponentFlowVersion(componentFlowVersion);
         }
 
-        persistenceManager.delete(flow.getData(), null, null, tableName(ComponentFlowData.class));
+        persistenceManager.delete(flow, null, null, tableName(ComponentFlow.class));
 
     }
 
     @Override
     public void delete(ComponentFlowNodeLink link) {
-        persistenceManager.delete(link.getData(), null, null,
-                tableName(ComponentFlowNodeLinkData.class));
+        persistenceManager.delete(link, null, null, tableName(ComponentFlowNodeLink.class));
     }
 
     @Override
@@ -387,69 +360,68 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
         List<ComponentFlowNodeLink> links = flowVersion.getComponentFlowNodeLinks();
         for (ComponentFlowNodeLink link : links) {
-            delete(link.getData());
+            delete(link);
         }
         List<ComponentFlowNode> nodes = flowVersion.getComponentFlowNodes();
         for (ComponentFlowNode node : nodes) {
-            delete(node.getData());
+            delete(node);
 
             ComponentVersion componentVersion = node.getComponentVersion();
             Component component = componentVersion.getComponent();
-            if (!component.getData().isShared()) {
+            if (!component.isShared()) {
                 /*
                  * I do not think there will ever be more than one version of a
                  * non shared component
                  */
-                delete(componentVersion.getData());
-                delete(component.getData());
+                delete(componentVersion);
+                delete(component);
             }
         }
-        delete(flowVersion.getData());
+        delete(flowVersion);
     }
 
     @Override
     public void refresh(Connection connection) {
-        refresh((AbstractObject<?>) connection);
+        refresh((AbstractObject) connection);
 
-        ConnectionData data = connection.getData();
         Map<String, Object> folderParams = new HashMap<String, Object>();
-        folderParams.put("id", data.getFolderId());
-        connection.setFolder(new Folder(findOne(FolderData.class, folderParams)));
+        folderParams.put("id", connection.getFolderId());
+        connection.setFolder(findOne(Folder.class, folderParams));
 
         Map<String, Object> settingParams = new HashMap<String, Object>();
-        settingParams.put("connectionId", data.getId());
-        List<? extends SettingData> settings = find(ConnectionSettingData.class, settingParams);
+        settingParams.put("connectionId", connection.getId());
+        List<? extends Setting> settings = find(ConnectionSetting.class, settingParams);
         connection.setSettings(settings);
     }
 
     @Override
     public void refresh(Model model) {
-        refresh((AbstractObject<?>) model);
+        refresh((DeprecatedAbstractObject<?>) model);
 
         ModelData data = model.getData();
         Map<String, Object> folderParams = new HashMap<String, Object>();
         folderParams.put("id", data.getFolderId());
-        model.setFolder(new Folder(findOne(FolderData.class, folderParams)));
+        model.setFolder(findOne(Folder.class, folderParams));
     }
 
     @Override
     public void refresh(Agent agent) {
-        refresh((AbstractObject<?>) agent);
+        refresh((AbstractObject) agent);
 
         // TODO refresh settings
     }
 
     @Override
     public void refresh(ComponentFlowVersion componentFlowVersion) {
-        refresh((AbstractObject<?>) componentFlowVersion);
+        refresh((AbstractObject) componentFlowVersion);
         refreshComponentFlowVersionRelations(componentFlowVersion);
     }
 
     private void refreshComponentFlowVersionRelations(ComponentFlowVersion componentFlowVersion) {
         ComponentFlow flow = componentFlowVersion.getComponentFlow();
         if (flow == null) {
-            flow = new ComponentFlow(null, new ComponentFlowData(componentFlowVersion.getData()
-                    .getComponentFlowId()));
+            flow = new ComponentFlow(null);
+            flow.setId(componentFlowVersion.getId());
             componentFlowVersion.setComponentFlow(flow);
         }
         refresh(flow);
@@ -457,23 +429,21 @@ abstract class AbstractConfigurationService extends AbstractService implements
         componentFlowVersion.getComponentFlowNodes().clear();
         componentFlowVersion.getComponentFlowNodeLinks().clear();
         Map<String, Object> versionParams = new HashMap<String, Object>();
-        versionParams.put("componentFlowVersionId", componentFlowVersion.getData().getId());
-        List<ComponentFlowNodeData> datas = persistenceManager.find(ComponentFlowNodeData.class,
-                versionParams, null, null, tableName(ComponentFlowNodeData.class));
-        for (ComponentFlowNodeData data : datas) {
-            ComponentFlowNode node = new ComponentFlowNode(
-                    findComponentVersion(data.getComponentVersionId()), data);
+        versionParams.put("componentFlowVersionId", componentFlowVersion.getId());
+        List<ComponentFlowNode> nodes = persistenceManager.find(ComponentFlowNode.class,
+                versionParams, null, null, tableName(ComponentFlowNode.class));
+        for (ComponentFlowNode node : nodes) {
+            node.setComponentVersion(findComponentVersion(node.getComponentVersionId()));
             componentFlowVersion.getComponentFlowNodes().add(node);
 
             Map<String, Object> linkParams = new HashMap<String, Object>();
-            linkParams.put("sourceNodeId", data.getId());
+            linkParams.put("sourceNodeId", node.getId());
 
-            List<ComponentFlowNodeLinkData> dataLinks = persistenceManager.find(
-                    ComponentFlowNodeLinkData.class, linkParams, null, null,
-                    tableName(ComponentFlowNodeLinkData.class));
-            for (ComponentFlowNodeLinkData dataLink : dataLinks) {
-                componentFlowVersion.getComponentFlowNodeLinks().add(
-                        new ComponentFlowNodeLink(dataLink));
+            List<ComponentFlowNodeLink> dataLinks = persistenceManager.find(
+                    ComponentFlowNodeLink.class, linkParams, null, null,
+                    tableName(ComponentFlowNodeLink.class));
+            for (ComponentFlowNodeLink dataLink : dataLinks) {
+                componentFlowVersion.getComponentFlowNodeLinks().add(dataLink);
             }
         }
 
@@ -481,9 +451,9 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void save(Connection connection) {
-        save((AbstractObject<?>) connection);
-        List<SettingData> settings = connection.getSettings();
-        for (SettingData settingData : settings) {
+        save((AbstractObject) connection);
+        List<Setting> settings = connection.getSettings();
+        for (Setting settingData : settings) {
             save(settingData);
         }
     }
@@ -492,17 +462,17 @@ abstract class AbstractConfigurationService extends AbstractService implements
     public void save(ComponentFlowNode componentFlowNode) {
         ComponentVersion version = componentFlowNode.getComponentVersion();
         Component component = version.getComponent();
-        if (!component.getData().isShared()) {
+        if (!component.isShared()) {
             save(component);
             save(version);
         }
-        save((AbstractObject<?>) componentFlowNode);
+        save((AbstractObject) componentFlowNode);
     }
 
     @Override
     public void save(ComponentFlowVersion flowVersion) {
 
-        save((AbstractObject<?>) flowVersion);
+        save((AbstractObject) flowVersion);
 
         List<ComponentFlowNode> componentFlowNodes = flowVersion.getComponentFlowNodes();
         for (ComponentFlowNode componentFlowNode : componentFlowNodes) {
@@ -511,9 +481,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
         List<ComponentFlowNodeLink> links = flowVersion.getComponentFlowNodeLinks();
         for (ComponentFlowNodeLink link : links) {
-            link.getData().setLastModifyTime(new Date());
-            persistenceManager.save(link.getData(), null, null,
-                    tableName(link.getData().getClass()));
+            link.setLastModifyTime(new Date());
+            persistenceManager.save(link, null, null, tableName(link.getClass()));
         }
 
     }
@@ -526,7 +495,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
             delete(modelVersion);
         }
 
-        persistenceManager.delete(model.getData(), null, null, tableName(ModelData.class));
+        persistenceManager.delete(model, null, null, tableName(ModelData.class));
     }
 
     @Override
@@ -537,8 +506,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         while (itr.hasNext()) {
             delete(itr.next().getValue());
         }
-        persistenceManager.delete(modelVersion.getData(), null, null,
-                tableName(ModelVersionData.class));
+        persistenceManager.delete(modelVersion, null, null, tableName(ModelVersionData.class));
     }
 
     @Override
@@ -556,14 +524,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
             delete(itra.next().getValue());
         }
 
-        persistenceManager.delete(modelEntity.getData(), null, null, tableName(ModelEntity.class));
+        persistenceManager.delete(modelEntity, null, null, tableName(ModelEntity.class));
     }
 
     @Override
     public void delete(ModelAttribute modelAttribute) {
 
-        persistenceManager.delete(modelAttribute.getData(), null, null,
-                tableName(ModelAttribute.class));
+        persistenceManager.delete(modelAttribute, null, null, tableName(ModelAttribute.class));
     }
 
     @Override
@@ -574,30 +541,30 @@ abstract class AbstractConfigurationService extends AbstractService implements
         while (itr.hasNext()) {
             delete(itr.next());
         }
-        persistenceManager.delete(modelEntityRelationship.getData(), null, null,
+        persistenceManager.delete(modelEntityRelationship, null, null,
                 tableName(ModelEntityRelationship.class));
     }
 
     @Override
     public void delete(ModelAttributeRelationship modelAttributeRelationship) {
 
-        persistenceManager.delete(modelAttributeRelationship.getData(), null, null,
+        persistenceManager.delete(modelAttributeRelationship, null, null,
                 tableName(ModelAttributeRelationship.class));
     }
 
     @Override
     public void refresh(ModelVersion modelVersion) {
 
-        refresh((AbstractObject<?>) modelVersion);
+        refresh((DeprecatedAbstractObject<?>) modelVersion);
         refreshModelVersionRelations(modelVersion);
     }
 
     @Override
     public void refresh(ModelEntity modelEntity) {
 
-        refresh((AbstractObject<?>) modelEntity);
+        refresh((DeprecatedAbstractObject<?>) modelEntity);
         Map<String, Object> entityParams = new HashMap<String, Object>();
-        entityParams.put("entityId", modelEntity.getData().getId());
+        entityParams.put("entityId", modelEntity.getId());
         modelEntity.getModelAttributes().clear();
         List<ModelAttributeData> attributeDatas = persistenceManager.find(ModelAttributeData.class,
                 entityParams, null, null, tableName(ModelAttributeData.class));
@@ -620,16 +587,15 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void refresh(ModelAttribute modelAttribute) {
-        refresh((AbstractObject<?>) modelAttribute);
+        refresh((DeprecatedAbstractObject<?>) modelAttribute);
     }
 
     @Override
     public void refresh(ModelEntityRelationship modelEntityRelationship) {
 
-        refresh((AbstractObject<?>) modelEntityRelationship);
+        refresh((DeprecatedAbstractObject<?>) modelEntityRelationship);
         Map<String, Object> entityRelationshipParams = new HashMap<String, Object>();
-        entityRelationshipParams.put("entityRelationshipId", modelEntityRelationship.getData()
-                .getId());
+        entityRelationshipParams.put("entityRelationshipId", modelEntityRelationship.getId());
         modelEntityRelationship.getAttributeRelationships().clear();
         List<ModelAttributeRelationshipData> attributeRelationshipDatas = persistenceManager.find(
                 ModelAttributeRelationshipData.class, entityRelationshipParams, null, null,
@@ -645,13 +611,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void refresh(ModelAttributeRelationship modelAttributeRelationship) {
 
-        refresh((AbstractObject<?>) modelAttributeRelationship);
+        refresh((DeprecatedAbstractObject<?>) modelAttributeRelationship);
     }
 
     @Override
     public void save(ModelVersion modelVersion) {
 
-        save((AbstractObject<?>) modelVersion);
+        save((DeprecatedAbstractObject<?>) modelVersion);
 
         Iterator<Entry<String, ModelEntity>> itr = modelVersion.getModelEntities().entrySet()
                 .iterator();
@@ -663,7 +629,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void save(ModelEntity modelEntity) {
 
-        save((AbstractObject<?>) modelEntity);
+        save((DeprecatedAbstractObject<?>) modelEntity);
 
         Iterator<Entry<String, ModelAttribute>> itra = modelEntity.getModelAttributes().entrySet()
                 .iterator();
@@ -680,7 +646,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void save(ModelEntityRelationship modelEntityRelationship) {
 
-        save((AbstractObject<?>) modelEntityRelationship);
+        save((DeprecatedAbstractObject<?>) modelEntityRelationship);
         for (ModelAttributeRelationship attributeRelationship : modelEntityRelationship
                 .getAttributeRelationships()) {
             save(attributeRelationship);

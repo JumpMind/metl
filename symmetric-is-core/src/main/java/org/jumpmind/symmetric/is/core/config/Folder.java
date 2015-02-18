@@ -3,22 +3,29 @@ package org.jumpmind.symmetric.is.core.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.config.data.FolderData;
-
-public class Folder extends AbstractObject<FolderData> {
+public class Folder extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
+    String parentFolderId;
+
+    String type;
+
+    String name;
+    
     Folder parent;
 
     List<Folder> children = new ArrayList<Folder>();
 
-    public Folder(FolderData data) {
-        super(data);
+    public Folder(String id) {
+        this.id = id;         
     }
-
+    
+    public Folder() {
+    }
+    
     public FolderType getFolderType() {
-        return FolderType.valueOf(getData().getType());
+        return FolderType.valueOf(type);
     }
 
     public List<Folder> getChildren() {
@@ -28,7 +35,7 @@ public class Folder extends AbstractObject<FolderData> {
     public void setParent(Folder parent) {
         this.parent = parent;
         if (parent != null) {
-            data.setParentFolderId(parent.getId());
+            parentFolderId = parent.getId();
         }
     }
 
@@ -37,21 +44,32 @@ public class Folder extends AbstractObject<FolderData> {
     }
 
     public boolean isParentOf(Folder folder) {
-        return folder.getData().getParentFolderId() != null
-                && folder.getData().getParentFolderId().equals(getData().getId());
+        return folder.getParentFolderId() != null
+                && folder.getParentFolderId().equals(id);
+    }
+    
+    public String getType() {
+        return type;
     }
 
-    public void setName(String name) {
-        this.data.setName(name);
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getName() {
-        return this.data.getName();
+        return name;
     }
 
-    @Override
-    public String toString() {
-        return getName();
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public void setParentFolderId(String parentFolderId) {
+        this.parentFolderId = parentFolderId;
+    }
+    
+    public String getParentFolderId() {
+        return parentFolderId;
     }
     
     @Override

@@ -5,7 +5,7 @@ import java.util.Map;
 import org.jumpmind.symmetric.is.core.config.data.ModelVersionData;
 import org.jumpmind.util.LinkedCaseInsensitiveMap;
 
-public class ModelVersion extends AbstractObject<ModelVersionData> {
+public class ModelVersion extends DeprecatedAbstractObject<ModelVersionData> {
 
     private static final long serialVersionUID = 1L;
 

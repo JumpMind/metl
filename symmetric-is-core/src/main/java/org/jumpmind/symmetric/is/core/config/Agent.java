@@ -1,73 +1,139 @@
 package org.jumpmind.symmetric.is.core.config;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.config.data.AgentData;
-import org.jumpmind.symmetric.is.core.config.data.AgentSettingData;
-import org.jumpmind.symmetric.is.core.config.data.SettingData;
-
-public class Agent extends AbstractObjectWithSettings<AgentData> {
+public class Agent extends AbstractObjectWithSettings {
 
     private static final long serialVersionUID = 1L;
 
     Folder folder;
-    
+
+    String name;
+
+    String folderId;
+
+    String host;
+
+    String startMode = AgentStartMode.AUTO.name();
+
+    String status = AgentStatus.STOPPED.name();
+
+    Date lastStartTime;
+
+    Date heartbeatTime;
+
     List<AgentDeployment> agentDeployments;
-    
-    public Agent(Folder folder, AgentData data, SettingData... settings) {
-        super(data, settings);
-        this.folder = folder;
-        this.data.setFolderId(folder.getData().getId());
+
+    public Agent() {
         this.agentDeployments = new ArrayList<AgentDeployment>();
     }
-    
+
+    public Agent(Folder folder, Setting... settings) {
+        super(settings);
+        setFolder(folder);
+        this.agentDeployments = new ArrayList<AgentDeployment>();
+    }
+
+    public void setFolder(Folder folder) {
+        this.folder = folder;
+        if (folder != null) {
+            folderId = folder.getId();
+        } else {
+            folderId = null;
+        }
+    }
+
     public AgentStartMode getAgentStartMode() {
-        return data.getStartMode() == null ? AgentStartMode.MANUAL : AgentStartMode.valueOf(data.getStartMode());
+        return startMode == null ? AgentStartMode.MANUAL : AgentStartMode.valueOf(startMode);
     }
-    
+
     public AgentStatus getAgentStatus() {
-        return data.getStatus() == null ? AgentStatus.UNKNOWN : AgentStatus.valueOf(data.getStatus());
+        return status == null ? AgentStatus.UNKNOWN : AgentStatus.valueOf(status);
     }
-    
-    public void setAgentStatus(AgentStatus status) {
-        data.setStatus(status.name());
+
+    public void setAgentStatus(AgentStatus agentStatus) {
+        status = agentStatus.name();
     }
-    
+
     @Override
-    protected SettingData createSettingData() {
-        return new AgentSettingData();
+    protected Setting createSettingData() {
+        return new AgentSetting();
     }
-    
+
     public Folder getFolder() {
         return folder;
     }
-    
-    public void setName(String name) {
-        this.data.setName(name);
-    }
-    
+
     public String getName() {
-        return this.data.getName();
+        return name;
     }
-    
-    @Override
-    public String toString() {
-        return data.getName();
+
+    public void setName(String name) {
+        this.name = name;
     }
-    
+
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
+    }
+
+    public String getFolderId() {
+        return folderId;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setStartMode(String startMode) {
+        this.startMode = startMode;
+    }
+
+    public String getStartMode() {
+        return startMode;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Date getLastStartTime() {
+        return lastStartTime;
+    }
+
+    public void setLastStartTime(Date lastStartTime) {
+        this.lastStartTime = lastStartTime;
+    }
+
+    public Date getHeartbeatTime() {
+        return heartbeatTime;
+    }
+
+    public void setHeartbeatTime(Date heartbeatTime) {
+        this.heartbeatTime = heartbeatTime;
+    }
+
     public List<AgentDeployment> getAgentDeployments() {
         return agentDeployments;
     }
-    
+
     public void setAgentDeployments(List<AgentDeployment> agentDeployments) {
         this.agentDeployments = agentDeployments;
     }
-    
+
     public boolean isDeployed(ComponentFlowVersion flowVersion) {
         return getAgentDeploymentFor(flowVersion) != null;
     }
-    
+
     public AgentDeployment getAgentDeploymentFor(ComponentFlowVersion flowVersion) {
         for (AgentDeployment agentDeployment : agentDeployments) {
             if (agentDeployment.getComponentFlowVersion().equals(flowVersion)) {
@@ -76,5 +142,5 @@ public class Agent extends AbstractObjectWithSettings<AgentData> {
         }
         return null;
     }
-    
+
 }

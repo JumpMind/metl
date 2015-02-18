@@ -6,8 +6,6 @@ import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
-import org.jumpmind.symmetric.is.core.config.data.AgentDeploymentData;
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
 import org.jumpmind.symmetric.ui.common.MultiSelectTable;
@@ -143,13 +141,12 @@ public class EditAgentDeploymentsWindow extends ResizableWindow {
                 @SuppressWarnings("unchecked")
                 Set<ComponentFlowVersionSummary> selectedFlows = (Set<ComponentFlowVersionSummary>) item;
                 for (ComponentFlowVersionSummary componentFlowVersionSummary : selectedFlows) {
-                    AgentDeploymentData data = new AgentDeploymentData();
-                    data.setAgentId(agent.getData().getId());
-                    data.setComponentFlowVersionId(componentFlowVersionSummary.getId());
-                    ComponentFlowVersion componentFlowVersion = new ComponentFlowVersion(null,
-                            new ComponentFlowVersionData(componentFlowVersionSummary.getId()));
+                    ComponentFlowVersion componentFlowVersion = new ComponentFlowVersion();
+                    componentFlowVersion.setId(componentFlowVersionSummary.getId());
                     configurationService.refresh(componentFlowVersion);
-                    AgentDeployment agentDeployment = new AgentDeployment(componentFlowVersion, data);
+                    AgentDeployment agentDeployment = new AgentDeployment(componentFlowVersion);
+                    agentDeployment.setAgentId(agent.getId());
+
                     configurationService.save(agentDeployment);
                     agent.getAgentDeployments().add(agentDeployment);
                     container.addBean(agentDeployment);

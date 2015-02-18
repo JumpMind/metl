@@ -5,10 +5,9 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
-
-public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionData> {
+public class ComponentFlowVersion extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
@@ -17,29 +16,68 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
     List<ComponentFlowNode> componentFlowNodes;
 
     List<ComponentFlowNodeLink> componentFlowNodeLinks;
+    
+    String componentFlowId;
+    
+    String startType = StartType.MANUAL.name();
+    
+    String startExpression;
+    
+    String versionName = UUID.randomUUID().toString();
 
-    public ComponentFlowVersion(ComponentFlow flow, ComponentFlowVersionData data) {
-        super(data);
-        this.componentFlow = flow;
+    public ComponentFlowVersion() {
         this.componentFlowNodes = new ArrayList<ComponentFlowNode>();
         this.componentFlowNodeLinks = new ArrayList<ComponentFlowNodeLink>();
+    }
+    
+    public ComponentFlowVersion(ComponentFlow flow) {
+        this();
+        setComponentFlow(flow);
     }
 
     public ComponentFlowNode findComponentFlowNodeWithId(String id) {
         for (ComponentFlowNode componentFlowNode : componentFlowNodes) {
-            if (componentFlowNode.getData().getId().equals(id)) {
+            if (componentFlowNode.getId().equals(id)) {
                 return componentFlowNode;
             }
         }
         return null;
     }
     
-    public String getVersion() {
-        return data.getVersionName();
+    public void setComponentFlowId(String componentFlowId) {
+        this.componentFlowId = componentFlowId;
+    }
+
+    public String getComponentFlowId() {
+        return componentFlowId;
+    }
+
+    public void setStartExpression(String startExpression) {
+        this.startExpression = startExpression;
     }
     
+    public String getStartExpression() {
+        return startExpression;
+    }
+    
+    public void setStartType(String startType) {
+        this.startType = startType;
+    }
+    
+    public String getStartType() {
+        return startType;
+    }
+
     public String getFolderName() {
-        return componentFlow.getFolder().getData().getName();
+        return componentFlow.getFolder().getName();
+    }
+
+    public void setVersionName(String versionName) {        
+        this.versionName = versionName;
+    }
+
+    public String getVersionName() {        
+        return versionName;
     }
 
     public List<ComponentFlowNode> getComponentFlowNodes() {
@@ -52,6 +90,11 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
     
     public void setComponentFlow(ComponentFlow componentFlow) {
         this.componentFlow = componentFlow;
+        if (componentFlow != null) {
+            componentFlowId = componentFlow.getId();
+        } else {
+            componentFlowId = null;
+        }
     }
 
     public List<ComponentFlowNodeLink> getComponentFlowNodeLinks() {
@@ -59,18 +102,18 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
     }
     
     public void setName(String name) {
-        data.setVersionName(name);
+        setVersionName(name);
     }
     
     public String getName() {
-        return data.getVersionName();
+        return versionName;
     }
     
     public ComponentFlowNode removeComponentFlowNode(ComponentFlowNode flowNode) {
         Iterator<ComponentFlowNode> i = componentFlowNodes.iterator();
         while (i.hasNext()) {
             ComponentFlowNode node = i.next();
-            if (node.getData().getId().equals(flowNode.getData().getId())) {
+            if (node.getId().equals(flowNode.getId())) {
                 i.remove();
                 return node;
             }
@@ -83,8 +126,8 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
         Iterator<ComponentFlowNodeLink> i = componentFlowNodeLinks.iterator();
         while (i.hasNext()) {
             ComponentFlowNodeLink link = i.next();
-            if (link.getData().getSourceNodeId().equals(flowNodeId)
-                    || link.getData().getTargetNodeId().equals(flowNodeId)) {
+            if (link.getSourceNodeId().equals(flowNodeId)
+                    || link.getTargetNodeId().equals(flowNodeId)) {
                 i.remove();
                 links.add(link);
             }
@@ -96,8 +139,8 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
         Iterator<ComponentFlowNodeLink> i = componentFlowNodeLinks.iterator();
         while (i.hasNext()) {
             ComponentFlowNodeLink link = i.next();
-            if (link.getData().getSourceNodeId().equals(sourceNodeId)
-                    && link.getData().getTargetNodeId().equals(targetNodeId)) {
+            if (link.getSourceNodeId().equals(sourceNodeId)
+                    && link.getTargetNodeId().equals(targetNodeId)) {
                 i.remove();
                 return link;
             }
@@ -105,24 +148,14 @@ public class ComponentFlowVersion extends AbstractObject<ComponentFlowVersionDat
         return null;
     }
     
-    public StartType getStartType() {
-        String type = data.getStartType();
-        if (isBlank(type)) {
+    public StartType asStartType() {
+        if (isBlank(startType)) {
             return StartType.MANUAL;
         } else {
-            return StartType.valueOf(type);
+            return StartType.valueOf(startType);
         }
     }
     
-    public String getStartExpression() {
-        return data.getStartExpression();
-    }
-    
-    @Override
-    public String toString() {
-        return getName() + ":" + getData().getVersionName();
-    }
-
     @Override
     public boolean isSettingNameAllowed() {
         return true;

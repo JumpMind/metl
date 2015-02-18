@@ -9,7 +9,6 @@ import java.util.Set;
 import org.jumpmind.symmetric.is.core.config.AbstractObject;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
-import org.jumpmind.symmetric.is.core.config.data.FolderData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.ui.common.EnableFocusTextField;
 import org.jumpmind.symmetric.is.ui.common.Icons;
@@ -70,9 +69,9 @@ abstract public class AbstractFolderNavigator extends Panel {
     
     Set<Object> lastSelected;
     
-    AbstractObject<?> itemBeingEdited;
+    AbstractObject itemBeingEdited;
     
-    AbstractObject<?> itemClicked;
+    AbstractObject itemClicked;
     
     long itemClickTimeInMs;
 
@@ -180,7 +179,7 @@ abstract public class AbstractFolderNavigator extends Panel {
         table.setImmediate(true);
         table.setSelectable(true);
         table.setEditable(true);
-        table.setContainerDataSource(new BeanItemContainer<AbstractObject<?>>(AbstractObject.class));
+        table.setContainerDataSource(new BeanItemContainer<AbstractObject>(AbstractObject.class));
         table.setTableFieldFactory(new DefaultFieldFactory() {
             @Override
             public Field<?> createField(Container container, Object itemId, Object propertyId,
@@ -240,8 +239,8 @@ abstract public class AbstractFolderNavigator extends Panel {
                             } else {
                                 itemClicked = null;
                             }
-                        } else if (event.getItemId() instanceof AbstractObject<?>) {
-                            itemClicked = (AbstractObject<?>) event.getItemId();
+                        } else if (event.getItemId() instanceof AbstractObject) {
+                            itemClicked = (AbstractObject) event.getItemId();
                             itemClickTimeInMs = System.currentTimeMillis();
                         }
                     }
@@ -287,7 +286,7 @@ abstract public class AbstractFolderNavigator extends Panel {
         return table;
     }
 
-    protected void startEditingItem(AbstractObject<?> obj) {
+    protected void startEditingItem(AbstractObject obj) {
         if (obj.isSettingNameAllowed()) {
             itemBeingEdited = obj;
             treeTable.refreshRowCache();
@@ -436,10 +435,10 @@ abstract public class AbstractFolderNavigator extends Panel {
                                 if (obj instanceof Folder) {
                                     Folder folder = (Folder) obj;
                                     try {
-                                        configurationService.deleteFolder(folder.getData().getId());
+                                        configurationService.deleteFolder(folder.getId());
                                     } catch (Exception ex) {
                                         CommonUiUtils.notify("Could not delete the \""
-                                                + folder.getData().getName() + "\" folder",
+                                                + folder.getName() + "\" folder",
                                                 Type.WARNING_MESSAGE);
                                     }
                                 }
@@ -465,11 +464,9 @@ abstract public class AbstractFolderNavigator extends Panel {
     protected void addFolder() {
         Folder parentFolder = getSelectedFolder();
 
-        FolderData folderData = new FolderData();
-        folderData.setName("New Folder");
-        folderData.setType(folderType.name());
-
-        Folder folder = new Folder(folderData);
+        Folder folder = new Folder();
+        folder.setName("New Folder");
+        folder.setType(folderType.name());
         folder.setParent(parentFolder);
 
         addChildFolder(folder);

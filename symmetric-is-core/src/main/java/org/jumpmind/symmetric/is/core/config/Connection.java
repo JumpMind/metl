@@ -1,41 +1,55 @@
 package org.jumpmind.symmetric.is.core.config;
 
-import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
-import org.jumpmind.symmetric.is.core.config.data.ConnectionSettingData;
-import org.jumpmind.symmetric.is.core.config.data.SettingData;
-
-public class Connection extends AbstractObjectWithSettings<ConnectionData> {
+public class Connection extends AbstractObjectWithSettings {
 
     private static final long serialVersionUID = 1L;
 
     Folder folder;
 
-    public Connection(ConnectionData data) {
-        this(null, data);
+    String name;
+
+    String type;
+
+    String folderId;
+
+    public Connection() {
     }
 
-    public Connection(Folder folder, ConnectionData data, SettingData... settings) {
-        super(data, settings);
+    public Connection(Folder folder, Setting... settings) {
+        super(settings);
         setFolder(folder);
     }
 
-    @Override
-    public String toString() {
-        return getData().getName();
+    public String getType() {
+        return type;
     }
-    
-    public void setName(String name) {
-        this.data.setName(name);
+
+    public void setType(String type) {
+        this.type = type;
     }
-    
+
     public String getName() {
-        return this.data.getName();
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
+    }
+
+    public String getFolderId() {
+        return folderId;
     }
 
     public void setFolder(Folder folder) {
         this.folder = folder;
         if (folder != null) {
-            data.setFolderId(folder.getData().getId());
+            setFolderId(folder.getId());
+        } else {
+            folderId = null;
         }
     }
 
@@ -44,8 +58,8 @@ public class Connection extends AbstractObjectWithSettings<ConnectionData> {
     }
 
     @Override
-    protected SettingData createSettingData() {
-        return new ConnectionSettingData(data.getId());
+    protected Setting createSettingData() {
+        return new ConnectionSetting(id);
     }
 
     @Override

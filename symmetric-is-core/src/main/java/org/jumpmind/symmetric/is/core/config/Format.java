@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.jumpmind.symmetric.is.core.config.data.FormatData;
 
-public class Format extends AbstractObject<FormatData> {
+public class Format extends DeprecatedAbstractObject<FormatData> {
 
     private static final long serialVersionUID = 1L;
 

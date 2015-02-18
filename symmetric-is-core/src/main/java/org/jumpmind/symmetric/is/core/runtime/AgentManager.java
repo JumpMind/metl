@@ -47,7 +47,7 @@ public class AgentManager implements IAgentManager {
     
     @Override
     public void undeploy(AgentDeployment agentDeployment) {
-        AgentRuntime engine = getAgentRuntime(agentDeployment.getData().getAgentId());
+        AgentRuntime engine = getAgentRuntime(agentDeployment.getAgentId());
         if (engine != null) {
             engine.undeploy(agentDeployment);
         }
@@ -82,7 +82,7 @@ public class AgentManager implements IAgentManager {
 
     @Override
     public boolean isAgentLocal(Agent agent) {
-        String hostName = agent.getData().getHost();
+        String hostName = agent.getHost();
         return "localhost".equals(hostName) || "127.0.0.1".equals(hostName)
                 || "::1".equals(hostName) || AppUtils.getHostName().equals(hostName)
                 || AppUtils.getIpAddress().equals(hostName);

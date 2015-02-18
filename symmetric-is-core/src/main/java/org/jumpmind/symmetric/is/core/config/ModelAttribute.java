@@ -2,7 +2,7 @@ package org.jumpmind.symmetric.is.core.config;
 
 import org.jumpmind.symmetric.is.core.config.data.ModelAttributeData;
 
-public class ModelAttribute extends AbstractObject<ModelAttributeData> {
+public class ModelAttribute extends DeprecatedAbstractObject<ModelAttributeData> {
 
     private static final long serialVersionUID = 1L;
 

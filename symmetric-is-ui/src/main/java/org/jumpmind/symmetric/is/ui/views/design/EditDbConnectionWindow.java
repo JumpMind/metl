@@ -17,11 +17,11 @@ import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
+import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
 import org.jumpmind.symmetric.ui.common.ResizableWindow;
 import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.jumpmind.symmetric.ui.common.UiConstants;
-import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
@@ -261,7 +261,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
 
         this.itemSavedListener = itemSavedListener;
 
-        nameField.setValue(connection.getData().getName());
+        nameField.setValue(connection.getName());
                 
         databaseType.setValue(findDatabaseType());
         databaseUrl.setValue(connection.get(DB_POOL_URL));
@@ -345,7 +345,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
     }
 
     protected void save() {
-        connection.getData().setType(DataSourceConnection.TYPE);
+        connection.setType(DataSourceConnection.TYPE);
         if (isBlank(nameField.getValue())) {
             CommonUiUtils.notify("The name of the connection cannot be blank", Type.WARNING_MESSAGE);
             return;
@@ -354,7 +354,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
         
 
         String type = (String)databaseType.getValue();
-        connection.getData().setName(nameField.getValue());
+        connection.setName(nameField.getValue());
         connection.put(DB_POOL_URL, databaseUrl.getValue());
         connection.put(DB_POOL_DRIVER, databaseToDriverMap.get(type));
         connection.put(DB_POOL_USER, userIdField.getValue());

@@ -8,9 +8,9 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
 import org.jumpmind.symmetric.is.core.config.Connection;
+import org.jumpmind.symmetric.is.core.config.Setting;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
-import org.jumpmind.symmetric.is.core.config.data.SettingData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
@@ -116,7 +116,7 @@ public class ComponentSettingsSheet extends VerticalLayout {
 
             TextField typeLabel = new TextField();
             typeLabel.setCaption("Type");
-            typeLabel.setValue(flowNode.getComponentVersion().getComponent().getData().getType());
+            typeLabel.setValue(flowNode.getComponentVersion().getComponent().getType());
             typeLabel.setReadOnly(true);
             formLayout.addComponent(typeLabel);
 
@@ -324,7 +324,7 @@ public class ComponentSettingsSheet extends VerticalLayout {
     }
 
     protected void saveSetting(String key, Field<?> field, ComponentFlowNode flowNode) {
-        SettingData data = flowNode.getComponentVersion().findSetting(key);
+        Setting data = flowNode.getComponentVersion().findSetting(key);
         data.setValue(field.getValue() != null ? field.getValue().toString() : null);
         configurationService.save(data);
         componentSettingsChangedListener.componentSettingsChanges(flowNode, false);

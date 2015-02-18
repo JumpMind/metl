@@ -23,9 +23,7 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
-import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
-import org.jumpmind.symmetric.is.core.config.data.SettingData;
+import org.jumpmind.symmetric.is.core.config.Setting;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
@@ -161,51 +159,48 @@ public class DbReaderComponentTest {
 	 	Folder folder = TestUtils.createFolder("Test Folder");
     	ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);	 	
     	Component component = TestUtils.createComponent(DbReaderComponent.TYPE, false);
-    	SettingData[] settingData = createReaderSettings();
+    	Setting[] settingData = createReaderSettings();
     	ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null, settingData);
     	componentVersion.setConnection(createConnection(createConnectionSettings()));
-    	ComponentFlowNodeData data = new ComponentFlowNodeData();
-    	data.setComponentFlowVersionId(flow.getId());
-    	data.setComponentVersionId(componentVersion.getId());
-    	data.setCreateBy("Test");
-    	data.setCreateTime(new Date());
-    	data.setLastModifyBy("Test");
-    	data.setLastModifyTime(new Date());
-    	ComponentFlowNode readerComponent = new ComponentFlowNode(componentVersion, data);
-        	
+    	ComponentFlowNode readerComponent = new ComponentFlowNode();
+    	readerComponent.setComponentFlowVersionId(flow.getId());
+    	readerComponent.setComponentVersionId(componentVersion.getId());
+    	readerComponent.setCreateBy("Test");
+    	readerComponent.setCreateTime(new Date());
+    	readerComponent.setLastModifyBy("Test");
+    	readerComponent.setLastModifyTime(new Date());
+    	readerComponent.setComponentVersion(componentVersion);        	
 	 	return readerComponent;
 	}
 	
-	private static Connection createConnection(SettingData[] settingsData) {
-		
-		ConnectionData connectionData = new ConnectionData();
+	private static Connection createConnection(List<Setting> settings) {		
+	    Connection connection = new Connection();
 		Folder folder = TestUtils.createFolder("Test Folder Connection");
-		connectionData.setName("Test Connection");
-		connectionData.setFolderId("Test Folder Connection");
-		connectionData.setType(DataSourceConnection.TYPE);
-		Connection connection = new Connection(folder, connectionData, settingsData);
+		connection.setName("Test Connection");
+		connection.setFolderId("Test Folder Connection");
+		connection.setType(DataSourceConnection.TYPE);
+		connection.setFolder(folder);
+		connection.setSettings(settings);
 		
 		return connection;
 	}
 	
-	private static SettingData[] createReaderSettings() {
+	private static Setting[] createReaderSettings() {
 		
-		SettingData[] settingData = new SettingData[2];
-		settingData[0] = new SettingData(DbReaderComponent.SQL,"select * From test_table_1 order by col1");
-		settingData[1] = new SettingData(DbReaderComponent.ROWS_PER_MESSAGE,"2");
+		Setting[] settingData = new Setting[2];
+		settingData[0] = new Setting(DbReaderComponent.SQL,"select * From test_table_1 order by col1");
+		settingData[1] = new Setting(DbReaderComponent.ROWS_PER_MESSAGE,"2");
 		
 		return settingData;
 	}
 	
-	private static SettingData[] createConnectionSettings() {
-		
-		SettingData[] settingData = new SettingData[4];
-		settingData[0] = new SettingData(DataSourceConnection.DB_POOL_DRIVER,"org.h2.Driver");
-		settingData[1] = new SettingData(DataSourceConnection.DB_POOL_URL,"jdbc:h2:file:build/dbs/testdb");
-		settingData[2] = new SettingData(DataSourceConnection.DB_POOL_USER,"jumpmind");
-		settingData[3] = new SettingData(DataSourceConnection.DB_POOL_PASSWORD,"jumpmind");
-		
-		return settingData;
+	private static List<Setting> createConnectionSettings() {
+		List<Setting> settings = new ArrayList<Setting>(4);
+		settings.add(new Setting(DataSourceConnection.DB_POOL_DRIVER,"org.h2.Driver"));
+		settings.add(new Setting(DataSourceConnection.DB_POOL_URL,"jdbc:h2:file:build/dbs/testdb"));
+		settings.add(new Setting(DataSourceConnection.DB_POOL_USER,"jumpmind"));
+		settings.add(new Setting(DataSourceConnection.DB_POOL_PASSWORD,"jumpmind"));		
+		return settings;
 	}
 	
 	private static IDatabasePlatform createPlatformAndTestDatabase() throws Exception {

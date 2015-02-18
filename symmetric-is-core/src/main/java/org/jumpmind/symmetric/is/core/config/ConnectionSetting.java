@@ -1,19 +1,20 @@
-package org.jumpmind.symmetric.is.core.config.data;
+package org.jumpmind.symmetric.is.core.config;
 
-public class ConnectionSettingData extends SettingData {
+
+public class ConnectionSetting extends Setting {
 
     private static final long serialVersionUID = 1L;
     
     String connectionId;
 
-    public ConnectionSettingData() {
+    public ConnectionSetting() {
     }
     
-    public ConnectionSettingData(String connectionId) {
+    public ConnectionSetting(String connectionId) {
         this.connectionId = connectionId;
     }
     
-    public ConnectionSettingData(String name, String value) {
+    public ConnectionSetting(String name, String value) {
         super(name, value);
     }
     

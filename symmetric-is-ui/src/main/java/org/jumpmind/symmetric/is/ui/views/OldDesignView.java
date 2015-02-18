@@ -12,9 +12,6 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
-import org.jumpmind.symmetric.is.core.config.data.ConnectionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
@@ -206,12 +203,12 @@ public class OldDesignView extends HorizontalLayout implements View {
             if (objects instanceof ComponentFlow) {
                 ComponentFlow flow = (ComponentFlow) objects;
                 ConfirmDialog.show("Delete Flow?", "Are you sure you want to delete the "
-                        + flow.getData().getName() + " flow?", new DeleteFlowConfirmationListener(
+                        + flow.getName() + " flow?", new DeleteFlowConfirmationListener(
                         flow));
             } else if (objects instanceof Connection) {
                 Connection connection = (Connection) objects;
                 ConfirmDialog.show("Delete Connection?", "Are you sure you want to delete the "
-                        + connection.getData().getName() + " connection?",
+                        + connection.getName() + " connection?",
                         new DeleteConnectionConfirmationListener(connection));
 
             }
@@ -229,7 +226,7 @@ public class OldDesignView extends HorizontalLayout implements View {
             List<Connection> connections = configurationService.findConnectionsInFolder(folder);
             for (Connection connection : connections) {
                 this.treeTable.addItem(connection);
-                if (DataSourceConnection.TYPE.equals(connection.getData().getType())) {
+                if (DataSourceConnection.TYPE.equals(connection.getType())) {
                     this.treeTable.setItemIcon(connection, FontAwesome.DATABASE);
                 } else {
                     this.treeTable.setItemIcon(connection, GENERAL_CONNECTION_ICON);
@@ -251,7 +248,7 @@ public class OldDesignView extends HorizontalLayout implements View {
                 for (ComponentFlowVersion componentFlowVersion : versions) {
                     this.treeTable.addItem(componentFlowVersion);
                     this.treeTable.setItemCaption(componentFlowVersion, componentFlowVersion
-                            .getData().getVersionName());
+                            .getVersionName());
                     this.treeTable.setItemIcon(componentFlowVersion, FontAwesome.FILE_TEXT);
                     this.treeTable.setParent(componentFlowVersion, flow);
                     this.treeTable.setChildrenAllowed(componentFlowVersion, false);
@@ -274,8 +271,7 @@ public class OldDesignView extends HorizontalLayout implements View {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
-                editDbConnectionWindow.show(new Connection(getSelectedFolder(),
-                        new ConnectionData()), MainTab.this);
+                editDbConnectionWindow.show(new Connection(getSelectedFolder()), MainTab.this);
             }
         }
 
@@ -287,19 +283,13 @@ public class OldDesignView extends HorizontalLayout implements View {
                 if (isNotBlank(content)) {
                     Folder folder = getSelectedFolder();
 
-                    ComponentFlowData data = new ComponentFlowData();
-                    data.setName(content);
-                    data.setFolderId(folder.getData().getId());
-
-                    ComponentFlow flow = new ComponentFlow(folder, data);
+                    ComponentFlow flow = new ComponentFlow(folder);
+                    flow.setName(content);
 
                     configurationService.save(flow);
 
-                    ComponentFlowVersionData versionData = new ComponentFlowVersionData();
-                    versionData.setVersionName("orig");
-                    versionData.setComponentFlowId(data.getId());
-
-                    ComponentFlowVersion flowVersion = new ComponentFlowVersion(flow, versionData);
+                    ComponentFlowVersion flowVersion = new ComponentFlowVersion(flow);
+                    flowVersion.setVersionName("version 1");
 
                     configurationService.save(flowVersion);
 

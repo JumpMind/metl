@@ -1,30 +1,72 @@
 package org.jumpmind.symmetric.is.core.config;
 
-import org.jumpmind.symmetric.is.core.config.data.ExecutionData;
+import java.util.Date;
 
-public class Execution extends AbstractObject<ExecutionData> {
+public class Execution extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
-    public Execution(ExecutionStatus status, String agentDeploymentId) {
-        this.data = new ExecutionData();
-        this.data.setAgentDeploymentId(agentDeploymentId);
-        setExecutionStatus(status);
-        
+    String agentDeploymentId;
+
+    String status;
+
+    Date startTime;
+
+    Date endTime;
+
+    public Execution() {
     }
-    
+
+    public Execution(ExecutionStatus status, String agentDeploymentId) {
+        this.agentDeploymentId = agentDeploymentId;
+        setExecutionStatus(status);
+    }
+
     public void setExecutionStatus(ExecutionStatus status) {
-        data.setStatus(status.name());
+        setStatus(status.name());
     }
 
     public ExecutionStatus getExecutionStatus() {
-        return ExecutionStatus.valueOf(data.getStatus());
+        return ExecutionStatus.valueOf(status);
     }
-    
+
     public void setName(String name) {
     }
-    
+
     public String getName() {
-        return this.data.getId();
+        return id;
     }
+
+    public String getAgentDeploymentId() {
+        return agentDeploymentId;
+    }
+
+    public void setAgentDeploymentId(String agentDeploymentId) {
+        this.agentDeploymentId = agentDeploymentId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
+
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
 }

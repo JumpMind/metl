@@ -7,15 +7,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.properties.TypedProperties;
+import org.jumpmind.symmetric.is.core.config.data.AbstractData;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 
-abstract public class AbstractObjectWithSettings extends AbstractObject {
+abstract public class DeprecatedAbstractObjectWithSettings<D extends AbstractData> extends DeprecatedAbstractObject<D> {
 
     private static final long serialVersionUID = 1L;
 
     protected List<Setting> settings;
 
-    public AbstractObjectWithSettings(Setting... settings) {
+    public DeprecatedAbstractObjectWithSettings(D data, Setting... settings) {
+        super(data);
         this.settings = new ArrayList<Setting>();
         if (settings != null) {
             for (Setting settingData : settings) {

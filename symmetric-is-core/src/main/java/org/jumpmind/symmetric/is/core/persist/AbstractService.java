@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.config.AbstractObject;
+import org.jumpmind.symmetric.is.core.config.DeprecatedAbstractObject;
 import org.jumpmind.symmetric.is.core.config.data.AbstractData;
 
 public abstract class AbstractService {
@@ -22,8 +23,12 @@ public abstract class AbstractService {
     
     protected String tableName(Class<?> clazz) {
         StringBuilder name = new StringBuilder(tablePrefix);
+        int end = clazz.getSimpleName().indexOf("Data");
+        if (end < 0) {
+            end = clazz.getSimpleName().length();
+        }
         String[] tokens = StringUtils.splitByCharacterTypeCamelCase(clazz.getSimpleName()
-                .substring(0, clazz.getSimpleName().indexOf("Data")));
+                .substring(0, end));
         for (String string : tokens) {
             name.append("_");
             name.append(string);
@@ -43,17 +48,26 @@ public abstract class AbstractService {
             return null;
         }
     }
-    
+
+    protected void delete(AbstractObject data) {
+        persistenceManager.delete(data, null, null, tableName(data.getClass()));
+    }
+
     protected void delete(AbstractData data) {
         persistenceManager.delete(data, null, null, tableName(data.getClass()));
     }
     
-    protected void refresh(AbstractObject<?> object) {
+    protected void refresh(DeprecatedAbstractObject<?> object) {
         persistenceManager.refresh(object.getData(), null, null, tableName(object.getData()
                 .getClass()));
     }
     
-    public void save(AbstractObject<?> obj) {
+    protected void refresh(AbstractObject object) {
+        persistenceManager.refresh(object, null, null, tableName(object
+                .getClass()));
+    }
+    
+    public void save(DeprecatedAbstractObject<?> obj) {
         save(obj.getData());
     }
 
@@ -61,5 +75,11 @@ public abstract class AbstractService {
         data.setLastModifyTime(new Date());
         persistenceManager.save(data, null, null, tableName(data.getClass()));
     }
+    
+    public void save(AbstractObject data) {
+        data.setLastModifyTime(new Date());
+        persistenceManager.save(data, null, null, tableName(data.getClass()));
+    }
+
     
 }

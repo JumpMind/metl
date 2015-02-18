@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.jumpmind.symmetric.is.core.config.data.ModelEntityRelationshipData;
 
-public class ModelEntityRelationship extends AbstractObject<ModelEntityRelationshipData> {
+public class ModelEntityRelationship extends DeprecatedAbstractObject<ModelEntityRelationshipData> {
 
     private static final long serialVersionUID = 1L;
 

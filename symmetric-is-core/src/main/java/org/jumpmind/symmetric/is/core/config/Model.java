@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.jumpmind.symmetric.is.core.config.data.ModelData;
 
-public class Model extends AbstractObject<ModelData> {
+public class Model extends DeprecatedAbstractObject<ModelData> {
 
     private static final long serialVersionUID = 1L;
     
@@ -33,7 +33,7 @@ public class Model extends AbstractObject<ModelData> {
 	public void setFolder(Folder folder) {
 		this.folder = folder;
         if (folder != null) {
-            data.setFolderId(folder.getData().getId());
+            data.setFolderId(folder.getId());
         }
 	}
 

@@ -9,7 +9,6 @@ import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.Execution;
 import org.jumpmind.symmetric.is.core.config.ExecutionStatus;
-import org.jumpmind.symmetric.is.core.config.data.ExecutionData;
 
 public class ExecutionSqlService extends AbstractExecutionService {
 
@@ -28,12 +27,11 @@ public class ExecutionSqlService extends AbstractExecutionService {
                         + "(select ?, ?, ?, ?, ?, ?, ? where not exists (select * from %1$s_execution where agent_deployment_id=? and end_time is null)) ",
                         tablePrefix);
         Execution execution = new Execution(ExecutionStatus.REQUESTED, deployment.getId());
-        ExecutionData data = execution.getData();
 
         ISqlTemplate template = databasePlatform.getSqlTemplate();
-        if (1 <= template.update(sql, data.getId(), data.getAgentDeploymentId(), data.getStatus(),
-                data.getCreateTime(), data.getCreateBy(), data.getLastModifyTime(),
-                data.getLastModifyBy())) {
+        if (1 <= template.update(sql, execution.getId(), execution.getAgentDeploymentId(), execution.getStatus(),
+                execution.getCreateTime(), execution.getCreateBy(), execution.getLastModifyTime(),
+                execution.getLastModifyBy())) {
             return execution;
         } else {
             return null;

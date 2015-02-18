@@ -49,7 +49,7 @@ public class ConnectionFactory implements IConnectionFactory {
     @Override
     public IConnection create(Connection connection) {
         try {
-            String connectionType = connection.getData().getType();
+            String connectionType = connection.getType();
             Class<? extends IConnection> clazz = connectionTypes.get(connectionType);
             if (clazz != null) {
                 IConnection runtime = clazz.newInstance();

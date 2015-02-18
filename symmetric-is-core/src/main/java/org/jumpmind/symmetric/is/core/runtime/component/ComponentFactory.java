@@ -48,7 +48,7 @@ public class ComponentFactory implements IComponentFactory {
     @Override
     public IComponent create(ComponentFlowNode componentFlowNode) {
         try {
-            String componentType = componentFlowNode.getComponentVersion().getComponent().getData().getType();
+            String componentType = componentFlowNode.getComponentVersion().getComponent().getType();
             Class<? extends IComponent> clazz = componentTypes.get(componentType);
             if (clazz != null) {
             	IComponent component = clazz.newInstance();

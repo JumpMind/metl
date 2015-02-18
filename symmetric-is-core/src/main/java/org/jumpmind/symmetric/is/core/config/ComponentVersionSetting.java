@@ -1,19 +1,20 @@
-package org.jumpmind.symmetric.is.core.config.data;
+package org.jumpmind.symmetric.is.core.config;
 
-public class ComponentVersionSettingData extends SettingData {
+
+public class ComponentVersionSetting extends Setting {
 
     private static final long serialVersionUID = 1L;
 
     String componentVersionId;
     
-    public ComponentVersionSettingData() {
+    public ComponentVersionSetting() {
     }
     
-    public ComponentVersionSettingData(String componentVersionId) {
+    public ComponentVersionSetting(String componentVersionId) {
         this.componentVersionId = componentVersionId;
     }
 
-    public ComponentVersionSettingData(String name, String value) {
+    public ComponentVersionSetting(String name, String value) {
         super(name, value);
     }
     

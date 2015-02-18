@@ -16,9 +16,6 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
 import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersion;
 import org.jumpmind.symmetric.is.core.config.StartType;
-import org.jumpmind.symmetric.is.core.config.data.ComponentData;
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeData;
-import org.jumpmind.symmetric.is.core.config.data.ComponentVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.AgentRuntime;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
@@ -164,7 +161,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
                 AgentDeployment agentDeployment = findAgentDeployment();
                 if (agentDeployment != null) {
                     AgentRuntime engine = EditFlowLayout.this.agentManager
-                            .getAgentRuntime(agentDeployment.getData().getAgentId());
+                            .getAgentRuntime(agentDeployment.getAgentId());
                     engine.undeploy(agentDeployment);
                     engine.deploy(agentDeployment.getComponentFlowVersion());
                 } else {
@@ -201,14 +198,14 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
                 AgentDeployment deployment = findAgentDeployment();
                 if (deployment != null) {
                     AgentRuntime runtime = EditFlowLayout.this.agentManager
-                            .getAgentRuntime(deployment.getData().getAgentId());
+                            .getAgentRuntime(deployment.getAgentId());
                     runtime.scheduleNow(deployment);
                 }
             }
         });
 
         startExpression = new TextField("Cron Expression");
-        startExpression.setVisible(componentFlowVersion.getStartType() == StartType.SCHEDULED_CRON);
+        startExpression.setVisible(componentFlowVersion.asStartType() == StartType.SCHEDULED_CRON);
         startExpression.setImmediate(true);
         startExpression.setTextChangeTimeout(500);
         startExpression.setTextChangeEventMode(TextChangeEventMode.LAZY);
@@ -219,7 +216,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
             @Override
             public void valueChange(ValueChangeEvent event) {
                 if (validateCron()) {
-                    EditFlowLayout.this.componentFlowVersion.getData().setStartExpression(
+                    EditFlowLayout.this.componentFlowVersion.setStartExpression(
                             startExpression.getValue());
                     EditFlowLayout.this.configurationService
                             .save(EditFlowLayout.this.componentFlowVersion);
@@ -245,7 +242,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
                     startExpression.setVisible(false);
                 }
 
-                EditFlowLayout.this.componentFlowVersion.getData().setStartType(
+                EditFlowLayout.this.componentFlowVersion.setStartType(
                         startType.getValue().toString());
                 EditFlowLayout.this.configurationService
                         .save(EditFlowLayout.this.componentFlowVersion);
@@ -255,8 +252,8 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
         actionLayout.add(actionBar, createSeparator(), startType, startExpression);
         actionLayout.alignAll(Alignment.BOTTOM_LEFT);
 
-        setCaption("Name: " + componentFlowVersion.getComponentFlow().getData().getName()
-                + ", Version: " + componentFlowVersion.getVersion());
+        setCaption("Name: " + componentFlowVersion.getComponentFlow().getName()
+                + ", Version: " + componentFlowVersion.getVersionName());
 
         populateComponentPalette();
 
@@ -277,7 +274,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
             List<AgentDeployment> deployments = configurationService
                     .findAgentDeploymentsFor(componentFlowVersion);
             for (AgentDeployment agentDeployment : deployments) {
-                if (agentDeployment.getData().getAgentId().equals(agent.getData().getId())) {
+                if (agentDeployment.getAgentId().equals(agent.getId())) {
                     return agentDeployment;
                 }
             }
@@ -307,7 +304,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
                 deployButton.setText("Redeploy");
                 undeployButton.setEnabled(true);
 
-                if (agentDeployment.getComponentFlowVersion().getStartType() == StartType.MANUAL) {
+                if (agentDeployment.getComponentFlowVersion().asStartType() == StartType.MANUAL) {
                     executeButton.setEnabled(true);
                 }
             }
@@ -405,16 +402,16 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
         for (ComponentFlowNode flowNode : flowNodes) {
             Node node = new Node();
             String name = flowNode.getComponentVersion().getComponent().getName();
-            String type = flowNode.getComponentVersion().getComponent().getData().getType();
+            String type = flowNode.getComponentVersion().getComponent().getType();
             node.setText(name + "<br><i>" + type + "</i>");
-            node.setId(flowNode.getData().getId());
-            node.setX(flowNode.getData().getX());
-            node.setY(flowNode.getData().getY());
+            node.setId(flowNode.getId());
+            node.setX(flowNode.getX());
+            node.setY(flowNode.getY());
             diagram.addNode(node);
 
             for (ComponentFlowNodeLink link : links) {
-                if (link.getData().getSourceNodeId().equals(node.getId())) {
-                    node.getTargetNodeIds().add(link.getData().getTargetNodeId());
+                if (link.getSourceNodeId().equals(node.getId())) {
+                    node.getTargetNodeIds().add(link.getTargetNodeId());
                 }
             }
 
@@ -426,7 +423,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
         int count = 0;
         List<ComponentFlowNode> nodes = componentFlowVersion.getComponentFlowNodes();
         for (ComponentFlowNode componentFlowNode : nodes) {
-            if (componentFlowNode.getComponentVersion().getComponent().getData().getType()
+            if (componentFlowNode.getComponentVersion().getComponent().getType()
                     .equals(type)) {
                 count++;
             }
@@ -453,8 +450,8 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
                 ComponentFlowNode flowNode = componentFlowVersion.findComponentFlowNodeWithId(node
                         .getId());
                 if (flowNode != null) {
-                    flowNode.getData().setX(node.getX());
-                    flowNode.getData().setY(node.getY());
+                    flowNode.setX(node.getX());
+                    flowNode.setY(node.getY());
                 }
                 configurationService.save(componentFlowVersion);
 
@@ -489,17 +486,17 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
 
         @Override
         public void buttonClick(ClickEvent event) {
-            Component component = new Component(new ComponentData(type, false));
+            Component component = new Component();
+            component.setType(type);
+            component.setShared(false);
 
             ComponentVersion componentVersion = new ComponentVersion(component, null,
-                    null,null,new ComponentVersionData());
+                    null,null);
 
             component.setName(type + " " + (countComponentsOfType(type) + 1));
 
-            ComponentFlowNodeData nodeData = new ComponentFlowNodeData(componentVersion.getData()
-                    .getId(), componentFlowVersion.getData().getId());
-
-            ComponentFlowNode componentFlowNode = new ComponentFlowNode(componentVersion, nodeData);
+            ComponentFlowNode componentFlowNode = new ComponentFlowNode(componentVersion);
+            componentFlowNode.setComponentFlowVersionId(componentFlowVersion.getId());
             componentFlowVersion.getComponentFlowNodes().add(componentFlowNode);
 
             configurationService.save(componentFlowNode);

@@ -1,19 +1,18 @@
 package org.jumpmind.symmetric.is.core.config;
 
 import org.jumpmind.symmetric.is.core.config.data.FormatVersionData;
-import org.jumpmind.symmetric.is.core.config.data.SettingData;
 
-public class FormatVersion extends AbstractObjectWithSettings<FormatVersionData> {
+public class FormatVersion extends DeprecatedAbstractObjectWithSettings<FormatVersionData> {
 
 	private static final long serialVersionUID = 1L;
 	
-	public FormatVersion(FormatVersionData data, SettingData[] settings) {
+	public FormatVersion(FormatVersionData data, Setting[] settings) {
 		super(data, settings);
 		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
-	protected SettingData createSettingData() {
+	protected Setting createSettingData() {
 		// TODO Auto-generated method stub
 		return null;
 	}

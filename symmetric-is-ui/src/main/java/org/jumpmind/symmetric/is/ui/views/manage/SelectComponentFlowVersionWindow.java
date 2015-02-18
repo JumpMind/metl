@@ -90,7 +90,7 @@ public class SelectComponentFlowVersionWindow extends ResizableWindow {
         setCaption("Select Flows to Deploy");
         this.container.removeAllItems();
         this.container.addAll(configurationService.findUndeployedComponentFlowVersionSummary(agent
-                .getData().getId()));
+                .getId()));
         this.table.setValue(new HashSet<ComponentFlowVersionSummary>());
         showAtSize(.5);
     }

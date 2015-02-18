@@ -1,6 +1,7 @@
-package org.jumpmind.symmetric.is.core.config.data;
+package org.jumpmind.symmetric.is.core.config;
 
-public class AgentSettingData extends SettingData {
+
+public class AgentSetting extends Setting {
 
     private static final long serialVersionUID = 1L;
 

@@ -3,6 +3,7 @@ package org.jumpmind.symmetric.is.core.persist;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.config.AbstractObject;
+import org.jumpmind.symmetric.is.core.config.DeprecatedAbstractObject;
 import org.jumpmind.symmetric.is.core.config.Agent;
 import org.jumpmind.symmetric.is.core.config.AgentDeployment;
 import org.jumpmind.symmetric.is.core.config.AgentSummary;
@@ -70,9 +71,11 @@ public interface IConfigurationService {
     
     public void save(ComponentFlowNode flowNode);
 
-    public abstract void save(AbstractObject<?> obj);
+    public void save(DeprecatedAbstractObject<?> obj);
     
-    public abstract void save(AbstractData obj);
+    public void save(AbstractData obj);
+    
+    public void save(AbstractObject obj);
 
     public void save(ComponentFlowVersion componentFlowVersion);
     

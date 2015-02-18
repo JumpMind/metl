@@ -3,21 +3,36 @@ package org.jumpmind.symmetric.is.core.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
-
-public class ComponentFlow extends AbstractObject<ComponentFlowData> {
+public class ComponentFlow extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
     List<ComponentFlowVersion> componentFlowVersions;
 
     Folder folder;
-
-    public ComponentFlow(Folder folder, ComponentFlowData data) {
-        super(data);
+    
+    String name;
+    
+    String folderId;
+    
+    public ComponentFlow() {
         componentFlowVersions = new ArrayList<ComponentFlowVersion>();
     }
 
+    public ComponentFlow(Folder folder) {
+        this();
+        setFolder(folder);
+    }
+    
+    public void setFolder(Folder folder) {
+        this.folder = folder;
+        if (folder != null) {
+            folderId = folder.getId();
+        } else {
+            folderId = null;
+        }
+    }
+    
     public List<ComponentFlowVersion> getComponentFlowVersions() {
         return componentFlowVersions;
     }
@@ -26,7 +41,7 @@ public class ComponentFlow extends AbstractObject<ComponentFlowData> {
         ComponentFlowVersion latest = null;
         for (ComponentFlowVersion componentFlowVersion : componentFlowVersions) {
             if (latest == null
-                    || latest.getData().getCreateTime()
+                    || latest.getCreateTime()
                             .before(componentFlowVersion.getCreateTime())) {
                 latest = componentFlowVersion;
             }
@@ -37,19 +52,22 @@ public class ComponentFlow extends AbstractObject<ComponentFlowData> {
     public Folder getFolder() {
         return folder;
     }
+    
+    public String getName() {
+        return name;
+    }
 
     public void setName(String name) {
-        this.data.setName(name);
+        this.name = name;
     }
-
-    public String getName() {
-        return this.data.getName();
+    
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
     }
-
-    @Override
-    public String toString() {
-        return getData().getName();
-    }
+    
+    public String getFolderId() {
+        return folderId;
+    }    
 
     @Override
     public boolean isSettingNameAllowed() {

@@ -16,8 +16,6 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
 import org.jumpmind.symmetric.is.core.config.DeploymentStatus;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
-import org.jumpmind.symmetric.is.core.config.data.AgentData;
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.ui.common.AbstractFolderNavigatorLayout;
@@ -159,7 +157,7 @@ public class OldManageView extends HorizontalLayout implements View {
                         Agent agent = (Agent) itemId;
                         List<AgentDeployment> deployments = agent.getAgentDeployments();
                         for (AgentDeployment deployment : deployments) {
-                            if (deployment.getStatus() == DeploymentStatus.ERROR) {
+                            if (deployment.getDeploymentStatus() == DeploymentStatus.ERROR) {
                                 return DeploymentStatus.ERROR.toString();
                             }
                         }
@@ -179,7 +177,7 @@ public class OldManageView extends HorizontalLayout implements View {
                 public Object generateCell(Table source, Object itemId, Object columnId) {
                     if (itemId instanceof Agent) {
                         Agent agent = (Agent) itemId;
-                        return agent.getData().getHost();
+                        return agent.getHost();
                     } else {
                         return null;
                     }
@@ -265,7 +263,7 @@ public class OldManageView extends HorizontalLayout implements View {
                 if (object instanceof Agent) {
                     Agent agent = (Agent) object;
                     ConfirmDialog.show("Delete Agent?", "Are you sure you want to delete the "
-                            + agent.getData().getName() + " agent?",
+                            + agent.getName() + " agent?",
                             new DeleteAgentConfirmationListener(agent, objects));
                 } else if (object instanceof AgentDeployment) {
                     AgentDeployment deployment = (AgentDeployment) object;
@@ -345,8 +343,8 @@ public class OldManageView extends HorizontalLayout implements View {
                 @SuppressWarnings("unchecked")
                 Set<ComponentFlowVersionSummary> selectedFlows = (Set<ComponentFlowVersionSummary>) item;
                 for (ComponentFlowVersionSummary componentFlowVersionSummary : selectedFlows) {
-                    ComponentFlowVersion componentFlowVersion = new ComponentFlowVersion(null,
-                            new ComponentFlowVersionData(componentFlowVersionSummary.getId()));
+                    ComponentFlowVersion componentFlowVersion = new ComponentFlowVersion();
+                    componentFlowVersion.setId(componentFlowVersionSummary.getId());
                     configurationService.refresh(componentFlowVersion);
                     agentManager.deploy(agent.getId(), componentFlowVersion);
                     refresh();
@@ -363,11 +361,8 @@ public class OldManageView extends HorizontalLayout implements View {
                 if (isNotBlank(content)) {
                     Folder folder = getSelectedFolder();
 
-                    AgentData data = new AgentData();
-                    data.setName(content);
-                    data.setFolderId(folder.getData().getId());
-
-                    Agent agent = new Agent(folder, data);
+                    Agent agent = new Agent(folder);
+                    agent.setName(content);
 
                     configurationService.save(agent);
 
@@ -424,7 +419,7 @@ public class OldManageView extends HorizontalLayout implements View {
             public boolean onOk() {
                 agentManager.undeploy(toDelete);
                 configurationService.delete(toDelete);
-                Agent agent = findObjectInTreeWithId(toDelete.getData().getAgentId());
+                Agent agent = findObjectInTreeWithId(toDelete.getAgentId());
                 refresh();
                 expand(agent.getFolder(), agent);
                 deleteTreeItems(alsoDelete);

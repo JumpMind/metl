@@ -7,8 +7,6 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowData;
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
 import org.jumpmind.symmetric.is.ui.common.Icons;
@@ -96,20 +94,13 @@ public class DesignNavigator extends AbstractFolderNavigator {
     protected void addNewFlow() {
         Folder folder = getSelectedFolder();
         if (folder != null) {
-            ComponentFlowData data = new ComponentFlowData();
-            data.setName("New Flow");
-            data.setFolderId(folder.getData().getId());
 
-            ComponentFlow flow = new ComponentFlow(folder, data);
-
+            ComponentFlow flow = new ComponentFlow(folder);
+            flow.setName("New Flow");
             configurationService.save(flow);
 
-            ComponentFlowVersionData versionData = new ComponentFlowVersionData();
-            versionData.setVersionName("version 1.0");
-            versionData.setComponentFlowId(data.getId());
-
-            ComponentFlowVersion flowVersion = new ComponentFlowVersion(flow, versionData);
-
+            ComponentFlowVersion flowVersion = new ComponentFlowVersion(flow);
+            flowVersion.setVersionName("version 1.0");
             configurationService.save(flowVersion);
 
             treeTable.addItem(flow);
@@ -129,7 +120,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
         List<Connection> connections = configurationService.findConnectionsInFolder(folder);
         for (Connection connection : connections) {
             this.treeTable.addItem(connection);
-            if (DataSourceConnection.TYPE.equals(connection.getData().getType())) {
+            if (DataSourceConnection.TYPE.equals(connection.getType())) {
                 this.treeTable.setItemIcon(connection, Icons.DATABASE);
             } else {
                 this.treeTable.setItemIcon(connection, Icons.GENERAL_CONNECTION);
@@ -150,7 +141,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
             List<ComponentFlowVersion> versions = flow.getComponentFlowVersions();
             for (ComponentFlowVersion componentFlowVersion : versions) {
                 this.treeTable.addItem(componentFlowVersion);
-                this.treeTable.setItemCaption(componentFlowVersion, componentFlowVersion.getData()
+                this.treeTable.setItemCaption(componentFlowVersion, componentFlowVersion
                         .getVersionName());
                 this.treeTable.setItemIcon(componentFlowVersion, Icons.FLOW_VERSION);
                 this.treeTable.setParent(componentFlowVersion, flow);

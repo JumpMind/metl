@@ -111,8 +111,8 @@ public class EditAgentWindow extends ResizableWindow {
     public void show(Agent agent, IItemUpdatedListener itemSavedListener) {
         this.agent = agent;
         this.itemSavedListener = itemSavedListener;
-        nameField.setValue(agent.getData().getName());
-        hostField.setValue(agent.getData().getHost());
+        nameField.setValue(agent.getName());
+        hostField.setValue(agent.getHost());
         agentStartModeCombo.setValue(agent.getAgentStartMode());
         showAtSize(.6);
         nameField.focus();
@@ -123,9 +123,9 @@ public class EditAgentWindow extends ResizableWindow {
     }
 
     protected void save() {
-        agent.getData().setName(nameField.getValue());
-        agent.getData().setHost(hostField.getValue());
-        agent.getData().setStartMode(((AgentStartMode)agentStartModeCombo.getValue()).name());
+        agent.setName(nameField.getValue());
+        agent.setHost(hostField.getValue());
+        agent.setStartMode(((AgentStartMode)agentStartModeCombo.getValue()).name());
         configurationService.save(agent);
 
         // do some validation

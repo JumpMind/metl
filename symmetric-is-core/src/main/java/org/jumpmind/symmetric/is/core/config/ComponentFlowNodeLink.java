@@ -1,24 +1,43 @@
 package org.jumpmind.symmetric.is.core.config;
 
-import org.jumpmind.symmetric.is.core.config.data.ComponentFlowNodeLinkData;
 
-public class ComponentFlowNodeLink extends AbstractObject<ComponentFlowNodeLinkData> {
+public class ComponentFlowNodeLink extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
-    public ComponentFlowNodeLink(String sourceNodeId, String targetNodeId) {
-        this(new ComponentFlowNodeLinkData(sourceNodeId, targetNodeId));
-    }
-
-    public ComponentFlowNodeLink(ComponentFlowNodeLinkData data) {
-        super(data);
+    String sourceNodeId;
+    
+    String targetNodeId;
+    
+    public ComponentFlowNodeLink() {
     }
     
+    public ComponentFlowNodeLink(String sourceNodeId, String targetNodeId) {
+        this.sourceNodeId = sourceNodeId;
+        this.targetNodeId = targetNodeId;
+    }
+    
+    public void setSourceNodeId(String sourceNodeId) {
+        this.sourceNodeId = sourceNodeId;
+    }
+    
+    public String getSourceNodeId() {
+        return sourceNodeId;
+    }
+    
+    public void setTargetNodeId(String targetNodeId) {
+        this.targetNodeId = targetNodeId;
+    }
+    
+    public String getTargetNodeId() {
+        return targetNodeId;
+    }
+
     public void setName(String name) {        
     }
     
     public String getName() {
-        return this.data.getSourceNodeId() + " to " + this.data.getTargetNodeId();
+        return sourceNodeId + " to " + targetNodeId;
     }
 
 }

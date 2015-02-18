@@ -6,7 +6,7 @@ import java.util.Map;
 import org.jumpmind.symmetric.is.core.config.data.ModelEntityData;
 import org.jumpmind.util.LinkedCaseInsensitiveMap;
 
-public class ModelEntity extends AbstractObject<ModelEntityData> {
+public class ModelEntity extends DeprecatedAbstractObject<ModelEntityData> {
 
     private static final long serialVersionUID = 1L;
  
