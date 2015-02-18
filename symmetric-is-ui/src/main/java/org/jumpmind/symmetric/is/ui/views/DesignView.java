@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Scope;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.TabSheet;
@@ -44,17 +43,14 @@ public class DesignView extends HorizontalLayout implements View {
     @PostConstruct
     protected void init() {
         setSizeFull();
-        setMargin(new MarginInfo(true, false, false, false));
 
         HorizontalSplitPanel rightSplit = new HorizontalSplitPanel();
         rightSplit.setSizeFull();
         rightSplit.setSplitPosition(300, Unit.PIXELS, true);
-        
 
         HorizontalSplitPanel leftSplit = new HorizontalSplitPanel();
         leftSplit.setSizeFull();
         leftSplit.setSplitPosition(300, Unit.PIXELS);
-
 
         VerticalSplitPanel leftTopBottomSplit = new VerticalSplitPanel();
         leftTopBottomSplit.setSizeFull();
@@ -62,7 +58,6 @@ public class DesignView extends HorizontalLayout implements View {
         designNavigator = new DesignNavigator(FolderType.DESIGN, configurationService);
         leftTopBottomSplit.setFirstComponent(designNavigator);
         leftTopBottomSplit.setSecondComponent(new DesignComponentPalette());
-
         
         leftSplit.setFirstComponent(leftTopBottomSplit);
         leftSplit.setSecondComponent(new TabSheet());
