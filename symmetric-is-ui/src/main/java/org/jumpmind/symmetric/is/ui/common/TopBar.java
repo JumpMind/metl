@@ -9,12 +9,11 @@ import java.util.Map;
 import java.util.Set;
 
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class TopBar extends HorizontalLayout implements ViewChangeListener {
 
@@ -33,7 +32,7 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
     public TopBar(ViewManager vm, DesignAgentSelect das) {
         setWidth(100, Unit.PERCENTAGE);
         setSpacing(true);
-        setMargin(new MarginInfo(true, true, false, true));
+        //setMargin(new MarginInfo(true, true, false, true));
 
         this.designAgentSelect = das;
         this.viewManager = vm;
@@ -42,11 +41,8 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
         viewToButtonMapping = new HashMap<String, MenuItem>();
 
         menuBar = new MenuBar();
+        menuBar.setWidth(100, Unit.PERCENTAGE);
         addComponent(menuBar);
-        setComponentAlignment(menuBar, Alignment.MIDDLE_LEFT);
-        
-        addComponent(designAgentSelect);
-        setComponentAlignment(designAgentSelect, Alignment.MIDDLE_RIGHT);
 
         Map<Category, List<TopBarLink>> menuItemsByCategory = viewManager.getMenuItemsByCategory();
         Set<Category> categories = menuItemsByCategory.keySet();
