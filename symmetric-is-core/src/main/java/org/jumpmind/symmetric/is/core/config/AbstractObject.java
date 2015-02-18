@@ -65,7 +65,6 @@ abstract public class AbstractObject<D extends AbstractData> implements Serializ
     public boolean isSettingNameAllowed() {
         return false;
     }
-
     
     @Override
     public int hashCode() {

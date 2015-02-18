@@ -56,15 +56,24 @@ import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 abstract public class AbstractFolderNavigator extends Panel {
 
-    protected final Logger log = LoggerFactory.getLogger(getClass());
-    protected MenuItem newFolder;
-    protected MenuItem delete;
-    protected IConfigurationService configurationService;
-    protected FolderType folderType;
-    protected TreeTable treeTable;
+    final Logger log = LoggerFactory.getLogger(getClass());
+    
+    MenuItem newFolder;
+    
+    MenuItem delete;
+    
+    IConfigurationService configurationService;
+    
+    FolderType folderType;
+    
+    TreeTable treeTable;
+    
     Set<Object> lastSelected;
+    
     AbstractObject<?> itemBeingEdited;
+    
     AbstractObject<?> itemClicked;
+    
     long itemClickTimeInMs;
 
     public AbstractFolderNavigator(FolderType folderType, IConfigurationService configurationService) {
@@ -86,7 +95,7 @@ abstract public class AbstractFolderNavigator extends Panel {
         content.addComponent(treeTable);
         content.setExpandRatio(treeTable, 1);
     }
-    
+
     public void addValueChangeListener(ValueChangeListener listener) {
         this.treeTable.addValueChangeListener(listener);
     }
@@ -94,7 +103,7 @@ abstract public class AbstractFolderNavigator extends Panel {
     abstract protected void addMenuButtons(MenuBar leftMenuBar, MenuBar rightMenuBar);
 
     public void refresh() {
-        Object selected = treeTable.getValue(); 
+        Object selected = treeTable.getValue();
         List<Object> expandedItems = new ArrayList<Object>();
         Collection<?> items = treeTable.getItemIds();
         for (Object object : items) {
@@ -226,8 +235,8 @@ abstract public class AbstractFolderNavigator extends Panel {
                         itemClicked = null;
                     } else {
                         if (itemClicked != null && itemClicked.equals(event.getItemId())) {
-                            if (System.currentTimeMillis()-itemClickTimeInMs > 600) {
-                               startEditingItem(itemClicked);
+                            if (System.currentTimeMillis() - itemClickTimeInMs > 600) {
+                                startEditingItem(itemClicked);
                             } else {
                                 itemClicked = null;
                             }
@@ -397,7 +406,8 @@ abstract public class AbstractFolderNavigator extends Panel {
     protected void selectionChanged(ValueChangeEvent event) {
         Set<Object> selected = getTableValues();
         Folder folder = getSelectedFolder();
-        boolean enabled = itemBeingEdited == null && ((folder == null && selected.size() == 0) || folder != null);
+        boolean enabled = itemBeingEdited == null
+                && ((folder == null && selected.size() == 0) || folder != null);
         newFolder.setEnabled(enabled);
 
         boolean deleteEnabled = false;

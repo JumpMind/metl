@@ -12,6 +12,7 @@ import org.jumpmind.symmetric.is.core.config.data.ComponentFlowVersionData;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
 import org.jumpmind.symmetric.is.ui.common.Icons;
+import org.jumpmind.symmetric.ui.common.TabbedApplicationPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.ui.MenuBar;
@@ -24,9 +25,12 @@ public class DesignNavigator extends AbstractFolderNavigator {
     MenuItem newFlow;
     MenuItem newConnection;
     MenuItem newModel;
+    
+    TabbedApplicationPanel tabs;
 
-    public DesignNavigator(FolderType folderType, IConfigurationService configurationService) {
+    public DesignNavigator(FolderType folderType, IConfigurationService configurationService, TabbedApplicationPanel tabs) {
         super(folderType, configurationService);
+        this.tabs = tabs;
     }
 
     protected void addMenuButtons(MenuBar leftMenuBar, MenuBar rightMenuBar) {
@@ -57,6 +61,19 @@ public class DesignNavigator extends AbstractFolderNavigator {
             }
         });
         newModel.setDescription("Add Model");
+    }
+    
+    @Override
+    protected void openItem(Object item) {
+        if (item instanceof ComponentFlow) {
+            item = ((ComponentFlow) item).getLatestComponentFlowVersion();
+        } 
+        
+        if (item instanceof ComponentFlowVersion) {
+            ComponentFlowVersion flowVersion = (ComponentFlowVersion)item;
+            DesignFlowLayout flowLayout = new DesignFlowLayout(configurationService, flowVersion);
+            tabs.addCloseableTab(flowVersion.getComponentFlow().getName() + " " + flowVersion.getName(), Icons.FLOW, flowLayout);
+        }
     }
     
     @Override

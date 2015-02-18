@@ -13,7 +13,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.themes.ValoTheme;
 
 public class TopBar extends HorizontalLayout implements ViewChangeListener {
 
@@ -31,8 +30,6 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
 
     public TopBar(ViewManager vm, DesignAgentSelect das) {
         setWidth(100, Unit.PERCENTAGE);
-        setSpacing(true);
-        //setMargin(new MarginInfo(true, true, false, true));
 
         this.designAgentSelect = das;
         this.viewManager = vm;
