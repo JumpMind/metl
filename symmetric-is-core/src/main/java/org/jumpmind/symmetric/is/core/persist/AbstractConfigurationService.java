@@ -25,7 +25,6 @@ import org.jumpmind.symmetric.is.core.config.ComponentVersion;
 import org.jumpmind.symmetric.is.core.config.ComponentVersionSetting;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.ConnectionSetting;
-import org.jumpmind.symmetric.is.core.config.DeprecatedAbstractObject;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.config.Model;
@@ -35,12 +34,6 @@ import org.jumpmind.symmetric.is.core.config.ModelEntity;
 import org.jumpmind.symmetric.is.core.config.ModelEntityRelationship;
 import org.jumpmind.symmetric.is.core.config.ModelVersion;
 import org.jumpmind.symmetric.is.core.config.Setting;
-import org.jumpmind.symmetric.is.core.config.data.ModelAttributeData;
-import org.jumpmind.symmetric.is.core.config.data.ModelAttributeRelationshipData;
-import org.jumpmind.symmetric.is.core.config.data.ModelData;
-import org.jumpmind.symmetric.is.core.config.data.ModelEntityData;
-import org.jumpmind.symmetric.is.core.config.data.ModelEntityRelationshipData;
-import org.jumpmind.symmetric.is.core.config.data.ModelVersionData;
 import org.jumpmind.symmetric.is.core.util.NameValue;
 
 // TODO make methods transactional
@@ -107,17 +100,15 @@ abstract class AbstractConfigurationService extends AbstractService implements
     public List<Model> findModelsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("folderId", folder.getId());
-        List<ModelData> datas = find(ModelData.class, params);
-        List<Model> models = new ArrayList<Model>();
-        for (ModelData modelData : datas) {
-            Model model = new Model(folder, modelData);
-
+        List<Model> models = find(Model.class, params);
+        for (Model model : models) {
+        	model.setFolder(folder);        	
             Map<String, Object> versionParams = new HashMap<String, Object>();
             versionParams.put("modelId", model.getId());
-            List<ModelVersionData> versionDatas = find(ModelVersionData.class, versionParams);
-            for (ModelVersionData versionData : versionDatas) {
-                ModelVersion modelVersion = new ModelVersion(model, versionData);
-                refreshModelVersionRelations(modelVersion);
+            List<ModelVersion> modelVersions = find(ModelVersion.class, versionParams);
+            for (ModelVersion modelVersion : modelVersions) {
+            	modelVersion.setModel(model);
+            	refreshModelVersionRelations(modelVersion);
                 model.getModelVersions().add(modelVersion);
             }
             models.add(model);
@@ -244,14 +235,12 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     public ModelVersion findModelVersion(String id) {
-        ModelVersionData modelVersionData = new ModelVersionData();
-        modelVersionData.setId(id);
-        persistenceManager.refresh(modelVersionData, null, null, tableName(ModelVersionData.class));
-        ModelData modelData = new ModelData();
-        modelData.setId(modelVersionData.getId());
-        persistenceManager.refresh(modelData, null, null, tableName(ModelData.class));
-        Model model = new Model(modelData);
-        ModelVersion modelVersion = new ModelVersion(model, modelVersionData);
+        ModelVersion modelVersion = new ModelVersion();
+        modelVersion.setId(id);
+        persistenceManager.refresh(modelVersion, null, null, tableName(ModelVersion.class));
+        Model model = new Model();
+        model.setId(modelVersion.getId());
+        persistenceManager.refresh(model, null, null, tableName(Model.class));
         return refreshModelVersionRelations(modelVersion);
     }
 
@@ -260,12 +249,11 @@ abstract class AbstractConfigurationService extends AbstractService implements
         modelVersion.getModelEntities().clear();
         Map<String, Object> versionParams = new HashMap<String, Object>();
         versionParams.put("modelVersionId", modelVersion.getId());
-        List<ModelEntityData> entityDatas = persistenceManager.find(ModelEntityData.class,
-                versionParams, null, null, tableName(ModelEntityData.class));
-        for (ModelEntityData entityData : entityDatas) {
-            ModelEntity modelEntity = new ModelEntity(modelVersion, entityData);
-            refresh(modelEntity);
-            modelVersion.getModelEntities().put(modelEntity.getName(), modelEntity);
+        List<ModelEntity> entities = persistenceManager.find(ModelEntity.class,
+                versionParams, null, null, tableName(ModelEntity.class));
+        for (ModelEntity entity : entities) {
+            refresh(entity);
+            modelVersion.getModelEntities().put(entity.getName(), entity);
         }
         return modelVersion;
     }
@@ -396,11 +384,10 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void refresh(Model model) {
-        refresh((DeprecatedAbstractObject<?>) model);
+        refresh((AbstractObject) model);
 
-        ModelData data = model.getData();
         Map<String, Object> folderParams = new HashMap<String, Object>();
-        folderParams.put("id", data.getFolderId());
+        folderParams.put("id", model.getFolderId());
         model.setFolder(findOne(Folder.class, folderParams));
     }
 
@@ -495,7 +482,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
             delete(modelVersion);
         }
 
-        persistenceManager.delete(model, null, null, tableName(ModelData.class));
+        persistenceManager.delete(model, null, null, tableName(Model.class));
     }
 
     @Override
@@ -506,7 +493,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         while (itr.hasNext()) {
             delete(itr.next().getValue());
         }
-        persistenceManager.delete(modelVersion, null, null, tableName(ModelVersionData.class));
+        persistenceManager.delete(modelVersion, null, null, tableName(ModelVersion.class));
     }
 
     @Override
@@ -555,31 +542,30 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void refresh(ModelVersion modelVersion) {
 
-        refresh((DeprecatedAbstractObject<?>) modelVersion);
+        refresh((AbstractObject) modelVersion);
         refreshModelVersionRelations(modelVersion);
     }
 
     @Override
     public void refresh(ModelEntity modelEntity) {
 
-        refresh((DeprecatedAbstractObject<?>) modelEntity);
+        refresh((AbstractObject) modelEntity);
         Map<String, Object> entityParams = new HashMap<String, Object>();
         entityParams.put("entityId", modelEntity.getId());
         modelEntity.getModelAttributes().clear();
-        List<ModelAttributeData> attributeDatas = persistenceManager.find(ModelAttributeData.class,
-                entityParams, null, null, tableName(ModelAttributeData.class));
-        for (ModelAttributeData attributeData : attributeDatas) {
-            ModelAttribute modelAttribute = new ModelAttribute(modelEntity, null, attributeData);
+        List<ModelAttribute> attributes = persistenceManager.find(ModelAttribute.class,
+                entityParams, null, null, tableName(ModelAttribute.class));
+        for (ModelAttribute attribute : attributes) {
+            ModelAttribute modelAttribute = new ModelAttribute();
             refresh(modelAttribute);
             modelEntity.getModelAttributes().put(modelAttribute.getName(), modelAttribute);
         }
         modelEntity.getModelEntityRelationships().clear();
-        List<ModelEntityRelationshipData> entityRelationshipDatas = persistenceManager.find(
-                ModelEntityRelationshipData.class, entityParams, null, null,
-                tableName(ModelEntityRelationshipData.class));
-        for (ModelEntityRelationshipData entityRelationshipData : entityRelationshipDatas) {
-            ModelEntityRelationship modelEntityRelationship = new ModelEntityRelationship(
-                    entityRelationshipData);
+        List<ModelEntityRelationship> entityRelationships = persistenceManager.find(
+                ModelEntityRelationship.class, entityParams, null, null,
+                tableName(ModelEntityRelationship.class));
+        for (ModelEntityRelationship entityRelationshipData : entityRelationships) {
+            ModelEntityRelationship modelEntityRelationship = new ModelEntityRelationship();
             refresh(modelEntityRelationship);
             modelEntity.getModelEntityRelationships().add(modelEntityRelationship);
         }
@@ -587,22 +573,21 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void refresh(ModelAttribute modelAttribute) {
-        refresh((DeprecatedAbstractObject<?>) modelAttribute);
+        refresh((AbstractObject) modelAttribute);
     }
 
     @Override
     public void refresh(ModelEntityRelationship modelEntityRelationship) {
 
-        refresh((DeprecatedAbstractObject<?>) modelEntityRelationship);
+        refresh((AbstractObject) modelEntityRelationship);
         Map<String, Object> entityRelationshipParams = new HashMap<String, Object>();
         entityRelationshipParams.put("entityRelationshipId", modelEntityRelationship.getId());
         modelEntityRelationship.getAttributeRelationships().clear();
-        List<ModelAttributeRelationshipData> attributeRelationshipDatas = persistenceManager.find(
-                ModelAttributeRelationshipData.class, entityRelationshipParams, null, null,
-                tableName(ModelAttributeData.class));
-        for (ModelAttributeRelationshipData attributeRelationshipData : attributeRelationshipDatas) {
-            ModelAttributeRelationship modelAttributeRelationship = new ModelAttributeRelationship(
-                    attributeRelationshipData);
+        List<ModelAttributeRelationship> attributeRelationships = persistenceManager.find(
+                ModelAttributeRelationship.class, entityRelationshipParams, null, null,
+                tableName(ModelAttribute.class));
+        for (ModelAttributeRelationship attributeRelationship : attributeRelationships) {
+            ModelAttributeRelationship modelAttributeRelationship = new ModelAttributeRelationship();
             refresh(modelAttributeRelationship);
             modelEntityRelationship.getAttributeRelationships().add(modelAttributeRelationship);
         }
@@ -611,13 +596,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void refresh(ModelAttributeRelationship modelAttributeRelationship) {
 
-        refresh((DeprecatedAbstractObject<?>) modelAttributeRelationship);
+        refresh((AbstractObject) modelAttributeRelationship);
     }
 
     @Override
     public void save(ModelVersion modelVersion) {
 
-        save((DeprecatedAbstractObject<?>) modelVersion);
+        save((AbstractObject) modelVersion);
 
         Iterator<Entry<String, ModelEntity>> itr = modelVersion.getModelEntities().entrySet()
                 .iterator();
@@ -629,7 +614,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void save(ModelEntity modelEntity) {
 
-        save((DeprecatedAbstractObject<?>) modelEntity);
+        save((AbstractObject) modelEntity);
 
         Iterator<Entry<String, ModelAttribute>> itra = modelEntity.getModelAttributes().entrySet()
                 .iterator();
@@ -646,7 +631,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void save(ModelEntityRelationship modelEntityRelationship) {
 
-        save((DeprecatedAbstractObject<?>) modelEntityRelationship);
+        save((AbstractObject) modelEntityRelationship);
         for (ModelAttributeRelationship attributeRelationship : modelEntityRelationship
                 .getAttributeRelationships()) {
             save(attributeRelationship);

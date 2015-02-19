@@ -7,8 +7,6 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.config.AbstractObject;
-import org.jumpmind.symmetric.is.core.config.DeprecatedAbstractObject;
-import org.jumpmind.symmetric.is.core.config.data.AbstractData;
 
 public abstract class AbstractService {
 
@@ -53,27 +51,9 @@ public abstract class AbstractService {
         persistenceManager.delete(data, null, null, tableName(data.getClass()));
     }
 
-    protected void delete(AbstractData data) {
-        persistenceManager.delete(data, null, null, tableName(data.getClass()));
-    }
-    
-    protected void refresh(DeprecatedAbstractObject<?> object) {
-        persistenceManager.refresh(object.getData(), null, null, tableName(object.getData()
-                .getClass()));
-    }
-    
     protected void refresh(AbstractObject object) {
         persistenceManager.refresh(object, null, null, tableName(object
                 .getClass()));
-    }
-    
-    public void save(DeprecatedAbstractObject<?> obj) {
-        save(obj.getData());
-    }
-
-    public void save(AbstractData data) {
-        data.setLastModifyTime(new Date());
-        persistenceManager.save(data, null, null, tableName(data.getClass()));
     }
     
     public void save(AbstractObject data) {

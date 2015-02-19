@@ -3,29 +3,31 @@ package org.jumpmind.symmetric.is.core.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.config.data.FormatData;
-
-public class Format extends DeprecatedAbstractObject<FormatData> {
+public class Format extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
     Folder folder;
     
     List<FormatVersion> formatVersions;
+        
+    String name;
     
-    public Format() {
-    	super(new FormatData());
-    }
+    String type;
     
-    public Format(FormatData data) {
-        super(data);
-    }
+    String folderId;
+    
+    boolean shared;
 
-    public Format(Folder folder, FormatData data) {
-    	super(data);
+    public Format() {
+    	formatVersions = new ArrayList<FormatVersion>();
+    }
+    
+    public Format(Folder folder) {
+    	this();
     	this.folder = folder;
     }
-
+    
 	public Folder getFolder() {
 		return folder;
 	}
@@ -35,23 +37,43 @@ public class Format extends DeprecatedAbstractObject<FormatData> {
 	}
 
 	public List<FormatVersion> getFormatVersions() {
-		if (formatVersions == null) {
-			formatVersions = new ArrayList<FormatVersion>();
-		}
 		return formatVersions;
 	}
-	
+
+	public void setFormatVersions(List<FormatVersion> formatVersions) {
+		this.formatVersions = formatVersions;
+	}
+
 	public String getName() {
-		return this.getData().getName();
+		return name;
 	}
-	
+
 	public void setName(String name) {
-		this.getData().setName(name);
+		this.name = name;
 	}
-	
+
 	public String getType() {
-		return this.getData().getType();
+		return type;
 	}
-	
-	
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getFolderId() {
+		return folderId;
+	}
+
+	public void setFolderId(String folderId) {
+		this.folderId = folderId;
+	}
+
+	public boolean isShared() {
+		return shared;
+	}
+
+	public void setShared(boolean shared) {
+		this.shared = shared;
+	}
+
 }

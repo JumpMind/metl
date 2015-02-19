@@ -1,8 +1,6 @@
 package org.jumpmind.symmetric.is.core.config;
 
-import org.jumpmind.symmetric.is.core.config.data.ModelAttributeRelationshipData;
-
-public class ModelAttributeRelationship extends DeprecatedAbstractObject<ModelAttributeRelationshipData> {
+public class ModelAttributeRelationship extends AbstractObject {
 	
     private static final long serialVersionUID = 1L;
     
@@ -10,24 +8,11 @@ public class ModelAttributeRelationship extends DeprecatedAbstractObject<ModelAt
     
     ModelAttribute targetAttribute;
     
-    public ModelAttributeRelationship(
-    		ModelAttributeRelationshipData data) {
-    	
-    	super(data);
-    	data.setSourceAttributeId(sourceAttribute.getId());
-    	data.setTargetAttributeId(targetAttribute.getId());
-    }
-
-    public ModelAttributeRelationship(
-    		ModelAttribute sourceAttribute, ModelAttribute targetAttribute,
-    		ModelAttributeRelationshipData data) {
-    	
-    	super(data);
-    	this.sourceAttribute = sourceAttribute;
-    	this.targetAttribute = targetAttribute;
-    	data.setSourceAttributeId(sourceAttribute.getId());
-    	data.setTargetAttributeId(targetAttribute.getId());
-    }
+    String entityRelationshipId;
+    
+    String sourceAttributeId;
+    
+    String targetAttributeId;
 
 	public ModelAttribute getSourceAttribute() {
 		return sourceAttribute;
@@ -44,12 +29,41 @@ public class ModelAttributeRelationship extends DeprecatedAbstractObject<ModelAt
 	public void setTargetAttribute(ModelAttribute targetAttribute) {
 		this.targetAttribute = targetAttribute;
 	}
-	
-    public void setName(String name) {
-    }
-    
-    public String getName() {
-        return sourceAttribute.getName() + " to " + targetAttribute.getName();
-    }
-    
+
+	public String getEntityRelationshipId() {
+		return entityRelationshipId;
+	}
+
+	public void setEntityRelationshipId(String entityRelationshipId) {
+		this.entityRelationshipId = entityRelationshipId;
+	}
+
+	public String getSourceAttributeId() {
+		return sourceAttributeId;
+	}
+
+	public void setSourceAttributeId(String sourceAttributeId) {
+		this.sourceAttributeId = sourceAttributeId;
+	}
+
+	public String getTargetAttributeId() {
+		return targetAttributeId;
+	}
+
+	public void setTargetAttributeId(String targetAttributeId) {
+		this.targetAttributeId = targetAttributeId;
+	}
+
+	@Override
+	public void setName(String name) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

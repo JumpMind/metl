@@ -3,9 +3,7 @@ package org.jumpmind.symmetric.is.core.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.config.data.ModelData;
-
-public class Model extends DeprecatedAbstractObject<ModelData> {
+public class Model extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
     
@@ -13,51 +11,70 @@ public class Model extends DeprecatedAbstractObject<ModelData> {
     
     List<ModelVersion> modelVersions;
     
-    public Model() {
-        super(new ModelData());
-    }
+    String name; 
+    
+    String type;
+    
+    String folderId;
+    
+    boolean shared;
 
-    public Model(ModelData data) {
-        super(data);
+    public Model() {
+    	modelVersions = new ArrayList<ModelVersion>();
     }
     
-    public Model(Folder folder, ModelData data) {
-        super(data);
-        setFolder(folder);
+    public Model(Folder folder) {
+    	this();
+    	this.folder = folder;
     }
     
-    public Folder getFolder() {
+	public Folder getFolder() {
 		return folder;
 	}
 
 	public void setFolder(Folder folder) {
 		this.folder = folder;
-        if (folder != null) {
-            data.setFolderId(folder.getId());
-        }
 	}
 
-    public void setName(String name) {
-        this.data.setName(name);
-    }
-    
-    public String getName() {
-        return this.data.getName();
-    }
-    
-    public String getType() {
-        return data.getType();
-    }
+	public String getName() {
+		return name;
+	}
 
-    public boolean isShared() {
-        return data.isShared();
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getFolderId() {
+		return folderId;
+	}
+
+	public void setFolderId(String folderId) {
+		this.folderId = folderId;
+	}
+
+	public boolean isShared() {
+		return shared;
+	}
+
+	public void setShared(boolean shared) {
+		this.shared = shared;
+	}
+
+	public List<ModelVersion> getModelVersions() {
+		return modelVersions;
+	}
+
+	public void setModelVersions(List<ModelVersion> modelVersions) {
+		this.modelVersions = modelVersions;
+	}
     
-    public List<ModelVersion> getModelVersions() {
-    	if (modelVersions == null) {
-    		modelVersions = new ArrayList<ModelVersion>();
-    	}
-        return modelVersions;
-    }
     
 }

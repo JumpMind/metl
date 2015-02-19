@@ -1,21 +1,26 @@
 package org.jumpmind.symmetric.is.core.config;
 
-import org.jumpmind.symmetric.is.core.config.data.ModelAttributeData;
 
-public class ModelAttribute extends DeprecatedAbstractObject<ModelAttributeData> {
+public class ModelAttribute extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
     ModelEntity typeEntity;
     
-    public ModelAttribute(ModelEntity modelEntity, ModelEntity typeEntity, ModelAttributeData data) {
-    	
-    	super(data);
-    	this.typeEntity = typeEntity;
-    	data.setEntityId(modelEntity.getId());
-    	data.setTypeEntityId(modelEntity.getId());
-    }
+    String id;
+    
+    String entityId;
 
+    String name;
+
+    DataType type;
+
+    String typeEntityId;
+
+    public ModelAttribute() {
+    	
+    }
+    
 	public ModelEntity getTypeEntity() {
 		return typeEntity;
 	}
@@ -23,12 +28,45 @@ public class ModelAttribute extends DeprecatedAbstractObject<ModelAttributeData>
 	public void setTypeEntity(ModelEntity typeEntity) {
 		this.typeEntity = typeEntity;
 	}
-	
-    public void setName(String name) {
-        this.data.setName(name);
-    }
-    
-    public String getName() {
-        return this.data.getName();
-    }
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getEntityId() {
+		return entityId;
+	}
+
+	public void setEntityId(String entityId) {
+		this.entityId = entityId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public DataType getType() {
+		return type;
+	}
+
+	public void setType(DataType type) {
+		this.type = type;
+	}
+
+	public String getTypeEntityId() {
+		return typeEntityId;
+	}
+
+	public void setTypeEntityId(String typeEntityId) {
+		this.typeEntityId = typeEntityId;
+	}
+
 }
