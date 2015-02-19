@@ -556,18 +556,16 @@ abstract class AbstractConfigurationService extends AbstractService implements
         List<ModelAttribute> attributes = persistenceManager.find(ModelAttribute.class,
                 entityParams, null, null, tableName(ModelAttribute.class));
         for (ModelAttribute attribute : attributes) {
-            ModelAttribute modelAttribute = new ModelAttribute();
-            refresh(modelAttribute);
-            modelEntity.getModelAttributes().put(modelAttribute.getName(), modelAttribute);
+            refresh(attribute);
+            modelEntity.getModelAttributes().put(attribute.getName(), attribute);
         }
         modelEntity.getModelEntityRelationships().clear();
         List<ModelEntityRelationship> entityRelationships = persistenceManager.find(
                 ModelEntityRelationship.class, entityParams, null, null,
                 tableName(ModelEntityRelationship.class));
         for (ModelEntityRelationship entityRelationshipData : entityRelationships) {
-            ModelEntityRelationship modelEntityRelationship = new ModelEntityRelationship();
-            refresh(modelEntityRelationship);
-            modelEntity.getModelEntityRelationships().add(modelEntityRelationship);
+            refresh(entityRelationshipData);
+            modelEntity.getModelEntityRelationships().add(entityRelationshipData);
         }
     }
 
@@ -587,9 +585,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
                 ModelAttributeRelationship.class, entityRelationshipParams, null, null,
                 tableName(ModelAttribute.class));
         for (ModelAttributeRelationship attributeRelationship : attributeRelationships) {
-            ModelAttributeRelationship modelAttributeRelationship = new ModelAttributeRelationship();
-            refresh(modelAttributeRelationship);
-            modelEntityRelationship.getAttributeRelationships().add(modelAttributeRelationship);
+            refresh(attributeRelationship);
+            modelEntityRelationship.getAttributeRelationships().add(attributeRelationship);
         }
     }
 
