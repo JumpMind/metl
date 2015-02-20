@@ -491,7 +491,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
             component.setShared(false);
 
             ComponentVersion componentVersion = new ComponentVersion(component, null,
-                    null,null);
+                    null, null, null, null);
 
             component.setName(type + " " + (countComponentsOfType(type) + 1));
 
