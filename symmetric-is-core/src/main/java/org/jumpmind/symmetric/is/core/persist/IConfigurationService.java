@@ -14,6 +14,7 @@ import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
+import org.jumpmind.symmetric.is.core.config.Format;
 import org.jumpmind.symmetric.is.core.config.Model;
 import org.jumpmind.symmetric.is.core.config.ModelAttribute;
 import org.jumpmind.symmetric.is.core.config.ModelAttributeRelationship;
@@ -44,6 +45,10 @@ public interface IConfigurationService {
     public boolean isDeployed(ComponentFlow componentFlow);
     
     public List<ComponentFlow> findComponentFlowsInFolder(Folder folder);
+    
+    public List<Model> findModelsInFolder(Folder folder);
+    
+    public List<Format> findFormatsInFolder(Folder folder);
     
     public Connection findConnection(String id);
     

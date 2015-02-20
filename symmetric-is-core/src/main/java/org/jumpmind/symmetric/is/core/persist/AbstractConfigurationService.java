@@ -27,6 +27,8 @@ import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.ConnectionSetting;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
+import org.jumpmind.symmetric.is.core.config.Format;
+import org.jumpmind.symmetric.is.core.config.FormatVersion;
 import org.jumpmind.symmetric.is.core.config.Model;
 import org.jumpmind.symmetric.is.core.config.ModelAttribute;
 import org.jumpmind.symmetric.is.core.config.ModelAttributeRelationship;
@@ -57,7 +59,6 @@ abstract class AbstractConfigurationService extends AbstractService implements
                     foundAParent = true;
                 }
             }
-
             if (!foundAParent) {
                 rootFolders.add(folder);
             }
@@ -66,7 +67,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         return rootFolders;
     }
 
-    public Map<String, Folder> foldersById(FolderType type) {
+    protected Map<String, Folder> foldersById(FolderType type) {
         Map<String, Object> byType = new HashMap<String, Object>();
         byType.put("type", type.name());
         List<Folder> folders = find(Folder.class, byType);
@@ -78,6 +79,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         return all;
     }
 
+    @Override
     public List<ComponentFlow> findComponentFlowsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("folderId", folder.getId());
@@ -97,6 +99,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         return flows;
     }
 
+    @Override
     public List<Model> findModelsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("folderId", folder.getId());
@@ -117,6 +120,34 @@ abstract class AbstractConfigurationService extends AbstractService implements
         return models;
     }
 
+    @Override
+    public List<Format> findFormatsInFolder(Folder folder) {
+    	Map<String, Object> params = new HashMap<String, Object>();
+        params.put("folderId", folder.getId());
+        List<Format> formats = find(Format.class, params);
+        for (Format format : formats) {
+        	format.setFolder(folder);        	
+            Map<String, Object> versionParams = new HashMap<String, Object>();
+            versionParams.put("formatId", format.getId());
+            List<FormatVersion> formatVersions = find(FormatVersion.class, versionParams);
+            for (FormatVersion formatVersion : formatVersions) {
+            	formatVersion.setFormat(format);
+            	refreshFormatVersionRelations(formatVersion);
+                format.getFormatVersions().add(formatVersion);
+            }
+            formats.add(format);
+        }
+
+        return formats;
+    }
+
+    protected void refreshFormatVersionRelations(FormatVersion formatVersion) {
+    	
+    	//TODO:
+
+    }
+    
+    @Override
     public List<Connection> findConnectionsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("folderId", folder.getId());
@@ -207,7 +238,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         return connection;
     }
 
-    public ComponentVersion findComponentVersion(String id) {
+    protected ComponentVersion findComponentVersion(String id) {
         ComponentVersion componentVersion = new ComponentVersion();
         componentVersion.setId(id);
         persistenceManager.refresh(componentVersion, null, null, tableName(ComponentVersion.class));
@@ -234,7 +265,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     }
 
-    public ModelVersion findModelVersion(String id) {
+    protected ModelVersion findModelVersion(String id) {
         ModelVersion modelVersion = new ModelVersion();
         modelVersion.setId(id);
         persistenceManager.refresh(modelVersion, null, null, tableName(ModelVersion.class));
@@ -244,7 +275,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         return refreshModelVersionRelations(modelVersion);
     }
 
-    public ModelVersion refreshModelVersionRelations(ModelVersion modelVersion) {
+    protected ModelVersion refreshModelVersionRelations(ModelVersion modelVersion) {
 
         modelVersion.getModelEntities().clear();
         Map<String, Object> versionParams = new HashMap<String, Object>();

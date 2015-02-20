@@ -20,6 +20,11 @@ public class Format extends AbstractObject {
     public Format() {
     	formatVersions = new ArrayList<FormatVersion>();
     }
+
+    public Format(String id) {
+    	this();
+    	this.id = id;
+    }
     
     public Format(Folder folder) {
     	this();
