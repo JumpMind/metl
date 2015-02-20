@@ -51,7 +51,10 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
 
     @Override
     public void valueChange(ValueChangeEvent event) {
-        Object obj = event.getProperty().getValue();
+        valueChange(event.getProperty().getValue());
+    }
+    
+    protected void valueChange(Object obj) {
         FormLayout formLayout = new FormLayout();
         formLayout.setWidth(100, Unit.PERCENTAGE);
         formLayout.setMargin(false);

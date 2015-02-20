@@ -69,7 +69,7 @@ public class ComponentVersion extends
     }
 
     public void setInputModelVersiondId(String inputModelVersiondId) {
-        if (inputModelVersion != null) {
+        if (inputModelVersiondId != null) {
             this.inputModelVersion = new ModelVersion(inputModelVersiondId);
         } else {
             this.inputModelVersion = null;
@@ -81,7 +81,7 @@ public class ComponentVersion extends
     }
 
     public void setOutputModelVersionId(String outputModelVersionId) {
-        if (outputModelVersion != null) {
+        if (outputModelVersionId != null) {
             this.outputModelVersion = new ModelVersion(outputModelVersionId);
         } else {
             this.outputModelVersion = null;
@@ -93,7 +93,7 @@ public class ComponentVersion extends
     }
 
     public void setInputFormatVersionId(String inputFormatVersionId) {
-        if (inputFormatVersion != null) {
+        if (inputFormatVersionId != null) {
             this.inputFormatVersion = new FormatVersion(inputFormatVersionId);
         } else {
             this.inputFormatVersion = null;
@@ -105,7 +105,7 @@ public class ComponentVersion extends
     }
 
     public void setOutputFormatVersionId(String outputFormatVersionId) {
-        if (outputFormatVersion != null) {
+        if (outputFormatVersionId != null) {
             this.outputFormatVersion = new FormatVersion(outputFormatVersionId);
         } else {
             this.outputFormatVersion = null;
@@ -117,7 +117,7 @@ public class ComponentVersion extends
     }
 
     public void setConnectionId(String connectionId) {
-        if (connection != null) {
+        if (connectionId != null) {
             this.connection = new Connection(connectionId);
         } else {
             this.connection = null;
@@ -125,7 +125,7 @@ public class ComponentVersion extends
     }
 
     public void setComponentId(String componentId) {
-        if (component != null) {
+        if (componentId != null) {
             this.component = new Component(componentId);
         } else {
             this.component = null;

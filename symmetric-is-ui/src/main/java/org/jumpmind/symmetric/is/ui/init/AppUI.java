@@ -10,7 +10,6 @@ import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.VerticalLayout;
 
 @Theme("apptheme")
@@ -31,9 +30,7 @@ public class AppUI extends AbstractSpringUI {
         root.setSizeFull();
         setContent(root);
 
-        CssLayout contentArea = new CssLayout();
-        contentArea.setPrimaryStyleName("valo-content");
-        contentArea.addStyleName("v-scrollable");
+        VerticalLayout contentArea = new VerticalLayout();
         contentArea.setSizeFull();
 
         WebApplicationContext ctx = getWebApplicationContext();

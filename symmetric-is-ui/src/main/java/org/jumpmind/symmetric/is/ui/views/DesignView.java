@@ -7,8 +7,8 @@ import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.ui.common.Category;
+import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.is.ui.common.TopBarLink;
-import org.jumpmind.symmetric.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -18,6 +18,7 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 
 @UiComponent
@@ -26,28 +27,28 @@ import com.vaadin.ui.VerticalSplitPanel;
 public class DesignView extends HorizontalLayout implements View {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Autowired
     IConfigurationService configurationService;
-    
-    @Autowired 
+
+    @Autowired
     IComponentFactory componentFactory;
-    
+
     @Autowired
     IConnectionFactory connectionFactory;
-    
+
     DesignNavigator designNavigator;
-    
-    DesignPropertySheet propertySheet;
-    
+
+    DesignPropertySheet designPropertySheet;
+
     TabbedApplicationPanel tabs;
-    
+
     @PostConstruct
     protected void init() {
         setSizeFull();
 
         tabs = new TabbedApplicationPanel();
-        
+
         HorizontalSplitPanel rightSplit = new HorizontalSplitPanel();
         rightSplit.setSizeFull();
         rightSplit.setSplitPosition(300, Unit.PIXELS, true);
@@ -59,22 +60,30 @@ public class DesignView extends HorizontalLayout implements View {
         VerticalSplitPanel leftTopBottomSplit = new VerticalSplitPanel();
         leftTopBottomSplit.setSizeFull();
         leftTopBottomSplit.setSplitPosition(60, Unit.PERCENTAGE);
-        designNavigator = new DesignNavigator(FolderType.DESIGN, configurationService, tabs);
+
+        designPropertySheet = new DesignPropertySheet(componentFactory, configurationService,
+                connectionFactory);
+
+        DesignComponentPalette designComponentPalette = new DesignComponentPalette(componentFactory, leftTopBottomSplit);
+        designNavigator = new DesignNavigator(FolderType.DESIGN, configurationService, tabs,
+                designComponentPalette, designPropertySheet);
         leftTopBottomSplit.setFirstComponent(designNavigator);
-        leftTopBottomSplit.setSecondComponent(new DesignComponentPalette());
-        
+        leftTopBottomSplit.setSecondComponent(designComponentPalette);
+
         leftSplit.setFirstComponent(leftTopBottomSplit);
-        leftSplit.setSecondComponent(tabs);
-        rightSplit.setFirstComponent(leftSplit);        
-        
-        propertySheet = new DesignPropertySheet(componentFactory, configurationService, connectionFactory);
-        designNavigator.addValueChangeListener(propertySheet);
-        
-        rightSplit.setSecondComponent(propertySheet);
-        
+        VerticalLayout container = new VerticalLayout();
+        container.setSizeFull();
+        container.addComponent(tabs);
+        leftSplit.setSecondComponent(container);
+        rightSplit.setFirstComponent(leftSplit);
+
+        designNavigator.addValueChangeListener(designPropertySheet);
+
+        rightSplit.setSecondComponent(designPropertySheet);
+
         addComponent(rightSplit);
     }
-    
+
     @Override
     public void enter(ViewChangeEvent event) {
         designNavigator.refresh();

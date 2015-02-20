@@ -10,7 +10,7 @@ import org.jumpmind.symmetric.is.core.config.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
 import org.jumpmind.symmetric.is.ui.common.Icons;
-import org.jumpmind.symmetric.ui.common.TabbedApplicationPanel;
+import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.ui.MenuBar;
@@ -23,11 +23,17 @@ public class DesignNavigator extends AbstractFolderNavigator {
     MenuItem newFlow;
     MenuItem newConnection;
     MenuItem newModel;
-    
-    TabbedApplicationPanel tabs;
 
-    public DesignNavigator(FolderType folderType, IConfigurationService configurationService, TabbedApplicationPanel tabs) {
+    TabbedApplicationPanel tabs;
+    DesignComponentPalette designComponentPalette;
+    DesignPropertySheet designPropertySheet;
+
+    public DesignNavigator(FolderType folderType, IConfigurationService configurationService,
+            TabbedApplicationPanel tabs, DesignComponentPalette designComponentPalette,
+            DesignPropertySheet designPropertySheet) {
         super(folderType, configurationService);
+        this.designComponentPalette = designComponentPalette;
+        this.designPropertySheet = designPropertySheet;
         this.tabs = tabs;
     }
 
@@ -43,13 +49,14 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
         newConnection = leftMenuBar.addItem("", Icons.GENERAL_CONNECTION, null);
         newConnection.setDescription("Add Connection");
-        
-        MenuItem newDbConnection = newConnection.addItem("Add Database", Icons.DATABASE, new Command() {
-            
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-            }
-        });
+
+        MenuItem newDbConnection = newConnection.addItem("Add Database", Icons.DATABASE,
+                new Command() {
+
+                    @Override
+                    public void menuSelected(MenuItem selectedItem) {
+                    }
+                });
         newDbConnection.setDescription("Add Database Connection");
 
         newModel = leftMenuBar.addItem("", Icons.MODEL, new Command() {
@@ -60,27 +67,30 @@ public class DesignNavigator extends AbstractFolderNavigator {
         });
         newModel.setDescription("Add Model");
     }
-    
+
     @Override
     protected void openItem(Object item) {
         if (item instanceof ComponentFlow) {
             item = ((ComponentFlow) item).getLatestComponentFlowVersion();
-        } 
-        
+        }
+
         if (item instanceof ComponentFlowVersion) {
-            ComponentFlowVersion flowVersion = (ComponentFlowVersion)item;
-            DesignFlowLayout flowLayout = new DesignFlowLayout(configurationService, flowVersion);
-            tabs.addCloseableTab(flowVersion.getComponentFlow().getName() + " " + flowVersion.getName(), Icons.FLOW, flowLayout);
+            ComponentFlowVersion flowVersion = (ComponentFlowVersion) item;
+            DesignFlowLayout flowLayout = new DesignFlowLayout(configurationService, flowVersion,
+                    designComponentPalette, designPropertySheet, this);
+            tabs.addCloseableTab(
+                    flowVersion.getComponentFlow().getName() + " " + flowVersion.getName(),
+                    Icons.FLOW, flowLayout);
         }
     }
-    
+
     @Override
     protected void selectionChanged(ValueChangeEvent event) {
         super.selectionChanged(event);
         boolean enabled = getSelectedFolder() != null && itemBeingEdited == null;
         newFlow.setEnabled(enabled);
         newConnection.setEnabled(enabled);
-        newModel.setEnabled(enabled);        
+        newModel.setEnabled(enabled);
     }
 
     @Override
@@ -141,8 +151,8 @@ public class DesignNavigator extends AbstractFolderNavigator {
             List<ComponentFlowVersion> versions = flow.getComponentFlowVersions();
             for (ComponentFlowVersion componentFlowVersion : versions) {
                 this.treeTable.addItem(componentFlowVersion);
-                this.treeTable.setItemCaption(componentFlowVersion, componentFlowVersion
-                        .getVersionName());
+                this.treeTable.setItemCaption(componentFlowVersion,
+                        componentFlowVersion.getVersionName());
                 this.treeTable.setItemIcon(componentFlowVersion, Icons.FLOW_VERSION);
                 this.treeTable.setParent(componentFlowVersion, flow);
                 this.treeTable.setChildrenAllowed(componentFlowVersion, false);
