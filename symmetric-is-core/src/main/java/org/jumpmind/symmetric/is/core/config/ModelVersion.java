@@ -20,6 +20,11 @@ public class ModelVersion extends AbstractObject {
     public ModelVersion() {
     	this.modelEntities = new LinkedCaseInsensitiveMap<ModelEntity>();
     }
+
+    public ModelVersion(String id) {
+    	this();
+    	this.id = id;
+    }
     
     public ModelVersion(Model model) {
     	this();

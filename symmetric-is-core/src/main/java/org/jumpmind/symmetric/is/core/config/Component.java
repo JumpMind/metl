@@ -19,6 +19,11 @@ public class Component extends AbstractObject {
         this.componentVersions = new ArrayList<ComponentVersion>();
     }
 
+    public Component(String id) {
+    	this();
+    	this.id = id;
+    }
+    
     public String getType() {
         return type;
     }

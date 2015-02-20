@@ -8,8 +8,6 @@ public class AgentDeployment extends AbstractObject {
 
     String agentId;
 
-    String componentFlowVersionId;
-
     String startMode;
 
     String status = DeploymentStatus.UNKNOWN.name();
@@ -25,11 +23,6 @@ public class AgentDeployment extends AbstractObject {
     
     public void setComponentFlowVersion(ComponentFlowVersion componentFlowVersion) {
         this.componentFlowVersion = componentFlowVersion;
-        if (componentFlowVersion != null) {
-            this.componentFlowVersionId = componentFlowVersion.getId();
-        } else {
-            this.componentFlowVersionId = null;
-        }
     }
 
     public String getAgentId() {
@@ -41,11 +34,15 @@ public class AgentDeployment extends AbstractObject {
     }
 
     public String getComponentFlowVersionId() {
-        return componentFlowVersionId;
+    	return componentFlowVersion != null ? componentFlowVersion.getId() : null;
     }
 
     public void setComponentFlowVersionId(String componentFlowVersionId) {
-        this.componentFlowVersionId = componentFlowVersionId;
+        if (componentFlowVersionId != null) {
+            this.componentFlowVersion = new ComponentFlowVersion();
+        } else {
+            this.componentFlowVersion = null;
+        }
     }
 
     public String getStartMode() {

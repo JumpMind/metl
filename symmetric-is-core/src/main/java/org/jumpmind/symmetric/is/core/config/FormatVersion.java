@@ -9,6 +9,10 @@ public class FormatVersion extends AbstractObjectWithSettings {
 	String formatId;
 	String modelVersionId;
 	
+	public FormatVersion(String id) {
+		this.id = id;
+	}
+	
 	@Override
 	protected Setting createSettingData() {
 		// TODO Auto-generated method stub

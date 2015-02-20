@@ -15,6 +15,10 @@ public class Connection extends AbstractObjectWithSettings {
     public Connection() {
     }
 
+    public Connection(String id) {
+    	this.id = id;
+    }
+    
     public Connection(Folder folder, Setting... settings) {
         super(settings);
         setFolder(folder);

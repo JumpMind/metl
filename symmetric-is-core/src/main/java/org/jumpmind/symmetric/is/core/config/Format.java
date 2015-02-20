@@ -14,9 +14,7 @@ public class Format extends AbstractObject {
     String name;
     
     String type;
-    
-    String folderId;
-    
+      
     boolean shared;
 
     public Format() {
@@ -60,13 +58,17 @@ public class Format extends AbstractObject {
 		this.type = type;
 	}
 
-	public String getFolderId() {
-		return folderId;
-	}
+    public void setFolderId(String folderId) {
+        if (folderId != null) {
+            this.folder = new Folder(folderId);
+        } else {
+            this.folder = null;
+        }
+    }
 
-	public void setFolderId(String folderId) {
-		this.folderId = folderId;
-	}
+    public String getFolderId() {
+        return folder != null ? folder.getId() : null;
+    }
 
 	public boolean isShared() {
 		return shared;

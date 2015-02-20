@@ -7,21 +7,21 @@ public class Folder extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
-    String parentFolderId;
-
     String type;
 
     String name;
     
     Folder parent;
 
-    List<Folder> children = new ArrayList<Folder>();
+    List<Folder> children;
 
-    public Folder(String id) {
-        this.id = id;         
+    public Folder() {
+    	children = new ArrayList<Folder>();
     }
     
-    public Folder() {
+    public Folder(String id) {
+    	this();
+        this.id = id;         
     }
     
     public FolderType getFolderType() {
@@ -34,9 +34,6 @@ public class Folder extends AbstractObject {
 
     public void setParent(Folder parent) {
         this.parent = parent;
-        if (parent != null) {
-            parentFolderId = parent.getId();
-        }
     }
 
     public Folder getParent() {
@@ -65,11 +62,15 @@ public class Folder extends AbstractObject {
     }
     
     public void setParentFolderId(String parentFolderId) {
-        this.parentFolderId = parentFolderId;
+        if (parentFolderId != null) {
+            this.parent = new Folder(parentFolderId);
+        } else {
+            this.parent = null;
+        }
     }
     
     public String getParentFolderId() {
-        return parentFolderId;
+    	return parent != null ? parent.getId() : null;
     }
     
     @Override

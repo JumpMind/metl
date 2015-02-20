@@ -7,8 +7,6 @@ public class ComponentFlowNode extends AbstractObject {
     
     protected ComponentVersion componentVersion;
     
-    String componentVersionId;
-    
     String componentFlowVersionId;
     
     int x;
@@ -38,11 +36,15 @@ public class ComponentFlowNode extends AbstractObject {
     }
     
     public String getComponentVersionId() {
-        return componentVersionId;
+        return componentVersion != null ? componentVersion.getId() : null;
     }
 
     public void setComponentVersionId(String componentVersionId) {
-        this.componentVersionId = componentVersionId;
+        if (componentVersionId != null) {
+            this.componentVersion = new ComponentVersion(componentVersionId);
+        } else {
+            this.componentVersion = null;
+        }
     }
 
     public String getComponentFlowVersionId() {

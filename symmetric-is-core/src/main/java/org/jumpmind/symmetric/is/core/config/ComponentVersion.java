@@ -14,67 +14,46 @@ public class ComponentVersion extends
 
 	ModelVersion outputModelVersion;
 	
-    String inputModelVersiondId;
-    
-    String outputModelVersionId;
-    
-    String connectionId;
-    
-    String componentId;
-    
+	FormatVersion inputFormatVersion;
+	
+	FormatVersion outputFormatVersion;
+	
     String versionName;
 	
     public ComponentVersion() {
     }
     
+    public ComponentVersion(String id) {
+    	this.id = id;
+    }
+    
 	public ComponentVersion(Component component, Connection connection,
 			ModelVersion inputModelVersion, ModelVersion outputModelVersion,
+			FormatVersion inputFormatVersion, FormatVersion outputFormatVersion,
 			Setting... settings) {
 	    super(settings);
 		this.component = component;
 		this.connection = connection;
 		this.inputModelVersion = inputModelVersion;
 		this.outputModelVersion = outputModelVersion;
-		this.componentId = component.getId();
-		if (connection != null) {
-			connectionId = connection.getId();
-		}
+		this.inputFormatVersion = inputFormatVersion;
+		this.outputFormatVersion = outputFormatVersion;
 	}
 	
 	public void setInputModelVersion(ModelVersion inputModelVersion) {
         this.inputModelVersion = inputModelVersion;
-        if (inputModelVersion != null) {
-            this.inputModelVersiondId = inputModelVersion.getId();
-        } else {
-            this.inputModelVersiondId = null;
-        }
     }
 	
 	public void setOutputModelVersion(ModelVersion outputModelVersion) {
         this.outputModelVersion = outputModelVersion;
-        if (outputModelVersion != null) {
-            outputModelVersionId = outputModelVersion.getId();
-        } else {
-            outputModelVersionId = null;
-        }
     }
 	
 	public void setComponent(Component component) {
         this.component = component;
-        if (component != null) {
-            this.componentId = component.getId();
-        } else {
-            this.componentId = null;
-        }
     }
 
 	public void setConnection(Connection connection) {
 		this.connection = connection;
-		if (connection != null) {
-		connectionId = connection.getId();
-		} else {
-		    connectionId = null;
-		}
 	}
 
 	public Connection getConnection() {
@@ -86,35 +65,75 @@ public class ComponentVersion extends
 	}
 
     public String getInputModelVersiondId() {
-        return inputModelVersiondId;
+        return inputModelVersion != null ? inputModelVersion.getId() : null;
     }
 
     public void setInputModelVersiondId(String inputModelVersiondId) {
-        this.inputModelVersiondId = inputModelVersiondId;
+        if (inputModelVersion != null) {
+            this.inputModelVersion = new ModelVersion(inputModelVersiondId);
+        } else {
+            this.inputModelVersion = null;
+        }
     }
 
     public String getOutputModelVersionId() {
-        return outputModelVersionId;
+        return inputModelVersion != null ? inputModelVersion.getId() : null;
     }
 
     public void setOutputModelVersionId(String outputModelVersionId) {
-        this.outputModelVersionId = outputModelVersionId;
+        if (outputModelVersion != null) {
+            this.outputModelVersion = new ModelVersion(outputModelVersionId);
+        } else {
+            this.outputModelVersion = null;
+        }
     }
 
+    public String getInputFormatVersionId() {
+        return inputFormatVersion != null ? inputFormatVersion.getId() : null;
+    }
+
+    public void setInputFormatVersionId(String inputFormatVersionId) {
+        if (inputFormatVersion != null) {
+            this.inputFormatVersion = new FormatVersion(inputFormatVersionId);
+        } else {
+            this.inputFormatVersion = null;
+        }
+    }
+
+    public String getOutputFormatVersionId() {
+        return outputFormatVersion != null ? outputFormatVersion.getId() : null;
+    }
+
+    public void setOutputFormatVersionId(String outputFormatVersionId) {
+        if (outputFormatVersion != null) {
+            this.outputFormatVersion = new FormatVersion(outputFormatVersionId);
+        } else {
+            this.outputFormatVersion = null;
+        }
+    }
+   
     public String getConnectionId() {
-        return connectionId;
+        return connection != null ? connection.getId() : null;
     }
 
     public void setConnectionId(String connectionId) {
-        this.connectionId = connectionId;
+        if (connection != null) {
+            this.connection = new Connection(connectionId);
+        } else {
+            this.connection = null;
+        }
     }
 
     public void setComponentId(String componentId) {
-        this.componentId = componentId;
+        if (component != null) {
+            this.component = new Component(componentId);
+        } else {
+            this.component = null;
+        }
     }
 
     public String getComponentId() {
-        return componentId;
+        return component != null ? component.getId() : null;
     }
     
     public String getVersionName() {
@@ -140,6 +159,22 @@ public class ComponentVersion extends
     	return outputModelVersion;
     }
     
+	public FormatVersion getInputFormatVersion() {
+		return inputFormatVersion;
+	}
+
+	public void setInputFormatVersion(FormatVersion inputFormatVersion) {
+		this.inputFormatVersion = inputFormatVersion;
+	}
+
+	public FormatVersion getOutputFormatVersion() {
+		return outputFormatVersion;
+	}
+
+	public void setOutputFormatVersion(FormatVersion outputFormatVersion) {
+		this.outputFormatVersion = outputFormatVersion;
+	}
+
 	@Override
 	protected Setting createSettingData() {
 		return new ComponentVersionSetting(id);

@@ -13,7 +13,6 @@ public class ComponentFlow extends AbstractObject {
 
     String name;
     
-
     public ComponentFlow() {
         componentFlowVersions = new ArrayList<ComponentFlowVersion>();
     }
