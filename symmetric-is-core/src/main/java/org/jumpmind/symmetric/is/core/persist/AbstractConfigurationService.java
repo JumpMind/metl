@@ -407,8 +407,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     private void refreshComponentFlowVersionRelations(ComponentFlowVersion componentFlowVersion) {
         ComponentFlow flow = componentFlowVersion.getComponentFlow();
         if (flow == null) {
-            flow = new ComponentFlow(null);
-            flow.setId(componentFlowVersion.getId());
+            flow = new ComponentFlow(componentFlowVersion.getId());
             componentFlowVersion.setComponentFlow(flow);
         }
         refresh(flow);

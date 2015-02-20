@@ -10,11 +10,10 @@ public class ComponentFlow extends AbstractObject {
     List<ComponentFlowVersion> componentFlowVersions;
 
     Folder folder;
-    
+
     String name;
     
-    String folderId;
-    
+
     public ComponentFlow() {
         componentFlowVersions = new ArrayList<ComponentFlowVersion>();
     }
@@ -24,15 +23,15 @@ public class ComponentFlow extends AbstractObject {
         setFolder(folder);
     }
     
+    public ComponentFlow(String id) {
+        this();
+        this.id = id;
+    }
+
     public void setFolder(Folder folder) {
         this.folder = folder;
-        if (folder != null) {
-            folderId = folder.getId();
-        } else {
-            folderId = null;
-        }
     }
-    
+
     public List<ComponentFlowVersion> getComponentFlowVersions() {
         return componentFlowVersions;
     }
@@ -41,8 +40,7 @@ public class ComponentFlow extends AbstractObject {
         ComponentFlowVersion latest = null;
         for (ComponentFlowVersion componentFlowVersion : componentFlowVersions) {
             if (latest == null
-                    || latest.getCreateTime()
-                            .before(componentFlowVersion.getCreateTime())) {
+                    || latest.getCreateTime().before(componentFlowVersion.getCreateTime())) {
                 latest = componentFlowVersion;
             }
         }
@@ -52,7 +50,7 @@ public class ComponentFlow extends AbstractObject {
     public Folder getFolder() {
         return folder;
     }
-    
+
     public String getName() {
         return name;
     }
@@ -60,14 +58,18 @@ public class ComponentFlow extends AbstractObject {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public void setFolderId(String folderId) {
-        this.folderId = folderId;
+        if (folderId != null) {
+            this.folder = new Folder(folderId);
+        } else {
+            this.folder = null;
+        }
     }
-    
+
     public String getFolderId() {
-        return folderId;
-    }    
+        return folder != null ? folder.getId() : null;
+    }
 
     @Override
     public boolean isSettingNameAllowed() {

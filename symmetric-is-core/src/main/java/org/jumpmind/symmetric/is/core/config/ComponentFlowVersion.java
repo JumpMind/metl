@@ -17,8 +17,6 @@ public class ComponentFlowVersion extends AbstractObject {
 
     List<ComponentFlowNodeLink> componentFlowNodeLinks;
     
-    String componentFlowId;
-    
     String startType = StartType.MANUAL.name();
     
     String startExpression;
@@ -45,11 +43,15 @@ public class ComponentFlowVersion extends AbstractObject {
     }
     
     public void setComponentFlowId(String componentFlowId) {
-        this.componentFlowId = componentFlowId;
+        if (componentFlowId != null) {
+            this.componentFlow = new ComponentFlow(componentFlowId);
+        } else {
+            this.componentFlow = null;
+        }
     }
 
     public String getComponentFlowId() {
-        return componentFlowId;
+        return componentFlow != null ? componentFlow.getId() : null;
     }
 
     public void setStartExpression(String startExpression) {
@@ -90,11 +92,6 @@ public class ComponentFlowVersion extends AbstractObject {
     
     public void setComponentFlow(ComponentFlow componentFlow) {
         this.componentFlow = componentFlow;
-        if (componentFlow != null) {
-            componentFlowId = componentFlow.getId();
-        } else {
-            componentFlowId = null;
-        }
     }
 
     public List<ComponentFlowNodeLink> getComponentFlowNodeLinks() {
