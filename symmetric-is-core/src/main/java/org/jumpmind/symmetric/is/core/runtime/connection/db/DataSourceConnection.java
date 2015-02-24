@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.core.runtime.connection;
+package org.jumpmind.symmetric.is.core.runtime.connection.db;
 
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ResettableBasicDataSource;
@@ -6,6 +6,9 @@ import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
+import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
+import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionDefinition;
+import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
 
 @ConnectionDefinition(typeName=DataSourceConnection.TYPE, connectionCategory=ConnectionCategory.DATASOURCE)
 public class DataSourceConnection extends AbstractRuntimeObject implements IConnection {

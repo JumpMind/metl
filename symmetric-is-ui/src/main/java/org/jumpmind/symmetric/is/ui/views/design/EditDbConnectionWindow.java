@@ -1,10 +1,10 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection.DB_POOL_DRIVER;
-import static org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection.DB_POOL_PASSWORD;
-import static org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection.DB_POOL_URL;
-import static org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection.DB_POOL_USER;
+import static org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection.DB_POOL_DRIVER;
+import static org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection.DB_POOL_PASSWORD;
+import static org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection.DB_POOL_URL;
+import static org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection.DB_POOL_USER;
 
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +16,7 @@ import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.runtime.connection.DataSourceConnection;
+import org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
 import org.jumpmind.symmetric.ui.common.ResizableWindow;

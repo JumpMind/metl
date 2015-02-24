@@ -21,7 +21,6 @@ import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.MessageManipulationStrategy;
-import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
@@ -69,11 +68,11 @@ public class DbReaderComponent extends AbstractComponent {
 		NamedParameterJdbcTemplate template = getJdbcTemplate();
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 
-		int recordCount = 1;
+		int inboundRecordCount = 1;
 		ArrayList<EntityData> payload = null;
 		if (!(inputMessage instanceof StartupMessage)) {
 			payload = inputMessage.getPayload();
-			recordCount = payload.size();
+			inboundRecordCount = payload.size();
 		}
 
 		/*
@@ -82,7 +81,7 @@ public class DbReaderComponent extends AbstractComponent {
 		 * to it. If the reader is started by another component, then loop for
 		 * all records in the input message
 		 */
-		for (int i = 0; i < recordCount; i++) {
+		for (int i = 0; i < inboundRecordCount; i++) {
 			if (payload != null && payload.size() > i) {
 				setParamsFromInboundMsgAndRec(paramMap, inputMessage,
 						payload.get(i));
@@ -98,6 +97,7 @@ public class DbReaderComponent extends AbstractComponent {
 					int count = meta.getColumnCount();
 
 					Message message = null;
+					int outputRecCount=0;
 					while (rs.next()) {
 						if (message == null) {
 							if (messageManipulationStrategy == MessageManipulationStrategy.ENHANCE) {
@@ -128,10 +128,10 @@ public class DbReaderComponent extends AbstractComponent {
 										"The table name could not be determined while mapping a database record to an EntitiesRow. "
 												+ "Try using hints to specify a column's table name as part of the SQL query.");
 							}
-
-							checkTableAndColumnAgainstOutputModel(tableName,
+							if (outputRecCount == 0) {
+								checkTableAndColumnAgainstOutputModel(tableName,
 									columnName);
-
+							}
 							EntityData record = records.get(tableName);
 							if (record == null) {
 								record = new EntityData(tableName);
@@ -152,8 +152,9 @@ public class DbReaderComponent extends AbstractComponent {
 							messageTarget.put(message);
 							message = null;
 						}
-					}
-
+						outputRecCount++;
+					} //loop for resultset for a given query
+					rs.close();
 					if (message != null) {
 						messageTarget.put(message);
 					}
@@ -161,14 +162,6 @@ public class DbReaderComponent extends AbstractComponent {
 				} /* end while for each result set msg from query */
 			});
 		} /* for record count within message */
-		/*
-		 * if this was a startup message, we've done everything we needed to do
-		 * send a shutdown message
-		 */
-		if (inputMessage instanceof StartupMessage) {
-			messageTarget.put(new ShutdownMessage(this.getComponentFlowNode()
-					.getId()));
-		}
 	}
 
 	private void checkTableAndColumnAgainstOutputModel(String tableName,

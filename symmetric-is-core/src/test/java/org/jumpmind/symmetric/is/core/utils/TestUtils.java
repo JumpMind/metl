@@ -110,7 +110,7 @@ public class TestUtils {
 	public static ComponentVersion createComponentVersion(Component component,
 			Connection connection, Setting... settings) {
         ComponentVersion componentVersion = new ComponentVersion(component,
-                connection, null, null,null,null, settings);
+                connection, null, null, settings);
         componentVersion.setComponentId(component.getId());
         componentVersion.setCreateBy("Test");
         componentVersion.setCreateTime(new Date());

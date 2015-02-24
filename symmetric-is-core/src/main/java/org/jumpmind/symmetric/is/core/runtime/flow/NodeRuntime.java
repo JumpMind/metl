@@ -109,6 +109,7 @@ public class NodeRuntime implements Runnable {
         for (NodeRuntime targetNodeRuntime : targetNodeRuntimes) {
             targetNodeRuntime.put(new ShutdownMessage(component.getComponentFlowNode().getId()));
         }
+        this.component.stop();
         running = false;
     }
 

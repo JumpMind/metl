@@ -1,17 +1,17 @@
 package org.jumpmind.symmetric.is.core.config;
 
-public class FormatVersionEntitySetting extends Setting {
+public class ComponentVersionEntitySetting extends Setting {
 
     private static final long serialVersionUID = 1L;
 
-    String formatVersionId;
+    String componentVersionId;
     String entityId;
     
 	public String getFormatVersionId() {
-		return formatVersionId;
+		return componentVersionId;
 	}
 	public void setFormatVersionId(String formatVersionId) {
-		this.formatVersionId = formatVersionId;
+		this.componentVersionId = formatVersionId;
 	}
 	public String getEntityId() {
 		return entityId;

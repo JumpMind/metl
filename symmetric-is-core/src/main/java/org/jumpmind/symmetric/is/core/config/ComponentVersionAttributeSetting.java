@@ -1,16 +1,16 @@
 package org.jumpmind.symmetric.is.core.config;
 
-public class FormatVersionAttributeSetting extends Setting {
+public class ComponentVersionAttributeSetting extends Setting {
 
     private static final long serialVersionUID = 1L;
 
-    String formatVersionId;
+    String componentVersionId;
     String attributeId;
 	public String getFormatVersionId() {
-		return formatVersionId;
+		return componentVersionId;
 	}
 	public void setFormatVersionId(String formatVersionId) {
-		this.formatVersionId = formatVersionId;
+		this.componentVersionId = formatVersionId;
 	}
 	public String getAttributeId() {
 		return attributeId;

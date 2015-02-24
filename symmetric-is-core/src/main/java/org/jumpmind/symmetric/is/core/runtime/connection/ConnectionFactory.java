@@ -8,6 +8,7 @@ import java.util.Map;
 import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
+import org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection;
 
 public class ConnectionFactory implements IConnectionFactory {
 

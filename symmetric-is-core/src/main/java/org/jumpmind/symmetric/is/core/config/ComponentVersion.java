@@ -14,10 +14,6 @@ public class ComponentVersion extends
 
 	ModelVersion outputModelVersion;
 	
-	FormatVersion inputFormatVersion;
-	
-	FormatVersion outputFormatVersion;
-	
     String versionName;
 	
     public ComponentVersion() {
@@ -29,15 +25,12 @@ public class ComponentVersion extends
     
 	public ComponentVersion(Component component, Connection connection,
 			ModelVersion inputModelVersion, ModelVersion outputModelVersion,
-			FormatVersion inputFormatVersion, FormatVersion outputFormatVersion,
 			Setting... settings) {
 	    super(settings);
 		this.component = component;
 		this.connection = connection;
 		this.inputModelVersion = inputModelVersion;
 		this.outputModelVersion = outputModelVersion;
-		this.inputFormatVersion = inputFormatVersion;
-		this.outputFormatVersion = outputFormatVersion;
 	}
 	
 	public void setInputModelVersion(ModelVersion inputModelVersion) {
@@ -88,30 +81,6 @@ public class ComponentVersion extends
         }
     }
 
-    public String getInputFormatVersionId() {
-        return inputFormatVersion != null ? inputFormatVersion.getId() : null;
-    }
-
-    public void setInputFormatVersionId(String inputFormatVersionId) {
-        if (inputFormatVersionId != null) {
-            this.inputFormatVersion = new FormatVersion(inputFormatVersionId);
-        } else {
-            this.inputFormatVersion = null;
-        }
-    }
-
-    public String getOutputFormatVersionId() {
-        return outputFormatVersion != null ? outputFormatVersion.getId() : null;
-    }
-
-    public void setOutputFormatVersionId(String outputFormatVersionId) {
-        if (outputFormatVersionId != null) {
-            this.outputFormatVersion = new FormatVersion(outputFormatVersionId);
-        } else {
-            this.outputFormatVersion = null;
-        }
-    }
-   
     public String getConnectionId() {
         return connection != null ? connection.getId() : null;
     }
@@ -159,22 +128,6 @@ public class ComponentVersion extends
     	return outputModelVersion;
     }
     
-	public FormatVersion getInputFormatVersion() {
-		return inputFormatVersion;
-	}
-
-	public void setInputFormatVersion(FormatVersion inputFormatVersion) {
-		this.inputFormatVersion = inputFormatVersion;
-	}
-
-	public FormatVersion getOutputFormatVersion() {
-		return outputFormatVersion;
-	}
-
-	public void setOutputFormatVersion(FormatVersion outputFormatVersion) {
-		this.outputFormatVersion = outputFormatVersion;
-	}
-
 	@Override
 	protected Setting createSettingData() {
 		return new ComponentVersionSetting(id);

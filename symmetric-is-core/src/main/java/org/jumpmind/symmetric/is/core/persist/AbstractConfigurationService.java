@@ -27,8 +27,6 @@ import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.ConnectionSetting;
 import org.jumpmind.symmetric.is.core.config.Folder;
 import org.jumpmind.symmetric.is.core.config.FolderType;
-import org.jumpmind.symmetric.is.core.config.Format;
-import org.jumpmind.symmetric.is.core.config.FormatVersion;
 import org.jumpmind.symmetric.is.core.config.Model;
 import org.jumpmind.symmetric.is.core.config.ModelAttribute;
 import org.jumpmind.symmetric.is.core.config.ModelAttributeRelationship;
@@ -119,34 +117,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
         return models;
     }
-
-    @Override
-    public List<Format> findFormatsInFolder(Folder folder) {
-    	Map<String, Object> params = new HashMap<String, Object>();
-        params.put("folderId", folder.getId());
-        List<Format> formats = find(Format.class, params);
-        for (Format format : formats) {
-        	format.setFolder(folder);        	
-            Map<String, Object> versionParams = new HashMap<String, Object>();
-            versionParams.put("formatId", format.getId());
-            List<FormatVersion> formatVersions = find(FormatVersion.class, versionParams);
-            for (FormatVersion formatVersion : formatVersions) {
-            	formatVersion.setFormat(format);
-            	refreshFormatVersionRelations(formatVersion);
-                format.getFormatVersions().add(formatVersion);
-            }
-            formats.add(format);
-        }
-
-        return formats;
-    }
-
-    protected void refreshFormatVersionRelations(FormatVersion formatVersion) {
-    	
-    	//TODO:
-
-    }
-    
+  
     @Override
     public List<Connection> findConnectionsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
