@@ -9,6 +9,7 @@ import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection;
+import org.jumpmind.symmetric.is.core.runtime.connection.localfile.DASNASConnection;
 
 public class ConnectionFactory implements IConnectionFactory {
 
@@ -18,6 +19,7 @@ public class ConnectionFactory implements IConnectionFactory {
 
     public ConnectionFactory() {
         register(DataSourceConnection.class);
+        register(DASNASConnection.class);
     }
 
     @Override

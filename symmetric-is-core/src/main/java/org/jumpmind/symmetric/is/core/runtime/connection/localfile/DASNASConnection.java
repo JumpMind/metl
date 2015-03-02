@@ -5,8 +5,11 @@ import org.jumpmind.symmetric.is.core.config.Connection;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
+import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
+import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionDefinition;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
 
+@ConnectionDefinition(typeName=DASNASConnection.TYPE, connectionCategory=ConnectionCategory.RESOURCE)
 public class DASNASConnection extends AbstractRuntimeObject implements
 		IConnection {
 

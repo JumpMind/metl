@@ -1,6 +1,5 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -98,6 +97,12 @@ public class FileWriterComponent extends AbstractComponent {
 	private void handleBinaryFile(Message inputMessage, IMessageTarget messageTarget) {
 		if (fileType.equalsIgnoreCase(FILE_TYPE_TEXT)) {
 			throw new IoException("Converting from Binary input to Text output not implemented");
+		}
+		byte[] payload = (byte[]) inputMessage.getPayload();
+		try {
+			outStream.write(payload);
+		} catch (IOException e) {
+			throw new IoException("Error writing to file" + e.getMessage());
 		}
 	}
 	

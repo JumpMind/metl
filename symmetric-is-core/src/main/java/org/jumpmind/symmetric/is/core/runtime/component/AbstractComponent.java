@@ -25,6 +25,7 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
             try {
                 this.connection = connectionFactory.create(connection);
                 this.connection.start(connection);
+                //TODO: connection.start gets called twice here...  Once during the create and again in the start after it.
             } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {

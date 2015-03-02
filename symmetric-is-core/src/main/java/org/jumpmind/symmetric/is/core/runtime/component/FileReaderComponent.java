@@ -22,8 +22,8 @@ public class FileReaderComponent extends AbstractComponent {
 	
 	public static final String TYPE = "File Reader";
 	
-	private static final String FILE_TYPE_TEXT = "TEXT";
-	private static final String FILE_TYPE_BINARY = "BINARY";
+	public static final String FILE_TYPE_TEXT = "TEXT";
+	public static final String FILE_TYPE_BINARY = "BINARY";
     public static final String DEFAULT_CHARSET = Charset.defaultCharset().name();
 
 	@SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Path and File")
@@ -37,11 +37,11 @@ public class FileReaderComponent extends AbstractComponent {
 			defaultValue = "true", label = "Must Exist")
 	public static final String FILEREADER_MUST_EXIST = "filereader.must.exist";
 
-	@SettingDefinition(type = Type.INTEGER, order = 40, required = true, provided = true, 
+	@SettingDefinition(type = Type.INTEGER, order = 40,  
 			defaultValue = "1", label = "Binary Size / Msg (KB)")
 	public static final String FILEREADER_BINARY_SIZE_PER_MESSAGE = "filereader.binary.size.per.message";
 
-	@SettingDefinition(type = Type.INTEGER, order = 50, required = true, provided = true, 
+	@SettingDefinition(type = Type.INTEGER, order = 50,  
 			defaultValue = "1", label = "Text Rows / Msg")
 	public static final String FILEREADER_TEXT_ROWS_PER_MESSAGE = "filereader.text.rows.per.message";
 	
@@ -139,7 +139,7 @@ public class FileReaderComponent extends AbstractComponent {
 	
 	private void initAndSendMessage(ArrayList<String> payload, IMessageTarget messageTarget, int linesInMessage) {
         Message message = new Message(componentNode.getId());
-        message.setPayload(payload);
+        message.setPayload(new ArrayList<String>(payload));
         messageTarget.put(message);
         payload.clear();
         linesInMessage = 0;
