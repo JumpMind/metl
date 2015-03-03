@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
+import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.config.SettingDefinition;
@@ -21,9 +22,9 @@ public class FileWriterComponent extends AbstractComponent {
 
 	public static final String TYPE = "File Writer";
 	
-	private static final String FILE_TYPE_TEXT = "TEXT";
-	private static final String FILE_TYPE_BINARY = "BINARY";
-	private static final String DEFAULT_CHARSET = "UTF-8";
+	public static final String FILE_TYPE_TEXT = "TEXT";
+	public static final String FILE_TYPE_BINARY = "BINARY";
+	public static final String DEFAULT_CHARSET = "UTF-8";
 	
 	@SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Path and File")
 	public final static String FILEWRITER_RELATIVE_PATH = "filewriter.relative.path";
@@ -39,7 +40,7 @@ public class FileWriterComponent extends AbstractComponent {
 	public static final String FILEWRITER_APPEND = "filewriter.append";
 	
 	@SettingDefinition(type = Type.INTEGER, order = 50, label = "Line Terminator")
-	public static final String FILEREADER_TEXT_LINE_TERMINATOR = "filereader.text.line.terminator";
+	public static final String FILEWRITER_TEXT_LINE_TERMINATOR = "filereader.text.line.terminator";
 
 	/* settings */
 	String relativePathAndFile;
@@ -91,7 +92,7 @@ public class FileWriterComponent extends AbstractComponent {
 		fileType = properties.get(FILEWRITER_FILE_TYPE);
 		mustExist = properties.is(FILEWRITER_MUST_EXIST);
 		append = properties.is(FILEWRITER_APPEND);
-		lineTerminator = properties.get(FILEREADER_TEXT_LINE_TERMINATOR);
+		lineTerminator = properties.get(FILEWRITER_TEXT_LINE_TERMINATOR);
 	}
 
 	private void handleBinaryFile(Message inputMessage, IMessageTarget messageTarget) {
@@ -116,6 +117,11 @@ public class FileWriterComponent extends AbstractComponent {
 		try {
 			for (String rec : recs) {
 				bufferedWriter.write(rec);
+				if (StringUtils.isNotBlank(lineTerminator)) { 
+					bufferedWriter.write(FILEWRITER_TEXT_LINE_TERMINATOR);
+				} else {
+					bufferedWriter.newLine();
+				}
 			}
 			bufferedWriter.flush();
 		} catch (IOException e) {
