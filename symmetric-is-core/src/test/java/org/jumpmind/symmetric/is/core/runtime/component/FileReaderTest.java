@@ -1,8 +1,10 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,14 +34,17 @@ public class FileReaderTest {
 
 	private static IConnectionFactory connectionFactory;
 	private static ComponentFlowNode readerComponentFlowNode;    
-    private static final String TEXT_FILE_PATH = "build/files/";
+    private static final String FILE_PATH = "build/files/";
     private static final String TEXT_FILE_NAME = "text_test.txt";
+    private static final String BINARY_FILE_NAME="binary_test.bin";
+    private static final String BINARY_FILE_DATA="This is a binary file to be read.";
     
 	@BeforeClass
 	public static void setup() throws Exception {
 
 		connectionFactory = new ConnectionFactory();
 		createTestTextFileToRead();
+		createTestBinaryFileToRead();
 		readerComponentFlowNode = createReaderComponentFlowNode();		
 	}	
 	
@@ -66,7 +71,7 @@ public class FileReaderTest {
 		assertEquals("This is the fourth line to read",payload.get(0));
 
 	}
-	
+
 	@Test
 	public void testTextReaderFlowFromStartupMsgMultipleRowsPerMessage() throws Exception {
 
@@ -90,18 +95,47 @@ public class FileReaderTest {
 
 	}
 	
+	@Test
+	public void testBinarytReaderFlowFromStartupMsg() throws Exception {
+
+		FileReaderComponent reader = new FileReaderComponent();
+		readerComponentFlowNode.getComponentVersion().getSettings().clear();
+		readerComponentFlowNode.getComponentVersion().getSettings().
+		addAll(createBinaryReaderSettings());
+		reader.setComponentFlowNode(readerComponentFlowNode);
+		reader.start(null, connectionFactory);
+		Message msg = new StartupMessage();
+		MessageTarget msgTarget = new MessageTarget();
+		reader.handle(msg, msgTarget);
+
+		assertEquals(1,msgTarget.getTargetMessageCount());
+		assertArrayEquals((byte[]) msgTarget.getMessage(0).getPayload(),BINARY_FILE_DATA.getBytes());
+	}
+	
 	private static void createTestTextFileToRead() throws Exception {
-		File dir = new File(TEXT_FILE_PATH);
-		if (!dir.exists()) {
-			dir.mkdir();
-		}
-		PrintWriter writer = new PrintWriter(TEXT_FILE_PATH + TEXT_FILE_NAME);
+		createTestDirectory();
+		PrintWriter writer = new PrintWriter(FILE_PATH + TEXT_FILE_NAME);
 		writer.println("This is a header row to skip");
         writer.println("This is the first line to read");
         writer.println("This is the second line to read");
         writer.println("This is the third line to read");
         writer.println("This is the fourth line to read");
         writer.close();
+	}
+	
+	private static void createTestBinaryFileToRead() throws Exception {
+		createTestDirectory();
+		byte[] data = BINARY_FILE_DATA.getBytes();
+		FileOutputStream outStream = new FileOutputStream(FILE_PATH + BINARY_FILE_NAME);
+		outStream.write(data);
+		outStream.close();
+	}
+	
+	private static void createTestDirectory() {
+		File dir = new File(FILE_PATH);
+		if (!dir.exists()) {
+			dir.mkdir();
+		}		
 	}
 	
 	private static ComponentFlowNode createReaderComponentFlowNode() {
@@ -146,9 +180,17 @@ public class FileReaderTest {
 		return settingData;
 	}
 	
+	private static ArrayList<Setting> createBinaryReaderSettings() {
+		ArrayList<Setting> settings = new ArrayList<Setting>(3);
+		settings.add(new Setting(FileReaderComponent.FILEREADER_RELATIVE_PATH,BINARY_FILE_NAME));
+		settings.add(new Setting(FileReaderComponent.FILEREADER_FILE_TYPE,FileReaderComponent.FILE_TYPE_BINARY));
+		settings.add(new Setting(FileReaderComponent.FILEREADER_BINARY_SIZE_PER_MESSAGE,"1"));		
+		return settings;
+	}
+	
 	private static List<Setting> createConnectionSettings() {
 		List<Setting> settings = new ArrayList<Setting>(2);
-		settings.add(new Setting(DASNASConnection.DASNAS_PATH,TEXT_FILE_PATH));
+		settings.add(new Setting(DASNASConnection.DASNAS_PATH,FILE_PATH));
 		settings.add(new Setting(DASNASConnection.DASNAS_MUST_EXIST,"true"));
 		return settings;
 	}

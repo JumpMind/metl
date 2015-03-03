@@ -94,9 +94,15 @@ public class FileReaderComponent extends AbstractComponent {
 		ByteBuffer buffer = ByteBuffer.allocate(binarySizePerMessage*1024);
 		open();
 		try {
-			while (inStream.read(buffer.array()) != -1) {
+			int bytesRead=0;
+			while ((bytesRead = inStream.read(buffer.array())) != -1) {
 				message = new Message(componentNode.getId());
-				message.setPayload(new byte[buffer.remaining()]);
+
+				if (bytesRead == binarySizePerMessage*1024) {
+					message.setPayload(buffer.array().clone());
+				} else {
+					message.setPayload(trimByteArray(buffer.array(),bytesRead));
+				}
 				messageTarget.put(message);
 				buffer.clear();
 			}
@@ -106,6 +112,12 @@ public class FileReaderComponent extends AbstractComponent {
 		} finally {
 			close();
 		}
+	}
+	
+	private byte[] trimByteArray(byte[] byteArray, int size) {
+		byte[] newArray = new byte[size];
+		System.arraycopy(byteArray,0,newArray,0,size);
+		return newArray;
 	}
 	
 	private void handleTextFile(Message inputMessage, IMessageTarget messageTarget) {
