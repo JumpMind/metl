@@ -1,9 +1,5 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
-import static org.jumpmind.symmetric.is.core.runtime.component.ComponentSupports.OUTPUT_MESSAGE;
-import static org.jumpmind.symmetric.is.core.runtime.component.ComponentSupports.OUTPUT_MODEL;
-import static org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory.DATASOURCE;
-
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -22,6 +18,7 @@ import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.MessageManipulationStrategy;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
+import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.springframework.dao.DataAccessException;
@@ -30,211 +27,204 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
-@ComponentDefinition(typeName = DbReaderComponent.TYPE, category = ComponentCategory.READER, supports = {
-		OUTPUT_MESSAGE, OUTPUT_MODEL }, connectionCategory = DATASOURCE)
+@ComponentDefinition(typeName = DbReaderComponent.TYPE, category = ComponentCategory.READER,
+        supports = { ComponentSupports.INPUT_MESSAGE, ComponentSupports.OUTPUT_MESSAGE,
+                ComponentSupports.INPUT_MODEL, ComponentSupports.OUTPUT_MODEL },
+        connectionCategory = ConnectionCategory.DATASOURCE)
 public class DbReaderComponent extends AbstractComponent {
 
-	public static final String TYPE = "Database Reader";
+    public static final String TYPE = "Database Reader";
 
-	@SettingDefinition(order = 0, required = true, type = Type.SQL, label = "Sql")
-	public final static String SQL = "db.reader.sql";
+    @SettingDefinition(order = 0, required = true, type = Type.SQL, label = "Sql")
+    public final static String SQL = "db.reader.sql";
 
-	@SettingDefinition(order = 10, required = true, type = Type.INTEGER, defaultValue = "1", label = "Rows/Msg")
-	public final static String ROWS_PER_MESSAGE = "db.reader.rows.per.message";
+    @SettingDefinition(order = 10, required = true, type = Type.INTEGER, defaultValue = "1",
+            label = "Rows/Msg")
+    public final static String ROWS_PER_MESSAGE = "db.reader.rows.per.message";
 
-	@SettingDefinition(order = 10, required = true, type = Type.BOOLEAN, defaultValue = "false", label = "Trim Columns")
-	public final static String TRIM_COLUMNS = "db.reader.trim.columns";
+    @SettingDefinition(order = 10, required = true, type = Type.BOOLEAN, defaultValue = "false",
+            label = "Trim Columns")
+    public final static String TRIM_COLUMNS = "db.reader.trim.columns";
 
-	@SettingDefinition(order = 200, type = Type.CHOICE, choices = { "REPLACE",
-			"ENHANCE" }, defaultValue = "REPLACE", label = "Msg Strategy")
-	public final static String MESSAGE_MANIPULATION_STRATEGY = "db.reader.message.manipulation.strategy";
+    @SettingDefinition(order = 200, type = Type.CHOICE, choices = { "REPLACE", "ENHANCE" },
+            defaultValue = "REPLACE", label = "Msg Strategy")
+    public final static String MESSAGE_MANIPULATION_STRATEGY = "db.reader.message.manipulation.strategy";
 
-	String sql;
-	long rowsPerMessage;
-	MessageManipulationStrategy messageManipulationStrategy = MessageManipulationStrategy.REPLACE;
-	boolean trimColumns = false;
+    String sql;
+    long rowsPerMessage;
+    MessageManipulationStrategy messageManipulationStrategy = MessageManipulationStrategy.REPLACE;
+    boolean trimColumns = false;
 
-	@Override
-	public void start(IExecutionTracker executionTracker,
-			IConnectionFactory connectionFactory) {
-		super.start(executionTracker, connectionFactory);
-		applySettings();
-	}
+    @Override
+    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory) {
+        super.start(executionTracker, connectionFactory);
+        applySettings();
+    }
 
-	@Override
-	public void handle(final Message inputMessage,
-			final IMessageTarget messageTarget) {
+    @Override
+    public void handle(final Message inputMessage, final IMessageTarget messageTarget) {
 
-		NamedParameterJdbcTemplate template = getJdbcTemplate();
-		Map<String, Object> paramMap = new HashMap<String, Object>();
+        NamedParameterJdbcTemplate template = getJdbcTemplate();
+        Map<String, Object> paramMap = new HashMap<String, Object>();
 
-		int inboundRecordCount = 1;
-		ArrayList<EntityData> payload = null;
-		if (!(inputMessage instanceof StartupMessage)) {
-			payload = inputMessage.getPayload();
-			inboundRecordCount = payload.size();
-		}
+        int inboundRecordCount = 1;
+        ArrayList<EntityData> payload = null;
+        if (!(inputMessage instanceof StartupMessage)) {
+            payload = inputMessage.getPayload();
+            inboundRecordCount = payload.size();
+        }
 
-		/*
-		 * A reader can be started by a startup message (if it has no input
-		 * links) or it can be started by another component that sends messages
-		 * to it. If the reader is started by another component, then loop for
-		 * all records in the input message
-		 */
-		for (int i = 0; i < inboundRecordCount; i++) {
-			if (payload != null && payload.size() > i) {
-				setParamsFromInboundMsgAndRec(paramMap, inputMessage,
-						payload.get(i));
-			} else {
-				setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
-			}
-			template.query(sql, paramMap, new ResultSetExtractor<Object>() {
-				@Override
-				public Object extractData(ResultSet rs) throws SQLException,
-						DataAccessException {
-					Map<Integer, String> sqlEntityHints = getSqlColumnEntityHints(sql);
-					ResultSetMetaData meta = rs.getMetaData();
-					int count = meta.getColumnCount();
+        /*
+         * A reader can be started by a startup message (if it has no input
+         * links) or it can be started by another component that sends messages
+         * to it. If the reader is started by another component, then loop for
+         * all records in the input message
+         */
+        for (int i = 0; i < inboundRecordCount; i++) {
+            if (payload != null && payload.size() > i) {
+                setParamsFromInboundMsgAndRec(paramMap, inputMessage, payload.get(i));
+            } else {
+                setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
+            }
+            template.query(sql, paramMap, new ResultSetExtractor<Object>() {
+                @Override
+                public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
+                    Map<Integer, String> sqlEntityHints = getSqlColumnEntityHints(sql);
+                    ResultSetMetaData meta = rs.getMetaData();
+                    int count = meta.getColumnCount();
 
-					Message message = null;
-					int outputRecCount=0;
-					while (rs.next()) {
-						if (message == null) {
-							if (messageManipulationStrategy == MessageManipulationStrategy.ENHANCE) {
-								message = inputMessage.copy();
-							} else {
-								message = new Message(componentNode.getId());
-								message.setPayload(new ArrayList<EntityData>());
-							}
-						}
-						Map<String, EntityData> records = new LinkedCaseInsensitiveMap<EntityData>(
-								1);
-						for (int i = 1; i <= count; i++) {
-							String columnName = meta.getColumnName(i);
-							String tableName = meta.getTableName(i);
-							if (sqlEntityHints.containsKey(i)) {
-								String hint = sqlEntityHints.get(i);
-								if (hint.indexOf(".") != -1) {
-									tableName = hint.substring(0,
-											hint.indexOf("."));
-									columnName = hint.substring(hint
-											.indexOf(".") + 1);
-								} else {
-									tableName = hint;
-								}
-							}
-							if (StringUtils.isBlank(tableName)) {
-								throw new SQLException(
-										"The table name could not be determined while mapping a database record to an EntitiesRow. "
-												+ "Try using hints to specify a column's table name as part of the SQL query.");
-							}
-							if (outputRecCount == 0) {
-								checkTableAndColumnAgainstOutputModel(tableName,
-									columnName);
-							}
-							EntityData record = records.get(tableName);
-							if (record == null) {
-								record = new EntityData(tableName);
-								records.put(tableName, record);
-							}
+                    Message message = null;
+                    int outputRecCount = 0;
+                    while (rs.next()) {
+                        if (message == null) {
+                            if (messageManipulationStrategy == MessageManipulationStrategy.ENHANCE) {
+                                message = inputMessage.copy();
+                            } else {
+                                message = new Message(componentNode.getId());
+                                message.setPayload(new ArrayList<EntityData>());
+                            }
+                        }
+                        Map<String, EntityData> records = new LinkedCaseInsensitiveMap<EntityData>(
+                                1);
+                        for (int i = 1; i <= count; i++) {
+                            String columnName = meta.getColumnName(i);
+                            String tableName = meta.getTableName(i);
+                            if (sqlEntityHints.containsKey(i)) {
+                                String hint = sqlEntityHints.get(i);
+                                if (hint.indexOf(".") != -1) {
+                                    tableName = hint.substring(0, hint.indexOf("."));
+                                    columnName = hint.substring(hint.indexOf(".") + 1);
+                                } else {
+                                    tableName = hint;
+                                }
+                            }
+                            if (StringUtils.isBlank(tableName)) {
+                                throw new SQLException(
+                                        "The table name could not be determined while mapping a database record to an EntitiesRow. "
+                                                + "Try using hints to specify a column's table name as part of the SQL query.");
+                            }
+                            if (outputRecCount == 0) {
+                                checkTableAndColumnAgainstOutputModel(tableName, columnName);
+                            }
+                            EntityData record = records.get(tableName);
+                            if (record == null) {
+                                record = new EntityData(tableName);
+                                records.put(tableName, record);
+                            }
 
-							Object value = JdbcUtils.getResultSetValue(rs, i);
-							if (trimColumns && value instanceof String) {
-								value = value.toString().trim();
-							}
-							record.put(columnName, value);
-						}
+                            Object value = JdbcUtils.getResultSetValue(rs, i);
+                            if (trimColumns && value instanceof String) {
+                                value = value.toString().trim();
+                            }
+                            record.put(columnName, value);
+                        }
 
-						ArrayList<EntityData> payload = message.getPayload();
-						payload.addAll(records.values());
+                        ArrayList<EntityData> payload = message.getPayload();
+                        payload.addAll(records.values());
 
-						if (payload.size() >= rowsPerMessage) {
-							messageTarget.put(message);
-							message = null;
-						}
-						outputRecCount++;
-					} //loop for resultset for a given query
-					rs.close();
-					if (message != null) {
-						messageTarget.put(message);
-					}
-					return null;
-				} /* end while for each result set msg from query */
-			});
-		} /* for record count within message */
-	}
+                        if (payload.size() >= rowsPerMessage) {
+                            messageTarget.put(message);
+                            message = null;
+                        }
+                        outputRecCount++;
+                    } // loop for resultset for a given query
+                    rs.close();
+                    if (message != null) {
+                        messageTarget.put(message);
+                    }
+                    return null;
+                } /* end while for each result set msg from query */
+            });
+        } /* for record count within message */
+    }
 
-	private void checkTableAndColumnAgainstOutputModel(String tableName,
-			String columnName) throws SQLException {
-		if (!this.componentNode.getComponentVersion().getOutputModelVersion()
-				.entityAttributeExists(tableName, columnName)) {
-			throw new SQLException(
-					"ResultSet returned a column that was not in the output model. Table:"
-							+ tableName + "Column:" + columnName);
-		}
-	}
+    private void checkTableAndColumnAgainstOutputModel(String tableName, String columnName)
+            throws SQLException {
+        if (!this.componentNode.getComponentVersion().getOutputModelVersion()
+                .entityAttributeExists(tableName, columnName)) {
+            throw new SQLException(
+                    "ResultSet returned a column that was not in the output model. Table:"
+                            + tableName + "Column:" + columnName);
+        }
+    }
 
-	protected NamedParameterJdbcTemplate getJdbcTemplate() {
+    protected NamedParameterJdbcTemplate getJdbcTemplate() {
 
-		return new NamedParameterJdbcTemplate(
-				(DataSource) this.connection.reference());
-	}
+        return new NamedParameterJdbcTemplate((DataSource) this.connection.reference());
+    }
 
-	protected void setParamsFromInboundMsgAndRec(Map<String, Object> paramMap,
-			final Message inputMessage, final EntityData dataRecord) {
+    protected void setParamsFromInboundMsgAndRec(Map<String, Object> paramMap,
+            final Message inputMessage, final EntityData dataRecord) {
 
-		/*
-		 * input parameters can come from the header and the record. header
-		 * parms should be used for every record.
-		 */
-		paramMap.clear();
-		paramMap.putAll(getParamsFromHeader(inputMessage));
-		if (dataRecord != null) {
-			paramMap.putAll(getParamsFromDetailRecord(dataRecord));
-		}
-	}
+        /*
+         * input parameters can come from the header and the record. header
+         * parms should be used for every record.
+         */
+        paramMap.clear();
+        paramMap.putAll(getParamsFromHeader(inputMessage));
+        if (dataRecord != null) {
+            paramMap.putAll(getParamsFromDetailRecord(dataRecord));
+        }
+    }
 
-	protected Map<String, Object> getParamsFromHeader(final Message inputMessage) {
+    protected Map<String, Object> getParamsFromHeader(final Message inputMessage) {
 
-		if (inputMessage != null && inputMessage.getHeader() != null) {
-			Map<String, Object> paramMap = new HashMap<String, Object>(
-					inputMessage.getHeader().getParameters());
-			return paramMap;
-		} else {
-			return null;
-		}
-	}
+        if (inputMessage != null && inputMessage.getHeader() != null) {
+            Map<String, Object> paramMap = new HashMap<String, Object>(inputMessage.getHeader()
+                    .getParameters());
+            return paramMap;
+        } else {
+            return null;
+        }
+    }
 
-	protected Map<String, Object> getParamsFromDetailRecord(
-			EntityData dataRecord) {
+    protected Map<String, Object> getParamsFromDetailRecord(EntityData dataRecord) {
 
-		return dataRecord;
-	}
+        return dataRecord;
+    }
 
-	protected void applySettings() {
-		TypedProperties properties = componentNode.getComponentVersion()
-				.toTypedProperties(this, false);
-		sql = properties.get(SQL);
-		rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
-		messageManipulationStrategy = MessageManipulationStrategy
-				.valueOf(properties.get(MESSAGE_MANIPULATION_STRATEGY));
-		trimColumns = properties.is(TRIM_COLUMNS);
-	}
+    protected void applySettings() {
+        TypedProperties properties = componentNode.getComponentVersion().toTypedProperties(this,
+                false);
+        sql = properties.get(SQL);
+        rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
+        messageManipulationStrategy = MessageManipulationStrategy.valueOf(properties
+                .get(MESSAGE_MANIPULATION_STRATEGY));
+        trimColumns = properties.is(TRIM_COLUMNS);
+    }
 
-	protected Map<Integer, String> getSqlColumnEntityHints(String sql) {
-		Map<Integer, String> columnEntityHints = new HashMap<Integer, String>();
-		String columns = sql.substring(
-				sql.toLowerCase().indexOf("select ") + 7, sql.toLowerCase()
-						.indexOf("from "));
-		int commentIdx = 0;
-		while (columns.indexOf("/*", commentIdx) != -1) {
-			commentIdx = columns.indexOf("/*", commentIdx) + 2;
-			int columnIdx = StringUtils.countMatches(
-					columns.substring(0, commentIdx), ",") + 1;
-			String entity = StringUtils.trim(columns.substring(commentIdx,
-					columns.indexOf("*/", commentIdx)));
-			columnEntityHints.put(columnIdx, entity);
-		}
-		return columnEntityHints;
-	}
+    protected Map<Integer, String> getSqlColumnEntityHints(String sql) {
+        Map<Integer, String> columnEntityHints = new HashMap<Integer, String>();
+        String columns = sql.substring(sql.toLowerCase().indexOf("select ") + 7, sql.toLowerCase()
+                .indexOf("from "));
+        int commentIdx = 0;
+        while (columns.indexOf("/*", commentIdx) != -1) {
+            commentIdx = columns.indexOf("/*", commentIdx) + 2;
+            int columnIdx = StringUtils.countMatches(columns.substring(0, commentIdx), ",") + 1;
+            String entity = StringUtils.trim(columns.substring(commentIdx,
+                    columns.indexOf("*/", commentIdx)));
+            columnEntityHints.put(columnIdx, entity);
+        }
+        return columnEntityHints;
+    }
 }
