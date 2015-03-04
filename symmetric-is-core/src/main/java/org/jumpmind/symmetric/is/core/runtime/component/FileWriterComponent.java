@@ -26,15 +26,13 @@ public class FileWriterComponent extends AbstractComponent {
 
     public static final String TYPE = "File Writer";
 
-    public static final String FILE_TYPE_TEXT = "TEXT";
-    public static final String FILE_TYPE_BINARY = "BINARY";
     public static final String DEFAULT_CHARSET = "UTF-8";
 
     @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Path and File")
     public final static String FILEWRITER_RELATIVE_PATH = "filewriter.relative.path";
 
     @SettingDefinition(order = 20, type = Type.CHOICE,
-            choices = { FILE_TYPE_TEXT, FILE_TYPE_BINARY }, defaultValue = FILE_TYPE_TEXT,
+            choices = { FileType.TEXT, FileType.BINARY }, defaultValue = FileType.TEXT,
             label = "File Type")
     public final static String FILEWRITER_FILE_TYPE = "filereader.file.type";
 
@@ -66,7 +64,7 @@ public class FileWriterComponent extends AbstractComponent {
         super.start(executionTracker, connectionFactory);
         applySettings();
         outStream = getOutputStream((IStreamableConnection) this.connection.reference());
-        if (fileType.equalsIgnoreCase(FILE_TYPE_TEXT)) {
+        if (fileType.equalsIgnoreCase(FileType.TEXT)) {
             bufferedWriter = initializeWriter(outStream);
         }
     }
@@ -101,7 +99,7 @@ public class FileWriterComponent extends AbstractComponent {
     }
 
     private void handleBinaryFile(Message inputMessage, IMessageTarget messageTarget) {
-        if (fileType.equalsIgnoreCase(FILE_TYPE_TEXT)) {
+        if (fileType.equalsIgnoreCase(FileType.TEXT)) {
             throw new IoException("Converting from Binary input to Text output not implemented");
         }
         byte[] payload = (byte[]) inputMessage.getPayload();
@@ -113,7 +111,7 @@ public class FileWriterComponent extends AbstractComponent {
     }
 
     private void handleTextFile(Message inputMessage, IMessageTarget messageTarget) {
-        if (fileType.equalsIgnoreCase(FILE_TYPE_BINARY)) {
+        if (fileType.equalsIgnoreCase(FileType.BINARY)) {
             throw new IoException("Converting from Text input to Binary output not implemented");
         }
         ArrayList<String> recs = inputMessage.getPayload();

@@ -26,15 +26,13 @@ public class FileReaderComponent extends AbstractComponent {
 
     public static final String TYPE = "File Reader";
 
-    public static final String FILE_TYPE_TEXT = "TEXT";
-    public static final String FILE_TYPE_BINARY = "BINARY";
     public static final String DEFAULT_CHARSET = Charset.defaultCharset().name();
 
     @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Path and File")
     public final static String FILEREADER_RELATIVE_PATH = "filereader.relative.path";
 
     @SettingDefinition(order = 20, type = Type.CHOICE,
-            choices = { FILE_TYPE_TEXT, FILE_TYPE_BINARY }, defaultValue = FILE_TYPE_TEXT,
+            choices = { FileType.TEXT, FileType.BINARY }, defaultValue = FileType.TEXT,
             label = "File Type")
     public final static String FILEREADER_FILE_TYPE = "filereader.file.type";
 
@@ -70,19 +68,19 @@ public class FileReaderComponent extends AbstractComponent {
     @Override
     public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory) {
         super.start(executionTracker, connectionFactory);
-        appySettings();
+        applySettings();
     }
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
-        if (fileType.equalsIgnoreCase(FILE_TYPE_BINARY)) {
+        if (fileType.equalsIgnoreCase(FileType.BINARY)) {
             handleBinaryFile(inputMessage, messageTarget);
         } else {
             handleTextFile(inputMessage, messageTarget);
         }
     }
 
-    private void appySettings() {
+    private void applySettings() {
         properties = componentNode.getComponentVersion().toTypedProperties(this, false);
         relativePathAndFile = properties.get(FILEREADER_RELATIVE_PATH);
         fileType = properties.get(FILEREADER_FILE_TYPE);
