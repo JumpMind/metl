@@ -24,6 +24,7 @@ public class FileStreamableConnection implements IStreamableConnection {
 				throw new IoException("Could not find " + file.getAbsolutePath());
 			}
 		}
+		//todo: get rid of basepath and must exist and get them from connection settings
 	}
 	
 	@Override

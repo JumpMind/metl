@@ -180,7 +180,7 @@ public class FileReaderTest {
         Setting[] settingData = new Setting[4];
         settingData[0] = new Setting(FileReaderComponent.FILEREADER_RELATIVE_PATH, TEXT_FILE_NAME);
         settingData[1] = new Setting(FileReaderComponent.FILEREADER_FILE_TYPE,
-                FileReaderComponent.FILE_TYPE_TEXT);
+                FileType.TEXT);
         settingData[2] = new Setting(FileReaderComponent.FILEREADER_TEXT_HEADER_LINES_TO_SKIP, "1");
         settingData[3] = new Setting(FileReaderComponent.FILEREADER_TEXT_ROWS_PER_MESSAGE, "1");
 
@@ -191,7 +191,7 @@ public class FileReaderTest {
         ArrayList<Setting> settings = new ArrayList<Setting>(3);
         settings.add(new Setting(FileReaderComponent.FILEREADER_RELATIVE_PATH, BINARY_FILE_NAME));
         settings.add(new Setting(FileReaderComponent.FILEREADER_FILE_TYPE,
-                FileReaderComponent.FILE_TYPE_BINARY));
+                FileType.BINARY));
         settings.add(new Setting(FileReaderComponent.FILEREADER_BINARY_SIZE_PER_MESSAGE, "1"));
         return settings;
     }

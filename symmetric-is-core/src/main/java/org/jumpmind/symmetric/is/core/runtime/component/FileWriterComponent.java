@@ -72,6 +72,7 @@ public class FileWriterComponent extends AbstractComponent {
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
 
+        //todo: separate into sep components and look at lastmsg boolean in header
         /*
          * we should get either an ArrayList of <String> for text file or byte[]
          * for a binary file

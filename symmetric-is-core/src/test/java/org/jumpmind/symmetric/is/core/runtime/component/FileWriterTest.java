@@ -157,7 +157,7 @@ public class FileWriterTest {
         Setting[] settingData = new Setting[2];
         settingData[0] = new Setting(FileWriterComponent.FILEWRITER_RELATIVE_PATH, TEXT_FILE_NAME);
         settingData[1] = new Setting(FileWriterComponent.FILEWRITER_FILE_TYPE,
-                FileReaderComponent.FILE_TYPE_TEXT);
+                FileType.TEXT);
 
         return settingData;
     }
@@ -166,7 +166,7 @@ public class FileWriterTest {
         ArrayList<Setting> settings = new ArrayList<Setting>(2);
         settings.add(new Setting(FileWriterComponent.FILEWRITER_RELATIVE_PATH, BINARY_FILE_NAME));
         settings.add(new Setting(FileWriterComponent.FILEWRITER_FILE_TYPE,
-                FileWriterComponent.FILE_TYPE_BINARY));
+                FileType.BINARY));
         return settings;
     }
 

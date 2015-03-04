@@ -1,7 +1,5 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.jumpmind.properties.TypedProperties;
@@ -20,13 +18,26 @@ public class FormatterComponent extends AbstractComponent {
 
     public static final String TYPE = "Formatter";
 
-    @SettingDefinition(order = 20, type = Type.CHOICE,
+    @SettingDefinition(order = 10, type = Type.CHOICE,
             choices = { FormatType.DELIMITED, FormatType.FIXED_LENGTH, FormatType.XML }, 
             label = "Format Type")
     public final static String FORMATTER_FORMAT_TYPE = "formatter.format.type";
+    
+    @SettingDefinition(order = 20, required = true, type = Type.STRING, label = "Delimiter")
+    public final static String FORMATTER_DELIMITER = "formatter.delimiter";
+    
+    @SettingDefinition(order = 30, required = true, type = Type.STRING, label = "Quote Character")
+    public final static String FORMATTER_QUOTE_CHARACTER = "formatter.quote.character";
+    
+    @SettingDefinition(type = Type.INTEGER, order = 40, defaultValue = "1",
+            label = "Text Rows / Msg")
+    public static final String FORMATTER_ROWS_PER_MESSAGE = "formatter.rows.per.message";
 
+    
     /* settings */
     String formatType;
+    String delimiter;
+    String quoteCharacter;
 
     /* other vars */
     TypedProperties properties;
@@ -42,7 +53,9 @@ public class FormatterComponent extends AbstractComponent {
         
         ArrayList<EntityData> records = inputMessage.getPayload();
         for (EntityData record:records) {
-            
+            switch(formatType) {
+                case FormatType.DELIMITED: 
+            }
         }
         
     }
@@ -50,5 +63,7 @@ public class FormatterComponent extends AbstractComponent {
     private void applySettings() {
         properties = componentNode.getComponentVersion().toTypedProperties(this, false);
         formatType = properties.get(FORMATTER_FORMAT_TYPE);
+        delimiter = properties.get(FORMATTER_DELIMITER);
+        quoteCharacter = properties.get(FORMATTER_QUOTE_CHARACTER);
     }
 }

@@ -39,7 +39,7 @@ public class DASNASConnection extends AbstractRuntimeObject implements
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T reference() {
-		// TODO Auto-generated method stub
+		// TODO think about renaming reference to connection or something more meaningful
 		return (T) streamableConnection;
 	}
 

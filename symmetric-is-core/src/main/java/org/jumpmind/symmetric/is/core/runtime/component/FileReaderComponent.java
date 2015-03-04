@@ -26,6 +26,7 @@ public class FileReaderComponent extends AbstractComponent {
 
     public static final String TYPE = "File Reader";
 
+    //TODO: THIS SHOULD PROBABLY BE A SETTING
     public static final String DEFAULT_CHARSET = Charset.defaultCharset().name();
 
     @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Path and File")
@@ -44,7 +45,7 @@ public class FileReaderComponent extends AbstractComponent {
             label = "Binary Size / Msg (KB)")
     public static final String FILEREADER_BINARY_SIZE_PER_MESSAGE = "filereader.binary.size.per.message";
 
-    @SettingDefinition(type = Type.INTEGER, order = 50, defaultValue = "1",
+    @SettingDefinition(type = Type.INTEGER, order = 50, defaultValue = "1000",
             label = "Text Rows / Msg")
     public static final String FILEREADER_TEXT_ROWS_PER_MESSAGE = "filereader.text.rows.per.message";
 
@@ -96,6 +97,7 @@ public class FileReaderComponent extends AbstractComponent {
         open();
         try {
             int bytesRead = 0;
+            //todo: set header variables for 1 of 2, 2 of 2, etc.
             while ((bytesRead = inStream.read(buffer.array())) != -1) {
                 message = new Message(componentNode.getId());
 
