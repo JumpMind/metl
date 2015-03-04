@@ -3,8 +3,8 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 import java.util.ArrayList;
 
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.symmetric.is.core.config.SettingDefinition;
-import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;

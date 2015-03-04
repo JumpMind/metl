@@ -1,9 +1,9 @@
 package org.jumpmind.symmetric.is.core.runtime.connection.localfile;
 
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.symmetric.is.core.config.Connection;
-import org.jumpmind.symmetric.is.core.config.SettingDefinition;
-import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
+import org.jumpmind.symmetric.is.core.model.Connection;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
 import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionDefinition;

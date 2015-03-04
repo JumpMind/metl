@@ -3,8 +3,8 @@ package org.jumpmind.symmetric.is.core.runtime.connection;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.symmetric.is.core.config.Connection;
-import org.jumpmind.symmetric.is.core.config.SettingDefinition;
+import org.jumpmind.symmetric.is.core.model.Connection;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 
 public interface IConnectionFactory {
 

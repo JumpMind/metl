@@ -2,11 +2,11 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.config.Component;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.config.ComponentVersion;
+import org.jumpmind.symmetric.is.core.model.Component;
+import org.jumpmind.symmetric.is.core.model.ComponentFlowNode;
+import org.jumpmind.symmetric.is.core.model.ComponentFlowNodeLink;
+import org.jumpmind.symmetric.is.core.model.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.ui.diagram.ConnectionEvent;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;

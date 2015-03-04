@@ -2,11 +2,11 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.config.ComponentFlow;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.config.Connection;
-import org.jumpmind.symmetric.is.core.config.Folder;
-import org.jumpmind.symmetric.is.core.config.FolderType;
+import org.jumpmind.symmetric.is.core.model.ComponentFlow;
+import org.jumpmind.symmetric.is.core.model.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.model.Connection;
+import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection;
 import org.jumpmind.symmetric.is.ui.common.Icons;

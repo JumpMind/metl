@@ -14,7 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ResettableBasicDataSource;
-import org.jumpmind.symmetric.is.core.config.Connection;
+import org.jumpmind.symmetric.is.core.model.Connection;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;

@@ -2,24 +2,24 @@ package org.jumpmind.symmetric.is.core.persist;
 
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.config.AbstractObject;
-import org.jumpmind.symmetric.is.core.config.Agent;
-import org.jumpmind.symmetric.is.core.config.AgentDeployment;
-import org.jumpmind.symmetric.is.core.config.AgentSummary;
-import org.jumpmind.symmetric.is.core.config.ComponentFlow;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
-import org.jumpmind.symmetric.is.core.config.Connection;
-import org.jumpmind.symmetric.is.core.config.Folder;
-import org.jumpmind.symmetric.is.core.config.FolderType;
-import org.jumpmind.symmetric.is.core.config.Model;
-import org.jumpmind.symmetric.is.core.config.ModelAttribute;
-import org.jumpmind.symmetric.is.core.config.ModelAttributeRelationship;
-import org.jumpmind.symmetric.is.core.config.ModelEntity;
-import org.jumpmind.symmetric.is.core.config.ModelEntityRelationship;
-import org.jumpmind.symmetric.is.core.config.ModelVersion;
+import org.jumpmind.symmetric.is.core.model.AbstractObject;
+import org.jumpmind.symmetric.is.core.model.Agent;
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.AgentSummary;
+import org.jumpmind.symmetric.is.core.model.ComponentFlow;
+import org.jumpmind.symmetric.is.core.model.ComponentFlowNode;
+import org.jumpmind.symmetric.is.core.model.ComponentFlowNodeLink;
+import org.jumpmind.symmetric.is.core.model.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.model.ComponentFlowVersionSummary;
+import org.jumpmind.symmetric.is.core.model.Connection;
+import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.FolderType;
+import org.jumpmind.symmetric.is.core.model.Model;
+import org.jumpmind.symmetric.is.core.model.ModelAttribute;
+import org.jumpmind.symmetric.is.core.model.ModelAttributeRelationship;
+import org.jumpmind.symmetric.is.core.model.ModelEntity;
+import org.jumpmind.symmetric.is.core.model.ModelEntityRelationship;
+import org.jumpmind.symmetric.is.core.model.ModelVersion;
 
 public interface IConfigurationService {
 

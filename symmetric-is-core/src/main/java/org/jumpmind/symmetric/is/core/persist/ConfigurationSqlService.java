@@ -7,10 +7,10 @@ import org.jumpmind.db.sql.ISqlRowMapper;
 import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.persist.IPersistenceManager;
-import org.jumpmind.symmetric.is.core.config.AgentSummary;
-import org.jumpmind.symmetric.is.core.config.ComponentFlow;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
+import org.jumpmind.symmetric.is.core.model.AgentSummary;
+import org.jumpmind.symmetric.is.core.model.ComponentFlow;
+import org.jumpmind.symmetric.is.core.model.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.model.ComponentFlowVersionSummary;
 
 public class ConfigurationSqlService extends AbstractConfigurationService {
 

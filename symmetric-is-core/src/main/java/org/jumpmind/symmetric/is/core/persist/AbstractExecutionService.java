@@ -1,7 +1,7 @@
 package org.jumpmind.symmetric.is.core.persist;
 
 import org.jumpmind.persist.IPersistenceManager;
-import org.jumpmind.symmetric.is.core.config.Execution;
+import org.jumpmind.symmetric.is.core.model.Execution;
 
 abstract public class AbstractExecutionService extends AbstractService implements IExecutionService {
     

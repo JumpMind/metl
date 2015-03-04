@@ -3,8 +3,8 @@ package org.jumpmind.symmetric.is.ui.views.manage;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jumpmind.symmetric.is.core.config.Agent;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
+import org.jumpmind.symmetric.is.core.model.Agent;
+import org.jumpmind.symmetric.is.core.model.ComponentFlowVersionSummary;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
 import org.jumpmind.symmetric.ui.common.MultiSelectTable;

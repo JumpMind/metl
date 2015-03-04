@@ -3,9 +3,9 @@ package org.jumpmind.symmetric.is.ui.views.design;
 import java.util.List;
 import java.util.Set;
 
-import org.jumpmind.symmetric.is.core.config.AgentDeployment;
-import org.jumpmind.symmetric.is.core.config.AgentSummary;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.AgentSummary;
+import org.jumpmind.symmetric.is.core.model.ComponentFlowVersion;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;

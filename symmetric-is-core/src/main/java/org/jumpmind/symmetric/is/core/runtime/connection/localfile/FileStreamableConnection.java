@@ -9,7 +9,7 @@ import java.io.OutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.symmetric.is.core.config.Connection;
+import org.jumpmind.symmetric.is.core.model.Connection;
 
 public class FileStreamableConnection implements IStreamableConnection {
 

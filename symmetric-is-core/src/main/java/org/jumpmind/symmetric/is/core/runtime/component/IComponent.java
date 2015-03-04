@@ -1,6 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
+import org.jumpmind.symmetric.is.core.model.ComponentFlowNode;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
