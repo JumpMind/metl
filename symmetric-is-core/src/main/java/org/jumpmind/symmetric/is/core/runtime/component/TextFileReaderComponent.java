@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 
@@ -19,44 +18,32 @@ import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.localfile.IStreamableConnection;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(typeName = FileReaderComponent.TYPE, category = ComponentCategory.READER,
+@ComponentDefinition(typeName = TextFileReaderComponent.TYPE, category = ComponentCategory.READER,
         supports = { ComponentSupports.OUTPUT_MESSAGE },
         connectionCategory = ConnectionCategory.RESOURCE)
-public class FileReaderComponent extends AbstractComponent {
+public class TextFileReaderComponent extends AbstractComponent {
 
-    public static final String TYPE = "File Reader";
+    public static final String TYPE = "Text File Reader";
 
-    //TODO: THIS SHOULD PROBABLY BE A SETTING
     public static final String DEFAULT_CHARSET = Charset.defaultCharset().name();
 
     @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Path and File")
-    public final static String FILEREADER_RELATIVE_PATH = "filereader.relative.path";
+    public final static String TEXTFILEREADER_RELATIVE_PATH = "textfilereader.relative.path";
 
-    @SettingDefinition(order = 20, type = Type.CHOICE,
-            choices = { FileType.TEXT, FileType.BINARY }, defaultValue = FileType.TEXT,
-            label = "File Type")
-    public final static String FILEREADER_FILE_TYPE = "filereader.file.type";
-
-    @SettingDefinition(type = Type.BOOLEAN, order = 30, required = true, provided = true,
+    @SettingDefinition(type = Type.BOOLEAN, order = 20, required = true, provided = true,
             defaultValue = "true", label = "Must Exist")
-    public static final String FILEREADER_MUST_EXIST = "filereader.must.exist";
+    public static final String TEXTFILEREADER_MUST_EXIST = "textfilereader.must.exist";
 
-    @SettingDefinition(type = Type.INTEGER, order = 40, defaultValue = "1",
-            label = "Binary Size / Msg (KB)")
-    public static final String FILEREADER_BINARY_SIZE_PER_MESSAGE = "filereader.binary.size.per.message";
+    @SettingDefinition(type = Type.INTEGER, order = 30, defaultValue = "1000",
+            label = "Rows / Msg")
+    public static final String TEXTFILEREADER_ROWS_PER_MESSAGE = "textfilereader.text.rows.per.message";
 
-    @SettingDefinition(type = Type.INTEGER, order = 50, defaultValue = "1000",
-            label = "Text Rows / Msg")
-    public static final String FILEREADER_TEXT_ROWS_PER_MESSAGE = "filereader.text.rows.per.message";
-
-    @SettingDefinition(type = Type.INTEGER, order = 70, label = "Line Terminator")
-    public static final String FILEREADER_TEXT_HEADER_LINES_TO_SKIP = "filereader.text.header.lines.to.skip";
+    @SettingDefinition(type = Type.INTEGER, order = 40, label = "Line Terminator")
+    public static final String TEXTFILEREADER_HEADER_LINES_TO_SKIP = "textfilereader.text.header.lines.to.skip";
 
     /* settings */
     String relativePathAndFile;
-    String fileType;
     boolean mustExist;
-    int binarySizePerMessage;
     int textRowsPerMessage;
     int textHeaderLinesToSkip;
 
@@ -74,55 +61,6 @@ public class FileReaderComponent extends AbstractComponent {
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
-        if (fileType.equalsIgnoreCase(FileType.BINARY)) {
-            handleBinaryFile(inputMessage, messageTarget);
-        } else {
-            handleTextFile(inputMessage, messageTarget);
-        }
-    }
-
-    private void applySettings() {
-        properties = componentNode.getComponentVersion().toTypedProperties(this, false);
-        relativePathAndFile = properties.get(FILEREADER_RELATIVE_PATH);
-        fileType = properties.get(FILEREADER_FILE_TYPE);
-        mustExist = properties.is(FILEREADER_MUST_EXIST);
-        binarySizePerMessage = properties.getInt(FILEREADER_BINARY_SIZE_PER_MESSAGE);
-        textRowsPerMessage = properties.getInt(FILEREADER_TEXT_ROWS_PER_MESSAGE);
-        textHeaderLinesToSkip = properties.getInt(FILEREADER_TEXT_HEADER_LINES_TO_SKIP);
-    }
-
-    private void handleBinaryFile(Message inputMessage, IMessageTarget messageTarget) {
-        Message message = null;
-        ByteBuffer buffer = ByteBuffer.allocate(binarySizePerMessage * 1024);
-        open();
-        try {
-            int bytesRead = 0;
-            //todo: set header variables for 1 of 2, 2 of 2, etc.
-            while ((bytesRead = inStream.read(buffer.array())) != -1) {
-                message = new Message(componentNode.getId());
-
-                if (bytesRead == binarySizePerMessage * 1024) {
-                    message.setPayload(buffer.array().clone());
-                } else {
-                    message.setPayload(trimByteArray(buffer.array(), bytesRead));
-                }
-                messageTarget.put(message);
-                buffer.clear();
-            }
-        } catch (IOException e) {
-            throw new IoException("Error reading from file " + e.getMessage());
-        } finally {
-            close();
-        }
-    }
-
-    private byte[] trimByteArray(byte[] byteArray, int size) {
-        byte[] newArray = new byte[size];
-        System.arraycopy(byteArray, 0, newArray, 0, size);
-        return newArray;
-    }
-
-    private void handleTextFile(Message inputMessage, IMessageTarget messageTarget) {
         String currentLine;
         int linesRead = 0;
         int linesInMessage = 0;
@@ -148,6 +86,14 @@ public class FileReaderComponent extends AbstractComponent {
         } finally {
             close();
         }
+    }
+
+    private void applySettings() {
+        properties = componentNode.getComponentVersion().toTypedProperties(this, false);
+        relativePathAndFile = properties.get(TEXTFILEREADER_RELATIVE_PATH);
+        mustExist = properties.is(TEXTFILEREADER_MUST_EXIST);
+        textRowsPerMessage = properties.getInt(TEXTFILEREADER_ROWS_PER_MESSAGE);
+        textHeaderLinesToSkip = properties.getInt(TEXTFILEREADER_HEADER_LINES_TO_SKIP);
     }
 
     private void initAndSendMessage(ArrayList<String> payload, IMessageTarget messageTarget,

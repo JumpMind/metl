@@ -1,6 +1,5 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.nio.charset.StandardCharsets;
@@ -28,14 +27,12 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class FileWriterTest {
+public class TextFileWriterTest {
 
     private static IConnectionFactory connectionFactory;
     private static ComponentFlowNode writerComponentFlowNode;
     private static final String FILE_PATH = "build/files/";
-    private static final String TEXT_FILE_NAME = "text_test_writer.txt";
-    private static final String BINARY_FILE_NAME = "binary_test_writer.bin";
-    private static final String BINARY_FILE_DATA = "This is a binary file to be written.";
+    private static final String FILE_NAME = "text_test_writer.txt";
 
     @BeforeClass
     public static void setup() throws Exception {
@@ -49,7 +46,7 @@ public class FileWriterTest {
 
     @Test
     public void testTextWriterMultipleRowsPerMessage() throws Exception {
-        FileWriterComponent writer = new FileWriterComponent();
+        TextFileWriterComponent writer = new TextFileWriterComponent();
         writer.setComponentFlowNode(writerComponentFlowNode);
         writer.start(null, connectionFactory);
         writer.handle(createMultipleRowTextMessageToWrite(), null);
@@ -58,7 +55,7 @@ public class FileWriterTest {
 
     @Test
     public void testTextWriterSingleRowPerMessage() throws Exception {
-        FileWriterComponent writer = new FileWriterComponent();
+        TextFileWriterComponent writer = new TextFileWriterComponent();
         writer.setComponentFlowNode(writerComponentFlowNode);
         writer.start(null, connectionFactory);
         writer.handle(createSingleRowTextMessageToWrite(1), null);
@@ -68,32 +65,14 @@ public class FileWriterTest {
         checkTextFile();
     }
 
-    @Test
-    public void testBinaryWriter() throws Exception {
-        FileWriterComponent writer = new FileWriterComponent();
-        writerComponentFlowNode.getComponentVersion().getSettings().clear();
-        writerComponentFlowNode.getComponentVersion().getSettings()
-                .addAll(createBinaryWriterSettings());
-        writer.setComponentFlowNode(writerComponentFlowNode);
-        writer.start(null, connectionFactory);
-        writer.handle(createBinaryMessageToWrite(), null);
-        checkBinaryFile();
-    }
-
     private static void checkTextFile() throws Exception {
-        Path path = Paths.get(FILE_PATH + TEXT_FILE_NAME);
+        Path path = Paths.get(FILE_PATH + FILE_NAME);
         List<String> fileLines = Files.readAllLines(path, StandardCharsets.UTF_8);
         assertEquals(4, fileLines.size());
         assertEquals("Line 1", fileLines.get(0));
         assertEquals("Line 2", fileLines.get(1));
         assertEquals("Line 3", fileLines.get(2));
         assertEquals("Line 4", fileLines.get(3));
-    }
-
-    private static void checkBinaryFile() throws Exception {
-        Path path = Paths.get(FILE_PATH + BINARY_FILE_NAME);
-        byte[] fileData = Files.readAllBytes(path);
-        assertArrayEquals(fileData, BINARY_FILE_DATA.getBytes());
     }
 
     private static Message createMultipleRowTextMessageToWrite() {
@@ -103,13 +82,6 @@ public class FileWriterTest {
         payload.add("Line 2");
         payload.add("Line 3");
         payload.add("Line 4");
-        msg.setPayload(payload);
-        return msg;
-    }
-
-    private static Message createBinaryMessageToWrite() {
-        Message msg = new Message("originating node id");
-        byte[] payload = BINARY_FILE_DATA.getBytes();
         msg.setPayload(payload);
         return msg;
     }
@@ -125,7 +97,7 @@ public class FileWriterTest {
     private static ComponentFlowNode createWriterComponentFlowNode() {
         Folder folder = TestUtils.createFolder("Test Folder");
         ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
-        Component component = TestUtils.createComponent(FileWriterComponent.TYPE, false);
+        Component component = TestUtils.createComponent(TextFileWriterComponent.TYPE, false);
         Setting[] settingData = createWriterSettings();
         ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
                 settingData);
@@ -154,20 +126,10 @@ public class FileWriterTest {
     }
 
     private static Setting[] createWriterSettings() {
-        Setting[] settingData = new Setting[2];
-        settingData[0] = new Setting(FileWriterComponent.FILEWRITER_RELATIVE_PATH, TEXT_FILE_NAME);
-        settingData[1] = new Setting(FileWriterComponent.FILEWRITER_FILE_TYPE,
-                FileType.TEXT);
+        Setting[] settingData = new Setting[1];
+        settingData[0] = new Setting(TextFileWriterComponent.TEXTFILEWRITER_RELATIVE_PATH, FILE_NAME);
 
         return settingData;
-    }
-
-    public static ArrayList<Setting> createBinaryWriterSettings() {
-        ArrayList<Setting> settings = new ArrayList<Setting>(2);
-        settings.add(new Setting(FileWriterComponent.FILEWRITER_RELATIVE_PATH, BINARY_FILE_NAME));
-        settings.add(new Setting(FileWriterComponent.FILEWRITER_FILE_TYPE,
-                FileType.BINARY));
-        return settings;
     }
 
     private static List<Setting> createConnectionSettings() {

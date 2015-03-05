@@ -19,37 +19,31 @@ import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.localfile.IStreamableConnection;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(typeName = FileWriterComponent.TYPE, category = ComponentCategory.WRITER,
+@ComponentDefinition(typeName = TextFileWriterComponent.TYPE, category = ComponentCategory.WRITER,
         supports = { ComponentSupports.INPUT_MESSAGE },
         connectionCategory = ConnectionCategory.RESOURCE)
-public class FileWriterComponent extends AbstractComponent {
+public class TextFileWriterComponent extends AbstractComponent {
 
-    public static final String TYPE = "File Writer";
+    public static final String TYPE = "Text File Writer";
 
     public static final String DEFAULT_CHARSET = "UTF-8";
 
     @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Path and File")
-    public final static String FILEWRITER_RELATIVE_PATH = "filewriter.relative.path";
-
-    @SettingDefinition(order = 20, type = Type.CHOICE,
-            choices = { FileType.TEXT, FileType.BINARY }, defaultValue = FileType.TEXT,
-            label = "File Type")
-    public final static String FILEWRITER_FILE_TYPE = "filereader.file.type";
+    public final static String TEXTFILEWRITER_RELATIVE_PATH = "textfilewriter.relative.path";
 
     @SettingDefinition(type = Type.BOOLEAN, order = 30, required = true, provided = true,
             defaultValue = "false", label = "Must Exist")
-    public static final String FILEWRITER_MUST_EXIST = "filewriter.must.exist";
+    public static final String TEXTFILEWRITER_MUST_EXIST = "textfilewriter.must.exist";
 
     @SettingDefinition(type = Type.BOOLEAN, order = 40, required = true, provided = true,
             defaultValue = "false", label = "Append")
-    public static final String FILEWRITER_APPEND = "filewriter.append";
+    public static final String TEXTFILEWRITER_APPEND = "textfilewriter.append";
 
     @SettingDefinition(type = Type.INTEGER, order = 50, label = "Line Terminator")
-    public static final String FILEWRITER_TEXT_LINE_TERMINATOR = "filereader.text.line.terminator";
+    public static final String TEXTFILEWRITER_TEXT_LINE_TERMINATOR = "textfilereader.text.line.terminator";
 
     /* settings */
     String relativePathAndFile;
-    String fileType;
     boolean mustExist;
     boolean append;
     String lineTerminator;
@@ -64,23 +58,25 @@ public class FileWriterComponent extends AbstractComponent {
         super.start(executionTracker, connectionFactory);
         applySettings();
         outStream = getOutputStream((IStreamableConnection) this.connection.reference());
-        if (fileType.equalsIgnoreCase(FileType.TEXT)) {
-            bufferedWriter = initializeWriter(outStream);
-        }
+        bufferedWriter = initializeWriter(outStream);
     }
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
 
-        //todo: separate into sep components and look at lastmsg boolean in header
-        /*
-         * we should get either an ArrayList of <String> for text file or byte[]
-         * for a binary file
-         */
-        if (inputMessage.getPayload() instanceof byte[]) {
-            handleBinaryFile(inputMessage, messageTarget);
-        } else {
-            handleTextFile(inputMessage, messageTarget);
+        ArrayList<String> recs = inputMessage.getPayload();
+        try {
+            for (String rec : recs) {
+                bufferedWriter.write(rec);
+                if (StringUtils.isNotBlank(lineTerminator)) {
+                    bufferedWriter.write(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
+                } else {
+                    bufferedWriter.newLine();
+                }
+            }
+            bufferedWriter.flush();
+        } catch (IOException e) {
+            throw new IoException("Error writing to file " + e.getMessage());
         }
     }
 
@@ -92,43 +88,10 @@ public class FileWriterComponent extends AbstractComponent {
 
     private void applySettings() {
         properties = componentNode.getComponentVersion().toTypedProperties(this, false);
-        relativePathAndFile = properties.get(FILEWRITER_RELATIVE_PATH);
-        fileType = properties.get(FILEWRITER_FILE_TYPE);
-        mustExist = properties.is(FILEWRITER_MUST_EXIST);
-        append = properties.is(FILEWRITER_APPEND);
-        lineTerminator = properties.get(FILEWRITER_TEXT_LINE_TERMINATOR);
-    }
-
-    private void handleBinaryFile(Message inputMessage, IMessageTarget messageTarget) {
-        if (fileType.equalsIgnoreCase(FileType.TEXT)) {
-            throw new IoException("Converting from Binary input to Text output not implemented");
-        }
-        byte[] payload = (byte[]) inputMessage.getPayload();
-        try {
-            outStream.write(payload);
-        } catch (IOException e) {
-            throw new IoException("Error writing to file" + e.getMessage());
-        }
-    }
-
-    private void handleTextFile(Message inputMessage, IMessageTarget messageTarget) {
-        if (fileType.equalsIgnoreCase(FileType.BINARY)) {
-            throw new IoException("Converting from Text input to Binary output not implemented");
-        }
-        ArrayList<String> recs = inputMessage.getPayload();
-        try {
-            for (String rec : recs) {
-                bufferedWriter.write(rec);
-                if (StringUtils.isNotBlank(lineTerminator)) {
-                    bufferedWriter.write(FILEWRITER_TEXT_LINE_TERMINATOR);
-                } else {
-                    bufferedWriter.newLine();
-                }
-            }
-            bufferedWriter.flush();
-        } catch (IOException e) {
-            throw new IoException("Error writing to file " + e.getMessage());
-        }
+        relativePathAndFile = properties.get(TEXTFILEWRITER_RELATIVE_PATH);
+        mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
+        append = properties.is(TEXTFILEWRITER_APPEND);
+        lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
     }
 
     private OutputStream getOutputStream(IStreamableConnection conn) {

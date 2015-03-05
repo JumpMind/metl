@@ -1,10 +1,8 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertArrayEquals;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,22 +29,19 @@ import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class FileReaderTest {
+public class TextFileReaderTest {
 
     private static IConnectionFactory connectionFactory;
     private static ComponentFlowNode readerComponentFlowNode;
     private static final String FILE_PATH = "build/files/";
-    private static final String TEXT_FILE_NAME = "text_test.txt";
-    private static final String BINARY_FILE_NAME = "binary_test.bin";
-    private static final String BINARY_FILE_DATA = "This is a binary file to be read.";
+    private static final String FILE_NAME = "text_test.txt";
 
     @BeforeClass
     public static void setup() throws Exception {
 
         connectionFactory = new ConnectionFactory();
-        createTestTextFileToRead();
-        createTestBinaryFileToRead();
-        readerComponentFlowNode = createReaderComponentFlowNode();
+        createTestFileToRead();
+        readerComponentFlowNode = createTextReaderComponentFlowNode();
     }
 
     @After
@@ -56,7 +51,7 @@ public class FileReaderTest {
     @Test
     public void testTextReaderFlowFromStartupMsgSingleRowPerMessage() throws Exception {
 
-        FileReaderComponent reader = new FileReaderComponent();
+        TextFileReaderComponent reader = new TextFileReaderComponent();
         reader.setComponentFlowNode(readerComponentFlowNode);
         reader.start(null, connectionFactory);
         Message msg = new StartupMessage();
@@ -79,7 +74,7 @@ public class FileReaderTest {
     @Test
     public void testTextReaderFlowFromStartupMsgMultipleRowsPerMessage() throws Exception {
 
-        FileReaderComponent reader = new FileReaderComponent();
+        TextFileReaderComponent reader = new TextFileReaderComponent();
         reader.setComponentFlowNode(readerComponentFlowNode);
         reader.start(null, connectionFactory);
         Message msg = new StartupMessage();
@@ -99,41 +94,15 @@ public class FileReaderTest {
 
     }
 
-    @Test
-    public void testBinarytReaderFlowFromStartupMsg() throws Exception {
-
-        FileReaderComponent reader = new FileReaderComponent();
-        readerComponentFlowNode.getComponentVersion().getSettings().clear();
-        readerComponentFlowNode.getComponentVersion().getSettings()
-                .addAll(createBinaryReaderSettings());
-        reader.setComponentFlowNode(readerComponentFlowNode);
-        reader.start(null, connectionFactory);
-        Message msg = new StartupMessage();
-        MessageTarget msgTarget = new MessageTarget();
-        reader.handle(msg, msgTarget);
-
-        assertEquals(1, msgTarget.getTargetMessageCount());
-        assertArrayEquals((byte[]) msgTarget.getMessage(0).getPayload(),
-                BINARY_FILE_DATA.getBytes());
-    }
-
-    private static void createTestTextFileToRead() throws Exception {
+    private static void createTestFileToRead() throws Exception {
         createTestDirectory();
-        PrintWriter writer = new PrintWriter(FILE_PATH + TEXT_FILE_NAME);
+        PrintWriter writer = new PrintWriter(FILE_PATH + FILE_NAME);
         writer.println("This is a header row to skip");
         writer.println("This is the first line to read");
         writer.println("This is the second line to read");
         writer.println("This is the third line to read");
         writer.println("This is the fourth line to read");
         writer.close();
-    }
-
-    private static void createTestBinaryFileToRead() throws Exception {
-        createTestDirectory();
-        byte[] data = BINARY_FILE_DATA.getBytes();
-        FileOutputStream outStream = new FileOutputStream(FILE_PATH + BINARY_FILE_NAME);
-        outStream.write(data);
-        outStream.close();
     }
 
     private static void createTestDirectory() {
@@ -143,11 +112,11 @@ public class FileReaderTest {
         }
     }
 
-    private static ComponentFlowNode createReaderComponentFlowNode() {
+    private static ComponentFlowNode createTextReaderComponentFlowNode() {
 
         Folder folder = TestUtils.createFolder("Test Folder");
         ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
-        Component component = TestUtils.createComponent(FileReaderComponent.TYPE, false);
+        Component component = TestUtils.createComponent(TextFileReaderComponent.TYPE, false);
         Setting[] settingData = createReaderSettings();
         ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
                 settingData);
@@ -177,23 +146,12 @@ public class FileReaderTest {
 
     private static Setting[] createReaderSettings() {
 
-        Setting[] settingData = new Setting[4];
-        settingData[0] = new Setting(FileReaderComponent.FILEREADER_RELATIVE_PATH, TEXT_FILE_NAME);
-        settingData[1] = new Setting(FileReaderComponent.FILEREADER_FILE_TYPE,
-                FileType.TEXT);
-        settingData[2] = new Setting(FileReaderComponent.FILEREADER_TEXT_HEADER_LINES_TO_SKIP, "1");
-        settingData[3] = new Setting(FileReaderComponent.FILEREADER_TEXT_ROWS_PER_MESSAGE, "1");
+        Setting[] settingData = new Setting[3];
+        settingData[0] = new Setting(TextFileReaderComponent.TEXTFILEREADER_RELATIVE_PATH, FILE_NAME);
+        settingData[1] = new Setting(TextFileReaderComponent.TEXTFILEREADER_HEADER_LINES_TO_SKIP, "1");
+        settingData[2] = new Setting(TextFileReaderComponent.TEXTFILEREADER_ROWS_PER_MESSAGE, "1");
 
         return settingData;
-    }
-
-    private static ArrayList<Setting> createBinaryReaderSettings() {
-        ArrayList<Setting> settings = new ArrayList<Setting>(3);
-        settings.add(new Setting(FileReaderComponent.FILEREADER_RELATIVE_PATH, BINARY_FILE_NAME));
-        settings.add(new Setting(FileReaderComponent.FILEREADER_FILE_TYPE,
-                FileType.BINARY));
-        settings.add(new Setting(FileReaderComponent.FILEREADER_BINARY_SIZE_PER_MESSAGE, "1"));
-        return settings;
     }
 
     private static List<Setting> createConnectionSettings() {
