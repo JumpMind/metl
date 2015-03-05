@@ -11,10 +11,10 @@ import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(typeName = FormatterComponent.TYPE, category = ComponentCategory.PROCESSOR,
+@ComponentDefinition(typeName = Formatter.TYPE, category = ComponentCategory.PROCESSOR,
 supports = { ComponentSupports.INPUT_MESSAGE, ComponentSupports.INPUT_MODEL, ComponentSupports.OUTPUT_MESSAGE })
 
-public class FormatterComponent extends AbstractComponent {
+public class Formatter extends AbstractComponent {
 
     public static final String TYPE = "Formatter";
 

@@ -19,10 +19,10 @@ import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.localfile.IStreamableConnection;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(typeName = TextFileWriterComponent.TYPE, category = ComponentCategory.WRITER,
+@ComponentDefinition(typeName = TextFileWriter.TYPE, category = ComponentCategory.WRITER,
         supports = { ComponentSupports.INPUT_MESSAGE },
         connectionCategory = ConnectionCategory.RESOURCE)
-public class TextFileWriterComponent extends AbstractComponent {
+public class TextFileWriter extends AbstractComponent {
 
     public static final String TYPE = "Text File Writer";
 

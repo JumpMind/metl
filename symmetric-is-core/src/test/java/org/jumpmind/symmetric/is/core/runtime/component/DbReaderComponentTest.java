@@ -62,7 +62,7 @@ public class DbReaderComponentTest {
     @Test
     public void testReaderParmsFromHeader() throws Exception {
 
-        DbReaderComponent reader = new DbReaderComponent();
+        DbReader reader = new DbReader();
         Message inputMessage = new StartupMessage();
         Map<String, Serializable> msgParamMap = new HashMap<String, Serializable>();
         msgParamMap.put("param1", "abcde");
@@ -78,7 +78,7 @@ public class DbReaderComponentTest {
     @Test
     public void testReaderParmsFromMsgBody() throws Exception {
 
-        DbReaderComponent reader = new DbReaderComponent();
+        DbReader reader = new DbReader();
         Message inputMessage = new StartupMessage();
         Map<String, Object> inputParamMap = new HashMap<String, Object>();
         EntityData inputRec = new EntityData();
@@ -93,7 +93,7 @@ public class DbReaderComponentTest {
     @Test
     public void testReaderParmsFromHeaderAndMsgBody() throws Exception {
 
-        DbReaderComponent reader = new DbReaderComponent();
+        DbReader reader = new DbReader();
         Message inputMessage = new StartupMessage();
         Map<String, Serializable> msgParamMap = new HashMap<String, Serializable>();
         msgParamMap.put("param1", "abcde");
@@ -114,7 +114,7 @@ public class DbReaderComponentTest {
     @Test
     public void testReaderFlowFromStartupMsg() throws Exception {
 
-        DbReaderComponent reader = new DbReaderComponent();
+        DbReader reader = new DbReader();
         reader.setComponentFlowNode(readerComponentFlowNode);
         reader.start(null, connectionFactory);
         Message msg = new StartupMessage();
@@ -131,7 +131,7 @@ public class DbReaderComponentTest {
     @Test
     public void testReaderFlowFromSingleContentMsg() throws Exception {
 
-        DbReaderComponent reader = new DbReaderComponent();
+        DbReader reader = new DbReader();
         reader.setComponentFlowNode(readerComponentFlowNode);
         reader.start(null, connectionFactory);
         Message message = new Message("fake node id");
@@ -157,7 +157,7 @@ public class DbReaderComponentTest {
 
         Folder folder = TestUtils.createFolder("Test Folder");
         ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
-        Component component = TestUtils.createComponent(DbReaderComponent.TYPE, false);
+        Component component = TestUtils.createComponent(DbReader.TYPE, false);
         Setting[] settingData = createReaderSettings();
         ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
                 settingData);
@@ -188,9 +188,9 @@ public class DbReaderComponentTest {
     private static Setting[] createReaderSettings() {
 
         Setting[] settingData = new Setting[2];
-        settingData[0] = new Setting(DbReaderComponent.SQL,
+        settingData[0] = new Setting(DbReader.SQL,
                 "select * From test_table_1 order by col1");
-        settingData[1] = new Setting(DbReaderComponent.ROWS_PER_MESSAGE, "2");
+        settingData[1] = new Setting(DbReader.ROWS_PER_MESSAGE, "2");
 
         return settingData;
     }

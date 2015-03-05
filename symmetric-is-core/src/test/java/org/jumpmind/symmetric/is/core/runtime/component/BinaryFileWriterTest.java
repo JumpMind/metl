@@ -46,7 +46,7 @@ public class BinaryFileWriterTest {
 
     @Test
     public void testBinaryWriter() throws Exception {
-        BinaryFileWriterComponent writer = new BinaryFileWriterComponent();
+        BinaryFileWriter writer = new BinaryFileWriter();
         writer.setComponentFlowNode(writerComponentFlowNode);
         writer.start(null, connectionFactory);
         writer.handle(createBinaryMessageToWrite(), null);
@@ -69,7 +69,7 @@ public class BinaryFileWriterTest {
     private static ComponentFlowNode createWriterComponentFlowNode() {
         Folder folder = TestUtils.createFolder("Test Folder");
         ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
-        Component component = TestUtils.createComponent(BinaryFileWriterComponent.TYPE, false);
+        Component component = TestUtils.createComponent(BinaryFileWriter.TYPE, false);
         Setting[] settingData = createWriterSettings();
         ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
                 settingData);
@@ -99,7 +99,7 @@ public class BinaryFileWriterTest {
 
     private static Setting[] createWriterSettings() {
         Setting[] settingData = new Setting[1];
-        settingData[0] = new Setting(BinaryFileWriterComponent.BINARYFILEWRITER_RELATIVE_PATH, FILE_NAME);
+        settingData[0] = new Setting(BinaryFileWriter.BINARYFILEWRITER_RELATIVE_PATH, FILE_NAME);
         return settingData;
     }
 

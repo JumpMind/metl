@@ -18,10 +18,10 @@ import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.localfile.IStreamableConnection;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(typeName = TextFileReaderComponent.TYPE, category = ComponentCategory.READER,
+@ComponentDefinition(typeName = TextFileReader.TYPE, category = ComponentCategory.READER,
         supports = { ComponentSupports.OUTPUT_MESSAGE },
         connectionCategory = ConnectionCategory.RESOURCE)
-public class TextFileReaderComponent extends AbstractComponent {
+public class TextFileReader extends AbstractComponent {
 
     public static final String TYPE = "Text File Reader";
 

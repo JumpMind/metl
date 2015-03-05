@@ -13,7 +13,7 @@ import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.model.Connection;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.Setting;
-import org.jumpmind.symmetric.is.core.runtime.component.NoOpProcessorComponent;
+import org.jumpmind.symmetric.is.core.runtime.component.NoOpProcessor;
 
 public class TestUtils {
     
@@ -41,7 +41,7 @@ public class TestUtils {
     
     public static ComponentFlowNode createNoOpProcessorComponentFlowNode(ComponentFlowVersion flowVersion, 
     		String name, Folder folder) {
-    	Component component = createComponent(NoOpProcessorComponent.TYPE, false);
+    	Component component = createComponent(NoOpProcessor.TYPE, false);
     	ComponentVersion componentVersion = createComponentVersion(component, null, (Setting[]) null);
     	ComponentFlowNode node = new ComponentFlowNode(componentVersion);
     	node.setComponentFlowVersionId(flowVersion.getId());

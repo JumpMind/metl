@@ -27,11 +27,11 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
-@ComponentDefinition(typeName = DbReaderComponent.TYPE, category = ComponentCategory.READER,
+@ComponentDefinition(typeName = DbReader.TYPE, category = ComponentCategory.READER,
         supports = { ComponentSupports.INPUT_MESSAGE, ComponentSupports.OUTPUT_MESSAGE,
                 ComponentSupports.INPUT_MODEL, ComponentSupports.OUTPUT_MODEL },
         connectionCategory = ConnectionCategory.DATASOURCE)
-public class DbReaderComponent extends AbstractComponent {
+public class DbReader extends AbstractComponent {
 
     public static final String TYPE = "Database Reader";
 

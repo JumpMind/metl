@@ -19,8 +19,8 @@ public class ComponentFactory implements IComponentFactory {
         componentTypesByCategory.put(ComponentCategory.READER, new ArrayList<String>());
         componentTypesByCategory.put(ComponentCategory.PROCESSOR, new ArrayList<String>());
         componentTypesByCategory.put(ComponentCategory.WRITER, new ArrayList<String>());
-        register(DbReaderComponent.class);
-        register(NoOpProcessorComponent.class);
+        register(DbReader.class);
+        register(NoOpProcessor.class);
     }
 
     @Override

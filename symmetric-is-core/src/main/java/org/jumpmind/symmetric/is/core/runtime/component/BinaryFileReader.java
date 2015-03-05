@@ -15,10 +15,10 @@ import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.connection.localfile.IStreamableConnection;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(typeName = BinaryFileReaderComponent.TYPE, category = ComponentCategory.READER,
+@ComponentDefinition(typeName = BinaryFileReader.TYPE, category = ComponentCategory.READER,
         supports = { ComponentSupports.OUTPUT_MESSAGE },
         connectionCategory = ConnectionCategory.RESOURCE)
-public class BinaryFileReaderComponent extends AbstractComponent {
+public class BinaryFileReader extends AbstractComponent {
 
     public static final String TYPE = "Binary File Reader";
 

@@ -51,7 +51,7 @@ public class TextFileReaderTest {
     @Test
     public void testTextReaderFlowFromStartupMsgSingleRowPerMessage() throws Exception {
 
-        TextFileReaderComponent reader = new TextFileReaderComponent();
+        TextFileReader reader = new TextFileReader();
         reader.setComponentFlowNode(readerComponentFlowNode);
         reader.start(null, connectionFactory);
         Message msg = new StartupMessage();
@@ -74,7 +74,7 @@ public class TextFileReaderTest {
     @Test
     public void testTextReaderFlowFromStartupMsgMultipleRowsPerMessage() throws Exception {
 
-        TextFileReaderComponent reader = new TextFileReaderComponent();
+        TextFileReader reader = new TextFileReader();
         reader.setComponentFlowNode(readerComponentFlowNode);
         reader.start(null, connectionFactory);
         Message msg = new StartupMessage();
@@ -116,7 +116,7 @@ public class TextFileReaderTest {
 
         Folder folder = TestUtils.createFolder("Test Folder");
         ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
-        Component component = TestUtils.createComponent(TextFileReaderComponent.TYPE, false);
+        Component component = TestUtils.createComponent(TextFileReader.TYPE, false);
         Setting[] settingData = createReaderSettings();
         ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
                 settingData);
@@ -147,9 +147,9 @@ public class TextFileReaderTest {
     private static Setting[] createReaderSettings() {
 
         Setting[] settingData = new Setting[3];
-        settingData[0] = new Setting(TextFileReaderComponent.TEXTFILEREADER_RELATIVE_PATH, FILE_NAME);
-        settingData[1] = new Setting(TextFileReaderComponent.TEXTFILEREADER_HEADER_LINES_TO_SKIP, "1");
-        settingData[2] = new Setting(TextFileReaderComponent.TEXTFILEREADER_ROWS_PER_MESSAGE, "1");
+        settingData[0] = new Setting(TextFileReader.TEXTFILEREADER_RELATIVE_PATH, FILE_NAME);
+        settingData[1] = new Setting(TextFileReader.TEXTFILEREADER_HEADER_LINES_TO_SKIP, "1");
+        settingData[2] = new Setting(TextFileReader.TEXTFILEREADER_ROWS_PER_MESSAGE, "1");
 
         return settingData;
     }

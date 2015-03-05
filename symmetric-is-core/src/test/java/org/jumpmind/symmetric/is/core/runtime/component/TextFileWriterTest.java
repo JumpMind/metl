@@ -46,7 +46,7 @@ public class TextFileWriterTest {
 
     @Test
     public void testTextWriterMultipleRowsPerMessage() throws Exception {
-        TextFileWriterComponent writer = new TextFileWriterComponent();
+        TextFileWriter writer = new TextFileWriter();
         writer.setComponentFlowNode(writerComponentFlowNode);
         writer.start(null, connectionFactory);
         writer.handle(createMultipleRowTextMessageToWrite(), null);
@@ -55,7 +55,7 @@ public class TextFileWriterTest {
 
     @Test
     public void testTextWriterSingleRowPerMessage() throws Exception {
-        TextFileWriterComponent writer = new TextFileWriterComponent();
+        TextFileWriter writer = new TextFileWriter();
         writer.setComponentFlowNode(writerComponentFlowNode);
         writer.start(null, connectionFactory);
         writer.handle(createSingleRowTextMessageToWrite(1), null);
@@ -97,7 +97,7 @@ public class TextFileWriterTest {
     private static ComponentFlowNode createWriterComponentFlowNode() {
         Folder folder = TestUtils.createFolder("Test Folder");
         ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
-        Component component = TestUtils.createComponent(TextFileWriterComponent.TYPE, false);
+        Component component = TestUtils.createComponent(TextFileWriter.TYPE, false);
         Setting[] settingData = createWriterSettings();
         ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
                 settingData);
@@ -127,7 +127,7 @@ public class TextFileWriterTest {
 
     private static Setting[] createWriterSettings() {
         Setting[] settingData = new Setting[1];
-        settingData[0] = new Setting(TextFileWriterComponent.TEXTFILEWRITER_RELATIVE_PATH, FILE_NAME);
+        settingData[0] = new Setting(TextFileWriter.TEXTFILEWRITER_RELATIVE_PATH, FILE_NAME);
 
         return settingData;
     }

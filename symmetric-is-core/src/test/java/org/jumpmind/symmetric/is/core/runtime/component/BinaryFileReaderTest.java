@@ -53,7 +53,7 @@ public class BinaryFileReaderTest {
     @Test
     public void testBinarytReaderFlowFromStartupMsg() throws Exception {
 
-        BinaryFileReaderComponent reader = new BinaryFileReaderComponent();
+        BinaryFileReader reader = new BinaryFileReader();
         reader.setComponentFlowNode(readerComponentFlowNode);
         reader.start(null, connectionFactory);
         Message msg = new StartupMessage();
@@ -84,7 +84,7 @@ public class BinaryFileReaderTest {
 
         Folder folder = TestUtils.createFolder("Test Folder");
         ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
-        Component component = TestUtils.createComponent(BinaryFileReaderComponent.TYPE, false);
+        Component component = TestUtils.createComponent(BinaryFileReader.TYPE, false);
         Setting[] settingData = createReaderSettings();
         ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
                 settingData);
@@ -114,8 +114,8 @@ public class BinaryFileReaderTest {
 
     private static Setting[] createReaderSettings() {
         Setting[] settings = new Setting[2];
-        settings[0] = new Setting(BinaryFileReaderComponent.BINARYFILEREADER_RELATIVE_PATH, FILE_NAME);
-        settings[1] = new Setting(BinaryFileReaderComponent.BINARYFILEREADER_SIZE_PER_MESSAGE, "1");
+        settings[0] = new Setting(BinaryFileReader.BINARYFILEREADER_RELATIVE_PATH, FILE_NAME);
+        settings[1] = new Setting(BinaryFileReader.BINARYFILEREADER_SIZE_PER_MESSAGE, "1");
         return settings;
     }
 
