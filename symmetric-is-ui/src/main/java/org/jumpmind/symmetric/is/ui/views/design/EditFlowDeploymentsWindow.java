@@ -3,9 +3,9 @@ package org.jumpmind.symmetric.is.ui.views.design;
 import java.util.List;
 import java.util.Set;
 
-import org.jumpmind.symmetric.is.core.config.AgentDeployment;
-import org.jumpmind.symmetric.is.core.config.AgentSummary;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.AgentSummary;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
@@ -42,7 +42,7 @@ public class EditFlowDeploymentsWindow extends ResizableWindow {
     @Autowired
     IAgentManager agentManager;
 
-    ComponentFlowVersion componentFlowVersion;
+    FlowVersion componentFlowVersion;
 
     BeanItemContainer<AgentDeployment> container;
 
@@ -109,7 +109,7 @@ public class EditFlowDeploymentsWindow extends ResizableWindow {
         return layout;
     }
 
-    public void show(ComponentFlowVersion componentFlowVersion) {
+    public void show(FlowVersion componentFlowVersion) {
         this.componentFlowVersion = componentFlowVersion;
         setCaption("Agent Deployments for '" + componentFlowVersion.getName() + "'");
         container.removeAllItems();        
@@ -118,7 +118,7 @@ public class EditFlowDeploymentsWindow extends ResizableWindow {
         showAtSize(.6);
     }
 
-    public ComponentFlowVersion getComponentFlowVersion() {
+    public FlowVersion getComponentFlowVersion() {
         return componentFlowVersion;
     }
 

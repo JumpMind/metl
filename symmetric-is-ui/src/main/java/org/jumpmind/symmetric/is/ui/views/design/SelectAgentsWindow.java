@@ -3,8 +3,8 @@ package org.jumpmind.symmetric.is.ui.views.design;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jumpmind.symmetric.is.core.config.AgentSummary;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
+import org.jumpmind.symmetric.is.core.model.AgentSummary;
+import org.jumpmind.symmetric.is.core.model.FlowVersionSummary;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
 import org.jumpmind.symmetric.ui.common.MultiSelectTable;
@@ -89,7 +89,7 @@ public class SelectAgentsWindow extends ResizableWindow {
         setCaption("Select Agents To Deploy To");
         this.container.removeAllItems();
         this.container.addAll(configurationService.findUndeployedAgentsFor(componentFlowVersionId));
-        this.table.setValue(new HashSet<ComponentFlowVersionSummary>());
+        this.table.setValue(new HashSet<FlowVersionSummary>());
         showAtSize(.5);
     }
 

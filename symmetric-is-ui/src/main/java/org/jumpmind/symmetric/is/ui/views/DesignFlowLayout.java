@@ -2,13 +2,13 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.config.Component;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.config.ComponentVersion;
+import org.jumpmind.symmetric.is.core.model.Component;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.FlowStepLink;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
+import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.ui.diagram.ConnectionEvent;
+import org.jumpmind.symmetric.is.ui.diagram.ResourceEvent;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
@@ -23,7 +23,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
 
     IConfigurationService configurationService;
 
-    ComponentFlowVersion componentFlowVersion;
+    FlowVersion componentFlowVersion;
 
     DesignComponentPalette designComponentPalette;
 
@@ -34,7 +34,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
     Diagram diagram;
 
     public DesignFlowLayout(IConfigurationService configurationService,
-            ComponentFlowVersion componentFlowVersion,
+            FlowVersion componentFlowVersion,
             DesignComponentPalette designComponentPalette, DesignPropertySheet designPropertySheet,
             DesignNavigator designNavigator) {
         this.configurationService = configurationService;
@@ -59,8 +59,8 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
 
     protected int countComponentsOfType(String type) {
         int count = 0;
-        List<ComponentFlowNode> nodes = componentFlowVersion.getComponentFlowNodes();
-        for (ComponentFlowNode componentFlowNode : nodes) {
+        List<FlowStep> nodes = componentFlowVersion.getFlowSteps();
+        for (FlowStep componentFlowNode : nodes) {
             if (componentFlowNode.getComponentVersion().getComponent().getType().equals(type)) {
                 count++;
             }
@@ -76,9 +76,9 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
         component.setName(component.getType() + " "
                 + (countComponentsOfType(component.getType()) + 1));
 
-        ComponentFlowNode componentFlowNode = new ComponentFlowNode(componentVersion);
-        componentFlowNode.setComponentFlowVersionId(componentFlowVersion.getId());
-        componentFlowVersion.getComponentFlowNodes().add(componentFlowNode);
+        FlowStep componentFlowNode = new FlowStep(componentVersion);
+        componentFlowNode.setFlowVersionId(componentFlowVersion.getId());
+        componentFlowVersion.getFlowSteps().add(componentFlowNode);
 
         configurationService.save(componentFlowNode);
 
@@ -98,10 +98,10 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
         diagram.addListener(new DiagramChangedListener());
         addComponent(diagram);
 
-        List<ComponentFlowNodeLink> links = componentFlowVersion.getComponentFlowNodeLinks();
+        List<FlowStepLink> links = componentFlowVersion.getFlowStepLinks();
 
-        List<ComponentFlowNode> flowNodes = componentFlowVersion.getComponentFlowNodes();
-        for (ComponentFlowNode flowNode : flowNodes) {
+        List<FlowStep> flowNodes = componentFlowVersion.getFlowSteps();
+        for (FlowStep flowNode : flowNodes) {
             Node node = new Node();
             String name = flowNode.getComponentVersion().getComponent().getName();
             String type = flowNode.getComponentVersion().getComponent().getType();
@@ -111,9 +111,9 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
             node.setY(flowNode.getY());
             diagram.addNode(node);
 
-            for (ComponentFlowNodeLink link : links) {
-                if (link.getSourceNodeId().equals(node.getId())) {
-                    node.getTargetNodeIds().add(link.getTargetNodeId());
+            for (FlowStepLink link : links) {
+                if (link.getSourceStepId().equals(node.getId())) {
+                    node.getTargetNodeIds().add(link.getTargetStepId());
                 }
             }
 
@@ -129,14 +129,14 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
             if (e instanceof NodeSelectedEvent) {
                 NodeSelectedEvent event = (NodeSelectedEvent) e;
                 Node node = event.getNode();
-                ComponentFlowNode flowNode = componentFlowVersion.findComponentFlowNodeWithId(node
+                FlowStep flowNode = componentFlowVersion.findFlowStepWithId(node
                         .getId());
                 designPropertySheet.valueChange(flowNode.getComponentVersion());
 
             } else if (e instanceof NodeMovedEvent) {
                 NodeMovedEvent event = (NodeMovedEvent) e;
                 Node node = event.getNode();
-                ComponentFlowNode flowNode = componentFlowVersion.findComponentFlowNodeWithId(node
+                FlowStep flowNode = componentFlowVersion.findFlowStepWithId(node
                         .getId());
                 if (flowNode != null) {
                     flowNode.setX(node.getX());
@@ -144,15 +144,15 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
                 }
                 configurationService.save(componentFlowVersion);
 
-            } else if (e instanceof ConnectionEvent) {
-                ConnectionEvent event = (ConnectionEvent) e;
+            } else if (e instanceof ResourceEvent) {
+                ResourceEvent event = (ResourceEvent) e;
                 if (!event.isRemoved()) {
-                    componentFlowVersion.getComponentFlowNodeLinks().add(
-                            new ComponentFlowNodeLink(event.getSourceNodeId(), event
+                    componentFlowVersion.getFlowStepLinks().add(
+                            new FlowStepLink(event.getSourceNodeId(), event
                                     .getTargetNodeId()));
                     configurationService.save(componentFlowVersion);
                 } else {
-                    ComponentFlowNodeLink link = componentFlowVersion.removeComponentFlowNodeLink(
+                    FlowStepLink link = componentFlowVersion.removeFlowStepLink(
                             event.getSourceNodeId(), event.getTargetNodeId());
                     if (link != null) {
                         configurationService.delete(link);

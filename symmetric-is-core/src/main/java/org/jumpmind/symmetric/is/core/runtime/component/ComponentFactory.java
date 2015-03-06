@@ -5,8 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
-import org.jumpmind.symmetric.is.core.config.SettingDefinition;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 
 public class ComponentFactory implements IComponentFactory {
@@ -19,8 +19,8 @@ public class ComponentFactory implements IComponentFactory {
         componentTypesByCategory.put(ComponentCategory.READER, new ArrayList<String>());
         componentTypesByCategory.put(ComponentCategory.PROCESSOR, new ArrayList<String>());
         componentTypesByCategory.put(ComponentCategory.WRITER, new ArrayList<String>());
-        register(DbReaderComponent.class);
-        register(NoOpProcessorComponent.class);
+        register(DbReader.class);
+        register(NoOpProcessor.class);
     }
 
     @Override
@@ -46,13 +46,13 @@ public class ComponentFactory implements IComponentFactory {
     }
 
     @Override
-    public IComponent create(ComponentFlowNode componentFlowNode) {
+    public IComponent create(FlowStep flowStep) {
         try {
-            String componentType = componentFlowNode.getComponentVersion().getComponent().getType();
+            String componentType = flowStep.getComponentVersion().getComponent().getType();
             Class<? extends IComponent> clazz = componentTypes.get(componentType);
             if (clazz != null) {
             	IComponent component = clazz.newInstance();
-            	component.setComponentFlowNode(componentFlowNode);
+            	component.setFlowStep(flowStep);
                 return component;
             } else {
                 throw new IllegalStateException(

@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.jumpmind.symmetric.is.core.config.Agent;
+import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;

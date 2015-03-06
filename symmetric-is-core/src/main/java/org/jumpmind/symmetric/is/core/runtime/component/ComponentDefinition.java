@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
+import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
@@ -17,6 +17,6 @@ public @interface ComponentDefinition {
     
     ComponentSupports[] supports();
     
-    ConnectionCategory connectionCategory() default ConnectionCategory.NONE;
+    ResourceCategory resourceCategory() default ResourceCategory.NONE;
     
 }

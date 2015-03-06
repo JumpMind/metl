@@ -4,18 +4,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.config.ComponentVersion;
-import org.jumpmind.symmetric.is.core.config.Connection;
-import org.jumpmind.symmetric.is.core.config.Setting;
-import org.jumpmind.symmetric.is.core.config.SettingDefinition;
-import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
+import org.jumpmind.symmetric.is.core.model.ComponentVersion;
+import org.jumpmind.symmetric.is.core.model.Resource;
+import org.jumpmind.symmetric.is.core.model.Setting;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
@@ -43,33 +43,33 @@ public class ComponentSettingsSheet extends VerticalLayout {
 
     IConfigurationService configurationService;
 
-    ComponentFlowVersion componentFlowVersion;
+    FlowVersion componentFlowVersion;
 
     IComponentSettingsChangedListener componentSettingsChangedListener;
 
     IComponentFactory componentFactory;
 
-    IConnectionFactory connectionFactory;
+    IResourceFactory resourceFactory;
 
     public ComponentSettingsSheet() {
     }
 
-    protected void show(IComponentFactory componentFactory, IConnectionFactory connectionFactory,
-            IConfigurationService configurationService, ComponentFlowVersion componentFlowVersion,
+    protected void show(IComponentFactory componentFactory, IResourceFactory resourceFactory,
+            IConfigurationService configurationService, FlowVersion componentFlowVersion,
             IComponentSettingsChangedListener componentSettingsChangedListener) {
         this.componentFactory = componentFactory;
-        this.connectionFactory = connectionFactory;
+        this.resourceFactory = resourceFactory;
         this.componentSettingsChangedListener = componentSettingsChangedListener;
         this.configurationService = configurationService;
         this.componentFlowVersion = componentFlowVersion;
         refresh(null);
     }
 
-    protected void refresh(ComponentFlowNode selected) {
+    protected void refresh(FlowStep selected) {
         removeAllComponents();
 
-        List<ComponentFlowNode> allNodes = componentFlowVersion.getComponentFlowNodes();
-        final ComponentFlowNode flowNode;
+        List<FlowStep> allNodes = componentFlowVersion.getFlowSteps();
+        final FlowStep flowNode;
         if (selected == null && allNodes.size() > 0) {
             flowNode = allNodes.get(0);
         } else {
@@ -120,7 +120,7 @@ public class ComponentSettingsSheet extends VerticalLayout {
             typeLabel.setReadOnly(true);
             formLayout.addComponent(typeLabel);
 
-            addConnectionCombo(formLayout, version);
+            addResourceCombo(formLayout, version);
 
             Map<String, SettingDefinition> settings = componentFactory
                     .getSettingDefinitionsForComponentType(version.getComponent().getType());
@@ -134,48 +134,48 @@ public class ComponentSettingsSheet extends VerticalLayout {
         setExpandRatio(formLayout, 1);
     }
 
-    protected void addConnectionCombo(FormLayout formLayout, final ComponentVersion version) {
+    protected void addResourceCombo(FormLayout formLayout, final ComponentVersion version) {
         ComponentDefinition componentDefintion = componentFactory
                 .getComponentDefinitionForComponentType(version.getComponent().getType());
-        if (componentDefintion.connectionCategory() != null
-                && componentDefintion.connectionCategory() != ConnectionCategory.NONE) {
-            final AbstractSelect connectionsCombo = new ComboBox("Connection");
-            connectionsCombo.setImmediate(true);
-            connectionsCombo.setRequired(true);
-            List<String> types = connectionFactory.getConnectionTypes(componentDefintion
-                    .connectionCategory());
+        if (componentDefintion.resourceCategory() != null
+                && componentDefintion.resourceCategory() != ResourceCategory.NONE) {
+            final AbstractSelect resourcesCombo = new ComboBox("Resource");
+            resourcesCombo.setImmediate(true);
+            resourcesCombo.setRequired(true);
+            List<String> types = resourceFactory.getResourceTypes(componentDefintion
+                    .resourceCategory());
             if (types != null) {
-                List<Connection> connections = configurationService.findConnectionsByTypes(types
+                List<Resource> resources = configurationService.findResourcesByTypes(types
                         .toArray(new String[types.size()]));
-                if (connections != null) {
-                    for (Connection connection : connections) {
-                        connectionsCombo.addItem(connection);
+                if (resources != null) {
+                    for (Resource resource : resources) {
+                        resourcesCombo.addItem(resource);
                     }
 
-                    connectionsCombo.setValue(version.getConnection());
+                    resourcesCombo.setValue(version.getResource());
                 }
             }
-            connectionsCombo.addValueChangeListener(new ValueChangeListener() {
+            resourcesCombo.addValueChangeListener(new ValueChangeListener() {
                 private static final long serialVersionUID = 1L;
 
                 @Override
                 public void valueChange(ValueChangeEvent event) {
-                    version.setConnection((Connection) connectionsCombo.getValue());
+                    version.setResource((Resource) resourcesCombo.getValue());
                     configurationService.save(version);
                 }
             });
 
-            formLayout.addComponent(connectionsCombo);
+            formLayout.addComponent(resourcesCombo);
         }
     }
 
-    protected void addNodeCombo(FormLayout formLayout, final ComponentFlowNode flowNode) {
-        List<ComponentFlowNode> allNodes = componentFlowVersion.getComponentFlowNodes();
+    protected void addNodeCombo(FormLayout formLayout, final FlowStep flowNode) {
+        List<FlowStep> allNodes = componentFlowVersion.getFlowSteps();
         final AbstractSelect nodeNameCombo = new ComboBox("Name");
         nodeNameCombo.setNewItemsAllowed(true);
         nodeNameCombo.setNullSelectionAllowed(false);
         nodeNameCombo.setImmediate(true);
-        for (ComponentFlowNode node : allNodes) {
+        for (FlowStep node : allNodes) {
             nodeNameCombo.addItem(node.getId());
             nodeNameCombo.setItemCaption(node.getId(), node.getComponentVersion().getComponent().getName());
         }
@@ -188,8 +188,8 @@ public class ComponentSettingsSheet extends VerticalLayout {
 
                 @Override
                 public void valueChange(ValueChangeEvent event) {
-                    List<ComponentFlowNode> allNodes = componentFlowVersion.getComponentFlowNodes();
-                    for (ComponentFlowNode node : allNodes) {
+                    List<FlowStep> allNodes = componentFlowVersion.getFlowSteps();
+                    for (FlowStep node : allNodes) {
                         if (node.getId().equals(nodeNameCombo.getValue())) {
                             refresh(node);
                         }
@@ -214,7 +214,7 @@ public class ComponentSettingsSheet extends VerticalLayout {
     }
 
     protected void addSettingField(final String key, final SettingDefinition definition,
-            final ComponentFlowNode flowNode, FormLayout formLayout) {
+            final FlowStep flowNode, FormLayout formLayout) {
         final ComponentVersion version = flowNode.getComponentVersion();
         boolean required = definition.required();
         String description = "Represents the " + key + " setting";
@@ -316,14 +316,14 @@ public class ComponentSettingsSheet extends VerticalLayout {
 
     }
 
-    protected void saveName(AbstractSelect nameField, ComponentFlowNode flowNode) {
+    protected void saveName(AbstractSelect nameField, FlowStep flowNode) {
         ComponentVersion version = flowNode.getComponentVersion();
         version.getComponent().setName((String) nameField.getItemCaption(nameField.getValue()));
         configurationService.save(version);
         componentSettingsChangedListener.componentSettingsChanges(flowNode, false);
     }
 
-    protected void saveSetting(String key, Field<?> field, ComponentFlowNode flowNode) {
+    protected void saveSetting(String key, Field<?> field, FlowStep flowNode) {
         Setting data = flowNode.getComponentVersion().findSetting(key);
         data.setValue(field.getValue() != null ? field.getValue().toString() : null);
         configurationService.save(data);
@@ -331,7 +331,7 @@ public class ComponentSettingsSheet extends VerticalLayout {
     }
 
     public interface IComponentSettingsChangedListener {
-        public void componentSettingsChanges(ComponentFlowNode node, boolean deleted);
+        public void componentSettingsChanges(FlowStep node, boolean deleted);
     }
 
 }

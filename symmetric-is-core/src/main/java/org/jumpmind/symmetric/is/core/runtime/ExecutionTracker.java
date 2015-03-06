@@ -1,7 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
-import org.jumpmind.symmetric.is.core.config.AgentDeployment;
-import org.jumpmind.symmetric.is.core.config.ComponentVersion;
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

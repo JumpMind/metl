@@ -2,10 +2,10 @@ package org.jumpmind.symmetric.is.ui.views.manage;
 
 import java.util.Set;
 
-import org.jumpmind.symmetric.is.core.config.Agent;
-import org.jumpmind.symmetric.is.core.config.AgentDeployment;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
+import org.jumpmind.symmetric.is.core.model.Agent;
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
+import org.jumpmind.symmetric.is.core.model.FlowVersionSummary;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
 import org.jumpmind.symmetric.ui.common.MultiSelectTable;
@@ -139,9 +139,9 @@ public class EditAgentDeploymentsWindow extends ResizableWindow {
         public void itemUpdated(Object item) {
             if (item instanceof Set) {
                 @SuppressWarnings("unchecked")
-                Set<ComponentFlowVersionSummary> selectedFlows = (Set<ComponentFlowVersionSummary>) item;
-                for (ComponentFlowVersionSummary componentFlowVersionSummary : selectedFlows) {
-                    ComponentFlowVersion componentFlowVersion = new ComponentFlowVersion();
+                Set<FlowVersionSummary> selectedFlows = (Set<FlowVersionSummary>) item;
+                for (FlowVersionSummary componentFlowVersionSummary : selectedFlows) {
+                    FlowVersion componentFlowVersion = new FlowVersion();
                     componentFlowVersion.setId(componentFlowVersionSummary.getId());
                     configurationService.refresh(componentFlowVersion);
                     AgentDeployment agentDeployment = new AgentDeployment(componentFlowVersion);

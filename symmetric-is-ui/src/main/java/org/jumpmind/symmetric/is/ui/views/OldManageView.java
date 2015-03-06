@@ -9,13 +9,13 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.jumpmind.symmetric.is.core.config.Agent;
-import org.jumpmind.symmetric.is.core.config.AgentDeployment;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
-import org.jumpmind.symmetric.is.core.config.DeploymentStatus;
-import org.jumpmind.symmetric.is.core.config.Folder;
-import org.jumpmind.symmetric.is.core.config.FolderType;
+import org.jumpmind.symmetric.is.core.model.Agent;
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
+import org.jumpmind.symmetric.is.core.model.FlowVersionSummary;
+import org.jumpmind.symmetric.is.core.model.DeploymentStatus;
+import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.ui.common.AbstractFolderNavigatorLayout;
@@ -341,9 +341,9 @@ public class OldManageView extends HorizontalLayout implements View {
             public void itemUpdated(Object item) {
                 Agent agent = getSingleSelection(Agent.class);
                 @SuppressWarnings("unchecked")
-                Set<ComponentFlowVersionSummary> selectedFlows = (Set<ComponentFlowVersionSummary>) item;
-                for (ComponentFlowVersionSummary componentFlowVersionSummary : selectedFlows) {
-                    ComponentFlowVersion componentFlowVersion = new ComponentFlowVersion();
+                Set<FlowVersionSummary> selectedFlows = (Set<FlowVersionSummary>) item;
+                for (FlowVersionSummary componentFlowVersionSummary : selectedFlows) {
+                    FlowVersion componentFlowVersion = new FlowVersion();
                     componentFlowVersion.setId(componentFlowVersionSummary.getId());
                     configurationService.refresh(componentFlowVersion);
                     agentManager.deploy(agent.getId(), componentFlowVersion);

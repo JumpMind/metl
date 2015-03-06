@@ -2,10 +2,10 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import javax.annotation.PostConstruct;
 
-import org.jumpmind.symmetric.is.core.config.FolderType;
+import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.ui.common.Category;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.is.ui.common.TopBarLink;
@@ -35,7 +35,7 @@ public class DesignView extends HorizontalLayout implements View {
     IComponentFactory componentFactory;
 
     @Autowired
-    IConnectionFactory connectionFactory;
+    IResourceFactory resourceFactory;
 
     DesignNavigator designNavigator;
 
@@ -62,7 +62,7 @@ public class DesignView extends HorizontalLayout implements View {
         leftTopBottomSplit.setSplitPosition(60, Unit.PERCENTAGE);
 
         designPropertySheet = new DesignPropertySheet(componentFactory, configurationService,
-                connectionFactory);
+                resourceFactory);
 
         DesignComponentPalette designComponentPalette = new DesignComponentPalette(componentFactory, leftTopBottomSplit);
         designNavigator = new DesignNavigator(FolderType.DESIGN, configurationService, tabs,

@@ -2,18 +2,18 @@ package org.jumpmind.symmetric.is.core.utils;
 
 import java.util.Date;
 
-import org.jumpmind.symmetric.is.core.config.Agent;
-import org.jumpmind.symmetric.is.core.config.AgentDeployment;
-import org.jumpmind.symmetric.is.core.config.Component;
-import org.jumpmind.symmetric.is.core.config.ComponentFlow;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNodeLink;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.config.ComponentVersion;
-import org.jumpmind.symmetric.is.core.config.Connection;
-import org.jumpmind.symmetric.is.core.config.Folder;
-import org.jumpmind.symmetric.is.core.config.Setting;
-import org.jumpmind.symmetric.is.core.runtime.component.NoOpProcessorComponent;
+import org.jumpmind.symmetric.is.core.model.Agent;
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.Component;
+import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.FlowStepLink;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
+import org.jumpmind.symmetric.is.core.model.ComponentVersion;
+import org.jumpmind.symmetric.is.core.model.Resource;
+import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.Setting;
+import org.jumpmind.symmetric.is.core.runtime.component.NoOpProcessor;
 
 public class TestUtils {
     
@@ -26,32 +26,32 @@ public class TestUtils {
     	return data;
     }
     
-    public static ComponentFlowVersion createFlow(String name, Folder folder) {    	
-    	ComponentFlow flow = createComponentFlow(name, folder);
+    public static FlowVersion createFlowVersion(String name, Folder folder) {    	
+    	Flow flow = createFlow(name, folder);
     	flow.setCreateBy("Test");
     	flow.setCreateTime(new Date());
     	flow.setId(name);
-    	ComponentFlowVersion flowVersion = new ComponentFlowVersion(flow);
+    	FlowVersion flowVersion = new FlowVersion(flow);
     	return flowVersion;
     }
     
-    public static void addNodeToComponentFlow(ComponentFlowVersion flow, ComponentFlowNode node) {    	
-    	flow.getComponentFlowNodes().add(node);    	
+    public static void addStepToFlow(FlowVersion flow, FlowStep step) {    	
+    	flow.getFlowSteps().add(step);    	
     }
     
-    public static ComponentFlowNode createNoOpProcessorComponentFlowNode(ComponentFlowVersion flowVersion, 
+    public static FlowStep createNoOpProcessorFlowStep(FlowVersion flowVersion, 
     		String name, Folder folder) {
-    	Component component = createComponent(NoOpProcessorComponent.TYPE, false);
+    	Component component = createComponent(NoOpProcessor.TYPE, false);
     	ComponentVersion componentVersion = createComponentVersion(component, null, (Setting[]) null);
-    	ComponentFlowNode node = new ComponentFlowNode(componentVersion);
-    	node.setComponentFlowVersionId(flowVersion.getId());
-    	node.setComponentVersionId(componentVersion.getId());
-    	node.setCreateBy("Test");
-    	node.setCreateTime(new Date());
-    	node.setId(name);
-    	node.setLastModifyBy("Test");
-    	node.setLastModifyTime(new Date());
-    	return node;
+    	FlowStep step = new FlowStep(componentVersion);
+    	step.setFlowVersionId(flowVersion.getId());
+    	//step.setComponentVersionId(componentVersion.getId());
+    	step.setCreateBy("Test");
+    	step.setCreateTime(new Date());
+    	step.setId(name);
+    	step.setLastModifyBy("Test");
+    	step.setLastModifyTime(new Date());
+    	return step;
     }
     
     public static Agent createAgent(String name, Folder folder) {    	
@@ -69,10 +69,10 @@ public class TestUtils {
     	return agent;
     }
     
-    public static AgentDeployment createAgentDeployment(String name, Agent agent, ComponentFlowVersion flow) {    	
+    public static AgentDeployment createAgentDeployment(String name, Agent agent, FlowVersion flow) {    	
         AgentDeployment deployment = new AgentDeployment(flow);
     	deployment.setAgentId(agent.getId());
-    	deployment.setComponentFlowVersionId(flow.getId());
+    	//deployment.setFlowVersionId(flow.getId());
     	deployment.setCreateBy("Test");
     	deployment.setCreateTime(new Date());
     	deployment.setId(name);
@@ -81,19 +81,19 @@ public class TestUtils {
     	return deployment;    			
     }
 
-    public static ComponentFlowNodeLink createComponentLink(ComponentFlowNode srcNode, ComponentFlowNode destNode) {    	
-    	ComponentFlowNodeLink link = new ComponentFlowNodeLink(srcNode.getId(), destNode.getId());
+    public static FlowStepLink createComponentLink(FlowStep srcStep, FlowStep destStep) {    	
+    	FlowStepLink link = new FlowStepLink(srcStep.getId(), destStep.getId());
     	return link;
     }
     
-    private static ComponentFlow createComponentFlow(String name, Folder folder) {    	
-        ComponentFlow componentFlow = new ComponentFlow(folder);
-    	componentFlow.setCreateBy("Test");
-    	componentFlow.setCreateTime(new Date());
-    	componentFlow.setFolderId(folder.getId());
-    	componentFlow.setId("ComponentFlowId");
-    	componentFlow.setName("ComponentFlow");
-    	return componentFlow;
+    private static Flow createFlow(String name, Folder folder) {    	
+        Flow flow = new Flow(folder);
+    	flow.setCreateBy("Test");
+    	flow.setCreateTime(new Date());
+    	flow.setFolderId(folder.getId());
+    	flow.setId("FlowId");
+    	flow.setName("Flow");
+    	return flow;
     }
     
     public static Component createComponent(String type, boolean shared) {
@@ -108,10 +108,10 @@ public class TestUtils {
     }
     
 	public static ComponentVersion createComponentVersion(Component component,
-			Connection connection, Setting... settings) {
+			Resource resource, Setting... settings) {
         ComponentVersion componentVersion = new ComponentVersion(component,
-                connection, null, null, settings);
-        componentVersion.setComponentId(component.getId());
+                resource, null, null, settings);
+        //componentVersion.setComponentId(component.getId());
         componentVersion.setCreateBy("Test");
         componentVersion.setCreateTime(new Date());
         componentVersion.setId("Test");

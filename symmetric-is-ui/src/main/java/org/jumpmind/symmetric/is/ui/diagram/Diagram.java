@@ -3,14 +3,13 @@ package org.jumpmind.symmetric.is.ui.diagram;
 import java.util.List;
 import java.util.UUID;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.vaadin.annotations.JavaScript;
 import com.vaadin.annotations.StyleSheet;
 import com.vaadin.ui.AbstractJavaScriptComponent;
 import com.vaadin.ui.JavaScriptFunction;
+
+import elemental.json.JsonArray;
+import elemental.json.JsonObject;
 
 @JavaScript({ "dom.jsPlumb-1.6.4-min.js", "diagram.js" })
 @StyleSheet({ "diagram.css" })
@@ -25,24 +24,24 @@ public class Diagram extends AbstractJavaScriptComponent {
         addFunction("onNodeMoved", new JavaScriptFunction() {
 
             private static final long serialVersionUID = 1L;
-
+            
             @Override
-            public void call(JSONArray arguments) throws JSONException {
+            public void call(JsonArray arguments) {
                 if (arguments.length() > 0) {
                     Object obj = arguments.get(0);
-                    if (obj instanceof JSONObject) {
-                        JSONObject json = arguments.getJSONObject(0);
+                    if (obj instanceof JsonObject) {
+                        JsonObject json = arguments.getObject(0);
                         String id = json.getString("id");
-                        int x = json.getInt("x");
-                        int y = json.getInt("y");
+                        double x = json.getNumber("x");
+                        double y = json.getNumber("y");
                         DiagramState state = getState();
                         for (Node node : state.nodes) {
                             if (node.getId().equals(id)) {
                                 if (node.getX() == x && node.getY() == y) {
                                     fireEvent(new NodeSelectedEvent(Diagram.this, node));
                                 } else {
-                                    node.setX(x);
-                                    node.setY(y);
+                                    node.setX((int)x);
+                                    node.setY((int)y);
                                     fireEvent(new NodeMovedEvent(Diagram.this, node));
                                 }
                                 break;
@@ -58,11 +57,11 @@ public class Diagram extends AbstractJavaScriptComponent {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void call(JSONArray arguments) throws JSONException {
+            public void call(JsonArray arguments) {
                 if (arguments.length() > 0) {
                     Object obj = arguments.get(0);
-                    if (obj instanceof JSONObject) {
-                        JSONObject json = arguments.getJSONObject(0);
+                    if (obj instanceof JsonObject) {
+                        JsonObject json = arguments.getObject(0);
                         String sourceNodeId = json.getString("sourceNodeId");
                         String targetNodeId = json.getString("targetNodeId");
                         boolean removed = json.getBoolean("removed");
@@ -74,7 +73,7 @@ public class Diagram extends AbstractJavaScriptComponent {
                                 } else if (removed) {
                                     node.getTargetNodeIds().remove(targetNodeId);
                                 }
-                                fireEvent(new ConnectionEvent(Diagram.this, sourceNodeId,
+                                fireEvent(new ResourceEvent(Diagram.this, sourceNodeId,
                                         targetNodeId, removed));
                                 break;
                             }

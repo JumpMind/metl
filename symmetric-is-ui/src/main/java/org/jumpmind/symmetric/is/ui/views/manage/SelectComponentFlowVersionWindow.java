@@ -3,8 +3,8 @@ package org.jumpmind.symmetric.is.ui.views.manage;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jumpmind.symmetric.is.core.config.Agent;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersionSummary;
+import org.jumpmind.symmetric.is.core.model.Agent;
+import org.jumpmind.symmetric.is.core.model.FlowVersionSummary;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
 import org.jumpmind.symmetric.ui.common.MultiSelectTable;
@@ -34,7 +34,7 @@ public class SelectComponentFlowVersionWindow extends ResizableWindow {
 
     IItemUpdatedListener itemUpdatedListener;
 
-    BeanItemContainer<ComponentFlowVersionSummary> container;
+    BeanItemContainer<FlowVersionSummary> container;
 
     MultiSelectTable table;
 
@@ -67,8 +67,8 @@ public class SelectComponentFlowVersionWindow extends ResizableWindow {
         layout.addComponent(searchField);
 
         table = new MultiSelectTable();
-        container = new BeanItemContainer<ComponentFlowVersionSummary>(
-                ComponentFlowVersionSummary.class);
+        container = new BeanItemContainer<FlowVersionSummary>(
+                FlowVersionSummary.class);
         table.setContainerDataSource(container);
         table.setSizeFull();
 
@@ -89,14 +89,14 @@ public class SelectComponentFlowVersionWindow extends ResizableWindow {
         this.itemUpdatedListener = itemUpdatedListener;
         setCaption("Select Flows to Deploy");
         this.container.removeAllItems();
-        this.container.addAll(configurationService.findUndeployedComponentFlowVersionSummary(agent
+        this.container.addAll(configurationService.findUndeployedFlowVersionSummary(agent
                 .getId()));
-        this.table.setValue(new HashSet<ComponentFlowVersionSummary>());
+        this.table.setValue(new HashSet<FlowVersionSummary>());
         showAtSize(.5);
     }
 
     protected void done() {
-        Set<ComponentFlowVersionSummary> selectedFlows = table
+        Set<FlowVersionSummary> selectedFlows = table
                 .getSelected();
         itemUpdatedListener.itemUpdated(selectedFlows);
         close();

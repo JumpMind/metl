@@ -1,14 +1,14 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
-import org.jumpmind.symmetric.is.core.config.ComponentFlowNode;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
 public interface IComponent {
 
-    public void start(IExecutionTracker tracker, IConnectionFactory connectionFactory);
+    public void start(IExecutionTracker tracker, IResourceFactory resourceFactory);
 
     public void stop();
     
@@ -16,8 +16,8 @@ public interface IComponent {
 
     public void handle(Message inputMessage, IMessageTarget messageTarget);
     
-    public ComponentFlowNode getComponentFlowNode();
+    public FlowStep getFlowStep();
     
-    public void setComponentFlowNode(ComponentFlowNode componentFlowNode);
+    public void setFlowStep(FlowStep flowStep);
 
 }

@@ -4,15 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.jumpmind.symmetric.is.core.config.AbstractObjectWithSettings;
-import org.jumpmind.symmetric.is.core.config.ComponentVersion;
-import org.jumpmind.symmetric.is.core.config.Connection;
-import org.jumpmind.symmetric.is.core.config.Setting;
-import org.jumpmind.symmetric.is.core.config.SettingDefinition;
-import org.jumpmind.symmetric.is.core.config.SettingDefinition.Type;
+import org.jumpmind.symmetric.is.core.model.AbstractObjectWithSettings;
+import org.jumpmind.symmetric.is.core.model.ComponentVersion;
+import org.jumpmind.symmetric.is.core.model.Resource;
+import org.jumpmind.symmetric.is.core.model.Setting;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.symmetric.ui.common.SqlField;
 import org.slf4j.Logger;
@@ -37,13 +37,13 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
 
     IConfigurationService configurationService;
 
-    IConnectionFactory connectionFactory;
+    IResourceFactory resourceFactory;
 
     public DesignPropertySheet(IComponentFactory componentFactory,
-            IConfigurationService configurationService, IConnectionFactory connectionFactory) {
+            IConfigurationService configurationService, IResourceFactory resourceFactory) {
         this.componentFactory = componentFactory;
         this.configurationService = configurationService;
-        this.connectionFactory = connectionFactory;
+        this.resourceFactory = resourceFactory;
         setCaption("Property Sheet");
         setSizeFull();
         addStyleName("noborder");
@@ -79,9 +79,9 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
             ComponentVersion version = (ComponentVersion) obj;
             return componentFactory.getSettingDefinitionsForComponentType(version.getComponent()
                     .getType());
-        } else if (obj instanceof Connection) {
-            Connection connection = (Connection) obj;
-            return connectionFactory.getSettingDefinitionsForConnectionType(connection
+        } else if (obj instanceof Resource) {
+            Resource resource = (Resource) obj;
+            return resourceFactory.getSettingDefinitionsForResourceType(resource
                     .getType());
         } else {
             return new HashMap<String, SettingDefinition>();

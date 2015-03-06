@@ -3,7 +3,7 @@ package org.jumpmind.symmetric.is.ui.views;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.symmetric.is.core.config.Component;
+import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentCategory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 

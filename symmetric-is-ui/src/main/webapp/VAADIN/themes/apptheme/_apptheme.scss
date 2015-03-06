@@ -1,5 +1,11 @@
-@mixin valo-loading-bar {
-  
+@mixin valo-loading-bar {  
+    
+  .v-loading-indicator {
+       width: 100%;  
+       height: 100%;  
+       margin: 0;  
+  }
+    
   .v-loading-indicator-delay, .v-loading-indicator-wait {  
        width: 100%;  
        height: 100%;  

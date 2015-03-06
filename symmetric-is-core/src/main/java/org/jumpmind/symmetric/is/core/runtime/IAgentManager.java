@@ -2,9 +2,9 @@ package org.jumpmind.symmetric.is.core.runtime;
 
 import java.util.Set;
 
-import org.jumpmind.symmetric.is.core.config.Agent;
-import org.jumpmind.symmetric.is.core.config.AgentDeployment;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.model.Agent;
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
 
 public interface IAgentManager {
 
@@ -20,7 +20,7 @@ public interface IAgentManager {
     
     public void undeploy(AgentDeployment deployment);
     
-    public AgentDeployment deploy(String agentId, ComponentFlowVersion componentFlowVersion);
+    public AgentDeployment deploy(String agentId, FlowVersion flowVersion);
     
     public void start();
     

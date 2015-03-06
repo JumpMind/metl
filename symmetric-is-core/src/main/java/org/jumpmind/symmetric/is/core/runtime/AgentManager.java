@@ -8,13 +8,13 @@ import java.util.Set;
 
 import javax.annotation.PreDestroy;
 
-import org.jumpmind.symmetric.is.core.config.Agent;
-import org.jumpmind.symmetric.is.core.config.AgentDeployment;
-import org.jumpmind.symmetric.is.core.config.AgentStartMode;
-import org.jumpmind.symmetric.is.core.config.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.model.Agent;
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.AgentStartMode;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.util.AppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,15 +27,15 @@ public class AgentManager implements IAgentManager {
 
     IComponentFactory componentFactory;
 
-    IConnectionFactory connectionFactory;
+    IResourceFactory resourceFactory;
 
     Map<Agent, AgentRuntime> engines = new HashMap<Agent, AgentRuntime>();
 
     public AgentManager(IConfigurationService configurationService,
-            IComponentFactory componentFactory, IConnectionFactory connectionFactory) {
+            IComponentFactory componentFactory, IResourceFactory resourceFactory) {
         this.configurationService = configurationService;
         this.componentFactory = componentFactory;
-        this.connectionFactory = connectionFactory;
+        this.resourceFactory = resourceFactory;
     }
 
     public void start() {
@@ -54,11 +54,11 @@ public class AgentManager implements IAgentManager {
     }
     
     @Override
-    public AgentDeployment deploy(String agentId, ComponentFlowVersion componentFlowVersion) {
+    public AgentDeployment deploy(String agentId, FlowVersion flowVersion) {
         AgentDeployment deployment = null;
         AgentRuntime engine = getAgentRuntime(agentId);
         if (engine != null) {
-            deployment = engine.deploy(componentFlowVersion);
+            deployment = engine.deploy(flowVersion);
         }
         return deployment;
     }
@@ -90,7 +90,7 @@ public class AgentManager implements IAgentManager {
 
     protected AgentRuntime createAndStartRuntime(Agent agent) {
         AgentRuntime engine = new AgentRuntime(agent, configurationService, componentFactory,
-                connectionFactory);
+                resourceFactory);
         engines.put(agent, engine);
         if (agent.getAgentStartMode() == AgentStartMode.AUTO) {
             engine.start();

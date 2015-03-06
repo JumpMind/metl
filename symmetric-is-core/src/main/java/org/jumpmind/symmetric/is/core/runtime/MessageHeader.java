@@ -14,20 +14,20 @@ public class MessageHeader implements Serializable, Cloneable {
 
     boolean lastMessage;
     
-    String originatingNodeId;
+    String originatingStepId;
 
     Map<String, Serializable> parameters = new HashMap<String, Serializable>();
     
-    public MessageHeader(String originatingNodeId) {
-        this.originatingNodeId = originatingNodeId;
+    public MessageHeader(String originatingStepId) {
+        this.originatingStepId = originatingStepId;
     }
 
-    public void setOriginatingNodeId(String originatingNodeId) {
-        this.originatingNodeId = originatingNodeId;
+    public void setOriginatingStepId(String originatingStepId) {
+        this.originatingStepId = originatingStepId;
     }
     
-    public String getOriginatingNodeId() {
-        return originatingNodeId;
+    public String getOriginatingStepId() {
+        return originatingStepId;
     }
     
     public String getExecutionId() {
