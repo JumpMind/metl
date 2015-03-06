@@ -14,7 +14,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
         slf4jVersion = '1.7.7'
         springVersion = '4.0.5.RELEASE'
         vaadinVersion = '7.4.0'
-        jettyVersion = '9.2.1.v20140609'
+        jettyVersion = '9.2.9.v20150224'
         commonsLangVersion = '2.6'
         commonsDbcpVersion = '1.4'
         commonsIoVersion = '2.4'
