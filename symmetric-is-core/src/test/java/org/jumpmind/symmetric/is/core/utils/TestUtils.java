@@ -45,7 +45,7 @@ public class TestUtils {
     	ComponentVersion componentVersion = createComponentVersion(component, null, (Setting[]) null);
     	FlowStep step = new FlowStep(componentVersion);
     	step.setFlowVersionId(flowVersion.getId());
-    	step.setComponentVersionId(componentVersion.getId());
+    	//step.setComponentVersionId(componentVersion.getId());
     	step.setCreateBy("Test");
     	step.setCreateTime(new Date());
     	step.setId(name);
@@ -72,7 +72,7 @@ public class TestUtils {
     public static AgentDeployment createAgentDeployment(String name, Agent agent, FlowVersion flow) {    	
         AgentDeployment deployment = new AgentDeployment(flow);
     	deployment.setAgentId(agent.getId());
-    	deployment.setFlowVersionId(flow.getId());
+    	//deployment.setFlowVersionId(flow.getId());
     	deployment.setCreateBy("Test");
     	deployment.setCreateTime(new Date());
     	deployment.setId(name);
@@ -111,7 +111,7 @@ public class TestUtils {
 			Resource resource, Setting... settings) {
         ComponentVersion componentVersion = new ComponentVersion(component,
                 resource, null, null, settings);
-        componentVersion.setComponentId(component.getId());
+        //componentVersion.setComponentId(component.getId());
         componentVersion.setCreateBy("Test");
         componentVersion.setCreateTime(new Date());
         componentVersion.setId("Test");
