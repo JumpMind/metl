@@ -13,14 +13,14 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.localfile.IStreamableConnection;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
+import org.jumpmind.symmetric.is.core.runtime.resource.localfile.IStreamableResource;
 
 @ComponentDefinition(typeName = TextFileReader.TYPE, category = ComponentCategory.READER,
         supports = { ComponentSupports.OUTPUT_MESSAGE },
-        connectionCategory = ConnectionCategory.RESOURCE)
+        resourceCategory = ResourceCategory.RESOURCE)
 public class TextFileReader extends AbstractComponent {
 
     public static final String TYPE = "Text File Reader";
@@ -54,8 +54,8 @@ public class TextFileReader extends AbstractComponent {
     String encoding = DEFAULT_CHARSET;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory) {
-        super.start(executionTracker, connectionFactory);
+    public void start(IExecutionTracker executionTracker, IResourceFactory resoureFactory) {
+        super.start(executionTracker, resoureFactory);
         applySettings();
     }
 
@@ -89,7 +89,7 @@ public class TextFileReader extends AbstractComponent {
     }
 
     private void applySettings() {
-        properties = componentNode.getComponentVersion().toTypedProperties(this, false);
+        properties = flowStep.getComponentVersion().toTypedProperties(this, false);
         relativePathAndFile = properties.get(TEXTFILEREADER_RELATIVE_PATH);
         mustExist = properties.is(TEXTFILEREADER_MUST_EXIST);
         textRowsPerMessage = properties.getInt(TEXTFILEREADER_ROWS_PER_MESSAGE);
@@ -99,7 +99,7 @@ public class TextFileReader extends AbstractComponent {
     private void initAndSendMessage(ArrayList<String> payload, IMessageTarget messageTarget,
            int numberMessages, boolean lastMessage) {
         numberMessages++;
-        Message message = new Message(componentNode.getId());
+        Message message = new Message(flowStep.getId());
         message.getHeader().setSequenceNumber(numberMessages);
         message.getHeader().setLastMessage(lastMessage);
         message.setPayload(new ArrayList<String>(payload));
@@ -108,9 +108,9 @@ public class TextFileReader extends AbstractComponent {
     }
 
     private void open() {
-        IStreamableConnection connection = (IStreamableConnection) this.connection.reference();
-        connection.appendPath(relativePathAndFile, mustExist);
-        inStream = connection.getInputStream();
+        IStreamableResource resource = (IStreamableResource) this.resource.reference();
+        resource.appendPath(relativePathAndFile, mustExist);
+        inStream = resource.getInputStream();
     }
 
     protected void close() {

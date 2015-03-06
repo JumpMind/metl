@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.core.runtime.connection;
+package org.jumpmind.symmetric.is.core.runtime.resource;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,10 +7,10 @@ import java.lang.annotation.Target;
 
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ConnectionDefinition {
+public @interface ResourceDefinition {
 
     String typeName();
     
-    ConnectionCategory connectionCategory();
+    ResourceCategory resourceCategory();
     
 }

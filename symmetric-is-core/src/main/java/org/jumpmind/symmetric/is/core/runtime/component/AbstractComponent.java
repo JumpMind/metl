@@ -1,31 +1,31 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
-import org.jumpmind.symmetric.is.core.model.ComponentFlowNode;
-import org.jumpmind.symmetric.is.core.model.Connection;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
 abstract public class AbstractComponent extends AbstractRuntimeObject implements IComponent {
 
-    protected ComponentFlowNode componentNode;    
-    protected IConnection connection;
-    protected IConnectionFactory connectionFactory;
+    protected FlowStep flowStep;    
+    protected IResource resource;
+    protected IResourceFactory resourceFactory;
     protected IExecutionTracker executionTracker;
     protected ComponentStatistics componentStatistics;
 
-    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory) {
+    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
         this.componentStatistics = new ComponentStatistics();
     	this.executionTracker = executionTracker;
-        this.connectionFactory = connectionFactory;
+        this.resourceFactory = resourceFactory;
 
-        Connection connection = componentNode.getComponentVersion().getConnection();
-        if (connection != null) {
+        Resource resource = flowStep.getComponentVersion().getResource();
+        if (resource != null) {
             try {
-                this.connection = connectionFactory.create(connection);
-                this.connection.start(connection);
-                //TODO: connection.start gets called twice here...  Once during the create and again in the start after it.
+                this.resource = resourceFactory.create(resource);
+                this.resource.start(resource);
+                //TODO: resource.start gets called twice here...  Once during the create and again in the start after it.
             } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {
@@ -35,8 +35,8 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     }
 
     public void stop() {
-        if (this.connection != null) {
-            this.connection.stop();
+        if (this.resource != null) {
+            this.resource.stop();
         }
     }
     
@@ -44,12 +44,12 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     	return componentStatistics;
     }
     
-    public ComponentFlowNode getComponentFlowNode() {
-    	return this.componentNode;
+    public FlowStep getFlowStep() {
+    	return this.flowStep;
     }
     
-    public void setComponentFlowNode(ComponentFlowNode componentNode) {
-    	this.componentNode = componentNode;
+    public void setFlowStep(FlowStep flowStep) {
+    	this.flowStep = flowStep;
     }
 
 }

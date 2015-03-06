@@ -1,9 +1,9 @@
-package org.jumpmind.symmetric.is.core.runtime.connection.localfile;
+package org.jumpmind.symmetric.is.core.runtime.resource.localfile;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public interface IStreamableConnection {
+public interface IStreamableResource {
 
     public void open();
     

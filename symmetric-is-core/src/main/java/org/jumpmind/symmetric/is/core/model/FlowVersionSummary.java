@@ -2,7 +2,7 @@ package org.jumpmind.symmetric.is.core.model;
 
 import java.io.Serializable;
 
-public class ComponentFlowVersionSummary implements Serializable {
+public class FlowVersionSummary implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

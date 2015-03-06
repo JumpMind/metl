@@ -10,18 +10,18 @@ import java.util.Date;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.Component;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowNode;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.ComponentVersion;
-import org.jumpmind.symmetric.is.core.model.Connection;
+import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.localfile.DASNASConnection;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.localfile.DASNASResource;
 import org.jumpmind.symmetric.is.core.utils.TestUtils;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -32,8 +32,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class BinaryFileReaderTest {
 
-    private static IConnectionFactory connectionFactory;
-    private static ComponentFlowNode readerComponentFlowNode;
+    private static IResourceFactory resourceFactory;
+    private static FlowStep readerFlowStep;
     private static final String FILE_PATH = "build/files/";
     private static final String FILE_NAME = "binary_test.bin";
     private static final String FILE_DATA = "This is a binary file to be read.";
@@ -41,9 +41,9 @@ public class BinaryFileReaderTest {
     @BeforeClass
     public static void setup() throws Exception {
 
-        connectionFactory = new ConnectionFactory();
+        resourceFactory = new ResourceFactory();
         createTestFileToRead();
-        readerComponentFlowNode = createReaderComponentFlowNode();
+        readerFlowStep = createReaderFlowStep();
     }
 
     @After
@@ -54,8 +54,8 @@ public class BinaryFileReaderTest {
     public void testBinarytReaderFlowFromStartupMsg() throws Exception {
 
         BinaryFileReader reader = new BinaryFileReader();
-        reader.setComponentFlowNode(readerComponentFlowNode);
-        reader.start(null, connectionFactory);
+        reader.setFlowStep(readerFlowStep);
+        reader.start(null, resourceFactory);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle(msg, msgTarget);
@@ -80,17 +80,17 @@ public class BinaryFileReaderTest {
         }
     }
 
-    private static ComponentFlowNode createReaderComponentFlowNode() {
+    private static FlowStep createReaderFlowStep() {
 
         Folder folder = TestUtils.createFolder("Test Folder");
-        ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
+        FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
         Component component = TestUtils.createComponent(BinaryFileReader.TYPE, false);
         Setting[] settingData = createReaderSettings();
         ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
                 settingData);
-        componentVersion.setConnection(createConnection(createConnectionSettings()));
-        ComponentFlowNode readerComponent = new ComponentFlowNode();
-        readerComponent.setComponentFlowVersionId(flow.getId());
+        componentVersion.setResource(createResource(createResourceSettings()));
+        FlowStep readerComponent = new FlowStep();
+        readerComponent.setFlowVersionId(flow.getId());
         readerComponent.setComponentVersionId(componentVersion.getId());
         readerComponent.setCreateBy("Test");
         readerComponent.setCreateTime(new Date());
@@ -100,16 +100,16 @@ public class BinaryFileReaderTest {
         return readerComponent;
     }
 
-    private static Connection createConnection(List<Setting> settings) {
-        Connection connection = new Connection();
-        Folder folder = TestUtils.createFolder("Test Folder Connection");
-        connection.setName("Test Connection");
-        connection.setFolderId("Test Folder Connection");
-        connection.setType(DASNASConnection.TYPE);
-        connection.setFolder(folder);
-        connection.setSettings(settings);
+    private static Resource createResource(List<Setting> settings) {
+        Resource resource = new Resource();
+        Folder folder = TestUtils.createFolder("Test Folder Resource");
+        resource.setName("Test Resource");
+        resource.setFolderId("Test Folder Resource");
+        resource.setType(DASNASResource.TYPE);
+        resource.setFolder(folder);
+        resource.setSettings(settings);
 
-        return connection;
+        return resource;
     }
 
     private static Setting[] createReaderSettings() {
@@ -119,10 +119,10 @@ public class BinaryFileReaderTest {
         return settings;
     }
 
-    private static List<Setting> createConnectionSettings() {
+    private static List<Setting> createResourceSettings() {
         List<Setting> settings = new ArrayList<Setting>(2);
-        settings.add(new Setting(DASNASConnection.DASNAS_PATH, FILE_PATH));
-        settings.add(new Setting(DASNASConnection.DASNAS_MUST_EXIST, "true"));
+        settings.add(new Setting(DASNASResource.DASNAS_PATH, FILE_PATH));
+        settings.add(new Setting(DASNASResource.DASNAS_MUST_EXIST, "true"));
         return settings;
     }
 

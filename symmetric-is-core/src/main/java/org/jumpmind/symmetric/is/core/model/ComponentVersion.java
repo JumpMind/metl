@@ -6,7 +6,7 @@ public class ComponentVersion extends
 
 	private static final long serialVersionUID = 1L;
 
-	Connection connection;
+	Resource resource;
 
 	Component component;
 
@@ -23,12 +23,12 @@ public class ComponentVersion extends
     	this.id = id;
     }
     
-	public ComponentVersion(Component component, Connection connection,
+	public ComponentVersion(Component component, Resource resource,
 			ModelVersion inputModelVersion, ModelVersion outputModelVersion,
 			Setting... settings) {
 	    super(settings);
 		this.component = component;
-		this.connection = connection;
+		this.resource = resource;
 		this.inputModelVersion = inputModelVersion;
 		this.outputModelVersion = outputModelVersion;
 	}
@@ -45,12 +45,12 @@ public class ComponentVersion extends
         this.component = component;
     }
 
-	public void setConnection(Connection connection) {
-		this.connection = connection;
+	public void setResource(Resource resource) {
+		this.resource = resource;
 	}
 
-	public Connection getConnection() {
-		return connection;
+	public Resource getResource() {
+		return resource;
 	}
 
 	public Component getComponent() {
@@ -81,15 +81,15 @@ public class ComponentVersion extends
         }
     }
 
-    public String getConnectionId() {
-        return connection != null ? connection.getId() : null;
+    public String getResourceId() {
+        return resource != null ? resource.getId() : null;
     }
 
-    public void setConnectionId(String connectionId) {
-        if (connectionId != null) {
-            this.connection = new Connection(connectionId);
+    public void setResourceId(String resourceId) {
+        if (resourceId != null) {
+            this.resource = new Resource(resourceId);
         } else {
-            this.connection = null;
+            this.resource = null;
         }
     }
 

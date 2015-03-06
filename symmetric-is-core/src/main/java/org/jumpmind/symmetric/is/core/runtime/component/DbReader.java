@@ -18,9 +18,9 @@ import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.MessageManipulationStrategy;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -30,7 +30,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 @ComponentDefinition(typeName = DbReader.TYPE, category = ComponentCategory.READER,
         supports = { ComponentSupports.INPUT_MESSAGE, ComponentSupports.OUTPUT_MESSAGE,
                 ComponentSupports.INPUT_MODEL, ComponentSupports.OUTPUT_MODEL },
-        connectionCategory = ConnectionCategory.DATASOURCE)
+        resourceCategory = ResourceCategory.DATASOURCE)
 public class DbReader extends AbstractComponent {
 
     public static final String TYPE = "Database Reader";
@@ -56,8 +56,8 @@ public class DbReader extends AbstractComponent {
     boolean trimColumns = false;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory) {
-        super.start(executionTracker, connectionFactory);
+    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
+        super.start(executionTracker, resourceFactory);
         applySettings();
     }
 
@@ -100,7 +100,7 @@ public class DbReader extends AbstractComponent {
                             if (messageManipulationStrategy == MessageManipulationStrategy.ENHANCE) {
                                 message = inputMessage.copy();
                             } else {
-                                message = new Message(componentNode.getId());
+                                message = new Message(flowStep.getId());
                                 message.setPayload(new ArrayList<EntityData>());
                             }
                         }
@@ -160,7 +160,7 @@ public class DbReader extends AbstractComponent {
 
     private void checkTableAndColumnAgainstOutputModel(String tableName, String columnName)
             throws SQLException {
-        if (!this.componentNode.getComponentVersion().getOutputModelVersion()
+        if (!this.flowStep.getComponentVersion().getOutputModelVersion()
                 .entityAttributeExists(tableName, columnName)) {
             throw new SQLException(
                     "ResultSet returned a column that was not in the output model. Table:"
@@ -170,7 +170,7 @@ public class DbReader extends AbstractComponent {
 
     protected NamedParameterJdbcTemplate getJdbcTemplate() {
 
-        return new NamedParameterJdbcTemplate((DataSource) this.connection.reference());
+        return new NamedParameterJdbcTemplate((DataSource) this.resource.reference());
     }
 
     protected void setParamsFromInboundMsgAndRec(Map<String, Object> paramMap,
@@ -204,7 +204,7 @@ public class DbReader extends AbstractComponent {
     }
 
     protected void applySettings() {
-        TypedProperties properties = componentNode.getComponentVersion().toTypedProperties(this,
+        TypedProperties properties = flowStep.getComponentVersion().toTypedProperties(this,
                 false);
         sql = properties.get(SQL);
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);

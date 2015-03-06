@@ -11,9 +11,9 @@ import java.util.Map;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Component;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowNode;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowNodeLink;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.FlowStepLink;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.model.StartType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
@@ -21,9 +21,9 @@ import org.jumpmind.symmetric.is.core.runtime.AgentRuntime;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentCategory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.ui.common.DesignAgentSelect;
-import org.jumpmind.symmetric.is.ui.diagram.ConnectionEvent;
+import org.jumpmind.symmetric.is.ui.diagram.ResourceEvent;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
@@ -66,11 +66,11 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
 
     IComponentFactory componentFactory;
 
-    IConnectionFactory connectionFactory;
+    IResourceFactory resourceFactory;
 
     IAgentManager agentManager;
 
-    ComponentFlowVersion componentFlowVersion;
+    FlowVersion componentFlowVersion;
 
     VerticalLayout flowLayout;
 
@@ -102,15 +102,15 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
 
     ValueChangeListener designAgentListener;
 
-    public EditFlowLayout(IAgentManager agentManager, ComponentFlowVersion componentFlowVersion,
+    public EditFlowLayout(IAgentManager agentManager, FlowVersion componentFlowVersion,
             IConfigurationService configurationService, IComponentFactory componentFactory,
-            IConnectionFactory connectionFactory, DesignAgentSelect designAgentSelect) {
+            IResourceFactory resourceFactory, DesignAgentSelect designAgentSelect) {
 
         this.agentManager = agentManager;
         this.componentFlowVersion = componentFlowVersion;
         this.configurationService = configurationService;
         this.componentFactory = componentFactory;
-        this.connectionFactory = connectionFactory;
+        this.resourceFactory = resourceFactory;
         this.designAgentSelect = designAgentSelect;
 
         VerticalLayout content = this;
@@ -163,7 +163,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
                     AgentRuntime engine = EditFlowLayout.this.agentManager
                             .getAgentRuntime(agentDeployment.getAgentId());
                     engine.undeploy(agentDeployment);
-                    engine.deploy(agentDeployment.getComponentFlowVersion());
+                    engine.deploy(agentDeployment.getFlowVersion());
                 } else {
                     Agent agent = (Agent) EditFlowLayout.this.designAgentSelect.getValue();
                     if (agent != null) {
@@ -252,12 +252,12 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
         actionLayout.add(actionBar, createSeparator(), startType, startExpression);
         actionLayout.alignAll(Alignment.BOTTOM_LEFT);
 
-        setCaption("Name: " + componentFlowVersion.getComponentFlow().getName()
+        setCaption("Name: " + componentFlowVersion.getFlow().getName()
                 + ", Version: " + componentFlowVersion.getVersionName());
 
         populateComponentPalette();
 
-        this.componentSettingsSheet.show(componentFactory, connectionFactory, configurationService,
+        this.componentSettingsSheet.show(componentFactory, resourceFactory, configurationService,
                 componentFlowVersion, this);
 
         redrawFlow();
@@ -304,7 +304,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
                 deployButton.setText("Redeploy");
                 undeployButton.setEnabled(true);
 
-                if (agentDeployment.getComponentFlowVersion().asStartType() == StartType.MANUAL) {
+                if (agentDeployment.getFlowVersion().asStartType() == StartType.MANUAL) {
                     executeButton.setEnabled(true);
                 }
             }
@@ -335,12 +335,12 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
         return true;
     }
 
-    public ComponentFlowVersion getComponentFlowVersion() {
+    public FlowVersion getComponentFlowVersion() {
         return componentFlowVersion;
     }
 
     @Override
-    public void componentSettingsChanges(ComponentFlowNode node, boolean deleted) {
+    public void componentSettingsChanges(FlowStep node, boolean deleted) {
         redrawFlow();
     }
 
@@ -396,10 +396,10 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
         flowLayout.addComponent(diagram);
         flowLayout.setExpandRatio(diagram, 1);
 
-        List<ComponentFlowNodeLink> links = componentFlowVersion.getComponentFlowNodeLinks();
+        List<FlowStepLink> links = componentFlowVersion.getFlowStepLinks();
 
-        List<ComponentFlowNode> flowNodes = componentFlowVersion.getComponentFlowNodes();
-        for (ComponentFlowNode flowNode : flowNodes) {
+        List<FlowStep> flowNodes = componentFlowVersion.getFlowSteps();
+        for (FlowStep flowNode : flowNodes) {
             Node node = new Node();
             String name = flowNode.getComponentVersion().getComponent().getName();
             String type = flowNode.getComponentVersion().getComponent().getType();
@@ -409,9 +409,9 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
             node.setY(flowNode.getY());
             diagram.addNode(node);
 
-            for (ComponentFlowNodeLink link : links) {
-                if (link.getSourceNodeId().equals(node.getId())) {
-                    node.getTargetNodeIds().add(link.getTargetNodeId());
+            for (FlowStepLink link : links) {
+                if (link.getSourceStepId().equals(node.getId())) {
+                    node.getTargetNodeIds().add(link.getTargetStepId());
                 }
             }
 
@@ -421,8 +421,8 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
 
     private int countComponentsOfType(String type) {
         int count = 0;
-        List<ComponentFlowNode> nodes = componentFlowVersion.getComponentFlowNodes();
-        for (ComponentFlowNode componentFlowNode : nodes) {
+        List<FlowStep> nodes = componentFlowVersion.getFlowSteps();
+        for (FlowStep componentFlowNode : nodes) {
             if (componentFlowNode.getComponentVersion().getComponent().getType()
                     .equals(type)) {
                 count++;
@@ -439,7 +439,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
             if (e instanceof NodeSelectedEvent) {
                 NodeSelectedEvent event = (NodeSelectedEvent) e;
                 Node node = event.getNode();
-                ComponentFlowNode flowNode = componentFlowVersion.findComponentFlowNodeWithId(node
+                FlowStep flowNode = componentFlowVersion.findFlowStepWithId(node
                         .getId());
                 componentSettingsSheet.refresh(flowNode);
                 tabs.setSelectedTab(propertiesTab);
@@ -447,7 +447,7 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
             } else if (e instanceof NodeMovedEvent) {
                 NodeMovedEvent event = (NodeMovedEvent) e;
                 Node node = event.getNode();
-                ComponentFlowNode flowNode = componentFlowVersion.findComponentFlowNodeWithId(node
+                FlowStep flowNode = componentFlowVersion.findFlowStepWithId(node
                         .getId());
                 if (flowNode != null) {
                     flowNode.setX(node.getX());
@@ -455,15 +455,15 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
                 }
                 configurationService.save(componentFlowVersion);
 
-            } else if (e instanceof ConnectionEvent) {
-                ConnectionEvent event = (ConnectionEvent) e;
+            } else if (e instanceof ResourceEvent) {
+                ResourceEvent event = (ResourceEvent) e;
                 if (!event.isRemoved()) {
-                    componentFlowVersion.getComponentFlowNodeLinks().add(
-                            new ComponentFlowNodeLink(event.getSourceNodeId(), event
+                    componentFlowVersion.getFlowStepLinks().add(
+                            new FlowStepLink(event.getSourceNodeId(), event
                                     .getTargetNodeId()));
                     configurationService.save(componentFlowVersion);
                 } else {
-                    ComponentFlowNodeLink link = componentFlowVersion.removeComponentFlowNodeLink(
+                    FlowStepLink link = componentFlowVersion.removeFlowStepLink(
                             event.getSourceNodeId(), event.getTargetNodeId());
                     if (link != null) {
                         configurationService.delete(link);
@@ -495,9 +495,9 @@ public class EditFlowLayout extends VerticalLayout implements IComponentSettings
 
             component.setName(type + " " + (countComponentsOfType(type) + 1));
 
-            ComponentFlowNode componentFlowNode = new ComponentFlowNode(componentVersion);
-            componentFlowNode.setComponentFlowVersionId(componentFlowVersion.getId());
-            componentFlowVersion.getComponentFlowNodes().add(componentFlowNode);
+            FlowStep componentFlowNode = new FlowStep(componentVersion);
+            componentFlowNode.setFlowVersionId(componentFlowVersion.getId());
+            componentFlowVersion.getFlowSteps().add(componentFlowNode);
 
             configurationService.save(componentFlowNode);
 

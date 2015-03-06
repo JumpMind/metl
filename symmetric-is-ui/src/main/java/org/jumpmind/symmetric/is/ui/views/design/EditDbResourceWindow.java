@@ -1,10 +1,10 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection.DB_POOL_DRIVER;
-import static org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection.DB_POOL_PASSWORD;
-import static org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection.DB_POOL_URL;
-import static org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection.DB_POOL_USER;
+import static org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource.DB_POOL_DRIVER;
+import static org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource.DB_POOL_PASSWORD;
+import static org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource.DB_POOL_URL;
+import static org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource.DB_POOL_USER;
 
 import java.util.Map;
 import java.util.Set;
@@ -14,9 +14,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ResettableBasicDataSource;
-import org.jumpmind.symmetric.is.core.model.Connection;
+import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection;
+import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
 import org.jumpmind.symmetric.ui.common.ResizableWindow;
@@ -41,7 +41,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-public class EditDbConnectionWindow extends ResizableWindow {
+public class EditDbResourceWindow extends ResizableWindow {
 
     private static final long serialVersionUID = 1L;
 
@@ -70,7 +70,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
 
     static final Map<String, String> databaseToValidationQueryMap = new TreeMap<String, String>();
 
-    static final Map<String, String> databaseConnectionProperties = new TreeMap<String, String>();
+    static final Map<String, String> databaseResourceProperties = new TreeMap<String, String>();
 
     static final Map<String, String> databaseInitSqlProperties = new TreeMap<String, String>();
 
@@ -151,7 +151,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
         databaseToValidationQueryMap.put(SQLITE, "select 1");
         databaseToValidationQueryMap.put(REDSHIFT, "select 1");
 
-        databaseConnectionProperties
+        databaseResourceProperties
                 .put(ORACLE,
                         "oracle.net.CONNECT_TIMEOUT=60000;oracle.net.READ_TIMEOUT=60000;oracle.jdbc.ReadTimeout=60000;SetBigStringTryClob=true");
 
@@ -166,7 +166,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
 
     IItemUpdatedListener itemSavedListener;
 
-    Connection connection;
+    Resource resource;
 
     TextField nameField;
 
@@ -178,7 +178,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
 
     PasswordField passwordField;
 
-    public EditDbConnectionWindow() {
+    public EditDbResourceWindow() {
 
         VerticalLayout content = new VerticalLayout();
         content.setSizeFull();
@@ -240,7 +240,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
             private static final long serialVersionUID = 1L;
 
             public void buttonClick(ClickEvent event) {
-                testConnection(true, true);
+                testResource(true, true);
             }
         });
 
@@ -255,20 +255,20 @@ public class EditDbConnectionWindow extends ResizableWindow {
 
     }
 
-    public void show(Connection connection, IItemUpdatedListener itemSavedListener) {
+    public void show(Resource resource, IItemUpdatedListener itemSavedListener) {
 
-        this.connection = connection;
+        this.resource = resource;
 
         this.itemSavedListener = itemSavedListener;
 
-        nameField.setValue(connection.getName());
+        nameField.setValue(resource.getName());
                 
         databaseType.setValue(findDatabaseType());
-        databaseUrl.setValue(connection.get(DB_POOL_URL));
-        userIdField.setValue(connection.get(DB_POOL_USER));
-        passwordField.setValue(connection.get(DB_POOL_PASSWORD));
+        databaseUrl.setValue(resource.get(DB_POOL_URL));
+        userIdField.setValue(resource.get(DB_POOL_USER));
+        passwordField.setValue(resource.get(DB_POOL_PASSWORD));
 
-        setCaption("Edit Connection");
+        setCaption("Edit Resource");
 
         showAtSize(.6);
 
@@ -277,7 +277,7 @@ public class EditDbConnectionWindow extends ResizableWindow {
     }
     
     protected String findDatabaseType() {
-        String driver = connection.get(DB_POOL_DRIVER);
+        String driver = resource.get(DB_POOL_DRIVER);
         if (driver != null) {
             Set<Map.Entry<String, String>> entries = databaseToDriverMap.entrySet();
             for (Map.Entry<String, String> entry : entries) {
@@ -289,11 +289,11 @@ public class EditDbConnectionWindow extends ResizableWindow {
         return "";
     }
 
-    public Connection getConnection() {
-        return connection;
+    public Resource getResource() {
+        return resource;
     }
 
-    protected boolean testConnection(boolean showSuccessNotification,
+    protected boolean testResource(boolean showSuccessNotification,
             boolean showFailureNotification) {
         String databaseName = (String) databaseType.getValue();
         try {
@@ -345,25 +345,25 @@ public class EditDbConnectionWindow extends ResizableWindow {
     }
 
     protected void save() {
-        connection.setType(DataSourceConnection.TYPE);
+        resource.setType(DataSourceResource.TYPE);
         if (isBlank(nameField.getValue())) {
-            CommonUiUtils.notify("The name of the connection cannot be blank", Type.WARNING_MESSAGE);
+            CommonUiUtils.notify("The name of the resource cannot be blank", Type.WARNING_MESSAGE);
             return;
         }
         
         
 
         String type = (String)databaseType.getValue();
-        connection.setName(nameField.getValue());
-        connection.put(DB_POOL_URL, databaseUrl.getValue());
-        connection.put(DB_POOL_DRIVER, databaseToDriverMap.get(type));
-        connection.put(DB_POOL_USER, userIdField.getValue());
-        connection.put(DB_POOL_PASSWORD, passwordField.getValue());
+        resource.setName(nameField.getValue());
+        resource.put(DB_POOL_URL, databaseUrl.getValue());
+        resource.put(DB_POOL_DRIVER, databaseToDriverMap.get(type));
+        resource.put(DB_POOL_USER, userIdField.getValue());
+        resource.put(DB_POOL_PASSWORD, passwordField.getValue());
         
-        configurationService.save(connection);
+        configurationService.save(resource);
 
         // do some validation
-        itemSavedListener.itemUpdated(connection);
+        itemSavedListener.itemUpdated(resource);
         close();
     }
 

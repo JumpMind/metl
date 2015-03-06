@@ -4,8 +4,8 @@ public class ShutdownMessage extends Message {
 
 	private static final long serialVersionUID = 1L;
 
-    public ShutdownMessage(String originatingNodeId) {
-        super(originatingNodeId);
+    public ShutdownMessage(String originatingStepId) {
+        super(originatingStepId);
     }
 		
 }

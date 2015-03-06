@@ -8,8 +8,8 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
 @ComponentDefinition(typeName = Formatter.TYPE, category = ComponentCategory.PROCESSOR,
 supports = { ComponentSupports.INPUT_MESSAGE, ComponentSupports.INPUT_MODEL, ComponentSupports.OUTPUT_MESSAGE })
@@ -43,8 +43,8 @@ public class Formatter extends AbstractComponent {
     TypedProperties properties;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory) {
-        super.start(executionTracker, connectionFactory);
+    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
+        super.start(executionTracker, resourceFactory);
         applySettings();
     }
 
@@ -61,7 +61,7 @@ public class Formatter extends AbstractComponent {
     }
     
     private void applySettings() {
-        properties = componentNode.getComponentVersion().toTypedProperties(this, false);
+        properties = flowStep.getComponentVersion().toTypedProperties(this, false);
         formatType = properties.get(FORMATTER_FORMAT_TYPE);
         delimiter = properties.get(FORMATTER_DELIMITER);
         quoteCharacter = properties.get(FORMATTER_QUOTE_CHARACTER);

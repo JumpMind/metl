@@ -10,14 +10,14 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.localfile.IStreamableConnection;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
+import org.jumpmind.symmetric.is.core.runtime.resource.localfile.IStreamableResource;
 
 @ComponentDefinition(typeName = BinaryFileReader.TYPE, category = ComponentCategory.READER,
         supports = { ComponentSupports.OUTPUT_MESSAGE },
-        connectionCategory = ConnectionCategory.RESOURCE)
+        resourceCategory = ResourceCategory.RESOURCE)
 public class BinaryFileReader extends AbstractComponent {
 
     public static final String TYPE = "Binary File Reader";
@@ -43,8 +43,8 @@ public class BinaryFileReader extends AbstractComponent {
     InputStream inStream = null;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory) {
-        super.start(executionTracker, connectionFactory);
+    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
+        super.start(executionTracker, resourceFactory);
         applySettings();
     }
 
@@ -73,7 +73,7 @@ public class BinaryFileReader extends AbstractComponent {
     private void initAndSendMessage(byte[] payload, IMessageTarget messageTarget,
             int numberMessages, boolean lastMessage) {
         numberMessages++;
-        Message message = new Message(componentNode.getId());
+        Message message = new Message(flowStep.getId());
         message.getHeader().setSequenceNumber(numberMessages);
         message.getHeader().setLastMessage(lastMessage);
         message.setPayload(payload);
@@ -81,7 +81,7 @@ public class BinaryFileReader extends AbstractComponent {
     }
     
     private void applySettings() {
-        properties = componentNode.getComponentVersion().toTypedProperties(this, false);
+        properties = flowStep.getComponentVersion().toTypedProperties(this, false);
         relativePathAndFile = properties.get(BINARYFILEREADER_RELATIVE_PATH);
         mustExist = properties.is(BINARYFILEREADER_MUST_EXIST);
         sizePerMessage = properties.getInt(BINARYFILEREADER_SIZE_PER_MESSAGE);
@@ -94,9 +94,9 @@ public class BinaryFileReader extends AbstractComponent {
     }
 
     private void open() {
-        IStreamableConnection connection = (IStreamableConnection) this.connection.reference();
-        connection.appendPath(relativePathAndFile, mustExist);
-        inStream = connection.getInputStream();
+        IStreamableResource resource = (IStreamableResource) this.resource.reference();
+        resource.appendPath(relativePathAndFile, mustExist);
+        inStream = resource.getInputStream();
     }
 
     protected void close() {

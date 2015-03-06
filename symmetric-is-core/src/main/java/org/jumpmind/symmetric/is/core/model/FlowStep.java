@@ -1,22 +1,22 @@
 package org.jumpmind.symmetric.is.core.model;
 
 
-public class ComponentFlowNode extends AbstractObject {
+public class FlowStep extends AbstractObject {
 
     private static final long serialVersionUID = 1L;    
     
     protected ComponentVersion componentVersion;
     
-    String componentFlowVersionId;
+    String flowVersionId;
     
     int x;
     
     int y;
     
-    public ComponentFlowNode() {
+    public FlowStep() {
     }
 
-    public ComponentFlowNode(ComponentVersion componentVersion) {
+    public FlowStep(ComponentVersion componentVersion) {
         this.componentVersion = componentVersion;
     }
 
@@ -47,12 +47,12 @@ public class ComponentFlowNode extends AbstractObject {
         }
     }
 
-    public String getComponentFlowVersionId() {
-        return componentFlowVersionId;
+    public String getFlowVersionId() {
+        return flowVersionId;
     }
 
-    public void setComponentFlowVersionId(String componentFlowVersionId) {
-        this.componentFlowVersionId = componentFlowVersionId;
+    public void setFlowVersionId(String flowVersionId) {
+        this.flowVersionId = flowVersionId;
     }
     
     public void setX(int x) {

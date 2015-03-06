@@ -9,9 +9,9 @@ import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
-public class NodeRuntime implements Runnable {
+public class StepRuntime implements Runnable {
 
     protected BlockingQueue<Message> inQueue;
 
@@ -24,33 +24,33 @@ public class NodeRuntime implements Runnable {
 
     IComponent component;
 
-    List<NodeRuntime> targetNodeRuntimes;
+    List<StepRuntime> targetStepRuntimes;
 
-    List<NodeRuntime> sourceNodeRuntimes;
+    List<StepRuntime> sourceStepRuntimes;
 
-    public NodeRuntime(IComponent component) {
+    public StepRuntime(IComponent component) {
         this.component = component;
         inQueue = new LinkedBlockingQueue<Message>(capacity);
     }
 
-    public boolean isStartNode() {
-        return sourceNodeRuntimes == null || sourceNodeRuntimes.size() == 0;
+    public boolean isStartStep() {
+        return sourceStepRuntimes == null || sourceStepRuntimes.size() == 0;
     }
 
-    public void setTargetNodeRuntimes(List<NodeRuntime> targetNodeRuntimes) {
-        this.targetNodeRuntimes = targetNodeRuntimes;
+    public void setTargetStepRuntimes(List<StepRuntime> targetStepRuntimes) {
+        this.targetStepRuntimes = targetStepRuntimes;
     }
 
-    public void setSourceNodeRuntimes(List<NodeRuntime> sourceNodeRuntimes) {
-        this.sourceNodeRuntimes = sourceNodeRuntimes;
+    public void setSourceStepRuntimes(List<StepRuntime> sourceStepRuntimes) {
+        this.sourceStepRuntimes = sourceStepRuntimes;
     }
 
     protected void put(Message message) throws InterruptedException {
         inQueue.put(message);
     }
 
-    public void start(IExecutionTracker tracker, IConnectionFactory connectionFactory) {
-        component.start(tracker, connectionFactory);
+    public void start(IExecutionTracker tracker, IResourceFactory resourceFactory) {
+        component.start(tracker, resourceFactory);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class NodeRuntime implements Runnable {
 
             MessageTarget target = new MessageTarget();
             /*
-             * if we are a start node (don't have any input links), we'll only
+             * if we are a start step (don't have any input links), we'll only
              * get a single message which is the start message sent by the flow
              * runtime to kick things off. If we have input links, we must loop
              * until we get a shutdown message from one of our sources
@@ -67,21 +67,21 @@ public class NodeRuntime implements Runnable {
             while (running) {
                 Message inputMessage = inQueue.take();
                 if (inputMessage instanceof ShutdownMessage) {
-                    String fromNodeId = inputMessage.getHeader().getOriginatingNodeId();
-                    removeSourceNodeRuntime(fromNodeId);
+                    String fromStepId = inputMessage.getHeader().getOriginatingStepId();
+                    removeSourceStepRuntime(fromStepId);
                     /*
-                     * When all of the source node runtimes have been removed or
+                     * When all of the source step runtimes have been removed or
                      * when the shutdown message comes from myself, then go
                      * ahead and shutdown
                      */
-                    if (fromNodeId == null || sourceNodeRuntimes == null
-                            || sourceNodeRuntimes.size() == 0
-                            || fromNodeId.equals(component.getComponentFlowNode().getId())) {
+                    if (fromStepId == null || sourceStepRuntimes == null
+                            || sourceStepRuntimes.size() == 0
+                            || fromStepId.equals(component.getFlowStep().getId())) {
                         shutdown();
                     }
                 } else {
                     component.handle(inputMessage, target);
-                    if (isStartNode()) {
+                    if (isStartStep()) {
                         shutdown();
                     }
                 }
@@ -93,12 +93,12 @@ public class NodeRuntime implements Runnable {
         }
     }
 
-    private void removeSourceNodeRuntime(String nodeId) {
-        if (sourceNodeRuntimes != null) {
-            Iterator<NodeRuntime> it = sourceNodeRuntimes.iterator();
+    private void removeSourceStepRuntime(String stepId) {
+        if (sourceStepRuntimes != null) {
+            Iterator<StepRuntime> it = sourceStepRuntimes.iterator();
             while (it.hasNext()) {
-                NodeRuntime sourceRuntime = (NodeRuntime) it.next();
-                if (sourceRuntime.getComponent().getComponentFlowNode().getId().equals(nodeId)) {
+                StepRuntime sourceRuntime = (StepRuntime) it.next();
+                if (sourceRuntime.getComponent().getFlowStep().getId().equals(stepId)) {
                     it.remove();
                 }
             }
@@ -106,8 +106,8 @@ public class NodeRuntime implements Runnable {
     }
 
     private void shutdown() throws InterruptedException {
-        for (NodeRuntime targetNodeRuntime : targetNodeRuntimes) {
-            targetNodeRuntime.put(new ShutdownMessage(component.getComponentFlowNode().getId()));
+        for (StepRuntime targetStepRuntime : targetStepRuntimes) {
+            targetStepRuntime.put(new ShutdownMessage(component.getFlowStep().getId()));
         }
         this.component.stop();
         running = false;
@@ -119,7 +119,7 @@ public class NodeRuntime implements Runnable {
 
     public void stop() throws InterruptedException {
         this.inQueue.clear();
-        this.inQueue.put(new ShutdownMessage(component.getComponentFlowNode().getId()));
+        this.inQueue.put(new ShutdownMessage(component.getFlowStep().getId()));
     }
 
     public IComponent getComponent() {
@@ -129,7 +129,7 @@ public class NodeRuntime implements Runnable {
     class MessageTarget implements IMessageTarget {
         @Override
         public void put(Message message) {
-            for (NodeRuntime targetRuntime : targetNodeRuntimes) {
+            for (StepRuntime targetRuntime : targetStepRuntimes) {
                 try {
                     targetRuntime.put(message);
                 } catch (Exception e) {

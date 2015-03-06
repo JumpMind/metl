@@ -73,7 +73,7 @@ public class Diagram extends AbstractJavaScriptComponent {
                                 } else if (removed) {
                                     node.getTargetNodeIds().remove(targetNodeId);
                                 }
-                                fireEvent(new ConnectionEvent(Diagram.this, sourceNodeId,
+                                fireEvent(new ResourceEvent(Diagram.this, sourceNodeId,
                                         targetNodeId, removed));
                                 break;
                             }

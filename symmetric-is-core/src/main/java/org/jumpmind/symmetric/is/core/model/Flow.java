@@ -3,26 +3,26 @@ package org.jumpmind.symmetric.is.core.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ComponentFlow extends AbstractObject {
+public class Flow extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
-    List<ComponentFlowVersion> componentFlowVersions;
+    List<FlowVersion> flowVersions;
 
     Folder folder;
 
     String name;
     
-    public ComponentFlow() {
-        componentFlowVersions = new ArrayList<ComponentFlowVersion>();
+    public Flow() {
+        flowVersions = new ArrayList<FlowVersion>();
     }
 
-    public ComponentFlow(Folder folder) {
+    public Flow(Folder folder) {
         this();
         setFolder(folder);
     }
     
-    public ComponentFlow(String id) {
+    public Flow(String id) {
         this();
         this.id = id;
     }
@@ -31,16 +31,16 @@ public class ComponentFlow extends AbstractObject {
         this.folder = folder;
     }
 
-    public List<ComponentFlowVersion> getComponentFlowVersions() {
-        return componentFlowVersions;
+    public List<FlowVersion> getFlowVersions() {
+        return flowVersions;
     }
 
-    public ComponentFlowVersion getLatestComponentFlowVersion() {
-        ComponentFlowVersion latest = null;
-        for (ComponentFlowVersion componentFlowVersion : componentFlowVersions) {
+    public FlowVersion getLatestFlowVersion() {
+        FlowVersion latest = null;
+        for (FlowVersion flowVersion : flowVersions) {
             if (latest == null
-                    || latest.getCreateTime().before(componentFlowVersion.getCreateTime())) {
-                latest = componentFlowVersion;
+                    || latest.getCreateTime().before(flowVersion.getCreateTime())) {
+                latest = flowVersion;
             }
         }
         return latest;

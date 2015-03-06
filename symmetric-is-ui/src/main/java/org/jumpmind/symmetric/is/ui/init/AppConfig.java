@@ -39,8 +39,8 @@ import org.jumpmind.symmetric.is.core.runtime.AgentManager;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
 import org.jumpmind.symmetric.is.core.util.EnvConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +71,7 @@ public class AppConfig {
 
     IComponentFactory componentFactory;
 
-    IConnectionFactory connectionFactory;
+    IResourceFactory resourceFactory;
 
     IPersistenceManager persistenceManager;
     
@@ -178,18 +178,18 @@ public class AppConfig {
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
-    public IConnectionFactory connectionFactory() {
-        if (connectionFactory == null) {
-            connectionFactory = new ConnectionFactory();
+    public IResourceFactory resourceFactory() {
+        if (resourceFactory == null) {
+            resourceFactory = new ResourceFactory();
         }
-        return connectionFactory;
+        return resourceFactory;
     }
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IAgentManager agentManager() {
         IAgentManager agentManager = new AgentManager(configurationService(), componentFactory(),
-                connectionFactory());
+                resourceFactory());
         return agentManager;
     }
 

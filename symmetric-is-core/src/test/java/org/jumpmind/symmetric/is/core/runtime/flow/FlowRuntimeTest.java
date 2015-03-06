@@ -6,14 +6,14 @@ import java.util.concurrent.Executors;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowNode;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.runtime.ExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
 import org.jumpmind.symmetric.is.core.utils.TestUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -24,7 +24,7 @@ public class FlowRuntimeTest {
 
     IDatabasePlatform platform;
     IComponentFactory componentFactory;
-    IConnectionFactory connectionFactory;
+    IResourceFactory resourceFactory;
     ExecutorService threadService;
     
     Folder folder;
@@ -34,7 +34,7 @@ public class FlowRuntimeTest {
     public void setup() throws Exception {
     	
     	componentFactory = new ComponentFactory();
-    	connectionFactory = new ConnectionFactory();
+    	resourceFactory = new ResourceFactory();
     	threadService = Executors.newFixedThreadPool(5);
     	
     	folder = TestUtils.createFolder("Test Folder");
@@ -47,82 +47,82 @@ public class FlowRuntimeTest {
     }
 
     @Test
-    public void simpleTwoNodeNoOp() throws Exception {
+    public void simpleTwoStepNoOp() throws Exception {
     	
-    	ComponentFlowVersion flow = createSimpleTwoNodeNoOpFlow(folder);
+    	FlowVersion flow = createSimpleTwoStepNoOpFlow(folder);
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);	
-    	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, connectionFactory, 
+    	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
     			new ExecutionTracker(deployment), threadService);
     	flowRuntime.start();
     	flowRuntime.waitForFlowCompletion();
-    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Node").getNumberInboundMessages());
-    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Node").getNumberInboundMessages());
+    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step").getNumberInboundMessages());
+    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Step").getNumberInboundMessages());
     }
     
     @Test
     public void singleSrcToTwoTarget() throws Exception {
-    	ComponentFlowVersion flow = createSrcToTwoTargetFlow(folder);
+    	FlowVersion flow = createSrcToTwoTargetFlow(folder);
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
-    	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, connectionFactory, 
+    	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
     			new ExecutionTracker(deployment), threadService);
     	flowRuntime.start();
     	flowRuntime.waitForFlowCompletion();
-    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Node").getNumberInboundMessages());
-    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Node 1").getNumberInboundMessages());
-    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Node 2").getNumberInboundMessages());    	
+    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step").getNumberInboundMessages());
+    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Step 1").getNumberInboundMessages());
+    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Step 2").getNumberInboundMessages());    	
     }
     
     @Test
     public void twoSrcOneTarget() throws Exception {
-        ComponentFlowVersion flow = createTwoSrcToOneTargetFlow(folder);
+        FlowVersion flow = createTwoSrcToOneTargetFlow(folder);
         AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
-        FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, connectionFactory, 
+        FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
                 new ExecutionTracker(deployment), threadService);
         flowRuntime.start();
         flowRuntime.waitForFlowCompletion();
-        Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Node 1").getNumberInboundMessages());
-        Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Node 2").getNumberInboundMessages());
-        Assert.assertEquals(2, flowRuntime.getComponentStatistics("Target Node").getNumberInboundMessages());     
+        Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step 1").getNumberInboundMessages());
+        Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step 2").getNumberInboundMessages());
+        Assert.assertEquals(2, flowRuntime.getComponentStatistics("Target Step").getNumberInboundMessages());     
     }
     
-    private ComponentFlowVersion createSimpleTwoNodeNoOpFlow(Folder folder) {
+    private FlowVersion createSimpleTwoStepNoOpFlow(Folder folder) {
 
-    	ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
-    	ComponentFlowNode srcNoOpNode = TestUtils.createNoOpProcessorComponentFlowNode(flow, "Src Node", folder);
-    	ComponentFlowNode targetNoOpNode = TestUtils.createNoOpProcessorComponentFlowNode(flow, "Target Node", folder);
-    	flow.getComponentFlowNodeLinks().add(TestUtils.createComponentLink(srcNoOpNode, targetNoOpNode));
-    	TestUtils.addNodeToComponentFlow(flow, srcNoOpNode);
-    	TestUtils.addNodeToComponentFlow(flow, targetNoOpNode);
+    	FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
+    	FlowStep srcNoOpStep = TestUtils.createNoOpProcessorFlowStep(flow, "Src Step", folder);
+    	FlowStep targetNoOpStep = TestUtils.createNoOpProcessorFlowStep(flow, "Target Step", folder);
+    	flow.getFlowStepLinks().add(TestUtils.createComponentLink(srcNoOpStep, targetNoOpStep));
+    	TestUtils.addStepToFlow(flow, srcNoOpStep);
+    	TestUtils.addStepToFlow(flow, targetNoOpStep);
 
     	return flow;
     }
 
-    private ComponentFlowVersion createSrcToTwoTargetFlow(Folder folder) {
+    private FlowVersion createSrcToTwoTargetFlow(Folder folder) {
 
-    	ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
-    	ComponentFlowNode srcNoOpNode = TestUtils.createNoOpProcessorComponentFlowNode(flow, "Src Node", folder);
-    	ComponentFlowNode targetNoOpNode1 = TestUtils.createNoOpProcessorComponentFlowNode(flow, "Target Node 1", folder);
-    	ComponentFlowNode targetNoOpNode2 = TestUtils.createNoOpProcessorComponentFlowNode(flow, "Target Node 2", folder);    	
-    	flow.getComponentFlowNodeLinks().add(TestUtils.createComponentLink(srcNoOpNode, targetNoOpNode1));
-    	flow.getComponentFlowNodeLinks().add(TestUtils.createComponentLink(srcNoOpNode, targetNoOpNode2));
-    	TestUtils.addNodeToComponentFlow(flow, srcNoOpNode);
-    	TestUtils.addNodeToComponentFlow(flow, targetNoOpNode1);
-    	TestUtils.addNodeToComponentFlow(flow, targetNoOpNode2);
+    	FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
+    	FlowStep srcNoOpStep = TestUtils.createNoOpProcessorFlowStep(flow, "Src Step", folder);
+    	FlowStep targetNoOpStep1 = TestUtils.createNoOpProcessorFlowStep(flow, "Target Step 1", folder);
+    	FlowStep targetNoOpStep2 = TestUtils.createNoOpProcessorFlowStep(flow, "Target Step 2", folder);    	
+    	flow.getFlowStepLinks().add(TestUtils.createComponentLink(srcNoOpStep, targetNoOpStep1));
+    	flow.getFlowStepLinks().add(TestUtils.createComponentLink(srcNoOpStep, targetNoOpStep2));
+    	TestUtils.addStepToFlow(flow, srcNoOpStep);
+    	TestUtils.addStepToFlow(flow, targetNoOpStep1);
+    	TestUtils.addStepToFlow(flow, targetNoOpStep2);
     	
     	return flow;   	
     } 
     
-    private ComponentFlowVersion createTwoSrcToOneTargetFlow(Folder folder) {
+    private FlowVersion createTwoSrcToOneTargetFlow(Folder folder) {
 
-        ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
-        ComponentFlowNode srcNoOpNode1 = TestUtils.createNoOpProcessorComponentFlowNode(flow, "Src Node 1", folder);
-        ComponentFlowNode srcNoOpNode2 = TestUtils.createNoOpProcessorComponentFlowNode(flow, "Src Node 2", folder);
-        ComponentFlowNode targetNoOpNode = TestUtils.createNoOpProcessorComponentFlowNode(flow, "Target Node", folder);
-        flow.getComponentFlowNodeLinks().add(TestUtils.createComponentLink(srcNoOpNode1, targetNoOpNode));
-        flow.getComponentFlowNodeLinks().add(TestUtils.createComponentLink(srcNoOpNode2, targetNoOpNode));
-        TestUtils.addNodeToComponentFlow(flow, srcNoOpNode1);
-        TestUtils.addNodeToComponentFlow(flow, srcNoOpNode2);
-        TestUtils.addNodeToComponentFlow(flow, targetNoOpNode);
+        FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
+        FlowStep srcNoOpStep1 = TestUtils.createNoOpProcessorFlowStep(flow, "Src Step 1", folder);
+        FlowStep srcNoOpStep2 = TestUtils.createNoOpProcessorFlowStep(flow, "Src Step 2", folder);
+        FlowStep targetNoOpStep = TestUtils.createNoOpProcessorFlowStep(flow, "Target Step", folder);
+        flow.getFlowStepLinks().add(TestUtils.createComponentLink(srcNoOpStep1, targetNoOpStep));
+        flow.getFlowStepLinks().add(TestUtils.createComponentLink(srcNoOpStep2, targetNoOpStep));
+        TestUtils.addStepToFlow(flow, srcNoOpStep1);
+        TestUtils.addStepToFlow(flow, srcNoOpStep2);
+        TestUtils.addStepToFlow(flow, targetNoOpStep);
         
         return flow;    
     } 

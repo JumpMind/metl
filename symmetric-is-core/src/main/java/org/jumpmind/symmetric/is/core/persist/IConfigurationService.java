@@ -6,12 +6,12 @@ import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentSummary;
-import org.jumpmind.symmetric.is.core.model.ComponentFlow;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowNode;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowNodeLink;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowVersionSummary;
-import org.jumpmind.symmetric.is.core.model.Connection;
+import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.FlowStepLink;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
+import org.jumpmind.symmetric.is.core.model.FlowVersionSummary;
+import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Model;
@@ -31,53 +31,53 @@ public interface IConfigurationService {
     
     public void delete(AgentDeployment agentDeployment);
     
-    public void delete(ComponentFlow flow);
+    public void delete(Flow flow);
     
-    public void delete(ComponentFlowVersion flow, ComponentFlowNode flowNode);
+    public void delete(FlowVersion flow, FlowStep flowStep);
     
-    public void delete(ComponentFlowNodeLink link);
+    public void delete(FlowStepLink link);
     
-    public void delete(Connection connection);
+    public void delete(Resource resource);
     
-    public boolean isDeployed(ComponentFlowVersion componentFlowVersion);
+    public boolean isDeployed(FlowVersion flowVersion);
     
-    public boolean isDeployed(ComponentFlow componentFlow);
+    public boolean isDeployed(Flow flow);
     
-    public List<ComponentFlow> findComponentFlowsInFolder(Folder folder);
+    public List<Flow> findFlowsInFolder(Folder folder);
     
     public List<Model> findModelsInFolder(Folder folder);
     
-    public Connection findConnection(String id);
+    public Resource findResource(String id);
     
-    public List<Connection> findConnectionsInFolder(Folder folder);
+    public List<Resource> findResourcesInFolder(Folder folder);
     
-    public List<Connection> findConnectionsByTypes(String ... types);
+    public List<Resource> findResourcesByTypes(String ... types);
     
     public List<Agent> findAgentsInFolder(Folder folder);
     
     public List<Agent> findAgentsForHost(String hostName);
     
-    public List<AgentDeployment> findAgentDeploymentsFor(ComponentFlowVersion componentFlowVersion);
+    public List<AgentDeployment> findAgentDeploymentsFor(FlowVersion flowVersion);
     
-    public void deleteComponentFlowVersion(ComponentFlowVersion componentFlowVersion);
+    public void deleteFlowVersion(FlowVersion flowVersion);
 
-    public void refresh(ComponentFlowVersion componentFlowVersion);
+    public void refresh(FlowVersion flowVersion);
     
     public void refresh(Agent agent);
     
-    public void refresh(Connection connection);
+    public void refresh(Resource resource);
     
-    public void save(Connection connection);
+    public void save(Resource resource);
     
-    public void save(ComponentFlowNode flowNode);
+    public void save(FlowStep flowStep);
 
     public void save(AbstractObject obj);
 
-    public void save(ComponentFlowVersion componentFlowVersion);
+    public void save(FlowVersion flowVersion);
     
-    public List<ComponentFlowVersionSummary> findUndeployedComponentFlowVersionSummary(String agentId);
+    public List<FlowVersionSummary> findUndeployedFlowVersionSummary(String agentId);
     
-    public List<AgentSummary> findUndeployedAgentsFor(String componentFlowVersionId);
+    public List<AgentSummary> findUndeployedAgentsFor(String flowVersionId);
     
     public void delete(Model model);
     

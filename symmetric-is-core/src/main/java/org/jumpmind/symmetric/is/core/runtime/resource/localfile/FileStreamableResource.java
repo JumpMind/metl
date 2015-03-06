@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.core.runtime.connection.localfile;
+package org.jumpmind.symmetric.is.core.runtime.resource.localfile;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,14 +9,14 @@ import java.io.OutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.symmetric.is.core.model.Connection;
+import org.jumpmind.symmetric.is.core.model.Resource;
 
-public class FileStreamableConnection implements IStreamableConnection {
+public class FileStreamableResource implements IStreamableResource {
 
 	protected File file;
 	String basePath;
 	
-	public FileStreamableConnection(Connection connection, String basePath, boolean mustExist) {
+	public FileStreamableResource(Resource resource, String basePath, boolean mustExist) {
 	    this.basePath = basePath;
 		file = new File(basePath);
 		if (!file.exists()) {
@@ -26,7 +26,7 @@ public class FileStreamableConnection implements IStreamableConnection {
 				throw new IoException("Could not find " + file.getAbsolutePath());
 			}
 		}
-		//todo: get rid of basepath and must exist and get them from connection settings
+		//todo: get rid of basepath and must exist and get them from resource settings
 	}
 	
 	@Override

@@ -8,44 +8,44 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowNode;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowNodeLink;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.FlowStepLink;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentStatistics;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.util.AppUtils;
 
 public class FlowRuntime {
 
     AgentDeployment deployment;
 
-    Map<ComponentFlowNode, IComponent> endpointRuntimes = new HashMap<ComponentFlowNode, IComponent>();
+    Map<FlowStep, IComponent> endpointRuntimes = new HashMap<FlowStep, IComponent>();
 
-    Map<String, IConnection> connectionRuntimes = new HashMap<String, IConnection>();
+    Map<String, IResource> resourceRuntimes = new HashMap<String, IResource>();
 
     IComponentFactory componentFactory;
 
-    IConnectionFactory connectionFactory;
+    IResourceFactory resourceFactory;
 
     IExecutionTracker executionTracker;
 
     ExecutorService threadService;
 
-    Map<String, NodeRuntime> nodeRuntimes;
+    Map<String, StepRuntime> stepRuntimes;
 
     public FlowRuntime(AgentDeployment deployment, IComponentFactory componentFactory,
-            IConnectionFactory connectionFactory, IExecutionTracker executionTracker,
+            IResourceFactory resourceFactory, IExecutionTracker executionTracker,
             ExecutorService threadService) {
         this.executionTracker = executionTracker;
         this.deployment = deployment;
         this.componentFactory = componentFactory;
-        this.connectionFactory = connectionFactory;
+        this.resourceFactory = resourceFactory;
         this.threadService = threadService;
     }
     
@@ -54,61 +54,61 @@ public class FlowRuntime {
     }
 
     public void start() throws InterruptedException {
-        this.nodeRuntimes = new HashMap<String, NodeRuntime>();
-        ComponentFlowVersion componentFlowVersion = deployment.getComponentFlowVersion();
-        List<ComponentFlowNode> nodes = componentFlowVersion.getComponentFlowNodes();
+        this.stepRuntimes = new HashMap<String, StepRuntime>();
+        FlowVersion flowVersion = deployment.getFlowVersion();
+        List<FlowStep> steps = flowVersion.getFlowSteps();
 
-        /* create a node runtime for every component in the flow */
-        for (ComponentFlowNode componentFlowNode : nodes) {
-            NodeRuntime nodeRuntime = new NodeRuntime(componentFactory.create(componentFlowNode));
-            nodeRuntimes.put(componentFlowNode.getId(), nodeRuntime);
+        /* create a step runtime for every component in the flow */
+        for (FlowStep flowStep : steps) {
+            StepRuntime stepRuntime = new StepRuntime(componentFactory.create(flowStep));
+            stepRuntimes.put(flowStep.getId(), stepRuntime);
         }
 
-        List<ComponentFlowNodeLink> links = componentFlowVersion.getComponentFlowNodeLinks();
+        List<FlowStepLink> links = flowVersion.getFlowStepLinks();
 
-        /* for each node runtime, set their list of target node runtimes */
-        for (String nodeId : nodeRuntimes.keySet()) {
-            List<NodeRuntime> targetNodeRuntimes = new ArrayList<NodeRuntime>();
-            List<NodeRuntime> sourceNodeRuntimes = new ArrayList<NodeRuntime>();
-            for (ComponentFlowNodeLink componentFlowNodeLink : links) {
-                if (nodeId.equals(componentFlowNodeLink.getSourceNodeId())) {
-                    targetNodeRuntimes.add(nodeRuntimes.get(componentFlowNodeLink
-                            .getTargetNodeId()));
-                } else if (nodeId.equals(componentFlowNodeLink.getTargetNodeId())) {
-                    sourceNodeRuntimes.add(nodeRuntimes.get(componentFlowNodeLink
-                            .getSourceNodeId()));
+        /* for each step runtime, set their list of target step runtimes */
+        for (String stepId : stepRuntimes.keySet()) {
+            List<StepRuntime> targetStepRuntimes = new ArrayList<StepRuntime>();
+            List<StepRuntime> sourceStepRuntimes = new ArrayList<StepRuntime>();
+            for (FlowStepLink flowStepLink : links) {
+                if (stepId.equals(flowStepLink.getSourceStepId())) {
+                    targetStepRuntimes.add(stepRuntimes.get(flowStepLink
+                            .getTargetStepId()));
+                } else if (stepId.equals(flowStepLink.getTargetStepId())) {
+                    sourceStepRuntimes.add(stepRuntimes.get(flowStepLink
+                            .getSourceStepId()));
                 }
             }
-            NodeRuntime runtime = nodeRuntimes.get(nodeId);
-            runtime.setTargetNodeRuntimes(targetNodeRuntimes);
-            runtime.setSourceNodeRuntimes(sourceNodeRuntimes);
+            StepRuntime runtime = stepRuntimes.get(stepId);
+            runtime.setTargetStepRuntimes(targetStepRuntimes);
+            runtime.setSourceStepRuntimes(sourceStepRuntimes);
         }
 
-        List<NodeRuntime> startNodes = findStartNodes();
+        List<StepRuntime> startSteps = findStartSteps();
 
-        /* each node is started as a thread */
-        for (NodeRuntime nodeRuntime : nodeRuntimes.values()) {
-            threadService.execute(nodeRuntime);
+        /* each step is started as a thread */
+        for (StepRuntime stepRuntime : stepRuntimes.values()) {
+            threadService.execute(stepRuntime);
         }
 
-        /* start up each node runtime */
-        for (NodeRuntime nodeRuntime : nodeRuntimes.values()) {
-            nodeRuntime.start(executionTracker, connectionFactory);
+        /* start up each step runtime */
+        for (StepRuntime stepRuntime : stepRuntimes.values()) {
+            stepRuntime.start(executionTracker, resourceFactory);
         }
 
         StartupMessage startMessage = new StartupMessage();
         // TODO set parameters on start message
         /*
-         * for each start node (node that has no input msgs), send a start
-         * message to that node
+         * for each start step (step that has no input msgs), send a start
+         * message to that step
          */
-        for (NodeRuntime nodeRuntime : startNodes) {
-            nodeRuntime.put(startMessage);
+        for (StepRuntime stepRuntime : startSteps) {
+            stepRuntime.put(startMessage);
         }
     }
 
     /*
-     * Waiting until all nodes have exited
+     * Waiting until all steps have exited
      */
     public void waitForFlowCompletion() throws InterruptedException {
         while (isRunning()) {
@@ -118,10 +118,10 @@ public class FlowRuntime {
 
     public boolean isRunning() {
         boolean running = false;
-        if (nodeRuntimes != null) {
-            Collection<NodeRuntime> allNodes = nodeRuntimes.values();
-            for (NodeRuntime nodeRuntime : allNodes) {
-                if (nodeRuntime.isRunning()) {
+        if (stepRuntimes != null) {
+            Collection<StepRuntime> allSteps = stepRuntimes.values();
+            for (StepRuntime stepRuntime : allSteps) {
+                if (stepRuntime.isRunning()) {
                     running = true;
                 }
             }
@@ -129,36 +129,36 @@ public class FlowRuntime {
         return running;
     }
 
-    protected List<NodeRuntime> findStartNodes() {
-        List<NodeRuntime> starterNodes = new ArrayList<NodeRuntime>();
-        for (String nodeId : nodeRuntimes.keySet()) {
-            List<ComponentFlowNodeLink> links = deployment.getComponentFlowVersion()
-                    .getComponentFlowNodeLinks();
-            boolean isTargetNode = false;
-            for (ComponentFlowNodeLink componentFlowNodeLink : links) {
-                if (nodeId.equals(componentFlowNodeLink.getTargetNodeId())) {
-                    isTargetNode = true;
+    protected List<StepRuntime> findStartSteps() {
+        List<StepRuntime> starterSteps = new ArrayList<StepRuntime>();
+        for (String stepId : stepRuntimes.keySet()) {
+            List<FlowStepLink> links = deployment.getFlowVersion()
+                    .getFlowStepLinks();
+            boolean isTargetStep = false;
+            for (FlowStepLink flowStepLink : links) {
+                if (stepId.equals(flowStepLink.getTargetStepId())) {
+                    isTargetStep = true;
                 }
             }
 
-            if (!isTargetNode) {
-                starterNodes.add(nodeRuntimes.get(nodeId));
+            if (!isTargetStep) {
+                starterSteps.add(stepRuntimes.get(stepId));
             }
         }
-        return starterNodes;
+        return starterSteps;
     }
 
     public void stop() throws InterruptedException {
         if (isRunning()) {
-            List<NodeRuntime> startNodes = findStartNodes();
-            for (NodeRuntime nodeRuntime : startNodes) {
-                nodeRuntime.put(new ShutdownMessage(nodeRuntime.getComponent()
-                        .getComponentFlowNode().getId()));
+            List<StepRuntime> startSteps = findStartSteps();
+            for (StepRuntime stepRuntime : startSteps) {
+                stepRuntime.put(new ShutdownMessage(stepRuntime.getComponent()
+                        .getFlowStep().getId()));
             }
         }
     }
 
-    public ComponentStatistics getComponentStatistics(String componentFlowNodeId) {
-        return nodeRuntimes.get(componentFlowNodeId).getComponent().getComponentStatistics();
+    public ComponentStatistics getComponentStatistics(String flowStepId) {
+        return stepRuntimes.get(flowStepId).getComponent().getComponentStatistics();
     }
 }

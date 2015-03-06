@@ -14,14 +14,14 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.localfile.IStreamableConnection;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
+import org.jumpmind.symmetric.is.core.runtime.resource.localfile.IStreamableResource;
 
 @ComponentDefinition(typeName = TextFileWriter.TYPE, category = ComponentCategory.WRITER,
         supports = { ComponentSupports.INPUT_MESSAGE },
-        connectionCategory = ConnectionCategory.RESOURCE)
+        resourceCategory = ResourceCategory.RESOURCE)
 public class TextFileWriter extends AbstractComponent {
 
     public static final String TYPE = "Text File Writer";
@@ -54,8 +54,8 @@ public class TextFileWriter extends AbstractComponent {
     BufferedWriter bufferedWriter = null;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory) {
-        super.start(executionTracker, connectionFactory);
+    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
+        super.start(executionTracker, resourceFactory);
         applySettings();
     }
 
@@ -90,19 +90,19 @@ public class TextFileWriter extends AbstractComponent {
     }
 
     private void initStreamAndWriter() {
-        outStream = getOutputStream((IStreamableConnection) this.connection.reference());
+        outStream = getOutputStream((IStreamableResource) this.resource.reference());
         bufferedWriter = initializeWriter(outStream);        
     }
     
     private void applySettings() {
-        properties = componentNode.getComponentVersion().toTypedProperties(this, false);
+        properties = flowStep.getComponentVersion().toTypedProperties(this, false);
         relativePathAndFile = properties.get(TEXTFILEWRITER_RELATIVE_PATH);
         mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
         append = properties.is(TEXTFILEWRITER_APPEND);
         lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
     }
 
-    private OutputStream getOutputStream(IStreamableConnection conn) {
+    private OutputStream getOutputStream(IStreamableResource conn) {
         conn.resetPath();
         conn.appendPath(relativePathAndFile, mustExist);
         return conn.getOutputStream();

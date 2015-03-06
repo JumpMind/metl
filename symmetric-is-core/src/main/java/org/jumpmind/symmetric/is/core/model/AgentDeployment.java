@@ -4,7 +4,7 @@ public class AgentDeployment extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
-    ComponentFlowVersion componentFlowVersion;
+    FlowVersion flowVersion;
 
     String agentId;
 
@@ -17,12 +17,12 @@ public class AgentDeployment extends AbstractObject {
     public AgentDeployment() {
     }
 
-    public AgentDeployment(ComponentFlowVersion componentFlowVersion) {
-        setComponentFlowVersion(componentFlowVersion);
+    public AgentDeployment(FlowVersion flowVersion) {
+        setFlowVersion(flowVersion);
     }
     
-    public void setComponentFlowVersion(ComponentFlowVersion componentFlowVersion) {
-        this.componentFlowVersion = componentFlowVersion;
+    public void setFlowVersion(FlowVersion flowVersion) {
+        this.flowVersion = flowVersion;
     }
 
     public String getAgentId() {
@@ -33,15 +33,15 @@ public class AgentDeployment extends AbstractObject {
         this.agentId = agentId;
     }
 
-    public String getComponentFlowVersionId() {
-    	return componentFlowVersion != null ? componentFlowVersion.getId() : null;
+    public String getFlowVersionId() {
+    	return flowVersion != null ? flowVersion.getId() : null;
     }
 
-    public void setComponentFlowVersionId(String componentFlowVersionId) {
-        if (componentFlowVersionId != null) {
-            this.componentFlowVersion = new ComponentFlowVersion();
+    public void setFlowVersionId(String flowVersionId) {
+        if (flowVersionId != null) {
+            this.flowVersion = new FlowVersion();
         } else {
-            this.componentFlowVersion = null;
+            this.flowVersion = null;
         }
     }
 
@@ -74,18 +74,18 @@ public class AgentDeployment extends AbstractObject {
     }
 
     public String getName() {
-        return componentFlowVersion.getComponentFlow().getName();
+        return flowVersion.getFlow().getName();
     }
 
     public void setName(String name) {
     }
 
-    public ComponentFlowVersion getComponentFlowVersion() {
-        return componentFlowVersion;
+    public FlowVersion getFlowVersion() {
+        return flowVersion;
     }
 
     @Override
     public String toString() {
-        return componentFlowVersion.getName();
+        return flowVersion.getName();
     }
 }

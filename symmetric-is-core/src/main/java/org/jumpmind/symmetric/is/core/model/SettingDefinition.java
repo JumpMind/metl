@@ -29,8 +29,8 @@ public @interface SettingDefinition {
 
     /**
      * When set, this setting must be provided by the user/caller of the object
-     * that defined the setting. For example, a file connection needs to be
-     * provided the name of the file or an SMTP connection needs to be provided
+     * that defined the setting. For example, a file resource needs to be
+     * provided the name of the file or an SMTP resource needs to be provided
      * the subject and to list for an email.
      */
     boolean provided() default false;

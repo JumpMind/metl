@@ -2,13 +2,13 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.model.ComponentFlow;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.model.Connection;
+import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
+import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection;
+import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 
@@ -21,7 +21,7 @@ import com.vaadin.ui.MenuBar.MenuItem;
 public class DesignNavigator extends AbstractFolderNavigator {
 
     MenuItem newFlow;
-    MenuItem newConnection;
+    MenuItem newResource;
     MenuItem newModel;
 
     TabbedApplicationPanel tabs;
@@ -47,17 +47,17 @@ public class DesignNavigator extends AbstractFolderNavigator {
         });
         newFlow.setDescription("Add Flow");
 
-        newConnection = leftMenuBar.addItem("", Icons.GENERAL_CONNECTION, null);
-        newConnection.setDescription("Add Connection");
+        newResource = leftMenuBar.addItem("", Icons.GENERAL_RESOURCE, null);
+        newResource.setDescription("Add Resource");
 
-        MenuItem newDbConnection = newConnection.addItem("Add Database", Icons.DATABASE,
+        MenuItem newDbResource = newResource.addItem("Add Database", Icons.DATABASE,
                 new Command() {
 
                     @Override
                     public void menuSelected(MenuItem selectedItem) {
                     }
                 });
-        newDbConnection.setDescription("Add Database Connection");
+        newDbResource.setDescription("Add Database Resource");
 
         newModel = leftMenuBar.addItem("", Icons.MODEL, new Command() {
 
@@ -70,16 +70,16 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
     @Override
     protected void openItem(Object item) {
-        if (item instanceof ComponentFlow) {
-            item = ((ComponentFlow) item).getLatestComponentFlowVersion();
+        if (item instanceof Flow) {
+            item = ((Flow) item).getLatestFlowVersion();
         }
 
-        if (item instanceof ComponentFlowVersion) {
-            ComponentFlowVersion flowVersion = (ComponentFlowVersion) item;
+        if (item instanceof FlowVersion) {
+            FlowVersion flowVersion = (FlowVersion) item;
             DesignFlowLayout flowLayout = new DesignFlowLayout(configurationService, flowVersion,
                     designComponentPalette, designPropertySheet, this);
             tabs.addCloseableTab(
-                    flowVersion.getComponentFlow().getName() + " " + flowVersion.getName(),
+                    flowVersion.getFlow().getName() + " " + flowVersion.getName(),
                     Icons.FLOW, flowLayout);
         }
     }
@@ -89,7 +89,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
         super.selectionChanged(event);
         boolean enabled = getSelectedFolder() != null && itemBeingEdited == null;
         newFlow.setEnabled(enabled);
-        newConnection.setEnabled(enabled);
+        newResource.setEnabled(enabled);
         newModel.setEnabled(enabled);
     }
 
@@ -97,7 +97,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
     protected void folderExpanded(Folder folder) {
         super.folderExpanded(folder);
         removeAllNonFolderChildren(folder);
-        addConnectionsToFolder(folder);
+        addResourcesToFolder(folder);
         addComponentFlowsToFolder(folder);
     }
 
@@ -105,11 +105,11 @@ public class DesignNavigator extends AbstractFolderNavigator {
         Folder folder = getSelectedFolder();
         if (folder != null) {
 
-            ComponentFlow flow = new ComponentFlow(folder);
+            Flow flow = new Flow(folder);
             flow.setName("New Flow");
             configurationService.save(flow);
 
-            ComponentFlowVersion flowVersion = new ComponentFlowVersion(flow);
+            FlowVersion flowVersion = new FlowVersion(flow);
             flowVersion.setVersionName("version 1.0");
             configurationService.save(flowVersion);
 
@@ -126,30 +126,30 @@ public class DesignNavigator extends AbstractFolderNavigator {
         }
     }
 
-    protected void addConnectionsToFolder(Folder folder) {
-        List<Connection> connections = configurationService.findConnectionsInFolder(folder);
-        for (Connection connection : connections) {
-            this.treeTable.addItem(connection);
-            if (DataSourceConnection.TYPE.equals(connection.getType())) {
-                this.treeTable.setItemIcon(connection, Icons.DATABASE);
+    protected void addResourcesToFolder(Folder folder) {
+        List<Resource> resources = configurationService.findResourcesInFolder(folder);
+        for (Resource resource : resources) {
+            this.treeTable.addItem(resource);
+            if (DataSourceResource.TYPE.equals(resource.getType())) {
+                this.treeTable.setItemIcon(resource, Icons.DATABASE);
             } else {
-                this.treeTable.setItemIcon(connection, Icons.GENERAL_CONNECTION);
+                this.treeTable.setItemIcon(resource, Icons.GENERAL_RESOURCE);
             }
-            this.treeTable.setChildrenAllowed(connection, false);
-            this.treeTable.setParent(connection, folder);
+            this.treeTable.setChildrenAllowed(resource, false);
+            this.treeTable.setParent(resource, folder);
         }
 
     }
 
     protected void addComponentFlowsToFolder(Folder folder) {
-        List<ComponentFlow> flows = configurationService.findComponentFlowsInFolder(folder);
-        for (ComponentFlow flow : flows) {
+        List<Flow> flows = configurationService.findFlowsInFolder(folder);
+        for (Flow flow : flows) {
             this.treeTable.addItem(flow);
             this.treeTable.setItemIcon(flow, Icons.FLOW);
             this.treeTable.setParent(flow, folder);
 
-            List<ComponentFlowVersion> versions = flow.getComponentFlowVersions();
-            for (ComponentFlowVersion componentFlowVersion : versions) {
+            List<FlowVersion> versions = flow.getFlowVersions();
+            for (FlowVersion componentFlowVersion : versions) {
                 this.treeTable.addItem(componentFlowVersion);
                 this.treeTable.setItemCaption(componentFlowVersion,
                         componentFlowVersion.getVersionName());

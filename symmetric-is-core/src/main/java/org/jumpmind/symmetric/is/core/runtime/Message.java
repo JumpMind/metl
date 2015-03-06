@@ -10,8 +10,8 @@ public class Message implements Serializable, Cloneable {
 
     Serializable payload;
     
-    public Message(String originatingNodeId) {
-        this.header = new MessageHeader(originatingNodeId);
+    public Message(String originatingStepId) {
+        this.header = new MessageHeader(originatingStepId);
     }
 
     public MessageHeader getHeader() {

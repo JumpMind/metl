@@ -3,7 +3,7 @@ package org.jumpmind.symmetric.is.ui.diagram;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Component.Event;
 
-public class ConnectionEvent extends Event {
+public class ResourceEvent extends Event {
 
     private static final long serialVersionUID = 1L;
 
@@ -13,7 +13,7 @@ public class ConnectionEvent extends Event {
 
     boolean removed;
 
-    public ConnectionEvent(Component source, String sourceNodeId, String targetNodeId,
+    public ResourceEvent(Component source, String sourceNodeId, String targetNodeId,
             boolean removed) {
         super(source);
         this.sourceNodeId = sourceNodeId;

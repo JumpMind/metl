@@ -18,20 +18,20 @@ import org.jumpmind.db.sql.DmlStatement;
 import org.jumpmind.db.sql.DmlStatement.DmlType;
 import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.symmetric.is.core.model.Component;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowNode;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowVersion;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.ComponentVersion;
-import org.jumpmind.symmetric.is.core.model.Connection;
+import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.db.DataSourceConnection;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
 import org.jumpmind.symmetric.is.core.utils.DbTestUtils;
 import org.jumpmind.symmetric.is.core.utils.TestUtils;
 import org.junit.After;
@@ -43,16 +43,16 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class DbReaderComponentTest {
 
-    private static IConnectionFactory connectionFactory;
+    private static IResourceFactory resourceFactory;
     private static IDatabasePlatform platform;
-    private static ComponentFlowNode readerComponentFlowNode;
+    private static FlowStep readerFlowStep;
 
     @BeforeClass
     public static void setup() throws Exception {
 
-        connectionFactory = new ConnectionFactory();
+        resourceFactory = new ResourceFactory();
         platform = createPlatformAndTestDatabase();
-        readerComponentFlowNode = createReaderComponentFlowNode();
+        readerFlowStep = createReaderFlowStep();
     }
 
     @After
@@ -115,8 +115,8 @@ public class DbReaderComponentTest {
     public void testReaderFlowFromStartupMsg() throws Exception {
 
         DbReader reader = new DbReader();
-        reader.setComponentFlowNode(readerComponentFlowNode);
-        reader.start(null, connectionFactory);
+        reader.setFlowStep(readerFlowStep);
+        reader.start(null, resourceFactory);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle(msg, msgTarget);
@@ -132,9 +132,9 @@ public class DbReaderComponentTest {
     public void testReaderFlowFromSingleContentMsg() throws Exception {
 
         DbReader reader = new DbReader();
-        reader.setComponentFlowNode(readerComponentFlowNode);
-        reader.start(null, connectionFactory);
-        Message message = new Message("fake node id");
+        reader.setFlowStep(readerFlowStep);
+        reader.start(null, resourceFactory);
+        Message message = new Message("fake step id");
         message.setPayload(new ArrayList<EntityData>());
         ArrayList<EntityData> payload = message.getPayload();
         EntityData fakeRec = new EntityData("fake");
@@ -153,17 +153,17 @@ public class DbReaderComponentTest {
 
     }
 
-    private static ComponentFlowNode createReaderComponentFlowNode() {
+    private static FlowStep createReaderFlowStep() {
 
         Folder folder = TestUtils.createFolder("Test Folder");
-        ComponentFlowVersion flow = TestUtils.createFlow("TestFlow", folder);
+        FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
         Component component = TestUtils.createComponent(DbReader.TYPE, false);
         Setting[] settingData = createReaderSettings();
         ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
                 settingData);
-        componentVersion.setConnection(createConnection(createConnectionSettings()));
-        ComponentFlowNode readerComponent = new ComponentFlowNode();
-        readerComponent.setComponentFlowVersionId(flow.getId());
+        componentVersion.setResource(createResource(createResourceSettings()));
+        FlowStep readerComponent = new FlowStep();
+        readerComponent.setFlowVersionId(flow.getId());
         readerComponent.setComponentVersionId(componentVersion.getId());
         readerComponent.setCreateBy("Test");
         readerComponent.setCreateTime(new Date());
@@ -173,16 +173,16 @@ public class DbReaderComponentTest {
         return readerComponent;
     }
 
-    private static Connection createConnection(List<Setting> settings) {
-        Connection connection = new Connection();
-        Folder folder = TestUtils.createFolder("Test Folder Connection");
-        connection.setName("Test Connection");
-        connection.setFolderId("Test Folder Connection");
-        connection.setType(DataSourceConnection.TYPE);
-        connection.setFolder(folder);
-        connection.setSettings(settings);
+    private static Resource createResource(List<Setting> settings) {
+        Resource resource = new Resource();
+        Folder folder = TestUtils.createFolder("Test Folder Resource");
+        resource.setName("Test Resource");
+        resource.setFolderId("Test Folder Resource");
+        resource.setType(DataSourceResource.TYPE);
+        resource.setFolder(folder);
+        resource.setSettings(settings);
 
-        return connection;
+        return resource;
     }
 
     private static Setting[] createReaderSettings() {
@@ -195,12 +195,12 @@ public class DbReaderComponentTest {
         return settingData;
     }
 
-    private static List<Setting> createConnectionSettings() {
+    private static List<Setting> createResourceSettings() {
         List<Setting> settings = new ArrayList<Setting>(4);
-        settings.add(new Setting(DataSourceConnection.DB_POOL_DRIVER, "org.h2.Driver"));
-        settings.add(new Setting(DataSourceConnection.DB_POOL_URL, "jdbc:h2:file:build/dbs/testdb"));
-        settings.add(new Setting(DataSourceConnection.DB_POOL_USER, "jumpmind"));
-        settings.add(new Setting(DataSourceConnection.DB_POOL_PASSWORD, "jumpmind"));
+        settings.add(new Setting(DataSourceResource.DB_POOL_DRIVER, "org.h2.Driver"));
+        settings.add(new Setting(DataSourceResource.DB_POOL_URL, "jdbc:h2:file:build/dbs/testdb"));
+        settings.add(new Setting(DataSourceResource.DB_POOL_USER, "jumpmind"));
+        settings.add(new Setting(DataSourceResource.DB_POOL_PASSWORD, "jumpmind"));
         return settings;
     }
 

@@ -11,8 +11,8 @@ import javax.annotation.PostConstruct;
 
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowVersion;
-import org.jumpmind.symmetric.is.core.model.ComponentFlowVersionSummary;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
+import org.jumpmind.symmetric.is.core.model.FlowVersionSummary;
 import org.jumpmind.symmetric.is.core.model.DeploymentStatus;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
@@ -341,9 +341,9 @@ public class OldManageView extends HorizontalLayout implements View {
             public void itemUpdated(Object item) {
                 Agent agent = getSingleSelection(Agent.class);
                 @SuppressWarnings("unchecked")
-                Set<ComponentFlowVersionSummary> selectedFlows = (Set<ComponentFlowVersionSummary>) item;
-                for (ComponentFlowVersionSummary componentFlowVersionSummary : selectedFlows) {
-                    ComponentFlowVersion componentFlowVersion = new ComponentFlowVersion();
+                Set<FlowVersionSummary> selectedFlows = (Set<FlowVersionSummary>) item;
+                for (FlowVersionSummary componentFlowVersionSummary : selectedFlows) {
+                    FlowVersion componentFlowVersion = new FlowVersion();
                     componentFlowVersion.setId(componentFlowVersionSummary.getId());
                     configurationService.refresh(componentFlowVersion);
                     agentManager.deploy(agent.getId(), componentFlowVersion);

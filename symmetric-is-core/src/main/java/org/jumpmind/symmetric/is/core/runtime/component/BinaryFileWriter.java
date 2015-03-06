@@ -9,14 +9,14 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnectionFactory;
-import org.jumpmind.symmetric.is.core.runtime.connection.localfile.IStreamableConnection;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
+import org.jumpmind.symmetric.is.core.runtime.resource.localfile.IStreamableResource;
 
 @ComponentDefinition(typeName = TextFileWriter.TYPE, category = ComponentCategory.WRITER,
         supports = { ComponentSupports.INPUT_MESSAGE },
-        connectionCategory = ConnectionCategory.RESOURCE)
+        resourceCategory = ResourceCategory.RESOURCE)
 public class BinaryFileWriter extends AbstractComponent {
 
     public static final String TYPE = "Binary File Writer";
@@ -45,8 +45,8 @@ public class BinaryFileWriter extends AbstractComponent {
     OutputStream outStream;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory) {
-        super.start(executionTracker, connectionFactory);
+    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
+        super.start(executionTracker, resourceFactory);
         applySettings();
     }
 
@@ -73,18 +73,18 @@ public class BinaryFileWriter extends AbstractComponent {
     }
 
     private void initStream() {
-        outStream = getOutputStream((IStreamableConnection) this.connection.reference());        
+        outStream = getOutputStream((IStreamableResource) this.resource.reference());        
     }
     
     private void applySettings() {
-        properties = componentNode.getComponentVersion().toTypedProperties(this, false);
+        properties = flowStep.getComponentVersion().toTypedProperties(this, false);
         relativePathAndFile = properties.get(BINARYFILEWRITER_RELATIVE_PATH);
         mustExist = properties.is(BINARYFILEWRITER_MUST_EXIST);
         append = properties.is(BINARYFILEWRITER_APPEND);
     }
 
 
-    private OutputStream getOutputStream(IStreamableConnection conn) {
+    private OutputStream getOutputStream(IStreamableResource conn) {
         conn.appendPath(relativePathAndFile, mustExist);
         return conn.getOutputStream();
     }

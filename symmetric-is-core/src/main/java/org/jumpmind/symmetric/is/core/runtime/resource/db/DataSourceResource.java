@@ -1,17 +1,17 @@
-package org.jumpmind.symmetric.is.core.runtime.connection.db;
+package org.jumpmind.symmetric.is.core.runtime.resource.db;
 
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ResettableBasicDataSource;
-import org.jumpmind.symmetric.is.core.model.Connection;
+import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionCategory;
-import org.jumpmind.symmetric.is.core.runtime.connection.ConnectionDefinition;
-import org.jumpmind.symmetric.is.core.runtime.connection.IConnection;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
+import org.jumpmind.symmetric.is.core.runtime.resource.ResourceDefinition;
 
-@ConnectionDefinition(typeName=DataSourceConnection.TYPE, connectionCategory=ConnectionCategory.DATASOURCE)
-public class DataSourceConnection extends AbstractRuntimeObject implements IConnection {
+@ResourceDefinition(typeName=DataSourceResource.TYPE, resourceCategory=ResourceCategory.DATASOURCE)
+public class DataSourceResource extends AbstractRuntimeObject implements IResource {
 
     public static final String TYPE = "Database";
     
@@ -60,8 +60,8 @@ public class DataSourceConnection extends AbstractRuntimeObject implements IConn
     @SettingDefinition(order = 140, type = Type.STRING, label = "Init Sql")
     public final static String DB_POOL_INIT_SQL = "db.init.sql";
 
-    @SettingDefinition(order = 150, type = Type.STRING, label = "Connection Properties")
-    public final static String DB_POOL_CONNECTION_PROPERTIES = "db.connection.properties";
+    @SettingDefinition(order = 150, type = Type.STRING, label = "Resource Properties")
+    public final static String DB_POOL_RESOURCE_PROPERTIES = "db.resource.properties";
 
     @SettingDefinition(order = 170, type = Type.INTEGER, defaultValue = "1000", label = "Fetch Size")
     public final static String DB_FETCH_SIZE = "db.fetch.size";
@@ -87,9 +87,9 @@ public class DataSourceConnection extends AbstractRuntimeObject implements IConn
     ResettableBasicDataSource dataSource = new ResettableBasicDataSource();
     
     @Override
-    public void start(Connection connection) {
+    public void start(Resource resource) {
         dataSource = BasicDataSourceFactory
-                .create(connection.toTypedProperties(this, false));
+                .create(resource.toTypedProperties(this, false));
     }
 
     @Override

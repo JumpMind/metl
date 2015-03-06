@@ -1,6 +1,6 @@
 package org.jumpmind.symmetric.is.core.model;
 
-public class Connection extends AbstractObjectWithSettings {
+public class Resource extends AbstractObjectWithSettings {
 
     private static final long serialVersionUID = 1L;
 
@@ -12,14 +12,14 @@ public class Connection extends AbstractObjectWithSettings {
 
     String folderId;
 
-    public Connection() {
+    public Resource() {
     }
 
-    public Connection(String id) {
+    public Resource(String id) {
     	this.id = id;
     }
     
-    public Connection(Folder folder, Setting... settings) {
+    public Resource(Folder folder, Setting... settings) {
         super(settings);
         setFolder(folder);
     }
@@ -63,7 +63,7 @@ public class Connection extends AbstractObjectWithSettings {
 
     @Override
     protected Setting createSettingData() {
-        return new ConnectionSetting(id);
+        return new ResourceSetting(id);
     }
 
     @Override
