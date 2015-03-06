@@ -14,8 +14,10 @@ import org.jumpmind.symmetric.is.core.model.Connection;
 public class FileStreamableConnection implements IStreamableConnection {
 
 	protected File file;
+	String basePath;
 	
 	public FileStreamableConnection(Connection connection, String basePath, boolean mustExist) {
+	    this.basePath = basePath;
 		file = new File(basePath);
 		if (!file.exists()) {
 			if (!mustExist) {
@@ -37,6 +39,11 @@ public class FileStreamableConnection implements IStreamableConnection {
 				throw new IoException("Could not find " + file.getAbsolutePath());
 			}
 		}
+	}
+	
+	@Override
+	public void resetPath() {
+	    file = new File(basePath);
 	}
 	
 	@Override

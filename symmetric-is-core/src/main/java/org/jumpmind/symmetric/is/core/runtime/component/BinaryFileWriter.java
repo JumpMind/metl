@@ -48,16 +48,21 @@ public class BinaryFileWriter extends AbstractComponent {
     public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory) {
         super.start(executionTracker, connectionFactory);
         applySettings();
-        outStream = getOutputStream((IStreamableConnection) this.connection.reference());
     }
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
         byte[] payload = (byte[]) inputMessage.getPayload();
+        if (inputMessage.getHeader().getSequenceNumber() == 1) {
+            initStream();
+        }
         try {
             outStream.write(payload);
         } catch (IOException e) {
             throw new IoException("Error writing to file" + e.getMessage());
+        }
+        if (inputMessage.getHeader().isLastMessage()) {
+            close();
         }
     }
 
@@ -67,6 +72,10 @@ public class BinaryFileWriter extends AbstractComponent {
         super.stop();
     }
 
+    private void initStream() {
+        outStream = getOutputStream((IStreamableConnection) this.connection.reference());        
+    }
+    
     private void applySettings() {
         properties = componentNode.getComponentVersion().toTypedProperties(this, false);
         relativePathAndFile = properties.get(BINARYFILEWRITER_RELATIVE_PATH);

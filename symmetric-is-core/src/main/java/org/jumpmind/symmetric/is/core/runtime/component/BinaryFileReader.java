@@ -50,21 +50,17 @@ public class BinaryFileReader extends AbstractComponent {
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
-        Message message = null;
+        int numberMessages = 0;
         ByteBuffer buffer = ByteBuffer.allocate(sizePerMessage * 1024);
         open();
         try {
             int bytesRead = 0;
-            //todo: set header variables for 1 of 2, 2 of 2, etc.
             while ((bytesRead = inStream.read(buffer.array())) != -1) {
-                message = new Message(componentNode.getId());
-
                 if (bytesRead == sizePerMessage * 1024) {
-                    message.setPayload(buffer.array().clone());
+                    initAndSendMessage(buffer.array().clone(), messageTarget, numberMessages, false);
                 } else {
-                    message.setPayload(trimByteArray(buffer.array(), bytesRead));
+                    initAndSendMessage(trimByteArray(buffer.array().clone(), bytesRead), messageTarget, numberMessages, true);
                 }
-                messageTarget.put(message);
                 buffer.clear();
             }
         } catch (IOException e) {
@@ -74,6 +70,16 @@ public class BinaryFileReader extends AbstractComponent {
         }
     }
 
+    private void initAndSendMessage(byte[] payload, IMessageTarget messageTarget,
+            int numberMessages, boolean lastMessage) {
+        numberMessages++;
+        Message message = new Message(componentNode.getId());
+        message.getHeader().setSequenceNumber(numberMessages);
+        message.getHeader().setLastMessage(lastMessage);
+        message.setPayload(payload);
+        messageTarget.put(message);
+    }
+    
     private void applySettings() {
         properties = componentNode.getComponentVersion().toTypedProperties(this, false);
         relativePathAndFile = properties.get(BINARYFILEREADER_RELATIVE_PATH);

@@ -57,13 +57,13 @@ public class TextFileWriter extends AbstractComponent {
     public void start(IExecutionTracker executionTracker, IConnectionFactory connectionFactory) {
         super.start(executionTracker, connectionFactory);
         applySettings();
-        outStream = getOutputStream((IStreamableConnection) this.connection.reference());
-        bufferedWriter = initializeWriter(outStream);
     }
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
-
+        if (inputMessage.getHeader().getSequenceNumber() == 1) {
+            initStreamAndWriter();
+        }
         ArrayList<String> recs = inputMessage.getPayload();
         try {
             for (String rec : recs) {
@@ -75,6 +75,9 @@ public class TextFileWriter extends AbstractComponent {
                 }
             }
             bufferedWriter.flush();
+            if (inputMessage.getHeader().isLastMessage()) {
+                close();
+            }
         } catch (IOException e) {
             throw new IoException("Error writing to file " + e.getMessage());
         }
@@ -86,6 +89,11 @@ public class TextFileWriter extends AbstractComponent {
         super.stop();
     }
 
+    private void initStreamAndWriter() {
+        outStream = getOutputStream((IStreamableConnection) this.connection.reference());
+        bufferedWriter = initializeWriter(outStream);        
+    }
+    
     private void applySettings() {
         properties = componentNode.getComponentVersion().toTypedProperties(this, false);
         relativePathAndFile = properties.get(TEXTFILEWRITER_RELATIVE_PATH);
@@ -95,6 +103,7 @@ public class TextFileWriter extends AbstractComponent {
     }
 
     private OutputStream getOutputStream(IStreamableConnection conn) {
+        conn.resetPath();
         conn.appendPath(relativePathAndFile, mustExist);
         return conn.getOutputStream();
     }

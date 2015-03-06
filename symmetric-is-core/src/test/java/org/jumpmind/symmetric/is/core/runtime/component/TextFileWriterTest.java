@@ -58,10 +58,10 @@ public class TextFileWriterTest {
         TextFileWriter writer = new TextFileWriter();
         writer.setComponentFlowNode(writerComponentFlowNode);
         writer.start(null, connectionFactory);
-        writer.handle(createSingleRowTextMessageToWrite(1), null);
-        writer.handle(createSingleRowTextMessageToWrite(2), null);
-        writer.handle(createSingleRowTextMessageToWrite(3), null);
-        writer.handle(createSingleRowTextMessageToWrite(4), null);
+        writer.handle(createSingleRowTextMessageToWrite(1, false), null);
+        writer.handle(createSingleRowTextMessageToWrite(2, false), null);
+        writer.handle(createSingleRowTextMessageToWrite(3, false), null);
+        writer.handle(createSingleRowTextMessageToWrite(4, true), null);
         checkTextFile();
     }
 
@@ -77,6 +77,8 @@ public class TextFileWriterTest {
 
     private static Message createMultipleRowTextMessageToWrite() {
         Message msg = new Message("originating node id");
+        msg.getHeader().setSequenceNumber(1);
+        msg.getHeader().setLastMessage(true);
         ArrayList<String> payload = new ArrayList<String>();
         payload.add("Line 1");
         payload.add("Line 2");
@@ -86,8 +88,10 @@ public class TextFileWriterTest {
         return msg;
     }
 
-    private static Message createSingleRowTextMessageToWrite(int lineNumber) {
+    private static Message createSingleRowTextMessageToWrite(int lineNumber, boolean lastMsg) {
         Message msg = new Message("originating node id");
+        msg.getHeader().setSequenceNumber(lineNumber);
+        msg.getHeader().setLastMessage(lastMsg);
         ArrayList<String> payload = new ArrayList<String>();
         payload.add("Line " + lineNumber);
         msg.setPayload(payload);

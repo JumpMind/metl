@@ -63,6 +63,8 @@ public class BinaryFileWriterTest {
         Message msg = new Message("originating node id");
         byte[] payload = FILE_DATA.getBytes();
         msg.setPayload(payload);
+        msg.getHeader().setSequenceNumber(1);
+        msg.getHeader().setLastMessage(true);
         return msg;
     }
 

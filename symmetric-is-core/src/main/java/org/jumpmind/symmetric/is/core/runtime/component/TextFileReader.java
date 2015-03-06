@@ -64,6 +64,7 @@ public class TextFileReader extends AbstractComponent {
         String currentLine;
         int linesRead = 0;
         int linesInMessage = 0;
+        int numberMessages = 0;
         open();
         try {
             reader = new BufferedReader(new InputStreamReader(inStream, encoding));
@@ -72,15 +73,14 @@ public class TextFileReader extends AbstractComponent {
                 linesRead++;
                 if (linesRead > textHeaderLinesToSkip) {
                     if (linesInMessage >= textRowsPerMessage) {
-                        initAndSendMessage(payload, messageTarget, linesInMessage);
+                        initAndSendMessage(payload, messageTarget, numberMessages, false);
+                        linesInMessage=0;
                     }
                     payload.add(currentLine);
                     linesInMessage++;
                 }
             }
-            if (linesInMessage > 0) {
-                initAndSendMessage(payload, messageTarget, linesInMessage);
-            }
+            initAndSendMessage(payload, messageTarget, numberMessages, true);
         } catch (IOException e) {
             throw new IoException("Error reading from file " + e.getMessage());
         } finally {
@@ -97,12 +97,14 @@ public class TextFileReader extends AbstractComponent {
     }
 
     private void initAndSendMessage(ArrayList<String> payload, IMessageTarget messageTarget,
-            int linesInMessage) {
+           int numberMessages, boolean lastMessage) {
+        numberMessages++;
         Message message = new Message(componentNode.getId());
+        message.getHeader().setSequenceNumber(numberMessages);
+        message.getHeader().setLastMessage(lastMessage);
         message.setPayload(new ArrayList<String>(payload));
         messageTarget.put(message);
         payload.clear();
-        linesInMessage = 0;
     }
 
     private void open() {

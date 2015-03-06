@@ -27,4 +27,6 @@ public interface IStreamableConnection {
     
     public void appendPath(String relativePath, boolean mustExist);
     
+    public void resetPath();
+    
 }
