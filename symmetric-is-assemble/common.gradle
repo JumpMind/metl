@@ -13,8 +13,8 @@ import org.apache.tools.ant.filters.ReplaceTokens
         log4jVersion = '1.2.17'
         slf4jVersion = '1.7.7'
         springVersion = '4.0.5.RELEASE'
-        vaadinVersion = '7.3.10'
-        jettyVersion = '9.2.1.v20140609'
+        vaadinVersion = '7.4.0'
+        jettyVersion = '9.2.9.v20150224'
         commonsLangVersion = '2.6'
         commonsDbcpVersion = '1.4'
         commonsIoVersion = '2.4'
@@ -37,8 +37,8 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
     repositories {
         mavenCentral()        
-        maven { url "http://repository.codehaus.org" }
-        maven { url "http://snapshots.repository.codehaus.org" }
+       // maven { url "http://repository.codehaus.org" }
+       // maven { url "http://snapshots.repository.codehaus.org" }
         maven { url "http://maven.vaadin.com/vaadin-addons" }
         maven { url "http://maven.jumpmind.com/repo" }
     }
