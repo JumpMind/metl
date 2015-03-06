@@ -286,7 +286,6 @@ public class WebServer {
         sessionManager.setLazyLoad(true);
         sessionManager.setDeleteUnrestorableSessions(true);
         sessionManager.setMaxInactiveInterval(10 * 60);
-        sessionManager.setStoreDirectory(new File(System.getProperty("java.io.tmpdir")));
         webapp.getSessionHandler().setSessionManager(sessionManager);
 
         webapp.getServletContext()
