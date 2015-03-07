@@ -22,7 +22,11 @@ public class ComponentVersion extends
     public ComponentVersion(String id) {
     	this.id = id;
     }
-    
+
+    public ComponentVersion(Component component) {
+        this(component, null, null, null);
+    }
+        
 	public ComponentVersion(Component component, Resource resource,
 			ModelVersion inputModelVersion, ModelVersion outputModelVersion,
 			Setting... settings) {

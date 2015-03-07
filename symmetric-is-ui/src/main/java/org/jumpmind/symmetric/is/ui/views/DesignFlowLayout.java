@@ -69,8 +69,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
     }
 
     protected void addComponent(Component component) {
-        ComponentVersion componentVersion = new ComponentVersion(component, null, null, null, null,
-                null);
+        ComponentVersion componentVersion = new ComponentVersion(component);
         componentVersion.setVersionName("version 1.0");
 
         component.setName(component.getType() + " "
