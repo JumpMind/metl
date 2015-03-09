@@ -39,9 +39,9 @@ public interface IConfigurationService {
     
     public void delete(FlowStepLink link);
     
-    public void delete(Resource resource);
+    public void delete(Resource resource);    
     
-    public boolean isDeployed(FlowVersion flowVersion);
+    public boolean isFlowVersionDeployed(String flowVersionId);
     
     public boolean isDeployed(Flow flow);
     

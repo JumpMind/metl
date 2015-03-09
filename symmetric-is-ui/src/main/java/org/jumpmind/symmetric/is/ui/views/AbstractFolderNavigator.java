@@ -529,5 +529,24 @@ abstract public class AbstractFolderNavigator extends Panel {
             }
         }
     }
+    
+    protected void expand(Folder folder, Object itemToSelect) {
+        List<Folder> toExpand = new ArrayList<Folder>();
+        toExpand.add(0, folder);
+        treeTable.unselect(folder);
+        while (folder != null) {
+            folder = folder.getParent();
+            if (folder != null) {
+                toExpand.add(0, folder);
+            }
+        }
+
+        for (Folder expandMe : toExpand) {
+            treeTable.setCollapsed(expandMe, false);
+        }
+
+        treeTable.focus();
+        treeTable.select(itemToSelect);
+    }
 
 }

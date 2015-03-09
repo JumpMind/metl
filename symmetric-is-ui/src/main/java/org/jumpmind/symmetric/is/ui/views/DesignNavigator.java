@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.ui.views;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.Flow;
@@ -12,8 +14,11 @@ import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
+import org.jumpmind.symmetric.ui.common.ConfirmDialog;
+import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -39,40 +44,33 @@ public class DesignNavigator extends AbstractFolderNavigator {
     }
 
     protected void addMenuButtons(MenuBar leftMenuBar, MenuBar rightMenuBar) {
-        newFlow = leftMenuBar.addItem("", Icons.FLOW, new Command() {
+        MenuItem newMenu = leftMenuBar.addItem("", FontAwesome.PLUS, null);
+
+        newFlow = newMenu.addItem("Flow", Icons.FLOW, new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 addNewFlow();
             }
         });
-        newFlow.setDescription("Add Flow");
 
-        newResource = leftMenuBar.addItem("", Icons.GENERAL_RESOURCE, null);
+        newResource = newMenu.addItem("Resource", Icons.GENERAL_RESOURCE, null);
         newResource.setDescription("Add Resource");
 
-        MenuItem newDbResource = newResource.addItem("Add Database", Icons.DATABASE, new Command() {
+        newResource.addItem("Database", Icons.DATABASE, new Command() {
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                addNewDatabase();
+            }
+        });
+
+        newModel = newMenu.addItem("Model", Icons.MODEL, new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
             }
         });
-        newDbResource.setDescription("Add Database Resource");
-
-        newModel = leftMenuBar.addItem("", Icons.MODEL, new Command() {
-
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-            }
-        });
-        newModel.setDescription("Add Model");
-    }
-
-    @Override
-    protected boolean isDeleteButtonEnabled(Object selected) {
-        boolean deleteButtonEnabled = super.isDeleteButtonEnabled(selected);
-
-        return deleteButtonEnabled;
     }
 
     @Override
@@ -106,6 +104,78 @@ public class DesignNavigator extends AbstractFolderNavigator {
         removeAllNonFolderChildren(folder);
         addResourcesToFolder(folder);
         addFlowsToFolder(folder);
+    }
+
+    protected void addNewDatabase() {
+        Folder folder = getSelectedFolder();
+        if (folder != null) {
+
+            Resource resource = new Resource();
+            resource.setName("Database");
+            resource.setType(DataSourceResource.TYPE);
+            configurationService.save(resource);
+
+            treeTable.addItem(resource);
+            treeTable.setItemIcon(resource, Icons.DATABASE);
+            treeTable.setParent(resource, folder);
+
+            treeTable.setCollapsed(folder, false);
+
+            startEditingItem(resource);
+        }
+    }
+
+    @Override
+    protected boolean isDeleteButtonEnabled(Object selected) {
+        boolean deleteButtonEnabled = super.isDeleteButtonEnabled(selected);
+        if (selected instanceof Flow) {
+            Flow flow = (Flow) selected;
+            if (!configurationService.isDeployed(flow)) {
+                deleteButtonEnabled |= true;
+            }
+        } else if (selected instanceof FlowVersion) {
+            if (!configurationService.isFlowVersionDeployed(((FlowVersion) selected).getId())) {
+                deleteButtonEnabled |= true;
+            }
+
+        } else if (selected instanceof FlowStep) {
+            if (!configurationService.isFlowVersionDeployed(((FlowStep) selected)
+                    .getFlowVersionId())) {
+                deleteButtonEnabled |= true;
+            }
+
+        }
+        deleteButtonEnabled |= super.isDeleteButtonEnabled(selected)
+                || selected instanceof Resource;
+        return deleteButtonEnabled;
+    }
+
+    @Override
+    protected void deleteTreeItems(Collection<Object> objects) {
+        final List<Object> treeItems = new ArrayList<Object>(objects);
+        if (treeItems.size() > 0) {
+            Object object = treeItems.remove(0);
+            if (object instanceof Flow) {
+                Flow flow = (Flow) object;
+                ConfirmDialog.show("Delete Flow?",
+                        "Are you sure you want to delete the " + flow.getName() + " flow?",
+                        new DeleteFlowConfirmationListener(flow, treeItems));
+            } else if (object instanceof Resource) {
+                Resource resource = (Resource) object;
+                ConfirmDialog.show("Delete Connection?", "Are you sure you want to delete the "
+                        + resource.getName() + " connection?",
+                        new DeleteResourceConfirmationListener(resource, treeItems));
+
+            } else if (object instanceof FlowStep) {
+                FlowStep flowStep = (FlowStep) object;
+                ConfirmDialog.show("Delete Step?", "Are you sure you want to delete the "
+                        + flowStep.getName() + " step?", new DeleteFlowStepConfirmationListener(
+                        flowStep, treeItems));
+
+            }
+
+        }
+
     }
 
     protected void addNewFlow() {
@@ -203,5 +273,83 @@ public class DesignNavigator extends AbstractFolderNavigator {
             flowVersionId = ((Flow) obj).getLatestFlowVersion().getId();
         }
         return flowVersionId;
+    }
+
+    class DeleteFlowConfirmationListener implements IConfirmListener {
+
+        Flow toDelete;
+
+        List<Object> alsoDelete;
+
+        private static final long serialVersionUID = 1L;
+
+        public DeleteFlowConfirmationListener(Flow toDelete, List<Object> alsoDelete) {
+            this.toDelete = toDelete;
+            this.alsoDelete = alsoDelete;
+        }
+
+        @Override
+        public boolean onOk() {
+            configurationService.delete(toDelete);
+            refresh();
+            expand(toDelete.getFolder(), toDelete.getFolder());
+            deleteTreeItems(alsoDelete);
+            return true;
+        }
+    }
+
+    class DeleteResourceConfirmationListener implements IConfirmListener {
+
+        Resource toDelete;
+
+        List<Object> alsoDelete;
+
+        private static final long serialVersionUID = 1L;
+
+        public DeleteResourceConfirmationListener(Resource toDelete, List<Object> alsoDelete) {
+            this.toDelete = toDelete;
+            this.alsoDelete = alsoDelete;
+        }
+
+        @Override
+        public boolean onOk() {
+            configurationService.delete(toDelete);
+            refresh();
+            expand(toDelete.getFolder(), toDelete.getFolder());
+            deleteTreeItems(alsoDelete);
+            return true;
+        }
+
+    }
+
+    class DeleteFlowStepConfirmationListener implements IConfirmListener {
+
+        FlowStep toDelete;
+
+        List<Object> alsoDelete;
+
+        private static final long serialVersionUID = 1L;
+
+        public DeleteFlowStepConfirmationListener(FlowStep toDelete, List<Object> alsoDelete) {
+            this.toDelete = toDelete;
+            this.alsoDelete = alsoDelete;
+        }
+
+        @Override
+        public boolean onOk() {
+            String flowVersionId = toDelete.getFlowVersionId();
+            FlowVersion flowVersion = configurationService.findFlowVersion(flowVersionId);
+
+            configurationService.delete(flowVersion, toDelete);
+            if (tabs.closeTab(flowVersionId)) {
+                openItem(configurationService.findFlowVersion(flowVersionId));
+            }
+
+            refresh();
+
+            deleteTreeItems(alsoDelete);
+
+            return true;
+        }
     }
 }

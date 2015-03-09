@@ -325,7 +325,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         for (Setting settingData : settings) {
             delete(settingData);
         }
-        delete(resource);
+        persistenceManager.delete(resource, null, null, tableName(Resource.class));
     }
 
     @Override
@@ -334,7 +334,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         for (Setting settingData : settings) {
             delete(settingData);
         }
-        delete(agent);
+        persistenceManager.delete(agent, null, null, tableName(Agent.class));
     }
 
     @Override
