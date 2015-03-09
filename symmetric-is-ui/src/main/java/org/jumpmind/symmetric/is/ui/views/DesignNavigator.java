@@ -23,6 +23,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
     MenuItem newFlow;
     MenuItem newResource;
     MenuItem newModel;
+    MenuItem run;
 
     TabbedApplicationPanel tabs;
     DesignComponentPalette designComponentPalette;
@@ -66,6 +67,15 @@ public class DesignNavigator extends AbstractFolderNavigator {
             }
         });
         newModel.setDescription("Add Model");
+        
+        run = leftMenuBar.addItem("", Icons.RUN, new Command() {
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                System.out.println("Hi!");
+                openExecution(selectedItem);
+            }
+        });
+        run.setDescription("Run on local agent");
     }
 
     @Override
@@ -80,6 +90,21 @@ public class DesignNavigator extends AbstractFolderNavigator {
                     designComponentPalette, designPropertySheet, this);
             tabs.addCloseableTab(
                     flowVersion.getFlow().getName() + " " + flowVersion.getName(),
+                    Icons.FLOW, flowLayout);
+        }
+    }
+
+    protected void openExecution(Object item) {
+        if (item instanceof ComponentFlow) {
+            item = ((ComponentFlow) item).getLatestComponentFlowVersion();
+        }
+
+        if (item instanceof ComponentFlowVersion) {
+            ComponentFlowVersion flowVersion = (ComponentFlowVersion) item;
+            DesignFlowLayout flowLayout = new DesignFlowLayout(configurationService, flowVersion,
+                    designComponentPalette, designPropertySheet, this);
+            tabs.addCloseableTab(
+                    flowVersion.getComponentFlow().getName() + " " + flowVersion.getName(),
                     Icons.FLOW, flowLayout);
         }
     }
