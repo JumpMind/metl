@@ -77,6 +77,13 @@ public class DesignNavigator extends AbstractFolderNavigator {
         });
         run.setDescription("Run on local agent");
     }
+    
+    @Override
+    protected boolean isDeleteButtonEnabled(Object selected) {
+        boolean deleteButtonEnabled = super.isDeleteButtonEnabled(selected);
+        
+        return deleteButtonEnabled;
+    }
 
     @Override
     protected void openItem(Object item) {

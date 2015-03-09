@@ -234,7 +234,8 @@ abstract public class AbstractFolderNavigator extends Panel {
                         itemClicked = null;
                     } else {
                         if (itemClicked != null && itemClicked.equals(event.getItemId())) {
-                            if (System.currentTimeMillis() - itemClickTimeInMs > 600) {
+                            long timeSinceClick = System.currentTimeMillis() - itemClickTimeInMs;
+                            if (timeSinceClick > 600 && timeSinceClick < 2000) {
                                 startEditingItem(itemClicked);
                             } else {
                                 itemClicked = null;
