@@ -43,6 +43,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
     AbstractConfigurationService(IPersistenceManager persistenceManager, String tablePrefix) {
         super(persistenceManager, tablePrefix);
     }
+    
+    @Override
+    public FlowVersion findFlowVersion(String id) {
+        FlowVersion flowVersion = new FlowVersion();
+        flowVersion.setId(id);
+        refresh(flowVersion);
+        return flowVersion;
+    }
 
     @Override
     public List<Folder> findFolders(FolderType type) {

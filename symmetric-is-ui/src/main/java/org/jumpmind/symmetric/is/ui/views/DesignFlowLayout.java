@@ -85,6 +85,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
 
         designPropertySheet.valueChange(componentVersion);
 
+        designNavigator.refresh();
        
     }
     

@@ -3,10 +3,11 @@ package org.jumpmind.symmetric.is.ui.views;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
-import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
+import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
 import org.jumpmind.symmetric.is.ui.common.Icons;
@@ -50,13 +51,12 @@ public class DesignNavigator extends AbstractFolderNavigator {
         newResource = leftMenuBar.addItem("", Icons.GENERAL_RESOURCE, null);
         newResource.setDescription("Add Resource");
 
-        MenuItem newDbResource = newResource.addItem("Add Database", Icons.DATABASE,
-                new Command() {
+        MenuItem newDbResource = newResource.addItem("Add Database", Icons.DATABASE, new Command() {
 
-                    @Override
-                    public void menuSelected(MenuItem selectedItem) {
-                    }
-                });
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+            }
+        });
         newDbResource.setDescription("Add Database Resource");
 
         newModel = leftMenuBar.addItem("", Icons.MODEL, new Command() {
@@ -67,11 +67,11 @@ public class DesignNavigator extends AbstractFolderNavigator {
         });
         newModel.setDescription("Add Model");
     }
-    
+
     @Override
     protected boolean isDeleteButtonEnabled(Object selected) {
         boolean deleteButtonEnabled = super.isDeleteButtonEnabled(selected);
-        
+
         return deleteButtonEnabled;
     }
 
@@ -85,9 +85,8 @@ public class DesignNavigator extends AbstractFolderNavigator {
             FlowVersion flowVersion = (FlowVersion) item;
             DesignFlowLayout flowLayout = new DesignFlowLayout(configurationService, flowVersion,
                     designComponentPalette, designPropertySheet, this);
-            tabs.addCloseableTab(
-                    flowVersion.getFlow().getName() + " " + flowVersion.getName(),
-                    Icons.FLOW, flowLayout);
+            tabs.addCloseableTab(flowVersion.getId(), flowVersion.getFlow().getName() + " "
+                    + flowVersion.getName(), Icons.FLOW, flowLayout);
         }
     }
 
@@ -98,6 +97,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
         newFlow.setEnabled(enabled);
         newResource.setEnabled(enabled);
         newModel.setEnabled(enabled);
+
     }
 
     @Override
@@ -105,7 +105,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
         super.folderExpanded(folder);
         removeAllNonFolderChildren(folder);
         addResourcesToFolder(folder);
-        addComponentFlowsToFolder(folder);
+        addFlowsToFolder(folder);
     }
 
     protected void addNewFlow() {
@@ -148,7 +148,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
     }
 
-    protected void addComponentFlowsToFolder(Folder folder) {
+    protected void addFlowsToFolder(Folder folder) {
         List<Flow> flows = configurationService.findFlowsInFolder(folder);
         for (Flow flow : flows) {
             this.treeTable.addItem(flow);
@@ -156,15 +156,52 @@ public class DesignNavigator extends AbstractFolderNavigator {
             this.treeTable.setParent(flow, folder);
 
             List<FlowVersion> versions = flow.getFlowVersions();
-            for (FlowVersion componentFlowVersion : versions) {
-                this.treeTable.addItem(componentFlowVersion);
-                this.treeTable.setItemCaption(componentFlowVersion,
-                        componentFlowVersion.getVersionName());
-                this.treeTable.setItemIcon(componentFlowVersion, Icons.FLOW_VERSION);
-                this.treeTable.setParent(componentFlowVersion, flow);
-                this.treeTable.setChildrenAllowed(componentFlowVersion, false);
+            for (FlowVersion flowVersion : versions) {
+                this.treeTable.addItem(flowVersion);
+                this.treeTable.setItemCaption(flowVersion, flowVersion.getVersionName());
+                this.treeTable.setItemIcon(flowVersion, Icons.FLOW_VERSION);
+                this.treeTable.setParent(flowVersion, flow);
+
+                List<FlowStep> flowSteps = flowVersion.getFlowSteps();
+
+                this.treeTable.setChildrenAllowed(flowVersion, flowSteps.size() > 0);
+
+                for (FlowStep flowStep : flowSteps) {
+                    this.treeTable.addItem(flowStep);
+                    this.treeTable.setItemCaption(flowStep, flowStep.getName());
+                    this.treeTable.setItemIcon(flowStep, Icons.COMPONENT);
+                    this.treeTable.setParent(flowStep, flowVersion);
+                    this.treeTable.setChildrenAllowed(flowStep, false);
+                }
             }
         }
     }
 
+    @Override
+    protected void finishEditingItem() {
+        Object beingEditted = itemBeingEdited;
+        super.finishEditingItem();
+        String flowVersionId = getFlowVersionIdFor(beingEditted);
+        if (flowVersionId != null) {
+            if (tabs.closeTab(flowVersionId)) {
+                openItem(configurationService.findFlowVersion(flowVersionId));
+            }
+        }
+    }
+
+    protected String getFlowVersionIdFor(Object obj) {
+        String flowVersionId = null;
+        if (obj instanceof FlowStep) {
+            flowVersionId = ((FlowStep) obj).getFlowVersionId();
+        }
+
+        if (obj instanceof FlowVersion) {
+            flowVersionId = ((FlowVersion) obj).getId();
+        }
+
+        if (obj instanceof Flow) {
+            flowVersionId = ((Flow) obj).getLatestFlowVersion().getId();
+        }
+        return flowVersionId;
+    }
 }

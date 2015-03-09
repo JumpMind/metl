@@ -24,6 +24,8 @@ import org.jumpmind.symmetric.is.core.model.ModelVersion;
 public interface IConfigurationService {
 
     public List<Folder> findFolders(FolderType type);
+    
+    public FlowVersion findFlowVersion(String id);
 
     public void deleteFolder(String folderId);
 
