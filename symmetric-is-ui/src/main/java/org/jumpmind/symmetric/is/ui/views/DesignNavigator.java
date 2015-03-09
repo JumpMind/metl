@@ -4,13 +4,14 @@ import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
-import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
+import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
+import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.ui.MenuBar;
@@ -71,8 +72,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
         run = leftMenuBar.addItem("", Icons.RUN, new Command() {
             @Override
             public void menuSelected(MenuItem selectedItem) {
-                System.out.println("Hi!");
-                openExecution(selectedItem);
+                openExecution();
             }
         });
         run.setDescription("Run on local agent");
@@ -101,18 +101,18 @@ public class DesignNavigator extends AbstractFolderNavigator {
         }
     }
 
-    protected void openExecution(Object item) {
-        if (item instanceof ComponentFlow) {
-            item = ((ComponentFlow) item).getLatestComponentFlowVersion();
+    protected void openExecution() {
+    	Object item = treeTable.getValue();
+        if (item instanceof Flow) {
+            item = ((Flow) item).getLatestFlowVersion();
         }
 
-        if (item instanceof ComponentFlowVersion) {
-            ComponentFlowVersion flowVersion = (ComponentFlowVersion) item;
-            DesignFlowLayout flowLayout = new DesignFlowLayout(configurationService, flowVersion,
-                    designComponentPalette, designPropertySheet, this);
+        if (item instanceof FlowVersion) {
+            FlowVersion flowVersion = (FlowVersion) item;
+            ExecutionLogPanel logPanel = new ExecutionLogPanel(flowVersion);
             tabs.addCloseableTab(
-                    flowVersion.getComponentFlow().getName() + " " + flowVersion.getName(),
-                    Icons.FLOW, flowLayout);
+                    "Run " + flowVersion.getFlow().getName() + " " + flowVersion.getName(),
+                    Icons.RUN, logPanel);
         }
     }
 
