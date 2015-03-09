@@ -9,6 +9,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.ui.common.Category;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.is.ui.common.TopBarLink;
+import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
 import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -36,6 +37,9 @@ public class DesignView extends HorizontalLayout implements View {
 
     @Autowired
     IResourceFactory resourceFactory;
+    
+    @Autowired
+    BackgroundRefresherService backgroundRefresherService;
 
     DesignNavigator designNavigator;
 
@@ -65,7 +69,7 @@ public class DesignView extends HorizontalLayout implements View {
                 resourceFactory);
 
         DesignComponentPalette designComponentPalette = new DesignComponentPalette(componentFactory, leftTopBottomSplit);
-        designNavigator = new DesignNavigator(FolderType.DESIGN, configurationService, tabs,
+        designNavigator = new DesignNavigator(backgroundRefresherService, configurationService, tabs,
                 designComponentPalette, designPropertySheet);
         leftTopBottomSplit.setFirstComponent(designNavigator);
         leftTopBottomSplit.setSecondComponent(designComponentPalette);

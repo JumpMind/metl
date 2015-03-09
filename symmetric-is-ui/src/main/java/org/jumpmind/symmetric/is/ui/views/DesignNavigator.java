@@ -14,6 +14,7 @@ import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
+import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 
@@ -33,11 +34,13 @@ public class DesignNavigator extends AbstractFolderNavigator {
     TabbedApplicationPanel tabs;
     DesignComponentPalette designComponentPalette;
     DesignPropertySheet designPropertySheet;
+    BackgroundRefresherService backgroundRefresherService;
 
-    public DesignNavigator(FolderType folderType, IConfigurationService configurationService,
-            TabbedApplicationPanel tabs, DesignComponentPalette designComponentPalette,
-            DesignPropertySheet designPropertySheet) {
-        super(folderType, configurationService);
+    public DesignNavigator(BackgroundRefresherService backgroundRefreserService,
+            IConfigurationService configurationService, TabbedApplicationPanel tabs,
+            DesignComponentPalette designComponentPalette, DesignPropertySheet designPropertySheet) {
+        super(FolderType.DESIGN, configurationService);
+        this.backgroundRefresherService = backgroundRefreserService;
         this.designComponentPalette = designComponentPalette;
         this.designPropertySheet = designPropertySheet;
         this.tabs = tabs;
@@ -81,8 +84,9 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
         if (item instanceof FlowVersion) {
             FlowVersion flowVersion = (FlowVersion) item;
-            DesignFlowLayout flowLayout = new DesignFlowLayout(configurationService, flowVersion,
-                    designComponentPalette, designPropertySheet, this);
+            DesignFlowLayout flowLayout = new DesignFlowLayout(backgroundRefresherService,
+                    configurationService, flowVersion, designComponentPalette, designPropertySheet,
+                    this);
             tabs.addCloseableTab(flowVersion.getId(), flowVersion.getFlow().getName() + " "
                     + flowVersion.getName(), Icons.FLOW, flowLayout);
         }
