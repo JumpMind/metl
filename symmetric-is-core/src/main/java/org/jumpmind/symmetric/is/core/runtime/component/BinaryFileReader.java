@@ -17,7 +17,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.localfile.IStreamableReso
 
 @ComponentDefinition(typeName = BinaryFileReader.TYPE, category = ComponentCategory.READER,
         supports = { ComponentSupports.OUTPUT_MESSAGE },
-        resourceCategory = ResourceCategory.RESOURCE)
+        resourceCategory = ResourceCategory.STREAMABLE)
 public class BinaryFileReader extends AbstractComponent {
 
     public static final String TYPE = "Binary File Reader";

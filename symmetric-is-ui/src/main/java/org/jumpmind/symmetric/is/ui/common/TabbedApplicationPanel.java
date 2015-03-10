@@ -77,6 +77,8 @@ public class TabbedApplicationPanel extends TabSheet {
             setSelectedTab(tab);
             tabsById.put(id, tab);
             contentToId.put(component, id);
+        } else {
+            setSelectedTab(tab);
         }
 
     }

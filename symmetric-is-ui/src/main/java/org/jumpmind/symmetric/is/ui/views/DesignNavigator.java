@@ -300,7 +300,10 @@ public class DesignNavigator extends AbstractFolderNavigator {
         }
 
         if (obj instanceof Flow) {
-            flowVersionId = ((Flow) obj).getLatestFlowVersion().getId();
+            FlowVersion version = ((Flow) obj).getLatestFlowVersion();
+            if (version != null) {
+                flowVersionId = version.getId();
+            }
         }
         return flowVersionId;
     }

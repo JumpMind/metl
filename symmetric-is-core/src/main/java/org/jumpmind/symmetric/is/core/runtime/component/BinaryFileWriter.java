@@ -16,7 +16,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.localfile.IStreamableReso
 
 @ComponentDefinition(typeName = TextFileWriter.TYPE, category = ComponentCategory.WRITER,
         supports = { ComponentSupports.INPUT_MESSAGE },
-        resourceCategory = ResourceCategory.RESOURCE)
+        resourceCategory = ResourceCategory.STREAMABLE)
 public class BinaryFileWriter extends AbstractComponent {
 
     public static final String TYPE = "Binary File Writer";

@@ -1,19 +1,24 @@
 package org.jumpmind.symmetric.is.ui.views;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObjectWithSettings;
 import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
+import org.jumpmind.symmetric.is.core.runtime.component.ComponentSupports;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.symmetric.ui.common.SqlField;
 import org.slf4j.Logger;
@@ -54,7 +59,7 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
     public void valueChange(ValueChangeEvent event) {
         valueChange(event.getProperty().getValue());
     }
-    
+
     protected void valueChange(Object obj) {
         FormLayout formLayout = new FormLayout();
         formLayout.setWidth(100, Unit.PERCENTAGE);
@@ -63,20 +68,89 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
 
         if (obj != null) {
             if (obj instanceof FlowStep) {
-                obj = ((FlowStep)obj).getComponentVersion();
+                obj = ((FlowStep) obj).getComponentVersion();
             }
             
-            Map<String, SettingDefinition> settings = buildSettings(obj);
-            Set<String> keys = settings.keySet();
-            for (String key : keys) {
-                SettingDefinition definition = settings.get(key);
-                if (obj instanceof AbstractObjectWithSettings) {
-                    addSettingField(key, definition, (AbstractObjectWithSettings) obj,
-                            formLayout);
+            if (obj instanceof ComponentVersion) {
+                addComponentVersionProperties(formLayout, (ComponentVersion) obj);
+            } else if (obj instanceof FlowVersion) {
+                addFlowVersionSpecificProperties(formLayout, (FlowVersion)obj);
+            }
+
+            if (obj instanceof AbstractObjectWithSettings) {
+                Map<String, SettingDefinition> settings = buildSettings(obj);
+                Set<String> keys = settings.keySet();
+                for (String key : keys) {
+                    SettingDefinition definition = settings.get(key);
+                    addSettingField(key, definition, (AbstractObjectWithSettings) obj, formLayout);
                 }
             }
         }
         setContent(formLayout);
+    }
+    
+    protected void addComponentVersionProperties(FormLayout formLayout, ComponentVersion version) {
+        ComponentDefinition definition = componentFactory.getComponentDefinitionForComponentType(version.getComponent()
+                .getType());
+
+        addResourceCombo(formLayout, version);
+        
+        ComponentSupports[] supports = definition.supports();
+        if (supports != null) {
+            for (ComponentSupports support : supports) {
+                switch (support) {
+                    case INPUT_MODEL:                                
+                        break;
+                    case OUTPUT_MODEL:                                
+                        break;
+                    case INPUT_MESSAGE:
+                        break;
+                    case OUTPUT_MESSAGE:
+                        break;
+                    default:
+                        break;
+                } 
+            }
+        }
+    }
+    
+    protected void addFlowVersionSpecificProperties(FormLayout formLayout, FlowVersion version) {
+        
+    }
+    
+    protected void addResourceCombo(FormLayout formLayout, final ComponentVersion version) {
+        ComponentDefinition componentDefintion = componentFactory
+                .getComponentDefinitionForComponentType(version.getComponent().getType());
+        if (componentDefintion.resourceCategory() != null
+                && componentDefintion.resourceCategory() != ResourceCategory.NONE) {
+            final AbstractSelect resourcesCombo = new ComboBox("Resource");
+            resourcesCombo.setImmediate(true);
+            resourcesCombo.setRequired(true);
+            List<String> types = resourceFactory.getResourceTypes(componentDefintion
+                    .resourceCategory());
+            if (types != null) {
+                List<Resource> resources = configurationService.findResourcesByTypes(types
+                        .toArray(new String[types.size()]));
+                if (resources != null) {
+                    for (Resource resource : resources) {
+                        resourcesCombo.addItem(resource);
+                    }
+
+                    resourcesCombo.setValue(version.getResource());
+                }
+            }
+            resourcesCombo.addValueChangeListener(new ValueChangeListener() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void valueChange(ValueChangeEvent event) {
+                    version.setResource((Resource) resourcesCombo.getValue());
+                    configurationService.save(version);
+                }
+            });
+
+            formLayout.addComponent(resourcesCombo);
+        }
     }
 
     protected Map<String, SettingDefinition> buildSettings(Object obj) {
@@ -86,8 +160,7 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
                     .getType());
         } else if (obj instanceof Resource) {
             Resource resource = (Resource) obj;
-            return resourceFactory.getSettingDefinitionsForResourceType(resource
-                    .getType());
+            return resourceFactory.getSettingDefinitionsForResourceType(resource.getType());
         } else {
             return new HashMap<String, SettingDefinition>();
         }

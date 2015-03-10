@@ -9,7 +9,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceDefinition;
 
-@ResourceDefinition(typeName=DASNASResource.TYPE, resourceCategory=ResourceCategory.RESOURCE)
+@ResourceDefinition(typeName=DASNASResource.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
 public class DASNASResource extends AbstractRuntimeObject implements
 		IResource {
 
