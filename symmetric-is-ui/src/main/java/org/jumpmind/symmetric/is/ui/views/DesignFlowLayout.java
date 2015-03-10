@@ -85,8 +85,8 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
     protected int countComponentsOfType(String type) {
         int count = 0;
         List<FlowStep> nodes = componentFlowVersion.getFlowSteps();
-        for (FlowStep componentFlowNode : nodes) {
-            if (componentFlowNode.getComponentVersion().getComponent().getType().equals(type)) {
+        for (FlowStep componentflowStep : nodes) {
+            if (componentflowStep.getComponentVersion().getComponent().getType().equals(type)) {
                 count++;
             }
         }
@@ -100,11 +100,11 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
         component.setName(component.getType() + " "
                 + (countComponentsOfType(component.getType()) + 1));
 
-        FlowStep componentFlowNode = new FlowStep(componentVersion);
-        componentFlowNode.setFlowVersionId(componentFlowVersion.getId());
-        componentFlowVersion.getFlowSteps().add(componentFlowNode);
+        FlowStep componentflowStep = new FlowStep(componentVersion);
+        componentflowStep.setFlowVersionId(componentFlowVersion.getId());
+        componentFlowVersion.getFlowSteps().add(componentflowStep);
 
-        configurationService.save(componentFlowNode);
+        configurationService.save(componentflowStep);
 
         redrawFlow();
 
@@ -125,15 +125,15 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
 
         List<FlowStepLink> links = componentFlowVersion.getFlowStepLinks();
 
-        List<FlowStep> flowNodes = componentFlowVersion.getFlowSteps();
-        for (FlowStep flowNode : flowNodes) {
+        List<FlowStep> flowSteps = componentFlowVersion.getFlowSteps();
+        for (FlowStep flowStep : flowSteps) {
             Node node = new Node();
-            String name = flowNode.getComponentVersion().getComponent().getName();
-            String type = flowNode.getComponentVersion().getComponent().getType();
+            String name = flowStep.getComponentVersion().getComponent().getName();
+            String type = flowStep.getComponentVersion().getComponent().getType();
             node.setText(name + "<br><i>" + type + "</i>");
-            node.setId(flowNode.getId());
-            node.setX(flowNode.getX());
-            node.setY(flowNode.getY());
+            node.setId(flowStep.getId());
+            node.setX(flowStep.getX());
+            node.setY(flowStep.getY());
             diagram.addNode(node);
 
             for (FlowStepLink link : links) {
@@ -154,16 +154,17 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
             if (e instanceof NodeSelectedEvent) {
                 NodeSelectedEvent event = (NodeSelectedEvent) e;
                 Node node = event.getNode();
-                FlowStep flowNode = componentFlowVersion.findFlowStepWithId(node.getId());
-                designPropertySheet.valueChange(flowNode.getComponentVersion());
+                FlowStep flowStep = componentFlowVersion.findFlowStepWithId(node.getId());
+                designPropertySheet.valueChange(flowStep.getComponentVersion());
+                designNavigator.select(flowStep);
 
             } else if (e instanceof NodeMovedEvent) {
                 NodeMovedEvent event = (NodeMovedEvent) e;
                 Node node = event.getNode();
-                FlowStep flowNode = componentFlowVersion.findFlowStepWithId(node.getId());
-                if (flowNode != null) {
-                    flowNode.setX(node.getX());
-                    flowNode.setY(node.getY());
+                FlowStep flowStep = componentFlowVersion.findFlowStepWithId(node.getId());
+                if (flowStep != null) {
+                    flowStep.setX(node.getX());
+                    flowStep.setY(node.getY());
                 }
                 configurationService.save(componentFlowVersion);
 

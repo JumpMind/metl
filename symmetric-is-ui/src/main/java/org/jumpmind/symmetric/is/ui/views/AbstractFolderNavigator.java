@@ -75,6 +75,10 @@ abstract public class AbstractFolderNavigator extends Panel {
     AbstractObject itemClicked;
 
     long itemClickTimeInMs;
+    
+    ShortcutListener treeTableEnterKeyShortcutListener;
+    
+    ShortcutListener treeTableDeleteKeyShortcutListener;
 
     public AbstractFolderNavigator(FolderType folderType, IConfigurationService configurationService) {
 
@@ -95,6 +99,19 @@ abstract public class AbstractFolderNavigator extends Panel {
         content.addComponent(treeTable);
         content.setExpandRatio(treeTable, 1);
 
+    }
+    
+    public void select(Object obj) {
+        Object parent = obj;
+        do {
+            parent = treeTable.getParent(parent);
+            if (parent != null) {
+                treeTable.setCollapsed(parent, false);
+            }
+        }
+        while (parent != null);
+        
+        treeTable.select(obj);
     }
 
     public void addValueChangeListener(ValueChangeListener listener) {
@@ -191,7 +208,8 @@ abstract public class AbstractFolderNavigator extends Panel {
         });
         table.setVisibleColumns(new Object[] { "name" });
         table.setColumnExpandRatio("name", 1);
-        table.addShortcutListener(new ShortcutListener("Delete", KeyCode.DELETE, null) {
+        
+        treeTableDeleteKeyShortcutListener = new ShortcutListener("Delete", KeyCode.DELETE, null) {
 
             private static final long serialVersionUID = 1L;
 
@@ -201,9 +219,10 @@ abstract public class AbstractFolderNavigator extends Panel {
                     handleDelete();
                 }
             }
-        });
+        };
+        table.addShortcutListener(treeTableDeleteKeyShortcutListener);
 
-        table.addShortcutListener(new ShortcutListener("Enter", KeyCode.ENTER, null) {
+        treeTableEnterKeyShortcutListener = new ShortcutListener("Enter", KeyCode.ENTER, null) {
 
             private static final long serialVersionUID = 1L;
 
@@ -214,7 +233,8 @@ abstract public class AbstractFolderNavigator extends Panel {
                     openItem(object);
                 }
             }
-        });
+        }; 
+        table.addShortcutListener(treeTableEnterKeyShortcutListener);
         table.addValueChangeListener(new ValueChangeListener() {
             private static final long serialVersionUID = 1L;
 
@@ -291,6 +311,8 @@ abstract public class AbstractFolderNavigator extends Panel {
 
     protected boolean startEditingItem(AbstractObject obj) {
         if (obj.isSettingNameAllowed()) {
+            treeTable.removeShortcutListener(treeTableDeleteKeyShortcutListener);
+            treeTable.removeShortcutListener(treeTableEnterKeyShortcutListener);
             itemBeingEdited = obj;
             treeTable.refreshRowCache();
             return true;
@@ -300,8 +322,11 @@ abstract public class AbstractFolderNavigator extends Panel {
 
     }
 
-    protected void finishEditingItem() {
+    protected void finishEditingItem() {        
         if (itemBeingEdited != null) {
+            treeTable.addShortcutListener(treeTableDeleteKeyShortcutListener);
+            treeTable.addShortcutListener(treeTableEnterKeyShortcutListener);
+
             Object selected = itemBeingEdited;
             Method method = null;
             try {

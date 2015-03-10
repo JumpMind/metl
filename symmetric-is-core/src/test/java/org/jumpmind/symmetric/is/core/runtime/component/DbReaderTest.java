@@ -121,11 +121,10 @@ public class DbReaderTest {
         MessageTarget msgTarget = new MessageTarget();
         reader.handle(msg, msgTarget);
 
-        /* 3 messages, 3 rows - 2 rows in msg 1, 1 row in msg 2, shutdown msg */
         assertEquals(3, msgTarget.getTargetMessageCount());
         ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
         assertEquals("test row 1", payload.get(0).get("COL2"));
-        assertEquals(true, msgTarget.getMessage(2) instanceof ShutdownMessage);
+        assertEquals("test row x", payload.get(1).get("COLY"));
     }
 
     @Test
@@ -142,10 +141,11 @@ public class DbReaderTest {
         MessageTarget msgTarget = new MessageTarget();
         reader.handle(message, msgTarget);
 
-        /* 2 messages, 3 rows - 2 rows in msg 1, 1 row in msg 2, no shutdown yet */
-        assertEquals(2, msgTarget.getTargetMessageCount());
+        /* 3 messages - 2 rows a piece (one from table x, one from table y) */
+        assertEquals(3, msgTarget.getTargetMessageCount());
         payload = msgTarget.getMessage(0).getPayload();
         assertEquals("test row 1", payload.get(0).get("COL2"));
+        assertEquals("test row x", payload.get(1).get("COLY"));
     }
 
     @Test
@@ -189,7 +189,8 @@ public class DbReaderTest {
 
         Setting[] settingData = new Setting[2];
         settingData[0] = new Setting(DbReader.SQL,
-                "select * From test_table_1 order by col1");
+                "select * From test_table_1 tt1 inner join test_table_2 tt2"
+                + " on tt1.col1 = tt2.colx order by tt1.col1");
         settingData[1] = new Setting(DbReader.ROWS_PER_MESSAGE, "2");
 
         return settingData;
@@ -217,8 +218,10 @@ public class DbReaderTest {
     private static Database createTestDatabase() {
 
         Table testTable1 = createTestTable1();
+        Table testTable2 = createTestTable2();
         Database database = new Database();
         database.addTable(testTable1);
+        database.addTable(testTable2);
         return database;
     }
 
@@ -230,6 +233,19 @@ public class DbReaderTest {
         columns.add(new Column("col1", true, Types.INTEGER, 4, 1));
         columns.add(new Column("col2", false, Types.VARCHAR, 50, 50));
         columns.add(new Column("col3", false, Types.DECIMAL, 9, 2));
+
+        table.addColumns(columns);
+        return table;
+    }
+    
+    private static Table createTestTable2() {
+
+        Table table = new Table("test_table_2");
+
+        List<Column> columns = new ArrayList<Column>();
+        columns.add(new Column("colx", true, Types.INTEGER, 4, 1));
+        columns.add(new Column("coly", false, Types.VARCHAR, 50, 50));
+        columns.add(new Column("colz", false, Types.DECIMAL, 9, 2));
 
         table.addColumns(columns);
         return table;
@@ -246,7 +262,15 @@ public class DbReaderTest {
                 statement.getValueArray(new Object[] { 2, "test row 2", 8.8 }, new Object[] { 1 }));
         template.update(statement.getSql(),
                 statement.getValueArray(new Object[] { 3, "test row 3", 9.9 }, new Object[] { 1 }));
-
+        
+        statement = platform.createDmlStatement(DmlType.INSERT, database.findTable("test_table_2"),null);
+        template.update(statement.getSql(),
+                statement.getValueArray(new Object[] { 1, "test row x", 7.7 }, new Object[] { 1 }));
+        template.update(statement.getSql(),
+                statement.getValueArray(new Object[] { 2, "test row y", 8.8 }, new Object[] { 1 }));
+        template.update(statement.getSql(),
+                statement.getValueArray(new Object[] { 3, "test row z", 9.9 }, new Object[] { 1 }));
+        
     }
 
     class MessageTarget implements IMessageTarget {

@@ -86,7 +86,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
         });
         run.setDescription("Run on local agent");
     }
-
+    
     @Override
     protected void openItem(Object item) {
         if (item instanceof Flow) {
