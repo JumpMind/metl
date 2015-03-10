@@ -5,6 +5,7 @@ import java.util.List;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Execution;
+import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 
 public interface IExecutionService {
 
@@ -14,4 +15,6 @@ public interface IExecutionService {
     
     public void saveExecutionStatus(Execution execution);
     
+    public List<ExecutionStepLog> findExecutionStepLog(List<String> executionStepIds);
+
 }

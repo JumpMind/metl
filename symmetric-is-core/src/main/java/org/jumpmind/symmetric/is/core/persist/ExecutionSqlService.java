@@ -3,14 +3,17 @@ package org.jumpmind.symmetric.is.core.persist;
 import java.util.List;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
+import org.jumpmind.db.sql.ISqlRowMapper;
 import org.jumpmind.db.sql.ISqlTemplate;
+import org.jumpmind.db.sql.Row;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Execution;
 import org.jumpmind.symmetric.is.core.model.ExecutionStatus;
+import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 
-public class ExecutionSqlService extends AbstractExecutionService {
+public class ExecutionSqlService extends AbstractExecutionService implements IExecutionService {
 
     IDatabasePlatform databasePlatform;
 
@@ -36,6 +39,34 @@ public class ExecutionSqlService extends AbstractExecutionService {
         } else {
             return null;
         }
+    }
+
+    public List<ExecutionStepLog> findExecutionStepLog(List<String> executionStepIds) {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        StringBuilder inClause = new StringBuilder("(");
+        for (int i = 0; i < executionStepIds.size(); i++) {
+        	inClause.append("'").append(executionStepIds.get(i)).append("'");
+        	if (i + 1 < executionStepIds.size()) {
+        		inClause.append(",");
+        	}
+        }
+        return template.query(String.format(
+        		"select id, execution_step_id, category, level, log_text, create_time " +
+                "from %1$s_execution_step_log " +
+                "where execution_step_id in " + inClause.toString() + " order by create_time",
+                tablePrefix), new ISqlRowMapper<ExecutionStepLog>() {
+                    @Override
+                    public ExecutionStepLog mapRow(Row row) {
+                    	ExecutionStepLog e = new ExecutionStepLog();
+                    	e.setId(row.getString("id"));
+                    	e.setExecutionStepId(row.getString("executionStepId"));
+                    	e.setCategory(row.getString("category"));
+                    	e.setLevel(row.getString("level"));
+                    	e.setLogText(row.getString("log_text"));
+                    	e.setCreateTime(row.getDateTime("create_time"));
+                        return e;
+                    }
+                });    	
     }
 
     @Override
