@@ -124,7 +124,8 @@ public class DbReader extends AbstractComponent {
                                                 + "Try using hints to specify a column's table name as part of the SQL query.");
                             }
                             if (outputRecCount == 0) {
-                                checkTableAndColumnAgainstOutputModel(tableName, columnName);
+//                                checkTableAndColumnAgainstOutputModel(tableName, columnName);
+//TODO: check model.  fix npe if we don't have a model at all...                                
                             }
                             EntityData record = records.get(tableName);
                             if (record == null) {
