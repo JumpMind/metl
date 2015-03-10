@@ -3,21 +3,24 @@ package org.jumpmind.symmetric.is.ui.views;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.Component;
+import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
-import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.ui.diagram.ResourceEvent;
+import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
+import org.jumpmind.symmetric.is.ui.diagram.ResourceEvent;
+import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 
-public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
+public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBackgroundRefreshable {
 
     private static final long serialVersionUID = 1L;
 
@@ -30,24 +33,46 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
     DesignPropertySheet designPropertySheet;
 
     DesignNavigator designNavigator;
-    
+
     Diagram diagram;
 
-    public DesignFlowLayout(IConfigurationService configurationService,
-            FlowVersion componentFlowVersion,
+    BackgroundRefresherService backgroundRefresherService;
+
+    int count = 0;
+
+    Label label = new Label();
+
+    public DesignFlowLayout(BackgroundRefresherService backgroundRefresherService,
+            IConfigurationService configurationService, FlowVersion componentFlowVersion,
             DesignComponentPalette designComponentPalette, DesignPropertySheet designPropertySheet,
             DesignNavigator designNavigator) {
+        this.backgroundRefresherService = backgroundRefresherService;
         this.configurationService = configurationService;
         this.componentFlowVersion = componentFlowVersion;
         this.designComponentPalette = designComponentPalette;
         this.designPropertySheet = designPropertySheet;
-        this.designNavigator = designNavigator;   
+        this.designNavigator = designNavigator;
+        addComponent(label);
         redrawFlow();
+        backgroundRefresherService.register(this);
+    }
+
+    @Override
+    public void onBackgroundUIRefresh(Object backgroundData) {
+        Integer counter = (Integer) backgroundData;
+        label.setCaption(counter.toString());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object onBackgroundDataRefresh() {
+        return new Integer(count++);
     }
 
     @Override
     public boolean closing() {
         this.designComponentPalette.setVisible(false);
+        backgroundRefresherService.unregister(this);
         return true;
     }
 
@@ -85,9 +110,10 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
 
         designPropertySheet.valueChange(componentVersion);
 
-       
+        designNavigator.refresh();
+
     }
-    
+
     protected void redrawFlow() {
         if (diagram != null) {
             removeComponent(diagram);
@@ -119,7 +145,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
         }
 
     }
-    
+
     class DiagramChangedListener implements Listener {
         private static final long serialVersionUID = 1L;
 
@@ -128,15 +154,13 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
             if (e instanceof NodeSelectedEvent) {
                 NodeSelectedEvent event = (NodeSelectedEvent) e;
                 Node node = event.getNode();
-                FlowStep flowNode = componentFlowVersion.findFlowStepWithId(node
-                        .getId());
+                FlowStep flowNode = componentFlowVersion.findFlowStepWithId(node.getId());
                 designPropertySheet.valueChange(flowNode.getComponentVersion());
 
             } else if (e instanceof NodeMovedEvent) {
                 NodeMovedEvent event = (NodeMovedEvent) e;
                 Node node = event.getNode();
-                FlowStep flowNode = componentFlowVersion.findFlowStepWithId(node
-                        .getId());
+                FlowStep flowNode = componentFlowVersion.findFlowStepWithId(node.getId());
                 if (flowNode != null) {
                     flowNode.setX(node.getX());
                     flowNode.setY(node.getY());
@@ -147,8 +171,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel {
                 ResourceEvent event = (ResourceEvent) e;
                 if (!event.isRemoved()) {
                     componentFlowVersion.getFlowStepLinks().add(
-                            new FlowStepLink(event.getSourceNodeId(), event
-                                    .getTargetNodeId()));
+                            new FlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
                     configurationService.save(componentFlowVersion);
                 } else {
                     FlowStepLink link = componentFlowVersion.removeFlowStepLink(

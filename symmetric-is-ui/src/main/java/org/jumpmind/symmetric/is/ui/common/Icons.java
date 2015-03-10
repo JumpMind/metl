@@ -22,5 +22,7 @@ final public class Icons {
     public static final FontAwesome FLOW_VERSION = FontAwesome.FILE_TEXT;
     
     public static final FontAwesome DATABASE = FontAwesome.DATABASE;
+    
+    public static final FontAwesome COMPONENT = FontAwesome.PUZZLE_PIECE;
 
 }

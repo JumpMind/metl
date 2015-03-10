@@ -29,6 +29,7 @@ public class FlowStep extends AbstractObject {
     }
     
     public void setName(String name) {
+        this.componentVersion.getComponent().setName(name);
     }
     
     public String getName() {
@@ -71,4 +72,8 @@ public class FlowStep extends AbstractObject {
         return y;
     }
 
+    @Override
+    public boolean isSettingNameAllowed() {
+        return true;
+    }
 }

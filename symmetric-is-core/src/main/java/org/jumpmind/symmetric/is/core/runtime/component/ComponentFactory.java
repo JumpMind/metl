@@ -20,7 +20,12 @@ public class ComponentFactory implements IComponentFactory {
         componentTypesByCategory.put(ComponentCategory.PROCESSOR, new ArrayList<String>());
         componentTypesByCategory.put(ComponentCategory.WRITER, new ArrayList<String>());
         register(DbReader.class);
+        register(BinaryFileReader.class);
+        register(BinaryFileWriter.class);
+        register(TextFileReader.class);
+        register(TextFileWriter.class);
         register(NoOpProcessor.class);
+        register(DelimitedFormatter.class);
     }
 
     @Override
