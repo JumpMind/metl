@@ -25,13 +25,13 @@ abstract public class AbstractExecutionService extends AbstractService implement
     public List<ExecutionStep> findExecutionStep(String executionId) {
     	Map<String, Object> args = new HashMap<String, Object>();
     	args.put("executionId", executionId);
-    	return persistenceManager.find(ExecutionStep.class, args);
+    	return persistenceManager.find(ExecutionStep.class, args, null, null, tableName(ExecutionStep.class));
     }
 
     public List<ExecutionStepLog> findExecutionStepLog(String executionStepId) {
     	Map<String, Object> args = new HashMap<String, Object>();
     	args.put("executionStepId", executionStepId);
-    	return persistenceManager.find(ExecutionStepLog.class, args);
+    	return persistenceManager.find(ExecutionStepLog.class, args, null, null, tableName(ExecutionStepLog.class));
     }
 
     @Override

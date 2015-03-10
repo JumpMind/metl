@@ -48,10 +48,11 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
         int i = executionStepIds.size();
         for (String executionStepId : executionStepIds) {
         	inClause.append(executionStepId);
-        	if (i-- > 0) {
+        	if (--i > 0) {
         		inClause.append(",");
         	}
         }
+        inClause.append(")");
         return template.query(String.format(
         		"select id, execution_step_id, category, level, log_text, create_time " +
                 "from %1$s_execution_step_log " +
@@ -61,7 +62,7 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
                     public ExecutionStepLog mapRow(Row row) {
                     	ExecutionStepLog e = new ExecutionStepLog();
                     	e.setId(row.getString("id"));
-                    	e.setExecutionStepId(row.getString("executionStepId"));
+                    	e.setExecutionStepId(row.getString("execution_step_id"));
                     	e.setCategory(row.getString("category"));
                     	e.setLevel(row.getString("level"));
                     	e.setLogText(row.getString("log_text"));
