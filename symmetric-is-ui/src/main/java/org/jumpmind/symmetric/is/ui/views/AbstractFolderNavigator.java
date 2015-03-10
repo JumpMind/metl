@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.ui.views;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -56,23 +57,23 @@ import com.vaadin.ui.themes.ValoTheme;
 abstract public class AbstractFolderNavigator extends Panel {
 
     final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     MenuItem newFolder;
-    
+
     MenuItem delete;
-    
+
     IConfigurationService configurationService;
-    
+
     FolderType folderType;
-    
+
     TreeTable treeTable;
-    
+
     Set<Object> lastSelected;
-    
+
     AbstractObject itemBeingEdited;
-    
+
     AbstractObject itemClicked;
-    
+
     long itemClickTimeInMs;
 
     public AbstractFolderNavigator(FolderType folderType, IConfigurationService configurationService) {
@@ -93,6 +94,7 @@ abstract public class AbstractFolderNavigator extends Panel {
         treeTable = buildTreeTable();
         content.addComponent(treeTable);
         content.setExpandRatio(treeTable, 1);
+
     }
 
     public void addValueChangeListener(ValueChangeListener listener) {
@@ -287,17 +289,36 @@ abstract public class AbstractFolderNavigator extends Panel {
         return table;
     }
 
-    protected void startEditingItem(AbstractObject obj) {
+    protected boolean startEditingItem(AbstractObject obj) {
         if (obj.isSettingNameAllowed()) {
             itemBeingEdited = obj;
             treeTable.refreshRowCache();
+            return true;
+        } else {
+            return false;
         }
+
     }
 
     protected void finishEditingItem() {
         if (itemBeingEdited != null) {
             Object selected = itemBeingEdited;
-            configurationService.save(itemBeingEdited);
+            Method method = null;
+            try {
+                method = configurationService.getClass().getMethod("save",
+                        itemBeingEdited.getClass());
+            } catch (NoSuchMethodException e) {
+            } catch (SecurityException e) {
+            }
+            if (method != null) {
+                try {
+                    method.invoke(configurationService, itemBeingEdited);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                configurationService.save(itemBeingEdited);
+            }
             itemBeingEdited = null;
             treeTable.refreshRowCache();
             treeTable.focus();
@@ -438,9 +459,9 @@ abstract public class AbstractFolderNavigator extends Panel {
                                     try {
                                         configurationService.deleteFolder(folder.getId());
                                     } catch (Exception ex) {
-                                        CommonUiUtils.notify("Could not delete the \""
-                                                + folder.getName() + "\" folder",
-                                                Type.WARNING_MESSAGE);
+                                        CommonUiUtils.notify(
+                                                "Could not delete the \"" + folder.getName()
+                                                        + "\" folder", Type.WARNING_MESSAGE);
                                     }
                                 }
                             }
@@ -507,6 +528,25 @@ abstract public class AbstractFolderNavigator extends Panel {
                 }
             }
         }
+    }
+    
+    protected void expand(Folder folder, Object itemToSelect) {
+        List<Folder> toExpand = new ArrayList<Folder>();
+        toExpand.add(0, folder);
+        treeTable.unselect(folder);
+        while (folder != null) {
+            folder = folder.getParent();
+            if (folder != null) {
+                toExpand.add(0, folder);
+            }
+        }
+
+        for (Folder expandMe : toExpand) {
+            treeTable.setCollapsed(expandMe, false);
+        }
+
+        treeTable.focus();
+        treeTable.select(itemToSelect);
     }
 
 }

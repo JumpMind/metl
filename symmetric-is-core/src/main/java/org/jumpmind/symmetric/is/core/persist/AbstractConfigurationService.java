@@ -43,6 +43,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
     AbstractConfigurationService(IPersistenceManager persistenceManager, String tablePrefix) {
         super(persistenceManager, tablePrefix);
     }
+    
+    @Override
+    public FlowVersion findFlowVersion(String id) {
+        FlowVersion flowVersion = new FlowVersion();
+        flowVersion.setId(id);
+        refresh(flowVersion);
+        return flowVersion;
+    }
 
     @Override
     public List<Folder> findFolders(FolderType type) {
@@ -317,7 +325,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         for (Setting settingData : settings) {
             delete(settingData);
         }
-        delete(resource);
+        persistenceManager.delete(resource, null, null, tableName(Resource.class));
     }
 
     @Override
@@ -326,7 +334,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         for (Setting settingData : settings) {
             delete(settingData);
         }
-        delete(agent);
+        persistenceManager.delete(agent, null, null, tableName(Agent.class));
     }
 
     @Override

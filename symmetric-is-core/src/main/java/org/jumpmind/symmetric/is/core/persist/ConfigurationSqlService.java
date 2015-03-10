@@ -9,7 +9,6 @@ import org.jumpmind.db.sql.Row;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.model.AgentSummary;
 import org.jumpmind.symmetric.is.core.model.Flow;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.FlowVersionSummary;
 
 public class ConfigurationSqlService extends AbstractConfigurationService {
@@ -34,11 +33,11 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
     }
 
     @Override
-    public boolean isDeployed(FlowVersion flowVersion) {
+    public boolean isFlowVersionDeployed(String flowVersionId) {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         return template.queryForInt(String.format(
                 "select count(*) from %1$s_agent_deployment where flow_version_id=?",
-                tablePrefix), flowVersion.getId()) > 0;
+                tablePrefix), flowVersionId) > 0;
     }
 
     @Override

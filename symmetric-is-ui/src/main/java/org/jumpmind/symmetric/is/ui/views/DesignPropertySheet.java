@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObjectWithSettings;
 import org.jumpmind.symmetric.is.core.model.ComponentVersion;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
@@ -61,6 +62,10 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
         formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
 
         if (obj != null) {
+            if (obj instanceof FlowStep) {
+                obj = ((FlowStep)obj).getComponentVersion();
+            }
+            
             Map<String, SettingDefinition> settings = buildSettings(obj);
             Set<String> keys = settings.keySet();
             for (String key : keys) {

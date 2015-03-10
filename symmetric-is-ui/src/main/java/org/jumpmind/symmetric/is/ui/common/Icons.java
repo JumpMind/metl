@@ -25,4 +25,6 @@ final public class Icons {
     
     public static final FontAwesome RUN = FontAwesome.PLAY;
 
+    public static final FontAwesome COMPONENT = FontAwesome.PUZZLE_PIECE;
+
 }

@@ -338,8 +338,8 @@
     </table>
     
     <table name="execution" description="">
-        <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="agent_deployment_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="agent_deployment_id" type="CHAR" size="36" required="true" description="A unique identifer" />
         <column name="status" type="VARCHAR" required="true" default="REQUESTED" size="255" description="" />
         <column name="start_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="end_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
@@ -350,15 +350,15 @@
     </table>    
 
     <table name="execution_params" description="">
-       <column name="execution_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
+       <column name="execution_id" type="CHAR" size="36" required="true" description="A unique identifer" />
        <column name="name" type="VARCHAR" size="255" primaryKey="true" required="true" description="" />
        <column name="value" type="VARCHAR" size="255" description="" />       
     </table>    
     
      <table name="execution_step" description="">
-        <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="execution_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
-        <column name="flow_step_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="execution_id" type="CHAR" size="36" required="true" description="A unique identifer" />
+        <column name="flow_step_id" type="CHAR" size="36" required="true" description="A unique identifer" />
         <column name="component_name" type="VARCHAR" size="255" required="true" description="A user defined name for the component" />
         <column name="status" type="VARCHAR" size="255" description="" />
         <column name="messages_received" type="INTEGER" default="0" required="true" />
@@ -368,8 +368,8 @@
     </table>        
 
     <table name="execution_step_log" description="">
-       <column name="id" type="VARCHAR" size="128" required="true" primaryKey="true" description="A unique identifer" />
-       <column name="execution_step_id" type="VARCHAR" size="128" required="true" description="A unique identifer" />
+       <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+       <column name="execution_step_id" type="CHAR" size="36" required="true" description="A unique identifer" />
        <column name="category" type="VARCHAR" size="255" required="true" description="" />
        <column name="level" type="VARCHAR" size="255" required="true" description="" />
        <column name="log_text" type="VARCHAR" size="4000" required="true" description="" />       

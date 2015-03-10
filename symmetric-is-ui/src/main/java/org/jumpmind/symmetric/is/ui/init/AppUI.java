@@ -20,11 +20,15 @@ public class AppUI extends AbstractSpringUI {
     private static final long serialVersionUID = 1L;
 
     ViewManager viewManager;
+    
+    BackgroundRefresherService backgroundRefresherService;
 
     @Override
     protected void init(VaadinRequest request) {
 
         super.init(request);
+        
+        setPollInterval(5000);
         
         VerticalLayout root = new VerticalLayout();
         root.setSizeFull();
@@ -32,8 +36,12 @@ public class AppUI extends AbstractSpringUI {
 
         VerticalLayout contentArea = new VerticalLayout();
         contentArea.setSizeFull();
-
+        
         WebApplicationContext ctx = getWebApplicationContext();
+        
+        backgroundRefresherService = ctx.getBean(BackgroundRefresherService.class);
+        backgroundRefresherService.init(this);
+        
         viewManager = ctx.getBean(ViewManager.class);
         viewManager.init(this, contentArea);
         
@@ -43,6 +51,15 @@ public class AppUI extends AbstractSpringUI {
 
         root.addComponents(menu, contentArea);
         root.setExpandRatio(contentArea, 1);
+
+    }
+    
+    @Override
+    public void detach() {
+        if (backgroundRefresherService != null) {
+            backgroundRefresherService.destroy();
+        }
+        super.detach();
 
     }
 
