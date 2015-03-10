@@ -21,7 +21,7 @@ import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
-import org.jumpmind.symmetric.is.core.runtime.resource.localfile.DASNASResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.localfile.LocalFileResource;
 import org.jumpmind.symmetric.is.core.utils.TestUtils;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -105,7 +105,7 @@ public class BinaryFileReaderTest {
         Folder folder = TestUtils.createFolder("Test Folder Resource");
         resource.setName("Test Resource");
         resource.setFolderId("Test Folder Resource");
-        resource.setType(DASNASResource.TYPE);
+        resource.setType(LocalFileResource.TYPE);
         resource.setFolder(folder);
         resource.setSettings(settings);
 
@@ -121,8 +121,8 @@ public class BinaryFileReaderTest {
 
     private static List<Setting> createResourceSettings() {
         List<Setting> settings = new ArrayList<Setting>(2);
-        settings.add(new Setting(DASNASResource.DASNAS_PATH, FILE_PATH));
-        settings.add(new Setting(DASNASResource.DASNAS_MUST_EXIST, "true"));
+        settings.add(new Setting(LocalFileResource.DASNAS_PATH, FILE_PATH));
+        settings.add(new Setting(LocalFileResource.DASNAS_MUST_EXIST, "true"));
         return settings;
     }
 

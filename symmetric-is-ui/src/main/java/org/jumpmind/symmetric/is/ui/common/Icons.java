@@ -23,6 +23,8 @@ final public class Icons {
     
     public static final FontAwesome DATABASE = FontAwesome.DATABASE;
     
+    public static final FontAwesome FILE_SYSTEM = FontAwesome.FILES_O;
+    
     public static final FontAwesome RUN = FontAwesome.PLAY;
 
     public static final FontAwesome COMPONENT = FontAwesome.PUZZLE_PIECE;

@@ -9,17 +9,17 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceDefinition;
 
-@ResourceDefinition(typeName=DASNASResource.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
-public class DASNASResource extends AbstractRuntimeObject implements
+@ResourceDefinition(typeName=LocalFileResource.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
+public class LocalFileResource extends AbstractRuntimeObject implements
 		IResource {
 
-	public static final String TYPE = "DAS/NAS";
+	public static final String TYPE = "Local File System";
 
 	@SettingDefinition(order = 0, required = true, type = Type.STRING, label = "Path")
-	public final static String DASNAS_PATH = "dasnas.path";
+	public final static String DASNAS_PATH = "localfile.path";
 
 	@SettingDefinition(type = Type.BOOLEAN, order = 20, required = true, provided = true, defaultValue = "false", label = "Must Exist")
-	public static final String DASNAS_MUST_EXIST = "dasnas.must.exist";
+	public static final String DASNAS_MUST_EXIST = "localfile.must.exist";
 
 	IStreamableResource streamableResource;
 

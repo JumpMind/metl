@@ -19,6 +19,7 @@ import org.jumpmind.symmetric.is.core.runtime.component.ComponentSupports;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
+import org.jumpmind.symmetric.ui.common.ImmediateUpdatePasswordField;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.symmetric.ui.common.SqlField;
 import org.slf4j.Logger;
@@ -227,7 +228,18 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
                 formLayout.addComponent(sqlField);
                 break;
             case PASSWORD:
-                // TODO
+                ImmediateUpdatePasswordField passwordField = new ImmediateUpdatePasswordField(
+                        definition.label()) {
+                    private static final long serialVersionUID = 1L;
+
+                    protected void save() {
+                        saveSetting(key, this, obj);
+                    };
+                };
+                passwordField.setValue(obj.get(key));
+                passwordField.setRequired(required);
+                passwordField.setDescription(description);
+                formLayout.addComponent(passwordField);
                 break;
             case INTEGER:
                 ImmediateUpdateTextField integerField = new ImmediateUpdateTextField(

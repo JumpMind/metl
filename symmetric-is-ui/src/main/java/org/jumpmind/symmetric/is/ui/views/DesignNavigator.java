@@ -12,6 +12,7 @@ import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.localfile.LocalFileResource;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
@@ -67,6 +68,14 @@ public class DesignNavigator extends AbstractFolderNavigator {
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 addNewDatabase();
+            }
+        });
+        
+        newResource.addItem("Local File System", Icons.FILE_SYSTEM, new Command() {
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                addNewFileSystem();
             }
         });
 
@@ -137,16 +146,24 @@ public class DesignNavigator extends AbstractFolderNavigator {
     }
 
     protected void addNewDatabase() {
+        addNewResource(DataSourceResource.TYPE, "Database", Icons.DATABASE);
+    }
+    
+    protected void addNewFileSystem() {
+        addNewResource(LocalFileResource.TYPE, "Directory", Icons.FILE_SYSTEM);
+    }
+    
+    protected void addNewResource(String type, String defaultName, FontAwesome icon) {
         Folder folder = getSelectedFolder();
         if (folder != null) {
-
             Resource resource = new Resource();
-            resource.setName("Database");
-            resource.setType(DataSourceResource.TYPE);
+            resource.setName(defaultName);
+            resource.setFolder(folder);
+            resource.setType(type);
             configurationService.save(resource);
 
             treeTable.addItem(resource);
-            treeTable.setItemIcon(resource, Icons.DATABASE);
+            treeTable.setItemIcon(resource, icon);
             treeTable.setParent(resource, folder);
 
             treeTable.setCollapsed(folder, false);
@@ -154,6 +171,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
             startEditingItem(resource);
         }
     }
+
 
     @Override
     protected boolean isDeleteButtonEnabled(Object selected) {

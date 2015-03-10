@@ -9,7 +9,7 @@ import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
-import org.jumpmind.symmetric.is.core.runtime.resource.localfile.DASNASResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.localfile.LocalFileResource;
 
 public class ResourceFactory implements IResourceFactory {
 
@@ -19,7 +19,7 @@ public class ResourceFactory implements IResourceFactory {
 
     public ResourceFactory() {
         register(DataSourceResource.class);
-        register(DASNASResource.class);
+        register(LocalFileResource.class);
     }
 
     @Override
