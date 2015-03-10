@@ -18,7 +18,6 @@ import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 
 public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBackgroundRefreshable {
 
@@ -38,10 +37,6 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
 
     BackgroundRefresherService backgroundRefresherService;
 
-    int count = 0;
-
-    Label label = new Label();
-
     public DesignFlowLayout(BackgroundRefresherService backgroundRefresherService,
             IConfigurationService configurationService, FlowVersion componentFlowVersion,
             DesignComponentPalette designComponentPalette, DesignPropertySheet designPropertySheet,
@@ -52,21 +47,18 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
         this.designComponentPalette = designComponentPalette;
         this.designPropertySheet = designPropertySheet;
         this.designNavigator = designNavigator;
-        addComponent(label);
         redrawFlow();
         backgroundRefresherService.register(this);
     }
 
     @Override
     public void onBackgroundUIRefresh(Object backgroundData) {
-        Integer counter = (Integer) backgroundData;
-        label.setCaption(counter.toString());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Object onBackgroundDataRefresh() {
-        return new Integer(count++);
+        return null;
     }
 
     @Override
@@ -122,6 +114,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
         diagram = new Diagram();
         diagram.addListener(new DiagramChangedListener());
         addComponent(diagram);
+        setExpandRatio(diagram, 1);
 
         List<FlowStepLink> links = componentFlowVersion.getFlowStepLinks();
 
