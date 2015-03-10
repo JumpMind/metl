@@ -9,7 +9,7 @@ import org.jumpmind.symmetric.is.core.model.Execution;
 import org.jumpmind.symmetric.is.core.model.ExecutionStep;
 import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
-import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -29,7 +29,7 @@ public class ExecutionLogPanel extends VerticalLayout {
 
 	private static final long serialVersionUID = 1L;
 	
-	protected IConfigurationService configurationService;
+	protected IExecutionService executionService;
 	
 	protected FlowVersion flowVersion;
 	
@@ -37,8 +37,8 @@ public class ExecutionLogPanel extends VerticalLayout {
 	
 	protected BeanItemContainer<ExecutionStepLog> logContainer;
 
-	public ExecutionLogPanel(IConfigurationService configurationService, FlowVersion flowVersion) {
-		this.configurationService = configurationService;
+	public ExecutionLogPanel(IExecutionService executionService, FlowVersion flowVersion) {
+		this.executionService = executionService;
 		this.flowVersion = flowVersion;
 
 		Execution execution = queryForExecution(flowVersion);

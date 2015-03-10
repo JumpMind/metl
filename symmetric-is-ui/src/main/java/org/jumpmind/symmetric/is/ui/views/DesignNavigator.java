@@ -11,12 +11,13 @@ import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.localfile.LocalFileResource;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
-import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
+import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 
@@ -38,12 +39,14 @@ public class DesignNavigator extends AbstractFolderNavigator {
     DesignComponentPalette designComponentPalette;
     DesignPropertySheet designPropertySheet;
     BackgroundRefresherService backgroundRefresherService;
+    IExecutionService executionService;
 
     public DesignNavigator(BackgroundRefresherService backgroundRefreserService,
-            IConfigurationService configurationService, TabbedApplicationPanel tabs,
+            IConfigurationService configurationService, IExecutionService executionService, TabbedApplicationPanel tabs,
             DesignComponentPalette designComponentPalette, DesignPropertySheet designPropertySheet) {
         super(FolderType.DESIGN, configurationService);
         this.backgroundRefresherService = backgroundRefreserService;
+        this.executionService = executionService;
         this.designComponentPalette = designComponentPalette;
         this.designPropertySheet = designPropertySheet;
         this.tabs = tabs;
@@ -120,7 +123,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
         if (item instanceof FlowVersion) {
             FlowVersion flowVersion = (FlowVersion) item;
-            ExecutionLogPanel logPanel = new ExecutionLogPanel(configurationService, flowVersion);
+            ExecutionLogPanel logPanel = new ExecutionLogPanel(executionService, flowVersion);
             tabs.addCloseableTab(flowVersion.getId() + 10000,
                     "Run " + flowVersion.getFlow().getName() + " " + flowVersion.getName(),
                     Icons.RUN, logPanel);

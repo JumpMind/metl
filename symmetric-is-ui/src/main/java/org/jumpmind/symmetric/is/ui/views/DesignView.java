@@ -3,6 +3,7 @@ package org.jumpmind.symmetric.is.ui.views;
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.ui.common.Category;
@@ -30,6 +31,9 @@ public class DesignView extends HorizontalLayout implements View {
 
     @Autowired
     IConfigurationService configurationService;
+
+    @Autowired
+    IExecutionService executionService;
 
     @Autowired
     IComponentFactory componentFactory;
@@ -68,7 +72,7 @@ public class DesignView extends HorizontalLayout implements View {
                 resourceFactory);
 
         DesignComponentPalette designComponentPalette = new DesignComponentPalette(componentFactory, leftTopBottomSplit);
-        designNavigator = new DesignNavigator(backgroundRefresherService, configurationService, tabs,
+        designNavigator = new DesignNavigator(backgroundRefresherService, configurationService, executionService, tabs,
                 designComponentPalette, designPropertySheet);
         leftTopBottomSplit.setFirstComponent(designNavigator);
         leftTopBottomSplit.setSecondComponent(designComponentPalette);
