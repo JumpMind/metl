@@ -96,6 +96,19 @@ abstract public class AbstractFolderNavigator extends Panel {
         content.setExpandRatio(treeTable, 1);
 
     }
+    
+    public void select(Object obj) {
+        Object parent = obj;
+        do {
+            parent = treeTable.getParent(parent);
+            if (parent != null) {
+                treeTable.setCollapsed(parent, false);
+            }
+        }
+        while (parent != null);
+        
+        treeTable.select(obj);
+    }
 
     public void addValueChangeListener(ValueChangeListener listener) {
         this.treeTable.addValueChangeListener(listener);

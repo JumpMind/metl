@@ -75,7 +75,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
             }
         });
     }
-
+    
     @Override
     protected void openItem(Object item) {
         if (item instanceof Flow) {
