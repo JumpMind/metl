@@ -16,10 +16,10 @@ public class LocalFileResource extends AbstractRuntimeObject implements
 	public static final String TYPE = "Local File System";
 
 	@SettingDefinition(order = 0, required = true, type = Type.STRING, label = "Path")
-	public final static String DASNAS_PATH = "localfile.path";
+	public final static String LOCALFILE_PATH = "localfile.path";
 
 	@SettingDefinition(type = Type.BOOLEAN, order = 20, required = true, provided = true, defaultValue = "false", label = "Must Exist")
-	public static final String DASNAS_MUST_EXIST = "localfile.must.exist";
+	public static final String LOCALFILE_MUST_EXIST = "localfile.must.exist";
 
 	IStreamableResource streamableResource;
 
@@ -27,8 +27,8 @@ public class LocalFileResource extends AbstractRuntimeObject implements
 	public void start(Resource resource) {
 		TypedProperties properties = resource.toTypedProperties(this, false);
 		streamableResource = new FileStreamableResource(resource,
-				properties.getProperty(DASNAS_PATH), 
-				properties.is(DASNAS_MUST_EXIST));
+				properties.getProperty(LOCALFILE_PATH), 
+				properties.is(LOCALFILE_MUST_EXIST));
 	}
 
 	@Override

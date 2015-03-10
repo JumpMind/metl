@@ -121,8 +121,8 @@ public class BinaryFileReaderTest {
 
     private static List<Setting> createResourceSettings() {
         List<Setting> settings = new ArrayList<Setting>(2);
-        settings.add(new Setting(LocalFileResource.DASNAS_PATH, FILE_PATH));
-        settings.add(new Setting(LocalFileResource.DASNAS_MUST_EXIST, "true"));
+        settings.add(new Setting(LocalFileResource.LOCALFILE_PATH, FILE_PATH));
+        settings.add(new Setting(LocalFileResource.LOCALFILE_MUST_EXIST, "true"));
         return settings;
     }
 
