@@ -1,7 +1,6 @@
 package org.jumpmind.symmetric.is.ui.views.manage;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -11,6 +10,7 @@ import org.jumpmind.symmetric.is.core.model.ExecutionStep;
 import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
+import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -26,7 +26,7 @@ import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 
-public class ExecutionLogPanel extends VerticalLayout {
+public class ExecutionLogPanel extends VerticalLayout implements IBackgroundRefreshable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -34,20 +34,29 @@ public class ExecutionLogPanel extends VerticalLayout {
 	
 	protected FlowVersion flowVersion;
 	
-	protected BeanContainer<String, ExecutionStep> stepContainer;
+	protected Table stepTable = new Table();
 	
-	protected BeanItemContainer<ExecutionStepLog> logContainer;
+	protected BeanContainer<String, ExecutionStep> stepContainer = new BeanContainer<String, ExecutionStep>(ExecutionStep.class);
+	
+	protected BeanItemContainer<ExecutionStepLog> logContainer = new BeanItemContainer<ExecutionStepLog>(ExecutionStepLog.class);
+	
+	protected Label flowLabel = new Label();
+	
+	protected Label statusLabel = new Label();
+	
+	protected Label startLabel = new Label();
+	
+	protected Label endLabel = new Label();
 
 	public ExecutionLogPanel(final IExecutionService executionService, final FlowVersion flowVersion) {
 		this.executionService = executionService;
 		this.flowVersion = flowVersion;
 
-		Execution execution = executionService.findExecution("1");
 		HorizontalLayout header1 = new HorizontalLayout();
 		header1.addComponent(new Label("<b>Flow:</b>", ContentMode.HTML));
-		header1.addComponent(new Label(flowVersion.getName()));
+		header1.addComponent(flowLabel);
 		header1.addComponent(new Label("<b>Start:</b>", ContentMode.HTML));
-		header1.addComponent(new Label(formatDate(execution.getStartTime())));
+		header1.addComponent(startLabel);
 		header1.setSpacing(true);
 		header1.setMargin(new MarginInfo(true, true, false, true));
 		header1.setWidth("100%");
@@ -55,20 +64,15 @@ public class ExecutionLogPanel extends VerticalLayout {
 		
 		HorizontalLayout header2 = new HorizontalLayout();
 		header2.addComponent(new Label("<b>Status:</b>", ContentMode.HTML));
-		header2.addComponent(new Label(execution.getStatus()));
+		header2.addComponent(statusLabel);
 		header2.addComponent(new Label("<b>End:</b>", ContentMode.HTML));
-		header2.addComponent(new Label(formatDate(execution.getEndTime())));
+		header2.addComponent(endLabel);
 		header2.setSpacing(true);
 		header2.setMargin(new MarginInfo(false, true, true, true));
 		header2.setWidth("100%");
 		addComponent(header2);
 		
-		List<ExecutionStep> steps = executionService.findExecutionStep("1");
-		stepContainer = new BeanContainer<String, ExecutionStep>(ExecutionStep.class);
 		stepContainer.setBeanIdProperty("id");
-		stepContainer.addAll(steps);
-
-		Table stepTable = new Table();
 		stepTable.setContainerDataSource(stepContainer);
 		stepTable.setSelectable(true);
 		stepTable.setMultiSelect(true);
@@ -89,8 +93,6 @@ public class ExecutionLogPanel extends VerticalLayout {
 			}			
 		});
 
-		logContainer = new BeanItemContainer<ExecutionStepLog>(ExecutionStepLog.class);
-
 		Table logTable = new Table();
 		logTable.setContainerDataSource(logContainer);
 		logTable.setSelectable(true);
@@ -107,95 +109,40 @@ public class ExecutionLogPanel extends VerticalLayout {
 		splitPanel.setSizeFull();
 		addComponent(splitPanel);
 		setExpandRatio(splitPanel, 1.0f);
-	}
-	
-	protected Execution queryForExecution(FlowVersion flowVersion) {
-		Execution e = new Execution();
-		e.setId("1");
-		e.setCreateBy("elong");
-		e.setCreateTime(new Date());
-		e.setStartTime(new Date());
-		e.setStatus("RUNNING");
-		return e;
-	}
-
-	protected ArrayList<ExecutionStep> queryForSteps() {
-		ArrayList<ExecutionStep> steps = new ArrayList<ExecutionStep>();
-
-		ExecutionStep e = new ExecutionStep();
-		e.setId("123");
-		e.setComponentName("FileReader");
-		e.setStatus("RUNNING");
-		e.setMessagesReceived(2);
-		e.setMessagesProduced(1);
-		e.setStartTime(new Date());
-		steps.add(e);
-
-		e = new ExecutionStep();
-		e.setId("124");
-		e.setComponentName("Cruncher");
-		e.setStatus("RUNNING");
-		e.setMessagesReceived(1);
-		e.setMessagesProduced(1);
-		e.setStartTime(new Date());
-		steps.add(e);
-
-		return steps;
-	}
-	
-	protected ArrayList<ExecutionStepLog> queryForLogs(String executionStepId) {
-		ArrayList<ExecutionStepLog> logs = new ArrayList<ExecutionStepLog>();
-		ExecutionStepLog e = new ExecutionStepLog();
-		if (executionStepId.equals("123")) {
-			e.setId("321");
-			e.setExecutionStepId("123");
-			e.setCategory("Integration");
-			e.setLevel("INFO");
-			e.setCreateTime(new Date());
-			e.setLogText("Opening file for reading");
-			logs.add(e);
-	
-			e = new ExecutionStepLog();
-			e.setId("322");
-			e.setExecutionStepId("123");
-			e.setCategory("Integration");
-			e.setLevel("INFO");
-			e.setCreateTime(new Date());
-			e.setLogText("Parsing file");
-			logs.add(e);
-	
-			e = new ExecutionStepLog();
-			e.setId("323");
-			e.setExecutionStepId("123");
-			e.setCategory("Integration");
-			e.setLevel("INFO");
-			e.setCreateTime(new Date());
-			e.setLogText("Processing");
-			logs.add(e);
-		}
 		
-		if (executionStepId.equals("124")) {
-			e = new ExecutionStepLog();
-			e.setId("324");
-			e.setExecutionStepId("124");
-			e.setCategory("Subsystem");
-			e.setLevel("WARN");
-			e.setCreateTime(new Date());
-			e.setLogText("Cruncher is hungry");
-			logs.add(e);
-	
-			e = new ExecutionStepLog();
-			e.setId("325");
-			e.setExecutionStepId("124");
-			e.setCategory("Subwoofer");
-			e.setLevel("DEBUG");
-			e.setCreateTime(new Date());
-			e.setLogText("Cruncher angry now");
-			logs.add(e);
-		}
-
-		return logs;
+		refreshUI(getExecutionData());
 	}
+	
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object onBackgroundDataRefresh() {
+        return getExecutionData();
+    }
+
+    @Override
+    public void onBackgroundUIRefresh(Object backgroundData) {
+    	refreshUI((ExecutionData) backgroundData);
+    }
+
+    @SuppressWarnings("unchecked")
+	protected ExecutionData getExecutionData() {
+    	ExecutionData data = new ExecutionData();
+    	data.execution = executionService.findExecution("1");
+    	data.steps = executionService.findExecutionStep("1");
+    	data.logs = executionService.findExecutionStepLog((Set<String>) stepTable.getValue());
+		return data;
+    }
+    
+    protected void refreshUI(ExecutionData data) {
+		flowLabel.setValue(flowVersion.getName());
+		startLabel.setValue(formatDate(data.execution.getStartTime()));
+		statusLabel.setValue(data.execution.getStatus());
+		endLabel.setValue(formatDate(data.execution.getEndTime()));
+    	stepContainer.removeAllItems();
+    	stepContainer.addAll(data.steps);
+    	logContainer.removeAllItems();
+		logContainer.addAll(data.logs);
+    }
 
 	protected String formatDate(Date date) {
 		SimpleDateFormat df = new SimpleDateFormat("MMM dd, yyyy hh:mm:ss aa");
@@ -204,7 +151,14 @@ public class ExecutionLogPanel extends VerticalLayout {
 		}
 		return "";
 	}
-    public class ComponentNameColumnGenerator implements ColumnGenerator {
+
+	public class ExecutionData {
+    	public Execution execution;
+		public List<ExecutionStep> steps;
+		public List<ExecutionStepLog> logs;		
+	}
+
+	public class ComponentNameColumnGenerator implements ColumnGenerator {
         private static final long serialVersionUID = 1L;
 
         @SuppressWarnings("unchecked")
