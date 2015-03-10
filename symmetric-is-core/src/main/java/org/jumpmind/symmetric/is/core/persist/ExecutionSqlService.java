@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.persist;
 
 import java.util.List;
+import java.util.Set;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.ISqlRowMapper;
@@ -41,12 +42,13 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
         }
     }
 
-    public List<ExecutionStepLog> findExecutionStepLog(List<String> executionStepIds) {
+    public List<ExecutionStepLog> findExecutionStepLog(Set<String> executionStepIds) {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         StringBuilder inClause = new StringBuilder("(");
-        for (int i = 0; i < executionStepIds.size(); i++) {
-        	inClause.append("'").append(executionStepIds.get(i)).append("'");
-        	if (i + 1 < executionStepIds.size()) {
+        int i = executionStepIds.size();
+        for (String executionStepId : executionStepIds) {
+        	inClause.append(executionStepId);
+        	if (i-- > 0) {
         		inClause.append(",");
         	}
         }

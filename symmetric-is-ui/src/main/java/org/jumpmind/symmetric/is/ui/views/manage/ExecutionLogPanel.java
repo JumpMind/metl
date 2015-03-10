@@ -3,6 +3,7 @@ package org.jumpmind.symmetric.is.ui.views.manage;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.Execution;
@@ -37,11 +38,11 @@ public class ExecutionLogPanel extends VerticalLayout {
 	
 	protected BeanItemContainer<ExecutionStepLog> logContainer;
 
-	public ExecutionLogPanel(IExecutionService executionService, FlowVersion flowVersion) {
+	public ExecutionLogPanel(final IExecutionService executionService, final FlowVersion flowVersion) {
 		this.executionService = executionService;
 		this.flowVersion = flowVersion;
 
-		Execution execution = queryForExecution(flowVersion);
+		Execution execution = executionService.findExecution("1");
 		HorizontalLayout header1 = new HorizontalLayout();
 		header1.addComponent(new Label("<b>Flow:</b>", ContentMode.HTML));
 		header1.addComponent(new Label(flowVersion.getName()));
@@ -62,7 +63,7 @@ public class ExecutionLogPanel extends VerticalLayout {
 		header2.setWidth("100%");
 		addComponent(header2);
 		
-		ArrayList<ExecutionStep> steps = queryForSteps();
+		List<ExecutionStep> steps = executionService.findExecutionStep("1");
 		stepContainer = new BeanContainer<String, ExecutionStep>(ExecutionStep.class);
 		stepContainer.setBeanIdProperty("id");
 		stepContainer.addAll(steps);
@@ -83,10 +84,8 @@ public class ExecutionLogPanel extends VerticalLayout {
 				@SuppressWarnings("unchecked")
 				Set<String> executionStepIds = (Set<String>) event.getProperty().getValue();
 				logContainer.removeAllItems();
-				for (String executionStepId : executionStepIds) {
-					ArrayList<ExecutionStepLog> logs = queryForLogs(executionStepId);
-					logContainer.addAll(logs);
-				}
+				List<ExecutionStepLog> logs = executionService.findExecutionStepLog(executionStepIds);
+				logContainer.addAll(logs);
 			}			
 		});
 
