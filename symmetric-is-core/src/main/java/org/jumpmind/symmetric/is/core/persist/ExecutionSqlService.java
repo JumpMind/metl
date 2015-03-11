@@ -27,14 +27,16 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
         StringBuilder inClause = new StringBuilder("(");
         int i = executionStepIds.size();
         for (String executionStepId : executionStepIds) {
+            inClause.append("'");
         	inClause.append(executionStepId);
+        	inClause.append("'");
         	if (--i > 0) {
         		inClause.append(",");
         	}
         }
         inClause.append(")");
         return template.query(String.format(
-        		"select id, execution_step_id, category, level, log_text, create_time " +
+        		"select id, execution_step_id, level, log_text, create_time " +
                 "from %1$s_execution_step_log " +
                 "where execution_step_id in " + inClause.toString() + " order by create_time",
                 tablePrefix), new ISqlRowMapper<ExecutionStepLog>() {
@@ -43,7 +45,6 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
                     	ExecutionStepLog e = new ExecutionStepLog();
                     	e.setId(row.getString("id"));
                     	e.setExecutionStepId(row.getString("execution_step_id"));
-                    	e.setCategory(row.getString("category"));
                     	e.setLevel(row.getString("level"));
                     	e.setLogText(row.getString("log_text"));
                     	e.setCreateTime(row.getDateTime("create_time"));

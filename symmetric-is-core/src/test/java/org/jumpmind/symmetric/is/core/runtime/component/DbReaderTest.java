@@ -18,15 +18,14 @@ import org.jumpmind.db.sql.DmlStatement;
 import org.jumpmind.db.sql.DmlStatement.DmlType;
 import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.symmetric.is.core.model.Component;
+import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
-import org.jumpmind.symmetric.is.core.model.ComponentVersion;
-import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
@@ -119,7 +118,7 @@ public class DbReaderTest {
         reader.start(null, resourceFactory);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
-        reader.handle(msg, msgTarget);
+        reader.handle("test", msg, msgTarget);
 
         assertEquals(3, msgTarget.getTargetMessageCount());
         ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
@@ -139,7 +138,7 @@ public class DbReaderTest {
         EntityData fakeRec = new EntityData("fake");
         payload.add(fakeRec);
         MessageTarget msgTarget = new MessageTarget();
-        reader.handle(message, msgTarget);
+        reader.handle("test", message, msgTarget);
 
         /* 3 messages - 2 rows a piece (one from table x, one from table y) */
         assertEquals(3, msgTarget.getTargetMessageCount());

@@ -15,6 +15,7 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
+import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.MessageManipulationStrategy;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
@@ -62,8 +63,10 @@ public class DbReader extends AbstractComponent {
     }
 
     @Override
-    public void handle(final Message inputMessage, final IMessageTarget messageTarget) {
+    public void handle(String executionId, final Message inputMessage, final IMessageTarget messageTarget) {
 
+        componentStatistics.incrementInboundMessages();
+        
         NamedParameterJdbcTemplate template = getJdbcTemplate();
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
@@ -86,6 +89,7 @@ public class DbReader extends AbstractComponent {
             } else {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
             }
+            executionTracker.log(executionId, LogLevel.DEBUG, this, "About to run: " + sql);
             template.query(sql, paramMap, new ResultSetExtractor<Object>() {
                 @Override
                 public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
@@ -144,6 +148,7 @@ public class DbReader extends AbstractComponent {
                         payload.addAll(records.values());
 
                         if (payload.size() >= rowsPerMessage) {
+                            componentStatistics.incrementOutboundMessages();
                             messageTarget.put(message);
                             message = null;
                         }
@@ -151,6 +156,7 @@ public class DbReader extends AbstractComponent {
                     } // loop for resultset for a given query
                     rs.close();
                     if (message != null) {
+                        componentStatistics.incrementOutboundMessages();
                         messageTarget.put(message);
                     }
                     return null;

@@ -60,7 +60,7 @@ public class TextFileReader extends AbstractComponent {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
         String currentLine;
         int linesRead = 0;
         int linesInMessage = 0;

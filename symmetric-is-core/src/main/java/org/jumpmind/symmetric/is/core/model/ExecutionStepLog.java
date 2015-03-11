@@ -8,8 +8,6 @@ public class ExecutionStepLog extends AbstractObject {
 
     private String executionStepId;
     
-    private String category;
-    
     private String level;
     
     private String logText;
@@ -31,14 +29,6 @@ public class ExecutionStepLog extends AbstractObject {
 
 	public void setExecutionStepId(String executionStepId) {
 		this.executionStepId = executionStepId;
-	}
-
-	public String getCategory() {
-		return category;
-	}
-
-	public void setCategory(String category) {
-		this.category = category;
 	}
 
 	public String getLevel() {

@@ -6,13 +6,18 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
+import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StepRuntime implements Runnable {
 
+    protected final Logger log = LoggerFactory.getLogger(getClass());
+    
     protected BlockingQueue<Message> inQueue;
 
     boolean running = true;
@@ -28,7 +33,13 @@ public class StepRuntime implements Runnable {
 
     List<StepRuntime> sourceStepRuntimes;
     
-    public StepRuntime(IComponent component) {
+    IExecutionTracker executionTracker;
+    
+    String executionId;
+    
+    public StepRuntime(String executionId, IComponent component, IExecutionTracker tracker) {
+        this.executionId = executionId;
+        this.executionTracker = tracker;
         this.component = component;
         inQueue = new LinkedBlockingQueue<Message>(capacity);
     }
@@ -80,7 +91,14 @@ public class StepRuntime implements Runnable {
                         shutdown();
                     }
                 } else {
-                    component.handle(inputMessage, target);
+                    try {
+                    executionTracker.beforeHandle(executionId, component);
+                    component.handle(executionId, inputMessage, target);
+                    } catch (Exception ex) {
+                        error = ex;
+                        executionTracker.log(executionId, LogLevel.ERROR, component, ex.getMessage());
+                    }
+                    executionTracker.afterHandle(executionId, component, error);
                     if (isStartStep()) {
                         shutdown();
                     }
@@ -89,6 +107,7 @@ public class StepRuntime implements Runnable {
         } catch (Exception ex) {
             // TODO: notify the flow runtime that we have an error and let it
             // gracefully shut things down
+            log.error("", ex);
             error = ex;
         }
     }

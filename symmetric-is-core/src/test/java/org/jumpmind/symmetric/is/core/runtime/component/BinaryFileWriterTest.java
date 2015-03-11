@@ -49,7 +49,7 @@ public class BinaryFileWriterTest {
         BinaryFileWriter writer = new BinaryFileWriter();
         writer.setFlowStep(writerFlowStep);
         writer.start(null, resourceFactory);
-        writer.handle(createBinaryMessageToWrite(), null);
+        writer.handle("test", createBinaryMessageToWrite(), null);
         checkBinaryFile();
     }
 

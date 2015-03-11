@@ -49,7 +49,7 @@ public class BinaryFileReader extends AbstractComponent {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
         int numberMessages = 0;
         ByteBuffer buffer = ByteBuffer.allocate(sizePerMessage * 1024);
         open();

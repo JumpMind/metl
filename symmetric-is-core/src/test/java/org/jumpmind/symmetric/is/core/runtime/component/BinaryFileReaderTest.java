@@ -58,7 +58,7 @@ public class BinaryFileReaderTest {
         reader.start(null, resourceFactory);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
-        reader.handle(msg, msgTarget);
+        reader.handle("test", msg, msgTarget);
 
         assertEquals(1, msgTarget.getTargetMessageCount());
         assertArrayEquals((byte[]) msgTarget.getMessage(0).getPayload(),

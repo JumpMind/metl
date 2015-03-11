@@ -51,7 +51,7 @@ public class BinaryFileWriter extends AbstractComponent {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
         byte[] payload = (byte[]) inputMessage.getPayload();
         if (inputMessage.getHeader().getSequenceNumber() == 1) {
             initStream();

@@ -39,7 +39,7 @@ public class DelimitedFormatter extends AbstractComponent {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
         
         ArrayList<EntityData> records = inputMessage.getPayload();
         for (EntityData record:records) {

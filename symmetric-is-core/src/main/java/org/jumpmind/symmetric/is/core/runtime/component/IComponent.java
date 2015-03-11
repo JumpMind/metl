@@ -14,7 +14,7 @@ public interface IComponent {
     
     public ComponentStatistics getComponentStatistics();
 
-    public void handle(Message inputMessage, IMessageTarget messageTarget);
+    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget);
     
     public FlowStep getFlowStep();
     

@@ -156,4 +156,9 @@ public class FlowVersion extends AbstractObject {
     public boolean isSettingNameAllowed() {
         return true;
     }
+    
+    @Override
+    public String toString() {
+        return flow.getName() + " " + getName();
+    }
 }

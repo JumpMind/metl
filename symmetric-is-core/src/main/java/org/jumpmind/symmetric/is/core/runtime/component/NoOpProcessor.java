@@ -11,7 +11,7 @@ public class NoOpProcessor extends AbstractComponent {
 	public static final String TYPE="No Op";
 		
 	@Override
-	public void handle(Message inputMessage, IMessageTarget messageTarget) {
+	public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
 		componentStatistics.incrementInboundMessages();
 		messageTarget.put(inputMessage);
 	}

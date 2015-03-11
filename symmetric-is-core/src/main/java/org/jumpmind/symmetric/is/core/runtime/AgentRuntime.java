@@ -175,7 +175,7 @@ public class AgentRuntime {
         if (deployment == null) {
             deployment = new AgentDeployment(flowVersion);
             deployment.setAgentId(agent.getId());
-            deployment.setFlowVersionId(flowVersion.getId());
+            deployment.setFlowVersion(flowVersion);
             configurationService.save(deployment);
 
             List<AgentDeployment> deployments = agent.getAgentDeployments();

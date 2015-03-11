@@ -49,7 +49,7 @@ public class TextFileWriterTest {
         TextFileWriter writer = new TextFileWriter();
         writer.setFlowStep(writerFlowStep);
         writer.start(null, resourceFactory);
-        writer.handle(createMultipleRowTextMessageToWrite(), null);
+        writer.handle("test", createMultipleRowTextMessageToWrite(), null);
         checkTextFile();
     }
 
@@ -58,10 +58,10 @@ public class TextFileWriterTest {
         TextFileWriter writer = new TextFileWriter();
         writer.setFlowStep(writerFlowStep);
         writer.start(null, resourceFactory);
-        writer.handle(createSingleRowTextMessageToWrite(1, false), null);
-        writer.handle(createSingleRowTextMessageToWrite(2, false), null);
-        writer.handle(createSingleRowTextMessageToWrite(3, false), null);
-        writer.handle(createSingleRowTextMessageToWrite(4, true), null);
+        writer.handle("test", createSingleRowTextMessageToWrite(1, false), null);
+        writer.handle("test", createSingleRowTextMessageToWrite(2, false), null);
+        writer.handle("test", createSingleRowTextMessageToWrite(3, false), null);
+        writer.handle("test", createSingleRowTextMessageToWrite(4, true), null);
         checkTextFile();
     }
 

@@ -1,17 +1,17 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
-import org.jumpmind.symmetric.is.core.model.ComponentVersion;
+import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
 
 public interface IExecutionTracker {
     
-    public void beforeHandle(String executionId, ComponentVersion componentVersion);
+    public void beforeHandle(String executionId, IComponent component);
     
-    public void afterHandle(String executionId, ComponentVersion componentVersion);
+    public void afterHandle(String executionId, IComponent component, Throwable error);
     
     public void beforeFlow(String executionId);
     
     public void afterFlow(String executionId);
 
-    public void log (String executionId, LogLevel level, ComponentVersion componentVersion, String category, String output);
+    public void log (String executionId, LogLevel level, IComponent component, String output);
     
 }

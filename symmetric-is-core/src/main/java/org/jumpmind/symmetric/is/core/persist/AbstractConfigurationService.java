@@ -293,7 +293,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void delete(AgentDeployment agentDeployment) {
-        delete(agentDeployment);
+        delete((AbstractObject)agentDeployment);
     }
 
     @Override

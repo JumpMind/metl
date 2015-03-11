@@ -108,8 +108,8 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
 		logTable.setMultiSelect(true);
 		logTable.setSizeFull();
 		logTable.addGeneratedColumn("componentName", new ComponentNameColumnGenerator());
-		logTable.setVisibleColumns(new Object[] { "componentName", "category", "level", "createTime", "logText" });
-		logTable.setColumnHeaders(new String[] { "Component Name", "Category", "Level", "Time", "Description" });
+		logTable.setVisibleColumns(new Object[] { "componentName", "level", "createTime", "logText" });
+		logTable.setColumnHeaders(new String[] { "Component Name", "Level", "Time", "Description" });
 
 		VerticalSplitPanel splitPanel = new VerticalSplitPanel();
 		splitPanel.setFirstComponent(stepTable);

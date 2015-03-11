@@ -60,7 +60,7 @@ public class TextFileWriter extends AbstractComponent {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
         if (inputMessage.getHeader().getSequenceNumber() == 1) {
             initStreamAndWriter();
         }
