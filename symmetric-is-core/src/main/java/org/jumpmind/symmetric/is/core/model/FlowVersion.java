@@ -5,7 +5,6 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 public class FlowVersion extends AbstractObject {
 
@@ -21,7 +20,7 @@ public class FlowVersion extends AbstractObject {
     
     String startExpression;
     
-    String versionName = UUID.randomUUID().toString();
+    String versionName = "";
 
     public FlowVersion() {
         this.flowSteps = new ArrayList<FlowStep>();

@@ -188,7 +188,7 @@ public class AppConfig {
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IAgentManager agentManager() {
-        IAgentManager agentManager = new AgentManager(configurationService(), componentFactory(),
+        IAgentManager agentManager = new AgentManager(configurationService(), executionService(), componentFactory(),
                 resourceFactory());
         return agentManager;
     }

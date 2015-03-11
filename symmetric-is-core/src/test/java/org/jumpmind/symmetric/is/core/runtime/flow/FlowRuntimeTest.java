@@ -9,7 +9,7 @@ import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.Folder;
-import org.jumpmind.symmetric.is.core.runtime.ExecutionTracker;
+import org.jumpmind.symmetric.is.core.runtime.ExecutionTrackerLogger;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
@@ -52,7 +52,7 @@ public class FlowRuntimeTest {
     	FlowVersion flow = createSimpleTwoStepNoOpFlow(folder);
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);	
     	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
-    			new ExecutionTracker(deployment), threadService);
+    			new ExecutionTrackerLogger(deployment), threadService);
     	flowRuntime.start();
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step").getNumberInboundMessages());
@@ -64,7 +64,7 @@ public class FlowRuntimeTest {
     	FlowVersion flow = createSrcToTwoTargetFlow(folder);
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
     	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
-    			new ExecutionTracker(deployment), threadService);
+    			new ExecutionTrackerLogger(deployment), threadService);
     	flowRuntime.start();
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step").getNumberInboundMessages());
@@ -77,7 +77,7 @@ public class FlowRuntimeTest {
         FlowVersion flow = createTwoSrcToOneTargetFlow(folder);
         AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
         FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
-                new ExecutionTracker(deployment), threadService);
+                new ExecutionTrackerLogger(deployment), threadService);
         flowRuntime.start();
         flowRuntime.waitForFlowCompletion();
         Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step 1").getNumberInboundMessages());

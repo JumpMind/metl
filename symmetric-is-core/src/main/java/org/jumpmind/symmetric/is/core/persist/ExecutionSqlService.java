@@ -9,9 +9,7 @@ import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.model.Agent;
-import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Execution;
-import org.jumpmind.symmetric.is.core.model.ExecutionStatus;
 import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 
 public class ExecutionSqlService extends AbstractExecutionService implements IExecutionService {
@@ -22,24 +20,6 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
             IPersistenceManager persistenceManager, String tablePrefix) {
         super(persistenceManager, tablePrefix);
         this.databasePlatform = databasePlatform;
-    }
-
-    @Override
-    public Execution requestExecution(AgentDeployment deployment) {
-        String sql = String
-                .format("insert into %1$s_execution (id, agent_deployment_id, status, create_time, create_by, last_update_time, last_update_by) "
-                        + "(select ?, ?, ?, ?, ?, ?, ? where not exists (select * from %1$s_execution where agent_deployment_id=? and end_time is null)) ",
-                        tablePrefix);
-        Execution execution = new Execution(ExecutionStatus.REQUESTED, deployment.getId());
-
-        ISqlTemplate template = databasePlatform.getSqlTemplate();
-        if (1 <= template.update(sql, execution.getId(), execution.getAgentDeploymentId(), execution.getStatus(),
-                execution.getCreateTime(), execution.getCreateBy(), execution.getLastModifyTime(),
-                execution.getLastModifyBy())) {
-            return execution;
-        } else {
-            return null;
-        }
     }
 
     public List<ExecutionStepLog> findExecutionStepLog(Set<String> executionStepIds) {

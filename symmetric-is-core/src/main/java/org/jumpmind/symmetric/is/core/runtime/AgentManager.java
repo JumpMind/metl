@@ -13,6 +13,7 @@ import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentStartMode;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.util.AppUtils;
@@ -24,6 +25,8 @@ public class AgentManager implements IAgentManager {
     final Logger log = LoggerFactory.getLogger(getClass());
 
     IConfigurationService configurationService;
+    
+    IExecutionService executionService;
 
     IComponentFactory componentFactory;
 
@@ -31,8 +34,9 @@ public class AgentManager implements IAgentManager {
 
     Map<Agent, AgentRuntime> engines = new HashMap<Agent, AgentRuntime>();
 
-    public AgentManager(IConfigurationService configurationService,
+    public AgentManager(IConfigurationService configurationService, IExecutionService executionService,
             IComponentFactory componentFactory, IResourceFactory resourceFactory) {
+        this.executionService = executionService;
         this.configurationService = configurationService;
         this.componentFactory = componentFactory;
         this.resourceFactory = resourceFactory;
@@ -67,6 +71,7 @@ public class AgentManager implements IAgentManager {
         Set<Agent> agents = new HashSet<Agent>(configurationService.findAgentsForHost(AppUtils
                 .getHostName()));
         agents.addAll(configurationService.findAgentsForHost(AppUtils.getIpAddress()));
+        agents.addAll(configurationService.findAgentsForHost("localhost"));
         return agents;
     }
 
@@ -89,7 +94,7 @@ public class AgentManager implements IAgentManager {
     }
 
     protected AgentRuntime createAndStartRuntime(Agent agent) {
-        AgentRuntime engine = new AgentRuntime(agent, configurationService, componentFactory,
+        AgentRuntime engine = new AgentRuntime(agent, configurationService, executionService, componentFactory,
                 resourceFactory);
         engines.put(agent, engine);
         if (agent.getAgentStartMode() == AgentStartMode.AUTO) {

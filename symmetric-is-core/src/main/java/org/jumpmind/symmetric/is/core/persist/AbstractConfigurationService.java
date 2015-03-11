@@ -187,7 +187,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
             List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class,
                     settingParams, null, null, tableName(AgentDeployment.class));
             for (AgentDeployment agentDeployment : deployments) {
-                FlowVersion flowVersion = new FlowVersion(null);
+                FlowVersion flowVersion = new FlowVersion();
                 flowVersion.setId(agentDeployment.getFlowVersionId());
                 refresh(flowVersion);
                 agentDeployment.setFlowVersion(flowVersion);

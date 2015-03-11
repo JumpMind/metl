@@ -3,9 +3,11 @@ package org.jumpmind.symmetric.is.ui.views;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.AgentStartMode;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
@@ -14,7 +16,7 @@ import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
-import org.jumpmind.symmetric.is.core.runtime.AgentRuntime;
+import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
@@ -47,8 +49,9 @@ public class DesignNavigator extends AbstractFolderNavigator {
     IExecutionService executionService;
     IComponentFactory componentFactory;
     IResourceFactory resourceFactory;
+    IAgentManager agentManager;
 
-    public DesignNavigator(BackgroundRefresherService backgroundRefreserService,
+    public DesignNavigator(IAgentManager agentManager, BackgroundRefresherService backgroundRefreserService,
             IConfigurationService configurationService, IExecutionService executionService, TabbedApplicationPanel tabs,
             DesignComponentPalette designComponentPalette, DesignPropertySheet designPropertySheet,
             IComponentFactory componentFactory, IResourceFactory resourceFactory) {
@@ -59,6 +62,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
         this.designPropertySheet = designPropertySheet;
         this.componentFactory = componentFactory;
         this.resourceFactory = resourceFactory;
+        this.agentManager = agentManager;
         this.tabs = tabs;
     }
 
@@ -133,32 +137,30 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
         if (item instanceof FlowVersion) {
             FlowVersion flowVersion = (FlowVersion) item;
-        	List<Agent> agents = configurationService.findAgentsForHost("localhost");
-        	Agent agent = null;
-        	if (agents.size() == 0) {
-        		agent = new Agent();
-        		agent.setHost("localhost");
-        		agent.setName("local");
-        		agent.setStartMode("MANUAL");
-        		configurationService.save(agent);
-        	} else {
-        		agent = agents.get(0);
+        	Set<Agent> agents = agentManager.getLocalAgents();
+        	Agent localAgent = null;
+        	for (Agent agent : agents) {
+                if (agent.getHost().equals("localhost")) {
+                    localAgent = agent;
+                    break;
+                }
+            }
+        	
+        	if (localAgent == null) {
+        		localAgent = new Agent();
+        		localAgent.setHost("localhost");
+        		localAgent.setName("local");
+        		localAgent.setStartMode(AgentStartMode.AUTO.name());
+        		configurationService.save(localAgent);
+        		agentManager.refresh(localAgent);
         	}
-        	boolean isDeployed = false;
-        	for (AgentDeployment deployment : configurationService.findAgentDeploymentsFor(flowVersion)) {
-        		if (deployment.getAgentId().equals(agent.getId())) {
-        			isDeployed = true;
-        		}
+        	
+        	AgentDeployment deployment = localAgent.getAgentDeploymentFor(flowVersion);
+        	if (deployment == null) {
+        		deployment = agentManager.deploy(localAgent.getId(), flowVersion);
         	}
-        	if (!isDeployed) {
-        		AgentDeployment deployment = new AgentDeployment();
-        		deployment.setAgentId(agent.getId());
-        		deployment.setFlowVersion(flowVersion);
-        		deployment.setStartMode("ON_DEPLOY");
-        		configurationService.save(deployment);
-        	}
-        	AgentRuntime runtime = new AgentRuntime(agents.get(0), configurationService, componentFactory, resourceFactory);
-        	runtime.start();
+        	
+        	agentManager.getAgentRuntime(localAgent).scheduleNow(deployment);
             ExecutionLogPanel logPanel = new ExecutionLogPanel(backgroundRefresherService, executionService, flowVersion);
             tabs.addCloseableTab(flowVersion.getId() + 10000,
                     "Run " + flowVersion.getFlow().getName() + " " + flowVersion.getName(),
@@ -272,9 +274,11 @@ public class DesignNavigator extends AbstractFolderNavigator {
             Flow flow = new Flow(folder);
             flow.setName("New Flow");
             configurationService.save(flow);
-
+            
             FlowVersion flowVersion = new FlowVersion(flow);
             flowVersion.setVersionName("version 1.0");
+            flow.getFlowVersions().add(flowVersion);
+            
             configurationService.save(flowVersion);
 
             treeTable.addItem(flow);

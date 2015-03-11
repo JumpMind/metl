@@ -40,6 +40,7 @@ public class AgentDeployment extends AbstractObject {
     public void setFlowVersionId(String flowVersionId) {
         if (flowVersionId != null) {
             this.flowVersion = new FlowVersion();
+            this.flowVersion.setId(flowVersionId);
         } else {
             this.flowVersion = null;
         }

@@ -5,12 +5,12 @@ import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExecutionTracker implements IExecutionTracker {
+public class ExecutionTrackerLogger implements IExecutionTracker {
 
     final Logger log = LoggerFactory.getLogger(getClass());
     AgentDeployment deployment;
 
-    public ExecutionTracker(AgentDeployment deployment) {
+    public ExecutionTrackerLogger(AgentDeployment deployment) {
         this.deployment = deployment;
     }
 

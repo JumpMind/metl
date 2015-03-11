@@ -34,8 +34,4 @@ abstract public class AbstractExecutionService extends AbstractService implement
     	return persistenceManager.find(ExecutionStepLog.class, args, null, null, tableName(ExecutionStepLog.class));
     }
 
-    @Override
-    public void saveExecutionStatus(Execution execution) {
-    }
-
 }

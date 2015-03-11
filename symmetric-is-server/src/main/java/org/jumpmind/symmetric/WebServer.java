@@ -63,7 +63,6 @@ import org.eclipse.jetty.util.security.Password;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.jminix.console.tool.StandaloneMiniConsole;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.security.ISecurityService;
 import org.jumpmind.security.SecurityConstants;
@@ -144,8 +143,6 @@ public class WebServer {
     protected String httpSslVerifiedServerNames = "all";
 
     protected boolean allowSelfSignedCerts = true;
-
-    protected StandaloneMiniConsole jmxConsole;
 
     protected Class<? extends WebApplicationInitializer>[] registeredAppInitializers;
 
@@ -406,7 +403,6 @@ public class WebServer {
         if (AppUtils.isSystemPropertySet(WebServerConstants.SYSPROP_JMX_HTTP_CONSOLE_ENABLED, true)
                 && jmxEnabled) {
             log.info("Starting JMX HTTP console on port {}", jmxPort);
-            jmxConsole = new StandaloneMiniConsole(jmxPort);
         }
     }
 

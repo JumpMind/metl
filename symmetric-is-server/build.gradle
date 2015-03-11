@@ -9,7 +9,7 @@ dependencies {
     compile "org.jumpmind.symmetric:symmetric-jdbc:$symmetricVersion"
     compile "org.jumpmind.symmetric:symmetric-io:$symmetricVersion"
     compile "org.jumpmind.symmetric:symmetric-core:$symmetricVersion"
-    compile 'org.jminix:jminix:1.1.0'    
+    //compile 'org.jminix:jminix:1.1.0'    
     compile "javax.servlet:javax.servlet-api:$servletVersion"
     compile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
     compile "org.eclipse.jetty:jetty-jmx:$jettyVersion"

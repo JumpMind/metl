@@ -19,7 +19,9 @@ import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.DeploymentStatus;
 import org.jumpmind.symmetric.is.core.model.StartType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.flow.AsyncRecorder;
 import org.jumpmind.symmetric.is.core.runtime.flow.FlowRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.slf4j.Logger;
@@ -47,6 +49,8 @@ public class AgentRuntime {
     IConfigurationService configurationService;
 
     IComponentFactory componentFactory;
+    
+    IExecutionService executionService;
 
     IResourceFactory resourceFactory;
 
@@ -55,14 +59,16 @@ public class AgentRuntime {
     ThreadPoolTaskScheduler flowExecutionScheduler;
 
     ScheduledFuture<AgentWatchdogRunner> watchdogScheduled;
+    
+    AsyncRecorder recorder;
 
-    public AgentRuntime(Agent agent, IConfigurationService configurationService,
+    public AgentRuntime(Agent agent, IConfigurationService configurationService, IExecutionService executionService,
             IComponentFactory componentFactory, IResourceFactory resourceFactory) {
         this.agent = agent;
+        this.executionService = executionService;
         this.configurationService = configurationService;
         this.componentFactory = componentFactory;
         this.resourceFactory = resourceFactory;
-
     }
 
     public void setAgent(Agent agent) {
@@ -103,6 +109,9 @@ public class AgentRuntime {
              */
             this.flowExecutionScheduler.setPoolSize(100);
             this.flowExecutionScheduler.initialize();
+            
+            this.recorder = new AsyncRecorder(executionService);
+            this.flowStepsExecutionThreads.execute(this.recorder);
 
             List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(
                     agent.getAgentDeployments());
@@ -133,9 +142,12 @@ public class AgentRuntime {
             for (AgentDeployment deployment : deployments) {
                 stop(deployment);
             }
-
+            
+            this.recorder.shutdown();
+            
             agent.setAgentStatus(AgentStatus.STOPPED);
             configurationService.save(agent);
+            
             started = false;
             stopping = false;
 
@@ -180,7 +192,7 @@ public class AgentRuntime {
             log.info("Deploying '{}' to '{}'", deployment.getFlowVersion().toString(),
                     agent.getName());
             FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory,
-                    resourceFactory, new ExecutionTracker(deployment),
+                    resourceFactory, new ExecutionTrackerRecorder(deployment, recorder),
                     flowStepsExecutionThreads);
             coordinators.put(deployment, flowRuntime);
 

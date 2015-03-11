@@ -4,6 +4,7 @@ import javax.annotation.PostConstruct;
 
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
+import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.ui.common.Category;
@@ -43,6 +44,9 @@ public class DesignView extends HorizontalLayout implements View {
     
     @Autowired
     BackgroundRefresherService backgroundRefresherService;
+    
+    @Autowired
+    IAgentManager agentManager;
 
     DesignNavigator designNavigator;
 
@@ -72,7 +76,7 @@ public class DesignView extends HorizontalLayout implements View {
                 resourceFactory);
 
         DesignComponentPalette designComponentPalette = new DesignComponentPalette(componentFactory, leftTopBottomSplit);
-        designNavigator = new DesignNavigator(backgroundRefresherService, configurationService, executionService, tabs,
+        designNavigator = new DesignNavigator(agentManager, backgroundRefresherService, configurationService, executionService, tabs,
                 designComponentPalette, designPropertySheet, componentFactory, resourceFactory);
         leftTopBottomSplit.setFirstComponent(designNavigator);
         leftTopBottomSplit.setSecondComponent(designComponentPalette);

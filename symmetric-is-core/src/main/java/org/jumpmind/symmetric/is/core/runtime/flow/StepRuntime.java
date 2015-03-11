@@ -27,7 +27,7 @@ public class StepRuntime implements Runnable {
     List<StepRuntime> targetStepRuntimes;
 
     List<StepRuntime> sourceStepRuntimes;
-
+    
     public StepRuntime(IComponent component) {
         this.component = component;
         inQueue = new LinkedBlockingQueue<Message>(capacity);
