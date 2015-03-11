@@ -53,7 +53,7 @@ public class FlowRuntimeTest {
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);	
     	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
     			new ExecutionTrackerLogger(deployment), threadService);
-    	flowRuntime.start();
+    	flowRuntime.start(null);
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step").getNumberInboundMessages());
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Step").getNumberInboundMessages());
@@ -65,7 +65,7 @@ public class FlowRuntimeTest {
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
     	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
     			new ExecutionTrackerLogger(deployment), threadService);
-    	flowRuntime.start();
+    	flowRuntime.start(null);
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step").getNumberInboundMessages());
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Step 1").getNumberInboundMessages());
@@ -78,7 +78,7 @@ public class FlowRuntimeTest {
         AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
         FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
                 new ExecutionTrackerLogger(deployment), threadService);
-        flowRuntime.start();
+        flowRuntime.start(null);
         flowRuntime.waitForFlowCompletion();
         Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step 1").getNumberInboundMessages());
         Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step 2").getNumberInboundMessages());

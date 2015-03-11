@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
@@ -39,6 +40,8 @@ public class FlowRuntime {
 
     Map<String, StepRuntime> stepRuntimes;
     
+    String executionId;
+    
     public FlowRuntime(AgentDeployment deployment, IComponentFactory componentFactory,
             IResourceFactory resourceFactory, IExecutionTracker executionTracker,
             ExecutorService threadService) {
@@ -53,10 +56,14 @@ public class FlowRuntime {
         return deployment;
     }
 
-    public void start() throws InterruptedException {
+    public void start(String executionId) throws InterruptedException {
+        
+        this.executionId = executionId == null ? UUID.randomUUID().toString() : executionId;
         this.stepRuntimes = new HashMap<String, StepRuntime>();
         FlowVersion flowVersion = deployment.getFlowVersion();
         List<FlowStep> steps = flowVersion.getFlowSteps();
+        
+        executionTracker.beforeFlow(executionId);
 
         /* create a step runtime for every component in the flow */
         for (FlowStep flowStep : steps) {
@@ -114,6 +121,8 @@ public class FlowRuntime {
         while (isRunning()) {
             AppUtils.sleep(500);
         }
+        
+        executionTracker.afterFlow(executionId);
     }
 
     public boolean isRunning() {

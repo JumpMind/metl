@@ -51,12 +51,15 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
 	protected Label endLabel = new Label();
 	
 	protected BackgroundRefresherService backgroundRefresherService;
+	
+	protected String executionId;
 
-	public ExecutionLogPanel(final BackgroundRefresherService backgroundRefresherService, final IExecutionService executionService,
+	public ExecutionLogPanel(String executionId, final BackgroundRefresherService backgroundRefresherService, final IExecutionService executionService,
 			final FlowVersion flowVersion) {
 		this.backgroundRefresherService = backgroundRefresherService;
 		this.executionService = executionService;
 		this.flowVersion = flowVersion;
+		this.executionId = executionId;
 
 		HorizontalLayout header1 = new HorizontalLayout();
 		header1.addComponent(new Label("<b>Flow:</b>", ContentMode.HTML));
@@ -144,8 +147,8 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
     @SuppressWarnings("unchecked")
 	protected ExecutionData getExecutionData() {
     	ExecutionData data = new ExecutionData();
-    	data.execution = executionService.findExecution("1");
-    	data.steps = executionService.findExecutionStep("1");
+    	data.execution = executionService.findExecution(executionId);
+    	data.steps = executionService.findExecutionStep(executionId);
     	data.logs = executionService.findExecutionStepLog((Set<String>) stepTable.getValue());
 		return data;
     }

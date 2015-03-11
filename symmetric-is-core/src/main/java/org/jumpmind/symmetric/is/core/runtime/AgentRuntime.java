@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
@@ -197,8 +198,7 @@ public class AgentRuntime {
             coordinators.put(deployment, flowRuntime);
 
             if (deployment.getFlowVersion().asStartType() == StartType.ON_DEPLOY) {
-                flowRuntime.start();
-                deployment.setStatus(DeploymentStatus.RUNNING.name());
+                scheduleNow(deployment);
             } else {
                 if (deployment.getFlowVersion().asStartType() == StartType.SCHEDULED_CRON) {
                     String cron = deployment.getFlowVersion().getStartExpression();
@@ -209,7 +209,7 @@ public class AgentRuntime {
                                     new CronSequenceGenerator(cron).next(new Date()) });
 
                     ScheduledFuture<?> future = this.flowExecutionScheduler.schedule(
-                            new FlowRunner(flowRuntime), new CronTrigger(cron));
+                            new FlowRunner(null, flowRuntime), new CronTrigger(cron));
                     scheduled.put(deployment, future);
                 }
 
@@ -226,19 +226,20 @@ public class AgentRuntime {
         configurationService.save(deployment);
     }
 
-    public boolean scheduleNow(AgentDeployment deployment) {
+    public String scheduleNow(AgentDeployment deployment) {
         ScheduledFuture<?> future = scheduled.get(deployment);
         if (future == null || future.isDone()) {
             log.info("Scheduling '{}' on '{}' for now", new Object[] {
                     deployment.getFlowVersion().toString(), agent.getName() });
 
             FlowRuntime flowRuntime = coordinators.get(deployment);
-            future = this.flowExecutionScheduler.schedule(new FlowRunner(flowRuntime),
+            String executionId = UUID.randomUUID().toString();
+            future = this.flowExecutionScheduler.schedule(new FlowRunner(executionId, flowRuntime),
                     new Date());
             scheduled.put(deployment, future);
-            return true;
+            return executionId;
         } else {
-            return false;
+            return null;
         }
     }
 
@@ -275,9 +276,12 @@ public class AgentRuntime {
     class FlowRunner implements Runnable {
 
         FlowRuntime flowRuntime;
+        
+        String executionId;
 
-        public FlowRunner(FlowRuntime flowRuntime) {
+        public FlowRunner(String executionId, FlowRuntime flowRuntime) {
             this.flowRuntime = flowRuntime;
+            this.executionId = executionId;
         }
 
         @Override
@@ -286,7 +290,7 @@ public class AgentRuntime {
                 AgentDeployment deployment = flowRuntime.getDeployment();
                 log.info("Scheduled '{}' on '{}' is running", deployment.getFlowVersion()
                         .toString(), agent.getName());
-                flowRuntime.start();
+                flowRuntime.start(executionId);
                 flowRuntime.waitForFlowCompletion();
                 log.info("Scheduled '{}' on '{}' is finished", deployment.getFlowVersion()
                         .toString(), agent.getName());

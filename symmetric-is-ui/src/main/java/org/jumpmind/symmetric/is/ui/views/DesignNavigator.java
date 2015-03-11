@@ -160,8 +160,8 @@ public class DesignNavigator extends AbstractFolderNavigator {
         		deployment = agentManager.deploy(localAgent.getId(), flowVersion);
         	}
         	
-        	agentManager.getAgentRuntime(localAgent).scheduleNow(deployment);
-            ExecutionLogPanel logPanel = new ExecutionLogPanel(backgroundRefresherService, executionService, flowVersion);
+        	String executionId = agentManager.getAgentRuntime(localAgent).scheduleNow(deployment);
+            ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, backgroundRefresherService, executionService, flowVersion);
             tabs.addCloseableTab(flowVersion.getId() + 10000,
                     "Run " + flowVersion.getFlow().getName() + " " + flowVersion.getName(),
                     Icons.RUN, logPanel);
