@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
@@ -12,6 +13,9 @@ import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
+import org.jumpmind.symmetric.is.core.runtime.AgentRuntime;
+import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.localfile.LocalFileResource;
 import org.jumpmind.symmetric.is.ui.common.Icons;
@@ -40,15 +44,20 @@ public class DesignNavigator extends AbstractFolderNavigator {
     DesignPropertySheet designPropertySheet;
     BackgroundRefresherService backgroundRefresherService;
     IExecutionService executionService;
+    IComponentFactory componentFactory;
+    IResourceFactory resourceFactory;
 
     public DesignNavigator(BackgroundRefresherService backgroundRefreserService,
             IConfigurationService configurationService, IExecutionService executionService, TabbedApplicationPanel tabs,
-            DesignComponentPalette designComponentPalette, DesignPropertySheet designPropertySheet) {
+            DesignComponentPalette designComponentPalette, DesignPropertySheet designPropertySheet,
+            IComponentFactory componentFactory, IResourceFactory resourceFactory) {
         super(FolderType.DESIGN, configurationService);
         this.backgroundRefresherService = backgroundRefreserService;
         this.executionService = executionService;
         this.designComponentPalette = designComponentPalette;
         this.designPropertySheet = designPropertySheet;
+        this.componentFactory = componentFactory;
+        this.resourceFactory = resourceFactory;
         this.tabs = tabs;
     }
 
@@ -123,6 +132,9 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
         if (item instanceof FlowVersion) {
             FlowVersion flowVersion = (FlowVersion) item;
+        	List<Agent> agents = configurationService.findAgentsForHost("localhost");
+        	AgentRuntime runtime = new AgentRuntime(agents.get(0), configurationService, componentFactory, resourceFactory);
+        	runtime.start();
             ExecutionLogPanel logPanel = new ExecutionLogPanel(backgroundRefresherService, executionService, flowVersion);
             tabs.addCloseableTab(flowVersion.getId() + 10000,
                     "Run " + flowVersion.getFlow().getName() + " " + flowVersion.getName(),

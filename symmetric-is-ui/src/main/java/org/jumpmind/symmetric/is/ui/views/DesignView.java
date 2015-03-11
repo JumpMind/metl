@@ -73,7 +73,7 @@ public class DesignView extends HorizontalLayout implements View {
 
         DesignComponentPalette designComponentPalette = new DesignComponentPalette(componentFactory, leftTopBottomSplit);
         designNavigator = new DesignNavigator(backgroundRefresherService, configurationService, executionService, tabs,
-                designComponentPalette, designPropertySheet);
+                designComponentPalette, designPropertySheet, componentFactory, resourceFactory);
         leftTopBottomSplit.setFirstComponent(designNavigator);
         leftTopBottomSplit.setSecondComponent(designComponentPalette);
 
