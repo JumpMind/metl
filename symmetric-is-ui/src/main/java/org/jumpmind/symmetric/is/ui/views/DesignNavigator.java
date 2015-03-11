@@ -123,7 +123,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
         if (item instanceof FlowVersion) {
             FlowVersion flowVersion = (FlowVersion) item;
-            ExecutionLogPanel logPanel = new ExecutionLogPanel(executionService, flowVersion);
+            ExecutionLogPanel logPanel = new ExecutionLogPanel(backgroundRefresherService, executionService, flowVersion);
             tabs.addCloseableTab(flowVersion.getId() + 10000,
                     "Run " + flowVersion.getFlow().getName() + " " + flowVersion.getName(),
                     Icons.RUN, logPanel);

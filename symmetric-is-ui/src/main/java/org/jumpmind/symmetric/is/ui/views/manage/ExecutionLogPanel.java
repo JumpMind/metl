@@ -11,6 +11,8 @@ import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
+import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
+import org.jumpmind.symmetric.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -26,7 +28,7 @@ import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 
-public class ExecutionLogPanel extends VerticalLayout implements IBackgroundRefreshable {
+public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -47,8 +49,11 @@ public class ExecutionLogPanel extends VerticalLayout implements IBackgroundRefr
 	protected Label startLabel = new Label();
 	
 	protected Label endLabel = new Label();
+	
+	protected BackgroundRefresherService backgroundRefresherService;
 
-	public ExecutionLogPanel(final IExecutionService executionService, final FlowVersion flowVersion) {
+	public ExecutionLogPanel(final BackgroundRefresherService backgroundRefresherService, final IExecutionService executionService,
+			final FlowVersion flowVersion) {
 		this.executionService = executionService;
 		this.flowVersion = flowVersion;
 
@@ -111,8 +116,19 @@ public class ExecutionLogPanel extends VerticalLayout implements IBackgroundRefr
 		setExpandRatio(splitPanel, 1.0f);
 		
 		refreshUI(getExecutionData());
+		backgroundRefresherService.register(this);
 	}
 	
+    @Override
+    public boolean closing() {
+        backgroundRefresherService.unregister(this);
+        return true;
+    }
+
+    @Override
+    public void showing() {
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Object onBackgroundDataRefresh() {
