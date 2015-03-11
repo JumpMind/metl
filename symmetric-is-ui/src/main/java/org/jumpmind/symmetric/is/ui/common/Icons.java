@@ -26,6 +26,10 @@ final public class Icons {
     public static final FontAwesome FILE_SYSTEM = FontAwesome.FILES_O;
     
     public static final FontAwesome RUN = FontAwesome.PLAY;
+    
+    //public static final FontAwesome EXECUTION = FontAwesome.CARET_SQUARE_O_RIGHT;
+    //public static final FontAwesome EXECUTION = FontAwesome.PLANE;
+    public static final FontAwesome EXECUTION = FontAwesome.ROCKET;
 
     public static final FontAwesome COMPONENT = FontAwesome.PUZZLE_PIECE;
 
