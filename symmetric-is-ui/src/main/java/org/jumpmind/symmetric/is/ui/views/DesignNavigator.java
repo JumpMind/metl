@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.Agent;
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
@@ -133,6 +134,29 @@ public class DesignNavigator extends AbstractFolderNavigator {
         if (item instanceof FlowVersion) {
             FlowVersion flowVersion = (FlowVersion) item;
         	List<Agent> agents = configurationService.findAgentsForHost("localhost");
+        	Agent agent = null;
+        	if (agents.size() == 0) {
+        		agent = new Agent();
+        		agent.setHost("localhost");
+        		agent.setName("local");
+        		agent.setStartMode("MANUAL");
+        		configurationService.save(agent);
+        	} else {
+        		agent = agents.get(0);
+        	}
+        	boolean isDeployed = false;
+        	for (AgentDeployment deployment : configurationService.findAgentDeploymentsFor(flowVersion)) {
+        		if (deployment.getAgentId().equals(agent.getId())) {
+        			isDeployed = true;
+        		}
+        	}
+        	if (!isDeployed) {
+        		AgentDeployment deployment = new AgentDeployment();
+        		deployment.setAgentId(agent.getId());
+        		deployment.setFlowVersion(flowVersion);
+        		deployment.setStartMode("ON_DEPLOY");
+        		configurationService.save(deployment);
+        	}
         	AgentRuntime runtime = new AgentRuntime(agents.get(0), configurationService, componentFactory, resourceFactory);
         	runtime.start();
             ExecutionLogPanel logPanel = new ExecutionLogPanel(backgroundRefresherService, executionService, flowVersion);

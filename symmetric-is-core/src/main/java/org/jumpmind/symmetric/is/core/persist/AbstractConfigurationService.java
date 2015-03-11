@@ -200,7 +200,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public List<AgentDeployment> findAgentDeploymentsFor(FlowVersion flowVersion) {
         List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class,
-                new NameValue("FlowVersionId", flowVersion.getId()), null, null,
+                new NameValue("flowVersionId", flowVersion.getId()), null, null,
                 tableName(AgentDeployment.class));
         for (AgentDeployment deployment : deployments) {
             deployment.setFlowVersion(flowVersion);
