@@ -54,6 +54,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
 
 	public ExecutionLogPanel(final BackgroundRefresherService backgroundRefresherService, final IExecutionService executionService,
 			final FlowVersion flowVersion) {
+		this.backgroundRefresherService = backgroundRefresherService;
 		this.executionService = executionService;
 		this.flowVersion = flowVersion;
 
