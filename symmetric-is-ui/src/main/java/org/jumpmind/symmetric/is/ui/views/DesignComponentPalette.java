@@ -5,10 +5,12 @@ import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentCategory;
+import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.server.ClassResource;
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -69,9 +71,13 @@ public class DesignComponentPalette extends Panel {
             componentAccordian.addTab(componentLayout, category.name() + "S");
             if (componentTypes != null) {
                 for (String componentType : componentTypes) {
+                    ComponentDefinition defintion = componentFactory.getComponentDefinitionForComponentType(componentType);
+                    ClassResource icon = new ClassResource("/org/jumpmind/symmetric/is/core/runtime/component/" + defintion.iconImage());
                     Button button = new Button(componentType);
+                    button.setIcon(icon);
+                    button.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
                     button.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
-                    button.addStyleName("leftAligned");
+                    button.addStyleName("leftAligned");                    
                     button.setWidth(100, Unit.PERCENTAGE);
                     button.addClickListener(new AddComponentClickListener(componentType));
                     DragAndDropWrapper wrapper = new DragAndDropWrapper(button); 

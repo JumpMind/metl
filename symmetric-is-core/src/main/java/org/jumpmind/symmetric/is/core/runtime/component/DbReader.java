@@ -28,7 +28,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
-@ComponentDefinition(typeName = DbReader.TYPE, category = ComponentCategory.READER,
+@ComponentDefinition(typeName = DbReader.TYPE, category = ComponentCategory.READER, iconImage="dbreader.png",
         supports = { ComponentSupports.INPUT_MESSAGE, ComponentSupports.OUTPUT_MESSAGE,
                 ComponentSupports.INPUT_MODEL, ComponentSupports.OUTPUT_MODEL },
         resourceCategory = ResourceCategory.DATASOURCE)

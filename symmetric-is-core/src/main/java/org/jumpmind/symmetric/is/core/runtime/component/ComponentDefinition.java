@@ -13,6 +13,8 @@ public @interface ComponentDefinition {
 
     String typeName();
     
+    String iconImage() default "puzzle.png";
+    
     ComponentCategory category();
     
     ComponentSupports[] supports();
