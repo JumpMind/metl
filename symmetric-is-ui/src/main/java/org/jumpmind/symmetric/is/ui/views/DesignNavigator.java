@@ -384,6 +384,10 @@ public class DesignNavigator extends AbstractFolderNavigator {
         @Override
         public boolean onOk() {
             configurationService.delete(toDelete);
+            List<FlowVersion> versions = toDelete.getFlowVersions();
+            for (FlowVersion flowVersion : versions) {
+                tabs.closeTab(flowVersion.getId());                
+            }
             refresh();
             expand(toDelete.getFolder(), toDelete.getFolder());
             deleteTreeItems(alsoDelete);

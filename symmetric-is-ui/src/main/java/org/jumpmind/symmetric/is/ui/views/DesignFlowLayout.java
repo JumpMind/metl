@@ -226,10 +226,6 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
             component.setShared(false);
             addComponent(details.getMouseEvent().getClientX() - details.getAbsoluteLeft(), details
                     .getMouseEvent().getClientY() - details.getAbsoluteTop(), component);
-
-            log.info("Dropped " + t.getSourceComponent() + " at "
-                    + (details.getMouseEvent().getClientX() - details.getAbsoluteLeft()) + ","
-                    + (details.getMouseEvent().getClientY() - details.getAbsoluteTop()));
         }
 
         @Override

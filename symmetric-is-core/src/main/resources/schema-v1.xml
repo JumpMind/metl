@@ -47,7 +47,7 @@
 
     <table name="model_entity" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="model_version_id" type="CHAR" size="36" required="true" primaryKey="true" description="A version number" />
+        <column name="model_version_id" type="CHAR" size="36" required="true" description="A version number" />
         <column name="name" type="VARCHAR" size="255" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
@@ -68,10 +68,10 @@
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
-        <foreign-key foreignTable="model_entity" name="fk_ma_2_me_1">
+        <foreign-key foreignTable="model_entity" name="fk_ei_2_me_1">
             <reference local="entity_id" foreign="id" />
         </foreign-key>
-        <foreign-key foreignTable="model_entity" name="fk_ma_2_me_2">
+        <foreign-key foreignTable="model_entity" name="fk_tei_2_me_2">
             <reference local="type_entity_id" foreign="id" />
         </foreign-key>
     </table>
