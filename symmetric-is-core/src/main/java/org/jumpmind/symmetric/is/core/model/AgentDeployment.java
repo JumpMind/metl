@@ -4,7 +4,7 @@ public class AgentDeployment extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
-    FlowVersion flowVersion;
+    FlowVersion flowVersion;    
 
     String agentId;
 

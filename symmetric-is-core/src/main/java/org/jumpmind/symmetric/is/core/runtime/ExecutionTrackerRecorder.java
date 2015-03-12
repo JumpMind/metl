@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Execution;
 import org.jumpmind.symmetric.is.core.model.ExecutionStatus;
@@ -18,11 +19,14 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     
     Execution execution;
     
+    Agent agent;
+    
     Map<String, ExecutionStep> steps;
     
-    public ExecutionTrackerRecorder(AgentDeployment deployment, AsyncRecorder recorder) {
+    public ExecutionTrackerRecorder(Agent agent, AgentDeployment deployment, AsyncRecorder recorder) {
         super(deployment);
-        this.recorder = recorder;        
+        this.recorder = recorder;
+        this.agent = agent;
     }
 
     @Override
@@ -35,7 +39,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         execution.setStatus(ExecutionStatus.RUNNING.name());
         execution.setAgentId(deployment.getAgentId());
         execution.setFlowVersionId(deployment.getFlowVersionId());
-        //execution.setAgentName();
+        execution.setAgentName(agent.getName());
         execution.setFlowName(deployment.getFlowVersion().getFlow().getName());
         this.recorder.record(execution);
     }

@@ -193,7 +193,7 @@ public class AgentRuntime {
             log.info("Deploying '{}' to '{}'", deployment.getFlowVersion().toString(),
                     agent.getName());
             FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory,
-                    resourceFactory, new ExecutionTrackerRecorder(deployment, recorder),
+                    resourceFactory, new ExecutionTrackerRecorder(agent, deployment, recorder),
                     flowStepsExecutionThreads);
             coordinators.put(deployment, flowRuntime);
 
