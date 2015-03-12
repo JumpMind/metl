@@ -6,7 +6,15 @@ public class Execution extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
-    String agentDeploymentId;
+    String agentId;
+    
+    String flowVersionId;
+    
+    String agentName;
+    
+    String hostName;
+    
+    String flowName;
 
     String status;
 
@@ -17,8 +25,7 @@ public class Execution extends AbstractObject {
     public Execution() {
     }
 
-    public Execution(ExecutionStatus status, String agentDeploymentId) {
-        this.agentDeploymentId = agentDeploymentId;
+    public Execution(ExecutionStatus status) {
         setExecutionStatus(status);
     }
 
@@ -35,14 +42,6 @@ public class Execution extends AbstractObject {
 
     public String getName() {
         return id;
-    }
-
-    public String getAgentDeploymentId() {
-        return agentDeploymentId;
-    }
-
-    public void setAgentDeploymentId(String agentDeploymentId) {
-        this.agentDeploymentId = agentDeploymentId;
     }
 
     public String getStatus() {
@@ -68,5 +67,45 @@ public class Execution extends AbstractObject {
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
+
+	public String getAgentId() {
+		return agentId;
+	}
+
+	public void setAgentId(String agentId) {
+		this.agentId = agentId;
+	}
+
+	public String getFlowVersionId() {
+		return flowVersionId;
+	}
+
+	public void setFlowVersionId(String flowVersionId) {
+		this.flowVersionId = flowVersionId;
+	}
+
+	public String getAgentName() {
+		return agentName;
+	}
+
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
+
+	public String getFlowName() {
+		return flowName;
+	}
+
+	public void setFlowName(String flowName) {
+		this.flowName = flowName;
+	}
+
+	public String getHostName() {
+		return hostName;
+	}
+
+	public void setHostName(String hostName) {
+		this.hostName = hostName;
+	}
 
 }

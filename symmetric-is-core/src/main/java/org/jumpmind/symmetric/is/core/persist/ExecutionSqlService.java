@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.persist;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
@@ -51,6 +52,10 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
                         return e;
                     }
                 });    	
+    }
+    
+    public List<Execution> findExecutions(Map<String, Object> params) {
+    	return persistenceManager.find(Execution.class, params, null, null, tableName(Execution.class));
     }
 
     @Override

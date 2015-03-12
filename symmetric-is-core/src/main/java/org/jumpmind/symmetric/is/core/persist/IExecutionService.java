@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.persist;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
@@ -14,6 +15,8 @@ public interface IExecutionService {
     public List<Execution> findActiveExecutions(Agent agent);
     
     public void save(AbstractObject object);
+
+    public List<Execution> findExecutions(Map<String, Object> params);
 
     public Execution findExecution(String id);
 

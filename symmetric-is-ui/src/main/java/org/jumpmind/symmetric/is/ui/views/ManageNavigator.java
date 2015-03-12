@@ -10,7 +10,6 @@ import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Flow;
-import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
@@ -127,6 +126,7 @@ public class ManageNavigator extends Panel {
 
     protected void selectionChanged(ValueChangeEvent event) {
     	// TODO: enabled/disable toolbar buttons
+    	System.out.println(treeTable.getValue());
     }
 
     @SuppressWarnings("unchecked")
@@ -251,18 +251,7 @@ public class ManageNavigator extends Panel {
                 treeTable.setItemCaption(flowVersion, flowVersion.getVersionName());
                 treeTable.setItemIcon(flowVersion, Icons.FLOW_VERSION);
                 treeTable.setParent(flowVersion, flow);
-
-                List<FlowStep> flowSteps = flowVersion.getFlowSteps();
-
-                treeTable.setChildrenAllowed(flowVersion, flowSteps.size() > 0);
-
-                for (FlowStep flowStep : flowSteps) {
-                    treeTable.addItem(flowStep);
-                    treeTable.setItemCaption(flowStep, flowStep.getName());
-                    treeTable.setItemIcon(flowStep, Icons.COMPONENT);
-                    treeTable.setParent(flowStep, flowVersion);
-                    treeTable.setChildrenAllowed(flowStep, false);
-                }
+                treeTable.setChildrenAllowed(flowVersion, false);
             }
         }
     }
