@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.Execution;
+import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
@@ -193,6 +194,9 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     			params.put("agentId", ((Agent) currentSelection).getId());
     		} else if (currentSelection instanceof FlowVersion) {
     			params.put("flowVersionId", ((FlowVersion) currentSelection).getId());    			
+    		} else if (currentSelection instanceof Flow) {
+    			FlowVersion flowVersion = ((Flow) currentSelection).getLatestFlowVersion();
+    			params.put("flowVersionId", flowVersion.getId());    			
     		}
 
     		if (params.size() > 0) {
