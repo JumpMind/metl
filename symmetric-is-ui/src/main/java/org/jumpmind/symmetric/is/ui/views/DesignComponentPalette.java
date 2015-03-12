@@ -6,11 +6,16 @@ import java.util.Map;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentCategory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.ui.Accordion;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.DragAndDropWrapper;
+import com.vaadin.ui.DragAndDropWrapper.DragStartMode;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -18,6 +23,8 @@ import com.vaadin.ui.themes.ValoTheme;
 public class DesignComponentPalette extends Panel {
 
     private static final long serialVersionUID = 1L;
+    
+    final Logger log = LoggerFactory.getLogger(getClass());
 
     Accordion componentAccordian;
 
@@ -67,7 +74,11 @@ public class DesignComponentPalette extends Panel {
                     button.addStyleName("leftAligned");
                     button.setWidth(100, Unit.PERCENTAGE);
                     button.addClickListener(new AddComponentClickListener(componentType));
-                    componentLayout.addComponent(button);
+                    DragAndDropWrapper wrapper = new DragAndDropWrapper(button); 
+                    wrapper.setSizeUndefined();
+                    wrapper.setDragStartMode(DragStartMode.WRAPPER);
+                    componentLayout.addComponent(wrapper);
+                    componentLayout.setComponentAlignment(wrapper, Alignment.TOP_CENTER);
                 }
             }
         }
@@ -90,7 +101,7 @@ public class DesignComponentPalette extends Panel {
             component.setShared(false);
 
             if (designFlowLayout != null) {
-                designFlowLayout.addComponent(component);
+                designFlowLayout.addComponent(0, 0, component);
             }
 
         }

@@ -17,8 +17,17 @@ import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.ResourceEvent;
 import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.vaadin.event.dd.DragAndDropEvent;
+import com.vaadin.event.dd.acceptcriteria.AcceptAll;
+import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.DragAndDropWrapper;
+import com.vaadin.ui.DragAndDropWrapper.WrapperTargetDetails;
+import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.themes.ValoTheme;
@@ -26,6 +35,8 @@ import com.vaadin.ui.themes.ValoTheme;
 public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBackgroundRefreshable {
 
     private static final long serialVersionUID = 1L;
+
+    final Logger log = LoggerFactory.getLogger(getClass());
 
     IConfigurationService configurationService;
 
@@ -36,14 +47,14 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
     DesignNavigator designNavigator;
 
     Diagram diagram;
-    
+
     CssLayout diagramLayout;
 
     BackgroundRefresherService backgroundRefresherService;
 
-    public DesignFlowLayout(BackgroundRefresherService backgroundRefresherService, IComponentFactory componentFactory,
-            IConfigurationService configurationService, FlowVersion componentFlowVersion,
-            DesignPropertySheet designPropertySheet,
+    public DesignFlowLayout(BackgroundRefresherService backgroundRefresherService,
+            IComponentFactory componentFactory, IConfigurationService configurationService,
+            FlowVersion componentFlowVersion, DesignPropertySheet designPropertySheet,
             DesignNavigator designNavigator) {
         this.backgroundRefresherService = backgroundRefresherService;
         this.configurationService = configurationService;
@@ -51,21 +62,25 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
         this.designPropertySheet = designPropertySheet;
         this.designNavigator = designNavigator;
 
-        DesignComponentPalette designComponentPalette = new DesignComponentPalette(this, componentFactory);
+        DesignComponentPalette designComponentPalette = new DesignComponentPalette(this,
+                componentFactory);
         addComponent(designComponentPalette);
 
         diagramLayout = new CssLayout();
         diagramLayout.setWidth(10000, Unit.PIXELS);
         diagramLayout.setHeight(10000, Unit.PIXELS);
-        
+        DragAndDropWrapper wrapper = new DragAndDropWrapper(diagramLayout);
+
+        wrapper.setDropHandler(new DropHandler());
+
         Panel panel = new Panel();
         panel.setSizeFull();
         panel.addStyleName(ValoTheme.PANEL_WELL);
         addComponent(panel);
         setExpandRatio(panel, 1);
-        
-        panel.setContent(diagramLayout);
-        
+
+        panel.setContent(wrapper);
+
         redrawFlow();
         backgroundRefresherService.register(this);
     }
@@ -101,18 +116,20 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
         return count;
     }
 
-    protected void addComponent(Component component) {
+    protected void addComponent(int x, int y, Component component) {
         ComponentVersion componentVersion = new ComponentVersion(component);
         componentVersion.setVersionName("version 1.0");
 
         component.setName(component.getType() + " "
                 + (countComponentsOfType(component.getType()) + 1));
 
-        FlowStep componentflowStep = new FlowStep(componentVersion);
-        componentflowStep.setFlowVersionId(componentFlowVersion.getId());
-        componentFlowVersion.getFlowSteps().add(componentflowStep);
+        FlowStep flowStep = new FlowStep(componentVersion);
+        flowStep.setX(x);
+        flowStep.setY(y);
+        flowStep.setFlowVersionId(componentFlowVersion.getId());
+        componentFlowVersion.getFlowSteps().add(flowStep);
 
-        configurationService.save(componentflowStep);
+        configurationService.save(flowStep);
 
         redrawFlow();
 
@@ -129,6 +146,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
 
         diagram = new Diagram();
         diagram.addListener(new DiagramChangedListener());
+
         diagramLayout.addComponent(diagram);
 
         List<FlowStepLink> links = componentFlowVersion.getFlowStepLinks();
@@ -191,6 +209,32 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
 
                 }
             }
+        }
+    }
+
+    class DropHandler implements com.vaadin.event.dd.DropHandler {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public void drop(DragAndDropEvent event) {
+            WrapperTransferable t = (WrapperTransferable) event.getTransferable();
+            WrapperTargetDetails details = (WrapperTargetDetails) event.getTargetDetails();
+            DragAndDropWrapper wrapper = (DragAndDropWrapper) t.getSourceComponent();
+            Button button = (Button) wrapper.iterator().next();
+            Component component = new Component();
+            component.setType(button.getCaption());
+            component.setShared(false);
+            addComponent(details.getMouseEvent().getClientX() - details.getAbsoluteLeft(), details
+                    .getMouseEvent().getClientY() - details.getAbsoluteTop(), component);
+
+            log.info("Dropped " + t.getSourceComponent() + " at "
+                    + (details.getMouseEvent().getClientX() - details.getAbsoluteLeft()) + ","
+                    + (details.getMouseEvent().getClientY() - details.getAbsoluteTop()));
+        }
+
+        @Override
+        public AcceptCriterion getAcceptCriterion() {
+            return AcceptAll.get();
         }
     }
 
