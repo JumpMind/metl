@@ -16,7 +16,7 @@ public interface IExecutionService {
     
     public void save(AbstractObject object);
 
-    public List<Execution> findExecutions(Map<String, Object> params);
+    public List<Execution> findExecutions(Map<String, Object> params, int limit);
 
     public Execution findExecution(String id);
 

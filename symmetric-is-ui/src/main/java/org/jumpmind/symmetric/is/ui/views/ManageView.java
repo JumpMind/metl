@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.StringUtils;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Execution;
@@ -17,11 +18,12 @@ import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.ui.common.Category;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.common.Icons;
+import org.jumpmind.symmetric.is.ui.common.MultiPropertyFilter;
+import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.is.ui.common.TopBarLink;
 import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
 import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
-import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -51,8 +53,11 @@ import com.vaadin.ui.themes.ValoTheme;
 @Scope(value = "ui")
 @TopBarLink(category = Category.MANAGE, name = "Manage", id = "manage", icon = FontAwesome.GEARS, menuOrder = 20)
 public class ManageView extends HorizontalLayout implements View, IUiPanel, IBackgroundRefreshable {
-    private static final long serialVersionUID = 1L;
 
+	private static final long serialVersionUID = 1L;
+
+	static final int DEFAULT_LIMIT = 100;
+    
     @Autowired
     IConfigurationService configurationService;
 
@@ -72,6 +77,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 	
 	Button viewButton;
 	
+	int limit = DEFAULT_LIMIT;
+		
     @SuppressWarnings("serial")
 	@PostConstruct
     protected void init() {
@@ -92,14 +99,26 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 		Label limitLabel = new Label("Limit:");
 		limitLayout.addComponent(limitLabel);
 		limitLayout.setComponentAlignment(limitLabel, Alignment.MIDDLE_CENTER);
-		TextField limitField = new TextField(null, "100");
+		TextField limitField = new TextField(null, String.valueOf(DEFAULT_LIMIT));
 		limitField.setWidth("5em");
+		limitField.setImmediate(true);
+        limitField.setTextChangeEventMode(TextChangeEventMode.LAZY);
+        limitField.setTextChangeTimeout(200);
+		limitField.addTextChangeListener(new TextChangeListener() {
+			public void textChange(TextChangeEvent event) {
+				try {
+					limit = Integer.parseInt(event.getText());
+				} catch (Exception e) {
+				}
+				refreshUI(getBackgroundData());
+			}		
+		});
 		limitLayout.addComponent(limitField);
 		header.addComponent(limitLayout);
 		header.setComponentAlignment(limitLayout, Alignment.MIDDLE_RIGHT);
 		header.setExpandRatio(limitLayout, 1.0f);
 		
-        final TextField filterField = new TextField();
+        TextField filterField = new TextField();
         filterField.setInputPrompt("Filter");
         filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
         filterField.setIcon(FontAwesome.SEARCH);
@@ -108,8 +127,11 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         filterField.setTextChangeTimeout(200);
         filterField.addTextChangeListener(new TextChangeListener() {
             public void textChange(TextChangeEvent event) {
-                String filterCriteria = (String) event.getText();
-                System.out.println("filter: " + filterCriteria);
+                executionContainer.removeAllContainerFilters();
+                if (! StringUtils.isBlank(event.getText())) {
+	                executionContainer.addContainerFilter(new MultiPropertyFilter(event.getText(), 
+	                		new String[] { "agentName", "hostName", "flowName", "status", "startTime", "endTime" }));
+                }
             }
         });
         header.addComponent(filterField);
@@ -126,6 +148,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 		table.setSizeFull();
 		table.setVisibleColumns(new Object[] { "agentName", "hostName", "flowName", "status", "startTime", "endTime" });
 		table.setColumnHeaders(new String[] { "Agent", "Host", "Flow", "Status", "Start", "End"});
+		table.setSortContainerPropertyId("startTime");
+		table.setSortAscending(false);
 		table.addValueChangeListener(new ValueChangeListener() {
 			public void valueChange(ValueChangeEvent event) {
 				viewButton.setEnabled(table.getValue() != null);
@@ -201,7 +225,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     		}
 
     		if (params.size() > 0) {
-    			return executionService.findExecutions(params);		
+    			return executionService.findExecutions(params, limit);		
     		}
     	}
     	return null;
@@ -214,6 +238,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     	table.setValue(null);
     	if (data != null) {
     		executionContainer.addAll((List<Execution>) data);
+    		table.sort();
     		table.setValue(currentSelection);
     	}
     	viewButton.setEnabled(table.getValue() != null);
