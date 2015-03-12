@@ -55,6 +55,8 @@ public interface IConfigurationService {
     
     public List<Resource> findResourcesByTypes(String ... types);
     
+    public List<Agent> findAgents();
+    
     public List<Agent> findAgentsInFolder(Folder folder);
     
     public List<Agent> findAgentsForHost(String hostName);

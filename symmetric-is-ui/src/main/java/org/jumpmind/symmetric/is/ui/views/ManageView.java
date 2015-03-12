@@ -84,8 +84,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         viewButton.setEnabled(false);
         
         VerticalLayout mainTab = new VerticalLayout();
+        mainTab.setSizeFull();
 		HorizontalLayout header = new HorizontalLayout();
-		header.setSizeFull();
 		header.addComponent(viewButton);
 		HorizontalLayout limitLayout = new HorizontalLayout();
 		limitLayout.setSpacing(true);

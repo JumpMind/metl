@@ -17,14 +17,12 @@ import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentSetting;
 import org.jumpmind.symmetric.is.core.model.Component;
+import org.jumpmind.symmetric.is.core.model.ComponentVersion;
+import org.jumpmind.symmetric.is.core.model.ComponentVersionSetting;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
-import org.jumpmind.symmetric.is.core.model.ComponentVersion;
-import org.jumpmind.symmetric.is.core.model.ComponentVersionSetting;
-import org.jumpmind.symmetric.is.core.model.Resource;
-import org.jumpmind.symmetric.is.core.model.ResourceSetting;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Model;
@@ -33,6 +31,8 @@ import org.jumpmind.symmetric.is.core.model.ModelAttributeRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.ModelEntityRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelVersion;
+import org.jumpmind.symmetric.is.core.model.Resource;
+import org.jumpmind.symmetric.is.core.model.ResourceSetting;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.util.NameValue;
 
@@ -88,7 +88,11 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public List<Flow> findFlowsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("folderId", folder.getId());
+        String folderId = null;
+        if (folder != null) {
+        	folderId = folder.getId();
+        }
+        params.put("folderId", folderId);
         List<Flow> flows = find(Flow.class, params);
         for (Flow flow : flows) {
             flow.setFolder(folder);
@@ -151,7 +155,11 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public List<Agent> findAgentsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("folderId", folder.getId());
+        String folderId = null;
+        if (folder != null) {
+        	folderId = folder.getId();
+        }
+        params.put("folderId", folderId);
         return findAgents(params, folder);
     }
 
@@ -160,6 +168,10 @@ abstract class AbstractConfigurationService extends AbstractService implements
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("host", hostName);
         return findAgents(params);
+    }
+
+    public List<Agent> findAgents() {
+        return persistenceManager.find(Agent.class, null, null, tableName(Agent.class));    
     }
 
     protected List<Agent> findAgents(Map<String, Object> params) {

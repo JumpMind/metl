@@ -42,6 +42,10 @@ public class ManageNavigator extends Panel {
     IConfigurationService configurationService;
 
     TreeTable treeTable;
+    
+    Folder agentsFolder;
+    
+    Folder flowsFolder;
 
     public ManageNavigator(FolderType folderType, IConfigurationService configurationService) {
         this.configurationService = configurationService;
@@ -58,6 +62,12 @@ public class ManageNavigator extends Panel {
         treeTable = buildTreeTable();
         content.addComponent(treeTable);
         content.setExpandRatio(treeTable, 1);
+        
+        agentsFolder = new Folder();
+        agentsFolder.setName("Agents");
+
+        flowsFolder = new Folder();
+        flowsFolder.setName("Flows");
     }
 
     public void refresh() {
@@ -71,23 +81,21 @@ public class ManageNavigator extends Panel {
         }
 
         treeTable.removeAllItems();
+        treeTable.addItem(agentsFolder);
+        treeTable.setItemIcon(agentsFolder, FontAwesome.FOLDER);
+        addAgentsToFolder(agentsFolder);
         
-        Agent rootAgent = new Agent();
-        rootAgent.setName("Agents");
-        treeTable.addItem(rootAgent);
-        treeTable.setItemIcon(rootAgent, FontAwesome.GEAR);
         List<Folder> folders = configurationService.findFolders(FolderType.RUNTIME);
         for (Folder folder : folders) {
-            addChildFolder(folder, rootAgent);
+            addChildFolder(folder, agentsFolder);
         }
 
-        Flow rootFlow = new Flow();
-        rootFlow.setName("Flows");
-        treeTable.addItem(rootFlow);
-        treeTable.setItemIcon(rootFlow, Icons.FLOW);
+        treeTable.addItem(flowsFolder);
+        treeTable.setItemIcon(flowsFolder, FontAwesome.FOLDER);
+        
         folders = configurationService.findFolders(FolderType.DESIGN);
         for (Folder folder : folders) {
-            addChildFolder(folder, rootFlow);
+            addChildFolder(folder, flowsFolder);
         }
 
         for (Object object : expandedItems) {
@@ -208,7 +216,7 @@ public class ManageNavigator extends Panel {
     }
 
     protected void addAgentsToFolder(Folder folder) {
-        List<Agent> agents = configurationService.findAgentsInFolder(folder);
+        List<Agent> agents = configurationService.findAgentsInFolder(folder == agentsFolder ? null : folder);
         for (Agent agent : agents) {
             treeTable.addItem(agent);
             treeTable.setItemIcon(agent, FontAwesome.GEAR);
@@ -227,7 +235,10 @@ public class ManageNavigator extends Panel {
     }
 
     protected void addFlowsToFolder(Folder folder) {
-        List<Flow> flows = configurationService.findFlowsInFolder(folder);
+    	if (folder == flowsFolder) {
+    		folder = null;
+    	}
+        List<Flow> flows = configurationService.findFlowsInFolder(folder == flowsFolder ? null : folder);
         for (Flow flow : flows) {
             treeTable.addItem(flow);
             treeTable.setItemIcon(flow, Icons.FLOW);
