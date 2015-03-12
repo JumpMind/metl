@@ -54,8 +54,8 @@ import com.vaadin.ui.Window.CloseListener;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.OLD_MANAGE, name = "Old Manage", id = "oldmanage", icon = FontAwesome.GEARS, menuOrder = 20)
-public class OldManageView extends HorizontalLayout implements View {
+@TopBarLink(category = Category.DEPLOY, name = "Deploy", id = "deploy", icon = FontAwesome.GEARS, menuOrder = 10)
+public class DeployView extends HorizontalLayout implements View {
 
     private static final long serialVersionUID = 1L;
 
@@ -80,7 +80,7 @@ public class OldManageView extends HorizontalLayout implements View {
 
     protected TabbedApplicationPanel tabSheet;
 
-    public OldManageView() {
+    public DeployView() {
         setSizeFull();
     }
 
@@ -107,7 +107,7 @@ public class OldManageView extends HorizontalLayout implements View {
         MenuItem addDeploymentButton;
 
         public MainTab() {
-            super(FolderType.RUNTIME, OldManageView.this.configurationService);
+            super(FolderType.RUNTIME, DeployView.this.configurationService);
         }
 
         @PostConstruct
