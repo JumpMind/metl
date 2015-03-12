@@ -43,7 +43,6 @@ public class DesignNavigator extends AbstractFolderNavigator {
     MenuItem run;
 
     TabbedApplicationPanel tabs;
-    DesignComponentPalette designComponentPalette;
     DesignPropertySheet designPropertySheet;
     BackgroundRefresherService backgroundRefresherService;
     IExecutionService executionService;
@@ -53,12 +52,11 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
     public DesignNavigator(IAgentManager agentManager, BackgroundRefresherService backgroundRefreserService,
             IConfigurationService configurationService, IExecutionService executionService, TabbedApplicationPanel tabs,
-            DesignComponentPalette designComponentPalette, DesignPropertySheet designPropertySheet,
+            DesignPropertySheet designPropertySheet,
             IComponentFactory componentFactory, IResourceFactory resourceFactory) {
         super(FolderType.DESIGN, configurationService);
         this.backgroundRefresherService = backgroundRefreserService;
         this.executionService = executionService;
-        this.designComponentPalette = designComponentPalette;
         this.designPropertySheet = designPropertySheet;
         this.componentFactory = componentFactory;
         this.resourceFactory = resourceFactory;
@@ -121,8 +119,8 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
         if (item instanceof FlowVersion) {
             FlowVersion flowVersion = (FlowVersion) item;
-            DesignFlowLayout flowLayout = new DesignFlowLayout(backgroundRefresherService,
-                    configurationService, flowVersion, designComponentPalette, designPropertySheet,
+            DesignFlowLayout flowLayout = new DesignFlowLayout(backgroundRefresherService, componentFactory,
+                    configurationService, flowVersion, designPropertySheet,
                     this);
             tabs.addCloseableTab(flowVersion.getId(), flowVersion.getFlow().getName() + " "
                     + flowVersion.getName(), Icons.FLOW, flowLayout);
@@ -233,11 +231,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
             }
 
         } else if (selected instanceof FlowStep) {
-            if (!configurationService.isFlowVersionDeployed(((FlowStep) selected)
-                    .getFlowVersionId())) {
-                deleteButtonEnabled |= true;
-            }
-
+            deleteButtonEnabled |= true;
         }
         deleteButtonEnabled |= super.isDeleteButtonEnabled(selected)
                 || selected instanceof Resource;

@@ -13,7 +13,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class DesignComponentPalette extends Panel {
@@ -24,19 +23,18 @@ public class DesignComponentPalette extends Panel {
 
     IComponentFactory componentFactory;
 
-    DesignFlowLayout currentlySelectedDesignFlowLayout;
+    DesignFlowLayout designFlowLayout;
 
-    VerticalSplitPanel layout;
-    
     float splitPosition = 60;
-    
+
     Unit splitUnit = Unit.PERCENTAGE;
 
-    public DesignComponentPalette(IComponentFactory componentFactory, VerticalSplitPanel layout) {
+    public DesignComponentPalette(DesignFlowLayout designFlowLayout,
+            IComponentFactory componentFactory) {
         this.componentFactory = componentFactory;
-        this.layout = layout;
-        setCaption("Component Palette");
-        setSizeFull();
+        this.designFlowLayout = designFlowLayout;
+        setHeight(100, Unit.PERCENTAGE);
+        setWidth(150, Unit.PIXELS);
         addStyleName("noborder");
 
         VerticalLayout content = new VerticalLayout();
@@ -52,28 +50,6 @@ public class DesignComponentPalette extends Panel {
 
         populateComponentPalette();
 
-        setVisible(false);
-
-    }
-    
-    @Override
-    public void setVisible(boolean visible) {
-        if (visible) {
-            layout.setSplitPosition(splitPosition, splitUnit);
-            layout.setLocked(false);
-        } else {
-            splitPosition = layout.getSplitPosition();
-            splitUnit = layout.getSplitPositionUnit();
-            layout.setSplitPosition(100, Unit.PERCENTAGE);
-            layout.setLocked(true);
-        }
-        super.setVisible(visible);
-    }
-    
-
-    public void setCurrentlySelectedDesignFlowLayout(
-            DesignFlowLayout currentlySelectedDesignFlowLayout) {
-        this.currentlySelectedDesignFlowLayout = currentlySelectedDesignFlowLayout;
     }
 
     protected void populateComponentPalette() {
@@ -113,8 +89,8 @@ public class DesignComponentPalette extends Panel {
             component.setType(type);
             component.setShared(false);
 
-            if (currentlySelectedDesignFlowLayout != null) {
-                currentlySelectedDesignFlowLayout.addComponent(component);
+            if (designFlowLayout != null) {
+                designFlowLayout.addComponent(component);
             }
 
         }

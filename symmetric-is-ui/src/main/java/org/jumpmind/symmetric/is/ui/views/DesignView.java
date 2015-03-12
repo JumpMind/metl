@@ -21,7 +21,6 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.VerticalSplitPanel;
 
 @UiComponent
 @Scope(value = "ui")
@@ -68,20 +67,13 @@ public class DesignView extends HorizontalLayout implements View {
         leftSplit.setSizeFull();
         leftSplit.setSplitPosition(300, Unit.PIXELS);
 
-        VerticalSplitPanel leftTopBottomSplit = new VerticalSplitPanel();
-        leftTopBottomSplit.setSizeFull();
-        leftTopBottomSplit.setSplitPosition(60, Unit.PERCENTAGE);
-
         designPropertySheet = new DesignPropertySheet(componentFactory, configurationService,
                 resourceFactory);
 
-        DesignComponentPalette designComponentPalette = new DesignComponentPalette(componentFactory, leftTopBottomSplit);
         designNavigator = new DesignNavigator(agentManager, backgroundRefresherService, configurationService, executionService, tabs,
-                designComponentPalette, designPropertySheet, componentFactory, resourceFactory);
-        leftTopBottomSplit.setFirstComponent(designNavigator);
-        leftTopBottomSplit.setSecondComponent(designComponentPalette);
+                designPropertySheet, componentFactory, resourceFactory);
 
-        leftSplit.setFirstComponent(leftTopBottomSplit);
+        leftSplit.setFirstComponent(designNavigator);
         VerticalLayout container = new VerticalLayout();
         container.setSizeFull();
         container.addComponent(tabs);
