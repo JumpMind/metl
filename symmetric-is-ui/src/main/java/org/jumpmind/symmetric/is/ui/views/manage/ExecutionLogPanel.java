@@ -8,7 +8,6 @@ import java.util.Set;
 import org.jumpmind.symmetric.is.core.model.Execution;
 import org.jumpmind.symmetric.is.core.model.ExecutionStep;
 import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
@@ -34,8 +33,6 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
 	
 	protected IExecutionService executionService;
 	
-	protected FlowVersion flowVersion;
-	
 	protected Table stepTable = new Table();
 	
 	protected BeanContainer<String, ExecutionStep> stepContainer = new BeanContainer<String, ExecutionStep>(ExecutionStep.class);
@@ -54,11 +51,9 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
 	
 	protected String executionId;
 
-	public ExecutionLogPanel(String executionId, final BackgroundRefresherService backgroundRefresherService, final IExecutionService executionService,
-			final FlowVersion flowVersion) {
+	public ExecutionLogPanel(String executionId, final BackgroundRefresherService backgroundRefresherService, final IExecutionService executionService) {
 		this.backgroundRefresherService = backgroundRefresherService;
 		this.executionService = executionService;
-		this.flowVersion = flowVersion;
 		this.executionId = executionId;
 
 		HorizontalLayout header1 = new HorizontalLayout();
@@ -154,7 +149,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
     }
     
     protected void refreshUI(ExecutionData data) {
-		flowLabel.setValue(flowVersion.getName());
+		flowLabel.setValue(data.execution.getFlowName());
 		startLabel.setValue(formatDate(data.execution.getStartTime()));
 		statusLabel.setValue(data.execution.getStatus());
 		endLabel.setValue(formatDate(data.execution.getEndTime()));

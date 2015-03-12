@@ -7,21 +7,21 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.symmetric.is.core.model.Agent;
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Execution;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
-import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.ui.common.Category;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TopBarLink;
 import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
+import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
-import org.jumpmind.symmetric.ui.common.TabbedApplicationPanel;
+import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -37,6 +37,8 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
@@ -58,17 +60,9 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     IExecutionService executionService;
 
     @Autowired
-    IComponentFactory componentFactory;
-
-    @Autowired
-    IResourceFactory resourceFactory;
-    
-    @Autowired
     BackgroundRefresherService backgroundRefresherService;
 
     ManageNavigator manageNavigator;
-
-    DesignPropertySheet designPropertySheet;
 
     TabbedApplicationPanel tabs;
 
@@ -83,6 +77,11 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     protected void init() {
         viewButton = new Button("View Log");
         viewButton.setEnabled(false);
+        viewButton.addClickListener(new ClickListener() {
+			public void buttonClick(ClickEvent event) {
+				viewLog();
+			}        	
+        });
         
         VerticalLayout mainTab = new VerticalLayout();
         mainTab.setSizeFull();
@@ -136,7 +135,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 		mainTab.setExpandRatio(table, 1.0f);
 		
         tabs = new TabbedApplicationPanel();        
-        tabs.addTab(mainTab, "Executions", Icons.EXECUTION);
+        tabs.setMainTab("Executions", Icons.EXECUTION, mainTab);
 
         HorizontalSplitPanel split = new HorizontalSplitPanel();
         split.setSizeFull();
@@ -197,6 +196,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     		} else if (currentSelection instanceof Flow) {
     			FlowVersion flowVersion = ((Flow) currentSelection).getLatestFlowVersion();
     			params.put("flowVersionId", flowVersion.getId());    			
+    		} else if (currentSelection instanceof AgentDeployment) {
+    			params.put("flowVersionId", ((AgentDeployment) currentSelection).getFlowVersionId());
     		}
 
     		if (params.size() > 0) {
@@ -216,6 +217,13 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     		table.setValue(currentSelection);
     	}
     	viewButton.setEnabled(table.getValue() != null);
+    }
+
+    protected void viewLog() {
+    	Execution execution = (Execution) table.getValue();
+        ExecutionLogPanel logPanel = new ExecutionLogPanel(execution.getId(),
+                backgroundRefresherService, executionService);
+        tabs.addCloseableTab(execution.getId(), "Log " + execution.getFlowName(), Icons.LOG, logPanel);
     }
 
 }

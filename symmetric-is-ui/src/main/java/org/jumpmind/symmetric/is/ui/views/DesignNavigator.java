@@ -164,9 +164,9 @@ public class DesignNavigator extends AbstractFolderNavigator {
             String executionId = agentManager.getAgentRuntime(localAgent).scheduleNow(deployment);
             if (executionId != null) {
                 ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId,
-                        backgroundRefresherService, executionService, flowVersion);
+                        backgroundRefresherService, executionService);
                 tabs.addCloseableTab(executionId, "Run " + flowVersion.getFlow().getName() + " "
-                        + flowVersion.getName(), Icons.RUN, logPanel);
+                        + flowVersion.getName(), Icons.LOG, logPanel);
             }
         }
     }
