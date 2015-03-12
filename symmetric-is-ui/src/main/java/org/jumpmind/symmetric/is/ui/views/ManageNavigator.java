@@ -16,7 +16,6 @@ import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 
-import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
@@ -124,11 +123,6 @@ public class ManageNavigator extends Panel {
     protected void openItem(Object item) {
     }
 
-    protected void selectionChanged(ValueChangeEvent event) {
-    	// TODO: enabled/disable toolbar buttons
-    	System.out.println(treeTable.getValue());
-    }
-
     @SuppressWarnings("unchecked")
 	protected Set<Object> getTableValues() {
         Set<Object> selectedIds = null;
@@ -167,12 +161,6 @@ public class ManageNavigator extends Panel {
                 for (Object object : selectedIds) {
                     openItem(object);
                 }
-            }
-        });
-
-        table.addValueChangeListener(new ValueChangeListener() {
-            public void valueChange(ValueChangeEvent event) {
-                selectionChanged(event);
             }
         });
 
@@ -254,6 +242,14 @@ public class ManageNavigator extends Panel {
                 treeTable.setChildrenAllowed(flowVersion, false);
             }
         }
+    }
+
+    public void addValueChangeListener(ValueChangeListener listener) {
+    	treeTable.addValueChangeListener(listener);
+    }
+
+    public Object getCurrentSelection() {
+    	return treeTable.getValue();
     }
 
 }

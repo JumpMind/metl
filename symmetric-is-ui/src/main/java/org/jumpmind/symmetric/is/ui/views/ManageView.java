@@ -6,7 +6,9 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.Execution;
+import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
@@ -23,6 +25,8 @@ import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
@@ -68,10 +72,16 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     TabbedApplicationPanel tabs;
 
 	BeanItemContainer<Execution> executionContainer = new BeanItemContainer<Execution>(Execution.class);
-
-    @PostConstruct
+	
+	Table table;
+	
+	Button viewButton;
+	
+    @SuppressWarnings("serial")
+	@PostConstruct
     protected void init() {
-        Button viewButton = new Button("View Log");
+        viewButton = new Button("View Log");
+        viewButton.setEnabled(false);
         
         VerticalLayout mainTab = new VerticalLayout();
 		HorizontalLayout header = new HorizontalLayout();
@@ -97,8 +107,6 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         filterField.setTextChangeEventMode(TextChangeEventMode.LAZY);
         filterField.setTextChangeTimeout(200);
         filterField.addTextChangeListener(new TextChangeListener() {
-            private static final long serialVersionUID = 1L;
-
             public void textChange(TextChangeEvent event) {
                 String filterCriteria = (String) event.getText();
                 System.out.println("filter: " + filterCriteria);
@@ -111,13 +119,18 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 		header.setWidth("100%");		
 		mainTab.addComponent(header);
 		
-		Table table = new Table();
+		table = new Table();
 		table.setContainerDataSource(executionContainer);
 		table.setSelectable(true);
-		table.setMultiSelect(true);
+		table.setMultiSelect(false);
 		table.setSizeFull();
 		table.setVisibleColumns(new Object[] { "agentName", "hostName", "flowName", "status", "startTime", "endTime" });
 		table.setColumnHeaders(new String[] { "Agent", "Host", "Flow", "Status", "Start", "End"});
+		table.addValueChangeListener(new ValueChangeListener() {
+			public void valueChange(ValueChangeEvent event) {
+				viewButton.setEnabled(table.getValue() != null);
+			}
+		});
 		mainTab.addComponent(table);
 		mainTab.setExpandRatio(table, 1.0f);
 		
@@ -129,6 +142,11 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         split.setSplitPosition(300, Unit.PIXELS, false);
         
         manageNavigator = new ManageNavigator(FolderType.RUNTIME, configurationService);
+        manageNavigator.addValueChangeListener(new ValueChangeListener() {
+			public void valueChange(ValueChangeEvent event) {
+				refreshUI(getBackgroundData());
+			}
+        });
         split.setFirstComponent(manageNavigator);
 
         VerticalLayout container = new VerticalLayout();
@@ -138,7 +156,6 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
         addComponent(split);
         setSizeFull();
-        //refreshUI(getBackgroundData());
         backgroundRefresherService.register(this);
     }
 
@@ -169,15 +186,32 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     }
 
     public Object getBackgroundData() {
-    	Map<String, Object> params = new HashMap<String, Object>();
-    	params.put("agentId", "119488c5-2828-471e-bd2b-9c6ea3c3eb24");
-    	return executionService.findExecutions(params);
+    	Object currentSelection = manageNavigator.getCurrentSelection();
+    	if (currentSelection != null) {
+        	Map<String, Object> params = new HashMap<String, Object>();
+    		if (currentSelection instanceof Agent) {
+    			params.put("agentId", ((Agent) currentSelection).getId());
+    		} else if (currentSelection instanceof FlowVersion) {
+    			params.put("flowVersionId", ((FlowVersion) currentSelection).getId());    			
+    		}
+
+    		if (params.size() > 0) {
+    			return executionService.findExecutions(params);		
+    		}
+    	}
+    	return null;
     }
 
     @SuppressWarnings("unchecked")
 	protected void refreshUI(Object data) {
+    	Object currentSelection = table.getValue();
     	executionContainer.removeAllItems();
-    	executionContainer.addAll((List<Execution>) data);
+    	table.setValue(null);
+    	if (data != null) {
+    		executionContainer.addAll((List<Execution>) data);
+    		table.setValue(currentSelection);
+    	}
+    	viewButton.setEnabled(table.getValue() != null);
     }
 
 }
