@@ -232,6 +232,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
     protected ComponentVersion findComponentVersion(String id) {
         ComponentVersion componentVersion = new ComponentVersion();
         componentVersion.setId(id);
+        refresh(componentVersion);
+        return componentVersion;
+    }
+
+    @Override
+    public void refresh(ComponentVersion componentVersion) {
+
         persistenceManager.refresh(componentVersion, null, null, tableName(ComponentVersion.class));
 
         componentVersion.setComponent(findOne(Component.class,
@@ -251,8 +258,6 @@ abstract class AbstractConfigurationService extends AbstractService implements
         componentVersion.setSettings(settings);
 
         componentVersion.setResource(findResource(componentVersion.getResourceId()));
-
-        return componentVersion;
 
     }
 

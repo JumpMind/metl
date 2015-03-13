@@ -56,13 +56,17 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     @Override
     public void beforeHandle(String executionId, IComponent component) {
         super.beforeHandle(executionId, component);
-        ExecutionStep step = new ExecutionStep();
+
+        ExecutionStep step = steps.get(component.getFlowStep().getId());
+        if (step == null) {
+            step = new ExecutionStep();
+            this.steps.put(component.getFlowStep().getId(), step);
+        }
         step.setExecutionId(executionId);
         step.setStartTime(new Date());
         step.setComponentName(component.getFlowStep().getComponentVersion().getComponent().getName());
         step.setFlowStepId(component.getFlowStep().getId());
         step.setStatus(ExecutionStatus.RUNNING.name());
-        this.steps.put(component.getFlowStep().getId(), step);
         this.recorder.record(step);
     }
 

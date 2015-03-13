@@ -6,6 +6,7 @@ import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentSummary;
+import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
@@ -71,9 +72,11 @@ public interface IConfigurationService {
     
     public void refresh(Resource resource);
     
+    public void refresh(ComponentVersion version);
+    
     public void save(Resource resource);
     
-    public void save(FlowStep flowStep);
+    public void save(FlowStep flowStep);    
 
     public void save(AbstractObject obj);
 

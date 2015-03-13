@@ -73,7 +73,9 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
             }
             
             if (obj instanceof ComponentVersion) {
-                addComponentVersionProperties(formLayout, (ComponentVersion) obj);
+                ComponentVersion version = (ComponentVersion)obj;
+                configurationService.refresh(version);                
+                addComponentVersionProperties(formLayout, version);
             } else if (obj instanceof FlowVersion) {
                 addFlowVersionSpecificProperties(formLayout, (FlowVersion)obj);
             }

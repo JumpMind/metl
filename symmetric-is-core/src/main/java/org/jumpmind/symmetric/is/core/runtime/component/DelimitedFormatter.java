@@ -41,10 +41,13 @@ public class DelimitedFormatter extends AbstractComponent {
     @Override
     public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
         
+        componentStatistics.incrementInboundMessages();
         ArrayList<EntityData> records = inputMessage.getPayload();
         for (EntityData record:records) {
             
         }
+        throw new RuntimeException("Boom goes the dynamite");
+
     }
     
     private void applySettings() {
