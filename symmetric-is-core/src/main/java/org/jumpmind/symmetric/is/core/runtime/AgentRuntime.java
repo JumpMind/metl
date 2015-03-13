@@ -189,9 +189,11 @@ public class AgentRuntime {
 
     private void deploy(final AgentDeployment deployment) {
         try {
-
             log.info("Deploying '{}' to '{}'", deployment.getFlowVersion().toString(),
                     agent.getName());
+            
+            configurationService.refresh(deployment.getFlowVersion());
+
             FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory,
                     resourceFactory, new ExecutionTrackerRecorder(agent, deployment, recorder),
                     flowStepsExecutionThreads);
@@ -287,7 +289,7 @@ public class AgentRuntime {
         @Override
         public void run() {
             try {
-                AgentDeployment deployment = flowRuntime.getDeployment();
+                AgentDeployment deployment = flowRuntime.getDeployment();                
                 log.info("Scheduled '{}' on '{}' is running", deployment.getFlowVersion()
                         .toString(), agent.getName());
                 flowRuntime.start(executionId);
