@@ -17,6 +17,7 @@ import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.DmlStatement;
 import org.jumpmind.db.sql.DmlStatement.DmlType;
 import org.jumpmind.db.sql.ISqlTemplate;
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
@@ -25,6 +26,8 @@ import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
+import org.jumpmind.symmetric.is.core.runtime.ExecutionTrackerLogger;
+import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
@@ -113,9 +116,10 @@ public class DbReaderTest {
     @Test
     public void testReaderFlowFromStartupMsg() throws Exception {
 
+        IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new FlowVersion()));
         DbReader reader = new DbReader();
         reader.setFlowStep(readerFlowStep);
-        reader.start(null, resourceFactory);
+        reader.start(executionTracker, resourceFactory);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle("test", msg, msgTarget);
@@ -129,9 +133,10 @@ public class DbReaderTest {
     @Test
     public void testReaderFlowFromSingleContentMsg() throws Exception {
 
+        IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new FlowVersion()));
         DbReader reader = new DbReader();
         reader.setFlowStep(readerFlowStep);
-        reader.start(null, resourceFactory);
+        reader.start(executionTracker, resourceFactory);
         Message message = new Message("fake step id");
         message.setPayload(new ArrayList<EntityData>());
         ArrayList<EntityData> payload = message.getPayload();
