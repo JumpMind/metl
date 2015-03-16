@@ -1,8 +1,13 @@
 package org.jumpmind.symmetric.is.ui.views;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
+import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentCategory;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
@@ -60,6 +65,30 @@ public class DesignComponentPalette extends Panel {
         populateComponentPalette();
 
     }
+    
+    protected String getBase64RepresentationOfImageForComponentType(String type) {
+        String resourceName = getImageResourceNameForComponentType(type);
+        InputStream is = getClass().getResourceAsStream(resourceName);
+        if (is != null) {
+            try {
+                byte[] bytes = IOUtils.toByteArray(is);
+                return new String(Base64.encodeBase64(bytes));
+            } catch (IOException e) {
+                throw new IoException(e);
+            }
+        } else {
+            return null;
+        }
+    }
+    
+    protected String getImageResourceNameForComponentType(String type) {
+        ComponentDefinition defintion = componentFactory.getComponentDefinitionForComponentType(type);
+        return "/org/jumpmind/symmetric/is/core/runtime/component/" + defintion.iconImage();                
+    }
+    
+    protected ClassResource getImageResourceForComponentType(String type) {
+        return new ClassResource(getImageResourceNameForComponentType(type));        
+    }
 
     protected void populateComponentPalette() {
         componentAccordian.removeAllComponents();
@@ -71,8 +100,7 @@ public class DesignComponentPalette extends Panel {
             componentAccordian.addTab(componentLayout, category.name() + "S");
             if (componentTypes != null) {
                 for (String componentType : componentTypes) {
-                    ComponentDefinition defintion = componentFactory.getComponentDefinitionForComponentType(componentType);
-                    ClassResource icon = new ClassResource("/org/jumpmind/symmetric/is/core/runtime/component/" + defintion.iconImage());
+                    ClassResource icon = getImageResourceForComponentType(componentType);
                     Button button = new Button(componentType);
                     button.setIcon(icon);
                     button.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);

@@ -49,8 +49,12 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
     Diagram diagram;
 
     CssLayout diagramLayout;
+    
+    IComponentFactory componentFactory;
 
     BackgroundRefresherService backgroundRefresherService;
+    
+    DesignComponentPalette designComponentPalette;
 
     public DesignFlowLayout(BackgroundRefresherService backgroundRefresherService,
             IComponentFactory componentFactory, IConfigurationService configurationService,
@@ -61,8 +65,9 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
         this.componentFlowVersion = componentFlowVersion;
         this.designPropertySheet = designPropertySheet;
         this.designNavigator = designNavigator;
+        this.componentFactory = componentFactory;
 
-        DesignComponentPalette designComponentPalette = new DesignComponentPalette(this,
+        this.designComponentPalette = new DesignComponentPalette(this,
                 componentFactory);
         addComponent(designComponentPalette);
 
@@ -156,7 +161,8 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
             Node node = new Node();
             String name = flowStep.getComponentVersion().getComponent().getName();
             String type = flowStep.getComponentVersion().getComponent().getType();
-            node.setText(name + "<br><i>" + type + "</i>");
+            String imageText = String.format("<img src=\"data:image/png;base64,%s\"/>", designComponentPalette.getBase64RepresentationOfImageForComponentType(type));
+            node.setText(imageText + "<br><i>" + name + "</i>");
             node.setId(flowStep.getId());
             node.setX(flowStep.getX());
             node.setY(flowStep.getY());
@@ -205,6 +211,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
                             event.getSourceNodeId(), event.getTargetNodeId());
                     if (link != null) {
                         configurationService.delete(link);
+                        redrawFlow();
                     }
 
                 }
