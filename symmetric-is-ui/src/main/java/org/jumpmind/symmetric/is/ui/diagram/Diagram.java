@@ -1,7 +1,6 @@
 package org.jumpmind.symmetric.is.ui.diagram;
 
 import java.util.List;
-import java.util.UUID;
 
 import com.vaadin.annotations.JavaScript;
 import com.vaadin.annotations.StyleSheet;
@@ -11,15 +10,15 @@ import com.vaadin.ui.JavaScriptFunction;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
-@JavaScript({ "dom.jsPlumb-1.6.4-min.js", "diagram.js" })
+@JavaScript({ "dom.jsPlumb-1.7.4-min.js", "diagram.js" })
 @StyleSheet({ "diagram.css" })
 public class Diagram extends AbstractJavaScriptComponent {
 
     private static final long serialVersionUID = 1L;
 
     public Diagram() {
-        setPrimaryStyleName("diagram");
-        setId(UUID.randomUUID().toString());
+        setPrimaryStyleName("diagram");        
+        setId("diagram");
 
         addFunction("onNodeMoved", new JavaScriptFunction() {
 
@@ -37,7 +36,7 @@ public class Diagram extends AbstractJavaScriptComponent {
                         DiagramState state = getState();
                         for (Node node : state.nodes) {
                             if (node.getId().equals(id)) {
-                                if (node.getX() == x && node.getY() == y) {
+                                if (x == 0 && y == 0) {
                                     fireEvent(new NodeSelectedEvent(Diagram.this, node));
                                 } else {
                                     node.setX((int)x);

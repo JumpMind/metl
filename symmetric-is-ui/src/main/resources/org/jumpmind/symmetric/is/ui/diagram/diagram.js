@@ -3,26 +3,22 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
     var state = this.getState();
     this.startX = -1;
     this.startY = -1;
+    
     var instance = jsPlumb.getInstance({
-        Endpoint : [ "Dot", {
-            radius : 2
-        } ],
-        HoverPaintStyle : {
-            strokeStyle : "#1e8151",
-            lineWidth : 2
-        },
-        ConnectionOverlays : [ [ "Arrow", {
-            location : 1,
-            id : "arrow",
-            length : 14,
-            foldback : 0.8
-        } ], [ "Label", {
-            label : "",
-            id : "label",
-            cssClass : "aLabel"
-        } ] ],
-        Container : "flow"
+        Endpoint: ["Dot", {radius: 2}],
+        HoverPaintStyle: {strokeStyle: "#1e8151", lineWidth: 2 },
+        ConnectionOverlays: [
+            [ "Arrow", {
+                location: 1,
+                id: "arrow",
+                length: 14,
+                foldback: 1
+            } ]
+        ],
+        Container: "diagram"
     });
+    
+   window.jsp = instance;
 
     this.layoutAll = function() {
         instance.unbind("dblclick");
@@ -48,6 +44,14 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
             var endpointDiv = document.createElement('div');
             endpointDiv.className = "ep";
             nodeDiv.appendChild(endpointDiv);
+            
+            nodeDiv.addEventListener("click", function(event) {
+                self.onNodeMoved({
+                    'id' : event.currentTarget.id,
+                    'x' : 0,
+                    'y' : 0
+                });                
+            }, false);
 
             parentDiv.appendChild(nodeDiv);
             instance.draggable(nodeDiv, {
@@ -59,58 +63,23 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
                         });
                 }
             });
-
-            var isFilterSupported = instance.isDragFilterSupported();
-            if (isFilterSupported) {
-                instance.makeSource(nodeDiv, {
-                    filter : ".ep",
-                    anchor : "Continuous",
-                    connector : [ "StateMachine", {
-                        curviness : 20
-                    } ],
-                    connectorStyle : {
-                        strokeStyle : "#5c96bc",
-                        lineWidth : 2,
-                        outlineColor : "transparent",
-                        outlineWidth : 4
-                    },
-                    maxConnections : 5,
-                    onMaxConnections : function(info, e) {
-                        alert("Maximum connections (" + info.maxConnections + ") reached");
-                    }
-                });
-            } else {
-                var eps = jsPlumb.getSelector(".ep");
-                for (var i = 0; i < eps.length; i++) {
-                    var e = eps[i], p = e.parentNode;
-                    instance.makeSource(e, {
-                        parent : p,
-                        anchor : "Continuous",
-                        connector : [ "StateMachine", {
-                            curviness : 20
-                        } ],
-                        connectorStyle : {
-                            strokeStyle : "#5c96bc",
-                            lineWidth : 2,
-                            outlineColor : "transparent",
-                            outlineWidth : 4
-                        },
-                        maxConnections : 5,
-                        onMaxConnections : function(info, e) {
-                            alert("Maximum connections (" + info.maxConnections + ") reached");
-                        }
-                    });
+            
+            instance.makeSource(nodeDiv, {
+                filter: ".ep",
+                anchor: "Continuous",
+                connector: [ "Flowchart", { cornerRadius: 2 } ],
+                connectorStyle: { strokeStyle: "#5c96bc", lineWidth: 2, outlineColor: "transparent", outlineWidth: 4 },
+                maxConnections: 5,
+                onMaxConnections: function (info, e) {
+                    alert("Maximum connections (" + info.maxConnections + ") reached");
                 }
-            }
+            });
 
-            // initialize all '.w' elements as connection targets.
+            // initialise all '.w' elements as connection targets.
             instance.makeTarget(nodeDiv, {
-                dropOptions : {
-                    hoverClass : "dragHover"
-                },
-                anchor : "Continuous",
-                allowLoopback : false,
-                anchor : "Continuous"
+                dropOptions: { hoverClass: "dragHover" },
+                anchor: "Continuous",
+                allowLoopback: true
             });
 
         }
@@ -148,14 +117,14 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
     };
 
     instance.bind("ready", function() {
-        instance.doWhileSuspended(function() {
+        instance.batch(function() {
             self.layoutAll();
         });
     });
 
     this.onStateChange = function() {
-        instance.doWhileSuspended(function() {
-            self.layoutAll();
+        instance.batch(function() {
+            //self.layoutAll();
         });
     };
 

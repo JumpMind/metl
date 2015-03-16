@@ -96,6 +96,7 @@ abstract public class AbstractFolderNavigator extends Panel {
         content.addComponent(buildMenuBar());
 
         treeTable = buildTreeTable();
+        treeTable.addStyleName("noselect");
         content.addComponent(treeTable);
         content.setExpandRatio(treeTable, 1);
 
