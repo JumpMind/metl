@@ -121,7 +121,7 @@ abstract public class AbstractFolderNavigator extends Panel {
 
     abstract protected void addMenuButtons(MenuBar leftMenuBar, MenuBar rightMenuBar);
 
-    public void refresh() {
+    public void refresh() {        
         Object selected = treeTable.getValue();
         List<Object> expandedItems = new ArrayList<Object>();
         Collection<?> items = treeTable.getItemIds();
@@ -144,7 +144,13 @@ abstract public class AbstractFolderNavigator extends Panel {
         treeTable.focus();
         if (treeTable.containsId(selected)) {
             treeTable.setValue(selected);
+        } else {
+            if (treeTable.getItemIds().size() > 0) {
+                treeTable.setValue(treeTable.getItemIds().iterator().next());
+            }
         }
+        
+        treeTable.focus();
     }
 
     protected HorizontalLayout buildMenuBar() {
