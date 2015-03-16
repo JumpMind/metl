@@ -3,22 +3,98 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
     var state = this.getState();
     this.startX = -1;
     this.startY = -1;
-    
+
     var instance = jsPlumb.getInstance({
-        Endpoint: ["Dot", {radius: 2}],
-        HoverPaintStyle: {strokeStyle: "#1e8151", lineWidth: 2 },
-        ConnectionOverlays: [
-            [ "Arrow", {
-                location: 1,
-                id: "arrow",
-                length: 14,
-                foldback: 1
-            } ]
-        ],
-        Container: "diagram"
+        ConnectionOverlays : [ [ "Arrow", {
+            location : 1,
+            id : "arrow",
+            length : 12,
+            width : 12,
+            foldback : 1
+        } ] ],
+        Container : "diagram"
     });
-    
-   window.jsp = instance;
+
+    var basicType = {
+        connector : "Flowchart",
+        paintStyle : {
+            strokeStyle : "red",
+            lineWidth : 2
+        },
+        ConnectionOverlays : [ [ "Arrow", {
+            location : 1,
+            id : "arrow",
+            length : 14,
+            width : 12,
+            foldback : 1
+        } ] ]
+    };
+    instance.registerConnectionType("basic", basicType);
+
+    var connectorPaintStyle = {
+        lineWidth : 2,
+        strokeStyle : "#0072C6",
+        joinstyle : "round",
+        outlineColor : "white",
+        outlineWidth : 2
+    },
+    // .. and this is the hover style.
+    connectorHoverStyle = {
+        lineWidth : 2,
+        strokeStyle : "#216477",
+        outlineWidth : 2,
+        outlineColor : "white"
+    }, endpointHoverStyle = {
+        fillStyle : "#216477",
+        strokeStyle : "#216477"
+    },
+    // the definition of source endpoints (the small blue ones)
+    sourceEndpoint = {
+        endpoint : "Dot",
+        paintStyle : {
+            strokeStyle : "#0072C6",
+            fillStyle : "transparent",
+            radius : 5,
+            lineWidth : 2
+        },
+        isSource : true,
+        connector : [ "Flowchart", {
+            stub : [ 40, 60 ],
+            gap : 10,
+            cornerRadius : 0,
+            alwaysRespectStubs : false
+        } ],
+        connectorStyle : connectorPaintStyle,
+        hoverPaintStyle : endpointHoverStyle,
+        connectorHoverStyle : connectorHoverStyle,
+        dragOptions : {}
+    },
+    // the definition of target endpoints (will appear when the user drags a connection)
+    targetEndpoint = {
+        endpoint : "Dot",
+        paintStyle : {
+            fillStyle : "#0072C6",
+            radius : 6
+        },
+        hoverPaintStyle : endpointHoverStyle,
+        maxConnections : -1,
+        dropOptions : {
+            hoverClass : "hover",
+            activeClass : "active"
+        },
+        isTarget : true
+    };
+
+    this.addEndpoints = function(toId) {
+        instance.addEndpoint(toId, sourceEndpoint, {
+            anchor : "RightMiddle",
+            uuid : "source-" + toId
+        });
+        instance.addEndpoint(toId, targetEndpoint, {
+            anchor : "LeftMiddle",
+            uuid : "target-" + toId
+        });
+    };
 
     this.layoutAll = function() {
         instance.unbind("dblclick");
@@ -39,56 +115,46 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
             nodeDiv.setAttribute('style', 'width:' + node.width + 'px;height:' + node.height + "px;top:" + node.y
                     + "px;left:" + node.x + "px");
             nodeDiv.innerHTML = node.text;
-            nodeDiv.className = "w";
+            nodeDiv.className = "diagram-node";
 
-            var endpointDiv = document.createElement('div');
-            endpointDiv.className = "ep";
-            nodeDiv.appendChild(endpointDiv);
-            
             nodeDiv.addEventListener("click", function(event) {
+//                var endpoints = instance.getEndpoints(event.currentTarget);
+//                for (j = 0; j < endpoints.length; j++) {
+//                    var endpoint = endpoints[j];
+//                    endpoint.setPaintStyle({
+//            strokeStyle : "red",
+//            fillStyle : "transparent",
+//            radius : 5,
+//            lineWidth : 2
+//        });
+//                }
                 self.onNodeMoved({
                     'id' : event.currentTarget.id,
                     'x' : 0,
                     'y' : 0
-                });                
+                });
             }, false);
 
             parentDiv.appendChild(nodeDiv);
             instance.draggable(nodeDiv, {
                 stop : function(event) {
-                        self.onNodeMoved({
-                            'id' : event.el.id,
-                            'x' : event.pos[0],
-                            'y' : event.pos[1]
-                        });
-                }
-            });
-            
-            instance.makeSource(nodeDiv, {
-                filter: ".ep",
-                anchor: "Continuous",
-                connector: [ "Flowchart", { cornerRadius: 2 } ],
-                connectorStyle: { strokeStyle: "#5c96bc", lineWidth: 2, outlineColor: "transparent", outlineWidth: 4 },
-                maxConnections: 5,
-                onMaxConnections: function (info, e) {
-                    alert("Maximum connections (" + info.maxConnections + ") reached");
+                    self.onNodeMoved({
+                        'id' : event.el.id,
+                        'x' : event.pos[0],
+                        'y' : event.pos[1]
+                    });
                 }
             });
 
-            // initialise all '.w' elements as connection targets.
-            instance.makeTarget(nodeDiv, {
-                dropOptions: { hoverClass: "dragHover" },
-                anchor: "Continuous",
-                allowLoopback: true
-            });
+            self.addEndpoints(nodeDiv.id);
 
         }
 
         for (j = 0; j < nodeList.length; j++) {
             for (i = 0; i < nodeList[j].targetNodeIds.length; i++) {
                 instance.connect({
-                    source : nodeList[j].id,
-                    target : nodeList[j].targetNodeIds[i]
+                    uuids : [ "source-" + nodeList[j].id, "target-" + nodeList[j].targetNodeIds[i] ],
+                    editable : true
                 });
             }
         }
@@ -113,6 +179,11 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
                 "targetNodeId" : connection.targetId,
                 "removed" : true
             });
+        });
+        instance.bind("click", function(conn, originalEvent) {
+            // if (confirm("Delete connection from " + conn.sourceId + " to " + conn.targetId + "?"))
+            //   instance.detach(conn);
+            conn.toggleType("basic");
         });
     };
 

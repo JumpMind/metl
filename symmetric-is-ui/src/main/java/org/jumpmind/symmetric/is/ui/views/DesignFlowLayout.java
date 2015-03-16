@@ -161,7 +161,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
             Node node = new Node();
             String name = flowStep.getComponentVersion().getComponent().getName();
             String type = flowStep.getComponentVersion().getComponent().getType();
-            String imageText = String.format("<img src=\"data:image/png;base64,%s\"/>", designComponentPalette.getBase64RepresentationOfImageForComponentType(type));
+            String imageText = String.format("<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>", designComponentPalette.getBase64RepresentationOfImageForComponentType(type));
             node.setText(imageText + "<br><i>" + name + "</i>");
             node.setId(flowStep.getId());
             node.setX(flowStep.getX());
