@@ -71,7 +71,7 @@ public class DbReader extends AbstractComponent {
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
         int inboundRecordCount = 1;
-        ArrayList<EntityData> payload = null;
+        ArrayList<ArrayList<EntityData>> payload = null;
         if (!(inputMessage instanceof StartupMessage)) {
             payload = inputMessage.getPayload();
             inboundRecordCount = payload.size();
@@ -108,7 +108,7 @@ public class DbReader extends AbstractComponent {
                                 message.setPayload(new ArrayList<EntityData>());
                             }
                         }
-                        Map<String, EntityData> records = new LinkedCaseInsensitiveMap<EntityData>(
+                        Map<String, EntityData> queryRowTables = new LinkedCaseInsensitiveMap<EntityData>(
                                 1);
                         for (int i = 1; i <= count; i++) {
                             String columnName = meta.getColumnName(i);
@@ -127,26 +127,23 @@ public class DbReader extends AbstractComponent {
                                         "The table name could not be determined while mapping a database record to an EntitiesRow. "
                                                 + "Try using hints to specify a column's table name as part of the SQL query.");
                             }
-                            if (outputRecCount == 0) {
-//                                checkTableAndColumnAgainstOutputModel(tableName, columnName);
-//TODO: check model.  fix npe if we don't have a model at all...                                
+                            if (outputRecCount == 0 && flowStep.getComponentVersion().getOutputModelVersion() != null) {
+                                checkTableAndColumnAgainstOutputModel(tableName, columnName);
                             }
-                            EntityData record = records.get(tableName);
-                            if (record == null) {
-                                record = new EntityData(tableName);
-                                records.put(tableName, record);
+                            EntityData queryRowTable = queryRowTables.get(tableName);
+                            if (queryRowTable == null) {
+                                queryRowTable = new EntityData(tableName);
+                                queryRowTables.put(tableName, queryRowTable);
                             }
 
                             Object value = JdbcUtils.getResultSetValue(rs, i);
                             if (trimColumns && value instanceof String) {
                                 value = value.toString().trim();
                             }
-                            record.put(columnName, value);
+                            queryRowTable.put(columnName, value);
                         }
-
-                        ArrayList<EntityData> payload = message.getPayload();
-                        payload.addAll(records.values());
-
+                        ArrayList<ArrayList<EntityData>> payload = message.getPayload();                        
+                        payload.add(new ArrayList<EntityData>(queryRowTables.values()));
                         if (payload.size() >= rowsPerMessage) {
                             componentStatistics.incrementOutboundMessages();
                             messageTarget.put(message);
@@ -181,7 +178,7 @@ public class DbReader extends AbstractComponent {
     }
 
     protected void setParamsFromInboundMsgAndRec(Map<String, Object> paramMap,
-            final Message inputMessage, final EntityData dataRecord) {
+            final Message inputMessage, final ArrayList<EntityData> rowTables) {
 
         /*
          * input parameters can come from the header and the record. header
@@ -189,8 +186,8 @@ public class DbReader extends AbstractComponent {
          */
         paramMap.clear();
         paramMap.putAll(getParamsFromHeader(inputMessage));
-        if (dataRecord != null) {
-            paramMap.putAll(getParamsFromDetailRecord(dataRecord));
+        if (rowTables != null) {
+            paramMap.putAll(getParamsFromDetailRecord(rowTables));
         }
     }
 
@@ -205,9 +202,13 @@ public class DbReader extends AbstractComponent {
         }
     }
 
-    protected Map<String, Object> getParamsFromDetailRecord(EntityData dataRecord) {
+    protected Map<String, Object> getParamsFromDetailRecord(ArrayList<EntityData> rowTables) {
 
-        return dataRecord;
+        Map<String, Object> parms = new HashMap<String, Object>();
+        for (EntityData rowTable : rowTables) {
+            parms.putAll(rowTable);
+        }
+        return parms;
     }
 
     protected void applySettings() {

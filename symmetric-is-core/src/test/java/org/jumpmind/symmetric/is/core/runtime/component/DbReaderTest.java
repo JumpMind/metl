@@ -86,7 +86,9 @@ public class DbReaderTest {
         EntityData inputRec = new EntityData();
         inputRec.put("param1", "fghij");
         inputRec.put("param2", new Integer(7));
-        reader.setParamsFromInboundMsgAndRec(inputParamMap, inputMessage, inputRec);
+        ArrayList<EntityData> rowTables = new ArrayList<EntityData>();
+        rowTables.add(inputRec);
+        reader.setParamsFromInboundMsgAndRec(inputParamMap, inputMessage, rowTables);
 
         assertEquals("fghij", inputParamMap.get("param1"));
         assertEquals(new Integer(7), inputParamMap.get("param2"));
@@ -104,8 +106,10 @@ public class DbReaderTest {
         EntityData inputRec = new EntityData();
         inputRec.put("param3", "fghij");
         inputRec.put("param4", new Integer(7));
+        ArrayList<EntityData> rowTables = new ArrayList<EntityData>();
+        rowTables.add(inputRec);
         Map<String, Object> inputParamMap = new HashMap<String, Object>();
-        reader.setParamsFromInboundMsgAndRec(inputParamMap, inputMessage, inputRec);
+        reader.setParamsFromInboundMsgAndRec(inputParamMap, inputMessage, rowTables);
 
         assertEquals("abcde", inputParamMap.get("param1"));
         assertEquals(new Integer(5), inputParamMap.get("param2"));
@@ -124,10 +128,10 @@ public class DbReaderTest {
         MessageTarget msgTarget = new MessageTarget();
         reader.handle("test", msg, msgTarget);
 
-        assertEquals(3, msgTarget.getTargetMessageCount());
-        ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
-        assertEquals("test row 1", payload.get(0).get("COL2"));
-        assertEquals("test row x", payload.get(1).get("COLY"));
+        assertEquals(2, msgTarget.getTargetMessageCount());
+        ArrayList<ArrayList<EntityData>> payload = msgTarget.getMessage(0).getPayload();
+        assertEquals("test row 1", payload.get(0).get(0).get("COL2"));
+        assertEquals("test row x", payload.get(0).get(1).get("COLY"));
     }
 
     @Test
@@ -138,18 +142,17 @@ public class DbReaderTest {
         reader.setFlowStep(readerFlowStep);
         reader.start(executionTracker, resourceFactory);
         Message message = new Message("fake step id");
-        message.setPayload(new ArrayList<EntityData>());
-        ArrayList<EntityData> payload = message.getPayload();
-        EntityData fakeRec = new EntityData("fake");
-        payload.add(fakeRec);
+        ArrayList<ArrayList<EntityData>> inboundPayload = new ArrayList<ArrayList<EntityData>>();
+        inboundPayload.add(new ArrayList<EntityData>());
+        message.setPayload(inboundPayload);
+        
         MessageTarget msgTarget = new MessageTarget();
         reader.handle("test", message, msgTarget);
 
-        /* 3 messages - 2 rows a piece (one from table x, one from table y) */
-        assertEquals(3, msgTarget.getTargetMessageCount());
-        payload = msgTarget.getMessage(0).getPayload();
-        assertEquals("test row 1", payload.get(0).get("COL2"));
-        assertEquals("test row x", payload.get(1).get("COLY"));
+        assertEquals(2, msgTarget.getTargetMessageCount());
+        ArrayList<ArrayList<EntityData>> payload = msgTarget.getMessage(0).getPayload();
+        assertEquals("test row 1", payload.get(0).get(0).get("COL2"));
+        assertEquals("test row x", payload.get(0).get(1).get("COLY"));
     }
 
     @Test
