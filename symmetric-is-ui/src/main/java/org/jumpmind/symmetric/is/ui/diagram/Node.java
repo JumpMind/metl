@@ -10,7 +10,7 @@ public class Node implements Serializable {
     private static final long serialVersionUID = 1L;
 
     int height = 40;
-    int width = 100;
+    int width = 55;
     int x = 0;
     int y = 0;
     String text;    
