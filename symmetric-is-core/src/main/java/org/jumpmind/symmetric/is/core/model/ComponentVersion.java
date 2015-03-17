@@ -1,65 +1,71 @@
 package org.jumpmind.symmetric.is.core.model;
 
+import java.util.List;
 
-public class ComponentVersion extends
-		AbstractObjectWithSettings {
+public class ComponentVersion extends AbstractObjectWithSettings {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	Resource resource;
+    Resource resource;
 
-	Component component;
+    Component component;
 
-	ModelVersion inputModelVersion;
+    ModelVersion inputModelVersion;
 
-	ModelVersion outputModelVersion;
-	
+    ModelVersion outputModelVersion;
+
+    List<ComponentVersionEntitySetting> entitySettings;
+
+    List<ComponentVersionAttributeSetting> attributeSettings;
+
     String versionName;
-	
+
     public ComponentVersion() {
     }
-    
+
     public ComponentVersion(String id) {
-    	this.id = id;
+        this.id = id;
     }
 
     public ComponentVersion(Component component) {
-        this(component, null, null, null);
+        this(component, null, null, null, null, null);
     }
-        
-	public ComponentVersion(Component component, Resource resource,
-			ModelVersion inputModelVersion, ModelVersion outputModelVersion,
-			Setting... settings) {
-	    super(settings);
-		this.component = component;
-		this.resource = resource;
-		this.inputModelVersion = inputModelVersion;
-		this.outputModelVersion = outputModelVersion;
-	}
-	
-	public void setInputModelVersion(ModelVersion inputModelVersion) {
+
+    public ComponentVersion(Component component, Resource resource, ModelVersion inputModelVersion,
+            ModelVersion outputModelVersion, List<ComponentVersionEntitySetting> entitySettings,
+            List<ComponentVersionAttributeSetting> attributeSettings, Setting... settings) {
+        super(settings);
+        this.component = component;
+        this.resource = resource;
+        this.inputModelVersion = inputModelVersion;
+        this.outputModelVersion = outputModelVersion;
+        this.entitySettings = entitySettings;
+        this.attributeSettings = attributeSettings;
+    }
+
+    public void setInputModelVersion(ModelVersion inputModelVersion) {
         this.inputModelVersion = inputModelVersion;
     }
-	
-	public void setOutputModelVersion(ModelVersion outputModelVersion) {
+
+    public void setOutputModelVersion(ModelVersion outputModelVersion) {
         this.outputModelVersion = outputModelVersion;
     }
-	
-	public void setComponent(Component component) {
+
+    public void setComponent(Component component) {
         this.component = component;
     }
 
-	public void setResource(Resource resource) {
-		this.resource = resource;
-	}
+    public void setResource(Resource resource) {
+        this.resource = resource;
+    }
 
-	public Resource getResource() {
-		return resource;
-	}
+    public Resource getResource() {
+        return resource;
+    }
 
-	public Component getComponent() {
-		return component;
-	}
+    public Component getComponent() {
+        return component;
+    }
 
     public String getInputModelVersiondId() {
         return inputModelVersion != null ? inputModelVersion.getId() : null;
@@ -108,33 +114,49 @@ public class ComponentVersion extends
     public String getComponentId() {
         return component != null ? component.getId() : null;
     }
-    
+
     public String getVersionName() {
         return versionName;
     }
-    
+
     public void setVersionName(String versionName) {
         this.versionName = versionName;
     }
-    
+
     public void setName(String name) {
     }
-    
+
     public String getName() {
         return this.component.getName();
     }
-    
+
     public ModelVersion getInputModelVersion() {
-    	return inputModelVersion;
+        return inputModelVersion;
     }
-    
+
     public ModelVersion getOutputModelVersion() {
-    	return outputModelVersion;
+        return outputModelVersion;
     }
-    
-	@Override
-	protected Setting createSettingData() {
-		return new ComponentVersionSetting(id);
-	}
+
+    public List<ComponentVersionEntitySetting> getEntitySettings() {
+        return entitySettings;
+    }
+
+    public void setEntitySettings(List<ComponentVersionEntitySetting> entitySettings) {
+        this.entitySettings = entitySettings;
+    }
+
+    public List<ComponentVersionAttributeSetting> getAttributeSettings() {
+        return attributeSettings;
+    }
+
+    public void setAttributeSettings(List<ComponentVersionAttributeSetting> attributeSettings) {
+        this.attributeSettings = attributeSettings;
+    }
+
+    @Override
+    protected Setting createSettingData() {
+        return new ComponentVersionSetting(id);
+    }
 
 }

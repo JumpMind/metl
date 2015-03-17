@@ -103,9 +103,8 @@ public class TextFileWriterTest {
         FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
         Component component = TestUtils.createComponent(TextFileWriter.TYPE, false);
         Setting[] settingData = createWriterSettings();
-        ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
-                settingData);
-        componentVersion.setResource(createResource(createResourceSettings()));
+        ComponentVersion componentVersion = TestUtils.createComponentVersion(component, 
+                createResource(createResourceSettings()), null, null, null, null, settingData);
         FlowStep writerComponent = new FlowStep();
         writerComponent.setFlowVersionId(flow.getId());
         writerComponent.setComponentVersionId(componentVersion.getId());

@@ -118,8 +118,9 @@ public class TextFileReaderTest {
         FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
         Component component = TestUtils.createComponent(TextFileReader.TYPE, false);
         Setting[] settingData = createReaderSettings();
-        ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
-                settingData);
+        ComponentVersion componentVersion = TestUtils.createComponentVersion(component, 
+                createResource(createResourceSettings()), null,
+                null, null, null, settingData);
         componentVersion.setResource(createResource(createResourceSettings()));
         FlowStep readerComponent = new FlowStep();
         readerComponent.setFlowVersionId(flow.getId());

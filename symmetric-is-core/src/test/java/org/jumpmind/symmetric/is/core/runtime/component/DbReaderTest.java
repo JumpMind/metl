@@ -89,9 +89,7 @@ public class DbReaderTest {
         EntityData inputRec = new EntityData();
         inputRec.put("param1", "fghij");
         inputRec.put("param2", new Integer(7));
-        ArrayList<EntityData> rowTables = new ArrayList<EntityData>();
-        rowTables.add(inputRec);
-        reader.setParamsFromInboundMsgAndRec(inputParamMap, inputMessage, rowTables);
+        reader.setParamsFromInboundMsgAndRec(inputParamMap, inputMessage, inputRec);
 
         assertEquals("fghij", inputParamMap.get("param1"));
         assertEquals(new Integer(7), inputParamMap.get("param2"));
@@ -109,10 +107,8 @@ public class DbReaderTest {
         EntityData inputRec = new EntityData();
         inputRec.put("param3", "fghij");
         inputRec.put("param4", new Integer(7));
-        ArrayList<EntityData> rowTables = new ArrayList<EntityData>();
-        rowTables.add(inputRec);
         Map<String, Object> inputParamMap = new HashMap<String, Object>();
-        reader.setParamsFromInboundMsgAndRec(inputParamMap, inputMessage, rowTables);
+        reader.setParamsFromInboundMsgAndRec(inputParamMap, inputMessage, inputRec);
 
         assertEquals("abcde", inputParamMap.get("param1"));
         assertEquals(new Integer(5), inputParamMap.get("param2"));
@@ -145,8 +141,8 @@ public class DbReaderTest {
         reader.setFlowStep(readerFlowStep);
         reader.start(executionTracker, resourceFactory);
         Message message = new Message("fake step id");
-        ArrayList<ArrayList<EntityData>> inboundPayload = new ArrayList<ArrayList<EntityData>>();
-        inboundPayload.add(new ArrayList<EntityData>());
+        ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
+        inboundPayload.add(new EntityData());
         message.setPayload(inboundPayload);
         
         MessageTarget msgTarget = new MessageTarget();
@@ -169,10 +165,9 @@ public class DbReaderTest {
         FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
         Component component = TestUtils.createComponent(DbReader.TYPE, false);
         Setting[] settingData = createReaderSettings();
-        ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
-                settingData);
-        componentVersion.setResource(createResource(createResourceSettings()));
-        componentVersion.setOutputModelVersion(createOutputModelVersion());
+        ComponentVersion componentVersion = TestUtils.createComponentVersion(component,
+                createResource(createResourceSettings()), null, createOutputModelVersion(), null,
+                null, settingData);
         FlowStep readerComponent = new FlowStep();
         readerComponent.setFlowVersionId(flow.getId());
         readerComponent.setComponentVersionId(componentVersion.getId());

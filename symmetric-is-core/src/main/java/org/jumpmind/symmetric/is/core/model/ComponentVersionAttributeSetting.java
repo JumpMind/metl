@@ -6,6 +6,13 @@ public class ComponentVersionAttributeSetting extends Setting {
 
     String componentVersionId;
     String attributeId;
+    
+    public ComponentVersionAttributeSetting(String attributeId,
+            String name, String value) {
+        super(name, value);
+        this.attributeId = attributeId;
+    }
+    
 	public String getFormatVersionId() {
 		return componentVersionId;
 	}

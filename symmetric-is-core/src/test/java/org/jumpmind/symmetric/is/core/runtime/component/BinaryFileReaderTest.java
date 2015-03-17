@@ -86,9 +86,9 @@ public class BinaryFileReaderTest {
         FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
         Component component = TestUtils.createComponent(BinaryFileReader.TYPE, false);
         Setting[] settingData = createReaderSettings();
-        ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
-                settingData);
-        componentVersion.setResource(createResource(createResourceSettings()));
+        ComponentVersion componentVersion = TestUtils.createComponentVersion(component, 
+                createResource(createResourceSettings()), null, null,
+                null, null, settingData);
         FlowStep readerComponent = new FlowStep();
         readerComponent.setFlowVersionId(flow.getId());
         readerComponent.setComponentVersionId(componentVersion.getId());
