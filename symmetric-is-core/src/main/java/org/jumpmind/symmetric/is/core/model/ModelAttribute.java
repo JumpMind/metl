@@ -21,6 +21,12 @@ public class ModelAttribute extends AbstractObject {
     	
     }
     
+    public ModelAttribute(String id, String entityId, String name) {
+        this.id = id;
+        this.entityId = entityId;
+        this.name = name;
+    }
+    
 	public ModelEntity getTypeEntity() {
 		return typeEntity;
 	}

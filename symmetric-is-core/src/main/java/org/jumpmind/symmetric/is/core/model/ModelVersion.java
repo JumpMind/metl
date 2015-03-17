@@ -63,12 +63,21 @@ public class ModelVersion extends AbstractObject {
 		this.modelId = modelId;
 	}
 
-	public boolean entityAttributeExists(String entityName, String attributeName) {
-    	ModelEntity entity = modelEntities.get(entityName);
+	public ModelEntity getEntityByName(String entityName) {
+	    for (ModelEntity entity:modelEntities.values()) {
+	        if (entity.getName().equalsIgnoreCase(entityName)) {
+	            return entity;
+	        }
+	    }
+	    return null;
+	}
+	
+	public String getAttributeId(String entityName, String attributeName) {
+    	ModelEntity entity = getEntityByName(entityName);
     	if (entity != null) {
-    		return entity.attributeExists(attributeName);
+    		return entity.getAttributeIdByName(attributeName);
     	}
-    	return false;
+    	return null;
     }
 
 	@Override

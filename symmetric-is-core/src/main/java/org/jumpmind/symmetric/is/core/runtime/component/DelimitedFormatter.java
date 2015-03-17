@@ -1,8 +1,11 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 
 import org.jumpmind.properties.TypedProperties;
+import org.jumpmind.symmetric.csv.CsvWriter;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
@@ -42,12 +45,34 @@ public class DelimitedFormatter extends AbstractComponent {
     public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
         
         componentStatistics.incrementInboundMessages();
-        ArrayList<EntityData> records = inputMessage.getPayload();
-        for (EntityData record:records) {
-            
-        }
-        throw new RuntimeException("Boom goes the dynamite");
+        ArrayList<ArrayList<EntityData>> inputRows = inputMessage.getPayload();
 
+        Message outputMessage = new Message(flowStep.getId());
+        ArrayList<String> outputPayload = new ArrayList<String>(); 
+        
+        //for every row in the input message
+        String outputRec;
+        for (ArrayList<EntityData> inputRow : inputRows) {
+            outputRec = processInputRow(inputRow);
+            outputPayload.add(outputRec);
+        } 
+        outputMessage.setPayload(outputPayload);
+        messageTarget.put(outputMessage);
+    }
+    
+    private String processInputRow(ArrayList<EntityData> inputRow) {
+   
+        Writer writer = new StringWriter();
+        CsvWriter csvWriter = new CsvWriter(writer, delimiter.charAt(0));
+        csvWriter.setTextQualifier(quoteCharacter.charAt(0));
+        
+        //get attribute settings
+        //sort them by ordinal position
+        //loop through them in ordinal position, appending the column content
+        //csvWriter.write(content);
+        
+        //csvWriter.endRecord();
+        return writer.toString();
     }
     
     private void applySettings() {

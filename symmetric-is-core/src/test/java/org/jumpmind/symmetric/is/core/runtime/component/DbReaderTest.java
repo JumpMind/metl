@@ -23,6 +23,9 @@ import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.ModelAttribute;
+import org.jumpmind.symmetric.is.core.model.ModelEntity;
+import org.jumpmind.symmetric.is.core.model.ModelVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
@@ -129,9 +132,9 @@ public class DbReaderTest {
         reader.handle("test", msg, msgTarget);
 
         assertEquals(2, msgTarget.getTargetMessageCount());
-        ArrayList<ArrayList<EntityData>> payload = msgTarget.getMessage(0).getPayload();
-        assertEquals("test row 1", payload.get(0).get(0).get("COL2"));
-        assertEquals("test row x", payload.get(0).get(1).get("COLY"));
+        ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
+        assertEquals("test row 1", payload.get(0).get("tt1col2"));
+        assertEquals("test row x", payload.get(0).get("tt2coly"));
     }
 
     @Test
@@ -150,9 +153,9 @@ public class DbReaderTest {
         reader.handle("test", message, msgTarget);
 
         assertEquals(2, msgTarget.getTargetMessageCount());
-        ArrayList<ArrayList<EntityData>> payload = msgTarget.getMessage(0).getPayload();
-        assertEquals("test row 1", payload.get(0).get(0).get("COL2"));
-        assertEquals("test row x", payload.get(0).get(1).get("COLY"));
+        ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
+        assertEquals("test row 1", payload.get(0).get("tt1col2"));
+        assertEquals("test row x", payload.get(0).get("tt2coly"));
     }
 
     @Test
@@ -169,6 +172,7 @@ public class DbReaderTest {
         ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
                 settingData);
         componentVersion.setResource(createResource(createResourceSettings()));
+        componentVersion.setOutputModelVersion(createOutputModelVersion());
         FlowStep readerComponent = new FlowStep();
         readerComponent.setFlowVersionId(flow.getId());
         readerComponent.setComponentVersionId(componentVersion.getId());
@@ -180,6 +184,25 @@ public class DbReaderTest {
         return readerComponent;
     }
 
+    private static ModelVersion createOutputModelVersion() {
+
+        ModelEntity tt1 = new ModelEntity("tt1", "TEST_TABLE_1");
+        tt1.getModelAttributes().put("tt1col1", new ModelAttribute("tt1col1", tt1.getId(), "COL1"));
+        tt1.getModelAttributes().put("tt1col2", new ModelAttribute("tt1col2", tt1.getId(), "COL2"));
+        tt1.getModelAttributes().put("tt1col3", new ModelAttribute("tt1col3", tt1.getId(), "COL3"));
+
+        ModelEntity tt2 = new ModelEntity("tt2", "TEST_TABLE_2");
+        tt2.getModelAttributes().put("tt2colx", new ModelAttribute("tt2colx", tt1.getId(), "COLX"));
+        tt2.getModelAttributes().put("tt2coly", new ModelAttribute("tt2coly", tt1.getId(), "COLY"));
+        tt2.getModelAttributes().put("tt2colz", new ModelAttribute("tt2colz", tt1.getId(), "COLZ"));
+
+        ModelVersion modelVersion = new ModelVersion();
+        modelVersion.getModelEntities().put("tt1", tt1);
+        modelVersion.getModelEntities().put("tt2", tt2);
+
+        return modelVersion;
+    }
+    
     private static Resource createResource(List<Setting> settings) {
         Resource resource = new Resource();
         Folder folder = TestUtils.createFolder("Test Folder Resource");

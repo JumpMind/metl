@@ -23,6 +23,12 @@ public class ModelEntity extends AbstractObject {
     	modelEntityRelationships = new ArrayList<ModelEntityRelationship>();
     }
     
+    public ModelEntity(String Id, String name) {
+        this();
+        this.id = Id;
+        this.name = name;
+    }
+    
     public Map<String, ModelAttribute> getModelAttributes() {
 		return modelAttributes;
 	}
@@ -64,7 +70,12 @@ public class ModelEntity extends AbstractObject {
 	}
 
 
-	public boolean attributeExists(String attributeName) {
-    	return modelAttributes.containsKey(attributeName);
+	public String getAttributeIdByName(String attributeName) {
+    	for (ModelAttribute attribute:modelAttributes.values()) {
+    	    if (attribute.getName().equalsIgnoreCase(attributeName)) {
+    	        return attribute.getId();
+    	    }
+    	}
+    	return null;
     }
 }

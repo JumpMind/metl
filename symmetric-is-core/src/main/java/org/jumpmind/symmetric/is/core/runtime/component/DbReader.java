@@ -26,7 +26,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.util.LinkedCaseInsensitiveMap;
 
 @ComponentDefinition(typeName = DbReader.TYPE, category = ComponentCategory.READER, iconImage="dbreader.png",
         supports = { ComponentSupports.INPUT_MESSAGE, ComponentSupports.OUTPUT_MESSAGE,
@@ -93,57 +92,29 @@ public class DbReader extends AbstractComponent {
             template.query(sql, paramMap, new ResultSetExtractor<Object>() {
                 @Override
                 public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
-                    Map<Integer, String> sqlEntityHints = getSqlColumnEntityHints(sql);
+                    
                     ResultSetMetaData meta = rs.getMetaData();
-                    int count = meta.getColumnCount();
-
+                    ArrayList<String> attributeIds=null;
                     Message message = null;
                     int outputRecCount = 0;
+                    
                     while (rs.next()) {
                         if (message == null) {
-                            if (messageManipulationStrategy == MessageManipulationStrategy.ENHANCE) {
-                                message = inputMessage.copy();
-                            } else {
-                                message = new Message(flowStep.getId());
-                                message.setPayload(new ArrayList<EntityData>());
-                            }
+                            message = createMessage(inputMessage);
                         }
-                        Map<String, EntityData> queryRowTables = new LinkedCaseInsensitiveMap<EntityData>(
-                                1);
-                        for (int i = 1; i <= count; i++) {
-                            String columnName = meta.getColumnName(i);
-                            String tableName = meta.getTableName(i);
-                            if (sqlEntityHints.containsKey(i)) {
-                                String hint = sqlEntityHints.get(i);
-                                if (hint.indexOf(".") != -1) {
-                                    tableName = hint.substring(0, hint.indexOf("."));
-                                    columnName = hint.substring(hint.indexOf(".") + 1);
-                                } else {
-                                    tableName = hint;
-                                }
-                            }
-                            if (StringUtils.isBlank(tableName)) {
-                                throw new SQLException(
-                                        "The table name could not be determined while mapping a database record to an EntitiesRow. "
-                                                + "Try using hints to specify a column's table name as part of the SQL query.");
-                            }
-                            if (outputRecCount == 0 && flowStep.getComponentVersion().getOutputModelVersion() != null) {
-                                checkTableAndColumnAgainstOutputModel(tableName, columnName);
-                            }
-                            EntityData queryRowTable = queryRowTables.get(tableName);
-                            if (queryRowTable == null) {
-                                queryRowTable = new EntityData(tableName);
-                                queryRowTables.put(tableName, queryRowTable);
-                            }
-
+                        if (outputRecCount == 0) {
+                            attributeIds = getAttributeIds(meta, getSqlColumnEntityHints(sql));
+                        }
+                        EntityData rowData = new EntityData();
+                        for (int i = 1; i <= meta.getColumnCount(); i++) {
                             Object value = JdbcUtils.getResultSetValue(rs, i);
                             if (trimColumns && value instanceof String) {
                                 value = value.toString().trim();
                             }
-                            queryRowTable.put(columnName, value);
+                            rowData.put(attributeIds.get(i-1), value);
                         }
-                        ArrayList<ArrayList<EntityData>> payload = message.getPayload();                        
-                        payload.add(new ArrayList<EntityData>(queryRowTables.values()));
+                        ArrayList<EntityData> payload = message.getPayload();                        
+                        payload.add(rowData);
                         if (payload.size() >= rowsPerMessage) {
                             componentStatistics.incrementOutboundMessages();
                             messageTarget.put(message);
@@ -162,13 +133,57 @@ public class DbReader extends AbstractComponent {
         } /* for record count within message */
     }
 
-    private void checkTableAndColumnAgainstOutputModel(String tableName, String columnName)
+    private Message createMessage(Message inputMessage) {
+        Message message;
+        if (messageManipulationStrategy == MessageManipulationStrategy.ENHANCE) {
+            message = inputMessage.copy();
+        } else {
+            message = new Message(flowStep.getId());
+            message.setPayload(new ArrayList<EntityData>());
+        }
+        return message;
+    }
+    
+    private ArrayList<String> getAttributeIds(ResultSetMetaData meta, Map<Integer, String> sqlEntityHints) throws SQLException {
+        
+        ArrayList<String> attributeIds = new ArrayList<String>();
+
+        for (int i=1; i<=meta.getColumnCount();i++) {    
+            String columnName = meta.getColumnName(i);
+            String tableName = meta.getTableName(i);            
+            if (sqlEntityHints.containsKey(i)) {
+                String hint = sqlEntityHints.get(i);
+                if (hint.indexOf(".") != -1) {
+                    tableName = hint.substring(0, hint.indexOf("."));
+                    columnName = hint.substring(hint.indexOf(".") + 1);
+                } else {
+                    tableName = hint;
+                }
+            }
+            if (StringUtils.isBlank(tableName)) {
+                throw new SQLException(
+                        "Table name could not be determined from metadata or hints.  Please check column and hint."
+                        + "Query column = " + i);
+            }
+            String attributeId = getAttributeId(tableName, columnName);
+            attributeIds.add(attributeId);
+        }
+        
+        return attributeIds;
+    }
+    
+    private String getAttributeId(String tableName, String columnName)
             throws SQLException {
-        if (!this.flowStep.getComponentVersion().getOutputModelVersion()
-                .entityAttributeExists(tableName, columnName)) {
-            throw new SQLException(
-                    "ResultSet returned a column that was not in the output model. Table:"
-                            + tableName + "Column:" + columnName);
+        
+        if (this.flowStep.getComponentVersion().getOutputModelVersion() != null) {
+            String attributeId = this.flowStep.getComponentVersion().getOutputModelVersion().getAttributeId(tableName, columnName);
+            if (attributeId == null) {
+                throw new SQLException("Table and Column not found in output model and not specified via hint.  "
+                        + "Table Name = " + tableName + " Column Name = " + columnName);
+            }        
+            return attributeId;            
+        } else {
+            throw new SQLException("No output model was specified for the db reader component.  An output model is required.");
         }
     }
 
