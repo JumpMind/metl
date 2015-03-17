@@ -115,7 +115,7 @@ abstract public class AbstractFolderNavigator extends Panel {
         treeTable.setValue(obj);
     }
 
-    abstract protected void addMenuButtons(MenuBar leftMenuBar, MenuBar rightMenuBar);
+    abstract protected void addMenuButtons(MenuItem addMenuItem, MenuBar leftMenuBar, MenuBar rightMenuBar);
 
     public void refresh() {        
         Object selected = treeTable.getValue();
@@ -156,8 +156,10 @@ abstract public class AbstractFolderNavigator extends Panel {
         MenuBar leftMenuBar = new MenuBar();
         leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
         leftMenuBar.setWidth(100, Unit.PERCENTAGE);
+        
+        MenuItem newMenu = leftMenuBar.addItem("", FontAwesome.PLUS, null);
 
-        newFolder = leftMenuBar.addItem("", Icons.FOLDER_OPEN, new Command() {
+        newFolder = newMenu.addItem("Folder", Icons.FOLDER_OPEN, new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
@@ -170,7 +172,7 @@ abstract public class AbstractFolderNavigator extends Panel {
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
 
-        addMenuButtons(leftMenuBar, rightMenuBar);
+        addMenuButtons(newMenu, leftMenuBar, rightMenuBar);
 
         delete = rightMenuBar.addItem("", Icons.DELETE, new Command() {
 

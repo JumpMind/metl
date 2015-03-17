@@ -3,12 +3,8 @@ package org.jumpmind.symmetric.is.ui.views;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
-import org.jumpmind.symmetric.is.core.model.Agent;
-import org.jumpmind.symmetric.is.core.model.AgentDeployment;
-import org.jumpmind.symmetric.is.core.model.AgentStartMode;
 import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
@@ -16,13 +12,11 @@ import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Resource;
-import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.localfile.LocalFileResource;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
-import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 
@@ -36,12 +30,17 @@ import com.vaadin.ui.MenuBar.MenuItem;
 public class DesignNavigator extends AbstractFolderNavigator {
 
     MenuItem newFlow;
+    
     MenuItem newResource;
+    
     MenuItem newModel;
-    MenuItem run;
+    
+    MenuItem newComponent;
 
     ApplicationContext context;
+    
     TabbedApplicationPanel tabs;
+    
     DesignPropertySheet designPropertySheet;
 
     public DesignNavigator(ApplicationContext context, TabbedApplicationPanel tabs) {
@@ -50,8 +49,8 @@ public class DesignNavigator extends AbstractFolderNavigator {
         this.tabs = tabs;
     }
 
-    protected void addMenuButtons(MenuBar leftMenuBar, MenuBar rightMenuBar) {
-        MenuItem newMenu = leftMenuBar.addItem("", FontAwesome.PLUS, null);
+    @Override
+    protected void addMenuButtons(MenuItem newMenu, MenuBar leftMenuBar, MenuBar rightMenuBar) {
         
         newFlow = newMenu.addItem("Flow", Icons.FLOW, new Command() {
 
@@ -61,6 +60,20 @@ public class DesignNavigator extends AbstractFolderNavigator {
             }
         });
 
+        newModel = newMenu.addItem("Model", Icons.MODEL, new Command() {
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+            }
+        });
+        
+        newComponent = newMenu.addItem("Component", Icons.COMPONENT, new Command() {
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+            }
+        });
+        
         newResource = newMenu.addItem("Resource", Icons.GENERAL_RESOURCE, null);
         newResource.setDescription("Add Resource");
 
@@ -80,21 +93,6 @@ public class DesignNavigator extends AbstractFolderNavigator {
             }
         });
 
-        newModel = newMenu.addItem("Model", Icons.MODEL, new Command() {
-
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-            }
-        });
-        newModel.setDescription("Add Model");
-        
-        run = leftMenuBar.addItem("", Icons.RUN, new Command() {
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                openExecution();
-            }
-        });
-        run.setDescription("Run on local agent");
     }
     
     @Override
@@ -107,53 +105,9 @@ public class DesignNavigator extends AbstractFolderNavigator {
             FlowVersion flowVersion = (FlowVersion) item;
             DesignFlowLayout flowLayout = new DesignFlowLayout(context,
                     flowVersion, 
-                    this);
+                    this, tabs);
             tabs.addCloseableTab(flowVersion.getId(), flowVersion.getFlow().getName() + " "
                     + flowVersion.getName(), Icons.FLOW, flowLayout);
-        }
-    }
-
-    protected void openExecution() {
-    	Object item = treeTable.getValue();
-        if (item instanceof Flow) {
-            item = ((Flow) item).getLatestFlowVersion();
-        }
-
-        if (item instanceof FlowVersion) {
-            IAgentManager agentManager = context.getAgentManager();
-            FlowVersion flowVersion = (FlowVersion) item;
-        	Set<Agent> agents = agentManager.getLocalAgents();
-        	Agent localAgent = null;
-        	for (Agent agent : agents) {
-                if (agent.getHost().equals("localhost")) {
-                    localAgent = agent;
-                    break;
-                }
-            }
-        	
-        	if (localAgent == null) {
-        		localAgent = new Agent();
-        		localAgent.setHost("localhost");
-        		localAgent.setName("local");
-        		localAgent.setStartMode(AgentStartMode.AUTO.name());
-        		configurationService.save(localAgent);
-        		agentManager.refresh(localAgent);
-        	}
-        	
-        	AgentDeployment deployment = localAgent.getAgentDeploymentFor(flowVersion);
-        	if (deployment != null) {
-        	    agentManager.undeploy(deployment);
-        		
-        	} 
-
-        	deployment = agentManager.deploy(localAgent.getId(), flowVersion);
-        	
-            String executionId = agentManager.getAgentRuntime(localAgent).scheduleNow(deployment);
-            if (executionId != null) {
-                ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context);
-                tabs.addCloseableTab(executionId, "Run " + flowVersion.getFlow().getName() + " "
-                        + flowVersion.getName(), Icons.LOG, logPanel);
-            }
         }
     }
 
