@@ -9,6 +9,7 @@ import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
@@ -30,6 +31,7 @@ import com.vaadin.ui.DragAndDropWrapper.WrapperTargetDetails;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBackgroundRefreshable {
@@ -56,37 +58,46 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
     
     DesignComponentPalette designComponentPalette;
 
-    public DesignFlowLayout(BackgroundRefresherService backgroundRefresherService,
-            IComponentFactory componentFactory, IConfigurationService configurationService,
-            FlowVersion componentFlowVersion, DesignPropertySheet designPropertySheet,
+    public DesignFlowLayout(ApplicationContext context,
+            FlowVersion componentFlowVersion, 
             DesignNavigator designNavigator) {
-        this.backgroundRefresherService = backgroundRefresherService;
-        this.configurationService = configurationService;
+        this.backgroundRefresherService = context.getBackgroundRefresherService();
+        this.configurationService = context.getConfigurationService();
+        this.componentFactory = context.getComponentFactory();
         this.componentFlowVersion = componentFlowVersion;
-        this.designPropertySheet = designPropertySheet;
         this.designNavigator = designNavigator;
-        this.componentFactory = componentFactory;
-
+        
+        this.designPropertySheet = new DesignPropertySheet(context);
         this.designComponentPalette = new DesignComponentPalette(this,
                 componentFactory);
+        
         addComponent(designComponentPalette);
+        
+        VerticalSplitPanel splitPanel = new VerticalSplitPanel();
+        splitPanel.setSizeFull();
+        splitPanel.setSplitPosition(50, Unit.PERCENTAGE);
 
         diagramLayout = new CssLayout();
         diagramLayout.setWidth(10000, Unit.PIXELS);
         diagramLayout.setHeight(10000, Unit.PIXELS);
+        
         DragAndDropWrapper wrapper = new DragAndDropWrapper(diagramLayout);
-
+        wrapper.setSizeUndefined();
         wrapper.setDropHandler(new DropHandler());
 
         Panel panel = new Panel();
         panel.setSizeFull();
         panel.addStyleName(ValoTheme.PANEL_WELL);
-        addComponent(panel);
-        setExpandRatio(panel, 1);
-
         panel.setContent(wrapper);
+        
+        splitPanel.addComponent(panel);
+        splitPanel.addComponent(designPropertySheet);
+        
+        addComponent(splitPanel);        
+        setExpandRatio(splitPanel, 1);
 
         redrawFlow();
+        
         backgroundRefresherService.register(this);
     }
 
@@ -103,11 +114,13 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
     @Override
     public boolean closing() {
         backgroundRefresherService.unregister(this);
+        designNavigator.setDesignPropertySheet(designPropertySheet);
         return true;
     }
 
     @Override
     public void showing() {
+        designNavigator.setDesignPropertySheet(designPropertySheet);
     }
 
     protected int countComponentsOfType(String type) {
@@ -141,6 +154,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
         designPropertySheet.valueChange(componentVersion);
 
         designNavigator.refresh();
+        designNavigator.select(flowStep);
 
     }
 

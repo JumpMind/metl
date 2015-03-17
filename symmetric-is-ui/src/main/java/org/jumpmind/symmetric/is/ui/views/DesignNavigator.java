@@ -5,25 +5,23 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentStartMode;
+import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Resource;
-import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
-import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.localfile.LocalFileResource;
+import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
-import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
 import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
@@ -42,31 +40,19 @@ public class DesignNavigator extends AbstractFolderNavigator {
     MenuItem newModel;
     MenuItem run;
 
+    ApplicationContext context;
     TabbedApplicationPanel tabs;
     DesignPropertySheet designPropertySheet;
-    BackgroundRefresherService backgroundRefresherService;
-    IExecutionService executionService;
-    IComponentFactory componentFactory;
-    IResourceFactory resourceFactory;
-    IAgentManager agentManager;
 
-    public DesignNavigator(IAgentManager agentManager, BackgroundRefresherService backgroundRefreserService,
-            IConfigurationService configurationService, IExecutionService executionService, TabbedApplicationPanel tabs,
-            DesignPropertySheet designPropertySheet,
-            IComponentFactory componentFactory, IResourceFactory resourceFactory) {
-        super(FolderType.DESIGN, configurationService);
-        this.backgroundRefresherService = backgroundRefreserService;
-        this.executionService = executionService;
-        this.designPropertySheet = designPropertySheet;
-        this.componentFactory = componentFactory;
-        this.resourceFactory = resourceFactory;
-        this.agentManager = agentManager;
+    public DesignNavigator(ApplicationContext context, TabbedApplicationPanel tabs) {
+        super(FolderType.DESIGN, context.getConfigurationService());
+        this.context = context;
         this.tabs = tabs;
     }
 
     protected void addMenuButtons(MenuBar leftMenuBar, MenuBar rightMenuBar) {
         MenuItem newMenu = leftMenuBar.addItem("", FontAwesome.PLUS, null);
-
+        
         newFlow = newMenu.addItem("Flow", Icons.FLOW, new Command() {
 
             @Override
@@ -119,8 +105,8 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
         if (item instanceof FlowVersion) {
             FlowVersion flowVersion = (FlowVersion) item;
-            DesignFlowLayout flowLayout = new DesignFlowLayout(backgroundRefresherService, componentFactory,
-                    configurationService, flowVersion, designPropertySheet,
+            DesignFlowLayout flowLayout = new DesignFlowLayout(context,
+                    flowVersion, 
                     this);
             tabs.addCloseableTab(flowVersion.getId(), flowVersion.getFlow().getName() + " "
                     + flowVersion.getName(), Icons.FLOW, flowLayout);
@@ -134,6 +120,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
         }
 
         if (item instanceof FlowVersion) {
+            IAgentManager agentManager = context.getAgentManager();
             FlowVersion flowVersion = (FlowVersion) item;
         	Set<Agent> agents = agentManager.getLocalAgents();
         	Agent localAgent = null;
@@ -163,8 +150,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
         	
             String executionId = agentManager.getAgentRuntime(localAgent).scheduleNow(deployment);
             if (executionId != null) {
-                ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId,
-                        backgroundRefresherService, executionService);
+                ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context);
                 tabs.addCloseableTab(executionId, "Run " + flowVersion.getFlow().getName() + " "
                         + flowVersion.getName(), Icons.LOG, logPanel);
             }
@@ -178,7 +164,15 @@ public class DesignNavigator extends AbstractFolderNavigator {
         newFlow.setEnabled(enabled);
         newResource.setEnabled(enabled);
         newModel.setEnabled(enabled);
-
+        
+        AbstractObject obj = getSingleSelection(AbstractObject.class);
+        if (obj instanceof ComponentVersion && designPropertySheet != null) {
+            designPropertySheet.valueChange(obj);
+        }
+    }
+    
+    public void setDesignPropertySheet(DesignPropertySheet designPropertySheet) {
+        this.designPropertySheet = designPropertySheet;
     }
 
     @Override

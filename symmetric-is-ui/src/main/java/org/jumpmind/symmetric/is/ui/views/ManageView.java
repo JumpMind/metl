@@ -13,15 +13,13 @@ import org.jumpmind.symmetric.is.core.model.Execution;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.FolderType;
-import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.persist.IExecutionService;
+import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.Category;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.MultiPropertyFilter;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.is.ui.common.TopBarLink;
-import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
 import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.common.UiComponent;
@@ -59,13 +57,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 	static final int DEFAULT_LIMIT = 100;
     
     @Autowired
-    IConfigurationService configurationService;
-
-    @Autowired
-    IExecutionService executionService;
-
-    @Autowired
-    BackgroundRefresherService backgroundRefresherService;
+    ApplicationContext context;
 
     ManageNavigator manageNavigator;
 
@@ -165,7 +157,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         split.setSizeFull();
         split.setSplitPosition(300, Unit.PIXELS, false);
         
-        manageNavigator = new ManageNavigator(FolderType.RUNTIME, configurationService);
+        manageNavigator = new ManageNavigator(FolderType.RUNTIME, context.getConfigurationService());
         manageNavigator.addValueChangeListener(new ValueChangeListener() {
 			public void valueChange(ValueChangeEvent event) {
 				refreshUI(getBackgroundData());
@@ -180,7 +172,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
         addComponent(split);
         setSizeFull();
-        backgroundRefresherService.register(this);
+        context.getBackgroundRefresherService().register(this);
     }
 
     @Override
@@ -190,7 +182,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     @Override
     public boolean closing() {
-        backgroundRefresherService.unregister(this);
+        context.getBackgroundRefresherService().unregister(this);
         return true;
     }
 
@@ -225,7 +217,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     		}
 
     		if (params.size() > 0) {
-    			return executionService.findExecutions(params, limit);		
+    			return context.getExecutionService().findExecutions(params, limit);		
     		}
     	}
     	return null;
@@ -246,8 +238,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     protected void viewLog() {
     	Execution execution = (Execution) table.getValue();
-        ExecutionLogPanel logPanel = new ExecutionLogPanel(execution.getId(),
-                backgroundRefresherService, executionService);
+        ExecutionLogPanel logPanel = new ExecutionLogPanel(execution.getId(),context);
         tabs.addCloseableTab(execution.getId(), "Log " + execution.getFlowName(), Icons.LOG, logPanel);
     }
 

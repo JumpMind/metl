@@ -112,11 +112,7 @@ abstract public class AbstractFolderNavigator extends Panel {
         }
         while (parent != null);
         
-        treeTable.select(obj);
-    }
-
-    public void addValueChangeListener(ValueChangeListener listener) {
-        this.treeTable.addValueChangeListener(listener);
+        treeTable.setValue(obj);
     }
 
     abstract protected void addMenuButtons(MenuBar leftMenuBar, MenuBar rightMenuBar);
@@ -234,7 +230,7 @@ abstract public class AbstractFolderNavigator extends Panel {
 
             @Override
             public void handleAction(Object sender, Object target) {
-                Set<Object> selectedIds = getTableValues();
+                Set<Object> selectedIds = getSelectedValues();
                 for (Object object : selectedIds) {
                     openItem(object);
                 }
@@ -246,7 +242,7 @@ abstract public class AbstractFolderNavigator extends Panel {
 
             @Override
             public void valueChange(ValueChangeEvent event) {
-                lastSelected = getTableValues();
+                lastSelected = getSelectedValues();
                 selectionChanged(event);
             }
         });
@@ -411,7 +407,7 @@ abstract public class AbstractFolderNavigator extends Panel {
     }
 
     @SuppressWarnings("unchecked")
-    protected Set<Object> getTableValues() {
+    protected Set<Object> getSelectedValues() {
         Set<Object> selectedIds = null;
         Object obj = treeTable.getValue();
         if (obj instanceof Set) {
@@ -429,7 +425,7 @@ abstract public class AbstractFolderNavigator extends Panel {
     }
 
     protected Folder getSelectedFolder() {
-        Set<Object> selectedIds = getTableValues();
+        Set<Object> selectedIds = getSelectedValues();
         for (Object object : selectedIds) {
             if (object instanceof Folder) {
                 return (Folder) object;
@@ -440,7 +436,7 @@ abstract public class AbstractFolderNavigator extends Panel {
 
     @SuppressWarnings("unchecked")
     protected <T> T getSingleSelection(Class<T> clazz) {
-        Set<Object> selectedIds = getTableValues();
+        Set<Object> selectedIds = getSelectedValues();
         if (selectedIds != null && selectedIds.size() == 1) {
             Object obj = selectedIds.iterator().next();
             if (obj != null && clazz.isAssignableFrom(obj.getClass())) {
@@ -455,7 +451,7 @@ abstract public class AbstractFolderNavigator extends Panel {
     }
 
     protected void selectionChanged(ValueChangeEvent event) {
-        Set<Object> selected = getTableValues();
+        Set<Object> selected = getSelectedValues();
         Folder folder = getSelectedFolder();
         boolean enabled = itemBeingEdited == null
                 && ((folder == null && selected.size() == 0) || folder != null);
@@ -482,7 +478,7 @@ abstract public class AbstractFolderNavigator extends Panel {
 
                         @Override
                         public boolean onOk() {
-                            Set<Object> selected = getTableValues();
+                            Set<Object> selected = getSelectedValues();
                             for (Object obj : selected) {
                                 if (obj instanceof Folder) {
                                     Folder folder = (Folder) obj;
@@ -501,7 +497,7 @@ abstract public class AbstractFolderNavigator extends Panel {
                     });
         }
 
-        Set<Object> objects = getTableValues();
+        Set<Object> objects = getSelectedValues();
         Collection<Object> noFolders = new HashSet<Object>();
         for (Object object : objects) {
             if (!(object instanceof Folder)) {
