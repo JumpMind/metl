@@ -9,6 +9,7 @@ import org.jumpmind.symmetric.is.core.model.Execution;
 import org.jumpmind.symmetric.is.core.model.ExecutionStep;
 import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
+import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
@@ -51,9 +52,9 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
 	
 	protected String executionId;
 
-	public ExecutionLogPanel(String executionId, final BackgroundRefresherService backgroundRefresherService, final IExecutionService executionService) {
-		this.backgroundRefresherService = backgroundRefresherService;
-		this.executionService = executionService;
+	public ExecutionLogPanel(String executionId, ApplicationContext context) {
+		this.backgroundRefresherService = context.getBackgroundRefresherService();
+		this.executionService = context.getExecutionService();
 		this.executionId = executionId;
 
 		HorizontalLayout header1 = new HorizontalLayout();

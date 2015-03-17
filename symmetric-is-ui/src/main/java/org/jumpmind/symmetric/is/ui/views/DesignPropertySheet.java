@@ -19,6 +19,7 @@ import org.jumpmind.symmetric.is.core.runtime.component.ComponentSupports;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
+import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdatePasswordField;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.symmetric.ui.common.SqlField;
@@ -46,11 +47,10 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
 
     IResourceFactory resourceFactory;
 
-    public DesignPropertySheet(IComponentFactory componentFactory,
-            IConfigurationService configurationService, IResourceFactory resourceFactory) {
-        this.componentFactory = componentFactory;
-        this.configurationService = configurationService;
-        this.resourceFactory = resourceFactory;
+    public DesignPropertySheet(ApplicationContext context) {
+        this.componentFactory = context.getComponentFactory();
+        this.configurationService = context.getConfigurationService();
+        this.resourceFactory = context.getResourceFactory();
         setCaption("Property Sheet");
         setSizeFull();
         addStyleName("noborder");

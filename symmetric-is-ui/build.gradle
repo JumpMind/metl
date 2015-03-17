@@ -31,7 +31,7 @@ vaadin.push = true
 
 dependencies {
     compile project(":symmetric-is-core")
-    compile "org.jumpmind.symmetric:symmetric-ui-common:1.0.7-SNAPSHOT"
+    compile "org.jumpmind.symmetric:symmetric-ui-common:1.0.8-SNAPSHOT"
     compile "com.cybercom:spring-ui-scope:0.0.2"
     compile "org.vaadin.addons:aceeditor:0.8.13"
     compile "org.springframework:spring-webmvc:$springVersion"

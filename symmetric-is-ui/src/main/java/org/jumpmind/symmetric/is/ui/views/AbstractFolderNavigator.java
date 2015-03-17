@@ -112,14 +112,10 @@ abstract public class AbstractFolderNavigator extends Panel {
         }
         while (parent != null);
         
-        treeTable.select(obj);
+        treeTable.setValue(obj);
     }
 
-    public void addValueChangeListener(ValueChangeListener listener) {
-        this.treeTable.addValueChangeListener(listener);
-    }
-
-    abstract protected void addMenuButtons(MenuBar leftMenuBar, MenuBar rightMenuBar);
+    abstract protected void addMenuButtons(MenuItem addMenuItem, MenuBar leftMenuBar, MenuBar rightMenuBar);
 
     public void refresh() {        
         Object selected = treeTable.getValue();
@@ -160,8 +156,10 @@ abstract public class AbstractFolderNavigator extends Panel {
         MenuBar leftMenuBar = new MenuBar();
         leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
         leftMenuBar.setWidth(100, Unit.PERCENTAGE);
+        
+        MenuItem newMenu = leftMenuBar.addItem("", FontAwesome.PLUS, null);
 
-        newFolder = leftMenuBar.addItem("", Icons.FOLDER_OPEN, new Command() {
+        newFolder = newMenu.addItem("Folder", Icons.FOLDER_OPEN, new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
@@ -174,7 +172,7 @@ abstract public class AbstractFolderNavigator extends Panel {
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
 
-        addMenuButtons(leftMenuBar, rightMenuBar);
+        addMenuButtons(newMenu, leftMenuBar, rightMenuBar);
 
         delete = rightMenuBar.addItem("", Icons.DELETE, new Command() {
 
@@ -234,7 +232,7 @@ abstract public class AbstractFolderNavigator extends Panel {
 
             @Override
             public void handleAction(Object sender, Object target) {
-                Set<Object> selectedIds = getTableValues();
+                Set<Object> selectedIds = getSelectedValues();
                 for (Object object : selectedIds) {
                     openItem(object);
                 }
@@ -246,7 +244,7 @@ abstract public class AbstractFolderNavigator extends Panel {
 
             @Override
             public void valueChange(ValueChangeEvent event) {
-                lastSelected = getTableValues();
+                lastSelected = getSelectedValues();
                 selectionChanged(event);
             }
         });
@@ -411,7 +409,7 @@ abstract public class AbstractFolderNavigator extends Panel {
     }
 
     @SuppressWarnings("unchecked")
-    protected Set<Object> getTableValues() {
+    protected Set<Object> getSelectedValues() {
         Set<Object> selectedIds = null;
         Object obj = treeTable.getValue();
         if (obj instanceof Set) {
@@ -429,7 +427,7 @@ abstract public class AbstractFolderNavigator extends Panel {
     }
 
     protected Folder getSelectedFolder() {
-        Set<Object> selectedIds = getTableValues();
+        Set<Object> selectedIds = getSelectedValues();
         for (Object object : selectedIds) {
             if (object instanceof Folder) {
                 return (Folder) object;
@@ -440,7 +438,7 @@ abstract public class AbstractFolderNavigator extends Panel {
 
     @SuppressWarnings("unchecked")
     protected <T> T getSingleSelection(Class<T> clazz) {
-        Set<Object> selectedIds = getTableValues();
+        Set<Object> selectedIds = getSelectedValues();
         if (selectedIds != null && selectedIds.size() == 1) {
             Object obj = selectedIds.iterator().next();
             if (obj != null && clazz.isAssignableFrom(obj.getClass())) {
@@ -455,7 +453,7 @@ abstract public class AbstractFolderNavigator extends Panel {
     }
 
     protected void selectionChanged(ValueChangeEvent event) {
-        Set<Object> selected = getTableValues();
+        Set<Object> selected = getSelectedValues();
         Folder folder = getSelectedFolder();
         boolean enabled = itemBeingEdited == null
                 && ((folder == null && selected.size() == 0) || folder != null);
@@ -482,7 +480,7 @@ abstract public class AbstractFolderNavigator extends Panel {
 
                         @Override
                         public boolean onOk() {
-                            Set<Object> selected = getTableValues();
+                            Set<Object> selected = getSelectedValues();
                             for (Object obj : selected) {
                                 if (obj instanceof Folder) {
                                     Folder folder = (Folder) obj;
@@ -501,7 +499,7 @@ abstract public class AbstractFolderNavigator extends Panel {
                     });
         }
 
-        Set<Object> objects = getTableValues();
+        Set<Object> objects = getSelectedValues();
         Collection<Object> noFolders = new HashSet<Object>();
         for (Object object : objects) {
             if (!(object instanceof Folder)) {
