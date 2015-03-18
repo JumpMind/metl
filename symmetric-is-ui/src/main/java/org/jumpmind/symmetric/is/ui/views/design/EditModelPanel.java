@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,6 +38,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 	TreeTable treeTable = new TreeTable();
 	
 	ModelVersion modelVersion;
+
+	Set<Object> lastEditItemIds = Collections.emptySet();
 	
 	public EditModelPanel(ApplicationContext context, ModelVersion modelVersion) {
 		this.context = context;
@@ -102,8 +105,10 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         for (ModelEntity e : modelVersion.getModelEntities().values()) {
         	addModelEntity(e);
         	for (ModelAttribute a : e.getModelAttributes().values()) {
+        		a.setEntity(e);
         		addModelAttribute(a);
         	}
+        	treeTable.setCollapsed(e, false);
         }
 	}
 	
@@ -142,16 +147,15 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 		treeTable.getContainerProperty(modelAttribute, "name").setValue(modelAttribute.getName());
 		treeTable.getContainerProperty(modelAttribute, "type").setValue(modelAttribute.getType().toString());
 		treeTable.setItemIcon(modelAttribute, FontAwesome.COLUMNS);
-		treeTable.setParent(modelAttribute, modelAttribute.getTypeEntity());
+		treeTable.setParent(modelAttribute, modelAttribute.getEntity());
 		treeTable.setChildrenAllowed(modelAttribute, false);
 	}
 
 	protected void editSelectedItem() {
-		final Set<Object> itemIds = getSelectedItems();
+		lastEditItemIds = getSelectedItems();
         treeTable.setTableFieldFactory(new TableFieldFactory() {
-			public Field<?> createField(Container container, Object itemId,
-					Object propertyId, Component uiContext) {
-				if (itemIds.contains(itemId)) {
+			public Field<?> createField(Container container, Object itemId, Object propertyId, Component uiContext) {
+				if (lastEditItemIds.contains(itemId)) {
 					if (propertyId.equals("name")) {
 						TextField t = new TextField();
 						t.focus();
@@ -193,13 +197,13 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 		        a.setDataType(DataType.STRING);
 				Object itemId = itemIds.iterator().next();
 				if (itemId instanceof ModelEntity) {
-					a.setTypeEntity((ModelEntity) itemId);
+					a.setEntity((ModelEntity) itemId);
 				} else if (itemId instanceof ModelAttribute) {
-					a.setTypeEntity(((ModelAttribute) itemId).getTypeEntity());					
+					a.setEntity(((ModelAttribute) itemId).getEntity());					
 				}
 				context.getConfigurationService().save(a);
 		        addModelAttribute(a);
-		        treeTable.setCollapsed(a.getTypeEntity(), false);
+		        treeTable.setCollapsed(a.getEntity(), false);
 		        selectOnly(a);
 		        editSelectedItem();		        
 			}
@@ -239,7 +243,14 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 	
 	class TreeTableValueChangeListener implements ValueChangeListener {
 		public void valueChange(ValueChangeEvent event) {
-	        treeTable.setEditable(false);			
+			for (Object itemId : lastEditItemIds) {
+				if (itemId instanceof ModelEntity) {
+					context.getConfigurationService().save((ModelEntity) itemId);
+				} else if (itemId instanceof ModelAttribute) {
+					context.getConfigurationService().save((ModelAttribute) itemId);
+				}				
+			}
+	        treeTable.setEditable(false);
 		}		
 	}
 

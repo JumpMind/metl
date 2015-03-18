@@ -5,6 +5,8 @@ public class ModelAttribute extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
+    ModelEntity entity;
+    
     ModelEntity typeEntity;
     
     String entityId;
@@ -31,7 +33,6 @@ public class ModelAttribute extends AbstractObject {
 
 	public void setTypeEntity(ModelEntity typeEntity) {
 		this.typeEntity = typeEntity;
-		this.entityId = typeEntity.getId();
 	}
 
 	public String getId() {
@@ -80,6 +81,15 @@ public class ModelAttribute extends AbstractObject {
 
 	public void setTypeEntityId(String typeEntityId) {
 		this.typeEntityId = typeEntityId;
+	}
+
+	public ModelEntity getEntity() {
+		return entity;
+	}
+
+	public void setEntity(ModelEntity entity) {
+		this.entity = entity;
+		this.entityId = entity.getId();
 	}
 
 }
