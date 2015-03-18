@@ -18,6 +18,8 @@ import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentSetting;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentVersion;
+import org.jumpmind.symmetric.is.core.model.ComponentVersionAttributeSetting;
+import org.jumpmind.symmetric.is.core.model.ComponentVersionEntitySetting;
 import org.jumpmind.symmetric.is.core.model.ComponentVersionSetting;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
@@ -256,7 +258,15 @@ abstract class AbstractConfigurationService extends AbstractService implements
         List<ComponentVersionSetting> settings = find(ComponentVersionSetting.class, new NameValue(
                 "componentVersionId", componentVersion.getId()));
         componentVersion.setSettings(settings);
-
+        
+        List<ComponentVersionEntitySetting> entitySettings = find(ComponentVersionEntitySetting.class,
+                new NameValue("componentVersionId", componentVersion.getId()));
+        componentVersion.setEntitySettings(entitySettings);
+        
+        List<ComponentVersionAttributeSetting> attributeSettings = find(ComponentVersionAttributeSetting.class,
+                new NameValue("componentVersionId", componentVersion.getId()));
+        componentVersion.setAttributeSettings(attributeSettings);
+        
         componentVersion.setResource(findResource(componentVersion.getResourceId()));
 
     }

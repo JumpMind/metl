@@ -1,22 +1,28 @@
 package org.jumpmind.symmetric.is.ui.views;
 
 import java.util.List;
+import java.util.Set;
 
+import org.jumpmind.symmetric.is.core.model.Agent;
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.AgentStartMode;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
+import org.jumpmind.symmetric.is.ui.common.Icons;
+import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.ResourceEvent;
-import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
+import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +31,15 @@ import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTargetDetails;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -40,7 +49,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
-    IConfigurationService configurationService;
+    ApplicationContext context;
 
     FlowVersion componentFlowVersion;
 
@@ -48,31 +57,34 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
 
     DesignNavigator designNavigator;
 
+    DesignComponentPalette designComponentPalette;
+
+    TabbedApplicationPanel tabs;
+
     Diagram diagram;
 
     CssLayout diagramLayout;
-    
-    IComponentFactory componentFactory;
 
-    BackgroundRefresherService backgroundRefresherService;
-    
-    DesignComponentPalette designComponentPalette;
+    Button runButton;
 
-    public DesignFlowLayout(ApplicationContext context,
-            FlowVersion componentFlowVersion, 
-            DesignNavigator designNavigator) {
-        this.backgroundRefresherService = context.getBackgroundRefresherService();
-        this.configurationService = context.getConfigurationService();
-        this.componentFactory = context.getComponentFactory();
+    public DesignFlowLayout(ApplicationContext context, FlowVersion componentFlowVersion,
+            DesignNavigator designNavigator, TabbedApplicationPanel tabs) {
+        this.context = context;
+        this.tabs = tabs;
         this.componentFlowVersion = componentFlowVersion;
         this.designNavigator = designNavigator;
-        
+
         this.designPropertySheet = new DesignPropertySheet(context);
         this.designComponentPalette = new DesignComponentPalette(this,
-                componentFactory);
-        
+                context.getComponentFactory());
+
         addComponent(designComponentPalette);
-        
+
+        VerticalLayout rightLayout = new VerticalLayout();
+        rightLayout.setSizeFull();
+
+        rightLayout.addComponent(buildButtonBar());
+
         VerticalSplitPanel splitPanel = new VerticalSplitPanel();
         splitPanel.setSizeFull();
         splitPanel.setSplitPosition(50, Unit.PERCENTAGE);
@@ -80,7 +92,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
         diagramLayout = new CssLayout();
         diagramLayout.setWidth(10000, Unit.PIXELS);
         diagramLayout.setHeight(10000, Unit.PIXELS);
-        
+
         DragAndDropWrapper wrapper = new DragAndDropWrapper(diagramLayout);
         wrapper.setSizeUndefined();
         wrapper.setDropHandler(new DropHandler());
@@ -89,16 +101,40 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
         panel.setSizeFull();
         panel.addStyleName(ValoTheme.PANEL_WELL);
         panel.setContent(wrapper);
-        
+
         splitPanel.addComponent(panel);
         splitPanel.addComponent(designPropertySheet);
-        
-        addComponent(splitPanel);        
-        setExpandRatio(splitPanel, 1);
+
+        rightLayout.addComponent(splitPanel);
+        rightLayout.setExpandRatio(splitPanel, 1);
+
+        addComponent(rightLayout);
+        setExpandRatio(rightLayout, 1);
 
         redrawFlow();
+
+        context.getBackgroundRefresherService().register(this);
+    }
+
+    protected HorizontalLayout buildButtonBar() {
+        HorizontalLayout layout = new HorizontalLayout();
+        //layout.setMargin(true);
+        layout.setSpacing(true);
         
-        backgroundRefresherService.register(this);
+        Button runButton = new Button("Run", Icons.RUN);
+        runButton.addStyleName(ValoTheme.BUTTON_SMALL);
+        runButton.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        runButton.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+        runButton.addClickListener(new ClickListener() {            
+            private static final long serialVersionUID = 1L;
+            @Override
+            public void buttonClick(ClickEvent event) {
+                openExecution();
+            }
+        });
+
+        layout.addComponent(runButton);
+        return layout;
     }
 
     @Override
@@ -113,7 +149,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
 
     @Override
     public boolean closing() {
-        backgroundRefresherService.unregister(this);
+        context.getBackgroundRefresherService().unregister(this);
         designNavigator.setDesignPropertySheet(designPropertySheet);
         return true;
     }
@@ -147,7 +183,7 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
         flowStep.setFlowVersionId(componentFlowVersion.getId());
         componentFlowVersion.getFlowSteps().add(flowStep);
 
-        configurationService.save(flowStep);
+        context.getConfigurationService().save(flowStep);
 
         redrawFlow();
 
@@ -175,7 +211,10 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
             Node node = new Node();
             String name = flowStep.getComponentVersion().getComponent().getName();
             String type = flowStep.getComponentVersion().getComponent().getType();
-            String imageText = String.format("<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>", designComponentPalette.getBase64RepresentationOfImageForComponentType(type));
+            String imageText = String
+                    .format("<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>",
+                            designComponentPalette
+                                    .getBase64RepresentationOfImageForComponentType(type));
             node.setText(imageText + "<br><i>" + name + "</i>");
             node.setId(flowStep.getId());
             node.setX(flowStep.getX());
@@ -192,11 +231,48 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
 
     }
 
+    protected void openExecution() {
+        IAgentManager agentManager = context.getAgentManager();
+        Set<Agent> agents = agentManager.getLocalAgents();
+        Agent localAgent = null;
+        for (Agent agent : agents) {
+            if (agent.getHost().equals("localhost")) {
+                localAgent = agent;
+                break;
+            }
+        }
+
+        if (localAgent == null) {
+            localAgent = new Agent();
+            localAgent.setHost("localhost");
+            localAgent.setName("local");
+            localAgent.setStartMode(AgentStartMode.AUTO.name());
+            context.getConfigurationService().save(localAgent);
+            agentManager.refresh(localAgent);
+        }
+
+        AgentDeployment deployment = localAgent.getAgentDeploymentFor(componentFlowVersion);
+        if (deployment != null) {
+            agentManager.undeploy(deployment);
+
+        }
+
+        deployment = agentManager.deploy(localAgent.getId(), componentFlowVersion);
+
+        String executionId = agentManager.getAgentRuntime(localAgent).scheduleNow(deployment);
+        if (executionId != null) {
+            ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context);
+            tabs.addCloseableTab(executionId, "Run " + componentFlowVersion.getFlow().getName()
+                    + " " + componentFlowVersion.getName(), Icons.LOG, logPanel);
+        }
+    }
+
     class DiagramChangedListener implements Listener {
         private static final long serialVersionUID = 1L;
 
         @Override
         public void componentEvent(Event e) {
+            IConfigurationService configurationService = context.getConfigurationService();
             if (e instanceof NodeSelectedEvent) {
                 NodeSelectedEvent event = (NodeSelectedEvent) e;
                 Node node = event.getNode();

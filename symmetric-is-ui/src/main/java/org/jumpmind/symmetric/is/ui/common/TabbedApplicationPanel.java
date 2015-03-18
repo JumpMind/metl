@@ -72,7 +72,7 @@ public class TabbedApplicationPanel extends TabSheet {
         Tab tab = tabsById.get(id);
         if (tab == null) {
             component.setSizeFull();
-            tab = addTab(component, caption, icon, mainTab == null ? 0 : 1);
+            tab = addTab(component, caption, icon);
             tab.setClosable(true);
             setSelectedTab(tab);
             tabsById.put(id, tab);

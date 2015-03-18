@@ -70,7 +70,7 @@ public class DbReader extends AbstractComponent {
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
         int inboundRecordCount = 1;
-        ArrayList<ArrayList<EntityData>> payload = null;
+        ArrayList<EntityData> payload = null;
         if (!(inputMessage instanceof StartupMessage)) {
             payload = inputMessage.getPayload();
             inboundRecordCount = payload.size();
@@ -193,7 +193,7 @@ public class DbReader extends AbstractComponent {
     }
 
     protected void setParamsFromInboundMsgAndRec(Map<String, Object> paramMap,
-            final Message inputMessage, final ArrayList<EntityData> rowTables) {
+            final Message inputMessage, final EntityData entityData) {
 
         /*
          * input parameters can come from the header and the record. header
@@ -201,8 +201,8 @@ public class DbReader extends AbstractComponent {
          */
         paramMap.clear();
         paramMap.putAll(getParamsFromHeader(inputMessage));
-        if (rowTables != null) {
-            paramMap.putAll(getParamsFromDetailRecord(rowTables));
+        if (entityData != null) {
+            paramMap.putAll(entityData);
         }
     }
 
@@ -215,15 +215,6 @@ public class DbReader extends AbstractComponent {
         } else {
             return null;
         }
-    }
-
-    protected Map<String, Object> getParamsFromDetailRecord(ArrayList<EntityData> rowTables) {
-
-        Map<String, Object> parms = new HashMap<String, Object>();
-        for (EntityData rowTable : rowTables) {
-            parms.putAll(rowTable);
-        }
-        return parms;
     }
 
     protected void applySettings() {

@@ -11,7 +11,7 @@ final public class Icons {
     
     public static final FontAwesome FOLDER_CLOSED = FontAwesome.FOLDER;
     
-    public static final FontAwesome GENERAL_RESOURCE = FontAwesome.BOLT;
+    public static final FontAwesome GENERAL_RESOURCE = FontAwesome.LINK;
 
     public static final FontAwesome FLOW = FontAwesome.SHARE_ALT;
     
