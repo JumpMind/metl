@@ -126,7 +126,6 @@ abstract class AbstractConfigurationService extends AbstractService implements
             	refreshModelVersionRelations(modelVersion);
                 model.getModelVersions().add(modelVersion);
             }
-            models.add(model);
         }
 
         return models;

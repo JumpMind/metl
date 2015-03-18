@@ -7,6 +7,7 @@ import java.util.Set;
 import org.jumpmind.symmetric.is.core.model.DataType;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
+import org.jumpmind.symmetric.is.core.model.ModelVersion;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 
@@ -35,8 +36,11 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 	
 	TreeTable treeTable = new TreeTable();
 	
-	public EditModelPanel(ApplicationContext context) {
+	ModelVersion modelVersion;
+	
+	public EditModelPanel(ApplicationContext context, ModelVersion modelVersion) {
 		this.context = context;
+		this.modelVersion = modelVersion;
 		
 		Button addEntityButton = new Button("Add Entity");
 		addEntityButton.setIcon(FontAwesome.TABLE);
@@ -121,7 +125,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 	
 	@Override
 	public boolean closing() {
-		return false;
+		return true;
 	}
 
 	@Override

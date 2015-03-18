@@ -29,6 +29,7 @@ public class ModelVersion extends AbstractObject {
     public ModelVersion(Model model) {
     	this();
     	this.model = model;
+    	this.modelId = model.getId();
     }
     
     public Model getModel() {
@@ -82,14 +83,12 @@ public class ModelVersion extends AbstractObject {
 
 	@Override
 	public void setName(String name) {
-		// TODO Auto-generated method stub
-		
+		versionName = name;
 	}
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+		return versionName;
 	}
        
 }

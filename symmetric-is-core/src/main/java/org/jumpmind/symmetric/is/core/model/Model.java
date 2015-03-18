@@ -13,7 +13,7 @@ public class Model extends AbstractObject {
     
     String name; 
     
-    String type;
+    String type = "NORMAL";
     
     String folderId;
     
@@ -26,8 +26,20 @@ public class Model extends AbstractObject {
     public Model(Folder folder) {
     	this();
     	this.folder = folder;
+    	this.folderId = folder.getId();
     }
-    
+
+    public ModelVersion getLatestModelVersion() {
+        ModelVersion latest = null;
+        for (ModelVersion modelVersion : modelVersions) {
+            if (latest == null
+                    || latest.getCreateTime().before(modelVersion.getCreateTime())) {
+                latest = modelVersion;
+            }
+        }
+        return latest;
+    }
+
 	public Folder getFolder() {
 		return folder;
 	}

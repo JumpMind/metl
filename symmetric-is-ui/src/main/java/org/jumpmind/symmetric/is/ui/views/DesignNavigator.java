@@ -11,6 +11,8 @@ import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
+import org.jumpmind.symmetric.is.core.model.Model;
+import org.jumpmind.symmetric.is.core.model.ModelVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.localfile.LocalFileResource;
@@ -65,8 +67,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
-                EditModelPanel editModel = new EditModelPanel(context);
-                tabs.addCloseableTab("1", "Edit Model", Icons.FLOW, editModel);
+            	addNewModel();
             }
         });
         
@@ -102,6 +103,8 @@ public class DesignNavigator extends AbstractFolderNavigator {
     protected void openItem(Object item) {
         if (item instanceof Flow) {
             item = ((Flow) item).getLatestFlowVersion();
+        } else if (item instanceof Model) {
+        	item = ((Model) item).getLatestModelVersion();
         }
 
         if (item instanceof FlowVersion) {
@@ -111,6 +114,10 @@ public class DesignNavigator extends AbstractFolderNavigator {
                     this, tabs);
             tabs.addCloseableTab(flowVersion.getId(), flowVersion.getFlow().getName() + " "
                     + flowVersion.getName(), Icons.FLOW, flowLayout);
+        } else if (item instanceof ModelVersion) {
+        	ModelVersion modelVersion = (ModelVersion) item;
+        	EditModelPanel editModel = new EditModelPanel(context, modelVersion);
+            tabs.addCloseableTab(modelVersion.getModelId(), "Edit Model", Icons.MODEL, editModel);
         }
     }
 
@@ -138,6 +145,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
         removeAllNonFolderChildren(folder);
         addResourcesToFolder(folder);
         addFlowsToFolder(folder);
+        addModelsToFolder(folder);
     }
 
     protected void addNewDatabase() {
@@ -217,6 +225,33 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
     }
 
+    protected void addNewModel() {
+        Folder folder = getSelectedFolder();
+        if (folder != null) {
+        	
+        	Model model = new Model(folder);
+            model.setName("New Model");
+            configurationService.save(model);
+            
+            ModelVersion modelVersion = new ModelVersion(model);
+            modelVersion.setVersionName("version 1.0");
+            model.getModelVersions().add(modelVersion);
+            
+            configurationService.save(modelVersion);
+
+            treeTable.addItem(model);
+            treeTable.setItemIcon(model, Icons.MODEL);
+            treeTable.setParent(model, folder);
+            treeTable.addItem(modelVersion);
+            treeTable.setItemIcon(modelVersion, Icons.FLOW_VERSION);
+            treeTable.setParent(modelVersion, model);
+
+            treeTable.setCollapsed(folder, false);
+
+            startEditingItem(model);
+        }    	
+    }
+
     protected void addNewFlow() {
         Folder folder = getSelectedFolder();
         if (folder != null) {
@@ -284,6 +319,24 @@ public class DesignNavigator extends AbstractFolderNavigator {
                     this.treeTable.setParent(flowStep, flowVersion);
                     this.treeTable.setChildrenAllowed(flowStep, false);
                 }
+            }
+        }
+    }
+
+    protected void addModelsToFolder(Folder folder) {
+        List<Model> models = configurationService.findModelsInFolder(folder);
+        for (Model model : models) {
+            this.treeTable.addItem(model);
+            this.treeTable.setItemIcon(model, Icons.FLOW);
+            this.treeTable.setParent(model, folder);
+
+            List<ModelVersion> versions = model.getModelVersions();
+            for (ModelVersion modelVersion : versions) {
+                this.treeTable.addItem(modelVersion);
+                this.treeTable.setItemCaption(modelVersion, modelVersion.getVersionName());
+                this.treeTable.setItemIcon(modelVersion, Icons.FLOW_VERSION);
+                this.treeTable.setParent(modelVersion, model);
+                this.treeTable.setChildrenAllowed(modelVersion, false);
             }
         }
     }
