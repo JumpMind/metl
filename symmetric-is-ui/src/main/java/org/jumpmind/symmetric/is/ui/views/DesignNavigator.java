@@ -22,6 +22,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.localfile.LocalFileResour
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
 import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
@@ -84,6 +85,8 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
+                EditModelPanel editModel = new EditModelPanel(context);
+                tabs.addCloseableTab("1", "Edit Model", Icons.FLOW, editModel);
             }
         });
         newModel.setDescription("Add Model");
