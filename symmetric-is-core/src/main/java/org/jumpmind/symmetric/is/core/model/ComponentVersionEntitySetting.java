@@ -6,17 +6,20 @@ public class ComponentVersionEntitySetting extends Setting {
 
     String componentVersionId;
     String entityId;
-    
-	public String getFormatVersionId() {
-		return componentVersionId;
-	}
-	public void setFormatVersionId(String formatVersionId) {
-		this.componentVersionId = formatVersionId;
-	}
-	public String getEntityId() {
-		return entityId;
-	}
-	public void setEntityId(String entityId) {
-		this.entityId = entityId;
-	}
+
+    public void setComponentVersionId(String componentVersionId) {
+        this.componentVersionId = componentVersionId;
+    }
+
+    public String getComponentVersionId() {
+        return componentVersionId;
+    }
+
+    public String getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
+    }
 }

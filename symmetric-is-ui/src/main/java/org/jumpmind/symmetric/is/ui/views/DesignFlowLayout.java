@@ -30,6 +30,9 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Resource;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -66,6 +69,8 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
     CssLayout diagramLayout;
 
     Button runButton;
+    
+    Button delButton;
 
     public DesignFlowLayout(ApplicationContext context, FlowVersion componentFlowVersion,
             DesignNavigator designNavigator, TabbedApplicationPanel tabs) {
@@ -117,14 +122,20 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
     }
 
     protected HorizontalLayout buildButtonBar() {
-        HorizontalLayout layout = new HorizontalLayout();
-        //layout.setMargin(true);
-        layout.setSpacing(true);
+        HorizontalLayout layout = new HorizontalLayout();        
+        layout.setWidth(100, Unit.PERCENTAGE);
         
-        Button runButton = new Button("Run", Icons.RUN);
-        runButton.addStyleName(ValoTheme.BUTTON_SMALL);
-        runButton.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
-        runButton.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+        HorizontalLayout right = new HorizontalLayout();
+        right.setSpacing(true);
+
+        HorizontalLayout left = new HorizontalLayout();
+        left.setSpacing(true);
+        
+        layout.addComponent(left);
+        layout.addComponent(right);
+        layout.setComponentAlignment(right, Alignment.MIDDLE_RIGHT);
+
+        runButton = createToolButton("Run", Icons.RUN);
         runButton.addClickListener(new ClickListener() {            
             private static final long serialVersionUID = 1L;
             @Override
@@ -132,9 +143,29 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
                 openExecution();
             }
         });
+        left.addComponent(runButton);
+        
 
-        layout.addComponent(runButton);
+        runButton = createToolButton("Delete", FontAwesome.TRASH_O);
+        runButton.addClickListener(new ClickListener() {            
+            private static final long serialVersionUID = 1L;
+            @Override
+            public void buttonClick(ClickEvent event) {
+                //openExecution();
+            }
+        });
+        right.addComponent(runButton);
+
+        
         return layout;
+    }
+    
+    protected Button createToolButton(String name, Resource icon) {
+        Button button = new Button(name, icon);
+        button.addStyleName(ValoTheme.BUTTON_SMALL);
+        button.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        button.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
+        return button;
     }
 
     @Override
