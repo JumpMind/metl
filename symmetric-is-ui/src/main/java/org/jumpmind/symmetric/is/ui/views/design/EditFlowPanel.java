@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui.views;
+package org.jumpmind.symmetric.is.ui.views.design;
 
 import java.util.List;
 import java.util.Set;
@@ -15,15 +15,17 @@ import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
+import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
+import org.jumpmind.symmetric.is.ui.diagram.LinkEvent;
 import org.jumpmind.symmetric.is.ui.diagram.LinkSelectedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
-import org.jumpmind.symmetric.is.ui.diagram.LinkEvent;
+import org.jumpmind.symmetric.is.ui.views.DesignNavigator;
 import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.slf4j.Logger;
@@ -34,7 +36,6 @@ import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -48,7 +49,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBackgroundRefreshable {
+public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgroundRefreshable {
 
     private static final long serialVersionUID = 1L;
 
@@ -58,11 +59,11 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
 
     FlowVersion componentFlowVersion;
 
-    DesignPropertySheet designPropertySheet;
+    EditFlowPropertySheet designPropertySheet;
 
     DesignNavigator designNavigator;
 
-    DesignComponentPalette designComponentPalette;
+    EditFlowPalette designComponentPalette;
 
     TabbedApplicationPanel tabs;
 
@@ -76,15 +77,15 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
     
     AbstractObject selected;
 
-    public DesignFlowLayout(ApplicationContext context, FlowVersion componentFlowVersion,
+    public EditFlowPanel(ApplicationContext context, FlowVersion componentFlowVersion,
             DesignNavigator designNavigator, TabbedApplicationPanel tabs) {
         this.context = context;
         this.tabs = tabs;
         this.componentFlowVersion = componentFlowVersion;
         this.designNavigator = designNavigator;
 
-        this.designPropertySheet = new DesignPropertySheet(context);
-        this.designComponentPalette = new DesignComponentPalette(this,
+        this.designPropertySheet = new EditFlowPropertySheet(context);
+        this.designComponentPalette = new EditFlowPalette(this,
                 context.getComponentFactory());
 
         addComponent(designComponentPalette);
@@ -125,21 +126,9 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
         context.getBackgroundRefresherService().register(this);
     }
 
-    protected HorizontalLayout buildButtonBar() {
-        HorizontalLayout layout = new HorizontalLayout();        
-        layout.setWidth(100, Unit.PERCENTAGE);
-        
-        HorizontalLayout right = new HorizontalLayout();
-        right.setSpacing(true);
-
-        HorizontalLayout left = new HorizontalLayout();
-        left.setSpacing(true);
-        
-        layout.addComponent(left);
-        layout.addComponent(right);
-        layout.setComponentAlignment(right, Alignment.MIDDLE_RIGHT);
-
-        runButton = createToolButton("Run", Icons.RUN);
+    protected HorizontalLayout buildButtonBar() {        
+        ButtonBar buttonBar = new ButtonBar();
+        runButton = buttonBar.addButton("Run", Icons.RUN);
         runButton.addClickListener(new ClickListener() {            
             private static final long serialVersionUID = 1L;
             @Override
@@ -147,10 +136,9 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
                 openExecution();
             }
         });
-        left.addComponent(runButton);
         
 
-        delButton = createToolButton("Remove", FontAwesome.TRASH_O);
+        delButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
         delButton.addClickListener(new ClickListener() {            
             private static final long serialVersionUID = 1L;
             @Override
@@ -159,10 +147,8 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
             }
         });
         delButton.setEnabled(false);
-        right.addComponent(delButton);
-
         
-        return layout;
+        return buttonBar;
     }
     
     protected Button createToolButton(String name, Resource icon) {

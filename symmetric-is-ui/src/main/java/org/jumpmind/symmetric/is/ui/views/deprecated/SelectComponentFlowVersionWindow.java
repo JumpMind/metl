@@ -1,9 +1,9 @@
-package org.jumpmind.symmetric.is.ui.views.design;
+package org.jumpmind.symmetric.is.ui.views.deprecated;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jumpmind.symmetric.is.core.model.AgentSummary;
+import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.FlowVersionSummary;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.ui.common.IItemUpdatedListener;
@@ -25,7 +25,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-public class SelectAgentsWindow extends ResizableWindow {
+public class SelectComponentFlowVersionWindow extends ResizableWindow {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,11 +34,11 @@ public class SelectAgentsWindow extends ResizableWindow {
 
     IItemUpdatedListener itemUpdatedListener;
 
-    BeanItemContainer<AgentSummary> container;
+    BeanItemContainer<FlowVersionSummary> container;
 
     MultiSelectTable table;
 
-    public SelectAgentsWindow() {
+    public SelectComponentFlowVersionWindow() {
         VerticalLayout content = new VerticalLayout();
         content.setSizeFull();
         setContent(content);
@@ -67,15 +67,16 @@ public class SelectAgentsWindow extends ResizableWindow {
         layout.addComponent(searchField);
 
         table = new MultiSelectTable();
-        container = new BeanItemContainer<AgentSummary>(AgentSummary.class);
+        container = new BeanItemContainer<FlowVersionSummary>(
+                FlowVersionSummary.class);
         table.setContainerDataSource(container);
         table.setSizeFull();
 
-        table.setColumnHeader("name", "Agent Name");
-        table.setColumnHeader("host", "Host Name");
+        table.setColumnHeader("name", "Flow Name");
+        table.setColumnHeader("versionName", "Version Name");
         table.setColumnHeader("folderName", "Folder Name");
 
-        table.setVisibleColumns("name", "host", "folderName");
+        table.setVisibleColumns("name", "versionName", "folderName");
         table.setColumnExpandRatio("folderName", 1);
 
         layout.addComponent(table);
@@ -84,18 +85,20 @@ public class SelectAgentsWindow extends ResizableWindow {
         return layout;
     }
 
-    public void show(String componentFlowVersionId, IItemUpdatedListener itemUpdatedListener) {
+    public void show(Agent agent, IItemUpdatedListener itemUpdatedListener) {
         this.itemUpdatedListener = itemUpdatedListener;
-        setCaption("Select Agents To Deploy To");
+        setCaption("Select Flows to Deploy");
         this.container.removeAllItems();
-        this.container.addAll(configurationService.findUndeployedAgentsFor(componentFlowVersionId));
+        this.container.addAll(configurationService.findUndeployedFlowVersionSummary(agent
+                .getId()));
         this.table.setValue(new HashSet<FlowVersionSummary>());
         showAtSize(.5);
     }
 
     protected void done() {
-        Set<AgentSummary> agents = table.getSelected();
-        itemUpdatedListener.itemUpdated(agents);
+        Set<FlowVersionSummary> selectedFlows = table
+                .getSelected();
+        itemUpdatedListener.itemUpdated(selectedFlows);
         close();
     }
 

@@ -16,7 +16,7 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
     var selectedType = {
         connector : "Flowchart",
         paintStyle : {
-            strokeStyle : "red",
+            strokeStyle : "orange",
             lineWidth : 2
         }
        

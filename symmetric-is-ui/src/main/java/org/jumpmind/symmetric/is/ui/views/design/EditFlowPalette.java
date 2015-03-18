@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui.views;
+package org.jumpmind.symmetric.is.ui.views.design;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +27,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class DesignComponentPalette extends Panel {
+public class EditFlowPalette extends Panel {
 
     private static final long serialVersionUID = 1L;
     
@@ -37,13 +37,13 @@ public class DesignComponentPalette extends Panel {
 
     IComponentFactory componentFactory;
 
-    DesignFlowLayout designFlowLayout;
+    EditFlowPanel designFlowLayout;
 
     float splitPosition = 60;
 
     Unit splitUnit = Unit.PERCENTAGE;
 
-    public DesignComponentPalette(DesignFlowLayout designFlowLayout,
+    public EditFlowPalette(EditFlowPanel designFlowLayout,
             IComponentFactory componentFactory) {
         this.componentFactory = componentFactory;
         this.designFlowLayout = designFlowLayout;

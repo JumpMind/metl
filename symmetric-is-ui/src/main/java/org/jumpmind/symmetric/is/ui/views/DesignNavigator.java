@@ -19,6 +19,8 @@ import org.jumpmind.symmetric.is.core.runtime.resource.localfile.LocalFileResour
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditFlowPropertySheet;
 import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
@@ -44,7 +46,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
     
     TabbedApplicationPanel tabs;
     
-    DesignPropertySheet designPropertySheet;
+    EditFlowPropertySheet designPropertySheet;
 
     public DesignNavigator(ApplicationContext context, TabbedApplicationPanel tabs) {
         super(FolderType.DESIGN, context.getConfigurationService());
@@ -109,7 +111,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
         if (item instanceof FlowVersion) {
             FlowVersion flowVersion = (FlowVersion) item;
-            DesignFlowLayout flowLayout = new DesignFlowLayout(context,
+            EditFlowPanel flowLayout = new EditFlowPanel(context,
                     flowVersion, 
                     this, tabs);
             tabs.addCloseableTab(flowVersion.getId(), flowVersion.getFlow().getName() + " "
@@ -136,7 +138,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
         }
     }
     
-    public void setDesignPropertySheet(DesignPropertySheet designPropertySheet) {
+    public void setDesignPropertySheet(EditFlowPropertySheet designPropertySheet) {
         this.designPropertySheet = designPropertySheet;
     }
 

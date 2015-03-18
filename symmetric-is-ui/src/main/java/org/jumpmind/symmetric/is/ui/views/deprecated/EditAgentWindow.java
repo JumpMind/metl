@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui.views.manage;
+package org.jumpmind.symmetric.is.ui.views.deprecated;
 
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentStartMode;

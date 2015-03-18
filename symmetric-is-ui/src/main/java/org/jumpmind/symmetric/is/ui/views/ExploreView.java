@@ -21,14 +21,14 @@ import com.vaadin.ui.VerticalLayout;
 @UiComponent
 @Scope("ui")
 @TopBarLink(id="explore", category=Category.EXPLORE, menuOrder=20, name = "Explore", icon=FontAwesome.DATABASE)
-public class SqlView extends VerticalLayout implements View {
+public class ExploreView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;
 
     @Autowired
     IDatabasePlatform platform;
     
-    public SqlView() {
+    public ExploreView() {
         setSizeFull();
         SqlExplorer explorer = new SqlExplorer(System.getProperty("java.io.tmpdir"),
                 new IDbProvider() {

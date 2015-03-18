@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.ui.views;
+package org.jumpmind.symmetric.is.ui.views.design;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +37,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class DesignPropertySheet extends Panel implements ValueChangeListener {
+public class EditFlowPropertySheet extends Panel implements ValueChangeListener {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -47,7 +47,7 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
 
     IResourceFactory resourceFactory;
 
-    public DesignPropertySheet(ApplicationContext context) {
+    public EditFlowPropertySheet(ApplicationContext context) {
         this.componentFactory = context.getComponentFactory();
         this.configurationService = context.getConfigurationService();
         this.resourceFactory = context.getResourceFactory();
@@ -61,7 +61,7 @@ public class DesignPropertySheet extends Panel implements ValueChangeListener {
         valueChange(event.getProperty().getValue());
     }
 
-    protected void valueChange(Object obj) {
+    public void valueChange(Object obj) {
         FormLayout formLayout = new FormLayout();
         formLayout.setWidth(100, Unit.PERCENTAGE);
         formLayout.setMargin(false);
