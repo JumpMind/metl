@@ -23,6 +23,10 @@
     -moz-transition: background-color 0.25s ease-in;
     transition: background-color 0.25s ease-in;
  }
+ 
+ .diagram-node.selected {
+   border: 1px solid red;
+ }
 
 .aLabel {
     -webkit-transition: background-color 0.25s ease-in;

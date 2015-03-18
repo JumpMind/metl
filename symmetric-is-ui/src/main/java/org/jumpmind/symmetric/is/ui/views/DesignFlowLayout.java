@@ -3,6 +3,7 @@ package org.jumpmind.symmetric.is.ui.views;
 import java.util.List;
 import java.util.Set;
 
+import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentStartMode;
@@ -18,10 +19,11 @@ import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
+import org.jumpmind.symmetric.is.ui.diagram.LinkSelectedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
-import org.jumpmind.symmetric.is.ui.diagram.ResourceEvent;
+import org.jumpmind.symmetric.is.ui.diagram.LinkEvent;
 import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.slf4j.Logger;
@@ -71,6 +73,8 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
     Button runButton;
     
     Button delButton;
+    
+    AbstractObject selected;
 
     public DesignFlowLayout(ApplicationContext context, FlowVersion componentFlowVersion,
             DesignNavigator designNavigator, TabbedApplicationPanel tabs) {
@@ -146,15 +150,16 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
         left.addComponent(runButton);
         
 
-        runButton = createToolButton("Delete", FontAwesome.TRASH_O);
-        runButton.addClickListener(new ClickListener() {            
+        delButton = createToolButton("Remove", FontAwesome.TRASH_O);
+        delButton.addClickListener(new ClickListener() {            
             private static final long serialVersionUID = 1L;
             @Override
             public void buttonClick(ClickEvent event) {
-                //openExecution();
+                deleteSelected();
             }
         });
-        right.addComponent(runButton);
+        delButton.setEnabled(false);
+        right.addComponent(delButton);
 
         
         return layout;
@@ -188,6 +193,21 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
     @Override
     public void showing() {
         designNavigator.setDesignPropertySheet(designPropertySheet);
+    }
+    
+    protected void deleteSelected() {
+        IConfigurationService configurationService = context.getConfigurationService();
+        if (selected instanceof FlowStep) {
+            FlowStep flowStep =(FlowStep)selected;
+            configurationService.delete(componentFlowVersion, flowStep);
+            designNavigator.refresh();            
+            redrawFlow();
+        } else if (selected instanceof FlowStepLink) {
+            FlowStepLink link = (FlowStepLink)selected;
+            configurationService.delete(link);
+            componentFlowVersion.removeFlowStepLink(link.getSourceStepId(), link.getTargetStepId());
+            redrawFlow();
+        }
     }
 
     protected int countComponentsOfType(String type) {
@@ -226,6 +246,8 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
     }
 
     protected void redrawFlow() {
+        selected = null;
+        delButton.setEnabled(false);
         if (diagram != null) {
             diagramLayout.removeComponent(diagram);
         }
@@ -310,7 +332,8 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
                 FlowStep flowStep = componentFlowVersion.findFlowStepWithId(node.getId());
                 designPropertySheet.valueChange(flowStep.getComponentVersion());
                 designNavigator.select(flowStep);
-
+                selected = flowStep;
+                delButton.setEnabled(true);
             } else if (e instanceof NodeMovedEvent) {
                 NodeMovedEvent event = (NodeMovedEvent) e;
                 Node node = event.getNode();
@@ -320,9 +343,8 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
                     flowStep.setY(node.getY());
                 }
                 configurationService.save(componentFlowVersion);
-
-            } else if (e instanceof ResourceEvent) {
-                ResourceEvent event = (ResourceEvent) e;
+            } else if (e instanceof LinkEvent) {
+                LinkEvent event = (LinkEvent) e;
                 if (!event.isRemoved()) {
                     componentFlowVersion.getFlowStepLinks().add(
                             new FlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
@@ -336,6 +358,10 @@ public class DesignFlowLayout extends HorizontalLayout implements IUiPanel, IBac
                     }
 
                 }
+            } else if (e instanceof LinkSelectedEvent) {
+                LinkSelectedEvent event = (LinkSelectedEvent)e;
+                selected = componentFlowVersion.findFlowStepLink(event.getSourceNodeId(), event.getTargetNodeId());
+                delButton.setEnabled(true);
             }
         }
     }

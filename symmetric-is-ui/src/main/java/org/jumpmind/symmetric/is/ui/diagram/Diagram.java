@@ -17,13 +17,54 @@ public class Diagram extends AbstractJavaScriptComponent {
     private static final long serialVersionUID = 1L;
 
     public Diagram() {
-        setPrimaryStyleName("diagram");        
+        setPrimaryStyleName("diagram");
         setId("diagram");
+
+        addFunction("onLinkSelected", new JavaScriptFunction() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void call(JsonArray arguments) {
+                if (arguments.length() > 0) {
+                    Object obj = arguments.get(0);
+                    if (obj instanceof JsonObject) {
+                        JsonObject json = arguments.getObject(0);
+                        String sourceNodeId = json.getString("sourceNodeId");
+                        String targetNodeId = json.getString("targetNodeId");
+                        fireEvent(new LinkSelectedEvent(Diagram.this, sourceNodeId, targetNodeId));
+                    }
+                }
+            }
+        });
+
+        addFunction("onNodeSelected", new JavaScriptFunction() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void call(JsonArray arguments) {
+                if (arguments.length() > 0) {
+                    Object obj = arguments.get(0);
+                    if (obj instanceof JsonObject) {
+                        JsonObject json = arguments.getObject(0);
+                        String id = json.getString("id");
+                        DiagramState state = getState();
+                        for (Node node : state.nodes) {
+                            if (node.getId().equals(id)) {
+                                fireEvent(new NodeSelectedEvent(Diagram.this, node));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
         addFunction("onNodeMoved", new JavaScriptFunction() {
 
             private static final long serialVersionUID = 1L;
-            
+
             @Override
             public void call(JsonArray arguments) {
                 if (arguments.length() > 0) {
@@ -36,13 +77,9 @@ public class Diagram extends AbstractJavaScriptComponent {
                         DiagramState state = getState();
                         for (Node node : state.nodes) {
                             if (node.getId().equals(id)) {
-                                if (x == 0 && y == 0) {
-                                    fireEvent(new NodeSelectedEvent(Diagram.this, node));
-                                } else {
-                                    node.setX((int)x);
-                                    node.setY((int)y);
-                                    fireEvent(new NodeMovedEvent(Diagram.this, node));
-                                }
+                                node.setX((int) x);
+                                node.setY((int) y);
+                                fireEvent(new NodeMovedEvent(Diagram.this, node));
                                 break;
                             }
                         }
@@ -72,8 +109,8 @@ public class Diagram extends AbstractJavaScriptComponent {
                                 } else if (removed) {
                                     node.getTargetNodeIds().remove(targetNodeId);
                                 }
-                                fireEvent(new ResourceEvent(Diagram.this, sourceNodeId,
-                                        targetNodeId, removed));
+                                fireEvent(new LinkEvent(Diagram.this, sourceNodeId, targetNodeId,
+                                        removed));
                                 break;
                             }
                         }
