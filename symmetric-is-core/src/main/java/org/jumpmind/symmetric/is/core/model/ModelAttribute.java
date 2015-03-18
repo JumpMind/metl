@@ -7,8 +7,6 @@ public class ModelAttribute extends AbstractObject {
 
     ModelEntity typeEntity;
     
-    String id;
-    
     String entityId;
 
     String name;
