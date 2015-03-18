@@ -31,6 +31,17 @@ public class FlowVersion extends AbstractObject {
         this();
         setFlow(flow);
     }
+    
+    public FlowStepLink findFlowStepLink(String sourceNodeId, String targetNodeId) {
+        if (flowStepLinks != null) {
+            for (FlowStepLink flowStepLink : flowStepLinks) {
+                if (flowStepLink.getSourceStepId().equals(sourceNodeId) && flowStepLink.getTargetStepId().equals(targetNodeId)) {
+                    return flowStepLink;
+                }
+            }
+        }
+        return null;
+    }
 
     public FlowStep findFlowStepWithId(String id) {
         for (FlowStep flowStep : flowSteps) {
@@ -132,16 +143,16 @@ public class FlowVersion extends AbstractObject {
     }
 
     public FlowStepLink removeFlowStepLink(String sourceStepId, String targetStepId) {
+        FlowStepLink link = null;
         Iterator<FlowStepLink> i = flowStepLinks.iterator();
         while (i.hasNext()) {
-            FlowStepLink link = i.next();
+            link = i.next();
             if (link.getSourceStepId().equals(sourceStepId)
                     && link.getTargetStepId().equals(targetStepId)) {
                 i.remove();
-                return link;
             }
         }
-        return null;
+        return link;
     }
     
     public StartType asStartType() {

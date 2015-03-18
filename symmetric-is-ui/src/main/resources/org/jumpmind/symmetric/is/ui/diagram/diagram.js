@@ -1,8 +1,6 @@
 window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
     var self = this;
     var state = this.getState();
-    this.startX = -1;
-    this.startY = -1;
 
     var instance = jsPlumb.getInstance({
         ConnectionOverlays : [ [ "Arrow", {
@@ -15,21 +13,15 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         Container : "diagram"
     });
 
-    var basicType = {
+    var selectedType = {
         connector : "Flowchart",
         paintStyle : {
             strokeStyle : "red",
             lineWidth : 2
-        },
-        ConnectionOverlays : [ [ "Arrow", {
-            location : 1,
-            id : "arrow",
-            length : 14,
-            width : 12,
-            foldback : 1
-        } ] ]
+        }
+       
     };
-    instance.registerConnectionType("basic", basicType);
+    instance.registerConnectionType("selected", selectedType);
 
     var connectorPaintStyle = {
         lineWidth : 2,
@@ -70,7 +62,8 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         connectorHoverStyle : connectorHoverStyle,
         dragOptions : {}
     },
-    // the definition of target endpoints (will appear when the user drags a connection)
+    // the definition of target endpoints (will appear when the user drags a
+    // connection)
     targetEndpoint = {
         endpoint : "Dot",
         paintStyle : {
@@ -119,20 +112,10 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
             nodeDiv.className = "diagram-node";
 
             nodeDiv.addEventListener("click", function(event) {
-//                var endpoints = instance.getEndpoints(event.currentTarget);
-//                for (j = 0; j < endpoints.length; j++) {
-//                    var endpoint = endpoints[j];
-//                    endpoint.setPaintStyle({
-//            strokeStyle : "red",
-//            fillStyle : "transparent",
-//            radius : 5,
-//            lineWidth : 2
-//        });
-//                }
-                self.onNodeMoved({
-                    'id' : event.currentTarget.id,
-                    'x' : 0,
-                    'y' : 0
+                unselectAll();
+                event.currentTarget.className = event.currentTarget.className + " selected ";
+                self.onNodeSelected({
+                    'id' : event.currentTarget.id
                 });
             }, false);
 
@@ -181,10 +164,18 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
                 "removed" : true
             });
         });
-        instance.bind("click", function(conn, originalEvent) {
-            // if (confirm("Delete connection from " + conn.sourceId + " to " + conn.targetId + "?"))
-            //   instance.detach(conn);
-            conn.toggleType("basic");
+        instance.bind("click", function(connection, originalEvent) {
+            unselectAll();
+            instance.detach(connection, {fireEvent:false});
+            connection = instance.connect({
+                uuids : [ "source-" + connection.sourceId, "target-" + connection.targetId ],
+                editable : true
+            });
+            connection.toggleType("selected");
+            self.onLinkSelected({
+                'sourceNodeId' : connection.sourceId,
+                'targetNodeId' : connection.targetId,
+            });
         });
     };
 
@@ -196,8 +187,24 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
 
     this.onStateChange = function() {
         instance.batch(function() {
-            //self.layoutAll();
+            // self.layoutAll();
         });
     };
+    
+    var unselectAll = function() {
+        var diagramDiv = document.getElementById("diagram");
+        var children = diagramDiv.childNodes;
+        for (var i = 0; i < children.length; i++) {
+            if (children[i].tagName == 'DIV') {
+                children[i].className = children[i].className.replace(/(?:^|\s)selected(?!\S)/g, '');
+            }
+        }
+        
+        var connections = instance.getAllConnections();
+        for (j = 0; j < connections.length; j++) {
+            var connection = connections[j];
+            connection.removeType("selected")
+        }
+    }
 
 }
