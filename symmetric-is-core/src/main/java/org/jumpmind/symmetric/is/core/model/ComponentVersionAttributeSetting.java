@@ -6,24 +6,29 @@ public class ComponentVersionAttributeSetting extends Setting {
 
     String componentVersionId;
     String attributeId;
-    
-    public ComponentVersionAttributeSetting(String attributeId,
-            String name, String value) {
+
+    public ComponentVersionAttributeSetting() {
+    }
+
+    public ComponentVersionAttributeSetting(String attributeId, String name, String value) {
         super(name, value);
         this.attributeId = attributeId;
     }
-    
-	public String getFormatVersionId() {
-		return componentVersionId;
-	}
-	public void setFormatVersionId(String formatVersionId) {
-		this.componentVersionId = formatVersionId;
-	}
-	public String getAttributeId() {
-		return attributeId;
-	}
-	public void setAttributeId(String attributeId) {
-		this.attributeId = attributeId;
-	}
+
+    public void setComponentVersionId(String componentVersionId) {
+        this.componentVersionId = componentVersionId;
+    }
+
+    public String getComponentVersionId() {
+        return componentVersionId;
+    }
+
+    public String getAttributeId() {
+        return attributeId;
+    }
+
+    public void setAttributeId(String attributeId) {
+        this.attributeId = attributeId;
+    }
 
 }
