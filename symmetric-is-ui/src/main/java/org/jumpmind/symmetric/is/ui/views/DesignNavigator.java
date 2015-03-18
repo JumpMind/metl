@@ -117,7 +117,8 @@ public class DesignNavigator extends AbstractFolderNavigator {
         } else if (item instanceof ModelVersion) {
         	ModelVersion modelVersion = (ModelVersion) item;
         	EditModelPanel editModel = new EditModelPanel(context, modelVersion);
-            tabs.addCloseableTab(modelVersion.getModelId(), "Edit Model", Icons.MODEL, editModel);
+            tabs.addCloseableTab(modelVersion.getModelId(), modelVersion.getModel().getName() + " "
+            		+ modelVersion.getName(), Icons.MODEL, editModel);
         }
     }
 
@@ -327,7 +328,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
         List<Model> models = configurationService.findModelsInFolder(folder);
         for (Model model : models) {
             this.treeTable.addItem(model);
-            this.treeTable.setItemIcon(model, Icons.FLOW);
+            this.treeTable.setItemIcon(model, Icons.MODEL);
             this.treeTable.setParent(model, folder);
 
             List<ModelVersion> versions = model.getModelVersions();

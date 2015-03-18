@@ -595,8 +595,10 @@ abstract class AbstractConfigurationService extends AbstractService implements
             modelEntity.getModelAttributes().put(attribute.getName(), attribute);
         }
         modelEntity.getModelEntityRelationships().clear();
+        Map<String, Object> entityRelationshipParams = new HashMap<String, Object>();
+        entityRelationshipParams.put("sourceEntityId", modelEntity.getId());
         List<ModelEntityRelationship> entityRelationships = persistenceManager.find(
-                ModelEntityRelationship.class, entityParams, null, null,
+                ModelEntityRelationship.class, entityRelationshipParams, null, null,
                 tableName(ModelEntityRelationship.class));
         for (ModelEntityRelationship entityRelationshipData : entityRelationships) {
             refresh(entityRelationshipData);

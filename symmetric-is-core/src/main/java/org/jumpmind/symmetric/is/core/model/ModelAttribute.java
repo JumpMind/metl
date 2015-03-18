@@ -31,6 +31,7 @@ public class ModelAttribute extends AbstractObject {
 
 	public void setTypeEntity(ModelEntity typeEntity) {
 		this.typeEntity = typeEntity;
+		this.entityId = typeEntity.getId();
 	}
 
 	public String getId() {
@@ -57,11 +58,19 @@ public class ModelAttribute extends AbstractObject {
 		this.name = name;
 	}
 
-	public DataType getType() {
+	public DataType getDataType() {
 		return type;
 	}
 
-	public void setType(DataType type) {
+	public String getType() {
+		return type.toString();
+	}
+
+	public void setType(String type) {
+		this.type = DataType.valueOf(type);
+	}
+
+	public void setDataType(DataType type) {
 		this.type = type;
 	}
 

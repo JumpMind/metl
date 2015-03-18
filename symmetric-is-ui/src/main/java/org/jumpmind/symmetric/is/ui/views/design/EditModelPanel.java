@@ -96,31 +96,15 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.addContainerProperty("type", String.class, "", "Type", null, null);
         treeTable.setVisibleColumns(new Object[] { "name", "type" });        
         treeTable.addValueChangeListener(new TreeTableValueChangeListener());
-
-        ModelEntity e = new ModelEntity();
-        e.setName("MyTable");
-        addModelEntity(e);
-        
-        ModelAttribute a = new ModelAttribute();
-        a.setName("column1");
-        a.setType(DataType.STRING);
-        a.setTypeEntity(e);
-        addModelAttribute(a);
-        
-        a = new ModelAttribute();
-        a.setName("column2");
-        a.setType(DataType.BOOLEAN);
-        a.setTypeEntity(e);
-        addModelAttribute(a);
-        
-        a = new ModelAttribute();
-        a.setName("column3");
-        a.setType(DataType.INTEGER);
-        a.setTypeEntity(e);
-        addModelAttribute(a);
-
 		addComponent(treeTable);
 		setExpandRatio(treeTable, 1.0f);
+
+        for (ModelEntity e : modelVersion.getModelEntities().values()) {
+        	addModelEntity(e);
+        	for (ModelAttribute a : e.getModelAttributes().values()) {
+        		addModelAttribute(a);
+        	}
+        }
 	}
 	
 	@Override
@@ -192,6 +176,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 		public void buttonClick(ClickEvent event) {
 	        ModelEntity e = new ModelEntity();
 	        e.setName("New Entity");
+	        e.setModelVersionId(modelVersion.getId());
+	        context.getConfigurationService().save(e);
 	        addModelEntity(e);
 	        selectOnly(e);
 	        editSelectedItem();
@@ -204,17 +190,18 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 			if (itemIds.size() > 0) {
 		        ModelAttribute a = new ModelAttribute();
 		        a.setName("New Attribute");
-		        a.setType(DataType.STRING);
+		        a.setDataType(DataType.STRING);
 				Object itemId = itemIds.iterator().next();
 				if (itemId instanceof ModelEntity) {
 					a.setTypeEntity((ModelEntity) itemId);
 				} else if (itemId instanceof ModelAttribute) {
 					a.setTypeEntity(((ModelAttribute) itemId).getTypeEntity());					
 				}
+				context.getConfigurationService().save(a);
 		        addModelAttribute(a);
 		        treeTable.setCollapsed(a.getTypeEntity(), false);
 		        selectOnly(a);
-		        editSelectedItem();
+		        editSelectedItem();		        
 			}
 		}
 	}
@@ -240,6 +227,11 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 			}
 
 			for (Object itemId : itemIds) {
+				if (itemId instanceof ModelEntity) {
+					context.getConfigurationService().delete((ModelEntity) itemId);
+				} else if (itemId instanceof ModelAttribute) {
+					context.getConfigurationService().delete((ModelAttribute) itemId);
+				}
 				treeTable.removeItem(itemId);
 			}
 		}
