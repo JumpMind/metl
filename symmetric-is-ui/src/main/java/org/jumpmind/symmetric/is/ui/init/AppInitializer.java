@@ -16,7 +16,6 @@ import org.jumpmind.db.util.ConfigDatabaseUpgrader;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.util.LogUtils;
-import org.jumpmind.symmetric.is.ui.common.Broadcaster;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.web.WebApplicationInitializer;
@@ -82,14 +81,6 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce
-                .getServletContext());
-        if (ctx != null) {
-            Broadcaster.destroy();
-        } else {
-            System.err
-                    .println("The web application context must have not been created, because we cannot find it for cleanup");
-        }
     }
 
     protected Properties loadProperties() {
