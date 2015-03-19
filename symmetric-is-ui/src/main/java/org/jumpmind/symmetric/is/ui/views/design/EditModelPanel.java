@@ -249,10 +249,15 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 		public void valueChange(ValueChangeEvent event) {
 			for (Object itemId : lastEditItemIds) {
 				if (itemId instanceof ModelEntity) {
-					context.getConfigurationService().save((ModelEntity) itemId);
+					ModelEntity e = (ModelEntity) itemId;
+					e.setName((String) treeTable.getContainerProperty(itemId, "name").getValue());
+					context.getConfigurationService().save(e);
 				} else if (itemId instanceof ModelAttribute) {
-					context.getConfigurationService().save((ModelAttribute) itemId);
-				}				
+					ModelAttribute a = (ModelAttribute) itemId;
+					a.setName((String) treeTable.getContainerProperty(itemId, "name").getValue());
+					a.setType((String) treeTable.getContainerProperty(itemId, "type").getValue());
+					context.getConfigurationService().save(a);
+				}
 			}
 	        treeTable.setEditable(false);
 		}		
