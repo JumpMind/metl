@@ -1,6 +1,0 @@
-package org.jumpmind.symmetric.is.core.runtime.component;
-
-public enum ComponentSupports {
-
-    ENTITY_INPUT_MESSAGE, ENTITY_OUTPUT_MESSAGE, TEXT_INPUT_MESSAGE, TEXT_OUTPUT_MESSAGE, BINARY_INPUT_MESSAGE, BINARY_OUTPUT_MESSAGE, INPUT_MODEL, OUTPUT_MODEL
-}

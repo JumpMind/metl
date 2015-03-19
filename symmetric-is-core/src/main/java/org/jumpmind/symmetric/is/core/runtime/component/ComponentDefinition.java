@@ -17,7 +17,9 @@ public @interface ComponentDefinition {
     
     ComponentCategory category();
     
-    ComponentSupports[] supports();
+    MessageType inputMessage() default MessageType.NONE;
+    
+    MessageType outgoingMessage() default MessageType.NONE;
     
     ResourceCategory resourceCategory() default ResourceCategory.NONE;
     
