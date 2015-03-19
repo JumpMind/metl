@@ -30,7 +30,6 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         outlineColor : "white",
         outlineWidth : 2
     },
-    // .. and this is the hover style.
     connectorHoverStyle = {
         lineWidth : 2,
         strokeStyle : "#216477",
@@ -40,7 +39,6 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         fillStyle : "#216477",
         strokeStyle : "#216477"
     },
-    // the definition of source endpoints (the small blue ones)
     sourceEndpoint = {
         endpoint : "Dot",
         paintStyle : {
@@ -53,7 +51,7 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         isSource : true,
         connector : [ "Flowchart", {
             stub : [ 40, 60 ],
-            gap : 10,
+            gap : 6,
             cornerRadius : 0,
             alwaysRespectStubs : false
         } ],
@@ -62,8 +60,6 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         connectorHoverStyle : connectorHoverStyle,
         dragOptions : {}
     },
-    // the definition of target endpoints (will appear when the user drags a
-    // connection)
     targetEndpoint = {
         endpoint : "Dot",
         paintStyle : {
@@ -79,6 +75,9 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         isTarget : true
     };
 
+    /**
+     * Enhance an node with input and output end points
+     */
     this.addEndpoints = function(toId) {
         instance.addEndpoint(toId, sourceEndpoint, {
             anchor : "RightMiddle",
@@ -90,6 +89,9 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         });
     };
 
+    /**
+     * Layout the diagram
+     */
     this.layoutAll = function() {
         instance.unbind("dblclick");
         instance.unbind("connection");
