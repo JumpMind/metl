@@ -156,7 +156,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
             if (tabs.getSelectedTab() instanceof EditFlowPanel) {
                 EditFlowPanel panel = (EditFlowPanel)tabs.getSelectedTab();
                 if (panel.getFlowVersion().getId().equals(step.getFlowVersionId())) {
-                    designPropertySheet.valueChange(obj);                
+                    panel.selected(step);
                 }
             }
         }        
