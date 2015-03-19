@@ -1,13 +1,10 @@
-package org.jumpmind.symmetric.is.core.runtime.resource.localfile;
+package org.jumpmind.symmetric.is.core.runtime.resource;
 
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
-import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
-import org.jumpmind.symmetric.is.core.runtime.resource.ResourceDefinition;
 
 @ResourceDefinition(typeName=LocalFileResource.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
 public class LocalFileResource extends AbstractRuntimeObject implements
