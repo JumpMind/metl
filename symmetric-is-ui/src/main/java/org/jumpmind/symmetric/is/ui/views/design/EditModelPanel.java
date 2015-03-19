@@ -26,6 +26,7 @@ import com.vaadin.ui.Field;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.TreeTable;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
@@ -220,6 +221,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
 	class ImportClickListener implements ClickListener {
 		public void buttonClick(ClickEvent event) {
+			TableColumnSelectWindow w = new TableColumnSelectWindow(context);
+			UI.getCurrent().addWindow(w);
 		}
 	}
 
