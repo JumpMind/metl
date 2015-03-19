@@ -46,6 +46,8 @@ public class PropertySheet extends Panel implements ValueChangeListener {
     IConfigurationService configurationService;
 
     IResourceFactory resourceFactory;
+    
+    Object value;
 
     public PropertySheet(ApplicationContext context) {
         this.componentFactory = context.getComponentFactory();
@@ -54,6 +56,10 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         setSizeFull();
         addStyleName("noborder");
     }
+    
+    public Object getValue() {
+        return value;
+    }
 
     @Override
     public void valueChange(ValueChangeEvent event) {
@@ -61,10 +67,11 @@ public class PropertySheet extends Panel implements ValueChangeListener {
     }
 
     public void valueChange(Object obj) {
+        value = obj;
         FormLayout formLayout = new FormLayout();
         formLayout.setWidth(100, Unit.PERCENTAGE);
         formLayout.setMargin(false);
-        formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);        
 
         if (obj != null) {
             if (obj instanceof FlowStep) {
