@@ -7,19 +7,17 @@ import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
+import org.jumpmind.symmetric.is.core.runtime.AbstractFactory;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
-import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
-import org.jumpmind.symmetric.is.core.runtime.resource.localfile.LocalFileResource;
 
-public class ResourceFactory implements IResourceFactory {
+public class ResourceFactory extends AbstractFactory<IResource> implements IResourceFactory {
 
-    Map<String, Class<? extends IResource>> resourceTypes = new LinkedHashMap<String, Class<? extends IResource>>();
+    Map<String, Class<? extends IResource>> resourceTypes;
 
-    Map<ResourceCategory, List<String>> categoryToTypeMapping = new LinkedHashMap<ResourceCategory, List<String>>();
+    Map<ResourceCategory, List<String>> categoryToTypeMapping;
 
     public ResourceFactory() {
-        register(DataSourceResource.class);
-        register(LocalFileResource.class);
+        super(IResource.class);
     }
 
     @Override
@@ -31,12 +29,19 @@ public class ResourceFactory implements IResourceFactory {
     public List<String> getResourceTypes(ResourceCategory category) {
         return categoryToTypeMapping.get(category);
     }
-
+    
     @Override
-    public void register(Class<? extends IResource> clazz) {
+    public void register(Class<IResource> clazz) {
         ResourceDefinition definition = clazz.getAnnotation(ResourceDefinition.class);
         if (definition != null) {
+            if (resourceTypes == null) {
+                resourceTypes = new LinkedHashMap<String, Class<? extends IResource>>();
+            }
             resourceTypes.put(definition.typeName(), clazz);
+            
+            if (categoryToTypeMapping == null) {
+                categoryToTypeMapping = new LinkedHashMap<ResourceCategory, List<String>>();
+            }
             List<String> types = categoryToTypeMapping.get(definition.resourceCategory());
             if (types == null) {
                 types = new ArrayList<String>();

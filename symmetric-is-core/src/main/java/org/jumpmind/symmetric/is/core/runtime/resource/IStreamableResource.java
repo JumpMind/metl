@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.core.runtime.resource.localfile;
+package org.jumpmind.symmetric.is.core.runtime.resource;
 
 import java.io.InputStream;
 import java.io.OutputStream;

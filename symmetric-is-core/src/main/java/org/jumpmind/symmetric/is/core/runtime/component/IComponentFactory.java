@@ -10,7 +10,7 @@ public interface IComponentFactory {
 
     public IComponent create(FlowStep flowStep);
 
-    public void register(Class<? extends IComponent> clazz);
+    public void register(Class<IComponent> clazz);
 
     public Map<ComponentCategory, List<String>> getComponentTypes();
     

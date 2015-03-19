@@ -7,25 +7,17 @@ import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
+import org.jumpmind.symmetric.is.core.runtime.AbstractFactory;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 
-public class ComponentFactory implements IComponentFactory {
+public class ComponentFactory extends AbstractFactory<IComponent> implements IComponentFactory {
 
-    Map<String, Class<? extends IComponent>> componentTypes = new LinkedHashMap<String, Class<? extends IComponent>>();
+    Map<String, Class<? extends IComponent>> componentTypes;
 
-    Map<ComponentCategory, List<String>> componentTypesByCategory = new LinkedHashMap<ComponentCategory, List<String>>();
+    Map<ComponentCategory, List<String>> componentTypesByCategory;
 
     public ComponentFactory() {
-        componentTypesByCategory.put(ComponentCategory.READER, new ArrayList<String>());
-        componentTypesByCategory.put(ComponentCategory.PROCESSOR, new ArrayList<String>());
-        componentTypesByCategory.put(ComponentCategory.WRITER, new ArrayList<String>());
-        register(DbReader.class);
-        register(BinaryFileReader.class);
-        register(BinaryFileWriter.class);
-        register(TextFileReader.class);
-        register(TextFileWriter.class);
-        register(NoOpProcessor.class);
-        register(DelimitedFormatter.class);
+        super(IComponent.class);
     }
 
     @Override
@@ -34,10 +26,17 @@ public class ComponentFactory implements IComponentFactory {
     }
 
     @Override
-    public void register(Class<? extends IComponent> clazz) {
+    public void register(Class<IComponent> clazz) {
         ComponentDefinition definition = clazz.getAnnotation(ComponentDefinition.class);
         if (definition != null) {
+            if (componentTypes == null) {
+                componentTypes = new LinkedHashMap<String, Class<? extends IComponent>>();
+            }
             componentTypes.put(definition.typeName(), clazz);
+
+            if (componentTypesByCategory == null) {
+                componentTypesByCategory = new LinkedHashMap<ComponentCategory, List<String>>();
+            }
             List<String> types = componentTypesByCategory.get(definition.category());
             if (types == null) {
                 types = new ArrayList<String>();
@@ -56,8 +55,8 @@ public class ComponentFactory implements IComponentFactory {
             String componentType = flowStep.getComponentVersion().getComponent().getType();
             Class<? extends IComponent> clazz = componentTypes.get(componentType);
             if (clazz != null) {
-            	IComponent component = clazz.newInstance();
-            	component.setFlowStep(flowStep);
+                IComponent component = clazz.newInstance();
+                component.setFlowStep(flowStep);
                 return component;
             } else {
                 throw new IllegalStateException(
@@ -76,11 +75,11 @@ public class ComponentFactory implements IComponentFactory {
         Class<? extends IComponent> clazz = componentTypes.get(componentType);
         return AbstractRuntimeObject.getSettingDefinitions(clazz, false);
     }
-    
+
     @Override
     public ComponentDefinition getComponentDefinitionForComponentType(String componentType) {
         Class<? extends IComponent> clazz = componentTypes.get(componentType);
         return clazz.getAnnotation(ComponentDefinition.class);
     }
-    
+
 }
