@@ -186,7 +186,12 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     public FlowVersion getFlowVersion() {
         return flowVersion;
     }
-
+    
+    public void selected(FlowStep step) {
+        diagram.setSelectedNodeId(step.getId());
+        designPropertySheet.valueChange(step);                
+    }
+    
     protected void deleteSelected() {
         IConfigurationService configurationService = context.getConfigurationService();
         if (selected instanceof FlowStep) {
@@ -245,6 +250,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         }
 
         diagram = new Diagram();
+        diagram.setSizeFull();
         diagram.addListener(new DiagramChangedListener());
 
         diagramLayout.addComponent(diagram);

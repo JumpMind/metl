@@ -9,6 +9,8 @@ public class DiagramState extends JavaScriptComponentState {
 
     private static final long serialVersionUID = 1L;
     
-    public List<Node> nodes = new ArrayList<Node>();    
+    public List<Node> nodes = new ArrayList<Node>();
+    
+    public String selectedNodeId;
     
 }

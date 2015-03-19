@@ -15,7 +15,6 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
-import org.jumpmind.symmetric.is.core.runtime.component.ComponentSupports;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
@@ -101,31 +100,14 @@ public class PropertySheet extends Panel implements ValueChangeListener {
     protected void addComponentVersionProperties(FormLayout formLayout, ComponentVersion version) {
         ComponentDefinition definition = componentFactory.getComponentDefinitionForComponentType(version.getComponent()
                 .getType());
-
-        addResourceCombo(formLayout, version);
-        
-        ComponentSupports[] supports = definition.supports();
-        if (supports != null) {
-            for (ComponentSupports support : supports) {
-                switch (support) {
-                    case INPUT_MODEL:                                
-                        break;
-                    case OUTPUT_MODEL:                                
-                        break;
-                    default:
-                        break;
-                } 
-            }
-        }
+        addResourceCombo(definition, formLayout, version);        
     }
     
     protected void addFlowVersionSpecificProperties(FormLayout formLayout, FlowVersion version) {
         
     }
     
-    protected void addResourceCombo(FormLayout formLayout, final ComponentVersion version) {
-        ComponentDefinition componentDefintion = componentFactory
-                .getComponentDefinitionForComponentType(version.getComponent().getType());
+    protected void addResourceCombo(ComponentDefinition componentDefintion, FormLayout formLayout, final ComponentVersion version) {
         if (componentDefintion.resourceCategory() != null
                 && componentDefintion.resourceCategory() != ResourceCategory.NONE) {
             final AbstractSelect resourcesCombo = new ComboBox("Resource");

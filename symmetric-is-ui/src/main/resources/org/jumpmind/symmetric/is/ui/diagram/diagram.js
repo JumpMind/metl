@@ -2,7 +2,34 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
     var self = this;
     var state = this.getState();
 
+    var connectorColor = "#0072C6";
+    var outlineColor = "white";
+    var selectedColor = "orange";
+
+    /**
+     * When you configure jsPlumb you can give it default settings to use.  These can be
+     * overwritten on a component by component basis if need be
+     */
     var instance = jsPlumb.getInstance({
+        Endpoint : "Dot",
+        EndpointStyle : {
+            strokeStyle : "transparent",
+            fillStyle : "transparent",
+            radius : 9,
+            lineWidth : 2
+        },
+        Connector : [ "Flowchart", {
+            stub : [ 40, 60 ],
+            gap : 8,
+            cornerRadius : 0
+        } ],
+        PaintStyle : {
+            lineWidth : 2,
+            strokeStyle : connectorColor,
+            joinstyle : "round",
+            outlineColor : outlineColor,
+            outlineWidth : 2
+        },
         ConnectionOverlays : [ [ "Arrow", {
             location : 1,
             id : "arrow",
@@ -12,78 +39,54 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         } ] ],
         Container : "diagram"
     });
+    
 
-    var selectedType = {
-        connector : "Flowchart",
+    /**
+     * Define a connection type that can be used when a connection is selected
+     */
+    instance.registerConnectionType("selected", {
         paintStyle : {
-            strokeStyle : "orange",
-            lineWidth : 2
-        }
-       
-    };
-    instance.registerConnectionType("selected", selectedType);
+            strokeStyle : selectedColor,
+        }       
+    });
 
-    var connectorPaintStyle = {
-        lineWidth : 2,
-        strokeStyle : "#0072C6",
-        joinstyle : "round",
-        outlineColor : "white",
-        outlineWidth : 2
-    },
-    connectorHoverStyle = {
-        lineWidth : 2,
-        strokeStyle : "#216477",
-        outlineWidth : 2,
-        outlineColor : "white"
-    }, endpointHoverStyle = {
-        fillStyle : "#216477",
-        strokeStyle : "#216477"
-    },
-    sourceEndpoint = {
-        endpoint : "Dot",
-        paintStyle : {
-            strokeStyle : "#0072C6",
-            fillStyle : "transparent",
-            radius : 5,
-            lineWidth : 2
-        },
+    var sourceEndpoint = {
         maxConnections : -1,
         isSource : true,
-        connector : [ "Flowchart", {
-            stub : [ 40, 60 ],
-            gap : 6,
-            cornerRadius : 0,
-            alwaysRespectStubs : false
-        } ],
-        connectorStyle : connectorPaintStyle,
-        hoverPaintStyle : endpointHoverStyle,
-        connectorHoverStyle : connectorHoverStyle,
-        dragOptions : {}
+        overlays: [
+                   [ "Label", {
+                       location: [0.5, 0.5],
+                       label: "E",
+                       cssClass: "endpointSourceLabel"
+                   } ]
+               ]
     },
     targetEndpoint = {
-        endpoint : "Dot",
-        paintStyle : {
-            fillStyle : "#0072C6",
-            radius : 6
-        },
-        hoverPaintStyle : endpointHoverStyle,
         maxConnections : -1,
         dropOptions : {
             hoverClass : "hover",
             activeClass : "active"
         },
-        isTarget : true
+        isTarget : true,
+        overlays: [
+                   [ "Label", {
+                       location: [0.5, 0.5],
+                       label: "E",
+                       cssClass: "endpointSourceLabel"
+                   } ]
+               ]
     };
 
     /**
      * Enhance an node with input and output end points
      */
     this.addEndpoints = function(toId) {
-        instance.addEndpoint(toId, sourceEndpoint, {
+        var s = instance.addEndpoint(toId, sourceEndpoint, {
             anchor : "RightMiddle",
             uuid : "source-" + toId
         });
-        instance.addEndpoint(toId, targetEndpoint, {
+
+        var t = instance.addEndpoint(toId, targetEndpoint, {
             anchor : "LeftMiddle",
             uuid : "target-" + toId
         });
@@ -122,7 +125,9 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
             }, false);
 
             parentDiv.appendChild(nodeDiv);
+            
             instance.draggable(nodeDiv, {
+                constrain:true,
                 stop : function(event) {
                     self.onNodeMoved({
                         'id' : event.el.id,
@@ -159,13 +164,6 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
                 "removed" : true
             });
         });
-        instance.bind("dblclick", function(connection, originalEvent) {
-            self.onConnection({
-                "sourceNodeId" : connection.sourceId,
-                "targetNodeId" : connection.targetId,
-                "removed" : true
-            });
-        });
         instance.bind("click", function(connection, originalEvent) {
             unselectAll();
             instance.detach(connection, {fireEvent:false});
@@ -189,7 +187,13 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
 
     this.onStateChange = function() {
         instance.batch(function() {
-            // self.layoutAll();
+            if (state.selectedNodeId != null) {
+                unselectAll();  
+                var node = document.getElementById(state.selectedNodeId);
+                if (node != null) {
+                    node.className = node.className + " selected ";
+                }
+            }
         });
     };
     
