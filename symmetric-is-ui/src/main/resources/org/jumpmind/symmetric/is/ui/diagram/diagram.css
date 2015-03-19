@@ -5,7 +5,7 @@
 .diagram-node {
 	padding: 18px;
 	position: absolute;
-	z-index: 4;
+	z-index: 1;
 	text-align: center;
 	border: 1px solid #2e6f9a;
 	box-shadow: 2px 2px 19px #e0e0e0;
@@ -31,6 +31,23 @@
 .diagram ._jsPlumb_endpoint {
 	z-index: 3;
 }
+
+.diagram ._jsPlumb_overlay {
+    z-index: 2;
+}
+
+.endpointSourceLabel {
+	color: white;
+	background-color: #0072C6;
+    padding: 1px 6px 2px;
+    font-size: 12.025px;
+    font-weight: bold;
+    white-space: nowrap;
+    -webkit-border-radius: 9px;
+    -moz-border-radius: 9px;
+    border-radius: 9px;
+}
+
 
 .dragHover {
 	border: 2px solid orange;

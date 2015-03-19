@@ -245,6 +245,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         }
 
         diagram = new Diagram();
+        diagram.setSizeFull();
         diagram.addListener(new DiagramChangedListener());
 
         diagramLayout.addComponent(diagram);
