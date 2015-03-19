@@ -105,10 +105,6 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                         break;
                     case OUTPUT_MODEL:                                
                         break;
-                    case INPUT_MESSAGE:
-                        break;
-                    case OUTPUT_MESSAGE:
-                        break;
                     default:
                         break;
                 } 

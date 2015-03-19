@@ -29,7 +29,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 
 @ComponentDefinition(typeName = DbReader.TYPE, category = ComponentCategory.READER, iconImage="dbreader.png",
-        supports = { ComponentSupports.INPUT_MESSAGE, ComponentSupports.OUTPUT_MESSAGE,
+        supports = { ComponentSupports.ENTITY_INPUT_MESSAGE, ComponentSupports.ENTITY_OUTPUT_MESSAGE,
                 ComponentSupports.INPUT_MODEL, ComponentSupports.OUTPUT_MODEL },
         resourceCategory = ResourceCategory.DATASOURCE)
 public class DbReader extends AbstractComponent {
