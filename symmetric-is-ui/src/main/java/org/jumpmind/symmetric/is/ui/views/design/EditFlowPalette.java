@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.server.ClassResource;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -23,14 +24,13 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.DragStartMode;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class EditFlowPalette extends Panel {
+public class EditFlowPalette extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
-    
+
     final Logger log = LoggerFactory.getLogger(getClass());
 
     Accordion componentAccordian;
@@ -43,29 +43,26 @@ public class EditFlowPalette extends Panel {
 
     Unit splitUnit = Unit.PERCENTAGE;
 
-    public EditFlowPalette(EditFlowPanel designFlowLayout,
-            IComponentFactory componentFactory) {
+    public EditFlowPalette(EditFlowPanel designFlowLayout, IComponentFactory componentFactory) {
         this.componentFactory = componentFactory;
         this.designFlowLayout = designFlowLayout;
         setHeight(100, Unit.PERCENTAGE);
         setWidth(150, Unit.PIXELS);
-        addStyleName("noborder");
+//        addStyleName("noborder");
 
-        VerticalLayout content = new VerticalLayout();
-        content.setSizeFull();
-        setContent(content);
+        setMargin(new MarginInfo(true, false, false, false));
 
         componentAccordian = new Accordion();
         componentAccordian.setSizeFull();
-        content.addComponent(componentAccordian);
-        content.setExpandRatio(componentAccordian, 1);
+        addComponent(componentAccordian);
+        setExpandRatio(componentAccordian, 1);
 
-        addStyleName(ValoTheme.MENU_ROOT);
+//        addStyleName(ValoTheme.MENU_ROOT);
 
         populateComponentPalette();
 
     }
-    
+
     protected String getBase64RepresentationOfImageForComponentType(String type) {
         String resourceName = getImageResourceNameForComponentType(type);
         InputStream is = getClass().getResourceAsStream(resourceName);
@@ -80,14 +77,15 @@ public class EditFlowPalette extends Panel {
             return null;
         }
     }
-    
+
     protected String getImageResourceNameForComponentType(String type) {
-        ComponentDefinition defintion = componentFactory.getComponentDefinitionForComponentType(type);
-        return "/org/jumpmind/symmetric/is/core/runtime/component/" + defintion.iconImage();                
+        ComponentDefinition defintion = componentFactory
+                .getComponentDefinitionForComponentType(type);
+        return "/org/jumpmind/symmetric/is/core/runtime/component/" + defintion.iconImage();
     }
-    
+
     protected ClassResource getImageResourceForComponentType(String type) {
-        return new ClassResource(getImageResourceNameForComponentType(type));        
+        return new ClassResource(getImageResourceNameForComponentType(type));
     }
 
     protected void populateComponentPalette() {
@@ -105,10 +103,10 @@ public class EditFlowPalette extends Panel {
                     button.setIcon(icon);
                     button.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
                     button.addStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
-                    button.addStyleName("leftAligned");                    
+                    button.addStyleName("leftAligned");
                     button.setWidth(100, Unit.PERCENTAGE);
                     button.addClickListener(new AddComponentClickListener(componentType));
-                    DragAndDropWrapper wrapper = new DragAndDropWrapper(button); 
+                    DragAndDropWrapper wrapper = new DragAndDropWrapper(button);
                     wrapper.setSizeUndefined();
                     wrapper.setDragStartMode(DragStartMode.WRAPPER);
                     componentLayout.addComponent(wrapper);
