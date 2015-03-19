@@ -104,7 +104,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
         for (ModelEntity e : modelVersion.getModelEntities().values()) {
         	addModelEntity(e);
-        	for (ModelAttribute a : e.getModelAttributes().values()) {
+        	for (ModelAttribute a : e.getModelAttributes()) {
         		a.setEntity(e);
         		addModelAttribute(a);
         	}
@@ -231,10 +231,14 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 			}
 
 			for (Object itemId : itemIds) {
+				if (itemId instanceof ModelAttribute) {
+					context.getConfigurationService().delete((ModelAttribute) itemId);
+				}
+				treeTable.removeItem(itemId);
+			}
+			for (Object itemId : itemIds) {
 				if (itemId instanceof ModelEntity) {
 					context.getConfigurationService().delete((ModelEntity) itemId);
-				} else if (itemId instanceof ModelAttribute) {
-					context.getConfigurationService().delete((ModelAttribute) itemId);
 				}
 				treeTable.removeItem(itemId);
 			}

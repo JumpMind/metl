@@ -540,10 +540,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
             delete(itrr.next());
         }
 
-        Iterator<Entry<String, ModelAttribute>> itra = modelEntity.getModelAttributes().entrySet()
-                .iterator();
-        while (itra.hasNext()) {
-            delete(itra.next().getValue());
+        for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
+        	delete(modelAttribute);
         }
 
         persistenceManager.delete(modelEntity, null, null, tableName(ModelEntity.class));
@@ -593,7 +591,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         for (ModelAttribute attribute : attributes) {
             refresh(attribute);
             attribute.setEntityId(modelEntity.getId());
-            modelEntity.getModelAttributes().put(attribute.getName(), attribute);
+            modelEntity.addModelAttribute(attribute);
         }
         modelEntity.getModelEntityRelationships().clear();
         Map<String, Object> entityRelationshipParams = new HashMap<String, Object>();
@@ -651,10 +649,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
         save((AbstractObject) modelEntity);
 
-        Iterator<Entry<String, ModelAttribute>> itra = modelEntity.getModelAttributes().entrySet()
-                .iterator();
-        while (itra.hasNext()) {
-            save(itra.next().getValue());
+        for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
+        	save(modelAttribute);
         }
         Iterator<ModelEntityRelationship> itrr = modelEntity.getModelEntityRelationships()
                 .iterator();

@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.properties.TypedProperties;
+import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
@@ -176,12 +177,12 @@ public class DbReader extends AbstractComponent {
             throws SQLException {
         
         if (this.flowStep.getComponentVersion().getOutputModelVersion() != null) {
-            String attributeId = this.flowStep.getComponentVersion().getOutputModelVersion().getAttributeId(tableName, columnName);
-            if (attributeId == null) {
+        	ModelAttribute modelAttribute = this.flowStep.getComponentVersion().getOutputModelVersion().getAttributeByName(tableName, columnName);
+            if (modelAttribute == null) {
                 throw new SQLException("Table and Column not found in output model and not specified via hint.  "
                         + "Table Name = " + tableName + " Column Name = " + columnName);
             }        
-            return attributeId;            
+            return modelAttribute.getId();            
         } else {
             throw new SQLException("No output model was specified for the db reader component.  An output model is required.");
         }
