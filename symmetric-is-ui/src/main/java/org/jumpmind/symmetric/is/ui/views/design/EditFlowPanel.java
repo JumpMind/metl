@@ -59,7 +59,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
     FlowVersion componentFlowVersion;
 
-    EditFlowPropertySheet designPropertySheet;
+    PropertySheet designPropertySheet;
 
     DesignNavigator designNavigator;
 
@@ -72,9 +72,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     CssLayout diagramLayout;
 
     Button runButton;
-    
+
     Button delButton;
-    
+
     AbstractObject selected;
 
     public EditFlowPanel(ApplicationContext context, FlowVersion componentFlowVersion,
@@ -84,9 +84,10 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         this.componentFlowVersion = componentFlowVersion;
         this.designNavigator = designNavigator;
 
-        this.designPropertySheet = new EditFlowPropertySheet(context);
-        this.designComponentPalette = new EditFlowPalette(this,
-                context.getComponentFactory());
+        this.designPropertySheet = new PropertySheet(context);
+        this.designPropertySheet.setCaption("Property Sheet");
+
+        this.designComponentPalette = new EditFlowPalette(this, context.getComponentFactory());
 
         addComponent(designComponentPalette);
 
@@ -126,31 +127,32 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         context.getBackgroundRefresherService().register(this);
     }
 
-    protected HorizontalLayout buildButtonBar() {        
+    protected HorizontalLayout buildButtonBar() {
         ButtonBar buttonBar = new ButtonBar();
         runButton = buttonBar.addButton("Run", Icons.RUN);
-        runButton.addClickListener(new ClickListener() {            
+        runButton.addClickListener(new ClickListener() {
             private static final long serialVersionUID = 1L;
+
             @Override
             public void buttonClick(ClickEvent event) {
                 openExecution();
             }
         });
-        
 
         delButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
-        delButton.addClickListener(new ClickListener() {            
+        delButton.addClickListener(new ClickListener() {
             private static final long serialVersionUID = 1L;
+
             @Override
             public void buttonClick(ClickEvent event) {
                 deleteSelected();
             }
         });
         delButton.setEnabled(false);
-        
+
         return buttonBar;
     }
-    
+
     protected Button createToolButton(String name, Resource icon) {
         Button button = new Button(name, icon);
         button.addStyleName(ValoTheme.BUTTON_SMALL);
@@ -180,16 +182,16 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     public void showing() {
         designNavigator.setDesignPropertySheet(designPropertySheet);
     }
-    
+
     protected void deleteSelected() {
         IConfigurationService configurationService = context.getConfigurationService();
         if (selected instanceof FlowStep) {
-            FlowStep flowStep =(FlowStep)selected;
+            FlowStep flowStep = (FlowStep) selected;
             configurationService.delete(componentFlowVersion, flowStep);
-            designNavigator.refresh();            
+            designNavigator.refresh();
             redrawFlow();
         } else if (selected instanceof FlowStepLink) {
-            FlowStepLink link = (FlowStepLink)selected;
+            FlowStepLink link = (FlowStepLink) selected;
             configurationService.delete(link);
             componentFlowVersion.removeFlowStepLink(link.getSourceStepId(), link.getTargetStepId());
             redrawFlow();
@@ -345,8 +347,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
                 }
             } else if (e instanceof LinkSelectedEvent) {
-                LinkSelectedEvent event = (LinkSelectedEvent)e;
-                selected = componentFlowVersion.findFlowStepLink(event.getSourceNodeId(), event.getTargetNodeId());
+                LinkSelectedEvent event = (LinkSelectedEvent) e;
+                selected = componentFlowVersion.findFlowStepLink(event.getSourceNodeId(),
+                        event.getTargetNodeId());
                 delButton.setEnabled(true);
             }
         }

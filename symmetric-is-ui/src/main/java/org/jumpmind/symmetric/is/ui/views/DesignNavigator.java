@@ -20,7 +20,7 @@ import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
-import org.jumpmind.symmetric.is.ui.views.design.EditFlowPropertySheet;
+import org.jumpmind.symmetric.is.ui.views.design.PropertySheet;
 import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
@@ -35,18 +35,18 @@ import com.vaadin.ui.MenuBar.MenuItem;
 public class DesignNavigator extends AbstractFolderNavigator {
 
     MenuItem newFlow;
-    
+
     MenuItem newResource;
-    
+
     MenuItem newModel;
-    
+
     MenuItem newComponent;
 
     ApplicationContext context;
-    
+
     TabbedApplicationPanel tabs;
-    
-    EditFlowPropertySheet designPropertySheet;
+
+    PropertySheet designPropertySheet;
 
     public DesignNavigator(ApplicationContext context, TabbedApplicationPanel tabs) {
         super(FolderType.DESIGN, context.getConfigurationService());
@@ -56,7 +56,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
     @Override
     protected void addMenuButtons(MenuItem newMenu, MenuBar leftMenuBar, MenuBar rightMenuBar) {
-        
+
         newFlow = newMenu.addItem("Flow", Icons.FLOW, new Command() {
 
             @Override
@@ -69,17 +69,17 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
-            	addNewModel();
+                addNewModel();
             }
         });
-        
+
         newComponent = newMenu.addItem("Component", Icons.COMPONENT, new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
             }
         });
-        
+
         newResource = newMenu.addItem("Resource", Icons.GENERAL_RESOURCE, null);
         newResource.setDescription("Add Resource");
 
@@ -90,7 +90,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
                 addNewDatabase();
             }
         });
-        
+
         newResource.addItem("Local File System", Icons.FILE_SYSTEM, new Command() {
 
             @Override
@@ -100,27 +100,32 @@ public class DesignNavigator extends AbstractFolderNavigator {
         });
 
     }
-    
+
     @Override
     protected void openItem(Object item) {
         if (item instanceof Flow) {
             item = ((Flow) item).getLatestFlowVersion();
         } else if (item instanceof Model) {
-        	item = ((Model) item).getLatestModelVersion();
+            item = ((Model) item).getLatestModelVersion();
         }
 
         if (item instanceof FlowVersion) {
             FlowVersion flowVersion = (FlowVersion) item;
-            EditFlowPanel flowLayout = new EditFlowPanel(context,
-                    flowVersion, 
-                    this, tabs);
+            EditFlowPanel flowLayout = new EditFlowPanel(context, flowVersion, this, tabs);
             tabs.addCloseableTab(flowVersion.getId(), flowVersion.getFlow().getName() + " "
                     + flowVersion.getName(), Icons.FLOW, flowLayout);
+
         } else if (item instanceof ModelVersion) {
-        	ModelVersion modelVersion = (ModelVersion) item;
-        	EditModelPanel editModel = new EditModelPanel(context, modelVersion);
+            ModelVersion modelVersion = (ModelVersion) item;
+            EditModelPanel editModel = new EditModelPanel(context, modelVersion);
             tabs.addCloseableTab(modelVersion.getModelId(), modelVersion.getModel().getName() + " "
-            		+ modelVersion.getName(), Icons.MODEL, editModel);
+                    + modelVersion.getName(), Icons.MODEL, editModel);
+        } else if (item instanceof Resource) {
+            Resource resource = (Resource) item;
+            PropertySheet sheet = new PropertySheet(context);
+            sheet.valueChange(resource);
+            tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item),
+                    sheet);
         }
     }
 
@@ -131,14 +136,14 @@ public class DesignNavigator extends AbstractFolderNavigator {
         newFlow.setEnabled(enabled);
         newResource.setEnabled(enabled);
         newModel.setEnabled(enabled);
-        
+
         AbstractObject obj = getSingleSelection(AbstractObject.class);
         if (obj instanceof ComponentVersion && designPropertySheet != null) {
             designPropertySheet.valueChange(obj);
         }
     }
-    
-    public void setDesignPropertySheet(EditFlowPropertySheet designPropertySheet) {
+
+    public void setDesignPropertySheet(PropertySheet designPropertySheet) {
         this.designPropertySheet = designPropertySheet;
     }
 
@@ -154,11 +159,11 @@ public class DesignNavigator extends AbstractFolderNavigator {
     protected void addNewDatabase() {
         addNewResource(DataSourceResource.TYPE, "Database", Icons.DATABASE);
     }
-    
+
     protected void addNewFileSystem() {
         addNewResource(LocalFileResource.TYPE, "Directory", Icons.FILE_SYSTEM);
     }
-    
+
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {
         Folder folder = getSelectedFolder();
         if (folder != null) {
@@ -177,7 +182,6 @@ public class DesignNavigator extends AbstractFolderNavigator {
             startEditingItem(resource);
         }
     }
-
 
     @Override
     protected boolean isDeleteButtonEnabled(Object selected) {
@@ -231,15 +235,15 @@ public class DesignNavigator extends AbstractFolderNavigator {
     protected void addNewModel() {
         Folder folder = getSelectedFolder();
         if (folder != null) {
-        	
-        	Model model = new Model(folder);
+
+            Model model = new Model(folder);
             model.setName("New Model");
             configurationService.save(model);
-            
+
             ModelVersion modelVersion = new ModelVersion(model);
             modelVersion.setVersionName("version 1.0");
             model.getModelVersions().add(modelVersion);
-            
+
             configurationService.save(modelVersion);
 
             treeTable.addItem(model);
@@ -252,7 +256,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
             treeTable.setCollapsed(folder, false);
 
             startEditingItem(model);
-        }    	
+        }
     }
 
     protected void addNewFlow() {
@@ -262,11 +266,11 @@ public class DesignNavigator extends AbstractFolderNavigator {
             Flow flow = new Flow(folder);
             flow.setName("New Flow");
             configurationService.save(flow);
-            
+
             FlowVersion flowVersion = new FlowVersion(flow);
             flowVersion.setVersionName("version 1.0");
             flow.getFlowVersions().add(flowVersion);
-            
+
             configurationService.save(flowVersion);
 
             treeTable.addItem(flow);
@@ -393,7 +397,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
             configurationService.delete(toDelete);
             List<FlowVersion> versions = toDelete.getFlowVersions();
             for (FlowVersion flowVersion : versions) {
-                tabs.closeTab(flowVersion.getId());                
+                tabs.closeTab(flowVersion.getId());
             }
             refresh();
             expand(toDelete.getFolder(), toDelete.getFolder());

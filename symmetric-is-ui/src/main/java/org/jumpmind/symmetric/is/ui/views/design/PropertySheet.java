@@ -37,7 +37,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class EditFlowPropertySheet extends Panel implements ValueChangeListener {
+public class PropertySheet extends Panel implements ValueChangeListener {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -47,11 +47,10 @@ public class EditFlowPropertySheet extends Panel implements ValueChangeListener 
 
     IResourceFactory resourceFactory;
 
-    public EditFlowPropertySheet(ApplicationContext context) {
+    public PropertySheet(ApplicationContext context) {
         this.componentFactory = context.getComponentFactory();
         this.configurationService = context.getConfigurationService();
         this.resourceFactory = context.getResourceFactory();
-        setCaption("Property Sheet");
         setSizeFull();
         addStyleName("noborder");
     }
