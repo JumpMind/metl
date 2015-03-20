@@ -48,7 +48,6 @@ public class EditFlowPalette extends VerticalLayout {
         this.designFlowLayout = designFlowLayout;
         setHeight(100, Unit.PERCENTAGE);
         setWidth(150, Unit.PIXELS);
-//        addStyleName("noborder");
 
         setMargin(new MarginInfo(true, false, false, false));
 
@@ -56,8 +55,6 @@ public class EditFlowPalette extends VerticalLayout {
         componentAccordian.setSizeFull();
         addComponent(componentAccordian);
         setExpandRatio(componentAccordian, 1);
-
-//        addStyleName(ValoTheme.MENU_ROOT);
 
         populateComponentPalette();
 

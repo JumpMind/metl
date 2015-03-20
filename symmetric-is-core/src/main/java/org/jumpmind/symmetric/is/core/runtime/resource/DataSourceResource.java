@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.core.runtime.resource.db;
+package org.jumpmind.symmetric.is.core.runtime.resource;
 
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ResettableBasicDataSource;
@@ -6,9 +6,6 @@ import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
-import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
-import org.jumpmind.symmetric.is.core.runtime.resource.ResourceDefinition;
 
 @ResourceDefinition(typeName=DataSourceResource.TYPE, resourceCategory=ResourceCategory.DATASOURCE)
 public class DataSourceResource extends AbstractRuntimeObject implements IResource {

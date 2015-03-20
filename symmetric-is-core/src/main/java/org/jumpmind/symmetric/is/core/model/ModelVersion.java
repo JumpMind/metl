@@ -73,10 +73,14 @@ public class ModelVersion extends AbstractObject {
 	    return null;
 	}
 	
-	public String getAttributeId(String entityName, String attributeName) {
+	public ModelAttribute getAttributeByName(String entityName, String attributeName) {
     	ModelEntity entity = getEntityByName(entityName);
     	if (entity != null) {
-    		return entity.getAttributeIdByName(attributeName);
+    		for (ModelAttribute modelAttribute : entity.getModelAttributes()) {
+    			if (modelAttribute.getName().equalsIgnoreCase(attributeName)) {
+    				return modelAttribute;
+    			}
+    		}
     	}
     	return null;
     }

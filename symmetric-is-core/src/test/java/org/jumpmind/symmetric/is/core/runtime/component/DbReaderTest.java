@@ -34,9 +34,9 @@ import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
-import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
 import org.jumpmind.symmetric.is.core.utils.DbTestUtils;
 import org.jumpmind.symmetric.is.core.utils.TestUtils;
 import org.junit.After;
@@ -182,14 +182,14 @@ public class DbReaderTest {
     private static ModelVersion createOutputModelVersion() {
 
         ModelEntity tt1 = new ModelEntity("tt1", "TEST_TABLE_1");
-        tt1.getModelAttributes().put("tt1col1", new ModelAttribute("tt1col1", tt1.getId(), "COL1"));
-        tt1.getModelAttributes().put("tt1col2", new ModelAttribute("tt1col2", tt1.getId(), "COL2"));
-        tt1.getModelAttributes().put("tt1col3", new ModelAttribute("tt1col3", tt1.getId(), "COL3"));
+        tt1.addModelAttribute(new ModelAttribute("tt1col1", tt1.getId(), "COL1"));
+        tt1.addModelAttribute(new ModelAttribute("tt1col2", tt1.getId(), "COL2"));
+        tt1.addModelAttribute(new ModelAttribute("tt1col3", tt1.getId(), "COL3"));
 
         ModelEntity tt2 = new ModelEntity("tt2", "TEST_TABLE_2");
-        tt2.getModelAttributes().put("tt2colx", new ModelAttribute("tt2colx", tt1.getId(), "COLX"));
-        tt2.getModelAttributes().put("tt2coly", new ModelAttribute("tt2coly", tt1.getId(), "COLY"));
-        tt2.getModelAttributes().put("tt2colz", new ModelAttribute("tt2colz", tt1.getId(), "COLZ"));
+        tt2.addModelAttribute(new ModelAttribute("tt2colx", tt1.getId(), "COLX"));
+        tt2.addModelAttribute(new ModelAttribute("tt2coly", tt1.getId(), "COLY"));
+        tt2.addModelAttribute(new ModelAttribute("tt2colz", tt1.getId(), "COLZ"));
 
         ModelVersion modelVersion = new ModelVersion();
         modelVersion.getModelEntities().put("tt1", tt1);

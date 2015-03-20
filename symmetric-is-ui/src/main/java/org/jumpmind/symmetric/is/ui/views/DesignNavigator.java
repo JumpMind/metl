@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
-import org.jumpmind.symmetric.is.core.model.ComponentVersion;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowVersion;
@@ -14,22 +13,25 @@ import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
-import org.jumpmind.symmetric.is.core.runtime.resource.db.DataSourceResource;
-import org.jumpmind.symmetric.is.core.runtime.resource.localfile.LocalFileResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
-import org.jumpmind.symmetric.is.ui.views.design.PropertySheet;
 import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
+import org.jumpmind.symmetric.is.ui.views.design.PropertySheet;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TabSheet.CloseHandler;
 
 @SuppressWarnings("serial")
 public class DesignNavigator extends AbstractFolderNavigator {
@@ -52,6 +54,12 @@ public class DesignNavigator extends AbstractFolderNavigator {
         super(FolderType.DESIGN, context.getConfigurationService());
         this.context = context;
         this.tabs = tabs;
+        this.tabs.addCloseHandler(new CloseHandler() {            
+            @Override
+            public void onTabClose(TabSheet tabsheet, Component tabContent) {
+                treeTable.focus();
+            }
+        });
     }
 
     @Override
@@ -107,6 +115,9 @@ public class DesignNavigator extends AbstractFolderNavigator {
             item = ((Flow) item).getLatestFlowVersion();
         } else if (item instanceof Model) {
             item = ((Model) item).getLatestModelVersion();
+        } else if (item instanceof FlowStep) {
+            String flowVersionId = ((FlowStep)item).getFlowVersionId();
+            item = configurationService.findFlowVersion(flowVersionId);
         }
 
         if (item instanceof FlowVersion) {
@@ -114,7 +125,6 @@ public class DesignNavigator extends AbstractFolderNavigator {
             EditFlowPanel flowLayout = new EditFlowPanel(context, flowVersion, this, tabs);
             tabs.addCloseableTab(flowVersion.getId(), flowVersion.getFlow().getName() + " "
                     + flowVersion.getName(), Icons.FLOW, flowLayout);
-
         } else if (item instanceof ModelVersion) {
             ModelVersion modelVersion = (ModelVersion) item;
             EditModelPanel editModel = new EditModelPanel(context, modelVersion);
@@ -136,15 +146,25 @@ public class DesignNavigator extends AbstractFolderNavigator {
         newFlow.setEnabled(enabled);
         newResource.setEnabled(enabled);
         newModel.setEnabled(enabled);
-
+        updatePropertySheet();
+    }
+    
+    protected void updatePropertySheet() {
         AbstractObject obj = getSingleSelection(AbstractObject.class);
-        if (obj instanceof ComponentVersion && designPropertySheet != null) {
-            designPropertySheet.valueChange(obj);
-        }
+        if (obj instanceof FlowStep && designPropertySheet != null) {
+            FlowStep step = (FlowStep)obj;
+            if (tabs.getSelectedTab() instanceof EditFlowPanel) {
+                EditFlowPanel panel = (EditFlowPanel)tabs.getSelectedTab();
+                if (panel.getFlowVersion().getId().equals(step.getFlowVersionId())) {
+                    panel.selected(step);
+                }
+            }
+        }        
     }
 
     public void setDesignPropertySheet(PropertySheet designPropertySheet) {
         this.designPropertySheet = designPropertySheet;
+        updatePropertySheet();
     }
 
     @Override

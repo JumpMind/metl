@@ -120,6 +120,15 @@ public class Diagram extends AbstractJavaScriptComponent {
         });
 
     }
+    
+    public void setSelectedNodeId(String nodeId) {
+        getState().selectedNodeId = nodeId;
+        markAsDirty();
+    }
+    
+    public String getSelectedNodeId() {
+        return getState().selectedNodeId;
+    }
 
     public void addNode(Node node) {
         getState().nodes.add(node);

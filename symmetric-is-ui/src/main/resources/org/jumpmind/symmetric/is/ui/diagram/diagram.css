@@ -1,61 +1,58 @@
 .diagram {
-	position:absolute;
+	position: absolute;
 }
 
 .diagram-node {
-    padding: 18px;
-    position: absolute;
-    z-index: 4;
-    text-align: center;
-    border: 1px solid #2e6f9a;
-    box-shadow: 2px 2px 19px #e0e0e0;
-    -o-box-shadow: 2px 2px 19px #e0e0e0;
-    -webkit-box-shadow: 2px 2px 19px #e0e0e0;
-    -moz-box-shadow: 2px 2px 19px #e0e0e0;
-    -moz-border-radius: 8px;
-    border-radius: 8px;
-    opacity: 0.8;
-    filter: alpha(opacity=80);    
-    cursor: move;
-    background-color: white;
-    font-size: 11px;
-    -webkit-transition: background-color 0.25s ease-in;
-    -moz-transition: background-color 0.25s ease-in;
-    transition: background-color 0.25s ease-in;
- }
- 
- .diagram-node.selected {
-   border: 2px solid orange;
- }
-
-.aLabel {
-    -webkit-transition: background-color 0.25s ease-in;
-    -moz-transition: background-color 0.25s ease-in;
-    transition: background-color 0.25s ease-in;
+	padding: 18px;
+	position: absolute;
+	z-index: 1;
+	text-align: center;
+	border: 1px solid #2e6f9a;
+	box-shadow: 2px 2px 19px #e0e0e0;
+	-o-box-shadow: 2px 2px 19px #e0e0e0;
+	-webkit-box-shadow: 2px 2px 19px #e0e0e0;
+	-moz-box-shadow: 2px 2px 19px #e0e0e0;
+	-moz-border-radius: 8px;
+	border-radius: 8px;
+	opacity: 0.8;
+	filter: alpha(opacity = 80);
+	cursor: move;
+	background-color: white;
+	font-size: 11px;
+	-webkit-transition: background-color 0.25s ease-in;
+	-moz-transition: background-color 0.25s ease-in;
+	transition: background-color 0.25s ease-in;
 }
 
-.aLabel._jsPlumb_hover {
-    background-color: #1e8151;
-    color: white;
-}
-
-.aLabel {
-    background-color: white;
-    opacity: 0.8;
-    padding: 0.3em;
-    border-radius: 0.5em;
-    border: 1px solid #346789;
-    cursor: pointer;
+.diagram-node.selected {
+	border: 2px solid orange;
 }
 
 .diagram ._jsPlumb_endpoint {
-    z-index: 3;
+	z-index: 3;
 }
 
+.diagram ._jsPlumb_overlay {
+    z-index: 2;
+}
+
+.endpointSourceLabel {
+	color: white;
+	background-color: #0072C6;
+    padding: 1px 6px 2px;
+    font-size: 12.025px;
+    font-weight: bold;
+    white-space: nowrap;
+    -webkit-border-radius: 9px;
+    -moz-border-radius: 9px;
+    border-radius: 9px;
+}
+
+
 .dragHover {
-    border: 2px solid orange;
+	border: 2px solid orange;
 }
 
 path {
-    cursor: pointer;
+	cursor: pointer;
 }

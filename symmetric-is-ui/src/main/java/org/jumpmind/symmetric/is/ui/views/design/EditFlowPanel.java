@@ -57,7 +57,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
     ApplicationContext context;
 
-    FlowVersion componentFlowVersion;
+    FlowVersion flowVersion;
 
     PropertySheet designPropertySheet;
 
@@ -81,7 +81,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             DesignNavigator designNavigator, TabbedApplicationPanel tabs) {
         this.context = context;
         this.tabs = tabs;
-        this.componentFlowVersion = componentFlowVersion;
+        this.flowVersion = componentFlowVersion;
         this.designNavigator = designNavigator;
 
         this.designPropertySheet = new PropertySheet(context);
@@ -182,25 +182,34 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     public void showing() {
         designNavigator.setDesignPropertySheet(designPropertySheet);
     }
-
+    
+    public FlowVersion getFlowVersion() {
+        return flowVersion;
+    }
+    
+    public void selected(FlowStep step) {
+        diagram.setSelectedNodeId(step.getId());
+        designPropertySheet.valueChange(step);                
+    }
+    
     protected void deleteSelected() {
         IConfigurationService configurationService = context.getConfigurationService();
         if (selected instanceof FlowStep) {
             FlowStep flowStep = (FlowStep) selected;
-            configurationService.delete(componentFlowVersion, flowStep);
+            configurationService.delete(flowVersion, flowStep);
             designNavigator.refresh();
             redrawFlow();
         } else if (selected instanceof FlowStepLink) {
             FlowStepLink link = (FlowStepLink) selected;
             configurationService.delete(link);
-            componentFlowVersion.removeFlowStepLink(link.getSourceStepId(), link.getTargetStepId());
+            flowVersion.removeFlowStepLink(link.getSourceStepId(), link.getTargetStepId());
             redrawFlow();
         }
     }
 
     protected int countComponentsOfType(String type) {
         int count = 0;
-        List<FlowStep> nodes = componentFlowVersion.getFlowSteps();
+        List<FlowStep> nodes = flowVersion.getFlowSteps();
         for (FlowStep componentflowStep : nodes) {
             if (componentflowStep.getComponentVersion().getComponent().getType().equals(type)) {
                 count++;
@@ -219,8 +228,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         FlowStep flowStep = new FlowStep(componentVersion);
         flowStep.setX(x);
         flowStep.setY(y);
-        flowStep.setFlowVersionId(componentFlowVersion.getId());
-        componentFlowVersion.getFlowSteps().add(flowStep);
+        flowStep.setFlowVersionId(flowVersion.getId());
+        flowVersion.getFlowSteps().add(flowStep);
 
         context.getConfigurationService().save(flowStep);
 
@@ -241,13 +250,14 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         }
 
         diagram = new Diagram();
+        diagram.setSizeFull();
         diagram.addListener(new DiagramChangedListener());
 
         diagramLayout.addComponent(diagram);
 
-        List<FlowStepLink> links = componentFlowVersion.getFlowStepLinks();
+        List<FlowStepLink> links = flowVersion.getFlowStepLinks();
 
-        List<FlowStep> flowSteps = componentFlowVersion.getFlowSteps();
+        List<FlowStep> flowSteps = flowVersion.getFlowSteps();
         for (FlowStep flowStep : flowSteps) {
             Node node = new Node();
             String name = flowStep.getComponentVersion().getComponent().getName();
@@ -292,19 +302,19 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             agentManager.refresh(localAgent);
         }
 
-        AgentDeployment deployment = localAgent.getAgentDeploymentFor(componentFlowVersion);
+        AgentDeployment deployment = localAgent.getAgentDeploymentFor(flowVersion);
         if (deployment != null) {
             agentManager.undeploy(deployment);
 
         }
 
-        deployment = agentManager.deploy(localAgent.getId(), componentFlowVersion);
+        deployment = agentManager.deploy(localAgent.getId(), flowVersion);
 
         String executionId = agentManager.getAgentRuntime(localAgent).scheduleNow(deployment);
         if (executionId != null) {
             ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context);
-            tabs.addCloseableTab(executionId, "Run " + componentFlowVersion.getFlow().getName()
-                    + " " + componentFlowVersion.getName(), Icons.LOG, logPanel);
+            tabs.addCloseableTab(executionId, "Run " + flowVersion.getFlow().getName()
+                    + " " + flowVersion.getName(), Icons.LOG, logPanel);
         }
     }
 
@@ -317,7 +327,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             if (e instanceof NodeSelectedEvent) {
                 NodeSelectedEvent event = (NodeSelectedEvent) e;
                 Node node = event.getNode();
-                FlowStep flowStep = componentFlowVersion.findFlowStepWithId(node.getId());
+                FlowStep flowStep = flowVersion.findFlowStepWithId(node.getId());
                 designPropertySheet.valueChange(flowStep.getComponentVersion());
                 designNavigator.select(flowStep);
                 selected = flowStep;
@@ -325,30 +335,29 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             } else if (e instanceof NodeMovedEvent) {
                 NodeMovedEvent event = (NodeMovedEvent) e;
                 Node node = event.getNode();
-                FlowStep flowStep = componentFlowVersion.findFlowStepWithId(node.getId());
+                FlowStep flowStep = flowVersion.findFlowStepWithId(node.getId());
                 if (flowStep != null) {
                     flowStep.setX(node.getX());
                     flowStep.setY(node.getY());
                 }
-                configurationService.save(componentFlowVersion);
+                configurationService.save(flowVersion);
             } else if (e instanceof LinkEvent) {
                 LinkEvent event = (LinkEvent) e;
                 if (!event.isRemoved()) {
-                    componentFlowVersion.getFlowStepLinks().add(
+                    flowVersion.getFlowStepLinks().add(
                             new FlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
-                    configurationService.save(componentFlowVersion);
+                    configurationService.save(flowVersion);
                 } else {
-                    FlowStepLink link = componentFlowVersion.removeFlowStepLink(
+                    FlowStepLink link = flowVersion.removeFlowStepLink(
                             event.getSourceNodeId(), event.getTargetNodeId());
                     if (link != null) {
                         configurationService.delete(link);
                         redrawFlow();
                     }
-
                 }
             } else if (e instanceof LinkSelectedEvent) {
                 LinkSelectedEvent event = (LinkSelectedEvent) e;
-                selected = componentFlowVersion.findFlowStepLink(event.getSourceNodeId(),
+                selected = flowVersion.findFlowStepLink(event.getSourceNodeId(),
                         event.getTargetNodeId());
                 delButton.setEnabled(true);
             }

@@ -1,6 +1,8 @@
 package org.jumpmind.symmetric.is.ui.common;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.symmetric.ui.common.IUiPanel;
@@ -19,6 +21,8 @@ public class TabbedApplicationPanel extends TabSheet {
     protected Map<String, Tab> tabsById = new HashMap<String, Tab>();
 
     protected Map<Component, String> contentToId = new HashMap<Component, String>();
+    
+    protected List<CloseHandler> closeHandlers = new ArrayList<TabSheet.CloseHandler>();
 
     public TabbedApplicationPanel() {
         setSizeFull();
@@ -48,8 +52,16 @@ public class TabbedApplicationPanel extends TabSheet {
                 } else {
                     closeTab(contentToId.get(tabContent));
                 }
+                
+                for (CloseHandler closeHandler : closeHandlers) {
+                    closeHandler.onTabClose(tabsheet, tabContent);                    
+                }
             }
         });
+    }
+    
+    public void addCloseHandler(CloseHandler handler) {
+        this.closeHandlers.add(handler);
     }
 
     public void setMainTab(String caption, Resource icon, Component component) {

@@ -10,7 +10,7 @@ public interface IResourceFactory {
 
     public IResource create(Resource resource);
 
-    public void register(Class<? extends IResource> clazz);
+    public void register(Class<IResource> clazz);
 
     public List<String> getResourceTypes();
     

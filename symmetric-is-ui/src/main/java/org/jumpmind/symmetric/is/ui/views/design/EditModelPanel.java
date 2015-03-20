@@ -10,24 +10,23 @@ import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.ModelVersion;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
+import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.TreeTable;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
@@ -44,49 +43,24 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 	public EditModelPanel(ApplicationContext context, ModelVersion modelVersion) {
 		this.context = context;
 		this.modelVersion = modelVersion;
-		
-		Button addEntityButton = new Button("Add Entity");
-		addEntityButton.setIcon(FontAwesome.TABLE);
-		addEntityButton.setStyleName("button-bar");
-		
-		Button addAttributeButton = new Button("Add Attribute");
-		addAttributeButton.setIcon(FontAwesome.COLUMNS);
-		addAttributeButton.setStyleName("button-bar");
-		
-		Button editButton = new Button("Edit");
-		editButton.setWidth("80px");
-		editButton.setIcon(FontAwesome.EDIT);
-		editButton.setStyleName("button-bar");
 
-		Button removeButton = new Button("Remove");
-		removeButton.setIcon(FontAwesome.TRASH_O);
-		removeButton.setStyleName("button-bar");
-		
-		Button importButton = new Button("Import ...");
-		importButton.setStyleName("button-bar");
-		importButton.setIcon(FontAwesome.DOWNLOAD);
+		ButtonBar buttonBar = new ButtonBar();
+		addComponent(buttonBar);
 
+		Button addEntityButton = buttonBar.addButton("Add Entity", FontAwesome.TABLE);
 		addEntityButton.addClickListener(new AddEntityClickListener());
+		
+		Button addAttributeButton = buttonBar.addButton("Add Attribute", FontAwesome.COLUMNS);
 		addAttributeButton.addClickListener(new AddAttributeClickListener());
-		removeButton.addClickListener(new RemoveClickListener());
+
+		Button editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
 		editButton.addClickListener(new EditClickListener());
 		
-		HorizontalLayout header = new HorizontalLayout();
-		header.setWidth("100%");
-		header.setMargin(new MarginInfo(true, false, true, false));
-		HorizontalLayout bar = new HorizontalLayout();
-		bar.setStyleName("button-bar");
-		bar.addComponent(addEntityButton);
-		bar.addComponent(addAttributeButton);
-		bar.addComponent(editButton);
-		bar.addComponent(removeButton);
-		bar.addComponent(importButton);
-		Label barSpacer = new Label();
-		bar.addComponent(barSpacer);
-		bar.setWidth("100%");
-		bar.setExpandRatio(barSpacer, 1.0f);
-		header.addComponent(bar);
-		addComponent(header);
+		Button removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+		removeButton.addClickListener(new RemoveClickListener());
+
+		Button importButton = buttonBar.addButton("Import ...", FontAwesome.DOWNLOAD);
+		importButton.addClickListener(new ImportClickListener());
 
 		treeTable.setSizeFull();
 		treeTable.setCacheRate(100);
@@ -104,7 +78,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
         for (ModelEntity e : modelVersion.getModelEntities().values()) {
         	addModelEntity(e);
-        	for (ModelAttribute a : e.getModelAttributes().values()) {
+        	for (ModelAttribute a : e.getModelAttributes()) {
         		a.setEntity(e);
         		addModelAttribute(a);
         	}
@@ -231,24 +205,40 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 			}
 
 			for (Object itemId : itemIds) {
+				if (itemId instanceof ModelAttribute) {
+					context.getConfigurationService().delete((ModelAttribute) itemId);
+				}
+				treeTable.removeItem(itemId);
+			}
+			for (Object itemId : itemIds) {
 				if (itemId instanceof ModelEntity) {
 					context.getConfigurationService().delete((ModelEntity) itemId);
-				} else if (itemId instanceof ModelAttribute) {
-					context.getConfigurationService().delete((ModelAttribute) itemId);
 				}
 				treeTable.removeItem(itemId);
 			}
 		}
 	}
-	
+
+	class ImportClickListener implements ClickListener {
+		public void buttonClick(ClickEvent event) {
+			TableColumnSelectWindow w = new TableColumnSelectWindow(context);
+			UI.getCurrent().addWindow(w);
+		}
+	}
+
 	class TreeTableValueChangeListener implements ValueChangeListener {
 		public void valueChange(ValueChangeEvent event) {
 			for (Object itemId : lastEditItemIds) {
 				if (itemId instanceof ModelEntity) {
-					context.getConfigurationService().save((ModelEntity) itemId);
+					ModelEntity e = (ModelEntity) itemId;
+					e.setName((String) treeTable.getContainerProperty(itemId, "name").getValue());
+					context.getConfigurationService().save(e);
 				} else if (itemId instanceof ModelAttribute) {
-					context.getConfigurationService().save((ModelAttribute) itemId);
-				}				
+					ModelAttribute a = (ModelAttribute) itemId;
+					a.setName((String) treeTable.getContainerProperty(itemId, "name").getValue());
+					a.setType((String) treeTable.getContainerProperty(itemId, "type").getValue());
+					context.getConfigurationService().save(a);
+				}
 			}
 	        treeTable.setEditable(false);
 		}		
