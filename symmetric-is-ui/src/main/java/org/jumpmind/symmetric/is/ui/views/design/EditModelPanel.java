@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.DataType;
+import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
@@ -16,6 +16,8 @@ import org.jumpmind.symmetric.ui.common.IUiPanel;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -71,22 +73,13 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         
         treeTable.addContainerProperty("name", String.class, "", "Name", null, null);
         treeTable.addContainerProperty("type", String.class, "", "Type", null, null);
-        treeTable.setVisibleColumns(new Object[] { "name", "type" });        
+        treeTable.setVisibleColumns(new Object[] { "name", "type" });
+        treeTable.addItemClickListener(new TreeTableItemClickListener());
         treeTable.addValueChangeListener(new TreeTableValueChangeListener());
+        
 		addComponent(treeTable);
 		setExpandRatio(treeTable, 1.0f);
 		addAll(model.getModelEntities().values());
-	}
-	
-	protected void addAll(Collection<ModelEntity> modelEntityList) {
-		for (ModelEntity e : modelEntityList) {
-			addModelEntity(e);
-			for (ModelAttribute a : e.getModelAttributes()) {
-				a.setEntity(e);
-				addModelAttribute(a);
-			}
-			treeTable.setCollapsed(e, false);
-		}
 	}
 
 	@Override
@@ -108,6 +101,17 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         	treeTable.unselect(id);
         }
         treeTable.select(itemId);
+	}
+
+	protected void addAll(Collection<ModelEntity> modelEntityList) {
+		for (ModelEntity e : modelEntityList) {
+			addModelEntity(e);
+			for (ModelAttribute a : e.getModelAttributes()) {
+				a.setEntity(e);
+				addModelAttribute(a);
+			}
+			treeTable.setCollapsed(e, false);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -235,6 +239,14 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 			}
 			addAll(modelEntityCollection);
 		}
+	}
+
+	class TreeTableItemClickListener implements ItemClickListener {
+		public void itemClick(ItemClickEvent event) {
+			if (event.isDoubleClick()) {
+				editSelectedItem();				
+			}
+		}		
 	}
 
 	class TreeTableValueChangeListener implements ValueChangeListener {
