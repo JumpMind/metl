@@ -6,7 +6,9 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
@@ -24,31 +26,28 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 @ComponentDefinition(typeName = DelimitedFormatter.TYPE, category = ComponentCategory.PROCESSOR, iconImage="format.png",
 supports = { ComponentSupports.INPUT_MESSAGE, ComponentSupports.INPUT_MODEL, ComponentSupports.OUTPUT_MESSAGE })
 
-public class DelimitedFormatter extends AbstractComponent {
+public class FixedLengthFormatter extends AbstractComponent {
 
-    public static final String TYPE = "Delimited Formatter";
+    public static final String TYPE = "Fixed Length Formatter";
 
-    @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Delimiter")
-    public final static String DELIMITED_FORMATTER_DELIMITER = "delimited.formatter.delimiter";
+    @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Quote Character")
+    public final static String FIXED_LENGTH_FORMATTER_QUOTE_CHARACTER = "fixed.length.formatter.quote.character";
     
-    @SettingDefinition(order = 20, required = true, type = Type.STRING, label = "Quote Character")
-    public final static String DELIMITED_FORMATTER_QUOTE_CHARACTER = "delimited.formatter.quote.character";
-    
+    @SettingDefinition(order = 20, required = true, type = Type.INTEGER, label = "Ordinal")
+    public final static String FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL = "fixed.length.formatter.attribute.ordinal";
+
     @SettingDefinition(order = 30, required = true, type = Type.INTEGER, label = "Ordinal")
-    public final static String DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL = "delimited.formatter.attribute.ordinal";
-    
-    @SettingDefinition(order = 40, required = false, type = Type.STRING, label = "FormatFunction")
-    public final static String DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = "delimited.formatter.attribute.format.function";
-    
+    public final static String FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH = "fixed.length.formatter.attribute.length";
+
     /* settings */
     String delimiter;
     String quoteCharacter;
 
     /* other vars */
     TypedProperties properties;
-    List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
+    List<AttributeFormat> attributesList;
+    StringBuilder stringBuilder;
     
-
     @Override
     public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
         super.start(executionTracker, resourceFactory);
@@ -80,56 +79,81 @@ public class DelimitedFormatter extends AbstractComponent {
         if (!StringUtils.isEmpty(quoteCharacter)) {
             csvWriter.setTextQualifier(quoteCharacter.charAt(0));
         }        
-        try {
-            for (AttributeFormat attribute : attributes) {
-                csvWriter.write(inputRow.get(attribute.getAttributeId()).toString());
-            }
-            csvWriter.endRecord();
-        } catch (IOException e) {
-            throw new IoException("Error writing to stream for formatted output. " + e.getMessage());
-        }
+//        try {
+//            for (AttributeFormat format : attributesList) {
+//                //stringBuilder.append(b)
+//                //csvWriter.write(inputRow.get(attribute.getAttributeId()).toString());
+//            }
+//            //csvWriter.endRecord();
+//        } catch (IOException e) {
+//            throw new IoException("Error writing to stream for formatted output. " + e.getMessage());
+//        }
         return writer.toString();
     }
     
     private void applySettings() {
         properties = flowStep.getComponentVersion().toTypedProperties(this, false);
-        delimiter = properties.get(DELIMITED_FORMATTER_DELIMITER);
-        quoteCharacter = properties.get(DELIMITED_FORMATTER_QUOTE_CHARACTER);
+        quoteCharacter = properties.get(FIXED_LENGTH_FORMATTER_QUOTE_CHARACTER);
         convertAttributeSettingsToAttributeFormat();
     }
     
     private void convertAttributeSettingsToAttributeFormat() {
         
+        Map<String, AttributeFormat> attributesMap = new HashMap<String, AttributeFormat>();
+        
         List<ComponentVersionAttributeSetting> attributeSettings = flowStep.getComponentVersion().getAttributeSettings();
         for (ComponentVersionAttributeSetting attributeSetting : attributeSettings) {
-            if (attributeSetting.getName().equalsIgnoreCase(DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL)) {
-                attributes.add(new AttributeFormat(attributeSetting.getAttributeId(), Integer.parseInt(attributeSetting.getValue())));
+            if (attributeSetting.getName().equalsIgnoreCase(FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL)) {
+                if (attributesMap.containsKey(attributeSetting.getAttributeId())) {
+                    attributesMap.get(attributeSetting.getAttributeId()).setOrdinal(Integer.parseInt(attributeSetting.getValue()));
+                } else {
+                    attributesMap.put(attributeSetting.getAttributeId(), 
+                            new AttributeFormat(Integer.parseInt(attributeSetting.getValue()), -1));                    
+                }
+            } else if (attributeSetting.getName().equalsIgnoreCase(FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH)) {
+                if (attributesMap.containsKey(attributeSetting.getAttributeId())) {
+                    attributesMap.get(attributeSetting.getAttributeId()).setLength(Integer.parseInt(attributeSetting.getValue()));
+                } else {
+                    attributesMap.put(attributeSetting.getAttributeId(), 
+                            new AttributeFormat(-1, Integer.parseInt(attributeSetting.getValue())));                    
+                }                                
             }
         }
-        Collections.sort(attributes, new Comparator<AttributeFormat>() {
+
+        attributesList = new ArrayList<AttributeFormat>(attributesMap.values());
+        
+        Collections.sort(attributesList, new Comparator<AttributeFormat>() {
             @Override
-            public int compare(AttributeFormat ordinal1, AttributeFormat ordinal2) {
-                return ordinal1.getOrdinal() - ordinal2.getOrdinal();
+            public int compare(AttributeFormat format1, AttributeFormat format2) {
+                return format1.getOrdinal() - format2.getOrdinal();
             }
         });
     }
     
     private class AttributeFormat {
         
-        public AttributeFormat(String attributeId, int ordinal) {
-            this.attributeId = attributeId;
+        int ordinal;
+        int length;
+        
+        public AttributeFormat(int ordinal, int length) {
+            this.ordinal = ordinal;
+            this.length = length;
+        }
+           
+        public int getOrdinal() {
+            return ordinal;
+        }
+        
+        public void setOrdinal(int ordinal) {
             this.ordinal = ordinal;
         }
         
-        String attributeId;
-        int ordinal;
-        
-        public String getAttributeId() {
-            return attributeId;
+        public int getLength() {
+            return length;
         }
-
-        public int getOrdinal() {
-            return ordinal;
+        
+        public void setLength(int length) {
+            this.length = length;
         }
     }
    
