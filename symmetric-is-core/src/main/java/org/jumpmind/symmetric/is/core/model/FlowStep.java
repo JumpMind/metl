@@ -5,9 +5,9 @@ public class FlowStep extends AbstractObject {
 
     private static final long serialVersionUID = 1L;    
     
-    protected ComponentVersion componentVersion;
+    protected Component component;
     
-    String flowVersionId;
+    String flowId;
     
     int x;
     
@@ -16,44 +16,44 @@ public class FlowStep extends AbstractObject {
     public FlowStep() {
     }
 
-    public FlowStep(ComponentVersion componentVersion) {
-        this.componentVersion = componentVersion;
+    public FlowStep(Component component) {
+        this.component = component;
     }
 
-    public ComponentVersion getComponentVersion() {
-        return componentVersion;
+    public Component getComponent() {
+        return component;
     }
 
-    public void setComponentVersion(ComponentVersion componentVersion) {
-        this.componentVersion = componentVersion;
+    public void setComponent(Component component) {
+        this.component = component;
     }
     
     public void setName(String name) {
-        this.componentVersion.getComponent().setName(name);
+        this.component.setName(name);
     }
     
     public String getName() {
-        return this.componentVersion.getComponent().getName();
+        return this.component.getName();
     }
     
-    public String getComponentVersionId() {
-        return componentVersion != null ? componentVersion.getId() : null;
+    public String getComponentId() {
+        return component != null ? component.getId() : null;
     }
 
-    public void setComponentVersionId(String componentVersionId) {
-        if (componentVersionId != null) {
-            this.componentVersion = new ComponentVersion(componentVersionId);
+    public void setComponentId(String componentId) {
+        if (componentId != null) {
+            this.component = new Component(componentId);
         } else {
-            this.componentVersion = null;
+            this.component = null;
         }
     }
 
-    public String getFlowVersionId() {
-        return flowVersionId;
+    public String getFlowId() {
+        return flowId;
     }
 
-    public void setFlowVersionId(String flowVersionId) {
-        this.flowVersionId = flowVersionId;
+    public void setFlowId(String flowVersionId) {
+        this.flowId = flowVersionId;
     }
     
     public void setX(int x) {

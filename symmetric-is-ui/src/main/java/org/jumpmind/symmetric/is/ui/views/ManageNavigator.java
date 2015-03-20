@@ -10,7 +10,6 @@ import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Flow;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
@@ -243,15 +242,6 @@ public class ManageNavigator extends Panel {
             treeTable.addItem(flow);
             treeTable.setItemIcon(flow, Icons.FLOW);
             treeTable.setParent(flow, folder);
-
-            List<FlowVersion> versions = flow.getFlowVersions();
-            for (FlowVersion flowVersion : versions) {
-                treeTable.addItem(flowVersion);
-                treeTable.setItemCaption(flowVersion, flowVersion.getVersionName());
-                treeTable.setItemIcon(flowVersion, Icons.FLOW_VERSION);
-                treeTable.setParent(flowVersion, flow);
-                treeTable.setChildrenAllowed(flowVersion, false);
-            }
         }
     }
 

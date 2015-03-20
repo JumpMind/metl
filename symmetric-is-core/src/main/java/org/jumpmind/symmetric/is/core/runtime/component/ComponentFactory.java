@@ -52,7 +52,7 @@ public class ComponentFactory extends AbstractFactory<IComponent> implements ICo
     @Override
     public IComponent create(FlowStep flowStep) {
         try {
-            String componentType = flowStep.getComponentVersion().getComponent().getType();
+            String componentType = flowStep.getComponent().getType();
             Class<? extends IComponent> clazz = componentTypes.get(componentType);
             if (clazz != null) {
                 IComponent component = clazz.newInstance();

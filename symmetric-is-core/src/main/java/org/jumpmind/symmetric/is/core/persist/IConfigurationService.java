@@ -6,13 +6,10 @@ import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentSummary;
-import org.jumpmind.symmetric.is.core.model.ComponentVersion;
+import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
-import org.jumpmind.symmetric.is.core.model.FlowVersionSummary;
-import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Model;
@@ -20,13 +17,13 @@ import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelAttributeRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.ModelEntityRelationship;
-import org.jumpmind.symmetric.is.core.model.ModelVersion;
+import org.jumpmind.symmetric.is.core.model.Resource;
 
 public interface IConfigurationService {
 
     public List<Folder> findFolders(FolderType type);
     
-    public FlowVersion findFlowVersion(String id);
+    public Flow findFlow(String id);
 
     public void deleteFolder(String folderId);
 
@@ -34,15 +31,11 @@ public interface IConfigurationService {
     
     public void delete(AgentDeployment agentDeployment);
     
-    public void delete(Flow flow);
-    
-    public void delete(FlowVersion flow, FlowStep flowStep);
+    public void delete(Flow flow, FlowStep flowStep);
     
     public void delete(FlowStepLink link);
     
     public void delete(Resource resource);    
-    
-    public boolean isFlowVersionDeployed(String flowVersionId);
     
     public boolean isDeployed(Flow flow);
     
@@ -62,17 +55,17 @@ public interface IConfigurationService {
     
     public List<Agent> findAgentsForHost(String hostName);
     
-    public List<AgentDeployment> findAgentDeploymentsFor(FlowVersion flowVersion);
+    public List<AgentDeployment> findAgentDeploymentsFor(Flow flow);
     
-    public void deleteFlowVersion(FlowVersion flowVersion);
+    public void deleteFlow(Flow flow);
 
-    public void refresh(FlowVersion flowVersion);
+    public void refresh(Flow flow);
     
     public void refresh(Agent agent);
     
     public void refresh(Resource resource);
     
-    public void refresh(ComponentVersion version);
+    public void refresh(Component component);
     
     public void save(Resource resource);
     
@@ -80,15 +73,11 @@ public interface IConfigurationService {
 
     public void save(AbstractObject obj);
 
-    public void save(FlowVersion flowVersion);
+    public void save(Flow flow);
     
-    public List<FlowVersionSummary> findUndeployedFlowVersionSummary(String agentId);
-    
-    public List<AgentSummary> findUndeployedAgentsFor(String flowVersionId);
+    public List<AgentSummary> findUndeployedAgentsFor(String flowId);
     
     public void delete(Model model);
-    
-    public void delete(ModelVersion modelVersion);
     
     public void delete(ModelEntity modelEntity);
     
@@ -100,8 +89,6 @@ public interface IConfigurationService {
     
     public void refresh(Model model);
     
-    public void refresh(ModelVersion modelVersion);
-    
     public void refresh(ModelEntity modelEntity);
     
     public void refresh(ModelAttribute modelAttribute);
@@ -110,7 +97,7 @@ public interface IConfigurationService {
     
     public void refresh(ModelAttributeRelationship modelAttributeRelationship);
     
-    public void save(ModelVersion modelVersion);
+    public void save(Model model);
     
     public void save(ModelEntity modelEntity);
     

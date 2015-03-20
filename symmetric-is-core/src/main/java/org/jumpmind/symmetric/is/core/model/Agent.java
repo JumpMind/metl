@@ -130,13 +130,13 @@ public class Agent extends AbstractObjectWithSettings {
         this.agentDeployments = agentDeployments;
     }
 
-    public boolean isDeployed(FlowVersion flowVersion) {
-        return getAgentDeploymentFor(flowVersion) != null;
+    public boolean isDeployed(Flow flow) {
+        return getAgentDeploymentFor(flow) != null;
     }
 
-    public AgentDeployment getAgentDeploymentFor(FlowVersion flowVersion) {
+    public AgentDeployment getAgentDeploymentFor(Flow flow) {
         for (AgentDeployment agentDeployment : agentDeployments) {
-            if (agentDeployment.getFlowVersion().equals(flowVersion)) {
+            if (agentDeployment.getFlow().equals(flow)) {
                 return agentDeployment;
             }
         }

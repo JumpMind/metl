@@ -11,7 +11,7 @@ import javax.annotation.PreDestroy;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentStartMode;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
+import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
@@ -58,11 +58,11 @@ public class AgentManager implements IAgentManager {
     }
     
     @Override
-    public AgentDeployment deploy(String agentId, FlowVersion flowVersion) {
+    public AgentDeployment deploy(String agentId, Flow flow) {
         AgentDeployment deployment = null;
         AgentRuntime engine = getAgentRuntime(agentId);
         if (engine != null) {
-            deployment = engine.deploy(flowVersion);
+            deployment = engine.deploy(flow);
         }
         return deployment;
     }

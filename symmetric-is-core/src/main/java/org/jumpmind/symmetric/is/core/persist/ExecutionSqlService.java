@@ -63,7 +63,7 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
         	}
         }
         return template.query(String.format(
-        		"select id, agent_id, flow_version_id, agent_name, host_name, flow_name, status, start_time, end_time " +
+        		"select id, agent_id, flow_id, agent_name, host_name, flow_name, status, start_time, end_time " +
                 "from %1$s_execution " +
                 "where " + whereClause + "order by create_time limit " + limit,
                 tablePrefix), new ISqlRowMapper<Execution>() {
@@ -71,7 +71,7 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
                     	Execution e = new Execution();
                     	e.setId(row.getString("id"));
                     	e.setAgentId(row.getString("agent_id"));
-                    	e.setFlowVersionId(row.getString("flow_version_id"));
+                    	e.setFlowId(row.getString("flow_id"));
                     	e.setAgentName(row.getString("agent_name"));
                     	e.setHostName(row.getString("host_name"));
                     	e.setFlowName(row.getString("flow_name"));

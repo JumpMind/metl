@@ -34,8 +34,8 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
         FlowStep flowStep = component.getFlowStep();
         String msg = String.format(
                 "started component execution: %s,  for deployment: %s,  component: %s:%s",
-                executionId, deployment.getId(), flowStep.getComponentVersion().getComponent().getName(),
-                flowStep.getComponentVersion().getId());
+                executionId, deployment.getId(), flowStep.getComponent().getName(),
+                flowStep.getComponent().getId());
         log.info(msg);
     }
 
@@ -44,8 +44,8 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
         FlowStep flowStep = component.getFlowStep();
         String msg = String.format(
                 "finished component execution: %s,  for deployment: %s,  component: %s:%s",
-                executionId, deployment.getId(), flowStep.getComponentVersion().getComponent().getName(),
-                flowStep.getComponentVersion().getId());
+                executionId, deployment.getId(), flowStep.getComponent().getName(),
+                flowStep.getComponent().getId());
         log.info(msg);
     }
 
@@ -54,8 +54,8 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
             String output) {
         String msg = String
                 .format("log output from execution: %s, for deployment: %s,  component: %s:%s,  output: %s",
-                        executionId, deployment.getId(), component.getFlowStep().getComponentVersion().getComponent().getName(),
-                        component.getFlowStep().getComponentVersion().getId(), output);
+                        executionId, deployment.getId(), component.getFlowStep().getComponent().getName(),
+                        component.getFlowStep().getComponent().getId(), output);
         switch (level) {
             case DEBUG:
                 log.debug(msg);

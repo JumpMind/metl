@@ -180,8 +180,8 @@ public class DbReader extends AbstractComponent {
     private String getAttributeId(String tableName, String columnName)
             throws SQLException {
         
-        if (this.flowStep.getComponentVersion().getOutputModelVersion() != null) {
-        	ModelAttribute modelAttribute = this.flowStep.getComponentVersion().getOutputModelVersion().getAttributeByName(tableName, columnName);
+        if (this.flowStep.getComponent().getOutputModel() != null) {
+        	ModelAttribute modelAttribute = this.flowStep.getComponent().getOutputModel().getAttributeByName(tableName, columnName);
             if (modelAttribute == null) {
                 throw new SQLException("Table and Column not found in output model and not specified via hint.  "
                         + "Table Name = " + tableName + " Column Name = " + columnName);
@@ -223,7 +223,7 @@ public class DbReader extends AbstractComponent {
     }
 
     protected void applySettings() {
-        TypedProperties properties = flowStep.getComponentVersion().toTypedProperties(this,
+        TypedProperties properties = flowStep.getComponent().toTypedProperties(this,
                 false);
         sql = properties.get(SQL);
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);

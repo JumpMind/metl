@@ -8,7 +8,7 @@ import java.util.Set;
 import org.jumpmind.symmetric.is.core.model.DataType;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.model.ModelVersion;
+import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
@@ -36,13 +36,13 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 	
 	TreeTable treeTable = new TreeTable();
 	
-	ModelVersion modelVersion;
+	Model model;
 
 	Set<Object> lastEditItemIds = Collections.emptySet();
 	
-	public EditModelPanel(ApplicationContext context, ModelVersion modelVersion) {
+	public EditModelPanel(ApplicationContext context, Model model) {
 		this.context = context;
-		this.modelVersion = modelVersion;
+		this.model = model;
 
 		ButtonBar buttonBar = new ButtonBar();
 		addComponent(buttonBar);
@@ -76,7 +76,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 		addComponent(treeTable);
 		setExpandRatio(treeTable, 1.0f);
 
-        for (ModelEntity e : modelVersion.getModelEntities().values()) {
+        for (ModelEntity e : model.getModelEntities().values()) {
         	addModelEntity(e);
         	for (ModelAttribute a : e.getModelAttributes()) {
         		a.setEntity(e);
@@ -154,7 +154,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 		public void buttonClick(ClickEvent event) {
 	        ModelEntity e = new ModelEntity();
 	        e.setName("New Entity");
-	        e.setModelVersionId(modelVersion.getId());
+	        e.setModelId(model.getId());
 	        context.getConfigurationService().save(e);
 	        addModelEntity(e);
 	        selectOnly(e);

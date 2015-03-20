@@ -8,7 +8,7 @@ public class Execution extends AbstractObject {
 
     String agentId;
     
-    String flowVersionId;
+    String flowId;
     
     String agentName;
     
@@ -76,12 +76,12 @@ public class Execution extends AbstractObject {
 		this.agentId = agentId;
 	}
 
-	public String getFlowVersionId() {
-		return flowVersionId;
+	public String getFlowId() {
+		return flowId;
 	}
 
-	public void setFlowVersionId(String flowVersionId) {
-		this.flowVersionId = flowVersionId;
+	public void setFlowId(String flowId) {
+		this.flowId = flowId;
 	}
 
 	public String getAgentName() {

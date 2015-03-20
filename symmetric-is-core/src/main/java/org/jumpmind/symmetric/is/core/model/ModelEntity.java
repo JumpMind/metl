@@ -11,7 +11,7 @@ public class ModelEntity extends AbstractObject {
     
     List<ModelEntityRelationship> modelEntityRelationships;
     
-    String modelVersionId;
+    String modelId;
     
     String name;
     
@@ -47,12 +47,12 @@ public class ModelEntity extends AbstractObject {
 		this.modelEntityRelationships = modelEntityRelationships;
 	}
 
-	public String getModelVersionId() {
-		return modelVersionId;
+	public String getModelId() {
+		return modelId;
 	}
 
-	public void setModelVersionId(String modelVersionId) {
-		this.modelVersionId = modelVersionId;
+	public void setModelId(String modelVersionId) {
+		this.modelId = modelVersionId;
 	}
 
 	public String getName() {

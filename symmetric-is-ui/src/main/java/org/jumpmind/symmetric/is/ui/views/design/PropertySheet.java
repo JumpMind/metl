@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObjectWithSettings;
-import org.jumpmind.symmetric.is.core.model.ComponentVersion;
+import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
+import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
@@ -74,15 +74,15 @@ public class PropertySheet extends Panel implements ValueChangeListener {
 
         if (obj != null) {
             if (obj instanceof FlowStep) {
-                obj = ((FlowStep) obj).getComponentVersion();
+                obj = ((FlowStep) obj).getComponent();
             }
             
-            if (obj instanceof ComponentVersion) {
-                ComponentVersion version = (ComponentVersion)obj;
+            if (obj instanceof Component) {
+                Component version = (Component)obj;
                 configurationService.refresh(version);                
-                addComponentVersionProperties(formLayout, version);
-            } else if (obj instanceof FlowVersion) {
-                addFlowVersionSpecificProperties(formLayout, (FlowVersion)obj);
+                addComponentProperties(formLayout, version);
+            } else if (obj instanceof Flow) {
+                addFlowSpecificProperties(formLayout, (Flow)obj);
             }
 
             if (obj instanceof AbstractObjectWithSettings) {
@@ -97,17 +97,17 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         setContent(formLayout);
     }
     
-    protected void addComponentVersionProperties(FormLayout formLayout, ComponentVersion version) {
-        ComponentDefinition definition = componentFactory.getComponentDefinitionForComponentType(version.getComponent()
+    protected void addComponentProperties(FormLayout formLayout, Component component) {
+        ComponentDefinition definition = componentFactory.getComponentDefinitionForComponentType(component
                 .getType());
-        addResourceCombo(definition, formLayout, version);        
+        addResourceCombo(definition, formLayout, component);        
     }
     
-    protected void addFlowVersionSpecificProperties(FormLayout formLayout, FlowVersion version) {
+    protected void addFlowSpecificProperties(FormLayout formLayout, Flow version) {
         
     }
     
-    protected void addResourceCombo(ComponentDefinition componentDefintion, FormLayout formLayout, final ComponentVersion version) {
+    protected void addResourceCombo(ComponentDefinition componentDefintion, FormLayout formLayout, final Component version) {
         if (componentDefintion.resourceCategory() != null
                 && componentDefintion.resourceCategory() != ResourceCategory.NONE) {
             final AbstractSelect resourcesCombo = new ComboBox("Resource");
@@ -141,9 +141,9 @@ public class PropertySheet extends Panel implements ValueChangeListener {
     }
 
     protected Map<String, SettingDefinition> buildSettings(Object obj) {
-        if (obj instanceof ComponentVersion) {
-            ComponentVersion version = (ComponentVersion) obj;
-            return componentFactory.getSettingDefinitionsForComponentType(version.getComponent()
+        if (obj instanceof Component) {
+            Component component = (Component) obj;
+            return componentFactory.getSettingDefinitionsForComponentType(component
                     .getType());
         } else if (obj instanceof Resource) {
             Resource resource = (Resource) obj;

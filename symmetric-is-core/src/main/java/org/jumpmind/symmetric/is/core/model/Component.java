@@ -1,28 +1,46 @@
 package org.jumpmind.symmetric.is.core.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class Component extends AbstractObject {
+public class Component extends AbstractObjectWithSettings {
 
     private static final long serialVersionUID = 1L;
-
-    List<ComponentVersion> componentVersions;
 
     String type;
 
     boolean shared;
 
     String name;
+    
+    Resource resource;
+
+    Model inputModel;
+
+    Model outputModel;
+
+    List<ComponentEntitySetting> entitySettings;
+
+    List<ComponentAttributeSetting> attributeSettings;
 
     public Component() {
-        this.componentVersions = new ArrayList<ComponentVersion>();
     }
-
+    
     public Component(String id) {
     	this();
     	this.id = id;
     }
+    
+    public Component(Resource resource, Model inputModel,
+            Model outputModel, List<ComponentEntitySetting> entitySettings,
+            List<ComponentAttributeSetting> attributeSettings, Setting... settings) {
+        super(settings);
+        this.resource = resource;
+        this.inputModel = inputModel;
+        this.outputModel = outputModel;
+        this.entitySettings = entitySettings;
+        this.attributeSettings = attributeSettings;
+    }
+    
     
     public String getType() {
         return type;
@@ -48,12 +66,85 @@ public class Component extends AbstractObject {
         return name;
     }
 
-    public List<ComponentVersion> getComponentVersions() {
-        return componentVersions;
+    public void setInputModel(Model inputModel) {
+        this.inputModel = inputModel;
     }
 
-    public void setComponentVersions(List<ComponentVersion> componentVersions) {
-        this.componentVersions = componentVersions;
+    public void setOutputModel(Model outputModel) {
+        this.outputModel = outputModel;
+    }
+
+    public void setResource(Resource resource) {
+        this.resource = resource;
+    }
+
+    public Resource getResource() {
+        return resource;
+    }
+
+    public String getInputModeldId() {
+        return inputModel != null ? inputModel.getId() : null;
+    }
+
+    public void setInputModeldId(String inputModeldId) {
+        if (inputModeldId != null) {
+            this.inputModel = new Model(inputModeldId);
+        } else {
+            this.inputModel = null;
+        }
+    }
+
+    public String getOutputModelId() {
+        return inputModel != null ? inputModel.getId() : null;
+    }
+
+    public void setOutputModelId(String outputModelId) {
+        if (outputModelId != null) {
+            this.outputModel = new Model(outputModelId);
+        } else {
+            this.outputModel = null;
+        }
+    }
+
+    public String getResourceId() {
+        return resource != null ? resource.getId() : null;
+    }
+
+    public void setResourceId(String resourceId) {
+        if (resourceId != null) {
+            this.resource = new Resource(resourceId);
+        } else {
+            this.resource = null;
+        }
+    }
+
+    public Model getInputModel() {
+        return inputModel;
+    }
+
+    public Model getOutputModel() {
+        return outputModel;
+    }
+
+    public List<ComponentEntitySetting> getEntitySettings() {
+        return entitySettings;
+    }
+
+    public void setEntitySettings(List<ComponentEntitySetting> entitySettings) {
+        this.entitySettings = entitySettings;
+    }
+
+    public List<ComponentAttributeSetting> getAttributeSettings() {
+        return attributeSettings;
+    }
+
+    public void setAttributeSettings(List<ComponentAttributeSetting> attributeSettings) {
+        this.attributeSettings = attributeSettings;
+    }
+
+    @Override
+    protected Setting createSettingData() {
+        return new ComponentSetting(id);
     }
 
 }

@@ -8,14 +8,13 @@ import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Component;
-import org.jumpmind.symmetric.is.core.model.ComponentVersion;
-import org.jumpmind.symmetric.is.core.model.ComponentVersionAttributeSetting;
+import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
+import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.model.ModelVersion;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.ExecutionTrackerLogger;
@@ -46,7 +45,7 @@ public class DelimitedFormatterTest {
     @Test
     public void testDelimitedFormatterFromSingleContentMsg() throws Exception {
 
-        IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new FlowVersion()));
+        IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DelimitedFormatter delimitedFormatter = new DelimitedFormatter();
         delimitedFormatter.setFlowStep(delimitedFormatterFlowStep);
         delimitedFormatter.start(executionTracker, null);        
@@ -81,20 +80,19 @@ public class DelimitedFormatterTest {
     private static FlowStep createDelimitedFormatterFlowStep() {
 
         Folder folder = TestUtils.createFolder("Test Folder");
-        FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
-        Component component = TestUtils.createComponent(DelimitedFormatter.TYPE, false);
+        Flow flow = TestUtils.createFlow("TestFlow", folder);
         Setting[] settingData = createDelimitedFormatterSettings();
-        ComponentVersion componentVersion = TestUtils.createComponentVersion(component, null,
-                createInputModelVersion(), null, null, createAttributeSettings(), settingData);
+        Component component = TestUtils.createComponent(DelimitedFormatter.TYPE, false, null,
+                createInputModel(), null, null, createAttributeSettings(), settingData);
 
         FlowStep formatterFlowStep = new FlowStep();
-        formatterFlowStep.setFlowVersionId(flow.getId());
-        formatterFlowStep.setComponentVersionId(componentVersion.getId());
+        formatterFlowStep.setFlowId(flow.getId());
+        formatterFlowStep.setComponentId(component.getId());
         formatterFlowStep.setCreateBy("Test");
         formatterFlowStep.setCreateTime(new Date());
         formatterFlowStep.setLastModifyBy("Test");
         formatterFlowStep.setLastModifyTime(new Date());
-        formatterFlowStep.setComponentVersion(componentVersion);
+        formatterFlowStep.setComponent(component);
         return formatterFlowStep;
     }
     
@@ -106,21 +104,21 @@ public class DelimitedFormatterTest {
         return settingData;
     }
     
-    private static List<ComponentVersionAttributeSetting> createAttributeSettings() { 
+    private static List<ComponentAttributeSetting> createAttributeSettings() { 
         
-        List<ComponentVersionAttributeSetting> attributeSettings = new ArrayList<ComponentVersionAttributeSetting>();
-        attributeSettings.add(new ComponentVersionAttributeSetting("tt1col2", DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL, "10"));
-        attributeSettings.add(new ComponentVersionAttributeSetting("tt1col1", DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL, "20"));
-        attributeSettings.add(new ComponentVersionAttributeSetting("tt2col2", DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL, "30"));
-        attributeSettings.add(new ComponentVersionAttributeSetting("tt2col3", DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL, "50"));
-        attributeSettings.add(new ComponentVersionAttributeSetting("tt1col3", DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL, "100"));
-        attributeSettings.add(new ComponentVersionAttributeSetting("tt2col1", DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL, "120"));
+        List<ComponentAttributeSetting> attributeSettings = new ArrayList<ComponentAttributeSetting>();
+        attributeSettings.add(new ComponentAttributeSetting("tt1col2", DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL, "10"));
+        attributeSettings.add(new ComponentAttributeSetting("tt1col1", DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL, "20"));
+        attributeSettings.add(new ComponentAttributeSetting("tt2col2", DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL, "30"));
+        attributeSettings.add(new ComponentAttributeSetting("tt2col3", DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL, "50"));
+        attributeSettings.add(new ComponentAttributeSetting("tt1col3", DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL, "100"));
+        attributeSettings.add(new ComponentAttributeSetting("tt2col1", DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL, "120"));
                 
         return attributeSettings;
         
     }
     
-    private static ModelVersion createInputModelVersion() {
+    private static Model createInputModel() {
 
         ModelEntity tt1 = new ModelEntity("tt1", "TEST_TABLE_1");
         tt1.addModelAttribute(new ModelAttribute("tt1col1", tt1.getId(), "COL1"));
@@ -132,7 +130,7 @@ public class DelimitedFormatterTest {
         tt2.addModelAttribute(new ModelAttribute("tt2coly", tt1.getId(), "COLY"));
         tt2.addModelAttribute(new ModelAttribute("tt2colz", tt1.getId(), "COLZ"));
 
-        ModelVersion modelVersion = new ModelVersion();
+        Model modelVersion = new Model();
         modelVersion.getModelEntities().put("tt1", tt1);
         modelVersion.getModelEntities().put("tt2", tt2);
 

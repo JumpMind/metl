@@ -16,8 +16,8 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentStatus;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.DeploymentStatus;
+import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.StartType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
@@ -170,12 +170,12 @@ public class AgentRuntime {
         return started;
     }
 
-    public AgentDeployment deploy(FlowVersion flowVersion) {
-        AgentDeployment deployment = agent.getAgentDeploymentFor(flowVersion);
+    public AgentDeployment deploy(Flow flow) {
+        AgentDeployment deployment = agent.getAgentDeploymentFor(flow);
         if (deployment == null) {
-            deployment = new AgentDeployment(flowVersion);
+            deployment = new AgentDeployment(flow);
             deployment.setAgentId(agent.getId());
-            deployment.setFlowVersion(flowVersion);
+            deployment.setFlow(flow);
             configurationService.save(deployment);
 
             List<AgentDeployment> deployments = agent.getAgentDeployments();
@@ -189,24 +189,24 @@ public class AgentRuntime {
 
     private void deploy(final AgentDeployment deployment) {
         try {
-            log.info("Deploying '{}' to '{}'", deployment.getFlowVersion().toString(),
+            log.info("Deploying '{}' to '{}'", deployment.getFlow().toString(),
                     agent.getName());
             
-            configurationService.refresh(deployment.getFlowVersion());
+            configurationService.refresh(deployment.getFlow());
 
             FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory,
                     resourceFactory, new ExecutionTrackerRecorder(agent, deployment, recorder),
                     flowStepsExecutionThreads);
             coordinators.put(deployment, flowRuntime);
 
-            if (deployment.getFlowVersion().asStartType() == StartType.ON_DEPLOY) {
+            if (deployment.getFlow().asStartType() == StartType.ON_DEPLOY) {
                 scheduleNow(deployment);
             } else {
-                if (deployment.getFlowVersion().asStartType() == StartType.SCHEDULED_CRON) {
-                    String cron = deployment.getFlowVersion().getStartExpression();
+                if (deployment.getFlow().asStartType() == StartType.SCHEDULED_CRON) {
+                    String cron = deployment.getFlow().getStartExpression();
                     log.info(
                             "Scheduling '{}' on '{}' with a cron expression of '{}'  The next run time should be at: {}",
-                            new Object[] { deployment.getFlowVersion().toString(),
+                            new Object[] { deployment.getFlow().toString(),
                                     agent.getName(), cron,
                                     new CronSequenceGenerator(cron).next(new Date()) });
 
@@ -219,9 +219,9 @@ public class AgentRuntime {
             }
 
             deployment.setMessage("");
-            log.info("Flow '{}' has been deployed", deployment.getFlowVersion().getName());
+            log.info("Flow '{}' has been deployed", deployment.getFlow().getName());
         } catch (Exception e) {
-            log.warn("Failed to start '{}'", deployment.getFlowVersion().getName(), e);
+            log.warn("Failed to start '{}'", deployment.getFlow().getName(), e);
             deployment.setStatus(DeploymentStatus.ERROR.name());
             deployment.setMessage(ExceptionUtils.getRootCauseMessage(e));
         }
@@ -232,7 +232,7 @@ public class AgentRuntime {
         ScheduledFuture<?> future = scheduled.get(deployment);
         if (future == null || future.isDone()) {
             log.info("Scheduling '{}' on '{}' for now", new Object[] {
-                    deployment.getFlowVersion().toString(), agent.getName() });
+                    deployment.getFlow().toString(), agent.getName() });
 
             FlowRuntime flowRuntime = coordinators.get(deployment);
             String executionId = UUID.randomUUID().toString();
@@ -258,10 +258,10 @@ public class AgentRuntime {
         if (coordinator != null) {
             try {
                 coordinator.stop();
-                log.info("Flow '{}' has been undeployed", deployment.getFlowVersion()
+                log.info("Flow '{}' has been undeployed", deployment.getFlow()
                         .getName());
             } catch (Exception e) {
-                log.warn("Failed to stop '{}'", deployment.getFlowVersion().getName(), e);
+                log.warn("Failed to stop '{}'", deployment.getFlow().getName(), e);
             }
         }
     }
@@ -290,11 +290,11 @@ public class AgentRuntime {
         public void run() {
             try {
                 AgentDeployment deployment = flowRuntime.getDeployment();                
-                log.info("Scheduled '{}' on '{}' is running", deployment.getFlowVersion()
+                log.info("Scheduled '{}' on '{}' is running", deployment.getFlow()
                         .toString(), agent.getName());
                 flowRuntime.start(executionId);
                 flowRuntime.waitForFlowCompletion();
-                log.info("Scheduled '{}' on '{}' is finished", deployment.getFlowVersion()
+                log.info("Scheduled '{}' on '{}' is finished", deployment.getFlow()
                         .toString(), agent.getName());
             } catch (Exception e) {
                 log.error("Error while waiting for the flow to complete", e);

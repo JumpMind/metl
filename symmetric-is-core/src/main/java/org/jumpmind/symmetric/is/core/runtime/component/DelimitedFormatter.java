@@ -12,7 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.csv.CsvWriter;
-import org.jumpmind.symmetric.is.core.model.ComponentVersionAttributeSetting;
+import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
@@ -93,7 +93,7 @@ public class DelimitedFormatter extends AbstractComponent {
     }
     
     private void applySettings() {
-        properties = flowStep.getComponentVersion().toTypedProperties(this, false);
+        properties = flowStep.getComponent().toTypedProperties(this, false);
         delimiter = properties.get(DELIMITED_FORMATTER_DELIMITER);
         quoteCharacter = properties.get(DELIMITED_FORMATTER_QUOTE_CHARACTER);
         convertAttributeSettingsToAttributeFormat();
@@ -101,8 +101,8 @@ public class DelimitedFormatter extends AbstractComponent {
     
     private void convertAttributeSettingsToAttributeFormat() {
         
-        List<ComponentVersionAttributeSetting> attributeSettings = flowStep.getComponentVersion().getAttributeSettings();
-        for (ComponentVersionAttributeSetting attributeSetting : attributeSettings) {
+        List<ComponentAttributeSetting> attributeSettings = flowStep.getComponent().getAttributeSettings();
+        for (ComponentAttributeSetting attributeSetting : attributeSettings) {
             if (attributeSetting.getName().equalsIgnoreCase(DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL)) {
                 attributes.add(new AttributeFormat(attributeSetting.getAttributeId(), Integer.parseInt(attributeSetting.getValue())));
             }

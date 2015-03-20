@@ -12,7 +12,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.csv.CsvWriter;
-import org.jumpmind.symmetric.is.core.model.ComponentVersionAttributeSetting;
+import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
@@ -91,7 +91,7 @@ public class FixedLengthFormatter extends AbstractComponent {
     }
 
     private void applySettings() {
-        properties = flowStep.getComponentVersion().toTypedProperties(this, false);
+        properties = flowStep.getComponent().toTypedProperties(this, false);
         quoteCharacter = properties.get(FIXED_LENGTH_FORMATTER_QUOTE_CHARACTER);
         convertAttributeSettingsToAttributeFormat();
     }
@@ -100,9 +100,9 @@ public class FixedLengthFormatter extends AbstractComponent {
 
         Map<String, AttributeFormat> attributesMap = new HashMap<String, AttributeFormat>();
 
-        List<ComponentVersionAttributeSetting> attributeSettings = flowStep.getComponentVersion()
+        List<ComponentAttributeSetting> attributeSettings = flowStep.getComponent()
                 .getAttributeSettings();
-        for (ComponentVersionAttributeSetting attributeSetting : attributeSettings) {
+        for (ComponentAttributeSetting attributeSetting : attributeSettings) {
             if (attributeSetting.getName().equalsIgnoreCase(
                     FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL)) {
                 if (attributesMap.containsKey(attributeSetting.getAttributeId())) {

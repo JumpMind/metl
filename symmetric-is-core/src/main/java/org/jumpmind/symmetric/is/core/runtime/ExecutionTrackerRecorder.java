@@ -38,9 +38,9 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         execution.setStartTime(new Date());
         execution.setStatus(ExecutionStatus.RUNNING.name());
         execution.setAgentId(deployment.getAgentId());
-        execution.setFlowVersionId(deployment.getFlowVersionId());
+        execution.setFlowId(deployment.getFlowId());
         execution.setAgentName(agent.getName());
-        execution.setFlowName(deployment.getFlowVersion().getFlow().getName());
+        execution.setFlowName(deployment.getFlow().getName());
         this.recorder.record(execution);
     }
 
@@ -64,7 +64,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         }
         step.setExecutionId(executionId);
         step.setStartTime(new Date());
-        step.setComponentName(component.getFlowStep().getComponentVersion().getComponent().getName());
+        step.setComponentName(component.getFlowStep().getComponent().getName());
         step.setFlowStepId(component.getFlowStep().getId());
         step.setStatus(ExecutionStatus.RUNNING.name());
         this.recorder.record(step);

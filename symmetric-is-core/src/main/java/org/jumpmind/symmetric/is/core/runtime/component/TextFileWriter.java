@@ -95,7 +95,7 @@ public class TextFileWriter extends AbstractComponent {
     }
     
     private void applySettings() {
-        properties = flowStep.getComponentVersion().toTypedProperties(this, false);
+        properties = flowStep.getComponent().toTypedProperties(this, false);
         relativePathAndFile = properties.get(TEXTFILEWRITER_RELATIVE_PATH);
         mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
         append = properties.is(TEXTFILEWRITER_APPEND);

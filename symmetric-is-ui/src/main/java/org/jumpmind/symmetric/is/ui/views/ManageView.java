@@ -11,7 +11,6 @@ import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Execution;
 import org.jumpmind.symmetric.is.core.model.Flow;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.Category;
@@ -207,13 +206,10 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         	Map<String, Object> params = new HashMap<String, Object>();
     		if (currentSelection instanceof Agent) {
     			params.put("agentId", ((Agent) currentSelection).getId());
-    		} else if (currentSelection instanceof FlowVersion) {
-    			params.put("flowVersionId", ((FlowVersion) currentSelection).getId());    			
     		} else if (currentSelection instanceof Flow) {
-    			FlowVersion flowVersion = ((Flow) currentSelection).getLatestFlowVersion();
-    			params.put("flowVersionId", flowVersion.getId());    			
+    			params.put("flowId", ((Flow) currentSelection).getId());    			
     		} else if (currentSelection instanceof AgentDeployment) {
-    			params.put("flowVersionId", ((AgentDeployment) currentSelection).getFlowVersionId());
+    			params.put("flowId", ((AgentDeployment) currentSelection).getFlowId());
     		}
 
     		if (params.size() > 0) {

@@ -9,11 +9,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.Component;
+import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
-import org.jumpmind.symmetric.is.core.model.ComponentVersion;
-import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
@@ -115,21 +114,20 @@ public class TextFileReaderTest {
     private static FlowStep createTextReaderFlowStep() {
 
         Folder folder = TestUtils.createFolder("Test Folder");
-        FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
-        Component component = TestUtils.createComponent(TextFileReader.TYPE, false);
+        Flow flow = TestUtils.createFlow("TestFlow", folder);
         Setting[] settingData = createReaderSettings();
-        ComponentVersion componentVersion = TestUtils.createComponentVersion(component, 
+        Component component = TestUtils.createComponent(TextFileReader.TYPE, false, 
                 createResource(createResourceSettings()), null,
                 null, null, null, settingData);
-        componentVersion.setResource(createResource(createResourceSettings()));
+        component.setResource(createResource(createResourceSettings()));
         FlowStep readerComponent = new FlowStep();
-        readerComponent.setFlowVersionId(flow.getId());
-        readerComponent.setComponentVersionId(componentVersion.getId());
+        readerComponent.setFlowId(flow.getId());
+        readerComponent.setComponentId(component.getId());
         readerComponent.setCreateBy("Test");
         readerComponent.setCreateTime(new Date());
         readerComponent.setLastModifyBy("Test");
         readerComponent.setLastModifyTime(new Date());
-        readerComponent.setComponentVersion(componentVersion);
+        readerComponent.setComponent(component);
         return readerComponent;
     }
 

@@ -20,7 +20,7 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     	this.executionTracker = executionTracker;
         this.resourceFactory = resourceFactory;
 
-        Resource resource = flowStep.getComponentVersion().getResource();
+        Resource resource = flowStep.getComponent().getResource();
         if (resource != null) {
             try {
                 this.resource = resourceFactory.create(resource);

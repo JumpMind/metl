@@ -4,7 +4,7 @@ public class AgentDeployment extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
-    FlowVersion flowVersion;    
+    Flow flow;    
 
     String agentId;
 
@@ -17,12 +17,12 @@ public class AgentDeployment extends AbstractObject {
     public AgentDeployment() {
     }
 
-    public AgentDeployment(FlowVersion flowVersion) {
-        setFlowVersion(flowVersion);
+    public AgentDeployment(Flow flow) {
+        setFlow(flow);
     }
     
-    public void setFlowVersion(FlowVersion flowVersion) {
-        this.flowVersion = flowVersion;
+    public void setFlow(Flow flow) {
+        this.flow = flow;
     }
 
     public String getAgentId() {
@@ -33,16 +33,16 @@ public class AgentDeployment extends AbstractObject {
         this.agentId = agentId;
     }
 
-    public String getFlowVersionId() {
-    	return flowVersion != null ? flowVersion.getId() : null;
+    public String getFlowId() {
+    	return flow != null ? flow.getId() : null;
     }
 
-    public void setFlowVersionId(String flowVersionId) {
-        if (flowVersionId != null) {
-            this.flowVersion = new FlowVersion();
-            this.flowVersion.setId(flowVersionId);
+    public void setFlowId(String flowId) {
+        if (flowId != null) {
+            this.flow = new Flow();
+            this.flow.setId(flowId);
         } else {
-            this.flowVersion = null;
+            this.flow = null;
         }
     }
 
@@ -75,18 +75,18 @@ public class AgentDeployment extends AbstractObject {
     }
 
     public String getName() {
-        return flowVersion.getFlow().getName();
+        return flow.getName();
     }
 
     public void setName(String name) {
     }
 
-    public FlowVersion getFlowVersion() {
-        return flowVersion;
+    public Flow getFlow() {
+        return flow;
     }
 
     @Override
     public String toString() {
-        return flowVersion.getName();
+        return flow.getName();
     }
 }
