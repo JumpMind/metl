@@ -75,17 +75,20 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.addValueChangeListener(new TreeTableValueChangeListener());
 		addComponent(treeTable);
 		setExpandRatio(treeTable, 1.0f);
-
-        for (ModelEntity e : model.getModelEntities().values()) {
-        	addModelEntity(e);
-        	for (ModelAttribute a : e.getModelAttributes()) {
-        		a.setEntity(e);
-        		addModelAttribute(a);
-        	}
-        	treeTable.setCollapsed(e, false);
-        }
+		addAll(model.getModelEntities().values());
 	}
 	
+	protected void addAll(Collection<ModelEntity> modelEntityList) {
+		for (ModelEntity e : modelEntityList) {
+			addModelEntity(e);
+			for (ModelAttribute a : e.getModelAttributes()) {
+				a.setEntity(e);
+				addModelAttribute(a);
+			}
+			treeTable.setCollapsed(e, false);
+		}
+	}
+
 	@Override
 	public boolean closing() {
 		return true;
@@ -168,7 +171,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 			if (itemIds.size() > 0) {
 		        ModelAttribute a = new ModelAttribute();
 		        a.setName("New Attribute");
-		        a.setDataType(DataType.STRING);
+		        a.setDataType(DataType.VARCHAR);
 				Object itemId = itemIds.iterator().next();
 				if (itemId instanceof ModelEntity) {
 					a.setEntity((ModelEntity) itemId);
@@ -219,10 +222,18 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 		}
 	}
 
-	class ImportClickListener implements ClickListener {
+	class ImportClickListener implements ClickListener, TableColumnSelectListener {
 		public void buttonClick(ClickEvent event) {
-			TableColumnSelectWindow w = new TableColumnSelectWindow(context);
+			TableColumnSelectWindow w = new TableColumnSelectWindow(context, model);
+			w.setTableColumnSelectListener(this);
 			UI.getCurrent().addWindow(w);
+		}
+		
+		public void selected(Collection<ModelEntity> modelEntityCollection) {
+			for (ModelEntity e : modelEntityCollection) {
+				context.getConfigurationService().save(e);
+			}
+			addAll(modelEntityCollection);
 		}
 	}
 
