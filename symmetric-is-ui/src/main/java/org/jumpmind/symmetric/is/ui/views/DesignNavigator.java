@@ -117,12 +117,12 @@ public class DesignNavigator extends AbstractFolderNavigator {
         if (item instanceof Flow) {
             Flow flow = (Flow) item;
             EditFlowPanel flowLayout = new EditFlowPanel(context, flow, this, tabs);
-            tabs.addCloseableTab(flow.getId(), flow.getName() + " " + flow.getName(), Icons.FLOW,
+            tabs.addCloseableTab(flow.getId(), flow.getName(), Icons.FLOW,
                     flowLayout);
         } else if (item instanceof Model) {
             Model model = (Model) item;
             EditModelPanel editModel = new EditModelPanel(context, model);
-            tabs.addCloseableTab(model.getId(), model.getName() + " " + model.getName(),
+            tabs.addCloseableTab(model.getId(), model.getName(),
                     Icons.MODEL, editModel);
         } else if (item instanceof Resource) {
             Resource resource = (Resource) item;
@@ -199,6 +199,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
     @Override
     protected boolean isDeleteButtonEnabled(Object selected) {
+ 
         boolean deleteButtonEnabled = super.isDeleteButtonEnabled(selected);
         if (selected instanceof Flow) {
             Flow flow = (Flow) selected;

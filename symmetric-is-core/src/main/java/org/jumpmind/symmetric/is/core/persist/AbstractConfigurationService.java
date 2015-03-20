@@ -222,8 +222,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
         persistenceManager.refresh(component, null, null, tableName(Component.class));
 
-        if (isNotBlank(component.getInputModeldId())) {
-            component.setInputModel(findModel(component.getInputModeldId()));
+        if (isNotBlank(component.getInputModelId())) {
+            component.setInputModel(findModel(component.getInputModelId()));
         }
         if (isNotBlank(component.getOutputModelId())) {
             component.setOutputModel(findModel(component.getOutputModelId()));

@@ -7,8 +7,10 @@ import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObjectWithSettings;
 import org.jumpmind.symmetric.is.core.model.Component;
-import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
@@ -16,6 +18,7 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.component.MessageType;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
@@ -45,7 +48,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
     IConfigurationService configurationService;
 
     IResourceFactory resourceFactory;
-    
+
     Object value;
 
     public PropertySheet(ApplicationContext context) {
@@ -55,7 +58,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         setSizeFull();
         addStyleName("noborder");
     }
-    
+
     public Object getValue() {
         return value;
     }
@@ -70,19 +73,19 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         FormLayout formLayout = new FormLayout();
         formLayout.setWidth(100, Unit.PERCENTAGE);
         formLayout.setMargin(false);
-        formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);        
+        formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
 
         if (obj != null) {
             if (obj instanceof FlowStep) {
                 obj = ((FlowStep) obj).getComponent();
             }
-            
+
             if (obj instanceof Component) {
-                Component version = (Component)obj;
-                configurationService.refresh(version);                
-                addComponentProperties(formLayout, version);
+                Component component = (Component) obj;
+                configurationService.refresh(component);
+                addComponentProperties(formLayout, component);
             } else if (obj instanceof Flow) {
-                addFlowSpecificProperties(formLayout, (Flow)obj);
+                addFlowSpecificProperties(formLayout, (Flow) obj);
             }
 
             if (obj instanceof AbstractObjectWithSettings) {
@@ -96,18 +99,85 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         }
         setContent(formLayout);
     }
-    
+
     protected void addComponentProperties(FormLayout formLayout, Component component) {
-        ComponentDefinition definition = componentFactory.getComponentDefinitionForComponentType(component
-                .getType());
-        addResourceCombo(definition, formLayout, component);        
+        ComponentDefinition componentDefintion = componentFactory
+                .getComponentDefinitionForComponentType(component.getType());
+        addResourceCombo(componentDefintion, formLayout, component);
+        addInputModelCombo(componentDefintion, formLayout, component);
+        addOutputModelCombo(componentDefintion, formLayout, component);
     }
-    
+
     protected void addFlowSpecificProperties(FormLayout formLayout, Flow version) {
-        
+
     }
-    
-    protected void addResourceCombo(ComponentDefinition componentDefintion, FormLayout formLayout, final Component version) {
+
+    protected void addOutputModelCombo(ComponentDefinition componentDefintion,
+            FormLayout formLayout, final Component component) {
+        if (value instanceof FlowStep) {
+            FlowStep step = (FlowStep) value;
+            Flow flow = configurationService.findFlow(step.getFlowId());
+            Folder folder = flow.getFolder();
+            if (componentDefintion.outgoingMessage() == MessageType.ENTITY_MESSAGE) {
+                final AbstractSelect combo = new ComboBox("Output Model");
+                combo.setImmediate(true);
+                combo.setNullSelectionAllowed(true);
+                List<Model> models = configurationService.findModelsInFolder(folder);
+                if (models != null) {
+                    for (Model model : models) {
+                        combo.addItem(model);
+                    }
+                    combo.setValue(component.getOutputModel());
+                }
+                combo.addValueChangeListener(new ValueChangeListener() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public void valueChange(ValueChangeEvent event) {
+                        component.setOutputModel((Model) combo.getValue());
+                        configurationService.save(component);
+                    }
+                });
+
+                formLayout.addComponent(combo);
+            }
+        }
+    }
+
+    protected void addInputModelCombo(ComponentDefinition componentDefintion,
+            FormLayout formLayout, final Component component) {
+        if (value instanceof FlowStep) {
+            FlowStep step = (FlowStep) value;
+            Flow flow = configurationService.findFlow(step.getFlowId());
+            Folder folder = flow.getFolder();
+            if (componentDefintion.inputMessage() == MessageType.ENTITY_MESSAGE) {
+                final AbstractSelect combo = new ComboBox("Input Model");
+                combo.setImmediate(true);
+                combo.setNullSelectionAllowed(true);
+                List<Model> models = configurationService.findModelsInFolder(folder);
+                if (models != null) {
+                    for (Model model : models) {
+                        combo.addItem(model);
+                    }
+                    combo.setValue(component.getInputModel());
+                }
+                combo.addValueChangeListener(new ValueChangeListener() {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public void valueChange(ValueChangeEvent event) {
+                        component.setInputModel((Model) combo.getValue());
+                        configurationService.save(component);
+                    }
+                });
+
+                formLayout.addComponent(combo);
+            }
+        }
+    }
+
+    protected void addResourceCombo(ComponentDefinition componentDefintion, FormLayout formLayout,
+            final Component component) {
         if (componentDefintion.resourceCategory() != null
                 && componentDefintion.resourceCategory() != ResourceCategory.NONE) {
             final AbstractSelect resourcesCombo = new ComboBox("Resource");
@@ -123,7 +193,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                         resourcesCombo.addItem(resource);
                     }
 
-                    resourcesCombo.setValue(version.getResource());
+                    resourcesCombo.setValue(component.getResource());
                 }
             }
             resourcesCombo.addValueChangeListener(new ValueChangeListener() {
@@ -131,8 +201,8 @@ public class PropertySheet extends Panel implements ValueChangeListener {
 
                 @Override
                 public void valueChange(ValueChangeEvent event) {
-                    version.setResource((Resource) resourcesCombo.getValue());
-                    configurationService.save(version);
+                    component.setResource((Resource) resourcesCombo.getValue());
+                    configurationService.save(component);
                 }
             });
 
@@ -143,8 +213,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
     protected Map<String, SettingDefinition> buildSettings(Object obj) {
         if (obj instanceof Component) {
             Component component = (Component) obj;
-            return componentFactory.getSettingDefinitionsForComponentType(component
-                    .getType());
+            return componentFactory.getSettingDefinitionsForComponentType(component.getType());
         } else if (obj instanceof Resource) {
             Resource resource = (Resource) obj;
             return resourceFactory.getSettingDefinitionsForResourceType(resource.getType());
