@@ -354,7 +354,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                         configurationService.delete(link);
                         redrawFlow();
                     }
-
                 }
             } else if (e instanceof LinkSelectedEvent) {
                 LinkSelectedEvent event = (LinkSelectedEvent) e;
