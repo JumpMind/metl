@@ -165,11 +165,13 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
             });
         });
         instance.bind("click", function(connection, originalEvent) {
-            unselectAll();
+            unselectAll();            
+            state.selectedNodeId = null;
             instance.detach(connection, {fireEvent:false});
             connection = instance.connect({
                 uuids : [ "source-" + connection.sourceId, "target-" + connection.targetId ],
-                editable : true
+                editable : true,
+                fireEvent:false
             });
             connection.toggleType("selected");
             self.onLinkSelected({
