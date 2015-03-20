@@ -28,7 +28,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                 .queryForInt(
                         String.format(
                                 "select count(*) from %1$s_agent_deployment where flow_version_id in "
-                                        + "(select flow_version_id from %1$s_flow_version where flow_id=?)",
+                                        + "(select id from %1$s_flow_version where flow_id=?)",
                                 tablePrefix), flow.getId()) > 0;
     }
 

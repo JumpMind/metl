@@ -67,6 +67,10 @@ public class DbReader extends AbstractComponent {
 
         componentStatistics.incrementInboundMessages();
         
+        if (resource == null) {
+            throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
+        }
+        
         NamedParameterJdbcTemplate template = getJdbcTemplate();
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
