@@ -12,6 +12,7 @@ public class NoOpProcessor extends AbstractComponent {
     @Override
     public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
         componentStatistics.incrementInboundMessages();
+        componentStatistics.incrementOutboundMessages();
         messageTarget.put(inputMessage);
     }
 

@@ -7,11 +7,9 @@ import java.util.List;
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Model;
-import org.jumpmind.symmetric.is.core.model.ModelVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
@@ -54,7 +52,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
         super(FolderType.DESIGN, context.getConfigurationService());
         this.context = context;
         this.tabs = tabs;
-        this.tabs.addCloseHandler(new CloseHandler() {            
+        this.tabs.addCloseHandler(new CloseHandler() {
             @Override
             public void onTabClose(TabSheet tabsheet, Component tabContent) {
                 treeTable.focus();
@@ -111,25 +109,21 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
     @Override
     protected void openItem(Object item) {
-        if (item instanceof Flow) {
-            item = ((Flow) item).getLatestFlowVersion();
-        } else if (item instanceof Model) {
-            item = ((Model) item).getLatestModelVersion();
-        } else if (item instanceof FlowStep) {
-            String flowVersionId = ((FlowStep)item).getFlowVersionId();
-            item = configurationService.findFlowVersion(flowVersionId);
+        if (item instanceof FlowStep) {
+            String flowId = ((FlowStep) item).getFlowId();
+            item = configurationService.findFlow(flowId);
         }
 
-        if (item instanceof FlowVersion) {
-            FlowVersion flowVersion = (FlowVersion) item;
-            EditFlowPanel flowLayout = new EditFlowPanel(context, flowVersion, this, tabs);
-            tabs.addCloseableTab(flowVersion.getId(), flowVersion.getFlow().getName() + " "
-                    + flowVersion.getName(), Icons.FLOW, flowLayout);
-        } else if (item instanceof ModelVersion) {
-            ModelVersion modelVersion = (ModelVersion) item;
-            EditModelPanel editModel = new EditModelPanel(context, modelVersion);
-            tabs.addCloseableTab(modelVersion.getModelId(), modelVersion.getModel().getName() + " "
-                    + modelVersion.getName(), Icons.MODEL, editModel);
+        if (item instanceof Flow) {
+            Flow flow = (Flow) item;
+            EditFlowPanel flowLayout = new EditFlowPanel(context, flow, this, tabs);
+            tabs.addCloseableTab(flow.getId(), flow.getName(), Icons.FLOW,
+                    flowLayout);
+        } else if (item instanceof Model) {
+            Model model = (Model) item;
+            EditModelPanel editModel = new EditModelPanel(context, model);
+            tabs.addCloseableTab(model.getId(), model.getName(),
+                    Icons.MODEL, editModel);
         } else if (item instanceof Resource) {
             Resource resource = (Resource) item;
             PropertySheet sheet = new PropertySheet(context);
@@ -148,18 +142,18 @@ public class DesignNavigator extends AbstractFolderNavigator {
         newModel.setEnabled(enabled);
         updatePropertySheet();
     }
-    
+
     protected void updatePropertySheet() {
         AbstractObject obj = getSingleSelection(AbstractObject.class);
         if (obj instanceof FlowStep && designPropertySheet != null) {
-            FlowStep step = (FlowStep)obj;
+            FlowStep step = (FlowStep) obj;
             if (tabs.getSelectedTab() instanceof EditFlowPanel) {
-                EditFlowPanel panel = (EditFlowPanel)tabs.getSelectedTab();
-                if (panel.getFlowVersion().getId().equals(step.getFlowVersionId())) {
+                EditFlowPanel panel = (EditFlowPanel) tabs.getSelectedTab();
+                if (panel.getFlow().getId().equals(step.getFlowId())) {
                     panel.selected(step);
                 }
             }
-        }        
+        }
     }
 
     public void setDesignPropertySheet(PropertySheet designPropertySheet) {
@@ -205,17 +199,13 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
     @Override
     protected boolean isDeleteButtonEnabled(Object selected) {
+ 
         boolean deleteButtonEnabled = super.isDeleteButtonEnabled(selected);
         if (selected instanceof Flow) {
             Flow flow = (Flow) selected;
             if (!configurationService.isDeployed(flow)) {
                 deleteButtonEnabled |= true;
             }
-        } else if (selected instanceof FlowVersion) {
-            if (!configurationService.isFlowVersionDeployed(((FlowVersion) selected).getId())) {
-                deleteButtonEnabled |= true;
-            }
-
         } else if (selected instanceof FlowStep) {
             deleteButtonEnabled |= true;
         }
@@ -260,21 +250,13 @@ public class DesignNavigator extends AbstractFolderNavigator {
             model.setName("New Model");
             configurationService.save(model);
 
-            ModelVersion modelVersion = new ModelVersion(model);
-            modelVersion.setVersionName("version 1.0");
-            model.getModelVersions().add(modelVersion);
-
-            configurationService.save(modelVersion);
-
             treeTable.addItem(model);
             treeTable.setItemIcon(model, Icons.MODEL);
             treeTable.setParent(model, folder);
-            treeTable.addItem(modelVersion);
-            treeTable.setItemIcon(modelVersion, Icons.FLOW_VERSION);
-            treeTable.setParent(modelVersion, model);
-
+            this.treeTable.setChildrenAllowed(model, false);
+            
             treeTable.setCollapsed(folder, false);
-
+            
             startEditingItem(model);
         }
     }
@@ -287,18 +269,9 @@ public class DesignNavigator extends AbstractFolderNavigator {
             flow.setName("New Flow");
             configurationService.save(flow);
 
-            FlowVersion flowVersion = new FlowVersion(flow);
-            flowVersion.setVersionName("version 1.0");
-            flow.getFlowVersions().add(flowVersion);
-
-            configurationService.save(flowVersion);
-
             treeTable.addItem(flow);
             treeTable.setItemIcon(flow, Icons.FLOW);
             treeTable.setParent(flow, folder);
-            treeTable.addItem(flowVersion);
-            treeTable.setItemIcon(flowVersion, Icons.FLOW_VERSION);
-            treeTable.setParent(flowVersion, flow);
 
             treeTable.setCollapsed(folder, false);
 
@@ -328,24 +301,16 @@ public class DesignNavigator extends AbstractFolderNavigator {
             this.treeTable.setItemIcon(flow, Icons.FLOW);
             this.treeTable.setParent(flow, folder);
 
-            List<FlowVersion> versions = flow.getFlowVersions();
-            for (FlowVersion flowVersion : versions) {
-                this.treeTable.addItem(flowVersion);
-                this.treeTable.setItemCaption(flowVersion, flowVersion.getVersionName());
-                this.treeTable.setItemIcon(flowVersion, Icons.FLOW_VERSION);
-                this.treeTable.setParent(flowVersion, flow);
+            List<FlowStep> flowSteps = flow.getFlowSteps();
 
-                List<FlowStep> flowSteps = flowVersion.getFlowSteps();
+            this.treeTable.setChildrenAllowed(flow, flowSteps.size() > 0);
 
-                this.treeTable.setChildrenAllowed(flowVersion, flowSteps.size() > 0);
-
-                for (FlowStep flowStep : flowSteps) {
-                    this.treeTable.addItem(flowStep);
-                    this.treeTable.setItemCaption(flowStep, flowStep.getName());
-                    this.treeTable.setItemIcon(flowStep, Icons.COMPONENT);
-                    this.treeTable.setParent(flowStep, flowVersion);
-                    this.treeTable.setChildrenAllowed(flowStep, false);
-                }
+            for (FlowStep flowStep : flowSteps) {
+                this.treeTable.addItem(flowStep);
+                this.treeTable.setItemCaption(flowStep, flowStep.getName());
+                this.treeTable.setItemIcon(flowStep, Icons.COMPONENT);
+                this.treeTable.setParent(flowStep, flow);
+                this.treeTable.setChildrenAllowed(flowStep, false);
             }
         }
     }
@@ -356,15 +321,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
             this.treeTable.addItem(model);
             this.treeTable.setItemIcon(model, Icons.MODEL);
             this.treeTable.setParent(model, folder);
-
-            List<ModelVersion> versions = model.getModelVersions();
-            for (ModelVersion modelVersion : versions) {
-                this.treeTable.addItem(modelVersion);
-                this.treeTable.setItemCaption(modelVersion, modelVersion.getVersionName());
-                this.treeTable.setItemIcon(modelVersion, Icons.FLOW_VERSION);
-                this.treeTable.setParent(modelVersion, model);
-                this.treeTable.setChildrenAllowed(modelVersion, false);
-            }
+            this.treeTable.setChildrenAllowed(model, false);
         }
     }
 
@@ -372,31 +329,25 @@ public class DesignNavigator extends AbstractFolderNavigator {
     protected void finishEditingItem() {
         Object beingEditted = itemBeingEdited;
         super.finishEditingItem();
-        String flowVersionId = getFlowVersionIdFor(beingEditted);
+        String flowVersionId = getFlowIdFor(beingEditted);
         if (flowVersionId != null) {
             if (tabs.closeTab(flowVersionId)) {
-                openItem(configurationService.findFlowVersion(flowVersionId));
+                openItem(configurationService.findFlow(flowVersionId));
             }
         }
     }
 
-    protected String getFlowVersionIdFor(Object obj) {
-        String flowVersionId = null;
+    protected String getFlowIdFor(Object obj) {
+        String flowId = null;
         if (obj instanceof FlowStep) {
-            flowVersionId = ((FlowStep) obj).getFlowVersionId();
-        }
-
-        if (obj instanceof FlowVersion) {
-            flowVersionId = ((FlowVersion) obj).getId();
+            flowId = ((FlowStep) obj).getFlowId();
         }
 
         if (obj instanceof Flow) {
-            FlowVersion version = ((Flow) obj).getLatestFlowVersion();
-            if (version != null) {
-                flowVersionId = version.getId();
-            }
+            flowId = ((Flow) obj).getId();
         }
-        return flowVersionId;
+
+        return flowId;
     }
 
     class DeleteFlowConfirmationListener implements IConfirmListener {
@@ -414,11 +365,8 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
         @Override
         public boolean onOk() {
-            configurationService.delete(toDelete);
-            List<FlowVersion> versions = toDelete.getFlowVersions();
-            for (FlowVersion flowVersion : versions) {
-                tabs.closeTab(flowVersion.getId());
-            }
+            configurationService.deleteFlow(toDelete);
+            tabs.closeTab(toDelete.getId());
             refresh();
             expand(toDelete.getFolder(), toDelete.getFolder());
             deleteTreeItems(alsoDelete);
@@ -465,12 +413,12 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
         @Override
         public boolean onOk() {
-            String flowVersionId = toDelete.getFlowVersionId();
-            FlowVersion flowVersion = configurationService.findFlowVersion(flowVersionId);
+            String flowVersionId = toDelete.getFlowId();
+            Flow flowVersion = configurationService.findFlow(flowVersionId);
 
             configurationService.delete(flowVersion, toDelete);
             if (tabs.closeTab(flowVersionId)) {
-                openItem(configurationService.findFlowVersion(flowVersionId));
+                openItem(configurationService.findFlow(flowVersionId));
             }
 
             refresh();

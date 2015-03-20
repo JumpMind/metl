@@ -7,7 +7,7 @@ import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
+import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.runtime.ExecutionTrackerLogger;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentFactory;
@@ -49,7 +49,7 @@ public class FlowRuntimeTest {
     @Test
     public void simpleTwoStepNoOp() throws Exception {
     	
-    	FlowVersion flow = createSimpleTwoStepNoOpFlow(folder);
+    	Flow flow = createSimpleTwoStepNoOpFlow(folder);
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);	
     	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
     			new ExecutionTrackerLogger(deployment), threadService);
@@ -61,7 +61,7 @@ public class FlowRuntimeTest {
     
     @Test
     public void singleSrcToTwoTarget() throws Exception {
-    	FlowVersion flow = createSrcToTwoTargetFlow(folder);
+    	Flow flow = createSrcToTwoTargetFlow(folder);
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
     	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
     			new ExecutionTrackerLogger(deployment), threadService);
@@ -74,7 +74,7 @@ public class FlowRuntimeTest {
     
     @Test
     public void twoSrcOneTarget() throws Exception {
-        FlowVersion flow = createTwoSrcToOneTargetFlow(folder);
+        Flow flow = createTwoSrcToOneTargetFlow(folder);
         AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
         FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
                 new ExecutionTrackerLogger(deployment), threadService);
@@ -85,9 +85,9 @@ public class FlowRuntimeTest {
         Assert.assertEquals(2, flowRuntime.getComponentStatistics("Target Step").getNumberInboundMessages());     
     }
     
-    private FlowVersion createSimpleTwoStepNoOpFlow(Folder folder) {
+    private Flow createSimpleTwoStepNoOpFlow(Folder folder) {
 
-    	FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
+    	Flow flow = TestUtils.createFlow("TestFlow", folder);
     	FlowStep srcNoOpStep = TestUtils.createNoOpProcessorFlowStep(flow, "Src Step", folder);
     	FlowStep targetNoOpStep = TestUtils.createNoOpProcessorFlowStep(flow, "Target Step", folder);
     	flow.getFlowStepLinks().add(TestUtils.createComponentLink(srcNoOpStep, targetNoOpStep));
@@ -97,9 +97,9 @@ public class FlowRuntimeTest {
     	return flow;
     }
 
-    private FlowVersion createSrcToTwoTargetFlow(Folder folder) {
+    private Flow createSrcToTwoTargetFlow(Folder folder) {
 
-    	FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
+    	Flow flow = TestUtils.createFlow("TestFlow", folder);
     	FlowStep srcNoOpStep = TestUtils.createNoOpProcessorFlowStep(flow, "Src Step", folder);
     	FlowStep targetNoOpStep1 = TestUtils.createNoOpProcessorFlowStep(flow, "Target Step 1", folder);
     	FlowStep targetNoOpStep2 = TestUtils.createNoOpProcessorFlowStep(flow, "Target Step 2", folder);    	
@@ -112,9 +112,9 @@ public class FlowRuntimeTest {
     	return flow;   	
     } 
     
-    private FlowVersion createTwoSrcToOneTargetFlow(Folder folder) {
+    private Flow createTwoSrcToOneTargetFlow(Folder folder) {
 
-        FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
+        Flow flow = TestUtils.createFlow("TestFlow", folder);
         FlowStep srcNoOpStep1 = TestUtils.createNoOpProcessorFlowStep(flow, "Src Step 1", folder);
         FlowStep srcNoOpStep2 = TestUtils.createNoOpProcessorFlowStep(flow, "Src Step 2", folder);
         FlowStep targetNoOpStep = TestUtils.createNoOpProcessorFlowStep(flow, "Target Step", folder);

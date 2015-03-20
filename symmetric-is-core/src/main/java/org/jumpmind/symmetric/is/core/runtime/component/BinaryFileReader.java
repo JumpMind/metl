@@ -81,7 +81,7 @@ public class BinaryFileReader extends AbstractComponent {
     }
     
     private void applySettings() {
-        properties = flowStep.getComponentVersion().toTypedProperties(this, false);
+        properties = flowStep.getComponent().toTypedProperties(this, false);
         relativePathAndFile = properties.get(BINARYFILEREADER_RELATIVE_PATH);
         mustExist = properties.is(BINARYFILEREADER_MUST_EXIST);
         sizePerMessage = properties.getInt(BINARYFILEREADER_SIZE_PER_MESSAGE);

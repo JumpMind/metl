@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
+import org.jumpmind.symmetric.is.core.model.Flow;
 
 public interface IAgentManager {
 
@@ -20,7 +20,7 @@ public interface IAgentManager {
     
     public void undeploy(AgentDeployment deployment);
     
-    public AgentDeployment deploy(String agentId, FlowVersion flowVersion);
+    public AgentDeployment deploy(String agentId, Flow flow);
     
     public void start();
     

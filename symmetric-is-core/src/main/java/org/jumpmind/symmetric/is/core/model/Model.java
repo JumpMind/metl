@@ -1,92 +1,103 @@
 package org.jumpmind.symmetric.is.core.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+
+import org.jumpmind.util.LinkedCaseInsensitiveMap;
 
 public class Model extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
-    
+
     Folder folder;
-    
-    List<ModelVersion> modelVersions;
-    
-    String name; 
-    
+
+    String name;
+
     String type = "NORMAL";
-    
+
     String folderId;
-    
+
+    Map<String, ModelEntity> modelEntities;
+
     boolean shared;
 
     public Model() {
-    	modelVersions = new ArrayList<ModelVersion>();
+        this.modelEntities = new LinkedCaseInsensitiveMap<ModelEntity>();
     }
     
-    public Model(Folder folder) {
-    	this();
-    	this.folder = folder;
-    	this.folderId = folder.getId();
+    public Model(String id) {
+        this();
+        this.setId(id);
     }
 
-    public ModelVersion getLatestModelVersion() {
-        ModelVersion latest = null;
-        for (ModelVersion modelVersion : modelVersions) {
-            if (latest == null
-                    || latest.getCreateTime().before(modelVersion.getCreateTime())) {
-                latest = modelVersion;
+    public Model(Folder folder) {
+        this();
+        this.folder = folder;
+        this.folderId = folder.getId();
+    }
+
+    public Folder getFolder() {
+        return folder;
+    }
+
+    public void setFolder(Folder folder) {
+        this.folder = folder;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getFolderId() {
+        return folderId;
+    }
+
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
+    }
+
+    public boolean isShared() {
+        return shared;
+    }
+
+    public void setShared(boolean shared) {
+        this.shared = shared;
+    }
+
+    public ModelEntity getEntityByName(String entityName) {
+        for (ModelEntity entity : modelEntities.values()) {
+            if (entity.getName().equalsIgnoreCase(entityName)) {
+                return entity;
             }
         }
-        return latest;
+        return null;
     }
 
-	public Folder getFolder() {
-		return folder;
-	}
-
-	public void setFolder(Folder folder) {
-		this.folder = folder;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public String getFolderId() {
-		return folderId;
-	}
-
-	public void setFolderId(String folderId) {
-		this.folderId = folderId;
-	}
-
-	public boolean isShared() {
-		return shared;
-	}
-
-	public void setShared(boolean shared) {
-		this.shared = shared;
-	}
-
-	public List<ModelVersion> getModelVersions() {
-		return modelVersions;
-	}
-
-	public void setModelVersions(List<ModelVersion> modelVersions) {
-		this.modelVersions = modelVersions;
-	}
+    public ModelAttribute getAttributeByName(String entityName, String attributeName) {
+        ModelEntity entity = getEntityByName(entityName);
+        if (entity != null) {
+            for (ModelAttribute modelAttribute : entity.getModelAttributes()) {
+                if (modelAttribute.getName().equalsIgnoreCase(attributeName)) {
+                    return modelAttribute;
+                }
+            }
+        }
+        return null;
+    }
     
-    
+    public Map<String, ModelEntity> getModelEntities() {
+        return modelEntities;
+    }
+
 }

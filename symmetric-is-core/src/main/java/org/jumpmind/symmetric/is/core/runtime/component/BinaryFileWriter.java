@@ -77,7 +77,7 @@ public class BinaryFileWriter extends AbstractComponent {
     }
     
     private void applySettings() {
-        properties = flowStep.getComponentVersion().toTypedProperties(this, false);
+        properties = flowStep.getComponent().toTypedProperties(this, false);
         relativePathAndFile = properties.get(BINARYFILEWRITER_RELATIVE_PATH);
         mustExist = properties.is(BINARYFILEWRITER_MUST_EXIST);
         append = properties.is(BINARYFILEWRITER_APPEND);

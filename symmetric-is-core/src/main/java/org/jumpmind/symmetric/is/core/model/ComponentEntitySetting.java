@@ -1,18 +1,18 @@
 package org.jumpmind.symmetric.is.core.model;
 
-public class ComponentVersionEntitySetting extends Setting {
+public class ComponentEntitySetting extends Setting {
 
     private static final long serialVersionUID = 1L;
 
-    String componentVersionId;
+    String componentId;
     String entityId;
 
-    public void setComponentVersionId(String componentVersionId) {
-        this.componentVersionId = componentVersionId;
+    public void setComponentId(String componentId) {
+        this.componentId = componentId;
     }
 
-    public String getComponentVersionId() {
-        return componentVersionId;
+    public String getComponentId() {
+        return componentId;
     }
 
     public String getEntityId() {

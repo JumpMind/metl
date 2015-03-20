@@ -89,7 +89,7 @@ public class TextFileReader extends AbstractComponent {
     }
 
     private void applySettings() {
-        properties = flowStep.getComponentVersion().toTypedProperties(this, false);
+        properties = flowStep.getComponent().toTypedProperties(this, false);
         relativePathAndFile = properties.get(TEXTFILEREADER_RELATIVE_PATH);
         mustExist = properties.is(TEXTFILEREADER_MUST_EXIST);
         textRowsPerMessage = properties.getInt(TEXTFILEREADER_ROWS_PER_MESSAGE);

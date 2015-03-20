@@ -19,13 +19,12 @@ import org.jumpmind.db.sql.DmlStatement.DmlType;
 import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Component;
-import org.jumpmind.symmetric.is.core.model.ComponentVersion;
+import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.model.ModelVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
@@ -119,7 +118,7 @@ public class DbReaderTest {
     @Test
     public void testReaderFlowFromStartupMsg() throws Exception {
 
-        IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new FlowVersion()));
+        IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DbReader reader = new DbReader();
         reader.setFlowStep(readerFlowStep);
         reader.start(executionTracker, resourceFactory);
@@ -136,7 +135,7 @@ public class DbReaderTest {
     @Test
     public void testReaderFlowFromSingleContentMsg() throws Exception {
 
-        IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new FlowVersion()));
+        IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DbReader reader = new DbReader();
         reader.setFlowStep(readerFlowStep);
         reader.start(executionTracker, resourceFactory);
@@ -162,24 +161,23 @@ public class DbReaderTest {
     private static FlowStep createReaderFlowStep() {
 
         Folder folder = TestUtils.createFolder("Test Folder");
-        FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
-        Component component = TestUtils.createComponent(DbReader.TYPE, false);
+        Flow flow = TestUtils.createFlow("TestFlow", folder);
         Setting[] settingData = createReaderSettings();
-        ComponentVersion componentVersion = TestUtils.createComponentVersion(component,
-                createResource(createResourceSettings()), null, createOutputModelVersion(), null,
+        Component componentVersion = TestUtils.createComponent(DbReader.TYPE, false,
+                createResource(createResourceSettings()), null, createOutputModel(), null,
                 null, settingData);
         FlowStep readerComponent = new FlowStep();
-        readerComponent.setFlowVersionId(flow.getId());
-        readerComponent.setComponentVersionId(componentVersion.getId());
+        readerComponent.setFlowId(flow.getId());
+        readerComponent.setComponentId(componentVersion.getId());
         readerComponent.setCreateBy("Test");
         readerComponent.setCreateTime(new Date());
         readerComponent.setLastModifyBy("Test");
         readerComponent.setLastModifyTime(new Date());
-        readerComponent.setComponentVersion(componentVersion);
+        readerComponent.setComponent(componentVersion);
         return readerComponent;
     }
 
-    private static ModelVersion createOutputModelVersion() {
+    private static Model createOutputModel() {
 
         ModelEntity tt1 = new ModelEntity("tt1", "TEST_TABLE_1");
         tt1.addModelAttribute(new ModelAttribute("tt1col1", tt1.getId(), "COL1"));
@@ -191,7 +189,7 @@ public class DbReaderTest {
         tt2.addModelAttribute(new ModelAttribute("tt2coly", tt1.getId(), "COLY"));
         tt2.addModelAttribute(new ModelAttribute("tt2colz", tt1.getId(), "COLZ"));
 
-        ModelVersion modelVersion = new ModelVersion();
+        Model modelVersion = new Model();
         modelVersion.getModelEntities().put("tt1", tt1);
         modelVersion.getModelEntities().put("tt2", tt2);
 

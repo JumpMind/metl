@@ -11,11 +11,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.Component;
+import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
-import org.jumpmind.symmetric.is.core.model.ComponentVersion;
-import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
@@ -100,19 +99,18 @@ public class TextFileWriterTest {
 
     private static FlowStep createWriterFlowStep() {
         Folder folder = TestUtils.createFolder("Test Folder");
-        FlowVersion flow = TestUtils.createFlowVersion("TestFlow", folder);
-        Component component = TestUtils.createComponent(TextFileWriter.TYPE, false);
+        Flow flow = TestUtils.createFlow("TestFlow", folder);
         Setting[] settingData = createWriterSettings();
-        ComponentVersion componentVersion = TestUtils.createComponentVersion(component, 
+        Component component = TestUtils.createComponent(TextFileWriter.TYPE, false, 
                 createResource(createResourceSettings()), null, null, null, null, settingData);
         FlowStep writerComponent = new FlowStep();
-        writerComponent.setFlowVersionId(flow.getId());
-        writerComponent.setComponentVersionId(componentVersion.getId());
+        writerComponent.setFlowId(flow.getId());
+        writerComponent.setComponentId(component.getId());
         writerComponent.setCreateBy("Test");
         writerComponent.setCreateTime(new Date());
         writerComponent.setLastModifyBy("Test");
         writerComponent.setLastModifyTime(new Date());
-        writerComponent.setComponentVersion(componentVersion);
+        writerComponent.setComponent(component);
         return writerComponent;
     }
 

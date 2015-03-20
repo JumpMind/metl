@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.DataType;
+import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.model.ModelVersion;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
@@ -16,6 +16,8 @@ import org.jumpmind.symmetric.ui.common.IUiPanel;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -36,13 +38,13 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 	
 	TreeTable treeTable = new TreeTable();
 	
-	ModelVersion modelVersion;
+	Model model;
 
 	Set<Object> lastEditItemIds = Collections.emptySet();
 	
-	public EditModelPanel(ApplicationContext context, ModelVersion modelVersion) {
+	public EditModelPanel(ApplicationContext context, Model model) {
 		this.context = context;
-		this.modelVersion = modelVersion;
+		this.model = model;
 
 		ButtonBar buttonBar = new ButtonBar();
 		addComponent(buttonBar);
@@ -71,21 +73,15 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         
         treeTable.addContainerProperty("name", String.class, "", "Name", null, null);
         treeTable.addContainerProperty("type", String.class, "", "Type", null, null);
-        treeTable.setVisibleColumns(new Object[] { "name", "type" });        
+        treeTable.setVisibleColumns(new Object[] { "name", "type" });
+        treeTable.addItemClickListener(new TreeTableItemClickListener());
         treeTable.addValueChangeListener(new TreeTableValueChangeListener());
+        
 		addComponent(treeTable);
 		setExpandRatio(treeTable, 1.0f);
-
-        for (ModelEntity e : modelVersion.getModelEntities().values()) {
-        	addModelEntity(e);
-        	for (ModelAttribute a : e.getModelAttributes()) {
-        		a.setEntity(e);
-        		addModelAttribute(a);
-        	}
-        	treeTable.setCollapsed(e, false);
-        }
+		addAll(model.getModelEntities().values());
 	}
-	
+
 	@Override
 	public boolean closing() {
 		return true;
@@ -105,6 +101,17 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         	treeTable.unselect(id);
         }
         treeTable.select(itemId);
+	}
+
+	protected void addAll(Collection<ModelEntity> modelEntityList) {
+		for (ModelEntity e : modelEntityList) {
+			addModelEntity(e);
+			for (ModelAttribute a : e.getModelAttributes()) {
+				a.setEntity(e);
+				addModelAttribute(a);
+			}
+			treeTable.setCollapsed(e, false);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -154,7 +161,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 		public void buttonClick(ClickEvent event) {
 	        ModelEntity e = new ModelEntity();
 	        e.setName("New Entity");
-	        e.setModelVersionId(modelVersion.getId());
+	        e.setModelId(model.getId());
 	        context.getConfigurationService().save(e);
 	        addModelEntity(e);
 	        selectOnly(e);
@@ -168,7 +175,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 			if (itemIds.size() > 0) {
 		        ModelAttribute a = new ModelAttribute();
 		        a.setName("New Attribute");
-		        a.setDataType(DataType.STRING);
+		        a.setDataType(DataType.VARCHAR);
 				Object itemId = itemIds.iterator().next();
 				if (itemId instanceof ModelEntity) {
 					a.setEntity((ModelEntity) itemId);
@@ -219,11 +226,27 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 		}
 	}
 
-	class ImportClickListener implements ClickListener {
+	class ImportClickListener implements ClickListener, TableColumnSelectListener {
 		public void buttonClick(ClickEvent event) {
-			TableColumnSelectWindow w = new TableColumnSelectWindow(context);
+			TableColumnSelectWindow w = new TableColumnSelectWindow(context, model);
+			w.setTableColumnSelectListener(this);
 			UI.getCurrent().addWindow(w);
 		}
+		
+		public void selected(Collection<ModelEntity> modelEntityCollection) {
+			for (ModelEntity e : modelEntityCollection) {
+				context.getConfigurationService().save(e);
+			}
+			addAll(modelEntityCollection);
+		}
+	}
+
+	class TreeTableItemClickListener implements ItemClickListener {
+		public void itemClick(ItemClickEvent event) {
+			if (event.isDoubleClick()) {
+				editSelectedItem();				
+			}
+		}		
 	}
 
 	class TreeTableValueChangeListener implements ValueChangeListener {

@@ -9,9 +9,9 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
-import org.jumpmind.symmetric.is.core.model.FlowVersion;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
@@ -60,8 +60,8 @@ public class FlowRuntime {
         
         this.executionId = executionId == null ? UUID.randomUUID().toString() : executionId;
         this.stepRuntimes = new HashMap<String, StepRuntime>();
-        FlowVersion flowVersion = deployment.getFlowVersion();
-        List<FlowStep> steps = flowVersion.getFlowSteps();
+        Flow flow = deployment.getFlow();
+        List<FlowStep> steps = flow.getFlowSteps();
         
         executionTracker.beforeFlow(executionId);
 
@@ -71,7 +71,7 @@ public class FlowRuntime {
             stepRuntimes.put(flowStep.getId(), stepRuntime);
         }
 
-        List<FlowStepLink> links = flowVersion.getFlowStepLinks();
+        List<FlowStepLink> links = flow.getFlowStepLinks();
 
         /* for each step runtime, set their list of target step runtimes */
         for (String stepId : stepRuntimes.keySet()) {
@@ -141,7 +141,7 @@ public class FlowRuntime {
     protected List<StepRuntime> findStartSteps() {
         List<StepRuntime> starterSteps = new ArrayList<StepRuntime>();
         for (String stepId : stepRuntimes.keySet()) {
-            List<FlowStepLink> links = deployment.getFlowVersion()
+            List<FlowStepLink> links = deployment.getFlow()
                     .getFlowStepLinks();
             boolean isTargetStep = false;
             for (FlowStepLink flowStepLink : links) {
