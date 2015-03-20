@@ -1,6 +1,5 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.jumpmind.exception.IoException;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.csv.CsvWriter;
 import org.jumpmind.symmetric.is.core.model.ComponentVersionAttributeSetting;
@@ -24,7 +22,8 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
 @ComponentDefinition(typeName = DelimitedFormatter.TYPE, category = ComponentCategory.PROCESSOR, iconImage="format.png",
-supports = { ComponentSupports.INPUT_MESSAGE, ComponentSupports.INPUT_MODEL, ComponentSupports.OUTPUT_MESSAGE })
+inputMessage=MessageType.ENTITY_MESSAGE, 
+outgoingMessage=MessageType.TEXT_MESSAGE)
 
 public class FixedLengthFormatter extends AbstractComponent {
 
