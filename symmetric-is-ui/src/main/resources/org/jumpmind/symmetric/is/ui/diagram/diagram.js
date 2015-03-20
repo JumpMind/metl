@@ -55,6 +55,7 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         isSource : true,
         overlays: [
                    [ "Label", {
+                       id: "label",
                        location: [0.5, 0.5],
                        label: "E",
                        cssClass: "endpointSourceLabel"
@@ -70,6 +71,7 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         isTarget : true,
         overlays: [
                    [ "Label", {
+                       id: "label",
                        location: [0.5, 0.5],
                        label: "E",
                        cssClass: "endpointSourceLabel"
@@ -80,22 +82,29 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
     /**
      * Enhance an node with input and output end points
      */
-    this.addEndpoints = function(toId) {
-        var s = instance.addEndpoint(toId, sourceEndpoint, {
-            anchor : "RightMiddle",
-            uuid : "source-" + toId
-        });
+    this.addEndpoints = function(node) {
+        if (node.outputLabel != null) {
+            var s = instance.addEndpoint(node.id, sourceEndpoint, {
+                anchor : "RightMiddle",
+                uuid : "source-" + node.id
+            });
+            s.getOverlay("label").label = node.outputLabel;
+        }
 
-        var t = instance.addEndpoint(toId, targetEndpoint, {
-            anchor : "LeftMiddle",
-            uuid : "target-" + toId
-        });
+        if (node.inputLabel != null) {
+            var t = instance.addEndpoint(node.id, targetEndpoint, {
+                anchor : "LeftMiddle",
+                uuid : "target-" + node.id
+            });
+            t.getOverlay("label").label = node.inputLabel;
+        }
     };
 
     /**
      * Layout the diagram
      */
     this.layoutAll = function() {
+        instance.unbind("beforeDrop");
         instance.unbind("dblclick");
         instance.unbind("connection");
         instance.unbind("connectionDetached");
@@ -137,7 +146,7 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
                 }
             });
 
-            self.addEndpoints(nodeDiv.id);
+            self.addEndpoints(node);
 
         }
 
@@ -149,7 +158,11 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
                 });
             }
         }
-
+        instance.bind("beforeDrop", function(info) {
+            var source = info.connection.endpoints[0].getOverlay("label").label;
+            var target = info.dropEndpoint.getOverlay("label").label;
+            return source === target;
+        });
         instance.bind("connection", function(info, originalEvent) {
             self.onConnection({
                 "sourceNodeId" : info.connection.sourceId,
