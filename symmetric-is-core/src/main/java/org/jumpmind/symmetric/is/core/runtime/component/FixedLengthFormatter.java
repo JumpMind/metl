@@ -21,7 +21,7 @@ import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
-@ComponentDefinition(typeName = DelimitedFormatter.TYPE, category = ComponentCategory.PROCESSOR, iconImage = "format.png", 
+@ComponentDefinition(typeName = FixedLengthFormatter.TYPE, category = ComponentCategory.PROCESSOR, iconImage = "format.png", 
   inputMessage = MessageType.ENTITY_MESSAGE, outgoingMessage = MessageType.TEXT_MESSAGE)
 public class FixedLengthFormatter extends AbstractComponent {
 

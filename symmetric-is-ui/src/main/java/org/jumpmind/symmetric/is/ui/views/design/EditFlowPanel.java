@@ -13,6 +13,7 @@ import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
+import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
@@ -267,6 +268,11 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             node.setId(flowStep.getId());
             node.setX(flowStep.getX());
             node.setY(flowStep.getY());
+            
+            ComponentDefinition definition = context.getComponentFactory().getComponentDefinitionForComponentType(type);
+            node.setInputLabel(definition.inputMessage().getLetter());
+            node.setOutputLabel(definition.outgoingMessage().getLetter());
+            
             diagram.addNode(node);
 
             for (FlowStepLink link : links) {

@@ -13,6 +13,8 @@ public class Node implements Serializable {
     int width = 55;
     int x = 0;
     int y = 0;
+    String outputLabel;
+    String inputLabel;
     String text;    
     String id = UUID.randomUUID().toString();
     List<String> targetNodeIds = new ArrayList<String>();
@@ -78,5 +80,21 @@ public class Node implements Serializable {
     
     public List<String> getTargetNodeIds() {
         return targetNodeIds;
+    }
+    
+    public String getInputLabel() {
+        return inputLabel;
+    }
+    
+    public void setInputLabel(String inputLabel) {
+        this.inputLabel = inputLabel;
+    }
+    
+    public String getOutputLabel() {
+        return outputLabel;
+    }
+    
+    public void setOutputLabel(String outputLabel) {
+        this.outputLabel = outputLabel;
     }
 }
