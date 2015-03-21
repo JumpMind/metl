@@ -65,6 +65,7 @@ public class TextFileWriter extends AbstractComponent {
             throw new IllegalStateException("The target resource has not been configured.  Please choose a resource.");
         }
         
+        componentStatistics.incrementInboundMessages();
         if (inputMessage.getHeader().getSequenceNumber() == 1) {
             initStreamAndWriter();
         }
