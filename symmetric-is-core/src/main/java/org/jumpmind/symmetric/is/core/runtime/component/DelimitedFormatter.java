@@ -73,6 +73,9 @@ public class DelimitedFormatter extends AbstractComponent {
         } 
         outputMessage.setPayload(outputPayload);
         executionTracker.log(executionId, LogLevel.INFO, this, outputPayload.toString());
+        componentStatistics.incrementOutboundMessages();
+        outputMessage.getHeader().setSequenceNumber(componentStatistics.getNumberOutboundMessages());
+        outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
         messageTarget.put(outputMessage);
     }
     

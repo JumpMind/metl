@@ -122,6 +122,10 @@ public class DbReader extends AbstractComponent {
                         payload.add(rowData);
                         if (payload.size() >= rowsPerMessage) {
                             componentStatistics.incrementOutboundMessages();
+                            message.getHeader().setSequenceNumber(componentStatistics.getNumberOutboundMessages());
+                            if (rs.isLast()) {
+                                message.getHeader().setLastMessage(true);
+                            }
                             messageTarget.put(message);
                             message = null;
                         }
@@ -130,6 +134,8 @@ public class DbReader extends AbstractComponent {
                     rs.close();
                     if (message != null) {
                         componentStatistics.incrementOutboundMessages();
+                        message.getHeader().setSequenceNumber(componentStatistics.getNumberOutboundMessages());
+                        message.getHeader().setLastMessage(true);
                         messageTarget.put(message);
                     }
                     return null;

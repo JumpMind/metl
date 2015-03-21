@@ -61,6 +61,7 @@ public class TextFileWriter extends AbstractComponent {
 
     @Override
     public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
+        componentStatistics.incrementInboundMessages();
         if (inputMessage.getHeader().getSequenceNumber() == 1) {
             initStreamAndWriter();
         }
