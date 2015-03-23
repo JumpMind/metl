@@ -156,6 +156,7 @@ public class TableColumnSelectWindow extends Window {
 				a.setType(tableColumn.getColumn().getJdbcTypeName());
 				e.addModelAttribute(a);
 			}
+			tree.unselect(itemId);
 		}
 		return tableModelEntity.values();
 	}

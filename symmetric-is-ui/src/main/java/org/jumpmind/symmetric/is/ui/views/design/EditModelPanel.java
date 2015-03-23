@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.ui.views.design;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,6 +42,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 	Model model;
 
 	Set<Object> lastEditItemIds = Collections.emptySet();
+	
+	TableColumnSelectWindow tableColumnSelectWindow;
 	
 	public EditModelPanel(ApplicationContext context, Model model) {
 		this.context = context;
@@ -103,14 +106,18 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.select(itemId);
 	}
 
+	protected void add(ModelEntity modelEntity) {
+		addModelEntity(modelEntity);
+		for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
+			modelAttribute.setEntity(modelEntity);
+			addModelAttribute(modelAttribute);
+		}
+		treeTable.setCollapsed(modelEntity, false);
+	}
+
 	protected void addAll(Collection<ModelEntity> modelEntityList) {
-		for (ModelEntity e : modelEntityList) {
-			addModelEntity(e);
-			for (ModelAttribute a : e.getModelAttributes()) {
-				a.setEntity(e);
-				addModelAttribute(a);
-			}
-			treeTable.setCollapsed(e, false);
+		for (ModelEntity modelEntity : modelEntityList) {
+			add(modelEntity);
 		}
 	}
 
@@ -213,31 +220,56 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
 			for (Object itemId : itemIds) {
 				if (itemId instanceof ModelAttribute) {
+					ModelAttribute a = (ModelAttribute) itemId;
 					context.getConfigurationService().delete((ModelAttribute) itemId);
+					a.getEntity().removeModelAttribute(a);
+					treeTable.removeItem(itemId);
 				}
-				treeTable.removeItem(itemId);
 			}
 			for (Object itemId : itemIds) {
 				if (itemId instanceof ModelEntity) {
 					context.getConfigurationService().delete((ModelEntity) itemId);
+					treeTable.removeItem(itemId);
 				}
-				treeTable.removeItem(itemId);
 			}
 		}
 	}
 
 	class ImportClickListener implements ClickListener, TableColumnSelectListener {
 		public void buttonClick(ClickEvent event) {
-			TableColumnSelectWindow w = new TableColumnSelectWindow(context, model);
-			w.setTableColumnSelectListener(this);
-			UI.getCurrent().addWindow(w);
+			if (tableColumnSelectWindow == null) {
+				tableColumnSelectWindow = new TableColumnSelectWindow(context, model);
+				tableColumnSelectWindow.setTableColumnSelectListener(this);
+			}
+			UI.getCurrent().addWindow(tableColumnSelectWindow);
 		}
 		
 		public void selected(Collection<ModelEntity> modelEntityCollection) {
-			for (ModelEntity e : modelEntityCollection) {
-				context.getConfigurationService().save(e);
+			HashMap<String, ModelEntity> existingModelEntities = new HashMap<String, ModelEntity>();
+			for (Object itemId : treeTable.getItemIds()) {
+				if (itemId instanceof ModelEntity) {
+					ModelEntity modelEntity = (ModelEntity) itemId;
+					existingModelEntities.put(modelEntity.getName().toUpperCase(), modelEntity);
+				}
 			}
-			addAll(modelEntityCollection);
+
+			for (ModelEntity e : modelEntityCollection) {
+				ModelEntity modelEntity = existingModelEntities.get(e.getName().toUpperCase());
+				if (modelEntity == null) {
+					context.getConfigurationService().save(e);
+					existingModelEntities.put(e.getName().toUpperCase(), e);
+					add(e);
+				} else {
+					for (ModelAttribute a : e.getModelAttributes()) {
+						if (modelEntity.getModelAttributeByName(a.getName()) == null) {
+							a.setEntity(modelEntity);
+							context.getConfigurationService().save(a);							
+							modelEntity.addModelAttribute(a);
+							addModelAttribute(a);
+						}
+					}
+				}
+			}
 		}
 	}
 
