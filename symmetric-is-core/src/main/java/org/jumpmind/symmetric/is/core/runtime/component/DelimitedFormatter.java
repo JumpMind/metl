@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
+import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
@@ -59,6 +61,12 @@ public class DelimitedFormatter extends AbstractComponent {
     @Override
     public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
         
+        if (attributes.size() == 0) {
+            executionTracker
+            .log(executionId, LogLevel.INFO, this,
+                    "There are no format attributes configured.  Writing all entity fields to the output.");
+        }
+
         componentStatistics.incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
@@ -67,14 +75,18 @@ public class DelimitedFormatter extends AbstractComponent {
         
         String outputRec;
         for (EntityData inputRow : inputRows) {
-            outputRec = processInputRow(inputRow);
+            outputRec = processInputRow(executionId, inputRow);
             outputPayload.add(outputRec);
         } 
         outputMessage.setPayload(outputPayload);
+        executionTracker.log(executionId, LogLevel.INFO, this, outputPayload.toString());
+        componentStatistics.incrementOutboundMessages();
+        outputMessage.getHeader().setSequenceNumber(componentStatistics.getNumberOutboundMessages());
+        outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
         messageTarget.put(outputMessage);
     }
     
-    private String processInputRow(EntityData inputRow) {
+    private String processInputRow(String executionId, EntityData inputRow) {
    
         Writer writer = new StringWriter();
         CsvWriter csvWriter = new CsvWriter(writer, delimiter.charAt(0));
@@ -82,8 +94,16 @@ public class DelimitedFormatter extends AbstractComponent {
             csvWriter.setTextQualifier(quoteCharacter.charAt(0));
         }        
         try {
-            for (AttributeFormat attribute : attributes) {
-                csvWriter.write(inputRow.get(attribute.getAttributeId()).toString());
+            if (attributes.size() > 0) {
+                for (AttributeFormat attribute : attributes) {
+                    csvWriter.write(inputRow.get(attribute.getAttributeId()).toString());
+                }
+            } else {
+                Collection<Object> values = inputRow.values();
+                for (Object object : values) {
+                    csvWriter.write(object != null ? object.toString() : null);
+                }
+
             }
             csvWriter.endRecord();
         } catch (IOException e) {
@@ -113,6 +133,7 @@ public class DelimitedFormatter extends AbstractComponent {
                 return ordinal1.getOrdinal() - ordinal2.getOrdinal();
             }
         });
+        
     }
     
     private class AttributeFormat {

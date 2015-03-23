@@ -82,11 +82,11 @@ public class Component extends AbstractObjectWithSettings {
         return resource;
     }
 
-    public String getInputModeldId() {
+    public String getInputModelId() {
         return inputModel != null ? inputModel.getId() : null;
     }
 
-    public void setInputModeldId(String inputModeldId) {
+    public void setInputModelId(String inputModeldId) {
         if (inputModeldId != null) {
             this.inputModel = new Model(inputModeldId);
         } else {
@@ -95,7 +95,7 @@ public class Component extends AbstractObjectWithSettings {
     }
 
     public String getOutputModelId() {
-        return inputModel != null ? inputModel.getId() : null;
+        return outputModel != null ? outputModel.getId() : null;
     }
 
     public void setOutputModelId(String outputModelId) {

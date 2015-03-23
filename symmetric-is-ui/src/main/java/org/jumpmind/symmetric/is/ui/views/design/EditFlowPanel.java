@@ -331,7 +331,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                 NodeSelectedEvent event = (NodeSelectedEvent) e;
                 Node node = event.getNode();
                 FlowStep flowStep = flow.findFlowStepWithId(node.getId());
-                designPropertySheet.valueChange(flowStep.getComponent());
                 designNavigator.select(flowStep);
                 selected = flowStep;
                 delButton.setEnabled(true);
