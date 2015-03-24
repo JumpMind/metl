@@ -272,6 +272,12 @@ abstract class AbstractConfigurationService extends AbstractService implements
         refresh(component);
         return component;
     }
+    
+    @Override
+    public void refresh(ProjectVersion projectVersion) {
+        refresh((AbstractObject)projectVersion);
+        refresh((AbstractObject)projectVersion.getProject());
+    }
 
     @Override
     public void refresh(Component component) {

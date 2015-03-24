@@ -63,6 +63,8 @@ public interface IConfigurationService {
 
     public void refresh(Flow flow);
     
+    public void refresh(ProjectVersion projectVersion);
+    
     public void refresh(Agent agent);
     
     public void refresh(Resource resource);

@@ -22,6 +22,8 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.event.FieldEvents.FocusEvent;
+import com.vaadin.event.FieldEvents.FocusListener;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
@@ -209,6 +211,17 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         treeTable.setParent(projectVersion, project);
         treeTable.setChildrenAllowed(projectVersion, false);
     }
+    
+    
+    protected void edit(Object obj) {
+        treeTable.setValue(obj);
+        if (currentlyEditing == null) {
+            currentlyEditing = (AbstractObject) obj;
+        }
+        setButtonsEnabled();
+        treeTable.refreshRowCache();
+    }
+
 
     class NewProjectVersionClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
@@ -226,7 +239,8 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
             IConfigurationService configurationService = context.getConfigurationService();
             configurationService.save(project);
             configurationService.save(version);
-            add(project);
+            refresh();
+            edit(project);
         }
     }
 
@@ -243,7 +257,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
                     project.setName(name);
                     project.setDescription(desc);
                     configurationService.save(project);
-                    projectNavigator.addProjectVersion(project.getLatestProjectVersion());
+                    projectNavigator.refresh();
 
                 } else if (currentlyEditing instanceof ProjectVersion) {
                     ProjectVersion version = (ProjectVersion) currentlyEditing;
@@ -258,7 +272,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
                     archived = archived == null ? false : archived;
                     version.setArchived(archived);
                     configurationService.save(version);
-                    projectNavigator.addProjectVersion(version);
+                    projectNavigator.refresh();                    
                 }
 
                 currentlyEditing = null;
@@ -268,7 +282,6 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
             }
         }
     }
-
     class CancelClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
             currentlyEditing = null;
@@ -285,11 +298,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     class EditClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            if (currentlyEditing == null) {
-                currentlyEditing = (AbstractObject) treeTable.getValue();
-            }
-            setButtonsEnabled();
-            treeTable.refreshRowCache();
+            edit(treeTable.getValue());
         }
     }
 
@@ -363,10 +372,10 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
                     final TextField textField = (TextField) field;
                     textField.setNullRepresentation("");
                     textField.setWidth(100, Unit.PERCENTAGE);
-                    textField.addValueChangeListener(new ValueChangeListener() {
-
+                    textField.addFocusListener(new FocusListener() {
+                        
                         @Override
-                        public void valueChange(ValueChangeEvent event) {
+                        public void focus(FocusEvent event) {
                             textField.selectAll();
                         }
                     });

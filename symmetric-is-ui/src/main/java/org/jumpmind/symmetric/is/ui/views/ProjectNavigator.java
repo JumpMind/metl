@@ -273,7 +273,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
         return layout;
     }
-
+       
     public void addProjectVersion(ProjectVersion projectVersion) {
         projects.remove(projectVersion);
         projects.add(projectVersion);
@@ -553,6 +553,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         Iterator<ProjectVersion> i = projects.iterator();
         while (i.hasNext()) {
             ProjectVersion projectVersion = i.next();
+            context.getConfigurationService().refresh(projectVersion);
             if (projectVersion.isDeleted() || projectVersion.getProject().isDeleted()) {
                 i.remove();
             }
