@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.model;
 
 import java.util.Map;
+import java.util.UUID;
 
 import org.jumpmind.util.LinkedCaseInsensitiveMap;
 
@@ -15,6 +16,10 @@ public class Model extends AbstractObject {
     String type = "NORMAL";
 
     String folderId;
+    
+    String projectVersionId;
+    
+    String rowId = UUID.randomUUID().toString();
 
     Map<String, ModelEntity> modelEntities;
 
@@ -98,6 +103,22 @@ public class Model extends AbstractObject {
     
     public Map<String, ModelEntity> getModelEntities() {
         return modelEntities;
+    }
+    
+    public void setProjectVersionId(String projectVersionId) {
+        this.projectVersionId = projectVersionId;
+    }
+    
+    public String getProjectVersionId() {
+        return projectVersionId;
+    }
+    
+    public void setRowId(String rowId) {
+        this.rowId = rowId;
+    }
+    
+    public String getRowId() {
+        return rowId;
     }
 
 }

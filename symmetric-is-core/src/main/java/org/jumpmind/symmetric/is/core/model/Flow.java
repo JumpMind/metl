@@ -5,12 +5,17 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 public class Flow extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
+    String rowId = UUID.randomUUID().toString();
+    
     Folder folder;
+    
+    String projectVersionId;
 
     String name;
 
@@ -164,6 +169,22 @@ public class Flow extends AbstractObject {
         } else {
             return StartType.valueOf(startType);
         }
+    }
+    
+    public void setProjectVersionId(String projectVersionId) {
+        this.projectVersionId = projectVersionId;
+    }
+    
+    public String getProjectVersionId() {
+        return projectVersionId;
+    }
+    
+    public void setRowId(String rowId) {
+        this.rowId = rowId;
+    }
+    
+    public String getRowId() {
+        return rowId;
     }
 
 }

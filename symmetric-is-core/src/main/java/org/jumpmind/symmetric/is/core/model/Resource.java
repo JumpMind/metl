@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.core.model;
 
+import java.util.UUID;
+
 public class Resource extends AbstractObjectWithSettings {
 
     private static final long serialVersionUID = 1L;
@@ -10,15 +12,17 @@ public class Resource extends AbstractObjectWithSettings {
 
     String type;
 
-    String folderId;
+    String projectVersionId;
+    
+    String rowId = UUID.randomUUID().toString();
 
     public Resource() {
     }
 
     public Resource(String id) {
-    	this.id = id;
+        this.id = id;
     }
-    
+
     public Resource(Folder folder, Setting... settings) {
         super(settings);
         setFolder(folder);
@@ -41,20 +45,19 @@ public class Resource extends AbstractObjectWithSettings {
     }
 
     public void setFolderId(String folderId) {
-        this.folderId = folderId;
+        if (folderId != null) {
+            folder = new Folder(folderId);
+        } else {
+            folder = null;
+        }
     }
 
     public String getFolderId() {
-        return folderId;
+        return folder != null ? folder.getId() : null;
     }
 
     public void setFolder(Folder folder) {
         this.folder = folder;
-        if (folder != null) {
-            setFolderId(folder.getId());
-        } else {
-            folderId = null;
-        }
     }
 
     public Folder getFolder() {
@@ -69,5 +72,21 @@ public class Resource extends AbstractObjectWithSettings {
     @Override
     public boolean isSettingNameAllowed() {
         return true;
+    }
+
+    public void setProjectVersionId(String projectVersionId) {
+        this.projectVersionId = projectVersionId;
+    }
+
+    public String getProjectVersionId() {
+        return projectVersionId;
+    }
+    
+    public void setRowId(String rowId) {
+        this.rowId = rowId;
+    }
+    
+    public String getRowId() {
+        return rowId;
     }
 }

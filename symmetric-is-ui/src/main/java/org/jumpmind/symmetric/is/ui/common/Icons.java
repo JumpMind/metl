@@ -10,6 +10,12 @@ final public class Icons {
     public static final FontAwesome FOLDER_OPEN = FontAwesome.FOLDER_OPEN;
     
     public static final FontAwesome FOLDER_CLOSED = FontAwesome.FOLDER;
+
+    public static final FontAwesome SEARCH = FontAwesome.SEARCH;
+    
+    public static final FontAwesome DELETE = FontAwesome.TRASH_O;
+    
+    public static final FontAwesome PROJECT = FontAwesome.CUBES;
     
     public static final FontAwesome GENERAL_RESOURCE = FontAwesome.LINK;
 
@@ -17,9 +23,7 @@ final public class Icons {
     
     public static final FontAwesome MODEL = FontAwesome.SITEMAP;
     
-    public static final FontAwesome DELETE = FontAwesome.TRASH_O;
-    
-    public static final FontAwesome FLOW_VERSION = FontAwesome.FILE_TEXT;
+    public static final FontAwesome VERSION = FontAwesome.FILE_TEXT;
     
     public static final FontAwesome DATABASE = FontAwesome.DATABASE;
     
