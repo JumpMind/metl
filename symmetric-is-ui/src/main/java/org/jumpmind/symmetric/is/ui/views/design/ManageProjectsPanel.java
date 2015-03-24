@@ -114,11 +114,15 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         treeTable.addItemClickListener(new TreeTableItemClickListener());
         treeTable.addValueChangeListener(new TreeTableValueChangeListener());
         treeTable.setTableFieldFactory(new FieldFactory());
+        treeTable.setSortContainerPropertyId("name");
+        treeTable.setSortAscending(true);
 
         addComponent(treeTable);
         setExpandRatio(treeTable, 1);
 
         refresh();
+        
+
     }
 
     protected void setButtonsEnabled() {
@@ -160,6 +164,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     protected void refresh() {
         Object selected = treeTable.getValue();
+        
         IConfigurationService configurationService = context.getConfigurationService();
         addAll(configurationService.findProjects());
 
@@ -169,6 +174,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
             selected = treeTable.getItemIds().iterator().next();
         }
         treeTable.setValue(selected);
+        
         Object parent = treeTable.getParent(selected);
         if (parent != null) {
             treeTable.setCollapsed(parent, false);
@@ -182,8 +188,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
             add(project);
         }
 
-        treeTable.setSortContainerPropertyId("name");
-        treeTable.setSortAscending(true);
+        treeTable.sort();
     }
 
     protected void add(Project project) {
@@ -232,16 +237,18 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
                 IConfigurationService configurationService = context.getConfigurationService();
 
                 String name = (String) item.getItemProperty("name").getValue();
+                String desc = (String) item.getItemProperty("description").getValue();
                 if (currentlyEditing instanceof Project) {
                     Project project = (Project) currentlyEditing;
                     project.setName(name);
-                    project.setDescription((String) item.getItemProperty("description").getValue());
+                    project.setDescription(desc);
                     configurationService.save(project);
                     projectNavigator.addProjectVersion(project.getLatestProjectVersion());
 
                 } else if (currentlyEditing instanceof ProjectVersion) {
                     ProjectVersion version = (ProjectVersion) currentlyEditing;
                     version.setVersionLabel(name);
+                    version.setDescription(desc);
 
                     Boolean locked = (Boolean) item.getItemProperty("locked").getValue();
                     locked = locked == null ? false : locked;
@@ -266,7 +273,6 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         public void buttonClick(ClickEvent event) {
             currentlyEditing = null;
             refresh();
-            treeTable.refreshRowCache();
         }
     }
 
@@ -349,7 +355,9 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         @Override
         public Field<?> createField(Container container, Object itemId, Object propertyId,
                 Component uiContext) {
-            if (itemId.equals(currentlyEditing) && !propertyId.equals("createTime")) {
+            boolean isVersion = itemId instanceof ProjectVersion;
+            if (itemId.equals(currentlyEditing) && !propertyId.equals("createTime") && 
+                    !(!isVersion && (propertyId.equals("locked") || propertyId.equals("archived")))) {
                 Field<?> field = super.createField(container, itemId, propertyId, uiContext);
                 if (field instanceof TextField) {
                     final TextField textField = (TextField) field;
@@ -365,6 +373,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
                     if ("name".equals(propertyId)) {
                         textField.focus();
                     }
+                    
                 } else if (field instanceof CheckBox) {
                     CheckBox checkBox = (CheckBox) field;
                     checkBox.setCaption(null);
