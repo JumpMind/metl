@@ -25,7 +25,7 @@ import org.jumpmind.symmetric.is.ui.diagram.LinkSelectedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
-import org.jumpmind.symmetric.is.ui.views.DesignNavigator;
+import org.jumpmind.symmetric.is.ui.views.IDesignNavigator;
 import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.slf4j.Logger;
@@ -61,7 +61,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
     PropertySheet designPropertySheet;
 
-    DesignNavigator designNavigator;
+    IDesignNavigator designNavigator;
 
     EditFlowPalette designComponentPalette;
 
@@ -78,7 +78,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     AbstractObject selected;
 
     public EditFlowPanel(ApplicationContext context, Flow componentFlow,
-            DesignNavigator designNavigator, TabbedApplicationPanel tabs) {
+            IDesignNavigator designNavigator, TabbedApplicationPanel tabs) {
         this.context = context;
         this.tabs = tabs;
         this.flow = componentFlow;
@@ -174,13 +174,13 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     @Override
     public boolean closing() {
         context.getBackgroundRefresherService().unregister(this);
-        designNavigator.setDesignPropertySheet(designPropertySheet);
+        designNavigator.setPropertySheet(null);
         return true;
     }
 
     @Override
     public void showing() {
-        designNavigator.setDesignPropertySheet(designPropertySheet);
+        designNavigator.setPropertySheet(designPropertySheet);
     }
     
     public Flow getFlow() {

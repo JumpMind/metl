@@ -34,7 +34,7 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.CloseHandler;
 
 @SuppressWarnings("serial")
-public class DesignNavigator extends AbstractFolderNavigator {
+public class DesignNavigator extends AbstractFolderNavigator implements IDesignNavigator {
 
 	MenuItem newFlow;
 
@@ -48,7 +48,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
 	TabbedApplicationPanel tabs;
 
-	PropertySheet designPropertySheet;
+	PropertySheet propertySheet;
 
 	public DesignNavigator(ApplicationContext context,
 			TabbedApplicationPanel tabs) {
@@ -159,7 +159,7 @@ public class DesignNavigator extends AbstractFolderNavigator {
 
 	protected void updatePropertySheet() {
 		AbstractObject obj = getSingleSelection(AbstractObject.class);
-		if (obj instanceof FlowStep && designPropertySheet != null) {
+		if (obj instanceof FlowStep && propertySheet != null) {
 			FlowStep step = (FlowStep) obj;
 			if (tabs.getSelectedTab() instanceof EditFlowPanel) {
 				EditFlowPanel panel = (EditFlowPanel) tabs.getSelectedTab();
@@ -170,8 +170,8 @@ public class DesignNavigator extends AbstractFolderNavigator {
 		}
 	}
 
-	public void setDesignPropertySheet(PropertySheet designPropertySheet) {
-		this.designPropertySheet = designPropertySheet;
+	public void setPropertySheet(PropertySheet designPropertySheet) {
+		this.propertySheet = designPropertySheet;
 		updatePropertySheet();
 	}
 
