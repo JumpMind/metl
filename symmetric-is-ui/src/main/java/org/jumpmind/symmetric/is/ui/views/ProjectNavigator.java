@@ -16,13 +16,18 @@ import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.EnableFocusTextField;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
 import org.jumpmind.symmetric.is.ui.views.design.PropertySheet;
-import org.jumpmind.symmetric.is.ui.views.design.ViewProjectsPanel;
+import org.jumpmind.symmetric.is.ui.views.design.ManageProjectsPanel;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -36,6 +41,7 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
@@ -63,7 +69,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class ProjectNavigator extends VerticalLayout {
+public class ProjectNavigator extends VerticalLayout implements IDesignNavigator {
 
     ApplicationContext context;
 
@@ -81,15 +87,21 @@ public class ProjectNavigator extends VerticalLayout {
 
     long itemClickTimeInMs;
 
-    PropertySheet designPropertySheet;
+    PropertySheet propertySheet;
+    
+    MenuItem newMenu;
 
     MenuItem newFlow;
-
-    MenuItem newResource;
 
     MenuItem newModel;
 
     MenuItem newComponent;
+
+    MenuItem newFileResource;
+
+    MenuItem newDataSource;
+    
+    MenuItem blank;
 
     MenuItem delete;
 
@@ -134,11 +146,32 @@ public class ProjectNavigator extends VerticalLayout {
 
     protected void setMenuItemsEnabled() {
         Object selected = treeTable.getValue();
-        boolean newProjectComponentEnabled = treeTable.getValue() != null;
-        newComponent.setEnabled(newProjectComponentEnabled);
-        newFlow.setEnabled(newProjectComponentEnabled);
-        newModel.setEnabled(newProjectComponentEnabled);
-        newResource.setEnabled(newProjectComponentEnabled);
+
+        newMenu.setEnabled(true);
+        blank.setVisible(false);
+        newComponent.setVisible(false);
+        newFlow.setVisible(false);
+        newModel.setVisible(false);
+        newDataSource.setVisible(false);
+        newFileResource.setVisible(false);
+        if (selected instanceof Folder) {
+            Folder folder = (Folder) selected;
+            if (folder.getName().equals("Flows")) {
+                newFlow.setVisible(true);
+            } else if (folder.getName().equals("Models")) {
+                newModel.setVisible(true);
+            } else if (folder.getName().equals("Resources")) {
+                newDataSource.setVisible(true);
+                newFileResource.setVisible(true);
+            } else {
+                blank.setVisible(true);
+                newMenu.setEnabled(false);
+            }
+        } else {
+            blank.setVisible(true);
+            newMenu.setEnabled(false);
+        }
+
         closeProject.setEnabled(selected instanceof ProjectVersion);
 
         boolean deleteEnabled = false;
@@ -155,26 +188,26 @@ public class ProjectNavigator extends VerticalLayout {
         leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
         leftMenuBar.setWidth(100, Unit.PERCENTAGE);
 
-        MenuItem menu = leftMenuBar.addItem("Menu", null);
+        newMenu = leftMenuBar.addItem("New", null);
 
-        MenuItem newMenu = menu.addItem("New", null);
-
-        MenuItem viewMenu = menu.addItem("View", null);
-        viewMenu.addItem("Projects", Icons.PROJECT, new Command() {
+        MenuItem projectMenu = leftMenuBar.addItem("Project", null);
+        projectMenu.addItem("Manage", new Command() {
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 viewProjects();
             }
         });
 
-        closeProject = menu.addItem("Close Project", Icons.FOLDER_CLOSED, new Command() {
+        closeProject = projectMenu.addItem("Close", new Command() {
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 closeProject();
             }
         });
 
-        newFlow = newMenu.addItem("Flow", Icons.FLOW, new Command() {
+        blank = newMenu.addItem("", null);
+        
+        newFlow = newMenu.addItem("Flow", new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
@@ -182,7 +215,7 @@ public class ProjectNavigator extends VerticalLayout {
             }
         });
 
-        newModel = newMenu.addItem("Model", Icons.MODEL, new Command() {
+        newModel = newMenu.addItem("Model", new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
@@ -190,17 +223,14 @@ public class ProjectNavigator extends VerticalLayout {
             }
         });
 
-        newComponent = newMenu.addItem("Component", Icons.COMPONENT, new Command() {
+        newComponent = newMenu.addItem("Component", new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
             }
         });
 
-        newResource = newMenu.addItem("Resource", Icons.GENERAL_RESOURCE, null);
-        newResource.setDescription("Add Resource");
-
-        newResource.addItem("Database", Icons.DATABASE, new Command() {
+        newDataSource = newMenu.addItem("Database", new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
@@ -208,7 +238,7 @@ public class ProjectNavigator extends VerticalLayout {
             }
         });
 
-        newResource.addItem("Local File System", Icons.FILE_SYSTEM, new Command() {
+        newFileResource = newMenu.addItem("Local File System", new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
@@ -461,6 +491,7 @@ public class ProjectNavigator extends VerticalLayout {
         }
     }
 
+    @Override
     public void refresh() {
         refreshOpenProjects();
 
@@ -494,10 +525,30 @@ public class ProjectNavigator extends VerticalLayout {
             treeTable.refreshRowCache();
         }
     }
+    
+    protected void updatePropertySheet() {
+        Object obj = treeTable.getValue();
+        if (obj instanceof FlowStep && propertySheet != null) {
+            FlowStep step = (FlowStep) obj;
+            if (tabs.getSelectedTab() instanceof EditFlowPanel) {
+                EditFlowPanel panel = (EditFlowPanel) tabs.getSelectedTab();
+                if (panel.getFlow().getId().equals(step.getFlowId())) {
+                    panel.selected(step);
+                }
+            }
+        }
+    }
+
+
+    @Override
+    public void setPropertySheet(PropertySheet propertySheet) {
+        this.propertySheet = propertySheet;
+        updatePropertySheet();
+    }
 
     protected void refreshOpenProjects() {
         // add any open projects to the tree table. check cookies
-        
+
         Iterator<ProjectVersion> i = projects.iterator();
         while (i.hasNext()) {
             ProjectVersion projectVersion = i.next();
@@ -596,6 +647,7 @@ public class ProjectNavigator extends VerticalLayout {
 
     protected void selectionChanged(ValueChangeEvent event) {
         setMenuItemsEnabled();
+        updatePropertySheet();
     }
 
     protected boolean isDeleteButtonEnabled(Object selected) {
@@ -603,11 +655,37 @@ public class ProjectNavigator extends VerticalLayout {
     }
 
     protected void openItem(Object item) {
+        if (item instanceof FlowStep) {
+            FlowStep flowStep = (FlowStep) item;
+            if (flowStep.getComponent().getType().equals(FixedLengthFormatter.TYPE)) {
+                EditFormatPanel editFormat = new EditFormatPanel(context, flowStep.getComponent());
+                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
+                        editFormat);
+            } else {
+                item = context.getConfigurationService().findFlow(flowStep.getFlowId());
+            }
+        }
+
+        if (item instanceof Flow) {
+            Flow flow = (Flow) item;
+            EditFlowPanel flowLayout = new EditFlowPanel(context, flow, this, tabs);
+            tabs.addCloseableTab(flow.getId(), flow.getName(), Icons.FLOW, flowLayout);
+        } else if (item instanceof Model) {
+            Model model = (Model) item;
+            EditModelPanel editModel = new EditModelPanel(context, model);
+            tabs.addCloseableTab(model.getId(), model.getName(), Icons.MODEL, editModel);
+        } else if (item instanceof Resource) {
+            Resource resource = (Resource) item;
+            PropertySheet sheet = new PropertySheet(context);
+            sheet.valueChange(resource);
+            tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item),
+                    sheet);
+        }
     }
 
     protected void viewProjects() {
-        tabs.addCloseableTab("projectslist", "View Projects", Icons.PROJECT, new ViewProjectsPanel(
-                context, this));
+        tabs.addCloseableTab("projectslist", "Manage Projects", Icons.PROJECT,
+                new ManageProjectsPanel(context, this));
     }
 
     protected void closeProject() {
@@ -618,15 +696,20 @@ public class ProjectNavigator extends VerticalLayout {
         }
     }
 
+    @Override
+    public void select(Object obj) {
+        Object parent = obj;
+        do {
+            parent = treeTable.getParent(parent);
+            if (parent != null) {
+                treeTable.setCollapsed(parent, false);
+            }
+        } while (parent != null);
+
+        treeTable.setValue(obj);
+    }
+
     protected void handleDelete() {
-
-    }
-
-    protected void addNewFileSystem() {
-
-    }
-
-    protected void addNewDatabase() {
 
     }
 
@@ -685,12 +768,53 @@ public class ProjectNavigator extends VerticalLayout {
         }
     }
 
-    protected void addNewComponent() {
+    protected void addNewDatabase() {
+        addNewResource(DataSourceResource.TYPE, "Database", Icons.DATABASE);
+    }
 
+    protected void addNewFileSystem() {
+        addNewResource(LocalFileResource.TYPE, "Directory", Icons.FILE_SYSTEM);
+    }
+
+    protected void addNewResource(String type, String defaultName,
+            FontAwesome icon) {
+        Folder folder = findFolderWithName("Resources");
+        if (folder != null) {
+            ProjectVersion projectVersion = findProjectVersion();
+            Resource resource = new Resource();
+            resource.setName(defaultName);
+            resource.setProjectVersionId(projectVersion.getId());
+            resource.setType(type);
+            context.getConfigurationService().save(resource);
+
+            treeTable.addItem(resource);
+            treeTable.setItemIcon(resource, icon);
+            treeTable.setParent(resource, folder);
+
+            treeTable.setCollapsed(folder, false);
+
+            startEditingItem(resource);
+        }
     }
 
     protected void addNewModel() {
+        Folder folder = findFolderWithName("Models");
+        if (folder != null) {
+            ProjectVersion projectVersion = findProjectVersion();
+            Model model = new Model();
+            model.setName("New Model");
+            model.setProjectVersionId(projectVersion.getId());
+            context.getConfigurationService().save(model);
 
+            treeTable.addItem(model);
+            treeTable.setItemIcon(model, Icons.MODEL);
+            treeTable.setParent(model, folder);
+            this.treeTable.setChildrenAllowed(model, false);
+
+            treeTable.setCollapsed(folder, false);
+
+            startEditingItem(model);
+        }
     }
 
 }

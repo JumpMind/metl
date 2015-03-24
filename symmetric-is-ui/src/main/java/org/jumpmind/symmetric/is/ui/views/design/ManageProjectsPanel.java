@@ -37,7 +37,7 @@ import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class ViewProjectsPanel extends VerticalLayout implements IUiPanel {
+public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -65,7 +65,7 @@ public class ViewProjectsPanel extends VerticalLayout implements IUiPanel {
 
     AbstractObject currentlyEditing;
 
-    public ViewProjectsPanel(ApplicationContext context, ProjectNavigator projectNavigator) {
+    public ManageProjectsPanel(ApplicationContext context, ProjectNavigator projectNavigator) {
         this.setSizeFull();
         this.context = context;
         this.projectNavigator = projectNavigator;
@@ -215,7 +215,7 @@ public class ViewProjectsPanel extends VerticalLayout implements IUiPanel {
             Project project = new Project();
             project.setName("New Project");
             ProjectVersion version = new ProjectVersion();
-            version.setName("1.0");
+            version.setVersionLabel("1.0");
             version.setProject(project);
             project.getProjectVersions().add(version);
             IConfigurationService configurationService = context.getConfigurationService();
@@ -241,7 +241,7 @@ public class ViewProjectsPanel extends VerticalLayout implements IUiPanel {
 
                 } else if (currentlyEditing instanceof ProjectVersion) {
                     ProjectVersion version = (ProjectVersion) currentlyEditing;
-                    version.setName(name);
+                    version.setVersionLabel(name);
 
                     Boolean locked = (Boolean) item.getItemProperty("locked").getValue();
                     locked = locked == null ? false : locked;

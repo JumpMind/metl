@@ -149,12 +149,12 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         if (value instanceof FlowStep) {
             FlowStep step = (FlowStep) value;
             Flow flow = configurationService.findFlow(step.getFlowId());
-            Folder folder = flow.getFolder();
+            String projectVersionId = flow.getProjectVersionId();
             if (componentDefintion.inputMessage() == MessageType.ENTITY_MESSAGE) {
                 final AbstractSelect combo = new ComboBox("Input Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
-                List<Model> models = configurationService.findModelsInFolder(folder);
+                List<Model> models = configurationService.findModelsInProject(projectVersionId);
                 if (models != null) {
                     for (Model model : models) {
                         combo.addItem(model);

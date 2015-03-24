@@ -27,7 +27,7 @@ public class DesignView extends HorizontalLayout implements View {
     @Autowired
     ApplicationContext context;
 
-    DesignNavigator projectNavigator;
+    ProjectNavigator projectNavigator;
 
     TabbedApplicationPanel tabs;
 
@@ -37,12 +37,11 @@ public class DesignView extends HorizontalLayout implements View {
 
         tabs = new TabbedApplicationPanel();
 
-
         HorizontalSplitPanel leftSplit = new HorizontalSplitPanel();
         leftSplit.setSizeFull();
         leftSplit.setSplitPosition(300, Unit.PIXELS);
 
-        projectNavigator = new DesignNavigator(context, tabs);
+        projectNavigator = new ProjectNavigator(context, tabs);
 
         leftSplit.setFirstComponent(projectNavigator);
         VerticalLayout container = new VerticalLayout();
