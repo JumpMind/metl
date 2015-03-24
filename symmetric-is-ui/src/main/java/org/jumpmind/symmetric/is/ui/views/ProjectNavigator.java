@@ -601,6 +601,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         treeTable.setItemIcon(folder, Icons.FOLDER_CLOSED);
         treeTable.setItemCaption(folder, name);
         treeTable.setParent(folder, projectVersion);
+        treeTable.setChildrenAllowed(folder, false);
         return folder;
     }
 
@@ -609,6 +610,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         List<Resource> resources = configurationService.findResourcesInProject(projectVersion
                 .getId());
         for (Resource resource : resources) {
+            this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(resource);
             if (DataSourceResource.TYPE.equals(resource.getType())) {
                 this.treeTable.setItemIcon(resource, Icons.DATABASE);
@@ -625,6 +627,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         IConfigurationService configurationService = context.getConfigurationService();
         List<Flow> flows = configurationService.findFlowsInProject(projectVersion.getId());
         for (Flow flow : flows) {
+            this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(flow);
             this.treeTable.setItemIcon(flow, Icons.FLOW);
             this.treeTable.setParent(flow, folder);
@@ -647,6 +650,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         IConfigurationService configurationService = context.getConfigurationService();
         List<Model> models = configurationService.findModelsInProject(projectVersion.getId());
         for (Model model : models) {
+            this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(model);
             this.treeTable.setItemIcon(model, Icons.MODEL);
             this.treeTable.setParent(model, folder);

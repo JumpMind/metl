@@ -354,8 +354,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
             setButtonsEnabled();
             if (currentlyEditing != null) {
                 currentlyEditing = null;
-                treeTable.refreshRowCache();
-                setButtonsEnabled();
+                refresh();
             }
         }
     }
