@@ -54,7 +54,7 @@
     <table name="model" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
         <column name="row_id" type="CHAR" size="36" required="true" description="A unique identifier for this row across different versions" />
-        <column name="project_version_id" type="CHAR" size="36" required="true" description="A unique identifier for the version this row belongs to" />        
+        <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />        
         <column name="name" type="VARCHAR" size="255" description="" />
         <column name="type" type="VARCHAR" size="50" required="true" description="RELATIONAL" />
         <column name="shared" type="BOOLEANINT" size="1" default="0" description="Indicator as to whether this is a shared model." />
@@ -138,7 +138,7 @@
     <table name="resource" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
         <column name="row_id" type="CHAR" size="36" required="true" description="A unique identifier for this row across different versions" />
-        <column name="project_version_id" type="CHAR" size="36" required="true" description="A unique identifier for the version this row belongs to" />                
+        <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />                
         <column name="name" type="VARCHAR" size="255" description="" />
         <column name="type" type="VARCHAR" size="50" required="true" description="" />
         <column name="folder_id" type="CHAR" size="36" description="" />
@@ -167,7 +167,7 @@
     <table name="component" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
         <column name="row_id" type="CHAR" size="36" required="true" description="A unique identifier for this row across different versions" />
-        <column name="project_version_id" type="CHAR" size="36" required="true" description="A unique identifier for the version this row belongs to" />                
+        <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />                
         <column name="name" type="VARCHAR" size="255" required="true" description="A user defined name for the component" />
         <column name="type" type="VARCHAR" size="50" required="true" description="" />
         <column name="folder_id" type="CHAR" size="36" description="" />   
@@ -246,7 +246,7 @@
     <table name="flow" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
         <column name="row_id" type="CHAR" size="36" required="true" description="A unique identifier for this row across different versions" />
-        <column name="project_version_id" type="CHAR" size="36" required="true" description="A unique identifier for the version this row belongs to" />                
+        <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />                
         <column name="name" type="VARCHAR" size="255" description="" />
         <column name="folder_id" type="CHAR" size="36" description="" />
         <column name="start_type" type="VARCHAR" default="AUTO" required="true" size="128" description="" />
