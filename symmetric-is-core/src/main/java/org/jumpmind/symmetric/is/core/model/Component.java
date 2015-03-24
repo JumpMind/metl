@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.model;
 
 import java.util.List;
+import java.util.UUID;
 
 public class Component extends AbstractObjectWithSettings {
 
@@ -17,6 +18,10 @@ public class Component extends AbstractObjectWithSettings {
     Model inputModel;
 
     Model outputModel;
+    
+    String projectVersionId;
+    
+    String rowId = UUID.randomUUID().toString();
 
     List<ComponentEntitySetting> entitySettings;
 
@@ -146,5 +151,20 @@ public class Component extends AbstractObjectWithSettings {
     protected Setting createSettingData() {
         return new ComponentSetting(id);
     }
+    
+    public void setProjectVersionId(String projectVersionId) {
+        this.projectVersionId = projectVersionId;
+    }
+    
+    public String getProjectVersionId() {
+        return projectVersionId;
+    }
 
+    public void setRowId(String rowId) {
+        this.rowId = rowId;
+    }
+    
+    public String getRowId() {
+        return rowId;
+    }
 }

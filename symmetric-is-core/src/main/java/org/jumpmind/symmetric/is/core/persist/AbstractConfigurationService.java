@@ -30,6 +30,8 @@ import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelAttributeRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.ModelEntityRelationship;
+import org.jumpmind.symmetric.is.core.model.Project;
+import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.ResourceSetting;
 import org.jumpmind.symmetric.is.core.model.Setting;
@@ -117,7 +119,10 @@ abstract class AbstractConfigurationService extends AbstractService implements
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("folderId", folder.getId());
         List<Resource> datas = find(Resource.class, params);
-        return buildResource(folder, datas);
+        for (Resource resource : datas) {
+            resource.setFolder(folder);
+        }
+        return buildResource(datas);
     }
 
     @Override
@@ -128,10 +133,61 @@ abstract class AbstractConfigurationService extends AbstractService implements
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("type", type);
                 List<Resource> datas = find(Resource.class, params);
-                list = buildResource(null, datas);
+                list = buildResource(datas);
             }
         }
         return list;
+    }
+
+    @Override
+    public List<Project> findProjects() {
+        List<Project> list = persistenceManager.find(Project.class, new NameValue("deleted", 0), null, null,
+                tableName(Project.class));
+        
+        List<ProjectVersion> versions = persistenceManager.find(ProjectVersion.class, new NameValue("deleted", 0), null, null,
+                tableName(ProjectVersion.class));
+        for (ProjectVersion projectVersion : versions) {
+            for (Project project : list) {
+                if (project.getId().equals(projectVersion.getProjectId())) {
+                    projectVersion.setProject(project);
+                    project.getProjectVersions().add(projectVersion);
+                    break;
+                }
+            }
+        }
+        return list;
+    }
+    
+    @Override
+    public List<Flow> findFlowsInProject(String projectVersionId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("projectVersionId", projectVersionId);
+        List<Flow> flows = find(Flow.class, params);
+        for (Flow flow : flows) {
+            flow.setProjectVersionId(projectVersionId);
+            refreshFlowRelations(flow);
+        }
+        return flows;
+    }
+    
+    @Override
+    public List<Model> findModelsInProject(String projectVersionId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("projectVersionId", projectVersionId);
+        List<Model> models = find(Model.class, params);
+        for (Model model : models) {
+            model.setProjectVersionId(projectVersionId);
+            refreshModelRelations(model);
+        }
+        return models;
+    }
+    
+    @Override
+    public List<Resource> findResourcesInProject(String projectVersionId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("projectVersionId", projectVersionId);
+        List<Resource> datas = find(Resource.class, params);
+        return buildResource(datas);
     }
 
     @Override
@@ -229,17 +285,15 @@ abstract class AbstractConfigurationService extends AbstractService implements
             component.setOutputModel(findModel(component.getOutputModelId()));
         }
 
-        List<ComponentSetting> settings = find(ComponentSetting.class, new NameValue(
-                "componentId", component.getId()));
+        List<ComponentSetting> settings = find(ComponentSetting.class, new NameValue("componentId",
+                component.getId()));
         component.setSettings(settings);
 
-        List<ComponentEntitySetting> entitySettings = find(
-                ComponentEntitySetting.class,
+        List<ComponentEntitySetting> entitySettings = find(ComponentEntitySetting.class,
                 new NameValue("componentId", component.getId()));
         component.setEntitySettings(entitySettings);
 
-        List<ComponentAttributeSetting> attributeSettings = find(
-                ComponentAttributeSetting.class,
+        List<ComponentAttributeSetting> attributeSettings = find(ComponentAttributeSetting.class,
                 new NameValue("componentId", component.getId()));
         component.setAttributeSettings(attributeSettings);
 
@@ -267,24 +321,17 @@ abstract class AbstractConfigurationService extends AbstractService implements
         return model;
     }
 
-    protected List<Resource> buildResource(Folder folder, List<Resource> datas) {
-        return buildResource(folder, datas.toArray(new Resource[datas.size()]));
+    protected List<Resource> buildResource(List<Resource> datas) {
+        return buildResource(datas.toArray(new Resource[datas.size()]));
     }
 
-    protected List<Resource> buildResource(Folder folder, Resource... resources) {
+    protected List<Resource> buildResource(Resource... resources) {
         List<Resource> list = new ArrayList<Resource>();
         for (Resource resource : resources) {
-            if (folder == null) {
-                Map<String, Object> folderParams = new HashMap<String, Object>();
-                folderParams.put("id", resource.getFolderId());
-                folder = findOne(Folder.class, folderParams);
-            }
-
             Map<String, Object> settingParams = new HashMap<String, Object>();
             settingParams.put("resourceId", resource.getId());
             List<ResourceSetting> settings = find(ResourceSetting.class, settingParams);
             resource.setSettings(settings);
-            resource.setFolder(folder);
             list.add(resource);
         }
         return list;
@@ -406,6 +453,16 @@ abstract class AbstractConfigurationService extends AbstractService implements
                 flow.getFlowStepLinks().add(dataLink);
             }
         }
+    }
+
+    @Override
+    public void save(Project project) {
+        save((AbstractObject) project);
+    }
+
+    @Override
+    public void save(ProjectVersion projectVersion) {
+        save((AbstractObject) projectVersion);
     }
 
     @Override

@@ -17,6 +17,8 @@ import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelAttributeRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.ModelEntityRelationship;
+import org.jumpmind.symmetric.is.core.model.Project;
+import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
 
 public interface IConfigurationService {
@@ -40,7 +42,7 @@ public interface IConfigurationService {
     public boolean isDeployed(Flow flow);
     
     public List<Flow> findFlowsInFolder(Folder folder);
-    
+       
     public List<Model> findModelsInFolder(Folder folder);
     
     public Resource findResource(String id);
@@ -48,7 +50,7 @@ public interface IConfigurationService {
     public List<Resource> findResourcesInFolder(Folder folder);
     
     public List<Resource> findResourcesByTypes(String ... types);
-    
+        
     public List<Agent> findAgents();
     
     public List<Agent> findAgentsInFolder(Folder folder);
@@ -74,6 +76,10 @@ public interface IConfigurationService {
     public void save(AbstractObject obj);
 
     public void save(Flow flow);
+    
+    public void save(Project project);
+    
+    public void save(ProjectVersion projectVersion);
     
     public List<AgentSummary> findUndeployedAgentsFor(String flowId);
     
@@ -102,5 +108,13 @@ public interface IConfigurationService {
     public void save(ModelEntity modelEntity);
     
     public void save(ModelEntityRelationship modelEntityRelationship);
+
+    public List<Project> findProjects();
+    
+    public List<Flow> findFlowsInProject(String projectVersionId);
+    
+    public List<Model> findModelsInProject(String projectVersionId);
+
+    public List<Resource> findResourcesInProject(String projectVersionId);
 
 }

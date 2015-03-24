@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.core.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Folder extends AbstractObject {
 
@@ -11,9 +12,15 @@ public class Folder extends AbstractObject {
 
     String name;
     
+    String projectVersionId;
+    
     Folder parent;
 
     List<Folder> children;
+    
+    boolean virtualFolder = false;
+    
+    String rowId = UUID.randomUUID().toString();
 
     public Folder() {
     	children = new ArrayList<Folder>();
@@ -22,6 +29,10 @@ public class Folder extends AbstractObject {
     public Folder(String id) {
     	this();
         this.id = id;         
+    }
+    
+    public void makeVirtual() {
+        this.virtualFolder = true;
     }
     
     public FolderType getFolderType() {
@@ -75,6 +86,22 @@ public class Folder extends AbstractObject {
     
     @Override
     public boolean isSettingNameAllowed() {
-        return true;
+        return !virtualFolder;
+    }
+    
+    public void setProjectVersionId(String projectVersionId) {
+        this.projectVersionId = projectVersionId;
+    }
+    
+    public String getProjectVersionId() {
+        return projectVersionId;
+    }
+    
+    public void setRowId(String rowId) {
+        this.rowId = rowId;
+    }
+    
+    public String getRowId() {
+        return rowId;
     }
 }
