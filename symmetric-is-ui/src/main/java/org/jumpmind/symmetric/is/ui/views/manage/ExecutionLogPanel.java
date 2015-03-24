@@ -28,29 +28,28 @@ import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 
+@SuppressWarnings("serial")
 public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable {
 
-	private static final long serialVersionUID = 1L;
+	IExecutionService executionService;
 	
-	protected IExecutionService executionService;
+	Table stepTable = new Table();
 	
-	protected Table stepTable = new Table();
+	BeanContainer<String, ExecutionStep> stepContainer = new BeanContainer<String, ExecutionStep>(ExecutionStep.class);
 	
-	protected BeanContainer<String, ExecutionStep> stepContainer = new BeanContainer<String, ExecutionStep>(ExecutionStep.class);
+	BeanItemContainer<ExecutionStepLog> logContainer = new BeanItemContainer<ExecutionStepLog>(ExecutionStepLog.class);
 	
-	protected BeanItemContainer<ExecutionStepLog> logContainer = new BeanItemContainer<ExecutionStepLog>(ExecutionStepLog.class);
+	Label flowLabel = new Label();
 	
-	protected Label flowLabel = new Label();
+	Label statusLabel = new Label();
 	
-	protected Label statusLabel = new Label();
+	Label startLabel = new Label();
 	
-	protected Label startLabel = new Label();
+	Label endLabel = new Label();
 	
-	protected Label endLabel = new Label();
+	BackgroundRefresherService backgroundRefresherService;
 	
-	protected BackgroundRefresherService backgroundRefresherService;
-	
-	protected String executionId;
+	String executionId;
 
 	public ExecutionLogPanel(String executionId, ApplicationContext context) {
 		this.backgroundRefresherService = context.getBackgroundRefresherService();
@@ -86,9 +85,6 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
 		stepTable.setVisibleColumns(new Object[] { "componentName", "status", "messagesReceived", "messagesProduced", "startTime", "endTime" });
 		stepTable.setColumnHeaders(new String[] { "Component Name", "Status", "Msgs Recvd", "Msgs Sent", "Start", "End" });
 		stepTable.addValueChangeListener(new ValueChangeListener() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
 			public void valueChange(ValueChangeEvent event) {
 				@SuppressWarnings("unchecked")
 				Set<String> executionStepIds = (Set<String>) event.getProperty().getValue();
@@ -175,8 +171,6 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
 	}
 
 	public class ComponentNameColumnGenerator implements ColumnGenerator {
-        private static final long serialVersionUID = 1L;
-
         @SuppressWarnings("unchecked")
         public Object generateCell(Table source, Object itemId, Object columnId) {
             BeanItem<ExecutionStepLog> logItem = (BeanItem<ExecutionStepLog>) source.getItem(itemId);
