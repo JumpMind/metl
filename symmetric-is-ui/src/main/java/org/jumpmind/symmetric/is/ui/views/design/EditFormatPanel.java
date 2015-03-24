@@ -11,12 +11,9 @@ import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 
 import com.vaadin.data.Container;
-import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.FieldEvents.BlurEvent;
-import com.vaadin.event.FieldEvents.BlurListener;
 import com.vaadin.event.FieldEvents.FocusEvent;
 import com.vaadin.event.FieldEvents.FocusListener;
 import com.vaadin.event.Transferable;
@@ -45,8 +42,11 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 
     Table table = new Table();
 
-    BeanItemContainer<AttributeFormat> container = new BeanItemContainer<AttributeFormat>(
-            AttributeFormat.class);
+    BeanItemContainer<AttributeFormat> container = new BeanItemContainer<AttributeFormat>(AttributeFormat.class);
+
+    List<TextField> textFields = new ArrayList<TextField>();
+
+    int textFieldIndex;
 
     public EditFormatPanel(ApplicationContext context, Component component) {
         this.context = context;
@@ -67,10 +67,8 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         table.setSortEnabled(false);
         table.setImmediate(true);
         table.setSizeFull();
-        table.setVisibleColumns(new Object[] { "entityName", "attributeName", "width", "startPos",
-                "endPos", "transformText" });
-        table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Width",
-                "Start Position", "End Position", "Transform" });
+        table.setVisibleColumns(new Object[] { "entityName", "attributeName", "width", "startPos", "endPos", "transformText" });
+        table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Width", "Start Position", "End Position", "Transform" });
         table.setTableFieldFactory(new EditFieldFactory());
         table.setEditable(true);
         table.setDragMode(TableDragMode.ROW);
@@ -78,10 +76,12 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         addComponent(table);
         setExpandRatio(table, 1.0f);
 
-        for (ModelEntity e : component.getInputModel().getModelEntities().values()) {
-            for (ModelAttribute a : e.getModelAttributes()) {
-                table.addItem(new AttributeFormat(e.getName(), a.getName(), 10));
-            }
+        if (component.getInputModel() != null) {
+	        for (ModelEntity e : component.getInputModel().getModelEntities().values()) {
+	            for (ModelAttribute a : e.getModelAttributes()) {
+	                table.addItem(new AttributeFormat(e.getName(), a.getName(), 10));
+	            }
+	        }
         }
         calculatePositions();
     }
@@ -100,20 +100,19 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         boolean needsRefreshed = false;
         for (AttributeFormat a : container.getItemIds()) {
             if (a.getStartPos() != pos) {
-            a.setStartPos(pos);
-            needsRefreshed = true;
+	            a.setStartPos(pos);
+	            needsRefreshed = true;
             }
             long endPos = pos + a.getWidth();
             if (a.getEndPos() != endPos) {
                 a.setEndPos(endPos);
                 needsRefreshed = true;
-            }
-            
+            }            
             pos += a.getWidth() + 1;
         }
 
-        if (needsRefreshed) {   
-            editables.clear();
+        if (needsRefreshed) {
+            textFields.clear();
             table.refreshRowCache();
         }
     }
@@ -142,39 +141,34 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         }
     }
     
-    List<TextField> editables = new ArrayList<TextField>();
-    int focusIndex;
 
-    class EditFieldFactory implements TableFieldFactory {
-        public Field<?> createField(Container container, final Object itemId,
-                final Object propertyId, com.vaadin.ui.Component uiContext) {
-            if (propertyId.equals("width") || propertyId.equals("transformText")) {
-                final AttributeFormat attributeFormat = (AttributeFormat) itemId;
-                final TextField textField = new TextField();
-                textField.setData(itemId);
-                textField.setImmediate(true);
-                textField.addValueChangeListener(new ValueChangeListener() {
-
-                    @Override
-                    public void valueChange(ValueChangeEvent event) {
-                        calculatePositions();
-                    }
-                });
-                 textField.addFocusListener(new FocusListener() {
-                 public void focus(FocusEvent event) {
-                     focusIndex = editables.indexOf(textField) + 1;
-                     table.select(((TextField) event.getSource()).getData());
-                 }
-                 });
-                editables.add(textField);
-                if (editables.size()-1 == focusIndex) {
-                    textField.focus();
-                }
-                return textField;
-            }
-            return null;
-        }
-    }
+	class EditFieldFactory implements TableFieldFactory {
+	    public Field<?> createField(Container container, final Object itemId,
+				final Object propertyId, com.vaadin.ui.Component uiContext) {
+			if (propertyId.equals("width") || propertyId.equals("transformText")) {
+				final TextField textField = new TextField();
+				textField.setData(itemId);
+				textField.setImmediate(true);
+				textField.addValueChangeListener(new ValueChangeListener() {
+					public void valueChange(ValueChangeEvent event) {
+						calculatePositions();
+					}
+				});
+				textField.addFocusListener(new FocusListener() {
+					public void focus(FocusEvent event) {
+						textFieldIndex = textFields.indexOf(textField) + 1;
+						table.select(((TextField) event.getSource()).getData());
+					}
+				});
+				textFields.add(textField);
+				if (textFields.size() - 1 == textFieldIndex) {
+					textField.focus();
+				}
+				return textField;
+			}
+			return null;
+		}
+	}
 
     class TableDropHandler implements DropHandler {
         public void drop(DragAndDropEvent event) {
