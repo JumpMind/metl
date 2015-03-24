@@ -8,7 +8,11 @@ import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 
 import com.vaadin.data.Container;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.FieldEvents.BlurEvent;
+import com.vaadin.event.FieldEvents.BlurListener;
 import com.vaadin.event.FieldEvents.FocusEvent;
 import com.vaadin.event.FieldEvents.FocusListener;
 import com.vaadin.event.Transferable;
@@ -71,6 +75,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 				table.addItem(new AttributeFormat(e.getName(), a.getName(), 10));
 			}
 		}
+		calculatePositions();
 	}
 
 	@Override
@@ -82,6 +87,15 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 	public void showing() {
 	}
 
+	protected void calculatePositions() {
+		int pos = 1;
+		for (AttributeFormat a : container.getItemIds()) {
+			a.setStartPos(pos);
+			a.setEndPos(pos + a.getWidth());
+			pos += a.getWidth() + 1;
+		}
+	}		
+
 	class MoveUpClickListener implements ClickListener {
 		public void buttonClick(ClickEvent event) {
 			Object itemId = table.getValue();
@@ -89,6 +103,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 			if (index != 0) {
 				container.removeItem(itemId);		
 				container.addItemAt(index - 1, itemId);
+				calculatePositions();
 			}
 		}
 	}
@@ -100,20 +115,50 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 			if (nextItemId != null) {
 				container.removeItem(itemId);
 				container.addItemAfter(nextItemId, itemId);
+				calculatePositions();
 			}
 		}
 	}
 
 	class EditFieldFactory implements TableFieldFactory {
-		public Field<?> createField(Container container, Object itemId, Object propertyId, com.vaadin.ui.Component uiContext) {
+		public Field<?> createField(Container container, final Object itemId, final Object propertyId, com.vaadin.ui.Component uiContext) {
 			if (propertyId.equals("width") || propertyId.equals("transformText")) {
+				final AttributeFormat attributeFormat = (AttributeFormat) itemId;
 				TextField textField = new TextField();
 				textField.setData(itemId);
+				textField.setImmediate(true);
 				textField.addFocusListener(new FocusListener() {
 					public void focus(FocusEvent event) {
 						table.select(((TextField) event.getSource()).getData());
 					}
 				});
+
+				textField.addValueChangeListener(new ValueChangeListener() {
+					public void valueChange(ValueChangeEvent event) {
+						
+						/*
+						String value = (String) event.getProperty().getValue();
+						if (propertyId.equals("width")) {
+							attributeFormat.setWidth(Long.parseLong((String) event.getProperty().getValue()));
+							calculatePositions();
+						} else {
+							attributeFormat.setTransformText((String) event.getProperty().getValue());
+						}
+						*/
+					}
+				});
+				textField.addBlurListener(new BlurListener() {
+
+					@Override
+					public void blur(BlurEvent event) {
+						// TODO Auto-generated method stub
+//						table.setEditable(true);
+						calculatePositions();
+						table.refreshRowCache();
+					}
+					
+				});
+
 				return textField;
 			}
 			return null;
@@ -135,6 +180,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 						}
 						container.removeItem(source);
 						container.addItemAfter(target, source);
+						calculatePositions();
 					}
 				}
 			}
