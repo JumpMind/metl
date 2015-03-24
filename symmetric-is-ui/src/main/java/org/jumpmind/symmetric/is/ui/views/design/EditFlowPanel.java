@@ -316,8 +316,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         String executionId = agentManager.getAgentRuntime(localAgent).scheduleNow(deployment);
         if (executionId != null) {
             ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context);
-            tabs.addCloseableTab(executionId, "Run " + flow.getName()
-                    + " " + flow.getName(), Icons.LOG, logPanel);
+            tabs.addCloseableTab(executionId, "Run " + flow.getName(), Icons.LOG, logPanel);
         }
     }
 
