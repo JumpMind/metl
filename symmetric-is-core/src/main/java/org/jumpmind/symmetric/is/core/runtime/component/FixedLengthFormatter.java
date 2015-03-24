@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -9,9 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.jumpmind.exception.IoException;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.symmetric.csv.CsvWriter;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
@@ -30,10 +30,7 @@ public class FixedLengthFormatter extends AbstractComponent {
     @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Quote Character")
     public final static String FIXED_LENGTH_FORMATTER_QUOTE_CHARACTER = "fixed.length.formatter.quote.character";
 
-    @SettingDefinition(order = 20, required = true, type = Type.INTEGER, label = "Ordinal")
     public final static String FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL = "fixed.length.formatter.attribute.ordinal";
-
-    @SettingDefinition(order = 30, required = true, type = Type.INTEGER, label = "Ordinal")
     public final static String FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH = "fixed.length.formatter.attribute.length";
 
     /* settings */
@@ -72,21 +69,16 @@ public class FixedLengthFormatter extends AbstractComponent {
     private String processInputRow(EntityData inputRow) {
 
         Writer writer = new StringWriter();
-        CsvWriter csvWriter = new CsvWriter(writer, delimiter.charAt(0));
-        if (!StringUtils.isEmpty(quoteCharacter)) {
-            csvWriter.setTextQualifier(quoteCharacter.charAt(0));
-        }
-        // try {
-        // for (AttributeFormat format : attributesList) {
-        // //stringBuilder.append(b)
-        // //csvWriter.write(inputRow.get(attribute.getAttributeId()).toString());
-        // }
-        // //csvWriter.endRecord();
-        // } catch (IOException e) {
-        // throw new
-        // IoException("Error writing to stream for formatted output. " +
-        // e.getMessage());
-        // }
+         try {
+             for (AttributeFormat attribute : attributesList) {
+                 stringBuilder.append(inputRow.get(attribute.getAttributeId()).toString());
+             }
+             writer.write(stringBuilder.toString());
+         } catch (IOException e) {
+         throw new
+         IoException("Error writing to stream for formatted output. " +
+         e.getMessage());
+         }
         return writer.toString();
     }
 
@@ -110,6 +102,7 @@ public class FixedLengthFormatter extends AbstractComponent {
                             Integer.parseInt(attributeSetting.getValue()));
                 } else {
                     attributesMap.put(attributeSetting.getAttributeId(), new AttributeFormat(
+                            attributeSetting.getAttributeId(),
                             Integer.parseInt(attributeSetting.getValue()), -1));
                 }
             } else if (attributeSetting.getName().equalsIgnoreCase(
@@ -118,7 +111,8 @@ public class FixedLengthFormatter extends AbstractComponent {
                     attributesMap.get(attributeSetting.getAttributeId()).setLength(
                             Integer.parseInt(attributeSetting.getValue()));
                 } else {
-                    attributesMap.put(attributeSetting.getAttributeId(), new AttributeFormat(-1,
+                    attributesMap.put(attributeSetting.getAttributeId(), new AttributeFormat(
+                            attributeSetting.getAttributeId(), -1,
                             Integer.parseInt(attributeSetting.getValue())));
                 }
             }
@@ -136,12 +130,22 @@ public class FixedLengthFormatter extends AbstractComponent {
 
     private class AttributeFormat {
 
+        String attributeId;
         int ordinal;
         int length;
 
-        public AttributeFormat(int ordinal, int length) {
+        public AttributeFormat(String attributeId, int ordinal, int length) {
+            this.attributeId = attributeId;
             this.ordinal = ordinal;
             this.length = length;
+        }
+
+        public String getAttributeId() {
+            return attributeId;
+        }
+
+        public void setAttributeId(String attributeId) {
+            this.attributeId = attributeId;
         }
 
         public int getOrdinal() {

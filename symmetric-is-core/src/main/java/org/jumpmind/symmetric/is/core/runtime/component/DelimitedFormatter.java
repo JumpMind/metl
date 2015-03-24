@@ -34,14 +34,13 @@ public class DelimitedFormatter extends AbstractComponent {
     @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Delimiter")
     public final static String DELIMITED_FORMATTER_DELIMITER = "delimited.formatter.delimiter";
     
-    @SettingDefinition(order = 20, required = true, type = Type.STRING, label = "Quote Character")
+    @SettingDefinition(order = 20, type = Type.STRING, label = "Quote Character")
     public final static String DELIMITED_FORMATTER_QUOTE_CHARACTER = "delimited.formatter.quote.character";
     
-    @SettingDefinition(order = 30, required = true, type = Type.INTEGER, label = "Ordinal")
-    public final static String DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL = "delimited.formatter.attribute.ordinal";
-    
-    @SettingDefinition(order = 40, required = false, type = Type.STRING, label = "FormatFunction")
+    @SettingDefinition(order = 30, type = Type.STRING, label = "FormatFunction")
     public final static String DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = "delimited.formatter.attribute.format.function";
+
+    public final static String DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL = "delimited.formatter.attribute.ordinal";
     
     /* settings */
     String delimiter;
@@ -105,7 +104,7 @@ public class DelimitedFormatter extends AbstractComponent {
                 }
 
             }
-            csvWriter.endRecord();
+            //csvWriter.endRecord();
         } catch (IOException e) {
             throw new IoException("Error writing to stream for formatted output. " + e.getMessage());
         }
