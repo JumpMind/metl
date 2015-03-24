@@ -349,6 +349,12 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
                         abortEditingItem();
                         openItem(event.getItemId());
                         itemClicked = null;
+                        
+                        
+                        if (table.areChildrenAllowed(event.getItemId())) {
+                            Object item = event.getItemId();
+                            table.setCollapsed(item, !table.isCollapsed(item));
+                        }
                     } else {
                         if (itemClicked != null && itemClicked.equals(event.getItemId())) {
                             long timeSinceClick = System.currentTimeMillis() - itemClickTimeInMs;

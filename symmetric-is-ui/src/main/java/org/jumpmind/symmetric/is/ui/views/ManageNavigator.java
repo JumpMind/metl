@@ -234,9 +234,6 @@ public class ManageNavigator extends Panel {
     }
 
     protected void addFlowsToFolder(Folder folder) {
-    	if (folder == flowsFolder) {
-    		folder = null;
-    	}
         List<Flow> flows = configurationService.findFlowsInFolder(folder == flowsFolder ? null : folder);
         for (Flow flow : flows) {
             treeTable.addItem(flow);

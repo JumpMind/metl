@@ -120,5 +120,10 @@ public class Model extends AbstractObject {
     public String getRowId() {
         return rowId;
     }
+    
+    @Override
+    public boolean isSettingNameAllowed() {
+        return true;
+    }
 
 }

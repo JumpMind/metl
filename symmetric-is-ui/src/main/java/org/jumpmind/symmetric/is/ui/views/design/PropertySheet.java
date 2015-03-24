@@ -9,7 +9,6 @@ import org.jumpmind.symmetric.is.core.model.AbstractObjectWithSettings;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
-import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
@@ -117,12 +116,12 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         if (value instanceof FlowStep) {
             FlowStep step = (FlowStep) value;
             Flow flow = configurationService.findFlow(step.getFlowId());
-            Folder folder = flow.getFolder();
+            String projectVersionId = flow.getProjectVersionId();
             if (componentDefintion.outgoingMessage() == MessageType.ENTITY_MESSAGE) {
                 final AbstractSelect combo = new ComboBox("Output Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
-                List<Model> models = configurationService.findModelsInFolder(folder);
+                List<Model> models = configurationService.findModelsInProject(projectVersionId);
                 if (models != null) {
                     for (Model model : models) {
                         combo.addItem(model);
