@@ -31,11 +31,11 @@ public class TextFileWriter extends AbstractComponent {
     @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Path and File")
     public final static String TEXTFILEWRITER_RELATIVE_PATH = "textfilewriter.relative.path";
 
-    @SettingDefinition(type = Type.BOOLEAN, order = 30, required = true, provided = true,
+    @SettingDefinition(type = Type.BOOLEAN, order = 30, required = true, 
             defaultValue = "false", label = "Must Exist")
     public static final String TEXTFILEWRITER_MUST_EXIST = "textfilewriter.must.exist";
 
-    @SettingDefinition(type = Type.BOOLEAN, order = 40, required = true, provided = true,
+    @SettingDefinition(type = Type.BOOLEAN, order = 40, required = true, 
             defaultValue = "false", label = "Append")
     public static final String TEXTFILEWRITER_APPEND = "textfilewriter.append";
 
