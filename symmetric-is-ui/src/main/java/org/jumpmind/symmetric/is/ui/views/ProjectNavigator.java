@@ -722,7 +722,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
                     new DeleteFlowConfirmationListener(flow));
         } else if (object instanceof Resource) {
             Resource resource = (Resource) object;
-            ConfirmDialog.show("Delete Connection?", "Are you sure you want to delete the '"
+            ConfirmDialog.show("Delete Resource?", "Are you sure you want to delete the '"
                     + resource.getName() + "' resource?", new DeleteResourceConfirmationListener(
                     resource));
 
@@ -902,13 +902,13 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
         @Override
         public boolean onOk() {
-            String flowVersionId = toDelete.getFlowId();
-            Flow flowVersion = context.getConfigurationService().findFlow(flowVersionId);
+            String flowId = toDelete.getFlowId();
+            Flow flow = context.getConfigurationService().findFlow(flowId);
 
-            context.getConfigurationService().delete(flowVersion, toDelete);
+            context.getConfigurationService().delete(flow, toDelete);
             Object parent = treeTable.getParent(toDelete);
-            if (tabs.closeTab(flowVersionId)) {
-                openItem(context.getConfigurationService().findFlow(flowVersionId));
+            if (tabs.closeTab(flowId)) {
+                openItem(context.getConfigurationService().findFlow(flowId));
             }
             refresh();
             treeTable.setValue(parent);
