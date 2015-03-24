@@ -505,9 +505,10 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
         if (treeTable.size() == 0) {
             openProjectsLayout = new VerticalLayout();
+            openProjectsLayout.addStyleName(ValoTheme.LAYOUT_CARD);
             openProjectsLayout.setSizeFull();
             openProjectsLayout.setMargin(true);
-            Button viewProjects = new Button("Click to open projects");
+            Button viewProjects = new Button("Click to manage projects");
             viewProjects.addStyleName(ValoTheme.BUTTON_LINK);
             viewProjects.addClickListener(new ClickListener() {
                 @Override
