@@ -327,7 +327,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
             @Override
             public void handleAction(Object sender, Object target) {
-                openItem(treeTable.getValue());
+                open(treeTable.getValue());
             }
         };
         table.addShortcutListener(treeTableEnterKeyShortcutListener);
@@ -347,7 +347,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
                 if (event.getButton() == MouseButton.LEFT) {
                     if (event.isDoubleClick()) {
                         abortEditingItem();
-                        openItem(event.getItemId());
+                        open(event.getItemId());
                         itemClicked = null;
                         
                         
@@ -668,7 +668,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
                 || selected instanceof Model || selected instanceof Resource;
     }
 
-    protected void openItem(Object item) {
+    public void open(Object item) {
         if (item instanceof FlowStep) {
             FlowStep flowStep = (FlowStep) item;
             if (flowStep.getComponent().getType().equals(FixedLengthFormatter.TYPE)) {
@@ -918,7 +918,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             context.getConfigurationService().delete(flow, toDelete);
             Object parent = treeTable.getParent(toDelete);
             if (tabs.closeTab(flowId)) {
-                openItem(context.getConfigurationService().findFlow(flowId));
+                open(context.getConfigurationService().findFlow(flowId));
             }
             refresh();
             treeTable.setValue(parent);

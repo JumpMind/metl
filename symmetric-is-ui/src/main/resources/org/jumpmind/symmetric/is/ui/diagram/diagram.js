@@ -132,6 +132,12 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
                     'id' : event.currentTarget.id
                 });
             }, false);
+            
+            nodeDiv.addEventListener("dblclick", function(event) {                
+                self.onNodeDoubleClick({
+                    'id' : event.currentTarget.id
+                });
+            }, false);
 
             parentDiv.appendChild(nodeDiv);
             

@@ -60,6 +60,30 @@ public class Diagram extends AbstractJavaScriptComponent {
                 }
             }
         });
+        
+        addFunction("onNodeDoubleClick", new JavaScriptFunction() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void call(JsonArray arguments) {
+                if (arguments.length() > 0) {
+                    Object obj = arguments.get(0);
+                    if (obj instanceof JsonObject) {
+                        JsonObject json = arguments.getObject(0);
+                        String id = json.getString("id");
+                        DiagramState state = getState();
+                        for (Node node : state.nodes) {
+                            if (node.getId().equals(id)) {
+                                fireEvent(new NodeDoubleClickedEvent(Diagram.this, node));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
 
         addFunction("onNodeMoved", new JavaScriptFunction() {
 

@@ -23,6 +23,7 @@ import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.diagram.LinkEvent;
 import org.jumpmind.symmetric.is.ui.diagram.LinkSelectedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.Node;
+import org.jumpmind.symmetric.is.ui.diagram.NodeDoubleClickedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.symmetric.is.ui.views.IDesignNavigator;
@@ -333,6 +334,11 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                 designNavigator.select(flowStep);
                 selected = flowStep;
                 delButton.setEnabled(true);
+            } else if (e instanceof NodeDoubleClickedEvent) {
+                NodeDoubleClickedEvent event = (NodeDoubleClickedEvent) e;
+                Node node = event.getNode();
+                FlowStep flowStep = flow.findFlowStepWithId(node.getId());
+                designNavigator.open(flowStep);
             } else if (e instanceof NodeMovedEvent) {
                 NodeMovedEvent event = (NodeMovedEvent) e;
                 Node node = event.getNode();

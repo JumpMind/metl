@@ -8,6 +8,8 @@ public interface IDesignNavigator {
     
     public void refresh();
     
-    public void select (Object value);
+    public void select (Object item);
+    
+    public void open(Object item);
 
 }
