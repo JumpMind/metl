@@ -26,8 +26,10 @@ import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
-import org.jumpmind.symmetric.is.ui.views.design.PropertySheet;
 import org.jumpmind.symmetric.is.ui.views.design.ManageProjectsPanel;
+import org.jumpmind.symmetric.is.ui.views.design.PropertySheet;
+import org.jumpmind.symmetric.ui.common.ConfirmDialog;
+import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -88,7 +90,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     long itemClickTimeInMs;
 
     PropertySheet propertySheet;
-    
+
     MenuItem newMenu;
 
     MenuItem newFlow;
@@ -100,7 +102,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     MenuItem newFileResource;
 
     MenuItem newDataSource;
-    
+
     MenuItem blank;
 
     MenuItem delete;
@@ -206,7 +208,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         });
 
         blank = newMenu.addItem("", null);
-        
+
         newFlow = newMenu.addItem("Flow", new Command() {
 
             @Override
@@ -273,7 +275,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
         return layout;
     }
-       
+
     public void addProjectVersion(ProjectVersion projectVersion) {
         projects.remove(projectVersion);
         projects.add(projectVersion);
@@ -526,7 +528,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             treeTable.refreshRowCache();
         }
     }
-    
+
     protected void updatePropertySheet() {
         Object obj = treeTable.getValue();
         if (obj instanceof FlowStep && propertySheet != null) {
@@ -539,7 +541,6 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             }
         }
     }
-
 
     @Override
     public void setPropertySheet(PropertySheet propertySheet) {
@@ -653,7 +654,8 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     }
 
     protected boolean isDeleteButtonEnabled(Object selected) {
-        return false;
+        return selected instanceof Flow || selected instanceof FlowStep
+                || selected instanceof Model || selected instanceof Resource;
     }
 
     protected void openItem(Object item) {
@@ -712,6 +714,30 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     }
 
     protected void handleDelete() {
+        Object object = treeTable.getValue();
+        if (object instanceof Flow) {
+            Flow flow = (Flow) object;
+            ConfirmDialog.show("Delete Flow?",
+                    "Are you sure you want to delete the '" + flow.getName() + "' flow?",
+                    new DeleteFlowConfirmationListener(flow));
+        } else if (object instanceof Resource) {
+            Resource resource = (Resource) object;
+            ConfirmDialog.show("Delete Connection?", "Are you sure you want to delete the '"
+                    + resource.getName() + "' resource?", new DeleteResourceConfirmationListener(
+                    resource));
+
+        } else if (object instanceof FlowStep) {
+            FlowStep flowStep = (FlowStep) object;
+            ConfirmDialog.show("Delete Step?",
+                    "Are you sure you want to delete the '" + flowStep.getName() + "' step?",
+                    new DeleteFlowStepConfirmationListener(flowStep));
+
+        } else if (object instanceof Model) {
+            Model model = (Model) object;
+            ConfirmDialog.show("Delete Model?",
+                    "Are you sure you want to delete the '" + model.getName() + "' model?",
+                    new DeleteModelConfirmationListener(model));
+        }
 
     }
 
@@ -778,8 +804,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         addNewResource(LocalFileResource.TYPE, "Directory", Icons.FILE_SYSTEM);
     }
 
-    protected void addNewResource(String type, String defaultName,
-            FontAwesome icon) {
+    protected void addNewResource(String type, String defaultName, FontAwesome icon) {
         Folder folder = findFolderWithName("Resources");
         if (folder != null) {
             ProjectVersion projectVersion = findProjectVersion();
@@ -816,6 +841,103 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             treeTable.setCollapsed(folder, false);
 
             startEditingItem(model);
+        }
+    }
+
+    class DeleteFlowConfirmationListener implements IConfirmListener {
+
+        Flow toDelete;
+
+        private static final long serialVersionUID = 1L;
+
+        public DeleteFlowConfirmationListener(Flow toDelete) {
+            this.toDelete = toDelete;
+        }
+
+        @Override
+        public boolean onOk() {
+            context.getConfigurationService().deleteFlow(toDelete);
+            tabs.closeTab(toDelete.getId());
+            Object parent = treeTable.getParent(toDelete);
+            refresh();
+            treeTable.setValue(parent);
+            treeTable.setCollapsed(parent, false);
+
+            return true;
+        }
+    }
+
+    class DeleteResourceConfirmationListener implements IConfirmListener {
+
+        Resource toDelete;
+
+        private static final long serialVersionUID = 1L;
+
+        public DeleteResourceConfirmationListener(Resource toDelete) {
+            this.toDelete = toDelete;
+        }
+
+        @Override
+        public boolean onOk() {
+            context.getConfigurationService().delete(toDelete);
+            tabs.closeTab(toDelete.getId());
+            Object parent = treeTable.getParent(toDelete);
+            refresh();
+            treeTable.setValue(parent);
+            treeTable.setCollapsed(parent, false);
+            return true;
+        }
+
+    }
+
+    class DeleteFlowStepConfirmationListener implements IConfirmListener {
+
+        FlowStep toDelete;
+
+        private static final long serialVersionUID = 1L;
+
+        public DeleteFlowStepConfirmationListener(FlowStep toDelete) {
+            this.toDelete = toDelete;
+        }
+
+        @Override
+        public boolean onOk() {
+            String flowVersionId = toDelete.getFlowId();
+            Flow flowVersion = context.getConfigurationService().findFlow(flowVersionId);
+
+            context.getConfigurationService().delete(flowVersion, toDelete);
+            Object parent = treeTable.getParent(toDelete);
+            if (tabs.closeTab(flowVersionId)) {
+                openItem(context.getConfigurationService().findFlow(flowVersionId));
+            }
+            refresh();
+            treeTable.setValue(parent);
+            treeTable.setCollapsed(parent, false);
+
+            return true;
+        }
+    }
+
+    class DeleteModelConfirmationListener implements IConfirmListener {
+
+        Model toDelete;
+
+        private static final long serialVersionUID = 1L;
+
+        public DeleteModelConfirmationListener(Model toDelete) {
+            this.toDelete = toDelete;
+        }
+
+        @Override
+        public boolean onOk() {
+            context.getConfigurationService().delete(toDelete);
+            tabs.closeTab(toDelete.getId());
+            Object parent = treeTable.getParent(toDelete);
+            refresh();
+            treeTable.setValue(parent);
+            treeTable.setCollapsed(parent, false);
+
+            return true;
         }
     }
 
