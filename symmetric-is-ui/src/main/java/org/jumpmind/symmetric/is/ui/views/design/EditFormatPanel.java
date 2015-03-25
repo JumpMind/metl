@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.Component;
+import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
+import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
@@ -42,7 +44,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 
     Table table = new Table();
 
-    BeanItemContainer<AttributeFormat> container = new BeanItemContainer<AttributeFormat>(AttributeFormat.class);
+    BeanItemContainer<RecordFormat> container = new BeanItemContainer<RecordFormat>(RecordFormat.class);
 
     List<TextField> textFields = new ArrayList<TextField>();
 
@@ -77,13 +79,16 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         setExpandRatio(table, 1.0f);
 
         if (component.getInputModel() != null) {
-	        for (ModelEntity e : component.getInputModel().getModelEntities().values()) {
-	            for (ModelAttribute a : e.getModelAttributes()) {
-	                table.addItem(new AttributeFormat(e.getName(), a.getName(), 10));
+	        for (ModelEntity entity : component.getInputModel().getModelEntities().values()) {
+	            for (ModelAttribute attr : entity.getModelAttributes()) {
+	                table.addItem(new RecordFormat(entity, attr, 10));
 	            }
 	        }
         }
         calculatePositions();
+        if (component.getAttributeSettings().size() == 0) {
+        	saveOrdinalSettings();
+        }
     }
 
     @Override
@@ -98,17 +103,17 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
     protected void calculatePositions() {
         int pos = 1;
         boolean needsRefreshed = false;
-        for (AttributeFormat a : container.getItemIds()) {
-            if (a.getStartPos() != pos) {
-	            a.setStartPos(pos);
+        for (RecordFormat record : container.getItemIds()) {
+            if (record.getStartPos() != pos) {
+            	record.setStartPos(pos);
 	            needsRefreshed = true;
             }
-            long endPos = pos + a.getWidth();
-            if (a.getEndPos() != endPos) {
-                a.setEndPos(endPos);
+            long endPos = pos + record.getWidth();
+            if (record.getEndPos() != endPos) {
+            	record.setEndPos(endPos);
                 needsRefreshed = true;
-            }            
-            pos += a.getWidth() + 1;
+            }
+            pos += record.getWidth() + 1;
         }
 
         if (needsRefreshed) {
@@ -117,30 +122,63 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         }
     }
 
+    protected void moveItemTo(RecordFormat itemId, int index) {
+    	if (index >= 0  && index < container.getItemIds().size() && itemId != null && index != container.indexOfId(itemId)) {
+            container.removeItem(itemId);
+            container.addItemAt(index, itemId);
+            calculatePositions();
+            saveOrdinalSettings();
+    	}
+    }
+    
+    protected void saveOrdinalSettings() {
+        int ordinal = 1;
+        for (RecordFormat record : container.getItemIds()) {
+			ComponentAttributeSetting setting = component.getAttributeSetting(record.getAttributeId(),
+					FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH);
+			if (setting == null) {
+				setting = new ComponentAttributeSetting(record.getAttributeId(),
+						FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, String.valueOf(ordinal));
+				setting.setComponentId(component.getId());
+				component.addAttributeSetting(setting);
+			} else {
+				setting.setValue(String.valueOf(ordinal));
+			}
+			context.getConfigurationService().save(setting);
+			ordinal++;
+        }
+    }
+
     class MoveUpClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            Object itemId = table.getValue();
-            int index = container.indexOfId(itemId);
-            if (index != 0) {
-                container.removeItem(itemId);
-                container.addItemAt(index - 1, itemId);
-                calculatePositions();
-            }
+        	RecordFormat itemId = (RecordFormat) table.getValue();
+        	moveItemTo(itemId, container.indexOfId(itemId) - 1);
         }
     }
 
     class MoveDownClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            Object itemId = table.getValue();
-            Object nextItemId = container.nextItemId(itemId);
-            if (nextItemId != null) {
-                container.removeItem(itemId);
-                container.addItemAfter(nextItemId, itemId);
-                calculatePositions();
-            }
+        	RecordFormat itemId = (RecordFormat) table.getValue();
+        	moveItemTo(itemId, container.indexOfId(itemId) + 1);
         }
     }
     
+    class TableDropHandler implements DropHandler {
+        public void drop(DragAndDropEvent event) {
+            AbstractSelectTargetDetails targetDetails = (AbstractSelectTargetDetails) event
+                    .getTargetDetails();
+            RecordFormat target = (RecordFormat) targetDetails.getItemIdOver();
+            Transferable transferable = event.getTransferable();
+            if (transferable.getSourceComponent() == table) {
+                RecordFormat source = (RecordFormat) transferable.getData("itemId");
+                moveItemTo(source, container.indexOfId(target));
+            }
+        }
+
+        public AcceptCriterion getAcceptCriterion() {
+            return AcceptAll.get();
+        }
+    }
 
 	class EditFieldFactory implements TableFieldFactory {
 	    public Field<?> createField(Container container, final Object itemId,
@@ -170,37 +208,10 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 		}
 	}
 
-    class TableDropHandler implements DropHandler {
-        public void drop(DragAndDropEvent event) {
-            AbstractSelectTargetDetails targetDetails = (AbstractSelectTargetDetails) event
-                    .getTargetDetails();
-            AttributeFormat target = (AttributeFormat) targetDetails.getItemIdOver();
-            if (target != null) {
-                Transferable transferable = event.getTransferable();
-                if (transferable.getSourceComponent() == table) {
-                    AttributeFormat source = (AttributeFormat) transferable.getData("itemId");
-                    int diff = container.indexOfId(source) - container.indexOfId(target);
-                    if (diff != 0) {
-                        if (diff > 0) {
-                            target = container.prevItemId(target);
-                        }
-                        container.removeItem(source);
-                        container.addItemAfter(target, source);
-                        calculatePositions();
-                    }
-                }
-            }
-        }
-
-        public AcceptCriterion getAcceptCriterion() {
-            return AcceptAll.get();
-        }
-    }
-
-    public class AttributeFormat {
-        String entityName;
-
-        String attributeName;
+    public class RecordFormat {
+    	ModelEntity modelEntity;
+    	
+    	ModelAttribute modelAttribute;
 
         long width;
 
@@ -210,37 +221,33 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 
         String transformText = "";
 
-        public AttributeFormat(String entityName, String attributeName, long width) {
-            this.entityName = entityName;
-            this.attributeName = attributeName;
+        public RecordFormat(ModelEntity modelEntity, ModelAttribute modelAttribute, long width) {
+            this.modelEntity = modelEntity;
+            this.modelAttribute = modelAttribute;
             this.width = width;
         }
 
         public int hashCode() {
-            return entityName.hashCode() + attributeName.hashCode();
+            return modelEntity.hashCode() + modelAttribute.hashCode();
         }
 
         public boolean equals(Object obj) {
-            if (obj instanceof AttributeFormat) {
-                return hashCode() == ((AttributeFormat) obj).hashCode();
+            if (obj instanceof RecordFormat) {
+                return hashCode() == ((RecordFormat) obj).hashCode();
             }
             return super.equals(obj);
         }
 
         public String getEntityName() {
-            return entityName;
-        }
-
-        public void setEntityName(String entityName) {
-            this.entityName = entityName;
+            return modelEntity.getName();
         }
 
         public String getAttributeName() {
-            return attributeName;
+            return modelAttribute.getName();
         }
 
-        public void setAttributeName(String attributeName) {
-            this.attributeName = attributeName;
+        public String getAttributeId() {
+        	return modelAttribute.getId();
         }
 
         public long getWidth() {

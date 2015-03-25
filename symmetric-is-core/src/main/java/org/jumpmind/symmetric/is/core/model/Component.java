@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -145,6 +146,22 @@ public class Component extends AbstractObjectWithSettings {
 
     public void setAttributeSettings(List<ComponentAttributeSetting> attributeSettings) {
         this.attributeSettings = attributeSettings;
+    }
+
+    public void addAttributeSetting(ComponentAttributeSetting attributeSetting) {
+        if (attributeSettings == null) {
+        	attributeSettings = new ArrayList<ComponentAttributeSetting>();
+        }
+        attributeSettings.add(attributeSetting);
+    }
+
+    public ComponentAttributeSetting getAttributeSetting(String attributeId, String name) {
+    	for (ComponentAttributeSetting setting : attributeSettings) {
+    		if (setting.getAttributeId().equals(attributeId) && setting.getName().equalsIgnoreCase(name)) {
+    			return setting;
+    		}
+    	}
+    	return null;
     }
 
     @Override
