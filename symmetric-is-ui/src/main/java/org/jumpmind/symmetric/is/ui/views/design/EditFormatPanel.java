@@ -86,9 +86,8 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 	        }
         }
         calculatePositions();
-        if (component.getAttributeSettings().size() == 0) {
-        	saveOrdinalSettings();
-        }
+    	saveOrdinalSettings();
+    	saveLengthSettings();
     }
 
     @Override
@@ -134,19 +133,28 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
     protected void saveOrdinalSettings() {
         int ordinal = 1;
         for (RecordFormat record : container.getItemIds()) {
-			ComponentAttributeSetting setting = component.getAttributeSetting(record.getAttributeId(),
-					FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH);
-			if (setting == null) {
-				setting = new ComponentAttributeSetting(record.getAttributeId(),
-						FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, String.valueOf(ordinal));
-				setting.setComponentId(component.getId());
-				component.addAttributeSetting(setting);
-			} else {
-				setting.setValue(String.valueOf(ordinal));
-			}
-			context.getConfigurationService().save(setting);
+        	saveSetting(record.getAttributeId(), FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL, String.valueOf(ordinal));
 			ordinal++;
         }
+    }
+
+    protected void saveLengthSettings() {
+    	for (RecordFormat record : container.getItemIds()) {
+    		saveSetting(record.getAttributeId(), FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, String.valueOf(record.getWidth()));
+    	}
+    }
+
+    protected void saveSetting(String attributeId, String name, String value) {
+		ComponentAttributeSetting setting = component.getAttributeSetting(attributeId, name);
+		if (setting == null) {
+			setting = new ComponentAttributeSetting(attributeId, name, value);
+			setting.setComponentId(component.getId());
+			component.addAttributeSetting(setting);
+			context.getConfigurationService().save(setting);
+		} else if (!setting.getValue().equals(value)) {
+			setting.setValue(value);
+			context.getConfigurationService().save(setting);
+		}
     }
 
     class MoveUpClickListener implements ClickListener {
@@ -190,6 +198,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 				textField.addValueChangeListener(new ValueChangeListener() {
 					public void valueChange(ValueChangeEvent event) {
 						calculatePositions();
+						saveLengthSettings();
 					}
 				});
 				textField.addFocusListener(new FocusListener() {
