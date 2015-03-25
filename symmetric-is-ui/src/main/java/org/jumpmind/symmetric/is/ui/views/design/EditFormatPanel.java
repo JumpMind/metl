@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
+import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
@@ -28,6 +29,7 @@ import com.vaadin.ui.AbstractSelect.AbstractSelectTargetDetails;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.TableDragMode;
@@ -144,6 +146,12 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
     	}
     }
 
+    protected void saveTransformSettings() {
+    	for (RecordFormat record : container.getItemIds()) {
+    		// TODO: what is the attribute name?
+    	}
+    }
+
     protected void saveSetting(String attributeId, String name, String value) {
 		ComponentAttributeSetting setting = component.getAttributeSetting(attributeId, name);
 		if (setting == null) {
@@ -191,7 +199,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 	class EditFieldFactory implements TableFieldFactory {
 	    public Field<?> createField(Container container, final Object itemId,
 				final Object propertyId, com.vaadin.ui.Component uiContext) {
-			if (propertyId.equals("width") || propertyId.equals("transformText")) {
+			if (propertyId.equals("width")) {
 				final TextField textField = new TextField();
 				textField.setData(itemId);
 				textField.setImmediate(true);
@@ -212,6 +220,23 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 					textField.focus();
 				}
 				return textField;
+			} else if (propertyId.equals("transformText")) {
+				ComboBox combo = new ComboBox();
+				combo.addItem("format(spec)");
+				combo.addItem("left(length)");
+				combo.addItem("lower()");
+				combo.addItem("pad(char, length)");
+				combo.addItem("right(length)");
+				combo.addItem("substr(start, end)");
+				combo.addItem("trim()");
+				combo.addItem("upper()");
+				combo.setImmediate(true);
+                combo.addValueChangeListener(new ValueChangeListener() {
+                    public void valueChange(ValueChangeEvent event) {
+                    	saveTransformSettings();
+                    }
+                });
+                return combo;
 			}
 			return null;
 		}
