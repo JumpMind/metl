@@ -126,12 +126,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
-    public List<Resource> findResourcesByTypes(String... types) {
+    public List<Resource> findResourcesByTypes(String projectVersionId, String... types) {
         List<Resource> list = new ArrayList<Resource>();
         if (types != null) {
             for (String type : types) {
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("type", type);
+                params.put("projectVersionId", projectVersionId);
                 List<Resource> datas = find(Resource.class, params);
                 list = buildResource(datas);
             }

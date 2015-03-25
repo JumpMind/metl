@@ -12,6 +12,7 @@ import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Execution;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FolderType;
+import org.jumpmind.symmetric.is.ui.common.AppConstants;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.Category;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
@@ -154,7 +155,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
         HorizontalSplitPanel split = new HorizontalSplitPanel();
         split.setSizeFull();
-        split.setSplitPosition(300, Unit.PIXELS, false);
+        split.setSplitPosition(AppConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS, false);
         
         manageNavigator = new ManageNavigator(FolderType.RUNTIME, context.getConfigurationService());
         manageNavigator.addValueChangeListener(new ValueChangeListener() {

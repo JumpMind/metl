@@ -49,7 +49,7 @@ public interface IConfigurationService {
     
     public List<Resource> findResourcesInFolder(Folder folder);
     
-    public List<Resource> findResourcesByTypes(String ... types);
+    public List<Resource> findResourcesByTypes(String projectVersionId, String ... types);
         
     public List<Agent> findAgents();
     
