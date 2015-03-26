@@ -178,15 +178,19 @@ public class PropertySheet extends Panel implements ValueChangeListener {
     protected void addResourceCombo(ComponentDefinition componentDefintion, FormLayout formLayout,
             final Component component) {
         if (componentDefintion.resourceCategory() != null
-                && componentDefintion.resourceCategory() != ResourceCategory.NONE) {
+                && componentDefintion.resourceCategory() != ResourceCategory.NONE
+                && value instanceof FlowStep) {
+            FlowStep step = (FlowStep) value;
             final AbstractSelect resourcesCombo = new ComboBox("Resource");
             resourcesCombo.setImmediate(true);
             resourcesCombo.setRequired(true);
             List<String> types = resourceFactory.getResourceTypes(componentDefintion
                     .resourceCategory());
+            Flow flow = configurationService.findFlow(step.getFlowId());
+            String projectVersionId = flow.getProjectVersionId();
             if (types != null) {
-                List<Resource> resources = configurationService.findResourcesByTypes(types
-                        .toArray(new String[types.size()]));
+                List<Resource> resources = configurationService.findResourcesByTypes(
+                        projectVersionId, types.toArray(new String[types.size()]));
                 if (resources != null) {
                     for (Resource resource : resources) {
                         resourcesCombo.addItem(resource);

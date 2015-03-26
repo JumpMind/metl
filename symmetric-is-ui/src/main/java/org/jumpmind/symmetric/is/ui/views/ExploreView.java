@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
+import org.jumpmind.symmetric.is.ui.common.AppConstants;
 import org.jumpmind.symmetric.is.ui.common.Category;
 import org.jumpmind.symmetric.is.ui.common.TopBarLink;
 import org.jumpmind.symmetric.ui.common.UiComponent;
@@ -88,7 +89,7 @@ public class ExploreView extends VerticalLayout implements View {
                         }
                         return dbs;
                     }
-                }, "admin");
+                }, "admin", AppConstants.DEFAULT_LEFT_SPLIT);
         addComponent(explorer);
         explorer.refresh();
 

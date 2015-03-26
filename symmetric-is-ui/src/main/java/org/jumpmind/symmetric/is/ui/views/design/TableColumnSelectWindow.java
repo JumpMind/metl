@@ -13,8 +13,6 @@ import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlTemplateSettings;
-import org.jumpmind.symmetric.is.core.model.Folder;
-import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
@@ -22,21 +20,22 @@ import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.Icons;
+import org.jumpmind.symmetric.ui.common.ResizableWindow;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.ExpandEvent;
 import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
 
-public class TableColumnSelectWindow extends Window {
+public class TableColumnSelectWindow extends ResizableWindow {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -50,28 +49,27 @@ public class TableColumnSelectWindow extends Window {
 	
 	TableColumnSelectListener listener;
 	
-	@SuppressWarnings({ "unchecked", "serial" })
+	@SuppressWarnings({ "serial" })
 	public TableColumnSelectWindow(ApplicationContext context, Model model) {
+	    super("Import from Database into Model");
 		this.context = context;
 		this.model = model;
 		
-		tree.setWidth(100f, Unit.PERCENTAGE);
+		//tree.setSizeFull();
 		tree.setMultiSelect(true);
         tree.addContainerProperty("name", String.class, "");
 
-		for (Folder folder : context.getConfigurationService().findFolders(FolderType.DESIGN)) {
-			tree.addItem(folder);
-			tree.getContainerProperty(folder, "name").setValue(folder.getName());				
-		}
+        List<Resource> list = context.getConfigurationService().findResourcesByTypes(model.getProjectVersionId(), DataSourceResource.TYPE);
+		for (Resource resource : list) {
+		    addItem(resource, null, resource.getName(), Icons.DATABASE, null, true);
+        }
 		
 		tree.setItemCaptionPropertyId("name");
         tree.setItemCaptionMode(ItemCaptionMode.PROPERTY);
         tree.addExpandListener(new ExpandListener() {
 			public void nodeExpand(ExpandEvent event) {
 				Object itemId = event.getItemId();
-				if (itemId instanceof Folder) {
-					addDatabasesToFolder((Folder) itemId);
-				} else if (itemId instanceof Resource) {
+				if (itemId instanceof Resource) {
 					addCatalogsToResource((Resource) itemId);
 				} else if (itemId instanceof Catalog) {
 					addSchemasToCatalog((Catalog) itemId);
@@ -85,30 +83,25 @@ public class TableColumnSelectWindow extends Window {
         
 		setWidth(600.0f, Unit.PIXELS);
 		setHeight(600.0f, Unit.PIXELS);
-		setCaption("Import from Database into Model");
-		setModal(true);
 		
 		VerticalLayout layout = new VerticalLayout();
 		layout.setSpacing(true);
 		layout.setMargin(true);
 		layout.setSizeFull();
 		layout.addComponent(new Label("Select tables and columns to import into the model."));
-		layout.addComponent(tree);
-		layout.setExpandRatio(tree, 1.0f);
 		
-		HorizontalLayout buttonLayout = new HorizontalLayout();
-		buttonLayout.setSpacing(true);
-		buttonLayout.setMargin(true);
-		buttonLayout.setWidth(100f, Unit.PERCENTAGE);
-		Label buttonSpacer = new Label();
-		buttonLayout.addComponent(buttonSpacer);
-		buttonLayout.setExpandRatio(buttonSpacer, 1.0f);
+		Panel scrollable = new Panel();
+		scrollable.addStyleName(ValoTheme.PANEL_BORDERLESS);
+		scrollable.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
+		scrollable.setSizeFull();
+		scrollable.setContent(tree);
+		layout.addComponent(scrollable);
+		layout.setExpandRatio(scrollable, 1.0f);
+		addComponent(layout, 1);
+		
 		Button cancelButton = new Button("Cancel");
-		buttonLayout.addComponent(cancelButton);
 		Button selectButton = new Button("Import");
-		buttonLayout.addComponent(selectButton);
-		layout.addComponent(buttonLayout);		
-		setContent(layout);
+		addComponent(buildButtonFooter(cancelButton, selectButton));
 		
 		cancelButton.addClickListener(new ClickListener() {
 			public void buttonClick(ClickEvent event) {
@@ -160,15 +153,6 @@ public class TableColumnSelectWindow extends Window {
 		}
 		return tableModelEntity.values();
 	}
-
-	protected void addDatabasesToFolder(Folder folder) {
-        List<Resource> resources = context.getConfigurationService().findResourcesInFolder(folder);
-        for (Resource resource : resources) {
-        	if (resource.getType().equals("Database")) {
-        		addItem(resource, null, resource.getName(), Icons.DATABASE, folder, true);
-        	}
-        }
-    }
 	
 	protected void addCatalogsToResource(Resource resource) {
 		DataSourceResource dataSourceResource = (DataSourceResource) context.getResourceFactory().create(resource);

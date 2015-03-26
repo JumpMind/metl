@@ -528,6 +528,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             openProjectsLayout.setComponentAlignment(viewProjects, Alignment.TOP_CENTER);
             addComponent(openProjectsLayout);
             setExpandRatio(openProjectsLayout, 1);
+            viewProjects();
         } else {
             addComponent(treeTable);
             setExpandRatio(treeTable, 1);

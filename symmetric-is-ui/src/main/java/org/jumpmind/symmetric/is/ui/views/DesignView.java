@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.ui.views;
 
 import javax.annotation.PostConstruct;
 
+import org.jumpmind.symmetric.is.ui.common.AppConstants;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.Category;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
@@ -39,7 +40,7 @@ public class DesignView extends HorizontalLayout implements View {
 
         HorizontalSplitPanel leftSplit = new HorizontalSplitPanel();
         leftSplit.setSizeFull();
-        leftSplit.setSplitPosition(300, Unit.PIXELS);
+        leftSplit.setSplitPosition(AppConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS);
 
         projectNavigator = new ProjectNavigator(context, tabs);
 
