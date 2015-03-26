@@ -7,6 +7,7 @@ import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
+import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
@@ -66,8 +67,13 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         table.setSortEnabled(false);
         table.setImmediate(true);
         table.setSizeFull();
-        table.setVisibleColumns(new Object[] { "entityName", "attributeName", "width", "startPos", "endPos", "transformText" });
-        table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Width", "Start Position", "End Position", "Transform" });
+        if (component.getType().equals(FixedLengthFormatter.TYPE)) {
+	        table.setVisibleColumns(new Object[] { "entityName", "attributeName", "width", "startPos", "endPos", "transformText" });
+	        table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Width", "Start Position", "End Position", "Transform" });
+        } else {
+	        table.setVisibleColumns(new Object[] { "entityName", "attributeName", "transformText" });
+	        table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Transform" });      	
+        }
         table.setTableFieldFactory(new EditFieldFactory());
         table.setEditable(true);
         table.setDragMode(TableDragMode.ROW);
@@ -85,6 +91,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         calculatePositions();
     	saveOrdinalSettings();
     	saveLengthSettings();
+    	saveTransformSettings();
     }
 
     @Override
@@ -97,6 +104,9 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
     }
 
     protected void calculatePositions() {
+    	if (component.getType().equals(DelimitedFormatter.TYPE)) {
+    		return;
+    	}
         int pos = 1;
         boolean needsRefreshed = false;
         for (RecordFormat record : container.getItemIds()) {
@@ -131,23 +141,34 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
     }
     
     protected void saveOrdinalSettings() {
+    	String attrName = FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL;
+    	if (component.getType().equals(DelimitedFormatter.TYPE)) {
+    		attrName = DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL;
+    	}
         int ordinal = 1;
         for (RecordFormat record : container.getItemIds()) {
-        	saveSetting(record.getAttributeId(), FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL, String.valueOf(ordinal));
+        	saveSetting(record.getAttributeId(), attrName, String.valueOf(ordinal));
 			ordinal++;
         }
     }
 
     protected void saveLengthSettings() {
+    	if (component.getType().equals(DelimitedFormatter.TYPE)) {
+    		return;
+    	}
     	for (RecordFormat record : container.getItemIds()) {
     		saveSetting(record.getAttributeId(), FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH, String.valueOf(record.getWidth()));
     	}
     }
 
     protected void saveTransformSettings() {
+    	String attrName = FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION;
+    	if (component.getType().equals(DelimitedFormatter.TYPE)) {
+    		attrName = DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION;
+    	}
+
     	for (RecordFormat record : container.getItemIds()) {
-    		record.getAttributeId();
-    		// TODO: what is the attribute name?
+			saveSetting(record.getAttributeId(), attrName, record.getTransformText());
     	}
     }
 

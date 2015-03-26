@@ -16,6 +16,7 @@ import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
@@ -672,7 +673,8 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     public void open(Object item) {
         if (item instanceof FlowStep) {
             FlowStep flowStep = (FlowStep) item;
-            if (flowStep.getComponent().getType().equals(FixedLengthFormatter.TYPE)) {
+            String type = flowStep.getComponent().getType();
+            if (type.equals(FixedLengthFormatter.TYPE) || type.equals(DelimitedFormatter.TYPE)) {
                 EditFormatPanel editFormat = new EditFormatPanel(context, flowStep.getComponent());
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
                         editFormat);
