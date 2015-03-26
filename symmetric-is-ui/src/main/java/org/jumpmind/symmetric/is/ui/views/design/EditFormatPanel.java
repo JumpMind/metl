@@ -1,11 +1,10 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
-import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
@@ -48,10 +47,6 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 
     BeanItemContainer<RecordFormat> container = new BeanItemContainer<RecordFormat>(RecordFormat.class);
 
-    List<TextField> textFields = new ArrayList<TextField>();
-
-    int textFieldIndex;
-
     public EditFormatPanel(ApplicationContext context, Component component) {
         this.context = context;
         this.component = component;
@@ -83,7 +78,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         if (component.getInputModel() != null) {
 	        for (ModelEntity entity : component.getInputModel().getModelEntities().values()) {
 	            for (ModelAttribute attr : entity.getModelAttributes()) {
-	                table.addItem(new RecordFormat(entity, attr, 10));
+	                table.addItem(new RecordFormat(entity, attr));
 	            }
 	        }
         }
@@ -118,14 +113,17 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         }
 
         if (needsRefreshed) {
-            textFields.clear();
+        	RecordFormat record = (RecordFormat) table.getValue();
+        	if (record != null) {
+        		record.setFocusFieldId("transformText");
+        	}
             table.refreshRowCache();
         }
     }
 
     protected void moveItemTo(RecordFormat itemId, int index) {
     	if (index >= 0  && index < container.getItemIds().size() && itemId != null && index != container.indexOfId(itemId)) {
-            container.removeItem(itemId);
+    		container.removeItem(itemId);
             container.addItemAt(index, itemId);
             calculatePositions();
             saveOrdinalSettings();
@@ -148,6 +146,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 
     protected void saveTransformSettings() {
     	for (RecordFormat record : container.getItemIds()) {
+    		record.getAttributeId();
     		// TODO: what is the attribute name?
     	}
     }
@@ -197,11 +196,12 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
     }
 
 	class EditFieldFactory implements TableFieldFactory {
-	    public Field<?> createField(Container container, final Object itemId,
+		public Field<?> createField(final Container dataContainer, final Object itemId,
 				final Object propertyId, com.vaadin.ui.Component uiContext) {
+            final RecordFormat record = (RecordFormat) itemId;
+            Field<?> field = null;
 			if (propertyId.equals("width")) {
 				final TextField textField = new TextField();
-				textField.setData(itemId);
 				textField.setImmediate(true);
 				textField.addValueChangeListener(new ValueChangeListener() {
 					public void valueChange(ValueChangeEvent event) {
@@ -211,17 +211,14 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 				});
 				textField.addFocusListener(new FocusListener() {
 					public void focus(FocusEvent event) {
-						textFieldIndex = textFields.indexOf(textField) + 1;
-						table.select(((TextField) event.getSource()).getData());
+						record.setFocusFieldId(propertyId);
+						table.select(itemId);
 					}
 				});
-				textFields.add(textField);
-				if (textFields.size() - 1 == textFieldIndex) {
-					textField.focus();
-				}
-				return textField;
+				record.addField(propertyId, textField);
+				field = textField;
 			} else if (propertyId.equals("transformText")) {
-				ComboBox combo = new ComboBox();
+				final ComboBox combo = new ComboBox();
 				combo.addItem("format(spec)");
 				combo.addItem("left(length)");
 				combo.addItem("lower()");
@@ -236,9 +233,21 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
                     	saveTransformSettings();
                     }
                 });
-                return combo;
+                combo.addFocusListener(new FocusListener() {
+					public void focus(FocusEvent event) {
+						record.setFocusFieldId(propertyId);
+						table.select(itemId);
+					}
+				});
+                record.addField(propertyId, combo);
+                field = combo;
 			}
-			return null;
+
+			RecordFormat selected = (RecordFormat) table.getValue();
+			if (selected == itemId && record.getFocusField() != null) {
+				record.getFocusField().focus();
+			}
+			return field;
 		}
 	}
 
@@ -246,8 +255,12 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
     	ModelEntity modelEntity;
     	
     	ModelAttribute modelAttribute;
+    	
+    	Map<Object, Field<?>> fields = new HashMap<Object, Field<?>>();
 
-        long width;
+    	Object focusFieldId;
+
+        long width = 1;
 
         long startPos;
 
@@ -255,10 +268,14 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 
         String transformText = "";
 
-        public RecordFormat(ModelEntity modelEntity, ModelAttribute modelAttribute, long width) {
+        public RecordFormat(ModelEntity modelEntity, ModelAttribute modelAttribute) {
             this.modelEntity = modelEntity;
             this.modelAttribute = modelAttribute;
-            this.width = width;
+            ComponentAttributeSetting setting = component.getAttributeSetting(modelAttribute.getId(), 
+            		FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH);
+            if (setting != null) {
+            	this.width = Long.parseLong(setting.getValue());
+            }
         }
 
         public int hashCode() {
@@ -314,6 +331,22 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 
         public void setEndPos(long endPos) {
             this.endPos = endPos;
+        }
+
+        public void addField(Object id, Field<?> field) {
+        	fields.put(id, field);
+        }
+        
+        public void setFocusFieldId(Object id) {
+        	this.focusFieldId = id;
+        }
+        
+        public Field<?> getFocusField() {
+        	Field<?> field = fields.get(focusFieldId);
+        	if (field == null) {
+        		field = fields.get("width");
+        	}
+        	return field;
         }
     }
 }
