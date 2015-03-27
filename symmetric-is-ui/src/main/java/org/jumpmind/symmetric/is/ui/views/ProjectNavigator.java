@@ -16,6 +16,7 @@ import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.runtime.component.DbReader;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
@@ -23,6 +24,7 @@ import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.EnableFocusTextField;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditDbReaderPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
@@ -672,10 +674,15 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     public void open(Object item) {
         if (item instanceof FlowStep) {
             FlowStep flowStep = (FlowStep) item;
+            // TODO: these ui's need to come from component plugin infrastructure 
             if (flowStep.getComponent().getType().equals(FixedLengthFormatter.TYPE)) {
                 EditFormatPanel editFormat = new EditFormatPanel(context, flowStep.getComponent());
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
                         editFormat);
+            } else if (flowStep.getComponent().getType().equals(DbReader.TYPE)) {
+                    EditDbReaderPanel editFormat = new EditDbReaderPanel(context, flowStep.getComponent());
+                    tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
+                            editFormat);
             } else {
                 item = context.getConfigurationService().findFlow(flowStep.getFlowId());
             }
