@@ -16,8 +16,6 @@ import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.runtime.component.DbReader;
-import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
@@ -71,6 +69,10 @@ import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+//github.com/JumpMind/symmetric-is-all.git
+import org.jumpmind.symmetric.is.core.runtime.component.DbReader;
+import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
+import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
 
 @SuppressWarnings("serial")
 public class ProjectNavigator extends VerticalLayout implements IDesignNavigator {
@@ -675,7 +677,8 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         if (item instanceof FlowStep) {
             FlowStep flowStep = (FlowStep) item;
             // TODO: these ui's need to come from component plugin infrastructure 
-            if (flowStep.getComponent().getType().equals(FixedLengthFormatter.TYPE)) {
+            String type = flowStep.getComponent().getType();
+            if (type.equals(FixedLengthFormatter.TYPE) || type.equals(DelimitedFormatter.TYPE)) {
                 EditFormatPanel editFormat = new EditFormatPanel(context, flowStep.getComponent());
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
                         editFormat);
