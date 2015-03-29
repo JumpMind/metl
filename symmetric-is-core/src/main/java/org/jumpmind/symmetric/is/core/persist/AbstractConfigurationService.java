@@ -4,6 +4,8 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -447,6 +449,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
         versionParams.put("flowId", flow.getId());
         List<FlowStep> steps = persistenceManager.find(FlowStep.class, versionParams, null, null,
                 tableName(FlowStep.class));
+        
+        Collections.sort(steps, new Comparator<FlowStep>() {
+            @Override
+            public int compare(FlowStep o1, FlowStep o2) {
+                return new Integer(o1.getX()).compareTo(new Integer(o2.getX()));
+            }
+        });
         for (FlowStep step : steps) {
             step.setComponent(findComponent(step.getComponentId()));
             flow.getFlowSteps().add(step);

@@ -18,7 +18,7 @@ import org.jumpmind.symmetric.is.ui.common.Category;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.MultiPropertyFilter;
-import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
+import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.is.ui.common.TopBarLink;
 import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
@@ -61,7 +61,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     ManageNavigator manageNavigator;
 
-    TabbedApplicationPanel tabs;
+    TabbedPanel tabs;
 
 	BeanItemContainer<Execution> executionContainer = new BeanItemContainer<Execution>(Execution.class);
 	
@@ -150,7 +150,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 		mainTab.addComponent(table);
 		mainTab.setExpandRatio(table, 1.0f);
 		
-        tabs = new TabbedApplicationPanel();        
+        tabs = new TabbedPanel();        
         tabs.setMainTab("Executions", Icons.EXECUTION, mainTab);
 
         HorizontalSplitPanel split = new HorizontalSplitPanel();

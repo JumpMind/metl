@@ -18,7 +18,7 @@ import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.common.Icons;
-import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
+import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
 import org.jumpmind.symmetric.is.ui.diagram.LinkEvent;
 import org.jumpmind.symmetric.is.ui.diagram.LinkSelectedEvent;
@@ -66,7 +66,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
     EditFlowPalette designComponentPalette;
 
-    TabbedApplicationPanel tabs;
+    TabbedPanel tabs;
 
     Diagram diagram;
 
@@ -79,7 +79,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     AbstractObject selected;
 
     public EditFlowPanel(ApplicationContext context, Flow componentFlow,
-            IDesignNavigator designNavigator, TabbedApplicationPanel tabs) {
+            IDesignNavigator designNavigator, TabbedPanel tabs) {
         this.context = context;
         this.tabs = tabs;
         this.flow = componentFlow;

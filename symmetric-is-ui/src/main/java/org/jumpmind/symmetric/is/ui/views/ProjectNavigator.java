@@ -21,7 +21,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.EnableFocusTextField;
 import org.jumpmind.symmetric.is.ui.common.Icons;
-import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
+import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditDbReaderPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel;
@@ -79,7 +79,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
     ApplicationContext context;
 
-    TabbedApplicationPanel tabs;
+    TabbedPanel tabs;
 
     TreeTable treeTable;
 
@@ -121,7 +121,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
     List<ProjectVersion> projects = new ArrayList<ProjectVersion>();
 
-    public ProjectNavigator(ApplicationContext context, TabbedApplicationPanel tabs) {
+    public ProjectNavigator(ApplicationContext context, TabbedPanel tabs) {
         this.context = context;
         this.tabs = tabs;
 

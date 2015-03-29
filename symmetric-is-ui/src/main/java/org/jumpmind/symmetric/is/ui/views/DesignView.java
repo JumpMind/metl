@@ -5,7 +5,7 @@ import javax.annotation.PostConstruct;
 import org.jumpmind.symmetric.is.ui.common.AppConstants;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.Category;
-import org.jumpmind.symmetric.is.ui.common.TabbedApplicationPanel;
+import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.is.ui.common.TopBarLink;
 import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +30,13 @@ public class DesignView extends HorizontalLayout implements View {
 
     ProjectNavigator projectNavigator;
 
-    TabbedApplicationPanel tabs;
+    TabbedPanel tabs;
 
     @PostConstruct
     protected void init() {
         setSizeFull();
 
-        tabs = new TabbedApplicationPanel();
+        tabs = new TabbedPanel();
 
         HorizontalSplitPanel leftSplit = new HorizontalSplitPanel();
         leftSplit.setSizeFull();

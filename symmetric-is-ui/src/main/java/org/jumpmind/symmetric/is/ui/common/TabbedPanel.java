@@ -12,7 +12,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class TabbedApplicationPanel extends TabSheet {
+public class TabbedPanel extends TabSheet {
 
     private static final long serialVersionUID = 1L;
 
@@ -24,7 +24,7 @@ public class TabbedApplicationPanel extends TabSheet {
     
     protected List<CloseHandler> closeHandlers = new ArrayList<TabSheet.CloseHandler>();
 
-    public TabbedApplicationPanel() {
+    public TabbedPanel() {
         setSizeFull();
         addStyleName(ValoTheme.TABSHEET_FRAMED);
 
@@ -92,7 +92,6 @@ public class TabbedApplicationPanel extends TabSheet {
         } else {
             setSelectedTab(tab);
         }
-
     }
 
 }

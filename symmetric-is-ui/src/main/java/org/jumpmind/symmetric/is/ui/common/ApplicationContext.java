@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.ui.common;
 
 import java.io.Serializable;
 
+import org.jumpmind.symmetric.is.core.model.User;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
@@ -29,12 +30,14 @@ public class ApplicationContext implements Serializable {
 
     @Autowired
     IResourceFactory resourceFactory;
-    
+
     @Autowired
     BackgroundRefresherService backgroundRefresherService;
-    
+
     @Autowired
     IAgentManager agentManager;
+
+    User user = new User();
 
     public IConfigurationService getConfigurationService() {
         return configurationService;
@@ -59,6 +62,13 @@ public class ApplicationContext implements Serializable {
     public IAgentManager getAgentManager() {
         return agentManager;
     }
-    
-    
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
 }
