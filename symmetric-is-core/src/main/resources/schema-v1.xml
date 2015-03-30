@@ -49,6 +49,9 @@
         <foreign-key foreignTable="folder" name="fk_fldr_2_fldr">
             <reference local="parent_folder_id" foreign="id" />
         </foreign-key>
+        <foreign-key foreignTable="project_version" name="fk_fld_2_v">
+            <reference local="project_version_id" foreign="id" />
+        </foreign-key>        
     </table>
 
     <table name="model" description="">
@@ -66,6 +69,9 @@
         <foreign-key foreignTable="folder" name="fk_m_2_fldr">
             <reference local="folder_id" foreign="id" />
         </foreign-key>
+        <foreign-key foreignTable="project_version" name="fk_m_2_v">
+            <reference local="project_version_id" foreign="id" />
+        </foreign-key>        
     </table>
 
     <table name="model_entity" description="">
@@ -149,6 +155,9 @@
         <foreign-key foreignTable="folder" name="fk_res_2_fldr">
             <reference local="folder_id" foreign="id" />
         </foreign-key>
+        <foreign-key foreignTable="project_version" name="fk_r_2_v">
+            <reference local="project_version_id" foreign="id" />
+        </foreign-key>        
     </table>
 
     <table name="resource_setting" description="">
@@ -190,7 +199,10 @@
         </foreign-key>
         <foreign-key foreignTable="resource" name="fk_cmpv_2_res">
             <reference local="resource_id" foreign="id" />
-        </foreign-key>        
+        </foreign-key>     
+        <foreign-key foreignTable="project_version" name="fk_c_2_v">
+            <reference local="project_version_id" foreign="id" />
+        </foreign-key>           
     </table>
 
     <table name="component_setting" description="">
@@ -258,6 +270,9 @@
         <foreign-key foreignTable="folder" name="fk_flw_2_fldr">
             <reference local="folder_id" foreign="id" />
         </foreign-key>
+        <foreign-key foreignTable="project_version" name="fk_flw_2_v">
+            <reference local="project_version_id" foreign="id" />
+        </foreign-key>        
     </table>
 
     <table name="flow_step" description="">
