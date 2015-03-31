@@ -1,8 +1,5 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.exception.IoException;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
@@ -21,8 +17,7 @@ import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
-@ComponentDefinition(typeName = FixedLengthFormatter.TYPE, category = ComponentCategory.PROCESSOR, iconImage = "format.png", 
-  inputMessage = MessageType.ENTITY_MESSAGE, outgoingMessage = MessageType.TEXT_MESSAGE)
+@ComponentDefinition(typeName = FixedLengthFormatter.TYPE, category = ComponentCategory.PROCESSOR, iconImage = "format.png", inputMessage = MessageType.ENTITY_MESSAGE, outgoingMessage = MessageType.TEXT_MESSAGE)
 public class FixedLengthFormatter extends AbstractComponent {
 
     public static final String TYPE = "Fixed Length Formatter";
@@ -41,7 +36,6 @@ public class FixedLengthFormatter extends AbstractComponent {
     /* other vars */
     TypedProperties properties;
     List<AttributeFormat> attributesList;
-    StringBuilder stringBuilder;
 
     @Override
     public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
@@ -51,7 +45,10 @@ public class FixedLengthFormatter extends AbstractComponent {
 
     @Override
     public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
-
+        if (attributesList == null || attributesList.size() == 0) {
+            throw new IllegalStateException(
+                    "There are no format attributes configured.  Writing all entity fields to the output.");
+        }
         componentStatistics.incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
@@ -64,23 +61,18 @@ public class FixedLengthFormatter extends AbstractComponent {
             outputPayload.add(outputRec);
         }
         outputMessage.setPayload(outputPayload);
+        componentStatistics.incrementOutboundMessages();
         messageTarget.put(outputMessage);
+        componentStatistics.incrementOutboundMessages();
     }
 
     private String processInputRow(EntityData inputRow) {
-
-        Writer writer = new StringWriter();
-         try {
-             for (AttributeFormat attribute : attributesList) {
-                 stringBuilder.append(inputRow.get(attribute.getAttributeId()).toString());
-             }
-             writer.write(stringBuilder.toString());
-         } catch (IOException e) {
-         throw new
-         IoException("Error writing to stream for formatted output. " +
-         e.getMessage());
-         }
-        return writer.toString();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (AttributeFormat attribute : attributesList) {
+            Object value = inputRow.get(attribute.getAttributeId());
+            stringBuilder.append(value != null ? value.toString() : "");
+        }
+        return stringBuilder.toString();
     }
 
     private void applySettings() {
@@ -102,9 +94,10 @@ public class FixedLengthFormatter extends AbstractComponent {
                     attributesMap.get(attributeSetting.getAttributeId()).setOrdinal(
                             Integer.parseInt(attributeSetting.getValue()));
                 } else {
-                    attributesMap.put(attributeSetting.getAttributeId(), new AttributeFormat(
+                    attributesMap.put(
                             attributeSetting.getAttributeId(),
-                            Integer.parseInt(attributeSetting.getValue()), -1));
+                            new AttributeFormat(attributeSetting.getAttributeId(), Integer
+                                    .parseInt(attributeSetting.getValue()), -1));
                 }
             } else if (attributeSetting.getName().equalsIgnoreCase(
                     FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH)) {
@@ -112,9 +105,10 @@ public class FixedLengthFormatter extends AbstractComponent {
                     attributesMap.get(attributeSetting.getAttributeId()).setLength(
                             Integer.parseInt(attributeSetting.getValue()));
                 } else {
-                    attributesMap.put(attributeSetting.getAttributeId(), new AttributeFormat(
-                            attributeSetting.getAttributeId(), -1,
-                            Integer.parseInt(attributeSetting.getValue())));
+                    attributesMap.put(
+                            attributeSetting.getAttributeId(),
+                            new AttributeFormat(attributeSetting.getAttributeId(), -1, Integer
+                                    .parseInt(attributeSetting.getValue())));
                 }
             }
         }

@@ -12,7 +12,7 @@ public class ExecutionStepLog extends AbstractObject {
     
     private String logText;
     
-    private Date createTime;
+    private Date createTime = new Date();
 	
     @Override
     public void setName(String name) {
