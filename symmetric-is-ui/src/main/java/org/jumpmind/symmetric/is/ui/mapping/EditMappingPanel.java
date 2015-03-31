@@ -39,7 +39,7 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 		Button autoMapButton = buttonBar.addButton("Auto Map", FontAwesome.FLASH);			
 		Button removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
 
-		diagram = new MappingDiagram(context, component.getInputModel(), component.getOutputModel());
+		diagram = new MappingDiagram(context, component);
 		addComponent(diagram);
 		setExpandRatio(diagram, 1.0f);		
 	}

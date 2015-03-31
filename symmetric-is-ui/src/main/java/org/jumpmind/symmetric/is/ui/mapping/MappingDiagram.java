@@ -1,8 +1,10 @@
 package org.jumpmind.symmetric.is.ui.mapping;
 
-import org.jumpmind.symmetric.is.core.model.Model;
+import org.jumpmind.symmetric.is.core.model.Component;
+import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
+import org.jumpmind.symmetric.is.core.runtime.component.MappingProcessor;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 
 import com.vaadin.annotations.JavaScript;
@@ -20,14 +22,17 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 
 	ApplicationContext context;
 	
-	public MappingDiagram(ApplicationContext context, Model inputModel, Model outputModel) {
+	Component component;
+	
+	public MappingDiagram(ApplicationContext context, Component component) {
 		this.context = context;
+		this.component = component;
         setPrimaryStyleName("mapping-diagram");
         setId("mapping-diagram");
 
         MappingDiagramState state = getState();
-        state.inputModel = inputModel;
-        state.outputModel = outputModel;
+        state.inputModel = component.getInputModel();
+        state.outputModel = component.getOutputModel();
         
         addFunction("onConnection", new OnConnectionFunction());
     }
@@ -39,17 +44,26 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 
     class OnConnectionFunction implements JavaScriptFunction {
 		public void call(JsonArray arguments) {
-			System.out.println("onConnection");
             if (arguments.length() > 0) {
                 JsonObject json = arguments.getObject(0);
                 String sourceId = json.getString("sourceId").substring(3);
                 String targetId = json.getString("targetId").substring(3);
                 boolean removed = json.getBoolean("removed");
-                System.out.println("Connection " + sourceId + " -> " + targetId + " (" + removed + ")");
-                ModelAttribute sourceAttr = getModelAttribute(sourceId);
-                ModelAttribute targetAttr = getModelAttribute(targetId);
-                System.out.println("Found source: " + sourceAttr);
-                System.out.println("Found target: " + targetAttr);
+                if (removed) {
+                	ComponentAttributeSetting setting = component.getAttributeSetting(sourceId, MappingProcessor.ATTRIBUTE_MAPS_TO);
+                	if (setting != null) {
+                		component.getAttributeSettings().remove(setting);
+                		context.getConfigurationService().save(setting);
+                	}
+                } else {
+                	ComponentAttributeSetting setting = new ComponentAttributeSetting();
+                	setting.setAttributeId(sourceId);
+                	setting.setComponentId(component.getId());
+                	setting.setName(MappingProcessor.ATTRIBUTE_MAPS_TO);
+                	setting.setValue(targetId);
+                	component.addAttributeSetting(setting);
+                	context.getConfigurationService().save(setting);
+                }
             }
 		}
 		

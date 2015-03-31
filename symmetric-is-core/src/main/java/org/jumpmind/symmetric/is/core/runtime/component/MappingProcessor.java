@@ -9,6 +9,8 @@ public class MappingProcessor extends AbstractComponent {
 
     public static final String TYPE = "Mapping";
 
+    public final static String ATTRIBUTE_MAPS_TO = "mapping.processor.attribute.maps.to";
+
     @Override
     public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
         componentStatistics.incrementInboundMessages();
