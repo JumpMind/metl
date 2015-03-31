@@ -11,8 +11,10 @@ import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.EnableFocusTextField;
 import org.jumpmind.symmetric.is.ui.common.Icons;
+import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
@@ -54,7 +56,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-abstract public class AbstractFolderNavigator extends Panel {
+public class DeployNavigator extends Panel {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -62,9 +64,7 @@ abstract public class AbstractFolderNavigator extends Panel {
 
     MenuItem delete;
 
-    IConfigurationService configurationService;
-
-    FolderType folderType;
+    ApplicationContext context;
 
     TreeTable treeTable;
 
@@ -75,16 +75,17 @@ abstract public class AbstractFolderNavigator extends Panel {
     AbstractObject itemClicked;
 
     long itemClickTimeInMs;
-    
+
     ShortcutListener treeTableEnterKeyShortcutListener;
-    
+
     ShortcutListener treeTableDeleteKeyShortcutListener;
 
-    public AbstractFolderNavigator(FolderType folderType, IConfigurationService configurationService) {
+    TabbedPanel tabbedPanel;
 
-        this.folderType = folderType;
-        this.configurationService = configurationService;
+    public DeployNavigator(ApplicationContext context, TabbedPanel tabbedPanel) {
 
+        this.context = context;
+        this.tabbedPanel = tabbedPanel;
         setCaption("Navigator");
         setSizeFull();
         addStyleName("noborder");
@@ -101,7 +102,7 @@ abstract public class AbstractFolderNavigator extends Panel {
         content.setExpandRatio(treeTable, 1);
 
     }
-    
+
     public void select(Object obj) {
         Object parent = obj;
         do {
@@ -109,15 +110,12 @@ abstract public class AbstractFolderNavigator extends Panel {
             if (parent != null) {
                 treeTable.setCollapsed(parent, false);
             }
-        }
-        while (parent != null);
-        
+        } while (parent != null);
+
         treeTable.setValue(obj);
     }
 
-    abstract protected void addMenuButtons(MenuItem addMenuItem, MenuBar leftMenuBar, MenuBar rightMenuBar);
-
-    public void refresh() {        
+    public void refresh() {
         Object selected = treeTable.getValue();
         List<Object> expandedItems = new ArrayList<Object>();
         Collection<?> items = treeTable.getItemIds();
@@ -128,7 +126,7 @@ abstract public class AbstractFolderNavigator extends Panel {
         }
 
         this.treeTable.removeAllItems();
-        List<Folder> folders = configurationService.findFolders(folderType);
+        List<Folder> folders = context.getConfigurationService().findFolders(FolderType.RUNTIME);
         for (Folder folder : folders) {
             addChildFolder(folder);
         }
@@ -145,7 +143,7 @@ abstract public class AbstractFolderNavigator extends Panel {
                 treeTable.setValue(treeTable.getItemIds().iterator().next());
             }
         }
-        
+
         treeTable.focus();
     }
 
@@ -156,23 +154,19 @@ abstract public class AbstractFolderNavigator extends Panel {
         MenuBar leftMenuBar = new MenuBar();
         leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
         leftMenuBar.setWidth(100, Unit.PERCENTAGE);
-        
-        MenuItem newMenu = leftMenuBar.addItem("", FontAwesome.PLUS, null);
 
-        newFolder = newMenu.addItem("Folder", Icons.FOLDER_OPEN, new Command() {
+        MenuItem newMenu = leftMenuBar.addItem("New", null);
+
+        newFolder = newMenu.addItem("Folder", new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 addFolder();
             }
         });
-        newFolder.setStyleName("folder");
-        newFolder.setDescription("New Folder");
 
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
-
-        addMenuButtons(newMenu, leftMenuBar, rightMenuBar);
 
         delete = rightMenuBar.addItem("", Icons.DELETE, new Command() {
 
@@ -181,7 +175,7 @@ abstract public class AbstractFolderNavigator extends Panel {
                 handleDelete();
             }
         });
-        delete.setDescription("Delete");
+        delete.setDescription("Remove");
 
         layout.addComponent(leftMenuBar);
         layout.addComponent(rightMenuBar);
@@ -237,7 +231,7 @@ abstract public class AbstractFolderNavigator extends Panel {
                     openItem(object);
                 }
             }
-        }; 
+        };
         table.addShortcutListener(treeTableEnterKeyShortcutListener);
         table.addValueChangeListener(new ValueChangeListener() {
             private static final long serialVersionUID = 1L;
@@ -326,8 +320,9 @@ abstract public class AbstractFolderNavigator extends Panel {
 
     }
 
-    protected void finishEditingItem() {        
+    protected void finishEditingItem() {
         if (itemBeingEdited != null) {
+            IConfigurationService configurationService = context.getConfigurationService();
             treeTable.addShortcutListener(treeTableDeleteKeyShortcutListener);
             treeTable.addShortcutListener(treeTableEnterKeyShortcutListener);
             Object selected = itemBeingEdited;
@@ -485,7 +480,8 @@ abstract public class AbstractFolderNavigator extends Panel {
                                 if (obj instanceof Folder) {
                                     Folder folder = (Folder) obj;
                                     try {
-                                        configurationService.deleteFolder(folder.getId());
+                                        context.getConfigurationService().deleteFolder(
+                                                folder.getId());
                                     } catch (Exception ex) {
                                         CommonUiUtils.notify(
                                                 "Could not delete the \"" + folder.getName()
@@ -516,7 +512,7 @@ abstract public class AbstractFolderNavigator extends Panel {
 
         Folder folder = new Folder();
         folder.setName("New Folder");
-        folder.setType(folderType.name());
+        folder.setType(FolderType.RUNTIME.name());
         folder.setParent(parentFolder);
 
         addChildFolder(folder);
@@ -557,7 +553,7 @@ abstract public class AbstractFolderNavigator extends Panel {
             }
         }
     }
-    
+
     protected void expand(Folder folder, Object itemToSelect) {
         List<Folder> toExpand = new ArrayList<Folder>();
         toExpand.add(0, folder);

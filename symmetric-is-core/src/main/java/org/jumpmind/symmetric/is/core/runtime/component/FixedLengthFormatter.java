@@ -62,8 +62,9 @@ public class FixedLengthFormatter extends AbstractComponent {
         }
         outputMessage.setPayload(outputPayload);
         componentStatistics.incrementOutboundMessages();
+        outputMessage.getHeader().setSequenceNumber(componentStatistics.getNumberOutboundMessages());
+        outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
         messageTarget.put(outputMessage);
-        componentStatistics.incrementOutboundMessages();
     }
 
     private String processInputRow(EntityData inputRow) {
