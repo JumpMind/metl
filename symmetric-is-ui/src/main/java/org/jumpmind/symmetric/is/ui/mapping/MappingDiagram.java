@@ -21,7 +21,7 @@ import elemental.json.JsonObject;
 public class MappingDiagram extends AbstractJavaScriptComponent {
 
 	ApplicationContext context;
-	
+
 	Component component;
 	
 	public MappingDiagram(ApplicationContext context, Component component) {
@@ -31,6 +31,7 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
         setId("mapping-diagram");
 
         MappingDiagramState state = getState();
+        state.component = component;
         state.inputModel = component.getInputModel();
         state.outputModel = component.getOutputModel();
         

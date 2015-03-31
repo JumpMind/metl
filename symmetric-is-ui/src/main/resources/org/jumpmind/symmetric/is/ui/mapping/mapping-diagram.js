@@ -16,7 +16,7 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
     var top = 1;
     var entities = state.inputModel.modelEntities;
     var parentDiv = document.getElementById("mapping-diagram");
-    		
+
     for (i = 0; i < entities.length; i++) {
     	var entity = entities[i];
         var entityDiv = document.createElement("div");
@@ -75,6 +75,14 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
     	top += 2;
     }
 
+    var settings = state.component.attributeSettings;
+    for (i = 0; i < settings.length; i++) {
+    	var setting = settings[i];
+    	if (setting.name == state.mapsToAttrName) {
+            instance.connect({ source: "src" + setting.attributeId, target: "dst" + setting.value });	
+    	}
+    }
+    
     var src = jsPlumb.getSelector(".mapping-diagram .src");
     var dst = jsPlumb.getSelector(".mapping-diagram .dst");
 
