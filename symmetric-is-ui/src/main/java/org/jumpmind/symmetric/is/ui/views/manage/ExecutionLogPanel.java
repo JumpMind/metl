@@ -125,8 +125,10 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
                         Object prop = event.getPropertyId();
                         String header = logTable.getColumnHeader(prop);
                         Property<?> p = event.getItem().getItemProperty(prop);
-                        String data = String.valueOf(p.getValue());
-                        new ReadOnlyTextAreaDialog(header, data, false).showAtSize(.5);
+                        if (p != null) {
+                            String data = String.valueOf(p.getValue());
+                            new ReadOnlyTextAreaDialog(header, data, false).showAtSize(.5);
+                        }
                     }
                 }
             }
