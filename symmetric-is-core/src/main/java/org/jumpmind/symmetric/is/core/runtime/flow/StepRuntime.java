@@ -1,10 +1,13 @@
 package org.jumpmind.symmetric.is.core.runtime.flow;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
@@ -96,7 +99,12 @@ public class StepRuntime implements Runnable {
                     component.handle(executionId, inputMessage, target);
                     } catch (Exception ex) {
                         error = ex;
-                        executionTracker.log(executionId, LogLevel.ERROR, component, ex.getMessage());
+                        String msg = ex.getMessage();
+                        if (isBlank(msg)) {
+                            msg = ExceptionUtils.getFullStackTrace(ex);
+                        }
+                        executionTracker.log(executionId, LogLevel.ERROR, component, msg);
+                        log.error("", ex);
                     }
                     executionTracker.afterHandle(executionId, component, error);
                     if (isStartStep()) {

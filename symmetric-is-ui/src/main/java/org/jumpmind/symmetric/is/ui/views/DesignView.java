@@ -30,24 +30,24 @@ public class DesignView extends HorizontalLayout implements View {
 
     ProjectNavigator projectNavigator;
 
-    TabbedPanel tabs;
+    TabbedPanel tabbedPanel;
 
     @PostConstruct
     protected void init() {
         setSizeFull();
 
-        tabs = new TabbedPanel();
+        tabbedPanel = new TabbedPanel();
 
         HorizontalSplitPanel leftSplit = new HorizontalSplitPanel();
         leftSplit.setSizeFull();
         leftSplit.setSplitPosition(AppConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS);
 
-        projectNavigator = new ProjectNavigator(context, tabs);
+        projectNavigator = new ProjectNavigator(context, tabbedPanel);
 
         leftSplit.setFirstComponent(projectNavigator);
         VerticalLayout container = new VerticalLayout();
         container.setSizeFull();
-        container.addComponent(tabs);
+        container.addComponent(tabbedPanel);
         leftSplit.setSecondComponent(container);
 
         addComponent(leftSplit);
