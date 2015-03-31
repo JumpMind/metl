@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
+import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
@@ -43,7 +43,6 @@ import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.ColumnHeaderMode;
@@ -56,7 +55,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class DeployNavigator extends Panel {
+public class DeployNavigator extends VerticalLayout {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -64,11 +63,15 @@ public class DeployNavigator extends Panel {
 
     MenuItem delete;
 
+    MenuItem newAgent;
+
+    MenuItem newDeployment;
+
     ApplicationContext context;
 
     TreeTable treeTable;
 
-    Set<Object> lastSelected;
+    AbstractObject lastSelected;
 
     AbstractObject itemBeingEdited;
 
@@ -91,15 +94,12 @@ public class DeployNavigator extends Panel {
         addStyleName("noborder");
         addStyleName(ValoTheme.MENU_ROOT);
 
-        VerticalLayout content = new VerticalLayout();
-        content.setSizeFull();
-        setContent(content);
-        content.addComponent(buildMenuBar());
+        addComponent(buildMenuBar());
 
         treeTable = buildTreeTable();
         treeTable.addStyleName("noselect");
-        content.addComponent(treeTable);
-        content.setExpandRatio(treeTable, 1);
+        addComponent(treeTable);
+        setExpandRatio(treeTable, 1);
 
     }
 
@@ -165,6 +165,22 @@ public class DeployNavigator extends Panel {
             }
         });
 
+        newAgent = newMenu.addItem("Agent", new Command() {
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                addAgent();
+            }
+        });
+
+        newDeployment = newMenu.addItem("Deployment", new Command() {
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                addAgentDeployment();
+            }
+        });
+
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
 
@@ -226,10 +242,7 @@ public class DeployNavigator extends Panel {
 
             @Override
             public void handleAction(Object sender, Object target) {
-                Set<Object> selectedIds = getSelectedValues();
-                for (Object object : selectedIds) {
-                    openItem(object);
-                }
+                openItem(getSelectedValue());
             }
         };
         table.addShortcutListener(treeTableEnterKeyShortcutListener);
@@ -238,7 +251,7 @@ public class DeployNavigator extends Panel {
 
             @Override
             public void valueChange(ValueChangeEvent event) {
-                lastSelected = getSelectedValues();
+                lastSelected = getSelectedValue();
                 selectionChanged(event);
             }
         });
@@ -403,42 +416,26 @@ public class DeployNavigator extends Panel {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    protected Set<Object> getSelectedValues() {
-        Set<Object> selectedIds = null;
-        Object obj = treeTable.getValue();
-        if (obj instanceof Set) {
-            selectedIds = (Set<Object>) obj;
-        } else {
-            selectedIds = new HashSet<Object>(1);
-            if (obj != null) {
-                selectedIds.add(obj);
-            }
-        }
-        return selectedIds;
+    protected AbstractObject getSelectedValue() {
+        return (AbstractObject) treeTable.getValue();
     }
 
     protected void openItem(Object item) {
     }
 
     protected Folder getSelectedFolder() {
-        Set<Object> selectedIds = getSelectedValues();
-        for (Object object : selectedIds) {
-            if (object instanceof Folder) {
-                return (Folder) object;
-            }
+        Object object = getSelectedValue();
+        if (object instanceof Folder) {
+            return (Folder) object;
         }
         return null;
     }
 
     @SuppressWarnings("unchecked")
     protected <T> T getSingleSelection(Class<T> clazz) {
-        Set<Object> selectedIds = getSelectedValues();
-        if (selectedIds != null && selectedIds.size() == 1) {
-            Object obj = selectedIds.iterator().next();
-            if (obj != null && clazz.isAssignableFrom(obj.getClass())) {
-                return (T) obj;
-            }
+        Object obj = getSelectedValue();
+        if (obj != null && clazz.isAssignableFrom(obj.getClass())) {
+            return (T) obj;
         }
         return null;
     }
@@ -448,17 +445,15 @@ public class DeployNavigator extends Panel {
     }
 
     protected void selectionChanged(ValueChangeEvent event) {
-        Set<Object> selected = getSelectedValues();
-        Folder folder = getSelectedFolder();
-        boolean enabled = itemBeingEdited == null
-                && ((folder == null && selected.size() == 0) || folder != null);
-        newFolder.setEnabled(enabled);
+        AbstractObject selected = getSelectedValue();
+        Folder selectedFolder = getSelectedFolder();
+        boolean showNewFolder = itemBeingEdited == null
+                && (selected == null || selectedFolder != null);
+        newFolder.setVisible(showNewFolder);
+        newAgent.setVisible(selectedFolder != null);
+        newDeployment.setVisible(selected instanceof Agent);
 
-        boolean deleteEnabled = false;
-        for (Object object : selected) {
-            deleteEnabled |= isDeleteButtonEnabled(object);
-        }
-        delete.setEnabled(deleteEnabled);
+        delete.setEnabled(isDeleteButtonEnabled(selected));
     }
 
     protected boolean isDeleteButtonEnabled(Object selected) {
@@ -475,18 +470,15 @@ public class DeployNavigator extends Panel {
 
                         @Override
                         public boolean onOk() {
-                            Set<Object> selected = getSelectedValues();
-                            for (Object obj : selected) {
-                                if (obj instanceof Folder) {
-                                    Folder folder = (Folder) obj;
-                                    try {
-                                        context.getConfigurationService().deleteFolder(
-                                                folder.getId());
-                                    } catch (Exception ex) {
-                                        CommonUiUtils.notify(
-                                                "Could not delete the \"" + folder.getName()
-                                                        + "\" folder", Type.WARNING_MESSAGE);
-                                    }
+                            Object obj = getSelectedValue();
+                            if (obj instanceof Folder) {
+                                Folder folder = (Folder) obj;
+                                try {
+                                    context.getConfigurationService().deleteFolder(folder.getId());
+                                } catch (Exception ex) {
+                                    CommonUiUtils.notify(
+                                            "Could not delete the \"" + folder.getName()
+                                                    + "\" folder", Type.WARNING_MESSAGE);
                                 }
                             }
                             refresh();
@@ -495,15 +487,9 @@ public class DeployNavigator extends Panel {
                     });
         }
 
-        Set<Object> objects = getSelectedValues();
-        Collection<Object> noFolders = new HashSet<Object>();
-        for (Object object : objects) {
-            if (!(object instanceof Folder)) {
-                noFolders.add(object);
-            }
-        }
-        if (noFolders.size() > 0) {
-            deleteTreeItems(noFolders);
+        AbstractObject obj = getSelectedValue();
+        if (!(obj instanceof Folder)) {
+            deleteTreeItems(obj);
         }
     }
 
@@ -525,6 +511,14 @@ public class DeployNavigator extends Panel {
         startEditingItem(folder);
     }
 
+    protected void addAgent() {
+
+    }
+
+    protected void addAgentDeployment() {
+
+    }
+
     protected void addChildFolder(Folder folder) {
         this.treeTable.addItem(folder);
         this.treeTable.setItemIcon(folder, FontAwesome.FOLDER);
@@ -538,7 +532,7 @@ public class DeployNavigator extends Panel {
         }
     }
 
-    protected void deleteTreeItems(Collection<Object> objects) {
+    protected void deleteTreeItems(AbstractObject obj) {
 
     }
 
