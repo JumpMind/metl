@@ -1,9 +1,8 @@
 package org.jumpmind.symmetric.is.core.model;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-
-import org.jumpmind.util.LinkedCaseInsensitiveMap;
 
 public class Model extends AbstractObject {
 
@@ -21,12 +20,12 @@ public class Model extends AbstractObject {
     
     String rowId = UUID.randomUUID().toString();
 
-    Map<String, ModelEntity> modelEntities;
+    List<ModelEntity> modelEntities;
 
     boolean shared;
 
     public Model() {
-        this.modelEntities = new LinkedCaseInsensitiveMap<ModelEntity>();
+        this.modelEntities = new ArrayList<ModelEntity>();
     }
     
     public Model(String id) {
@@ -81,7 +80,7 @@ public class Model extends AbstractObject {
     }
 
     public ModelEntity getEntityByName(String entityName) {
-        for (ModelEntity entity : modelEntities.values()) {
+        for (ModelEntity entity : modelEntities) {
             if (entity.getName().equalsIgnoreCase(entityName)) {
                 return entity;
             }
@@ -101,10 +100,14 @@ public class Model extends AbstractObject {
         return null;
     }
     
-    public Map<String, ModelEntity> getModelEntities() {
+    public List<ModelEntity> getModelEntities() {
         return modelEntities;
     }
-    
+
+    public void setModelEntities(List<ModelEntity> modelEntities) {
+    	this.modelEntities = modelEntities;
+    }
+
     public void setProjectVersionId(String projectVersionId) {
         this.projectVersionId = projectVersionId;
     }

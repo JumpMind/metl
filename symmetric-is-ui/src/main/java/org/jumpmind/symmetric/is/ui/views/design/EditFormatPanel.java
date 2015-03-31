@@ -82,7 +82,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         setExpandRatio(table, 1.0f);
 
         if (component.getInputModel() != null) {
-	        for (ModelEntity entity : component.getInputModel().getModelEntities().values()) {
+	        for (ModelEntity entity : component.getInputModel().getModelEntities()) {
 	            for (ModelAttribute attr : entity.getModelAttributes()) {
 	                table.addItem(new RecordFormat(entity, attr));
 	            }

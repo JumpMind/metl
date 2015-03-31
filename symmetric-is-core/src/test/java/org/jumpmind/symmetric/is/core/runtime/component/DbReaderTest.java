@@ -190,8 +190,8 @@ public class DbReaderTest {
         tt2.addModelAttribute(new ModelAttribute("tt2colz", tt1.getId(), "COLZ"));
 
         Model modelVersion = new Model();
-        modelVersion.getModelEntities().put("tt1", tt1);
-        modelVersion.getModelEntities().put("tt2", tt2);
+        modelVersion.getModelEntities().add(tt1);
+        modelVersion.getModelEntities().add(tt2);
 
         return modelVersion;
     }

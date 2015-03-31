@@ -16,12 +16,18 @@ import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+//github.com/JumpMind/symmetric-is-all.git
+import org.jumpmind.symmetric.is.core.runtime.component.DbReader;
+import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
+import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
+import org.jumpmind.symmetric.is.core.runtime.component.MappingProcessor;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.EnableFocusTextField;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
+import org.jumpmind.symmetric.is.ui.mapping.EditMappingPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditDbReaderPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel;
@@ -69,10 +75,6 @@ import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-//github.com/JumpMind/symmetric-is-all.git
-import org.jumpmind.symmetric.is.core.runtime.component.DbReader;
-import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
-import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
 
 @SuppressWarnings("serial")
 public class ProjectNavigator extends VerticalLayout implements IDesignNavigator {
@@ -682,10 +684,14 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
                 EditFormatPanel editFormat = new EditFormatPanel(context, flowStep.getComponent());
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
                         editFormat);
-            } else if (flowStep.getComponent().getType().equals(DbReader.TYPE)) {
-                    EditDbReaderPanel editFormat = new EditDbReaderPanel(context, flowStep.getComponent());
-                    tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
-                            editFormat);
+            } else if (type.equals(DbReader.TYPE)) {
+                EditDbReaderPanel editFormat = new EditDbReaderPanel(context, flowStep.getComponent());
+                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
+                        editFormat);
+            } else if (type.equals(MappingProcessor.TYPE)) {
+            	EditMappingPanel editMapping = new EditMappingPanel(context, flowStep.getComponent());
+                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
+                		editMapping);
             } else {
                 item = context.getConfigurationService().findFlow(flowStep.getFlowId());
             }

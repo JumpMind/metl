@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
@@ -325,7 +324,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
                 null, null, tableName(ModelEntity.class));
         for (ModelEntity entity : entities) {
             refresh(entity);
-            model.getModelEntities().put(entity.getName(), entity);
+            model.getModelEntities().add(entity);
         }
         return model;
     }
@@ -518,9 +517,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void delete(Model model) {
-        Iterator<Entry<String, ModelEntity>> itr = model.getModelEntities().entrySet().iterator();
-        while (itr.hasNext()) {
-            delete(itr.next().getValue());
+        for (ModelEntity modelEntity: model.getModelEntities()) {
+        	delete(modelEntity);
         }
         persistenceManager.delete(model, null, null, tableName(Model.class));
     }
@@ -629,9 +627,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void save(Model model) {
         save((AbstractObject) model);
-        Iterator<Entry<String, ModelEntity>> itr = model.getModelEntities().entrySet().iterator();
-        while (itr.hasNext()) {
-            save(itr.next().getValue());
+        for (ModelEntity modelEntity: model.getModelEntities()) {
+        	save(modelEntity);
         }
     }
 

@@ -82,7 +82,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         
 		addComponent(treeTable);
 		setExpandRatio(treeTable, 1.0f);
-		addAll(model.getModelEntities().values());
+		addAll(model.getModelEntities());
 	}
 
 	@Override
