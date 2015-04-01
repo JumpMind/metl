@@ -3,14 +3,15 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
 	state = this.getState();
 	
     instance = jsPlumb.getInstance({
-        Endpoint: ["Rectangle", { width: 10, height: 10 }],
+    	Endpoint: ["Dot", { radius: 7 }],
+    	EndpointStyle: { fillStyle: "#0072C6" }, 
         Anchor: [ "Left", "Right" ],
-        HoverPaintStyle: {strokeStyle: "orange", lineWidth: 2 },
-        Connector: [ "StateMachine", { curviness: 1 } ],
-        ConnectionOverlays: [ [ "Arrow", { location: 1, id: "arrow", length: 12, width: 12, foldback: 1 } ] ],
+    	Connector: [ "Straight", { gap: 7 } ],
+        ConnectionOverlays: [ [ "Arrow", { location: 1, width: 12, length: 12, foldback: 1 } ] ],
+        PaintStyle: { lineWidth : 2, strokeStyle : "#0072C6" },
         Container: "mapping-diagram"
     });
-
+    
     window.jsp = instance;
     entities = state.inputModel.modelEntities;
     parentDiv = document.getElementById("mapping-diagram");
@@ -27,10 +28,9 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
     }
 
     instance.batch(function () {
-        instance.makeSource(jsPlumb.getSelector(".mapping-diagram .src"),
-        	{ connectorStyle: { strokeStyle: "#5c96bc", lineWidth: 2, outlineColor: "transparent", outlineWidth: 4 } });
+        instance.makeSource(jsPlumb.getSelector(".mapping-diagram .src"));
         
-        instance.makeTarget(jsPlumb.getSelector(".mapping-diagram .dst"), 
+        instance.makeTarget(jsPlumb.getSelector(".mapping-diagram .dst"),
         	{ dropOptions: { hoverClass: "dragHover" }, maxConnections: 1 });
 
         instance.bind("connection", function(info, originalEvent) {

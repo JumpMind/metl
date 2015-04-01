@@ -57,12 +57,15 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
                 		context.getConfigurationService().save(setting);
                 	}
                 } else {
-                	ComponentAttributeSetting setting = new ComponentAttributeSetting();
-                	setting.setAttributeId(sourceId);
-                	setting.setComponentId(component.getId());
-                	setting.setName(MappingProcessor.ATTRIBUTE_MAPS_TO);
+                	ComponentAttributeSetting setting = component.getAttributeSetting(sourceId, MappingProcessor.ATTRIBUTE_MAPS_TO);
+                	if (setting == null) {
+                		setting = new ComponentAttributeSetting();
+                    	setting.setAttributeId(sourceId);
+                    	setting.setComponentId(component.getId());
+                		setting.setName(MappingProcessor.ATTRIBUTE_MAPS_TO);
+                		component.addAttributeSetting(setting);
+                	}
                 	setting.setValue(targetId);
-                	component.addAttributeSetting(setting);
                 	context.getConfigurationService().save(setting);
                 }
             }

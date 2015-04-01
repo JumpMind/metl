@@ -1,15 +1,14 @@
 .entity {
     padding: 2px 10px 2px 10px;
     position: absolute;
-    z-index: 4;
+    z-index: 1;
     border: 1px solid #2e6f9a;
     box-shadow: 2px 2px 19px #e0e0e0;
     -o-box-shadow: 2px 2px 19px #e0e0e0;
     -webkit-box-shadow: 2px 2px 19px #e0e0e0;
     -moz-box-shadow: 2px 2px 19px #e0e0e0;
     -moz-border-radius: 8px;
-    border-radius: 8px;
-    opacity: 0.8;
+    border-radius: 2px;
     filter: alpha(opacity=80);
     cursor: move;
     background-color: white;
@@ -25,8 +24,8 @@
     user-select: none;
 }
 
-.mapping-diagram ._jsPlumb_endpoint {
-    z-index: 3;
+.mapping-diagram ._jsPlumb_endpoint_anchor, .mapping-diagram ._jsPlumb_connector {
+    z-index: 2;
 }
 
 .mapping-diagram {
