@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
@@ -35,6 +36,7 @@ import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Field;
@@ -46,6 +48,7 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.ColumnHeaderMode;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree.CollapseEvent;
 import com.vaadin.ui.Tree.CollapseListener;
 import com.vaadin.ui.Tree.ExpandEvent;
@@ -84,6 +87,10 @@ public class DeployNavigator extends VerticalLayout {
     ShortcutListener treeTableDeleteKeyShortcutListener;
 
     TabbedPanel tabbedPanel;
+    
+    MenuItem search;
+
+    HorizontalLayout searchBarLayout;
 
     public DeployNavigator(ApplicationContext context, TabbedPanel tabbedPanel) {
 
@@ -95,6 +102,9 @@ public class DeployNavigator extends VerticalLayout {
         addStyleName(ValoTheme.MENU_ROOT);
 
         addComponent(buildMenuBar());
+        
+        searchBarLayout = buildSearchBar();
+        addComponent(searchBarLayout);
 
         treeTable = buildTreeTable();
         treeTable.addStyleName("noselect");
@@ -146,6 +156,19 @@ public class DeployNavigator extends VerticalLayout {
 
         treeTable.focus();
     }
+    
+    protected HorizontalLayout buildSearchBar() {
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setMargin(new MarginInfo(false, true, true, true));
+        layout.setWidth(100, Unit.PERCENTAGE);
+        layout.setVisible(false);
+        TextField search = new TextField();
+        search.setIcon(Icons.SEARCH);
+        search.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
+        search.setWidth(100, Unit.PERCENTAGE);
+        layout.addComponent(search);
+        return layout;
+    }
 
     protected HorizontalLayout buildMenuBar() {
         HorizontalLayout layout = new HorizontalLayout();
@@ -177,13 +200,22 @@ public class DeployNavigator extends VerticalLayout {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
-                addAgentDeployment();
+                addDeployment();
             }
         });
 
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
 
+        search = rightMenuBar.addItem("", Icons.SEARCH, new Command() {
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                search.setChecked(!search.isChecked());
+                searchBarLayout.setVisible(search.isChecked());
+            }
+        });
+        
         delete = rightMenuBar.addItem("", Icons.DELETE, new Command() {
 
             @Override
@@ -265,6 +297,11 @@ public class DeployNavigator extends VerticalLayout {
                         abortEditingItem();
                         openItem(event.getItemId());
                         itemClicked = null;
+
+                        if (table.areChildrenAllowed(event.getItemId())) {
+                            Object item = event.getItemId();
+                            table.setCollapsed(item, !table.isCollapsed(item));
+                        }
                     } else {
                         if (itemClicked != null && itemClicked.equals(event.getItemId())) {
                             long timeSinceClick = System.currentTimeMillis() - itemClickTimeInMs;
@@ -441,7 +478,15 @@ public class DeployNavigator extends VerticalLayout {
     }
 
     protected void folderExpanded(Folder folder) {
-
+        List<Agent> agents = context.getConfigurationService().findAgentsInFolder(folder);
+        for (Agent agent : agents) {
+            addAgent(folder, agent);
+            
+            List<AgentDeployment> deployments = agent.getAgentDeployments();
+            for (AgentDeployment agentDeployment : deployments) {
+                addDeployment(agent, agentDeployment);
+            }
+        }
     }
 
     protected void selectionChanged(ValueChangeEvent event) {
@@ -512,12 +557,35 @@ public class DeployNavigator extends VerticalLayout {
     }
 
     protected void addAgent() {
+        Folder folder = getSelectedFolder();
+        if (folder != null) {
+            Agent agent = new Agent();
+            agent.setName("New Agent");
+            agent.setFolder(folder);
+            context.getConfigurationService().save(agent);
+
+            addAgent(folder, agent);
+        }
 
     }
 
-    protected void addAgentDeployment() {
-
+    protected void addAgent(Folder folder, Agent agent) {
+        treeTable.addItem(agent);
+        treeTable.setItemIcon(agent, Icons.AGENT);
+        treeTable.setParent(agent, folder);
+        treeTable.setChildrenAllowed(agent, false);
     }
+
+    protected void addDeployment() {
+    }
+    
+    protected void addDeployment(Agent agent, AgentDeployment deployment) {
+        treeTable.addItem(deployment);
+        treeTable.setItemIcon(deployment, Icons.DEPLOYMENT);
+        treeTable.setParent(deployment, agent);
+        treeTable.setChildrenAllowed(agent, true);        
+    }
+
 
     protected void addChildFolder(Folder folder) {
         this.treeTable.addItem(folder);

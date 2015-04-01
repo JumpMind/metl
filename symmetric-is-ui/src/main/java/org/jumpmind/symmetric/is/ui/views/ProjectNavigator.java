@@ -113,13 +113,13 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
     MenuItem delete;
 
+    MenuItem closeProject;
+    
     MenuItem search;
 
-    MenuItem closeProject;
+    HorizontalLayout searchBarLayout;
 
     VerticalLayout openProjectsLayout;
-
-    HorizontalLayout searchBarLayout;
 
     List<ProjectVersion> projects = new ArrayList<ProjectVersion>();
 
@@ -354,8 +354,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
                     if (event.isDoubleClick()) {
                         abortEditingItem();
                         open(event.getItemId());
-                        itemClicked = null;
-                        
+                        itemClicked = null;                        
                         
                         if (table.areChildrenAllowed(event.getItemId())) {
                             Object item = event.getItemId();

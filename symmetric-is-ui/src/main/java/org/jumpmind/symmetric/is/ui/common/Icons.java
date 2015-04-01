@@ -17,6 +17,10 @@ final public class Icons {
     
     public static final FontAwesome PROJECT = FontAwesome.CUBES;
     
+    public static final FontAwesome AGENT = FontAwesome.GEAR;
+
+    public static final FontAwesome DEPLOYMENT = FontAwesome.CUBE;
+    
     public static final FontAwesome GENERAL_RESOURCE = FontAwesome.LINK;
 
     public static final FontAwesome FLOW = FontAwesome.SHARE_ALT;

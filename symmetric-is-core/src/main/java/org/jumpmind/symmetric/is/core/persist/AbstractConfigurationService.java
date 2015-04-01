@@ -3,7 +3,6 @@ package org.jumpmind.symmetric.is.core.persist;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -56,8 +55,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public List<Folder> findFolders(FolderType type) {
-        Collection<Folder> allFolders = foldersById(type).values();
+        ArrayList<Folder> allFolders = new ArrayList<Folder>(foldersById(type).values());
         List<Folder> rootFolders = new ArrayList<Folder>();
+        Collections.sort(allFolders, new Comparator<Folder>() {
+            @Override
+            public int compare(Folder o1, Folder o2) {
+                return o1.getCreateTime().compareTo(o2.getCreateTime());
+            }
+        });
         for (Folder folder : allFolders) {
             boolean foundAParent = false;
             for (Folder parentFolder : allFolders) {
@@ -78,7 +83,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     protected Map<String, Folder> foldersById(FolderType type) {
         Map<String, Object> byType = new HashMap<String, Object>();
         byType.put("type", type.name());
-        List<Folder> folders = find(Folder.class, byType);
+        List<Folder> folders = find(Folder.class, byType);        
 
         Map<String, Folder> all = new HashMap<String, Folder>();
         for (Folder folder : folders) {
@@ -239,12 +244,17 @@ abstract class AbstractConfigurationService extends AbstractService implements
             List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class,
                     settingParams, null, null, tableName(AgentDeployment.class));
             for (AgentDeployment agentDeployment : deployments) {
-                Flow flow = new Flow();
-                flow.setId(agentDeployment.getFlowId());
-                agentDeployment.setFlow(flow);
+                refresh(agentDeployment.getFlow());
                 agent.getAgentDeployments().add(agentDeployment);
-            }
+            }            
         }
+        
+        Collections.sort(list, new Comparator<Agent>() {
+            @Override
+            public int compare(Agent o1, Agent o2) {
+                return o1.getCreateTime().compareTo(o2.getCreateTime());
+            }
+        });
         return list;
     }
 
