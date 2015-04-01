@@ -25,14 +25,6 @@
     user-select: none;
 }
 
-.entity:hover {
-	border: 2px solid orange;
-}
-
-.aLabel._jsPlumb_hover, ._jsPlumb_source_hover, ._jsPlumb_target_hover {
-	border: 2px solid orange;
-}
-
 .mapping-diagram ._jsPlumb_endpoint {
     z-index: 3;
 }

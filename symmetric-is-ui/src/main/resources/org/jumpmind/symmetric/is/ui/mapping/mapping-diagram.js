@@ -1,103 +1,37 @@
 window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
-
-	var self = this;
-	var state = this.getState();
+	self = this;
+	state = this.getState();
 	
-    var instance = jsPlumb.getInstance({
+    instance = jsPlumb.getInstance({
         Endpoint: ["Rectangle", { width: 10, height: 10 }],
         Anchor: [ "Left", "Right" ],
         HoverPaintStyle: {strokeStyle: "orange", lineWidth: 2 },
+        Connector: [ "StateMachine", { curviness: 1 } ],
         ConnectionOverlays: [ [ "Arrow", { location: 1, id: "arrow", length: 12, width: 12, foldback: 1 } ] ],
         Container: "mapping-diagram"
     });
+
     window.jsp = instance;
+    entities = state.inputModel.modelEntities;
+    parentDiv = document.getElementById("mapping-diagram");
 
-	var left = 1;
-    var top = 1;
-    var entities = state.inputModel.modelEntities;
-    var parentDiv = document.getElementById("mapping-diagram");
+    widest = appendChildren(parentDiv, state.inputModel.modelEntities, "src", 1, 1);
+    appendChildren(parentDiv, state.outputModel.modelEntities, "dst", (widest / 2) + 10, 1)
 
-    for (i = 0; i < entities.length; i++) {
-    	var entity = entities[i];
-        var entityDiv = document.createElement("div");
-        entityDiv.id = "src" + entity.id;
-        entityDiv.style.top = top + "em";
-        entityDiv.style.left = "1em";
-        entityDiv.innerHTML = entity.name;
-        entityDiv.className = "entity";
-    	parentDiv.appendChild(entityDiv);
-    	
-    	top += 2;
-    	var attrs = entity.modelAttributes;
-    	for (j = 0; j < attrs.length; j++) {
-    		var attr = attrs[j];
-            var attrDiv = document.createElement("div");
-            attrDiv.id = "src" + attr.id;
-            attrDiv.style.top = top + "em";
-            attrDiv.style.left = "3em";
-            attrDiv.innerHTML = attr.name;
-            attrDiv.className = "entity src";
-            parentDiv.appendChild(attrDiv);
-    		if (attr.name.length > left) {
-    			left = attr.name.length;
-    		}
-        	top += 2;
-    	}
-    	top += 2;
-    }
-
-    var top = 1;
-    left += 5;
-    var entities = state.outputModel.modelEntities;
-    for (i = 0; i < entities.length; i++) {
-    	var entity = entities[i];
-        var entityDiv = document.createElement("div");
-        entityDiv.id = "dst" + entity.id;
-        entityDiv.style.top = top + "em";
-        entityDiv.style.left = "30em";
-        entityDiv.innerHTML = entity.name;
-        entityDiv.className = "entity";
-    	parentDiv.appendChild(entityDiv);
-    	
-    	top += 2;
-    	var attrs = entity.modelAttributes;
-    	for (j = 0; j < attrs.length; j++) {
-    		var attr = attrs[j];
-            var attrDiv = document.createElement("div");
-            attrDiv.id = "dst" + attr.id;
-            attrDiv.style.top = top + "em";
-            attrDiv.style.left = "31em";
-            attrDiv.innerHTML = attr.name;
-            attrDiv.className = "entity dst";
-            parentDiv.appendChild(attrDiv);
-        	top += 2;
-    	}
-    	top += 2;
-    }
-
-    var settings = state.component.attributeSettings;
+    settings = state.component.attributeSettings;
     for (i = 0; i < settings.length; i++) {
-    	var setting = settings[i];
+    	setting = settings[i];
     	if (setting.name == state.mapsToAttrName) {
-            instance.connect({ source: "src" + setting.attributeId, target: "dst" + setting.value });	
+            instance.connect({ source: "src" + setting.attributeId, target: "dst" + setting.value });
     	}
     }
-    
-    var src = jsPlumb.getSelector(".mapping-diagram .src");
-    var dst = jsPlumb.getSelector(".mapping-diagram .dst");
 
     instance.batch(function () {
-        instance.makeSource(src, {
-            anchor: "Continuous",
-            connector: [ "StateMachine", { curviness: 1 } ],
-            connectorStyle: { strokeStyle: "#5c96bc", lineWidth: 2, outlineColor: "transparent", outlineWidth: 4 }
-        });
+        instance.makeSource(jsPlumb.getSelector(".mapping-diagram .src"),
+        	{ connectorStyle: { strokeStyle: "#5c96bc", lineWidth: 2, outlineColor: "transparent", outlineWidth: 4 } });
         
-        instance.makeTarget(dst, {
-            dropOptions: { hoverClass: "dragHover" },
-            anchor: "Continuous",
-            maxConnections: 1
-        });
+        instance.makeTarget(jsPlumb.getSelector(".mapping-diagram .dst"), 
+        	{ dropOptions: { hoverClass: "dragHover" }, maxConnections: 1 });
 
         instance.bind("connection", function(info, originalEvent) {
             self.onConnection({
@@ -115,5 +49,34 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
             });
         });
     });
+}
 
+function appendChildren(parentDiv, entities, prefix, x, y) {
+	widest = 0;
+    for (i = 0; i < entities.length; i++, y += 2) {
+    	entity = entities[i];
+        entityDiv = document.createElement("div");
+        entityDiv.id = "src" + entity.id;
+        entityDiv.style.top = y + "em";
+        entityDiv.style.left = x + "em";
+        entityDiv.innerHTML = entity.name;
+        entityDiv.className = "entity";
+    	parentDiv.appendChild(entityDiv);
+    	
+    	attrs = entity.modelAttributes;
+    	for (j = 0, y += 2; j < attrs.length; j++, y += 2) {
+    		attr = attrs[j];
+            attrDiv = document.createElement("div");
+            attrDiv.id = prefix + attr.id;
+            attrDiv.style.top = y + "em";
+            attrDiv.style.left = (x + 1) + "em";
+            attrDiv.innerHTML = attr.name;
+            attrDiv.className = "entity " + prefix;
+            parentDiv.appendChild(attrDiv);
+    		if (attr.name.length > widest) {
+    			widest = attr.name.length;
+    		}
+    	}
+    }
+    return widest;
 }
