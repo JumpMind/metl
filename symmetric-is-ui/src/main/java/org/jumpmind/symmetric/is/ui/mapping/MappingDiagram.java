@@ -49,10 +49,10 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
     }
 
     public void removeSelected() {
-    	System.out.println("Remove " + selectedSourceId + ", " + selectedTargetId);
     	if (selectedSourceId != null) {
     		removeConnection(selectedSourceId, selectedTargetId);
     		selectedSourceId = selectedTargetId = null;
+    		markAsDirty();
     	}
     }
 
@@ -72,10 +72,8 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
                 JsonObject json = arguments.getObject(0);
                 selectedSourceId = json.getString("sourceId").substring(3);
                 selectedTargetId = json.getString("targetId").substring(3);
-                System.out.println("Selected: " + selectedSourceId + ", " + selectedTargetId);
             } else {
             	selectedSourceId = selectedTargetId = null;
-            	System.out.println("Unselect");
             }
             fireEvent(new SelectEvent(MappingDiagram.this, selectedSourceId, selectedTargetId));
     	}
@@ -89,10 +87,8 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
                 String targetId = json.getString("targetId").substring(3);
                 boolean removed = json.getBoolean("removed");
                 if (removed) {
-                	System.out.println("Remove " + sourceId + ", " + targetId);
                 	removeConnection(sourceId, targetId);
                 } else {
-                	System.out.println("Add " + sourceId + ", " + targetId);
                 	ComponentAttributeSetting setting = new ComponentAttributeSetting();
                 	setting.setAttributeId(sourceId);
                 	setting.setComponentId(component.getId());

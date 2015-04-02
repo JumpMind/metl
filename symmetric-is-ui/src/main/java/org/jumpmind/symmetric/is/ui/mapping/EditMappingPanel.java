@@ -34,6 +34,7 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 		addComponent(buttonBar);
 		Button autoMapButton = buttonBar.addButton("Auto Map", FontAwesome.FLASH);
 		removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+		removeButton.setEnabled(false);
 		autoMapButton.addClickListener(new AutoMapListener());
 		removeButton.addClickListener(new RemoveListener());
 
@@ -52,7 +53,7 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 	public void showing() {
 	}
 
-	void autoMap(ModelAttribute attr, ModelAttribute attr2) {
+	protected void autoMap(ModelAttribute attr, ModelAttribute attr2) {
 		boolean isMapped = false;
 		for (ComponentAttributeSetting setting : component.getAttributeSettings()) {
 			if (setting.getName().equals(MappingProcessor.ATTRIBUTE_MAPS_TO) &&
@@ -69,16 +70,16 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 			setting.setValue(attr2.getId());
 			component.addAttributeSetting(setting);
 			context.getConfigurationService().save(setting);
-			//diagram.markAsDirty();
+			diagram.markAsDirty();
 		}
 	}
 
-	boolean fuzzyMatches(String str1, String str2) {
+	protected boolean fuzzyMatches(String str1, String str2) {
 		int x = computeLevenshteinDistance(str1, str2);
 		return x < 3;
 	}
 
-	int computeLevenshteinDistance(CharSequence str1, CharSequence str2) {
+	protected int computeLevenshteinDistance(CharSequence str1, CharSequence str2) {
 		int[][] distance = new int[str1.length() + 1][str2.length() + 1];
 
 		for (int i = 0; i <= str1.length(); i++) {
@@ -98,7 +99,7 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 		return distance[str1.length()][str2.length()];
 	}
 	
-    int minimum(int a, int b, int c) {
+	protected int minimum(int a, int b, int c) {
         return Math.min(Math.min(a, b), c);
     }
 
