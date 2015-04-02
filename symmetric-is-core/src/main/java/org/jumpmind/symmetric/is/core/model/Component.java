@@ -155,13 +155,22 @@ public class Component extends AbstractObjectWithSettings {
         attributeSettings.add(attributeSetting);
     }
 
-    public ComponentAttributeSetting getAttributeSetting(String attributeId, String name) {
-    	for (ComponentAttributeSetting setting : attributeSettings) {
-    		if (setting.getAttributeId().equals(attributeId) && setting.getName().equalsIgnoreCase(name)) {
-    			return setting;
-    		}
+    public ComponentAttributeSetting getSingleAttributeSetting(String attributeId, String name) {
+    	List<ComponentAttributeSetting> list = getAttributeSetting(attributeId, name);
+    	if (list.size() > 0) {
+    		return list.get(0);
     	}
     	return null;
+    }
+    
+    public List<ComponentAttributeSetting> getAttributeSetting(String attributeId, String name) {
+    	List<ComponentAttributeSetting> list = new ArrayList<ComponentAttributeSetting>();
+    	for (ComponentAttributeSetting setting : attributeSettings) {
+    		if (setting.getAttributeId().equals(attributeId) && setting.getName().equalsIgnoreCase(name)) {
+    			list.add(setting);
+    		}
+    	}
+    	return list;
     }
 
     @Override

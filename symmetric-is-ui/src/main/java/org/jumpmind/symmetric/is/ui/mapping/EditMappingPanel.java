@@ -24,6 +24,8 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 	
 	MappingDiagram diagram;
 
+	Button removeButton;
+
 	public EditMappingPanel(ApplicationContext context, Component component) {
 		this.context = context;
 		this.component = component;
@@ -31,51 +33,14 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 		ButtonBar buttonBar = new ButtonBar();
 		addComponent(buttonBar);
 		Button autoMapButton = buttonBar.addButton("Auto Map", FontAwesome.FLASH);
-		Button removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+		removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
 		autoMapButton.addClickListener(new AutoMapListener());
 		removeButton.addClickListener(new RemoveListener());
 
 		diagram = new MappingDiagram(context, component);
 		addComponent(diagram);
-		setExpandRatio(diagram, 1.0f);		
-	}
-
-	class RemoveListener implements ClickListener {
-		public void buttonClick(ClickEvent event) {
-		}
-	}
-
-	class AutoMapListener implements ClickListener {
-		public void buttonClick(ClickEvent event) {
-			for (ModelEntity entity : component.getInputModel().getModelEntities()) {
-				for (ModelAttribute attr : entity.getModelAttributes()) {
-					for (ModelEntity entity2 : component.getOutputModel().getModelEntities()) {
-						for (ModelAttribute attr2 : entity2.getModelAttributes()) {
-							boolean isMapped = false;
-							for (ComponentAttributeSetting setting : component.getAttributeSettings()) {
-								if (setting.getName().equals(MappingProcessor.ATTRIBUTE_MAPS_TO) &&
-										setting.getValue().equals(attr2.getId())) {
-									isMapped = true;
-									break;
-								}
-							}
-							if (!isMapped && fuzzyMatches(attr.getName(), attr2.getName())) {
-								if (component.getAttributeSetting(attr.getId(), MappingProcessor.ATTRIBUTE_MAPS_TO) == null) {
-									ComponentAttributeSetting setting = new ComponentAttributeSetting();
-									setting.setAttributeId(attr.getId());
-									setting.setComponentId(component.getId());
-									setting.setName(MappingProcessor.ATTRIBUTE_MAPS_TO);
-									setting.setValue(attr2.getId());
-									component.addAttributeSetting(setting);
-									context.getConfigurationService().save(setting);
-									diagram.markAsDirty();
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+		setExpandRatio(diagram, 1.0f);
+		diagram.addListener(new EventListener());
 	}
 
 	@Override
@@ -87,11 +52,32 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 	public void showing() {
 	}
 
+	void autoMap(ModelAttribute attr, ModelAttribute attr2) {
+		boolean isMapped = false;
+		for (ComponentAttributeSetting setting : component.getAttributeSettings()) {
+			if (setting.getName().equals(MappingProcessor.ATTRIBUTE_MAPS_TO) &&
+					setting.getValue().equals(attr2.getId())) {
+				isMapped = true;
+				break;
+			}
+		}
+		if (!isMapped && fuzzyMatches(attr.getName(), attr2.getName())) {
+			ComponentAttributeSetting setting = new ComponentAttributeSetting();
+			setting.setAttributeId(attr.getId());
+			setting.setComponentId(component.getId());
+			setting.setName(MappingProcessor.ATTRIBUTE_MAPS_TO);
+			setting.setValue(attr2.getId());
+			component.addAttributeSetting(setting);
+			context.getConfigurationService().save(setting);
+			//diagram.markAsDirty();
+		}
+	}
+
 	boolean fuzzyMatches(String str1, String str2) {
 		int x = computeLevenshteinDistance(str1, str2);
 		return x < 3;
 	}
-	
+
 	int computeLevenshteinDistance(CharSequence str1, CharSequence str2) {
 		int[][] distance = new int[str1.length() + 1][str2.length() + 1];
 
@@ -115,4 +101,34 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
     int minimum(int a, int b, int c) {
         return Math.min(Math.min(a, b), c);
     }
+
+    class EventListener implements Listener {
+		public void componentEvent(Event event) {
+			if (event instanceof SelectEvent) {
+				SelectEvent selectEvent = (SelectEvent) event;
+				removeButton.setEnabled(selectEvent.getSelectedSourceId() != null);
+			}
+		}
+    }
+    
+	class RemoveListener implements ClickListener {
+		public void buttonClick(ClickEvent event) {
+			diagram.removeSelected();
+		}
+	}
+
+	class AutoMapListener implements ClickListener {
+		public void buttonClick(ClickEvent event) {
+			System.out.println("Auto map");
+			for (ModelEntity entity : component.getInputModel().getModelEntities()) {
+				for (ModelAttribute attr : entity.getModelAttributes()) {
+					for (ModelEntity entity2 : component.getOutputModel().getModelEntities()) {
+						for (ModelAttribute attr2 : entity2.getModelAttributes()) {
+							autoMap(attr, attr2);
+						}
+					}
+				}
+			}
+		}
+	}
 }

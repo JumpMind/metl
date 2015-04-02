@@ -85,6 +85,8 @@ public interface IConfigurationService {
     
     public List<AgentSummary> findUndeployedAgentsFor(String flowId);
     
+    public void delete(AbstractObject obj);
+    
     public void delete(Model model);
     
     public void delete(ModelEntity modelEntity);

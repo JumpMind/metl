@@ -47,7 +47,7 @@ public abstract class AbstractService {
         }
     }
 
-    protected void delete(AbstractObject data) {
+    public void delete(AbstractObject data) {
         persistenceManager.delete(data, null, null, tableName(data.getClass()));
     }
 

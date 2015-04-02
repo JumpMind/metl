@@ -1,9 +1,9 @@
 package org.jumpmind.symmetric.is.ui.mapping;
 
+import java.util.List;
+
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
-import org.jumpmind.symmetric.is.core.model.ModelAttribute;
-import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.component.MappingProcessor;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 
@@ -24,6 +24,10 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 
 	Component component;
 	
+    String selectedSourceId;
+    
+    String selectedTargetId;
+
 	public MappingDiagram(ApplicationContext context, Component component) {
 		this.context = context;
 		this.component = component;
@@ -34,13 +38,47 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
         state.component = component;
         state.inputModel = component.getInputModel();
         state.outputModel = component.getOutputModel();
-        
+
+        addFunction("onSelect", new OnSelectFunction());       
         addFunction("onConnection", new OnConnectionFunction());
     }
     
     @Override
     protected MappingDiagramState getState() {
         return (MappingDiagramState) super.getState();
+    }
+
+    public void removeSelected() {
+    	System.out.println("Remove " + selectedSourceId + ", " + selectedTargetId);
+    	if (selectedSourceId != null) {
+    		removeConnection(selectedSourceId, selectedTargetId);
+    		selectedSourceId = selectedTargetId = null;
+    	}
+    }
+
+    protected void removeConnection(String sourceId, String targetId) {
+    	List<ComponentAttributeSetting> settings = component.getAttributeSetting(sourceId, MappingProcessor.ATTRIBUTE_MAPS_TO);
+    	for (ComponentAttributeSetting setting : settings) {
+    		if (setting.getValue().equals(targetId)) {
+        		component.getAttributeSettings().remove(setting);
+        		context.getConfigurationService().delete(setting);
+    		}
+    	}
+    }
+    
+    class OnSelectFunction implements JavaScriptFunction {
+    	public void call(JsonArray arguments) {
+            if (arguments.length() > 0) {
+                JsonObject json = arguments.getObject(0);
+                selectedSourceId = json.getString("sourceId").substring(3);
+                selectedTargetId = json.getString("targetId").substring(3);
+                System.out.println("Selected: " + selectedSourceId + ", " + selectedTargetId);
+            } else {
+            	selectedSourceId = selectedTargetId = null;
+            	System.out.println("Unselect");
+            }
+            fireEvent(new SelectEvent(MappingDiagram.this, selectedSourceId, selectedTargetId));
+    	}
     }
 
     class OnConnectionFunction implements JavaScriptFunction {
@@ -51,35 +89,19 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
                 String targetId = json.getString("targetId").substring(3);
                 boolean removed = json.getBoolean("removed");
                 if (removed) {
-                	ComponentAttributeSetting setting = component.getAttributeSetting(sourceId, MappingProcessor.ATTRIBUTE_MAPS_TO);
-                	if (setting != null) {
-                		component.getAttributeSettings().remove(setting);
-                		context.getConfigurationService().save(setting);
-                	}
+                	System.out.println("Remove " + sourceId + ", " + targetId);
+                	removeConnection(sourceId, targetId);
                 } else {
-                	ComponentAttributeSetting setting = component.getAttributeSetting(sourceId, MappingProcessor.ATTRIBUTE_MAPS_TO);
-                	if (setting == null) {
-                		setting = new ComponentAttributeSetting();
-                    	setting.setAttributeId(sourceId);
-                    	setting.setComponentId(component.getId());
-                		setting.setName(MappingProcessor.ATTRIBUTE_MAPS_TO);
-                		component.addAttributeSetting(setting);
-                	}
+                	System.out.println("Add " + sourceId + ", " + targetId);
+                	ComponentAttributeSetting setting = new ComponentAttributeSetting();
+                	setting.setAttributeId(sourceId);
+                	setting.setComponentId(component.getId());
+            		setting.setName(MappingProcessor.ATTRIBUTE_MAPS_TO);
+            		component.addAttributeSetting(setting);
                 	setting.setValue(targetId);
                 	context.getConfigurationService().save(setting);
                 }
             }
-		}
-		
-		ModelAttribute getModelAttribute(String id) {
-            for (ModelEntity entity : getState().inputModel.getModelEntities()) {
-            	for (ModelAttribute attr : entity.getModelAttributes()) {
-            		if (id.equals(attr.getId())) {
-            			return attr;
-            		}
-            	}
-            }
-            return null;
 		}
     }
 }

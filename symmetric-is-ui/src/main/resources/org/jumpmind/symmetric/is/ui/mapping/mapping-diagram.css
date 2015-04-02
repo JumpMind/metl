@@ -36,6 +36,10 @@
     border: 2px solid orange;
 }
 
+.selected {
+	border: 2px solid orange;
+}
+
 path {
     cursor: pointer;
 }

@@ -173,7 +173,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
     }
 
     protected void saveSetting(String attributeId, String name, String value) {
-		ComponentAttributeSetting setting = component.getAttributeSetting(attributeId, name);
+		ComponentAttributeSetting setting = component.getSingleAttributeSetting(attributeId, name);
 		if (setting == null) {
 			setting = new ComponentAttributeSetting(attributeId, name, value);
 			setting.setComponentId(component.getId());
@@ -292,7 +292,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         public RecordFormat(ModelEntity modelEntity, ModelAttribute modelAttribute) {
             this.modelEntity = modelEntity;
             this.modelAttribute = modelAttribute;
-            ComponentAttributeSetting setting = component.getAttributeSetting(modelAttribute.getId(), 
+            ComponentAttributeSetting setting = component.getSingleAttributeSetting(modelAttribute.getId(), 
             		FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH);
             if (setting != null) {
             	this.width = Long.parseLong(setting.getValue());
