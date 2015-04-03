@@ -41,13 +41,9 @@ public interface IConfigurationService {
     
     public boolean isDeployed(Flow flow);
     
-    public List<Flow> findFlowsInFolder(Folder folder);
-       
-    public List<Model> findModelsInFolder(Folder folder);
-    
+    public List<Flow> findFlows();
+           
     public Resource findResource(String id);
-    
-    public List<Resource> findResourcesInFolder(Folder folder);
     
     public List<Resource> findResourcesByTypes(String projectVersionId, String ... types);
         

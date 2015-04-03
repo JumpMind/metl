@@ -93,42 +93,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
-    public List<Flow> findFlowsInFolder(Folder folder) {
+    public List<Flow> findFlows() {
         Map<String, Object> params = new HashMap<String, Object>();
-        String folderId = null;
-        if (folder != null) {
-            folderId = folder.getId();
-        }
-        params.put("folderId", folderId);
+        params.put("deleted", 0);
         List<Flow> flows = find(Flow.class, params);
         for (Flow flow : flows) {
-            flow.setFolder(folder);
             refreshFlowRelations(flow);
         }
         return flows;
-    }
-
-    @Override
-    public List<Model> findModelsInFolder(Folder folder) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("folderId", folder.getId());
-        List<Model> models = find(Model.class, params);
-        for (Model model : models) {
-            refreshModelRelations(model);
-            model.setFolder(folder);
-        }
-        return models;
-    }
-
-    @Override
-    public List<Resource> findResourcesInFolder(Folder folder) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("folderId", folder.getId());
-        List<Resource> datas = find(Resource.class, params);
-        for (Resource resource : datas) {
-            resource.setFolder(folder);
-        }
-        return buildResource(datas);
     }
 
     @Override
@@ -138,6 +110,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
             for (String type : types) {
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("type", type);
+                params.put("deleted", 0);
                 params.put("projectVersionId", projectVersionId);
                 List<Resource> datas = find(Resource.class, params);
                 list = buildResource(datas);
@@ -169,6 +142,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     public List<Flow> findFlowsInProject(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("projectVersionId", projectVersionId);
+        params.put("deleted", 0);
         List<Flow> flows = find(Flow.class, params);
         for (Flow flow : flows) {
             flow.setProjectVersionId(projectVersionId);
@@ -181,6 +155,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     public List<Model> findModelsInProject(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("projectVersionId", projectVersionId);
+        params.put("deleted", 0);
         List<Model> models = find(Model.class, params);
         for (Model model : models) {
             model.setProjectVersionId(projectVersionId);
@@ -193,6 +168,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     public List<Resource> findResourcesInProject(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("projectVersionId", projectVersionId);
+        params.put("deleted", 0);
         List<Resource> datas = find(Resource.class, params);
         return buildResource(datas);
     }
@@ -384,11 +360,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void delete(Resource resource) {
-        List<Setting> settings = resource.getSettings();
-        for (Setting settingData : settings) {
-            delete(settingData);
-        }
-        persistenceManager.delete(resource, null, null, tableName(Resource.class));
+        resource.setDeleted(true);
+        save((AbstractObject)resource);
     }
 
     @Override
@@ -407,21 +380,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void deleteFlow(Flow flow) {
-
-        List<FlowStepLink> links = flow.getFlowStepLinks();
-        for (FlowStepLink link : links) {
-            delete(link);
-        }
-        List<FlowStep> steps = flow.getFlowSteps();
-        for (FlowStep step : steps) {
-            delete(step);
-
-            Component component = step.getComponent();
-            if (!component.isShared()) {
-                delete(component);
-            }
-        }
-        delete((AbstractObject) flow);
+        flow.setDeleted(true);
+        save((AbstractObject)flow);
     }
 
     @Override
@@ -527,10 +487,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void delete(Model model) {
-        for (ModelEntity modelEntity: model.getModelEntities()) {
-        	delete(modelEntity);
-        }
-        persistenceManager.delete(model, null, null, tableName(Model.class));
+        model.setDeleted(true);
+        save((AbstractObject)model);
     }
 
     @Override

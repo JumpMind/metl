@@ -26,6 +26,8 @@ public class Flow extends AbstractObject {
     String startType = StartType.MANUAL.name();
 
     String startExpression;
+    
+    boolean deleted = false;
 
     public Flow() {
         this.flowSteps = new ArrayList<FlowStep>();
@@ -187,4 +189,11 @@ public class Flow extends AbstractObject {
         return rowId;
     }
 
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+    
+    public boolean isDeleted() {
+        return deleted;
+    }
 }

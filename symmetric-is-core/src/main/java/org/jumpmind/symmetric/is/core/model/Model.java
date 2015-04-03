@@ -23,6 +23,8 @@ public class Model extends AbstractObject {
     List<ModelEntity> modelEntities;
 
     boolean shared;
+    
+    boolean deleted = false;
 
     public Model() {
         this.modelEntities = new ArrayList<ModelEntity>();
@@ -127,6 +129,14 @@ public class Model extends AbstractObject {
     @Override
     public boolean isSettingNameAllowed() {
         return true;
+    }
+    
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+    
+    public boolean isDeleted() {
+        return deleted;
     }
 
 }

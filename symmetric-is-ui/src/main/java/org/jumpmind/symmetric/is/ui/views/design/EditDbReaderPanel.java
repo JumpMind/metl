@@ -154,18 +154,22 @@ public class EditDbReaderPanel extends VerticalLayout implements IUiPanel {
 
     @Override
     public boolean closing() {
-        save();
-        BasicDataSource dataSource = (BasicDataSource) platform.getDataSource();
-        try {
-            dataSource.close();
-        } catch (SQLException e) {
+        if (queryPanel != null) {
+            save();
+            BasicDataSource dataSource = (BasicDataSource) platform.getDataSource();
+            try {
+                dataSource.close();
+            } catch (SQLException e) {
+            }
         }
         return true;
     }
 
     @Override
     public void showing() {
-        queryPanel.selected();
+        if (queryPanel != null) {
+            queryPanel.selected();
+        }
     }
 
     class ExecuteSqlClickListener implements ClickListener {

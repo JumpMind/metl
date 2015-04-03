@@ -13,15 +13,17 @@ public class Component extends AbstractObjectWithSettings {
     boolean shared;
 
     String name;
-    
+
     Resource resource;
 
     Model inputModel;
 
     Model outputModel;
-    
+
     String projectVersionId;
-    
+
+    boolean deleted = false;
+
     String rowId = UUID.randomUUID().toString();
 
     List<ComponentEntitySetting> entitySettings;
@@ -30,14 +32,14 @@ public class Component extends AbstractObjectWithSettings {
 
     public Component() {
     }
-    
+
     public Component(String id) {
-    	this();
-    	this.id = id;
+        this();
+        this.id = id;
     }
-    
-    public Component(Resource resource, Model inputModel,
-            Model outputModel, List<ComponentEntitySetting> entitySettings,
+
+    public Component(Resource resource, Model inputModel, Model outputModel,
+            List<ComponentEntitySetting> entitySettings,
             List<ComponentAttributeSetting> attributeSettings, Setting... settings) {
         super(settings);
         this.resource = resource;
@@ -46,8 +48,7 @@ public class Component extends AbstractObjectWithSettings {
         this.entitySettings = entitySettings;
         this.attributeSettings = attributeSettings;
     }
-    
-    
+
     public String getType() {
         return type;
     }
@@ -150,38 +151,39 @@ public class Component extends AbstractObjectWithSettings {
 
     public void addAttributeSetting(ComponentAttributeSetting attributeSetting) {
         if (attributeSettings == null) {
-        	attributeSettings = new ArrayList<ComponentAttributeSetting>();
+            attributeSettings = new ArrayList<ComponentAttributeSetting>();
         }
         attributeSettings.add(attributeSetting);
     }
 
     public ComponentAttributeSetting getSingleAttributeSetting(String attributeId, String name) {
-    	List<ComponentAttributeSetting> list = getAttributeSetting(attributeId, name);
-    	if (list.size() > 0) {
-    		return list.get(0);
-    	}
-    	return null;
+        List<ComponentAttributeSetting> list = getAttributeSetting(attributeId, name);
+        if (list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
     }
-    
+
     public List<ComponentAttributeSetting> getAttributeSetting(String attributeId, String name) {
-    	List<ComponentAttributeSetting> list = new ArrayList<ComponentAttributeSetting>();
-    	for (ComponentAttributeSetting setting : attributeSettings) {
-    		if (setting.getAttributeId().equals(attributeId) && setting.getName().equalsIgnoreCase(name)) {
-    			list.add(setting);
-    		}
-    	}
-    	return list;
+        List<ComponentAttributeSetting> list = new ArrayList<ComponentAttributeSetting>();
+        for (ComponentAttributeSetting setting : attributeSettings) {
+            if (setting.getAttributeId().equals(attributeId)
+                    && setting.getName().equalsIgnoreCase(name)) {
+                list.add(setting);
+            }
+        }
+        return list;
     }
 
     @Override
     protected Setting createSettingData() {
         return new ComponentSetting(id);
     }
-    
+
     public void setProjectVersionId(String projectVersionId) {
         this.projectVersionId = projectVersionId;
     }
-    
+
     public String getProjectVersionId() {
         return projectVersionId;
     }
@@ -189,8 +191,16 @@ public class Component extends AbstractObjectWithSettings {
     public void setRowId(String rowId) {
         this.rowId = rowId;
     }
-    
+
     public String getRowId() {
         return rowId;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
     }
 }

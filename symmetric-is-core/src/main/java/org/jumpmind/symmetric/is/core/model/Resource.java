@@ -14,6 +14,8 @@ public class Resource extends AbstractObjectWithSettings {
 
     String projectVersionId;
     
+    boolean deleted = false;
+    
     String rowId = UUID.randomUUID().toString();
 
     public Resource() {
@@ -88,5 +90,13 @@ public class Resource extends AbstractObjectWithSettings {
     
     public String getRowId() {
         return rowId;
+    }
+    
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+    
+    public boolean isDeleted() {
+        return deleted;
     }
 }
