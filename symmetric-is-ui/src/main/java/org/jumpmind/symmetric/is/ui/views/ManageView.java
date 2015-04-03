@@ -203,15 +203,20 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     public Object getBackgroundData() {
     	Object currentSelection = manageNavigator.getCurrentSelection();
+    	Object currentSelectionParent = manageNavigator.getCurrentSelectionParent();
     	if (currentSelection != null) {
         	Map<String, Object> params = new HashMap<String, Object>();
     		if (currentSelection instanceof Agent) {
     			params.put("agentId", ((Agent) currentSelection).getId());
-    		} else if (currentSelection instanceof Flow) {
+    		} else if (currentSelection instanceof Flow) {    		    
     			params.put("flowId", ((Flow) currentSelection).getId());    			
     		} else if (currentSelection instanceof AgentDeployment) {
     			params.put("flowId", ((AgentDeployment) currentSelection).getFlowId());
     		}
+    		
+    		if (currentSelectionParent instanceof Agent) {
+                params.put("agentId", ((Agent)currentSelectionParent).getId());
+            }
 
     		if (params.size() > 0) {
     			return context.getExecutionService().findExecutions(params, limit);		

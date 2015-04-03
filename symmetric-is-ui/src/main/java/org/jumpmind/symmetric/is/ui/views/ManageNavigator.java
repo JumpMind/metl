@@ -19,8 +19,6 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
-import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.ui.Panel;
@@ -41,9 +39,9 @@ public class ManageNavigator extends Panel {
     IConfigurationService configurationService;
 
     TreeTable treeTable;
-    
+
     Folder agentsFolder;
-    
+
     Folder flowsFolder;
 
     public ManageNavigator(FolderType folderType, IConfigurationService configurationService) {
@@ -61,7 +59,7 @@ public class ManageNavigator extends Panel {
         treeTable = buildTreeTable();
         content.addComponent(treeTable);
         content.setExpandRatio(treeTable, 1);
-        
+
         agentsFolder = new Folder();
         agentsFolder.setName("Agents");
 
@@ -83,7 +81,7 @@ public class ManageNavigator extends Panel {
         treeTable.addItem(agentsFolder);
         treeTable.setItemIcon(agentsFolder, FontAwesome.FOLDER);
         addAgentsToFolder(agentsFolder);
-        
+
         List<Folder> folders = configurationService.findFolders(FolderType.RUNTIME);
         for (Folder folder : folders) {
             addChildFolder(folder, agentsFolder);
@@ -91,7 +89,7 @@ public class ManageNavigator extends Panel {
 
         treeTable.addItem(flowsFolder);
         treeTable.setItemIcon(flowsFolder, FontAwesome.FOLDER);
-        
+
         folders = configurationService.findFolders(FolderType.DESIGN);
         for (Folder folder : folders) {
             addChildFolder(folder, flowsFolder);
@@ -106,7 +104,7 @@ public class ManageNavigator extends Panel {
             treeTable.setValue(selected);
         }
     }
-    
+
     protected void addChildFolder(Folder folder, AbstractObject root) {
         treeTable.addItem(folder);
         treeTable.setItemIcon(folder, FontAwesome.FOLDER);
@@ -114,7 +112,7 @@ public class ManageNavigator extends Panel {
         if (folder.getParent() != null) {
             treeTable.setParent(folder, folder.getParent());
         } else {
-        	treeTable.setParent(folder, root);
+            treeTable.setParent(folder, root);
         }
         List<Folder> children = folder.getChildren();
         for (Folder child : children) {
@@ -123,17 +121,14 @@ public class ManageNavigator extends Panel {
     }
 
     protected void folderExpanded(Folder folder) {
-    	addAgentsToFolder(folder);
-    	if (folder.getName().equals("Flows")) {
-    	    addFlowsToFolder(folder);
-    	}
-    }
-
-    protected void openItem(Object item) {
+        addAgentsToFolder(folder);
+        if (folder.getName().equals("Flows")) {
+            addFlowsToFolder(folder);
+        }
     }
 
     @SuppressWarnings("unchecked")
-	protected Set<Object> getTableValues() {
+    protected Set<Object> getTableValues() {
         Set<Object> selectedIds = null;
         Object obj = treeTable.getValue();
         if (obj instanceof Set) {
@@ -164,22 +159,14 @@ public class ManageNavigator extends Panel {
         table.setVisibleColumns(new Object[] { "name" });
         table.setColumnExpandRatio("name", 1);
 
-        table.addShortcutListener(new ShortcutListener("Enter", KeyCode.ENTER, null) {
-            public void handleAction(Object sender, Object target) {
-                Set<Object> selectedIds = getTableValues();
-                for (Object object : selectedIds) {
-                    openItem(object);
-                }
-            }
-        });
-
         table.addItemClickListener(new ItemClickListener() {
             public void itemClick(ItemClickEvent event) {
                 if (event.getButton() == MouseButton.LEFT) {
                     if (event.isDoubleClick()) {
-
-                    } else {
-
+                        if (treeTable.hasChildren(event.getItemId())) {
+                            treeTable.setCollapsed(event.getItemId(),
+                                    !treeTable.isCollapsed(event.getItemId()));
+                        }
                     }
                 }
             }
@@ -217,7 +204,8 @@ public class ManageNavigator extends Panel {
     }
 
     protected void addAgentsToFolder(Folder folder) {
-        List<Agent> agents = configurationService.findAgentsInFolder(folder == agentsFolder ? null : folder);
+        List<Agent> agents = configurationService.findAgentsInFolder(folder == agentsFolder ? null
+                : folder);
         for (Agent agent : agents) {
             treeTable.addItem(agent);
             treeTable.setItemIcon(agent, FontAwesome.GEAR);
@@ -245,11 +233,19 @@ public class ManageNavigator extends Panel {
     }
 
     public void addValueChangeListener(ValueChangeListener listener) {
-    	treeTable.addValueChangeListener(listener);
+        treeTable.addValueChangeListener(listener);
     }
 
     public Object getCurrentSelection() {
-    	return treeTable.getValue();
+        return treeTable.getValue();
+    }
+
+    public Object getCurrentSelectionParent() {
+        if (treeTable.getValue() != null) {
+            return treeTable.getParent(treeTable.getValue());
+        } else {
+            return null;
+        }
     }
 
 }
