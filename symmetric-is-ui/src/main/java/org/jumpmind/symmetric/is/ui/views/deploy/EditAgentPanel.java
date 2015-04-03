@@ -91,6 +91,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
         });
         
         editAgentLayout.addComponent(startModeCombo);
+        editAgentLayout.setComponentAlignment(startModeCombo, Alignment.BOTTOM_LEFT);
         
         HorizontalLayout buttonGroup = new HorizontalLayout();
         
@@ -123,6 +124,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
         buttonGroup.setComponentAlignment(getHostNameButton, Alignment.BOTTOM_LEFT);
         
         editAgentLayout.addComponent(buttonGroup);
+        editAgentLayout.setComponentAlignment(buttonGroup, Alignment.BOTTOM_LEFT);
         
 
         ButtonBar buttonBar = new ButtonBar();
@@ -216,6 +218,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
                 AgentDeployment deployment = (AgentDeployment)itemId;
                 if (propertyId.equals("flow")) {                    
                     AbstractSelect combo = new ComboBox();
+                    combo.setWidth(100, Unit.PERCENTAGE);
                     IConfigurationService service = context.getConfigurationService();
                     List<Flow> allFlows = new ArrayList<Flow>(service.findFlows());
                     @SuppressWarnings("unchecked")
@@ -240,6 +243,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
                     return combo;
                 } else if (propertyId.equals("logLevel")) {
                     AbstractSelect combo = new ComboBox();
+                    combo.setWidth(100, Unit.PERCENTAGE);
                     LogLevel[] levels = LogLevel.values();
                     for (LogLevel logLevel : levels) {
                         combo.addItem(logLevel.name());
@@ -248,6 +252,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
                     return combo;
                 } else if (propertyId.equals("startType")) {
                     AbstractSelect combo = new ComboBox();
+                    combo.setWidth(100, Unit.PERCENTAGE);
                     StartType[] values = StartType.values();
                     for (StartType value : values) {
                         combo.addItem(value.name());
@@ -256,6 +261,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
                     return combo;
                 } else if (propertyId.equals("startExpression")) {
                     TextField field = new TextField();
+                    field.setWidth(100, Unit.PERCENTAGE);
                     field.setNullRepresentation("");
                     return field;
                 } else {

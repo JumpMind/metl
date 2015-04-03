@@ -124,7 +124,9 @@ public class ManageNavigator extends Panel {
 
     protected void folderExpanded(Folder folder) {
     	addAgentsToFolder(folder);
-    	addFlowsToFolder(folder);
+    	if (folder.getName().equals("Flows")) {
+    	    addFlowsToFolder(folder);
+    	}
     }
 
     protected void openItem(Object item) {
