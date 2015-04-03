@@ -12,7 +12,9 @@ import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentStartMode;
 import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.StartType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
+import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.Icons;
@@ -211,8 +213,8 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
         public Field<?> createField(Container container, Object itemId, Object propertyId,
                 Component uiContext) {
             if (lastEditItemIds.contains(itemId)) {
-                if (propertyId.equals("flow")) {
-                    AgentDeployment deployment = (AgentDeployment)itemId;
+                AgentDeployment deployment = (AgentDeployment)itemId;
+                if (propertyId.equals("flow")) {                    
                     AbstractSelect combo = new ComboBox();
                     IConfigurationService service = context.getConfigurationService();
                     List<Flow> allFlows = new ArrayList<Flow>(service.findFlows());
@@ -236,6 +238,26 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
 
                     combo.focus();
                     return combo;
+                } else if (propertyId.equals("logLevel")) {
+                    AbstractSelect combo = new ComboBox();
+                    LogLevel[] levels = LogLevel.values();
+                    for (LogLevel logLevel : levels) {
+                        combo.addItem(logLevel.name());
+                    }
+                    combo.setValue(deployment.getLogLevel());
+                    return combo;
+                } else if (propertyId.equals("startType")) {
+                    AbstractSelect combo = new ComboBox();
+                    StartType[] values = StartType.values();
+                    for (StartType value : values) {
+                        combo.addItem(value.name());
+                    }
+                    combo.setValue(deployment.getStartType());
+                    return combo;
+                } else if (propertyId.equals("startExpression")) {
+                    TextField field = new TextField();
+                    field.setNullRepresentation("");
+                    return field;
                 } else {
                     super.createField(container, itemId, propertyId, uiContext);
                 }
@@ -273,14 +295,20 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
     }
 
     class TableItemClickListener implements ItemClickListener {
+        long lastClick;
+        
         public void itemClick(ItemClickEvent event) {
             if (event.isDoubleClick()) {
+                table.setValue(event.getItemId());
                 editSelectedItem();
             } else {
-                if (getSelectedItems().contains(event.getItemId())) {
+                if (getSelectedItems().contains(event.getItemId()) &&
+                        System.currentTimeMillis()-lastClick > 500) {
                     table.setValue(null);
                 }
             }
+            
+            lastClick = System.currentTimeMillis();
         }
     }
 

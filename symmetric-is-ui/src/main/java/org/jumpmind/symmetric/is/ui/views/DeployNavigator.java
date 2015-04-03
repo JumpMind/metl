@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
-import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
@@ -68,8 +67,6 @@ public class DeployNavigator extends VerticalLayout {
     MenuItem delete;
 
     MenuItem newAgent;
-
-    MenuItem newDeployment;
 
     ApplicationContext context;
 
@@ -194,14 +191,6 @@ public class DeployNavigator extends VerticalLayout {
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 addAgent();
-            }
-        });
-
-        newDeployment = newMenu.addItem("Deployment", new Command() {
-
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                addDeployment();
             }
         });
 
@@ -485,12 +474,7 @@ public class DeployNavigator extends VerticalLayout {
     protected void folderExpanded(Folder folder) {
         List<Agent> agents = context.getConfigurationService().findAgentsInFolder(folder);
         for (Agent agent : agents) {
-            addAgent(folder, agent);
-            
-            List<AgentDeployment> deployments = agent.getAgentDeployments();
-            for (AgentDeployment agentDeployment : deployments) {
-                addDeployment(agent, agentDeployment);
-            }
+            addAgent(folder, agent);                       
         }
     }
 
@@ -501,7 +485,6 @@ public class DeployNavigator extends VerticalLayout {
                 && (selected == null || selectedFolder != null);
         newFolder.setVisible(showNewFolder);
         newAgent.setVisible(selectedFolder != null);
-        newDeployment.setVisible(selected instanceof Agent);
 
         delete.setEnabled(isDeleteButtonEnabled(selected));
     }
@@ -580,18 +563,7 @@ public class DeployNavigator extends VerticalLayout {
         treeTable.setParent(agent, folder);
         treeTable.setChildrenAllowed(agent, false);
     }
-
-    protected void addDeployment() {
-    }
     
-    protected void addDeployment(Agent agent, AgentDeployment deployment) {
-        treeTable.addItem(deployment);
-        treeTable.setItemIcon(deployment, Icons.DEPLOYMENT);
-        treeTable.setParent(deployment, agent);
-        treeTable.setChildrenAllowed(agent, true);        
-    }
-
-
     protected void addChildFolder(Folder folder) {
         this.treeTable.addItem(folder);
         this.treeTable.setItemIcon(folder, FontAwesome.FOLDER);
