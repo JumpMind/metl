@@ -35,8 +35,8 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
             instance.connect({ source: "src" + setting.attributeId, target: "dst" + setting.value});
     	}
     }
-
-    instance.batch(function () {
+    
+    this.layoutAll = function() {
         instance.makeSource(jsPlumb.getSelector(".mapping-diagram .src"));
         
         instance.makeTarget(jsPlumb.getSelector(".mapping-diagram .dst"),
@@ -82,7 +82,7 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
                 "targetId" : connection.targetId
             });
         });
-    });
+    };   
     
     unselectAll = function() {
         connections = instance.getAllConnections();
@@ -93,6 +93,18 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
             }
         }
     }
+    
+    this.onStateChange = function() {
+        instance.batch(function() {
+            self.layoutAll();
+        });
+    };
+    
+    instance.bind("ready", function() {
+        instance.batch(function() {
+            self.layoutAll();
+        });
+    });
 }
 
 function appendChildren(parentDiv, entities, prefix, x, y) {
