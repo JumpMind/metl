@@ -7,14 +7,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.AgentStartMode;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
+import org.jumpmind.util.AppUtils;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -24,7 +27,10 @@ import com.vaadin.data.util.BeanContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -32,8 +38,11 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Field;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class EditAgentPanel extends VerticalLayout implements IUiPanel {
@@ -55,6 +64,64 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
     public EditAgentPanel(ApplicationContext context, Agent agent) {
         this.context = context;
         this.agent = agent;
+        
+        HorizontalLayout editAgentLayout = new HorizontalLayout();
+        editAgentLayout.setSpacing(true);
+        editAgentLayout.setMargin(new MarginInfo(true, false, false, true));
+        editAgentLayout.addStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);        
+        addComponent(editAgentLayout);
+        
+        final ComboBox startModeCombo = new ComboBox("Start Mode");
+        startModeCombo.setImmediate(true);
+        startModeCombo.setNullSelectionAllowed(false);
+        AgentStartMode[] modes = AgentStartMode.values();
+        for (AgentStartMode agentStartMode : modes) {
+            startModeCombo.addItem(agentStartMode.name());
+        }
+        startModeCombo.setValue(agent.getStartMode());
+        startModeCombo.addValueChangeListener(new ValueChangeListener() {
+            
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                EditAgentPanel.this.agent.setStartMode((String)startModeCombo.getValue());
+                EditAgentPanel.this.context.getConfigurationService().save((AbstractObject)EditAgentPanel.this.agent);
+            }
+        });
+        
+        editAgentLayout.addComponent(startModeCombo);
+        
+        HorizontalLayout buttonGroup = new HorizontalLayout();
+        
+        final TextField hostNameField = new TextField("Hostname");
+        hostNameField.setImmediate(true);
+        hostNameField.setTextChangeEventMode(TextChangeEventMode.LAZY);
+        hostNameField.setTextChangeTimeout(100);
+        hostNameField.setNullRepresentation("");
+        hostNameField.setValue(agent.getHost());
+        hostNameField.addValueChangeListener(new ValueChangeListener() {
+            
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                EditAgentPanel.this.agent.setHost((String)hostNameField.getValue());
+                EditAgentPanel.this.context.getConfigurationService().save((AbstractObject)EditAgentPanel.this.agent);                
+            }
+        });
+        buttonGroup.addComponent(hostNameField);
+        buttonGroup.setComponentAlignment(hostNameField, Alignment.BOTTOM_LEFT);
+        
+        Button getHostNameButton = new Button("Get Host");
+        getHostNameButton.addClickListener(new ClickListener() {
+            
+            @Override
+            public void buttonClick(ClickEvent event) {
+                hostNameField.setValue(AppUtils.getHostName());
+            }
+        });
+        buttonGroup.addComponent(getHostNameButton);
+        buttonGroup.setComponentAlignment(getHostNameButton, Alignment.BOTTOM_LEFT);
+        
+        editAgentLayout.addComponent(buttonGroup);
+        
 
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
@@ -74,7 +141,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
             public AgentDeployment getIdForBean(AgentDeployment bean) {
                 return bean;
             }
-        });
+        });       
 
         table = new Table();
         table.setSizeFull();
@@ -145,6 +212,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
                 Component uiContext) {
             if (lastEditItemIds.contains(itemId)) {
                 if (propertyId.equals("flow")) {
+                    AgentDeployment deployment = (AgentDeployment)itemId;
                     AbstractSelect combo = new ComboBox();
                     IConfigurationService service = context.getConfigurationService();
                     List<Flow> allFlows = new ArrayList<Flow>(service.findFlows());
@@ -161,6 +229,11 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
                         }
                     }
                     combo.addItems(allFlows);
+                    if (!combo.getItemIds().contains(deployment.getFlow())) {
+                        combo.addItem(deployment.getFlow());
+                        combo.setValue(deployment.getFlow());
+                    }
+
                     combo.focus();
                     return combo;
                 } else {

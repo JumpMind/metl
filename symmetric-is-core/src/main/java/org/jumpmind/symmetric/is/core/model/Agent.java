@@ -72,8 +72,7 @@ public class Agent extends AbstractObjectWithSettings {
             folder = new Folder(folderId);
         } else {
             folder = null;
-        }
-            
+        }            
     }
 
     public String getFolderId() {
