@@ -1,18 +1,26 @@
 package org.jumpmind.symmetric.is.core.model;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
+import org.jumpmind.symmetric.is.core.runtime.LogLevel;
+
 public class AgentDeployment extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
-    Flow flow;    
+    Flow flow;
 
     String agentId;
-
-    String startMode;
 
     String status = DeploymentStatus.UNKNOWN.name();
 
     String message;
+
+    String logLevel = LogLevel.DEBUG.name();
+
+    String startType = StartType.MANUAL.name();
+
+    String startExpression;
 
     public AgentDeployment() {
     }
@@ -20,7 +28,7 @@ public class AgentDeployment extends AbstractObject {
     public AgentDeployment(Flow flow) {
         setFlow(flow);
     }
-    
+
     public void setFlow(Flow flow) {
         this.flow = flow;
     }
@@ -34,7 +42,7 @@ public class AgentDeployment extends AbstractObject {
     }
 
     public String getFlowId() {
-    	return flow != null ? flow.getId() : null;
+        return flow != null ? flow.getId() : null;
     }
 
     public void setFlowId(String flowId) {
@@ -44,14 +52,6 @@ public class AgentDeployment extends AbstractObject {
         } else {
             this.flow = null;
         }
-    }
-
-    public String getStartMode() {
-        return startMode;
-    }
-
-    public void setStartMode(String startMode) {
-        this.startMode = startMode;
     }
 
     public String getStatus() {
@@ -83,6 +83,38 @@ public class AgentDeployment extends AbstractObject {
 
     public Flow getFlow() {
         return flow;
+    }
+
+    public void setStartExpression(String startExpression) {
+        this.startExpression = startExpression;
+    }
+
+    public String getStartExpression() {
+        return startExpression;
+    }
+
+    public void setStartType(String startType) {
+        this.startType = startType;
+    }
+
+    public String getStartType() {
+        return startType;
+    }
+
+    public StartType asStartType() {
+        if (isBlank(startType)) {
+            return StartType.MANUAL;
+        } else {
+            return StartType.valueOf(startType);
+        }
+    }
+
+    public String getLogLevel() {
+        return logLevel;
+    }
+
+    public void setLogLevel(String logLevel) {
+        this.logLevel = logLevel;
     }
 
     @Override

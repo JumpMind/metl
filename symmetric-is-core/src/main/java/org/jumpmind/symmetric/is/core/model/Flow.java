@@ -1,7 +1,5 @@
 package org.jumpmind.symmetric.is.core.model;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,10 +21,6 @@ public class Flow extends AbstractObject {
 
     List<FlowStepLink> flowStepLinks;
 
-    String startType = StartType.MANUAL.name();
-
-    String startExpression;
-    
     boolean deleted = false;
 
     public Flow() {
@@ -98,22 +92,6 @@ public class Flow extends AbstractObject {
         return null;
     }
 
-    public void setStartExpression(String startExpression) {
-        this.startExpression = startExpression;
-    }
-
-    public String getStartExpression() {
-        return startExpression;
-    }
-
-    public void setStartType(String startType) {
-        this.startType = startType;
-    }
-
-    public String getStartType() {
-        return startType;
-    }
-
     public String getFolderName() {
         return folder.getName();
     }
@@ -163,14 +141,6 @@ public class Flow extends AbstractObject {
             }
         }
         return link;
-    }
-
-    public StartType asStartType() {
-        if (isBlank(startType)) {
-            return StartType.MANUAL;
-        } else {
-            return StartType.valueOf(startType);
-        }
     }
     
     public void setProjectVersionId(String projectVersionId) {
