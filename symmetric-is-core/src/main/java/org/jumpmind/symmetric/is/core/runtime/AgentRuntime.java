@@ -199,11 +199,11 @@ public class AgentRuntime {
                     flowStepsExecutionThreads);
             coordinators.put(deployment, flowRuntime);
 
-            if (deployment.getFlow().asStartType() == StartType.ON_DEPLOY) {
+            if (deployment.asStartType() == StartType.ON_DEPLOY) {
                 scheduleNow(deployment);
             } else {
-                if (deployment.getFlow().asStartType() == StartType.SCHEDULED_CRON) {
-                    String cron = deployment.getFlow().getStartExpression();
+                if (deployment.asStartType() == StartType.SCHEDULED_CRON) {
+                    String cron = deployment.getStartExpression();
                     log.info(
                             "Scheduling '{}' on '{}' with a cron expression of '{}'  The next run time should be at: {}",
                             new Object[] { deployment.getFlow().toString(),

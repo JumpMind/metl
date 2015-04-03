@@ -16,6 +16,7 @@ import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.EnableFocusTextField;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
+import org.jumpmind.symmetric.is.ui.views.deploy.EditAgentPanel;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
@@ -458,6 +459,10 @@ public class DeployNavigator extends VerticalLayout {
     }
 
     protected void openItem(Object item) {
+        if (item instanceof Agent) {
+            Agent agent = (Agent)item;
+            tabbedPanel.addCloseableTab(agent.getId(), agent.getName(), Icons.AGENT, new EditAgentPanel(context, agent));
+        }
     }
 
     protected Folder getSelectedFolder() {

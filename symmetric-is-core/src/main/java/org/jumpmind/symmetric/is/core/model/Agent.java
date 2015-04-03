@@ -12,8 +12,6 @@ public class Agent extends AbstractObjectWithSettings {
 
     String name;
 
-    String folderId;
-
     String host;
 
     String startMode = AgentStartMode.AUTO.name();
@@ -38,11 +36,6 @@ public class Agent extends AbstractObjectWithSettings {
 
     public void setFolder(Folder folder) {
         this.folder = folder;
-        if (folder != null) {
-            folderId = folder.getId();
-        } else {
-            folderId = null;
-        }
     }
 
     public AgentStartMode getAgentStartMode() {
@@ -75,11 +68,16 @@ public class Agent extends AbstractObjectWithSettings {
     }
 
     public void setFolderId(String folderId) {
-        this.folderId = folderId;
+        if (folderId != null) {
+            folder = new Folder(folderId);
+        } else {
+            folder = null;
+        }
+            
     }
 
     public String getFolderId() {
-        return folderId;
+        return folder != null ? folder.getId() : null;
     }
 
     public void setHost(String host) {
@@ -132,6 +130,11 @@ public class Agent extends AbstractObjectWithSettings {
 
     public boolean isDeployed(Flow flow) {
         return getAgentDeploymentFor(flow) != null;
+    }
+    
+    @Override
+    public boolean isSettingNameAllowed() {
+        return true;
     }
 
     public AgentDeployment getAgentDeploymentFor(Flow flow) {
