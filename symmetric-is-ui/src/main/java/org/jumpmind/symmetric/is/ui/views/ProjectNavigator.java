@@ -804,6 +804,8 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
         Folder folder = findFolderWithName("Flows");
         if (folder != null) {
+            treeTable.setChildrenAllowed(folder, true);
+            
             ProjectVersion projectVersion = findProjectVersion();
             Flow flow = new Flow();
             flow.setProjectVersionId(projectVersion.getId());
@@ -833,6 +835,8 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {
         Folder folder = findFolderWithName("Resources");
         if (folder != null) {
+            treeTable.setChildrenAllowed(folder, true);
+            
             ProjectVersion projectVersion = findProjectVersion();
             Resource resource = new Resource();
             resource.setName(defaultName);
@@ -844,7 +848,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             treeTable.setItemIcon(resource, icon);
             treeTable.setParent(resource, folder);
 
-            treeTable.setCollapsed(folder, false);
+            treeTable.setCollapsed(folder, false);            
 
             startEditingItem(resource);
         }
@@ -853,6 +857,8 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     protected void addNewModel() {
         Folder folder = findFolderWithName("Models");
         if (folder != null) {
+            treeTable.setChildrenAllowed(folder, true);
+            
             ProjectVersion projectVersion = findProjectVersion();
             Model model = new Model();
             model.setName("New Model");
