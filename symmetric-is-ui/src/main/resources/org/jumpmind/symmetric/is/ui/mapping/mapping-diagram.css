@@ -22,6 +22,7 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    white-space: nowrap;
 }
 
 .mapping-diagram ._jsPlumb_endpoint_anchor, .mapping-diagram ._jsPlumb_connector {

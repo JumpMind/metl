@@ -115,12 +115,12 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 	class RemoveListener implements ClickListener {
 		public void buttonClick(ClickEvent event) {
 			diagram.removeSelected();
+			removeButton.setEnabled(false);
 		}
 	}
 
 	class AutoMapListener implements ClickListener {
 		public void buttonClick(ClickEvent event) {
-			System.out.println("Auto map");
 			for (ModelEntity entity : component.getInputModel().getModelEntities()) {
 				for (ModelAttribute attr : entity.getModelAttributes()) {
 					for (ModelEntity entity2 : component.getOutputModel().getModelEntities()) {
