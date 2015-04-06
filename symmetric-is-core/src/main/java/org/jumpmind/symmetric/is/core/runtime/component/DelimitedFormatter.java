@@ -92,12 +92,15 @@ public class DelimitedFormatter extends AbstractComponent {
         Writer writer = new StringWriter();
         CsvWriter csvWriter = new CsvWriter(writer, delimiter.charAt(0));
         if (!StringUtils.isEmpty(quoteCharacter)) {
+            csvWriter.setUseTextQualifier(true);
             csvWriter.setTextQualifier(quoteCharacter.charAt(0));
+            csvWriter.setForceQualifier(true);
         }        
         try {
             if (attributes.size() > 0) {
                 for (AttributeFormat attribute : attributes) {
-                    csvWriter.write(inputRow.get(attribute.getAttributeId()).toString());
+                    Object object = inputRow.get(attribute.getAttributeId());
+                    csvWriter.write(object != null ? object.toString() : null);
                 }
             } else {
                 Collection<Object> values = inputRow.values();
