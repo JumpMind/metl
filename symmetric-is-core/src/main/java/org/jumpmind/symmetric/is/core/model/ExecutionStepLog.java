@@ -2,6 +2,8 @@ package org.jumpmind.symmetric.is.core.model;
 
 import java.util.Date;
 
+import org.apache.commons.lang.StringUtils;
+
 public class ExecutionStepLog extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
@@ -44,7 +46,7 @@ public class ExecutionStepLog extends AbstractObject {
 	}
 
 	public void setLogText(String logText) {
-		this.logText = logText;
+		this.logText = StringUtils.abbreviate(logText, 3900);
 	}
 
 	public Date getCreateTime() {

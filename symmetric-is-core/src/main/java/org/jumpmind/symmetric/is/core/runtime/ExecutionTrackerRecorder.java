@@ -16,15 +16,16 @@ import org.jumpmind.symmetric.is.core.runtime.flow.AsyncRecorder;
 public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
 
     AsyncRecorder recorder;
-    
+
     Execution execution;
-    
+
     Agent agent;
-    
+
     Map<String, ExecutionStep> steps;
-    
-    public ExecutionTrackerRecorder(Agent agent, AgentDeployment deployment, AsyncRecorder recorder) {
-        super(deployment);
+
+    public ExecutionTrackerRecorder(Agent agent, AgentDeployment agentDeployment,
+            AsyncRecorder recorder) {
+        super(agentDeployment);
         this.recorder = recorder;
         this.agent = agent;
     }
@@ -83,16 +84,16 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
 
     @Override
-    public void log(String executionId, LogLevel level, IComponent component,
-            String output) {
+    public void log(String executionId, LogLevel level, IComponent component, String output) {
         super.log(executionId, level, component, output);
-        ExecutionStepLog log = new ExecutionStepLog();
-        log.setExecutionStepId(steps.get(component.getFlowStep().getId()).getId());
-        log.setLevel(level.name());
-        log.setLogText(output);
-        this.recorder.record(log);
+
+        if (deployment.asLogLevel().log(level)) {
+            ExecutionStepLog log = new ExecutionStepLog();
+            log.setExecutionStepId(steps.get(component.getFlowStep().getId()).getId());
+            log.setLevel(level.name());
+            log.setLogText(output);
+            this.recorder.record(log);
+        }
     }
 
-    
-    
 }

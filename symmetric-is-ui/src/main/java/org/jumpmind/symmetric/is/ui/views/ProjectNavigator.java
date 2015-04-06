@@ -847,6 +847,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             treeTable.addItem(resource);
             treeTable.setItemIcon(resource, icon);
             treeTable.setParent(resource, folder);
+            treeTable.setChildrenAllowed(resource, false);
 
             treeTable.setCollapsed(folder, false);            
 

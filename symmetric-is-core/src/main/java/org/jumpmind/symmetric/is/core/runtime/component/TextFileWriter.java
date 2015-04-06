@@ -13,6 +13,7 @@ import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
+import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
@@ -43,15 +44,18 @@ public class TextFileWriter extends AbstractComponent {
     public static final String TEXTFILEWRITER_TEXT_LINE_TERMINATOR = "textfilereader.text.line.terminator";
 
     /* settings */
+    
     String relativePathAndFile;
     boolean mustExist;
     boolean append;
     String lineTerminator;
 
     /* other vars */
+    
     TypedProperties properties;
     OutputStream outStream;
     BufferedWriter bufferedWriter = null;
+    String executionId;
 
     @Override
     public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
@@ -61,14 +65,18 @@ public class TextFileWriter extends AbstractComponent {
 
     @Override
     public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
+        this.executionId = executionId;
+
+        componentStatistics.incrementInboundMessages();
+        
         if (this.resource == null) {
             throw new IllegalStateException("The target resource has not been configured.  Please choose a resource.");
         }
         
-        componentStatistics.incrementInboundMessages();
         if (inputMessage.getHeader().getSequenceNumber() == 1) {
             initStreamAndWriter();
         }
+        
         ArrayList<String> recs = inputMessage.getPayload();
         try {
             for (String rec : recs) {
@@ -110,6 +118,7 @@ public class TextFileWriter extends AbstractComponent {
     private OutputStream getOutputStream(IStreamableResource conn) {
         conn.resetPath();
         conn.appendPath(relativePathAndFile, mustExist);
+        executionTracker.log(executionId, LogLevel.INFO, this, String.format("Writing text file to %s", conn.toString()));
         return conn.getOutputStream();
     }
 

@@ -31,25 +31,27 @@ public class DelimitedFormatter extends AbstractComponent {
 
     public static final String TYPE = "Delimited Formatter";
 
-    @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Delimiter")
+    @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Delimiter", defaultValue=",")
     public final static String DELIMITED_FORMATTER_DELIMITER = "delimited.formatter.delimiter";
     
-    @SettingDefinition(order = 20, type = Type.STRING, label = "Quote Character")
+    @SettingDefinition(order = 20, type = Type.STRING, label = "Quote Character", defaultValue="\"")
     public final static String DELIMITED_FORMATTER_QUOTE_CHARACTER = "delimited.formatter.quote.character";
     
-    @SettingDefinition(order = 30, type = Type.STRING, label = "FormatFunction")
     public final static String DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = "delimited.formatter.attribute.format.function";
-
+    
     public final static String DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL = "delimited.formatter.attribute.ordinal";
     
     /* settings */
+    
     String delimiter;
+    
     String quoteCharacter;
 
     /* other vars */
-    TypedProperties properties;
-    List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
     
+    TypedProperties properties;
+    
+    List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();    
 
     @Override
     public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {

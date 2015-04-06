@@ -101,4 +101,9 @@ public class FileStreamableResource implements IStreamableResource {
 	public boolean supportsDelete() {
 		return true;
 	}
+	
+	@Override
+	public String toString() {
+	    return file.getAbsolutePath();
+	}
 }

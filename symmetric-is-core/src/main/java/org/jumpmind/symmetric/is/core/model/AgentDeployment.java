@@ -108,6 +108,14 @@ public class AgentDeployment extends AbstractObject {
             return StartType.valueOf(startType);
         }
     }
+    
+    public LogLevel asLogLevel() {
+        if (isBlank(logLevel)) {
+            return LogLevel.DEBUG;
+        } else {
+            return LogLevel.valueOf(logLevel);
+        }
+    }
 
     public String getLogLevel() {
         return logLevel;
