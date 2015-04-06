@@ -109,7 +109,6 @@ public class DelimitedFormatter extends AbstractComponent {
                 }
 
             }
-            //csvWriter.endRecord();
         } catch (IOException e) {
             throw new IoException("Error writing to stream for formatted output. " + e.getMessage());
         }

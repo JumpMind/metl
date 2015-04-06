@@ -142,6 +142,7 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
             parentDiv.appendChild(nodeDiv);
             
             instance.draggable(nodeDiv, {
+                grid : [50, 50],
                 constrain:true,
                 stop : function(event) {
                     self.onNodeMoved({
