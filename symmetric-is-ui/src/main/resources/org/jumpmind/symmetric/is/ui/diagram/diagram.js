@@ -142,7 +142,6 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
             parentDiv.appendChild(nodeDiv);
             
             instance.draggable(nodeDiv, {
-                grid : [50, 50],
                 constrain:true,
                 stop : function(event) {
                     self.onNodeMoved({
@@ -150,7 +149,10 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
                         'x' : event.pos[0],
                         'y' : event.pos[1]
                     });
-                }
+                },
+                grid : [10, 10],
+                snapThreshold : 10
+                
             });
 
             self.addEndpoints(node);
