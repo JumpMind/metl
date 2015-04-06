@@ -47,6 +47,8 @@ public class MappingProcessor extends AbstractComponent {
         
         ArrayList<EntityData> outputRows = new ArrayList<EntityData>();
         Message outputMessage = new Message(flowStep.getId());
+        outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
+        outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
         
         for (EntityData inputRow : inputRows) {
             EntityData outputRow = new EntityData();
