@@ -1,6 +1,10 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.Component;
@@ -82,11 +86,26 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         setExpandRatio(table, 1.0f);
 
         if (component.getInputModel() != null) {
+
+            List<RecordFormat> attributes = new ArrayList<RecordFormat>();
+            
 	        for (ModelEntity entity : component.getInputModel().getModelEntities()) {
 	            for (ModelAttribute attr : entity.getModelAttributes()) {
-	                table.addItem(new RecordFormat(entity, attr));
+	                attributes.add(new RecordFormat(entity, attr));
 	            }
 	        }
+
+	        Collections.sort(attributes, new Comparator<RecordFormat>() {
+	            @Override
+	            public int compare(RecordFormat o1, RecordFormat o2) {
+	                return new Integer(o1.getOrdinalSetting()).compareTo(new Integer(o2.getOrdinalSetting()));
+	            }
+            });
+	        
+	        for (RecordFormat recordFormat : attributes) {
+	            table.addItem(recordFormat);    
+            }            
+
         }
         calculatePositions();
     	saveOrdinalSettings();
@@ -288,6 +307,8 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         long endPos;
 
         String transformText = "";
+        
+        int ordinalSetting;
 
         public RecordFormat(ModelEntity modelEntity, ModelAttribute modelAttribute) {
             this.modelEntity = modelEntity;
@@ -297,6 +318,19 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
             if (setting != null) {
             	this.width = Long.parseLong(setting.getValue());
             }
+            
+            if (component.getType().equals(DelimitedFormatter.TYPE)) {
+                setting = component.getSingleAttributeSetting(modelAttribute.getId(),
+                        DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL);
+            } else if (component.getType().equals(FixedLengthFormatter.TYPE)) {
+                setting = component.getSingleAttributeSetting(modelAttribute.getId(),
+                        FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL);
+            }
+           
+            if (setting != null) {
+                this.ordinalSetting = Integer.parseInt(setting.getValue());
+            }
+
         }
 
         public int hashCode() {
@@ -368,6 +402,14 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         		field = fields.get("width");
         	}
         	return field;
+        }
+        
+        public int getOrdinalSetting() {
+            return ordinalSetting;
+        }
+        
+        public void setOrdinalSetting(int ordinalSetting) {
+            this.ordinalSetting = ordinalSetting;
         }
     }
 }
