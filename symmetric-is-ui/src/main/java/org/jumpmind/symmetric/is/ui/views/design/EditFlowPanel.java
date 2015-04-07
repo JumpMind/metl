@@ -60,11 +60,11 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
     Flow flow;
 
-    PropertySheet designPropertySheet;
+    PropertySheet propertySheet;
 
     IDesignNavigator designNavigator;
 
-    EditFlowPalette designComponentPalette;
+    EditFlowPalette componentPalette;
 
     TabbedPanel tabs;
 
@@ -85,12 +85,12 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         this.flow = componentFlow;
         this.designNavigator = designNavigator;
 
-        this.designPropertySheet = new PropertySheet(context);
-        this.designPropertySheet.setCaption("Property Sheet");
+        this.propertySheet = new PropertySheet(context);
+        this.propertySheet.setCaption("Property Sheet");
 
-        this.designComponentPalette = new EditFlowPalette(this, context.getComponentFactory());
+        this.componentPalette = new EditFlowPalette(this, context.getComponentFactory());
 
-        addComponent(designComponentPalette);
+        addComponent(componentPalette);
 
         VerticalLayout rightLayout = new VerticalLayout();
         rightLayout.setSizeFull();
@@ -115,7 +115,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         panel.setContent(wrapper);
 
         splitPanel.addComponent(panel);
-        splitPanel.addComponent(designPropertySheet);
+        splitPanel.addComponent(propertySheet);
 
         rightLayout.addComponent(splitPanel);
         rightLayout.setExpandRatio(splitPanel, 1);
@@ -180,8 +180,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     }
 
     @Override
-    public void showing() {
-        designNavigator.setPropertySheet(designPropertySheet);
+    public void selected() {
+        designNavigator.setPropertySheet(propertySheet);
     }
     
     public Flow getFlow() {
@@ -190,7 +190,11 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     
     public void selected(FlowStep step) {
         diagram.setSelectedNodeId(step.getId());
-        designPropertySheet.valueChange(step);                
+        propertySheet.valueChange(step);                
+    }
+    
+    @Override
+    public void deselected() {
     }
     
     protected void deleteSelected() {
@@ -234,7 +238,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
         redrawFlow();
 
-        designPropertySheet.valueChange(component);
+        propertySheet.valueChange(component);
 
         designNavigator.refresh();
         designNavigator.select(flowStep);
@@ -263,7 +267,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             String type = flowStep.getComponent().getType();
             String imageText = String
                     .format("<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>",
-                            designComponentPalette
+                            componentPalette
                                     .getBase64RepresentationOfImageForComponentType(type));
             node.setText(imageText + "<br><i>" + name + "</i>");
             node.setId(flowStep.getId());

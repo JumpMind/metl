@@ -23,6 +23,8 @@ public class TabbedPanel extends TabSheet {
     protected Map<Component, String> contentToId = new HashMap<Component, String>();
     
     protected List<CloseHandler> closeHandlers = new ArrayList<TabSheet.CloseHandler>();
+    
+    protected IUiPanel selectedTab;
 
     public TabbedPanel() {
         setSizeFull();
@@ -34,8 +36,15 @@ public class TabbedPanel extends TabSheet {
             @Override
             public void selectedTabChange(SelectedTabChangeEvent event) {
                 Component selected = event.getTabSheet().getSelectedTab();
+                if (selectedTab != null) {
+                    selectedTab.deselected();
+                    selectedTab = null;
+                }
+                
                 if (selected instanceof IUiPanel) {
-                    ((IUiPanel) selected).showing();
+                    selectedTab = ((IUiPanel) selected); 
+                    selectedTab.selected();
+                    
                 }
             }
         });
@@ -49,6 +58,7 @@ public class TabbedPanel extends TabSheet {
                     if (((IUiPanel) tabContent).closing()) {
                         closeTab(contentToId.get(tabContent));
                     }
+                    selectedTab = null;
                 } else {
                     closeTab(contentToId.get(tabContent));
                 }

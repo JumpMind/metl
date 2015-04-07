@@ -50,8 +50,12 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 	}
 
 	@Override
-	public void showing() {
+	public void selected() {
 	}
+	
+    @Override
+    public void deselected() {
+    }
 
 	protected void autoMap(ModelAttribute attr, ModelAttribute attr2) {
 		boolean isMapped = false;

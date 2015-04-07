@@ -153,7 +153,11 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
     }
 
     @Override
-    public void showing() {
+    public void selected() {
+    }
+    
+    @Override
+    public void deselected() {
     }
 
     @SuppressWarnings("unchecked")

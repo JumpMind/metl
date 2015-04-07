@@ -187,7 +187,11 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     }
 
     @Override
-    public void showing() {
+    public void selected() {
+    }
+    
+    @Override
+    public void deselected() {
     }
 
     @SuppressWarnings("unchecked")

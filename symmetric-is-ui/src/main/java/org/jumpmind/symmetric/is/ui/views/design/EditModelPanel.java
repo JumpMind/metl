@@ -91,8 +91,12 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 	}
 
 	@Override
-	public void showing() {
+	public void selected() {
 	}
+	
+    @Override
+    public void deselected() {
+    }
 
 	@SuppressWarnings("unchecked")
 	protected Set<Object> getSelectedItems() {
