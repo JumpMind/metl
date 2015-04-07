@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -73,6 +75,9 @@ public class FixedLengthFormatter extends AbstractComponent {
         StringBuilder stringBuilder = new StringBuilder();
         for (AttributeFormat attribute : attributesList) {
             Object value = inputRow.get(attribute.getAttributeId());
+            if (isNotBlank(attribute.getFormatFunction())) {
+               value = Transformer.eval(value, attribute.getFormatFunction());
+            }
             String paddedValue = StringUtils.pad(value != null ? value.toString() : "",
                     attribute.getLength(), " ", true);
             stringBuilder.append(paddedValue);

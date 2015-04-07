@@ -29,12 +29,12 @@ public class Transformer {
         return StringUtils.right(value != null ? value.toString() : "", length);
     }
     
-    public String rpad(char padChar, int length) {
+    public String rpad(String padChar, int length) {
         String text = value != null ? value.toString() : "";
         return StringUtils.rightPad(text, length, padChar);
     }
     
-    public String lpad(char padChar, int length) {
+    public String lpad(String padChar, int length) {
         String text = value != null ? value.toString() : "";
         return StringUtils.leftPad(text, length, padChar);
     }
@@ -96,6 +96,9 @@ public class Transformer {
     }
 
     public static Object eval(Object value, String expression) {
+        /*
+         * TODO Probably needs to be refactored to NOT create the script engine every time.
+         */
         ScriptEngineManager factory = new ScriptEngineManager();
         ScriptEngine engine = factory.getEngineByName("groovy");
         if (engine == null) {
