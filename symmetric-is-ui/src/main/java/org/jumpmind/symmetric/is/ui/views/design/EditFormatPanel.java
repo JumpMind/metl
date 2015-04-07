@@ -119,7 +119,11 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
     }
 
     @Override
-    public void showing() {
+    public void selected() {
+    }
+    
+    @Override
+    public void deselected() {
     }
 
     protected void calculatePositions() {

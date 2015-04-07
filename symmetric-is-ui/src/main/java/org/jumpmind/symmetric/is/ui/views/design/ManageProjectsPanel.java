@@ -150,7 +150,11 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
     }
 
     @Override
-    public void showing() {
+    public void selected() {
+    }
+
+    @Override
+    public void deselected() {
     }
 
     protected void openProject(Object source) {

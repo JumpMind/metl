@@ -121,7 +121,7 @@ public class FixedLengthFormatter extends AbstractComponent {
             }
         });
     }
-
+    
     private class AttributeFormat {
 
         String attributeId;

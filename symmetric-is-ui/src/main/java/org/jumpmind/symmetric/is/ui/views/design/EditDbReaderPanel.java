@@ -166,10 +166,14 @@ public class EditDbReaderPanel extends VerticalLayout implements IUiPanel {
     }
 
     @Override
-    public void showing() {
+    public void selected() {
         if (queryPanel != null) {
             queryPanel.selected();
         }
+    }
+    
+    @Override
+    public void deselected() {
     }
 
     class ExecuteSqlClickListener implements ClickListener {

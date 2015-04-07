@@ -23,7 +23,6 @@ import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdatePasswordField;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
-import org.jumpmind.symmetric.ui.common.SqlField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,9 +82,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                 Component component = (Component) obj;
                 configurationService.refresh(component);
                 addComponentProperties(formLayout, component);
-            } else if (obj instanceof Flow) {
-                addFlowSpecificProperties(formLayout, (Flow) obj);
-            }
+            } 
 
             if (obj instanceof AbstractObjectWithSettings) {
                 Map<String, SettingDefinition> settings = buildSettings(obj);
@@ -105,10 +102,6 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         addResourceCombo(componentDefintion, formLayout, component);
         addInputModelCombo(componentDefintion, formLayout, component);
         addOutputModelCombo(componentDefintion, formLayout, component);
-    }
-
-    protected void addFlowSpecificProperties(FormLayout formLayout, Flow version) {
-
     }
 
     protected void addOutputModelCombo(ComponentDefinition componentDefintion,
@@ -268,22 +261,6 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                     }
                 });
                 formLayout.addComponent(choice);
-                break;
-            case SQL:
-                final SqlField sqlField = new SqlField();
-                sqlField.setRequired(required);
-                sqlField.setDescription(description);
-                sqlField.setValue(obj.get(key));
-                sqlField.setCaption(definition.label());
-                sqlField.addValueChangeListener(new ValueChangeListener() {
-                    private static final long serialVersionUID = 1L;
-
-                    @Override
-                    public void valueChange(ValueChangeEvent event) {
-                        saveSetting(key, sqlField, obj);
-                    }
-                });
-                formLayout.addComponent(sqlField);
                 break;
             case PASSWORD:
                 ImmediateUpdatePasswordField passwordField = new ImmediateUpdatePasswordField(

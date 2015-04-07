@@ -287,7 +287,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         projects.add(projectVersion);
         refresh();
     }
-
+    
     protected TreeTable buildTreeTable() {
         final TreeTable table = new TreeTable();
         table.addStyleName(ValoTheme.TREETABLE_NO_HORIZONTAL_LINES);
@@ -336,7 +336,6 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
                 open(treeTable.getValue());
             }
         };
-        table.addShortcutListener(treeTableEnterKeyShortcutListener);
         table.addValueChangeListener(new ValueChangeListener() {
             private static final long serialVersionUID = 1L;
 
@@ -405,6 +404,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
             }
         });
+        
 
         return table;
     }
@@ -468,7 +468,6 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         if (itemBeingEdited != null) {
             IConfigurationService configurationService = context.getConfigurationService();
             treeTable.addShortcutListener(treeTableDeleteKeyShortcutListener);
-            treeTable.addShortcutListener(treeTableEnterKeyShortcutListener);
             Object selected = itemBeingEdited;
             Method method = null;
             try {
@@ -667,6 +666,14 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     protected void selectionChanged(ValueChangeEvent event) {
         setMenuItemsEnabled();
         updatePropertySheet();
+        treeTable.removeShortcutListener(treeTableEnterKeyShortcutListener);
+        if (treeTable.getValue() != null) {
+            treeTable.addShortcutListener(treeTableEnterKeyShortcutListener);
+        }
+    }
+    
+    public void unselectAll() {
+        treeTable.setValue(null);
     }
 
     protected boolean isDeleteButtonEnabled(Object selected) {
@@ -687,6 +694,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
                 EditDbReaderPanel editFormat = new EditDbReaderPanel(context, flowStep.getComponent());
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
                         editFormat);
+                unselectAll();
             } else if (type.equals(MappingProcessor.TYPE)) {
             	EditMappingPanel editMapping = new EditMappingPanel(context, flowStep.getComponent());
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
