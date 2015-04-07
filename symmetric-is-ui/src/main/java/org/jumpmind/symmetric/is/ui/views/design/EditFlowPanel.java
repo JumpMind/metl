@@ -189,8 +189,13 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     }
     
     public void selected(FlowStep step) {
-        diagram.setSelectedNodeId(step.getId());
-        propertySheet.valueChange(step);                
+        if (step != null) {
+            diagram.setSelectedNodeId(step.getId());
+            propertySheet.valueChange(step);
+        } else {
+            diagram.setSelectedNodeId(null);
+            propertySheet.valueChange((Object) null);
+        }
     }
     
     @Override
