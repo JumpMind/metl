@@ -345,6 +345,16 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
         flow.removeFlowStep(flowStep);
         delete(flowStep);
+        
+        Component comp = flowStep.getComponent();
+        if (!comp.isShared()) {
+            delete(comp);
+        }
+    }
+    
+    public void delete(Component comp) {
+        comp.setDeleted(true);
+        save((AbstractObject)comp);
     }
 
     @Override
