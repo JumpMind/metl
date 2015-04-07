@@ -11,6 +11,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
 public class Transformer {
 
@@ -23,6 +24,45 @@ public class Transformer {
     public String left(int length) {
         return StringUtils.left(value != null ? value.toString() : "", length);
     }
+    
+    public String right(int length) {
+        return StringUtils.right(value != null ? value.toString() : "", length);
+    }
+    
+    public String rpad(char padChar, int length) {
+        String text = value != null ? value.toString() : "";
+        return StringUtils.rightPad(text, length, padChar);
+    }
+    
+    public String lpad(char padChar, int length) {
+        String text = value != null ? value.toString() : "";
+        return StringUtils.leftPad(text, length, padChar);
+    }
+    
+    public String substr(int start, int end) {
+        String text = value != null ? value.toString() : "";
+        return StringUtils.substring(text, start, end);        
+    }
+    
+    public String lower() {
+        String text = value != null ? value.toString() : "";
+        return StringUtils.lowerCase(text);
+    }
+    
+    public String upper() {
+        String text = value != null ? value.toString() : "";
+        return StringUtils.upperCase(text);
+    }
+    
+    public String trim() {
+        String text = value != null ? value.toString() : "";
+        return StringUtils.trim(text);
+        
+    }
+    
+    /*
+                combo.addItem("format(spec)");
+     */
 
     protected Object eval() {
         return value;
@@ -31,18 +71,20 @@ public class Transformer {
     public static String[] getSignatures() {
         List<String> signatures = new ArrayList<String>();
         Method[] methods = Transformer.class.getMethods();
+        LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
         for (Method method : methods) {
             if (method.getDeclaringClass().equals(Transformer.class)
                     && Modifier.isPublic(method.getModifiers())
                     && !Modifier.isStatic(method.getModifiers())) {
                 StringBuilder sig = new StringBuilder(method.getName());
                 sig.append("(");
-                Class<?>[] params = method.getParameterTypes();
-                for (Class<?> class1 : params) {
-                    sig.append(class1.getName());
+                String[] names = discoverer.getParameterNames(method);
+                for (String name : names) {
+                    sig.append(name);
                     sig.append(",");
+                    
                 }
-                if (params.length > 0) {
+                if (names.length > 0) {
                     sig.replace(sig.length() - 1, sig.length(), ")");
                 } else {
                     sig.append(")");
