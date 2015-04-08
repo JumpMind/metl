@@ -153,6 +153,11 @@ public class Diagram extends AbstractJavaScriptComponent {
     public String getSelectedNodeId() {
         return getState().selectedNodeId;
     }
+    
+    public void setNodes(List<Node> nodes) {
+        getState().nodes = nodes;
+        markAsDirty();
+    }
 
     public void addNode(Node node) {
         getState().nodes.add(node);

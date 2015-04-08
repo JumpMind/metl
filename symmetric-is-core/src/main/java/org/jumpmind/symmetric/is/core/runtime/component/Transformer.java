@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.script.ScriptEngine;
@@ -11,11 +12,14 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.FastDateFormat;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
 public class Transformer {
 
     Object value;
+
+    static private ThreadLocal<ScriptEngine> scriptEngine = new ThreadLocal<ScriptEngine>();
 
     public Transformer(Object value) {
         this.value = value;
@@ -24,45 +28,60 @@ public class Transformer {
     public String left(int length) {
         return StringUtils.left(value != null ? value.toString() : "", length);
     }
-    
+
     public String right(int length) {
         return StringUtils.right(value != null ? value.toString() : "", length);
     }
-    
+
     public String rpad(String padChar, int length) {
         String text = value != null ? value.toString() : "";
         return StringUtils.rightPad(text, length, padChar);
     }
-    
+
     public String lpad(String padChar, int length) {
         String text = value != null ? value.toString() : "";
         return StringUtils.leftPad(text, length, padChar);
     }
-    
+
     public String substr(int start, int end) {
         String text = value != null ? value.toString() : "";
-        return StringUtils.substring(text, start, end);        
+        return StringUtils.substring(text, start, end);
     }
-    
+
     public String lower() {
         String text = value != null ? value.toString() : "";
         return StringUtils.lowerCase(text);
     }
-    
+
     public String upper() {
         String text = value != null ? value.toString() : "";
         return StringUtils.upperCase(text);
     }
-    
+
     public String trim() {
         String text = value != null ? value.toString() : "";
         return StringUtils.trim(text);
-        
     }
-    
-    /*
-                combo.addItem("format(spec)");
-     */
+
+    public String format(String spec) {
+        return String.format(spec, value);
+    }
+
+    public String replace(String searchString, String replacement) {
+        String text = value != null ? value.toString() : "";
+        return StringUtils.replace(text, searchString, replacement);
+    }
+
+    public String formatdate(String pattern) {
+        if (value instanceof Date) {
+            FastDateFormat formatter = FastDateFormat.getInstance(pattern);
+            return formatter.format((Date) value);
+        } else if (value != null) {
+            return "Not a datetime";
+        } else {
+            return "";
+        }
+    }
 
     protected Object eval() {
         return value;
@@ -82,7 +101,7 @@ public class Transformer {
                 for (String name : names) {
                     sig.append(name);
                     sig.append(",");
-                    
+
                 }
                 if (names.length > 0) {
                     sig.replace(sig.length() - 1, sig.length(), ")");
@@ -96,13 +115,11 @@ public class Transformer {
     }
 
     public static Object eval(Object value, String expression) {
-        /*
-         * TODO Probably needs to be refactored to NOT create the script engine every time.
-         */
-        ScriptEngineManager factory = new ScriptEngineManager();
-        ScriptEngine engine = factory.getEngineByName("groovy");
+        ScriptEngine engine = scriptEngine.get();
         if (engine == null) {
-            throw new UnsupportedOperationException("Script type 'groovy' is not supported");
+            ScriptEngineManager factory = new ScriptEngineManager();
+            engine = factory.getEngineByName("groovy");
+            scriptEngine.set(engine);
         }
 
         engine.put("value", value);
@@ -112,7 +129,14 @@ public class Transformer {
             String code = String.format(
                     "return new Transformer(value) { public Object eval() { return %s } }.eval()",
                     expression);
-            return engine.eval(importString + code);
+            Object obj = engine.eval(importString + code);
+            if (obj instanceof RuntimeException) {
+                throw (RuntimeException)obj;
+            } else if (obj instanceof Throwable) {
+                throw new RuntimeException((Throwable)obj);
+            } else {
+                return obj;
+            }            
         } catch (ScriptException e) {
             throw new RuntimeException("Unable to evaluate groovy script", e);
         }

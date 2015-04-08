@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
@@ -78,6 +79,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
                     "startPos", "endPos", "transformText" });
             table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Width",
                     "Start Position", "End Position", "Transform" });
+            table.setColumnWidth("width", 75);
         } else {
             table.setVisibleColumns(new Object[] { "entityName", "attributeName", "transformText" });
             table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Transform" });
@@ -210,7 +212,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
             setting.setComponentId(component.getId());
             component.addAttributeSetting(setting);
             context.getConfigurationService().save(setting);
-        } else if (!setting.getValue().equals(value)) {
+        } else if (!StringUtils.equals(setting.getValue(), value)) {
             setting.setValue(value);
             context.getConfigurationService().save(setting);
         }
@@ -254,6 +256,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
             Field<?> field = null;
             if (propertyId.equals("width")) {
                 final TextField textField = new TextField();
+                textField.setWidth(100, Unit.PERCENTAGE);
                 textField.setImmediate(true);
                 textField.addValueChangeListener(new ValueChangeListener() {
                     public void valueChange(ValueChangeEvent event) {
@@ -271,10 +274,12 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
                 field = textField;
             } else if (propertyId.equals("transformText")) {
                 final ComboBox combo = new ComboBox();
+                combo.setWidth(100, Unit.PERCENTAGE);
                 String[] functions = Transformer.getSignatures();
                 for (String function : functions) {
                     combo.addItem(function);
                 }
+                combo.setPageLength(functions.length > 20 ? 20 : functions.length);
                 if (record.getTransformText() != null && 
                         !combo.getItemIds().contains(record.getTransformText())) {
                     combo.addItem(record.getTransformText());

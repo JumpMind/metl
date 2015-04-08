@@ -509,6 +509,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
             delete(itrr.next());
         }
 
+        List<ComponentEntitySetting> settings = persistenceManager.find(
+                ComponentEntitySetting.class, new NameValue("entityId", modelEntity.getId()), null,
+                null, tableName(ComponentEntitySetting.class));
+        for (ComponentEntitySetting setting : settings) {
+            delete(setting);
+        }
+
         for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
             delete(modelAttribute);
         }
@@ -518,6 +525,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void delete(ModelAttribute modelAttribute) {
+        List<ComponentAttributeSetting> attributeSettings = persistenceManager.find(
+                ComponentAttributeSetting.class,
+                new NameValue("attributeId", modelAttribute.getId()), null, null,
+                tableName(ComponentAttributeSetting.class));
+        for (ComponentAttributeSetting setting : attributeSettings) {
+            delete(setting);
+        }
         persistenceManager.delete(modelAttribute, null, null, tableName(ModelAttribute.class));
     }
 
