@@ -449,7 +449,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         } else {
             return null;
         }
-    }
+    }    
 
     protected boolean startEditingItem(AbstractObject obj) {
         if (obj.isSettingNameAllowed()) {
@@ -457,6 +457,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             treeTable.removeShortcutListener(treeTableEnterKeyShortcutListener);
             itemBeingEdited = obj;
             treeTable.refreshRowCache();
+            treeTable.setValue(null);
             return true;
         } else {
             return false;
@@ -486,7 +487,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             }
             itemBeingEdited = null;
             treeTable.refreshRowCache();
-            treeTable.focus();
+            treeTable.focus();            
             treeTable.setValue(selected);
         }
     }

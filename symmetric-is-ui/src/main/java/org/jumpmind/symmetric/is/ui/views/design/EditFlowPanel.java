@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -190,6 +191,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     
     public void selected(FlowStep step) {
         if (step != null) {
+            diagram.setNodes(getNodes());
             diagram.setSelectedNodeId(step.getId());
             propertySheet.valueChange(step);
         } else {
@@ -263,9 +265,13 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
         diagramLayout.addComponent(diagram);
 
-        List<FlowStepLink> links = flow.getFlowStepLinks();
-
+        diagram.setNodes(getNodes());
+    }
+    
+    protected List<Node> getNodes() {
         List<FlowStep> flowSteps = flow.getFlowSteps();
+        List<FlowStepLink> links = flow.getFlowStepLinks();
+        List<Node> list = new ArrayList<Node>();
         for (FlowStep flowStep : flowSteps) {
             Node node = new Node();
             String name = flowStep.getComponent().getName();
@@ -283,16 +289,17 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             node.setInputLabel(definition.inputMessage().getLetter());
             node.setOutputLabel(definition.outgoingMessage().getLetter());
             
-            diagram.addNode(node);
-
             for (FlowStepLink link : links) {
                 if (link.getSourceStepId().equals(node.getId())) {
                     node.getTargetNodeIds().add(link.getTargetStepId());
                 }
             }
-
+            
+            list.add(node);
+            
+            
         }
-
+        return list;
     }
 
     protected void openExecution() {

@@ -215,10 +215,22 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
             if (state.selectedNodeId != null) {
                 var node = document.getElementById(state.selectedNodeId);
                 if (node != null) {
+                    node.innerHTML = findNode(state.selectedNodeId).text;
                     node.className = node.className + " selected ";
                 }
             }
         });
+    };
+    
+    var findNode = function(id) {
+        var nodeList = state.nodes;
+        for (i = 0; i < nodeList.length; i++) {
+            var node = nodeList[i];
+            if (node.id === id) {
+                return node;
+            }
+        }
+        return null;
     };
     
     var unselectAll = function() {
@@ -233,7 +245,7 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         var connections = instance.getAllConnections();
         for (j = 0; j < connections.length; j++) {
             var connection = connections[j];
-            connection.removeType("selected")
+            connection.removeType("selected");
         }
     }
 
