@@ -108,7 +108,7 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
         instance.makeSource(jsPlumb.getSelector(".mapping-diagram .src"));
         
         instance.makeTarget(jsPlumb.getSelector(".mapping-diagram .dst"),
-        	{ dropOptions: { hoverClass: "dragHover" }, maxConnections: 1 });
+        	{ dropOptions: { hoverClass: "dragHover" }});
 
     });    
 }

@@ -114,7 +114,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     MenuItem delete;
 
     MenuItem closeProject;
-    
+
     MenuItem search;
 
     HorizontalLayout searchBarLayout;
@@ -287,7 +287,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         projects.add(projectVersion);
         refresh();
     }
-    
+
     protected TreeTable buildTreeTable() {
         final TreeTable table = new TreeTable();
         table.addStyleName(ValoTheme.TREETABLE_NO_HORIZONTAL_LINES);
@@ -353,8 +353,8 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
                     if (event.isDoubleClick()) {
                         abortEditingItem();
                         open(event.getItemId());
-                        itemClicked = null;                        
-                        
+                        itemClicked = null;
+
                         if (table.areChildrenAllowed(event.getItemId())) {
                             Object item = event.getItemId();
                             table.setCollapsed(item, !table.isCollapsed(item));
@@ -404,7 +404,6 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
             }
         });
-        
 
         return table;
     }
@@ -450,7 +449,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         } else {
             return null;
         }
-    }
+    }    
 
     protected boolean startEditingItem(AbstractObject obj) {
         if (obj.isSettingNameAllowed()) {
@@ -458,6 +457,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             treeTable.removeShortcutListener(treeTableEnterKeyShortcutListener);
             itemBeingEdited = obj;
             treeTable.refreshRowCache();
+            treeTable.setValue(null);
             return true;
         } else {
             return false;
@@ -487,7 +487,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             }
             itemBeingEdited = null;
             treeTable.refreshRowCache();
-            treeTable.focus();
+            treeTable.focus();            
             treeTable.setValue(selected);
         }
     }
@@ -542,12 +542,19 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
     protected void updatePropertySheet() {
         Object obj = treeTable.getValue();
-        if (obj instanceof FlowStep && propertySheet != null) {
-            FlowStep step = (FlowStep) obj;
-            if (tabs.getSelectedTab() instanceof EditFlowPanel) {
-                EditFlowPanel panel = (EditFlowPanel) tabs.getSelectedTab();
-                if (panel.getFlow().getId().equals(step.getFlowId())) {
-                    panel.selected(step);
+        if (propertySheet != null && obj != null) {
+            if (obj instanceof FlowStep) {
+                FlowStep step = (FlowStep) obj;
+                if (tabs.getSelectedTab() instanceof EditFlowPanel) {
+                    EditFlowPanel panel = (EditFlowPanel) tabs.getSelectedTab();
+                    if (panel.getFlow().getId().equals(step.getFlowId())) {
+                        panel.selected(step);
+                    }
+                }
+            } else {
+                if (tabs.getSelectedTab() instanceof EditFlowPanel) {
+                    EditFlowPanel panel = (EditFlowPanel) tabs.getSelectedTab();
+                    panel.selected(null);
                 }
             }
         }
@@ -671,7 +678,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             treeTable.addShortcutListener(treeTableEnterKeyShortcutListener);
         }
     }
-    
+
     public void unselectAll() {
         treeTable.setValue(null);
     }
@@ -684,21 +691,24 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     public void open(Object item) {
         if (item instanceof FlowStep) {
             FlowStep flowStep = (FlowStep) item;
-            // TODO: these ui's need to come from component plugin infrastructure 
+            // TODO: these ui's need to come from component plugin
+            // infrastructure
             String type = flowStep.getComponent().getType();
             if (type.equals(FixedLengthFormatter.TYPE) || type.equals(DelimitedFormatter.TYPE)) {
                 EditFormatPanel editFormat = new EditFormatPanel(context, flowStep.getComponent());
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
                         editFormat);
             } else if (type.equals(DbReader.TYPE)) {
-                EditDbReaderPanel editFormat = new EditDbReaderPanel(context, flowStep.getComponent());
+                EditDbReaderPanel editFormat = new EditDbReaderPanel(context,
+                        flowStep.getComponent());
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
                         editFormat);
                 unselectAll();
             } else if (type.equals(MappingProcessor.TYPE)) {
-            	EditMappingPanel editMapping = new EditMappingPanel(context, flowStep.getComponent());
+                EditMappingPanel editMapping = new EditMappingPanel(context,
+                        flowStep.getComponent());
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
-                		editMapping);
+                        editMapping);
             } else {
                 item = context.getConfigurationService().findFlow(flowStep.getFlowId());
             }
@@ -813,7 +823,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         Folder folder = findFolderWithName("Flows");
         if (folder != null) {
             treeTable.setChildrenAllowed(folder, true);
-            
+
             ProjectVersion projectVersion = findProjectVersion();
             Flow flow = new Flow();
             flow.setProjectVersionId(projectVersion.getId());
@@ -844,7 +854,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         Folder folder = findFolderWithName("Resources");
         if (folder != null) {
             treeTable.setChildrenAllowed(folder, true);
-            
+
             ProjectVersion projectVersion = findProjectVersion();
             Resource resource = new Resource();
             resource.setName(defaultName);
@@ -857,7 +867,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             treeTable.setParent(resource, folder);
             treeTable.setChildrenAllowed(resource, false);
 
-            treeTable.setCollapsed(folder, false);            
+            treeTable.setCollapsed(folder, false);
 
             startEditingItem(resource);
         }
@@ -867,7 +877,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         Folder folder = findFolderWithName("Models");
         if (folder != null) {
             treeTable.setChildrenAllowed(folder, true);
-            
+
             ProjectVersion projectVersion = findProjectVersion();
             Model model = new Model();
             model.setName("New Model");
