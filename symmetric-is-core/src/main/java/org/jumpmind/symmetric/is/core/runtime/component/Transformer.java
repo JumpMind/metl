@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -23,6 +24,11 @@ public class Transformer {
 
     public Transformer(Object value) {
         this.value = value;
+    }
+    
+    public String abbreviate(int maxwidth) {
+        String text = value != null ? value.toString() : "";
+        return StringUtils.abbreviate(text, maxwidth);
     }
 
     public String left(int length) {
@@ -111,6 +117,7 @@ public class Transformer {
                 signatures.add(sig.toString());
             }
         }
+        Collections.sort(signatures);
         return signatures.toArray(new String[signatures.size()]);
     }
 
@@ -129,14 +136,7 @@ public class Transformer {
             String code = String.format(
                     "return new Transformer(value) { public Object eval() { return %s } }.eval()",
                     expression);
-            Object obj = engine.eval(importString + code);
-            if (obj instanceof RuntimeException) {
-                throw (RuntimeException)obj;
-            } else if (obj instanceof Throwable) {
-                throw new RuntimeException((Throwable)obj);
-            } else {
-                return obj;
-            }            
+            return engine.eval(importString + code);
         } catch (ScriptException e) {
             throw new RuntimeException("Unable to evaluate groovy script", e);
         }

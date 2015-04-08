@@ -75,11 +75,20 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     public void afterHandle(String executionId, IComponent component, Throwable error) {
         super.afterHandle(executionId, component, error);
         ExecutionStep step = steps.get(component.getFlowStep().getId());
+        step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.RUNNING.name());
+        step.setMessagesReceived(component.getComponentStatistics().getNumberInboundMessages());
+        step.setMessagesProduced(component.getComponentStatistics().getNumberOutboundMessages());
+        this.recorder.record(step);
+    }
+    
+    @Override
+    public void flowStepFinished(String executionId, IComponent component, Throwable error) {
+        super.flowStepFinished(executionId, component, error);
+        ExecutionStep step = steps.get(component.getFlowStep().getId());
         step.setEndTime(new Date());
         step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.DONE.name());
         step.setMessagesReceived(component.getComponentStatistics().getNumberInboundMessages());
         step.setMessagesProduced(component.getComponentStatistics().getNumberOutboundMessages());
-
         this.recorder.record(step);
     }
 
