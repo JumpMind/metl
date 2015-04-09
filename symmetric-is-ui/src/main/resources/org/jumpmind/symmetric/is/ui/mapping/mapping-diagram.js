@@ -3,11 +3,29 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
 	state = this.getState();
 
     parentDiv = document.getElementById("mapping-diagram");
-    parentDiv.parentNode.addEventListener("click", function(event) {
+
+    selectedDstId = null;
+    selectedSrcId = null;
+    
+    isScrolling = false;
+    scrollMultiple = 1;
+    scrollDiv = parentDiv.parentNode.parentNode.parentNode.parentNode;
+    parentDiv.addEventListener("mousemove", function(event) {
+    	if (event.pageY < 100) startScrolling(-60);
+    	else if (event.pageY < 125) startScrolling(-40);
+    	else if (event.pageY < 150) startScrolling(-20);
+    	else isScrolling = false;
+    }, false);
+
+    scrollDiv.parentNode.addEventListener("click", function(event) {
     	if (event.target.tagName == "DIV") {
-    		unselectAll();
+    		unselectAllConnections();
     		self.onSelect();
     	}
+    	if (event.target.classList !== undefined && !event.target.classList.contains("dst")) {
+			selectedSrcId = selectedDstId = null;
+			unselectAllDivs();			
+		}
     }, false);
 
     instance = jsPlumb.getInstance({
@@ -24,6 +42,7 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
     instance.registerEndpointType("selected", { paintStyle : { fillStyle: "orange" } });
 
     instance.bind("connection", function(info, originalEvent) {
+    	unselectAllDivs();
         self.onConnection({
             "sourceId" : info.connection.sourceId,
             "targetId" : info.connection.targetId,
@@ -32,6 +51,7 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
     });
 
     instance.bind("connectionDetached", function(info, originalEvent) {
+    	unselectAllDivs();
         self.onConnection({
             "sourceId" : info.connection.sourceId,
             "targetId" : info.connection.targetId,
@@ -40,6 +60,7 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
     });
 
     instance.bind("connectionMoved", function(info, originalEvent) {
+    	unselectAllDivs();
     	if (info.connection.getType().indexOf("selected") != -1) {
             for (var i = 0; i < info.connection.endpoints.length; i++) {
             	info.connection.endpoints[i].toggleType("selected");
@@ -56,7 +77,7 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
     	if (connection.connections !== undefined) {
     		connection = connection.connections[0];
     	}
-    	unselectAll();
+    	unselectAllConnections();
     	instance.detach(connection, { fireEvent: false });
         var connection = instance.connect({ source: connection.sourceId, target: connection.targetId, fireEvent: false });
         connection.toggleType("selected");
@@ -69,7 +90,12 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
         });
     });
 
-    unselectAll = function() {
+    instance.bind("connectionDrag", function(connection) {
+    	dragConnection = connection;
+    	console.log("drag start");
+    });
+    
+    unselectAllConnections = function() {
         var connections = instance.getAllConnections();
         for (var i = 0; i < connections.length; i++) {
             connections[i].removeType("selected");
@@ -109,8 +135,7 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
         
         instance.makeTarget(jsPlumb.getSelector(".mapping-diagram .dst"),
         	{ dropOptions: { hoverClass: "dragHover" }});
-
-    });    
+    });
 }
 
 function appendChildren(parentDiv, entities, prefix, x, y) {
@@ -137,5 +162,69 @@ function createDiv(parentDiv, id, name, className, x, y) {
     div.style.left = x + "em";
     div.innerHTML = name;
     div.className = className;
+    div.onmousedown = divClick;
 	parentDiv.appendChild(div);
+}
+
+function divClick(event) {
+	if (event.currentTarget.className.indexOf("src") != -1) {
+		selectedSrcId = event.currentTarget.id;
+		unselectDivs("src");
+		unselectAllConnections();
+		selectDiv(event.currentTarget);
+	} else if (event.currentTarget.className.indexOf("dst") != -1) {
+		selectedDstId = event.currentTarget.id;
+		unselectDivs("dst");
+		selectDiv(event.currentTarget);
+	} else {
+		selectedSrcId = selectedDstId = null;
+	}
+	if (selectedSrcId != null && selectedDstId != null) {
+		instance.connect({ source: selectedSrcId, target: selectedDstId });
+		selectedSrcId = selectedDstId = null;
+	}
+}
+
+function selectDiv(div) {
+	if (!div.classList.contains("selected")) {
+		div.classList.add("selected");
+	}
+}
+
+function unselectAllDivs() {
+	unselectDivs("src");
+	unselectDivs("dst");
+}
+
+function unselectDivs(className) {
+	var children = parentDiv.childNodes;
+	for (var child in children) {
+		var div = children[child];
+		if (div.classList !== undefined && div.classList.contains(className)) {
+			div.classList.remove("selected");
+		}
+	}
+}
+
+function startScrolling(multiple) {
+	scrollMultiple = multiple
+	if (!isScrolling) {
+		isScrolling = true;
+		scrolling();		
+	}
+}
+
+function scrolling() {
+	var scrollY = scrollDiv.scrollTop;
+	if (isScrolling) {
+		if (scrollMultiple < 0 && scrollY > 0) {
+			scrollY += (1 * scrollMultiple);
+			scrollDiv.scrollTop = scrollY;
+			setTimeout(scrolling, 100);
+		} else if (scrollMultiple > 0) {
+			scrollY += (1 * scrollMultiple);
+			scrollDiv.scrollTop = scrollY;
+			setTimeout(scrolling, 100);
+		}
+	}
 }

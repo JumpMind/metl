@@ -51,7 +51,6 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
     public void removeSelected() {
     	if (selectedSourceId != null) {
     		removeConnection(selectedSourceId, selectedTargetId);
-    		selectedSourceId = selectedTargetId = null;
     	}
     }
 
@@ -63,6 +62,10 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
         		context.getConfigurationService().delete(setting);
         		markAsDirty();
     		}
+    	}
+    	if (sourceId.equals(selectedSourceId) && targetId.equals(selectedTargetId)) {
+    	    selectedSourceId = selectedTargetId = null;
+    	    fireEvent(new SelectEvent(MappingDiagram.this, selectedSourceId, selectedTargetId));
     	}
     }
     
