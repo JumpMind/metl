@@ -1,5 +1,8 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,15 +20,19 @@ import org.jumpmind.symmetric.ui.common.IUiPanel;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.TreeTable;
@@ -45,6 +52,18 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 	
 	TableColumnSelectWindow tableColumnSelectWindow;
 	
+	Button addEntityButton;
+    
+    Button addAttributeButton;
+
+    Button editButton;
+    
+    Button removeButton;
+
+    Button importButton;
+    
+    TextField filterField;
+	
 	public EditModelPanel(ApplicationContext context, Model model) {
 		this.context = context;
 		this.model = model;
@@ -52,20 +71,31 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 		ButtonBar buttonBar = new ButtonBar();
 		addComponent(buttonBar);
 
-		Button addEntityButton = buttonBar.addButton("Add Entity", FontAwesome.TABLE);
+		addEntityButton = buttonBar.addButton("Add Entity", FontAwesome.TABLE);
 		addEntityButton.addClickListener(new AddEntityClickListener());
 		
-		Button addAttributeButton = buttonBar.addButton("Add Attribute", FontAwesome.COLUMNS);
+		addAttributeButton = buttonBar.addButton("Add Attribute", FontAwesome.COLUMNS);
 		addAttributeButton.addClickListener(new AddAttributeClickListener());
 
-		Button editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
+		editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
 		editButton.addClickListener(new EditClickListener());
 		
-		Button removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+		removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
 		removeButton.addClickListener(new RemoveClickListener());
 
-		Button importButton = buttonBar.addButton("Import ...", FontAwesome.DOWNLOAD);
+		importButton = buttonBar.addButton("Import ...", FontAwesome.DOWNLOAD);
 		importButton.addClickListener(new ImportClickListener());
+		
+		filterField = buttonBar.addFilter();
+		filterField.addTextChangeListener(new TextChangeListener() {
+            
+            @Override
+            public void textChange(TextChangeEvent event) {
+                setButtonsEnabled(event.getText());
+                treeTable.removeAllItems();
+                addAll(event.getText(), EditModelPanel.this.model.getModelEntities());
+            }
+        });
 
 		treeTable.setSizeFull();
 		treeTable.setCacheRate(100);
@@ -74,7 +104,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.setSelectable(true);
         treeTable.setMultiSelect(true);
         
-        treeTable.addContainerProperty("name", String.class, "", "Name", null, null);
+        treeTable.addContainerProperty("name", Label.class, "", "Name", null, null);
         treeTable.addContainerProperty("type", String.class, "", "Type", null, null);
         treeTable.setVisibleColumns(new Object[] { "name", "type" });
         treeTable.addItemClickListener(new TreeTableItemClickListener());
@@ -82,7 +112,18 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         
 		addComponent(treeTable);
 		setExpandRatio(treeTable, 1.0f);
-		addAll(model.getModelEntities());
+		addAll("", model.getModelEntities());
+		setButtonsEnabled("");
+	}
+	
+	public void setButtonsEnabled(String filter) {
+	    boolean noFilter = isBlank(filter);	    
+	    Set<Object> selected = getSelectedItems();	    
+	    addEntityButton.setEnabled(noFilter);
+	    importButton.setEnabled(noFilter);
+	    addAttributeButton.setEnabled(noFilter);	    
+	    removeButton.setEnabled(selected.size() > 0);	    
+	    editButton.setEnabled(selected.size() > 0);	    	    
 	}
 
 	@Override
@@ -110,33 +151,55 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.select(itemId);
 	}
 
-	protected void add(ModelEntity modelEntity) {
-		addModelEntity(modelEntity);
+	protected void add(String filter, ModelEntity modelEntity) {
+		addModelEntity(filter, modelEntity);
 		for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
 			modelAttribute.setEntity(modelEntity);
-			addModelAttribute(modelAttribute);
+			addModelAttribute(filter, modelAttribute);
 		}
 		treeTable.setCollapsed(modelEntity, false);
 	}
 
-	protected void addAll(Collection<ModelEntity> modelEntityList) {
-		for (ModelEntity modelEntity : modelEntityList) {
-			add(modelEntity);
-		}
-	}
+    protected void addAll(String filter, Collection<ModelEntity> modelEntityList) {
+        for (ModelEntity modelEntity : modelEntityList) {
+            boolean add = isBlank(filter) || modelEntity.getName().contains(filter);
+            if (!add) {
+                for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
+                    add |= modelAttribute.getName().contains(filter);
+                }
+            }
+
+            if (add) {
+                add(filter, modelEntity);
+            }
+        }
+    }
+    
+    protected Label getName(String filter, String name) {        
+        if (isNotBlank(filter) && name.contains(filter)) {
+            int start = name.indexOf(filter);
+            String pre = start < name.length() ? name.substring(0, start) : "";
+            String highlighted = name.substring(start, start + filter.length());
+            String post = start + filter.length() < name.length() ? name.substring(start
+                    + filter.length()) : "";
+            name = pre + "<span class='highlight'>" + highlighted + "</span>" + post;
+        }
+        Label label = new Label(name, ContentMode.HTML);
+        return label;
+    }
 
 	@SuppressWarnings("unchecked")
-	protected void addModelEntity(ModelEntity modelEntity) {
+	protected void addModelEntity(String filter, ModelEntity modelEntity) {
 		treeTable.addItem(modelEntity);
-		treeTable.getContainerProperty(modelEntity, "name").setValue(modelEntity.getName());
+		treeTable.getContainerProperty(modelEntity, "name").setValue(getName(filter, modelEntity.getName()));
 		treeTable.setItemIcon(modelEntity, FontAwesome.TABLE);
 		treeTable.setChildrenAllowed(modelEntity, true);
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void addModelAttribute(ModelAttribute modelAttribute) {
+	protected void addModelAttribute(String filter, ModelAttribute modelAttribute) {
 		treeTable.addItem(modelAttribute);
-		treeTable.getContainerProperty(modelAttribute, "name").setValue(modelAttribute.getName());
+		treeTable.getContainerProperty(modelAttribute, "name").setValue(getName(filter, modelAttribute.getName()));
 		treeTable.getContainerProperty(modelAttribute, "type").setValue(modelAttribute.getType().toString());
 		treeTable.setItemIcon(modelAttribute, FontAwesome.COLUMNS);
 		treeTable.setParent(modelAttribute, modelAttribute.getEntity());
@@ -174,7 +237,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 	        e.setName("New Entity");
 	        e.setModelId(model.getId());
 	        context.getConfigurationService().save(e);
-	        addModelEntity(e);
+	        addModelEntity("", e);
 	        selectOnly(e);
 	        editSelectedItem();
 		}
@@ -194,7 +257,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 					a.setEntity(((ModelAttribute) itemId).getEntity());					
 				}
 				context.getConfigurationService().save(a);
-		        addModelAttribute(a);
+		        addModelAttribute("", a);
 		        treeTable.setCollapsed(a.getEntity(), false);
 		        selectOnly(a);
 		        editSelectedItem();		        
@@ -262,14 +325,14 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 				if (modelEntity == null) {
 					context.getConfigurationService().save(e);
 					existingModelEntities.put(e.getName().toUpperCase(), e);
-					add(e);
+					add("", e);
 				} else {
 					for (ModelAttribute a : e.getModelAttributes()) {
 						if (modelEntity.getModelAttributeByName(a.getName()) == null) {
 							a.setEntity(modelEntity);
 							context.getConfigurationService().save(a);							
 							modelEntity.addModelAttribute(a);
-							addModelAttribute(a);
+							addModelAttribute("", a);
 						}
 					}
 				}
@@ -300,6 +363,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 				}
 			}
 	        treeTable.setEditable(false);
+	        setButtonsEnabled(filterField.getValue());
 		}		
 	}
 
