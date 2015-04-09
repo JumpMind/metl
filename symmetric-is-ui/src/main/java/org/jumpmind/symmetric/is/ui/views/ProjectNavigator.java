@@ -1,7 +1,6 @@
 package org.jumpmind.symmetric.is.ui.views;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -120,8 +119,6 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     HorizontalLayout searchBarLayout;
 
     VerticalLayout openProjectsLayout;
-
-    List<ProjectVersion> projects = new ArrayList<ProjectVersion>();
 
     public ProjectNavigator(ApplicationContext context, TabbedPanel tabs) {
         this.context = context;
@@ -283,8 +280,8 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     }
 
     public void addProjectVersion(ProjectVersion projectVersion) {
-        projects.remove(projectVersion);
-        projects.add(projectVersion);
+        context.getOpenProjects().remove(projectVersion);
+        context.getOpenProjects().add(projectVersion);
         refresh();
     }
 
@@ -569,7 +566,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     protected void refreshOpenProjects() {
         // add any open projects to the tree table. check cookies
 
-        Iterator<ProjectVersion> i = projects.iterator();
+        Iterator<ProjectVersion> i = context.getOpenProjects().iterator();
         while (i.hasNext()) {
             ProjectVersion projectVersion = i.next();
             context.getConfigurationService().refresh(projectVersion);
@@ -578,7 +575,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             }
         }
 
-        Collections.sort(projects, new Comparator<ProjectVersion>() {
+        Collections.sort(context.getOpenProjects(), new Comparator<ProjectVersion>() {
             @Override
             public int compare(ProjectVersion o1, ProjectVersion o2) {
                 return o1.getProject().getName().compareTo(o2.getProject().getName());
@@ -587,7 +584,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
         treeTable.removeAllItems();
 
-        for (ProjectVersion projectVersion : projects) {
+        for (ProjectVersion projectVersion : context.getOpenProjects()) {
             treeTable.addItem(projectVersion);
             treeTable.setItemIcon(projectVersion, Icons.PROJECT);
             treeTable.setItemCaption(projectVersion, projectVersion.getProject().getName());
@@ -739,7 +736,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     protected void closeProject() {
         Object selected = treeTable.getValue();
         if (selected instanceof ProjectVersion) {
-            projects.remove(selected);
+            context.getOpenProjects().remove(selected);
             refresh();
         }
     }

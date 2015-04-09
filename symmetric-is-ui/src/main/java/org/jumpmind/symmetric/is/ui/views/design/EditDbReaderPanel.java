@@ -69,8 +69,6 @@ public class EditDbReaderPanel extends VerticalLayout implements IUiPanel {
             resource.put(BasicDataSourcePropertyConstants.DB_POOL_MIN_IDLE, "2");
             DataSourceResource dataSourceResource = (DataSourceResource) context
                     .getResourceFactory().create(resource);
-
-            dataSourceResource.start(resource);
             DataSource dataSource = dataSourceResource.reference();
             platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource,
                     new SqlTemplateSettings(), false);

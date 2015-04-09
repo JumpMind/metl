@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public class StepRuntime implements Runnable {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     protected BlockingQueue<Message> inQueue;
 
     boolean running = true;
@@ -35,11 +35,11 @@ public class StepRuntime implements Runnable {
     List<StepRuntime> targetStepRuntimes;
 
     List<StepRuntime> sourceStepRuntimes;
-    
+
     IExecutionTracker executionTracker;
-    
+
     String executionId;
-    
+
     public StepRuntime(String executionId, IComponent component, IExecutionTracker tracker) {
         this.executionId = executionId;
         this.executionTracker = tracker;
@@ -95,8 +95,8 @@ public class StepRuntime implements Runnable {
                     }
                 } else {
                     try {
-                    executionTracker.beforeHandle(executionId, component);
-                    component.handle(executionId, inputMessage, target);
+                        executionTracker.beforeHandle(executionId, component);
+                        component.handle(executionId, inputMessage, target);
                     } catch (Exception ex) {
                         error = ex;
                         String msg = ex.getMessage();
@@ -138,6 +138,7 @@ public class StepRuntime implements Runnable {
         }
         this.component.stop();
         running = false;
+        executionTracker.flowStepFinished(executionId, component, error);
     }
 
     public boolean isRunning() {

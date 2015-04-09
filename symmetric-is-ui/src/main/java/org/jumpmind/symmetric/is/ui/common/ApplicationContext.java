@@ -1,7 +1,10 @@
 package org.jumpmind.symmetric.is.ui.common;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.User;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
@@ -38,6 +41,8 @@ public class ApplicationContext implements Serializable {
     IAgentManager agentManager;
 
     User user = new User();
+    
+    List<ProjectVersion> openProjects = new ArrayList<ProjectVersion>();
 
     public IConfigurationService getConfigurationService() {
         return configurationService;
@@ -69,6 +74,10 @@ public class ApplicationContext implements Serializable {
 
     public User getUser() {
         return user;
+    }
+    
+    public List<ProjectVersion> getOpenProjects() {
+        return openProjects;
     }
 
 }
