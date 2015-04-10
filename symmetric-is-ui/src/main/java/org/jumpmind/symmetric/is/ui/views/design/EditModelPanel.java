@@ -333,6 +333,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 if (itemId instanceof ModelEntity) {
                     context.getConfigurationService().delete((ModelEntity) itemId);
                     treeTable.removeItem(itemId);
+                    model.getModelEntities().remove(itemId);
                 }
             }
         }
