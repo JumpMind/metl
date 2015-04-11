@@ -89,6 +89,17 @@ public class Model extends AbstractObject {
         }
         return null;
     }
+    
+    public ModelAttribute getAttributeById(String attributeId) {
+        for (ModelEntity entity : modelEntities) {
+            for (ModelAttribute modelAttribute : entity.getModelAttributes()) {
+                if (modelAttribute.getId().equalsIgnoreCase(attributeId)) {
+                    return modelAttribute;
+                }
+            }
+        }
+        return null;        
+    }
 
     public ModelAttribute getAttributeByName(String entityName, String attributeName) {
         ModelEntity entity = getEntityByName(entityName);

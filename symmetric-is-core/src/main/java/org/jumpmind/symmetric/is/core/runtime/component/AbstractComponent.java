@@ -1,7 +1,10 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
+import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.Resource;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
@@ -9,6 +12,10 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
 abstract public class AbstractComponent extends AbstractRuntimeObject implements IComponent {
 
+    @SettingDefinition(order = 100, required = false, type = Type.INTEGER, defaultValue = "10000", label = "Inbound Queue Capacity")
+    public final static String INBOUND_QUEUE_CAPACITY = "inbound.queue.capacity";
+    
+    protected Flow flow;
     protected FlowStep flowStep;    
     protected IResource resource;
     protected IResourceFactory resourceFactory;
@@ -48,8 +55,9 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     	return this.flowStep;
     }
     
-    public void setFlowStep(FlowStep flowStep) {
+    public void init(FlowStep flowStep, Flow flow) {
     	this.flowStep = flowStep;
+    	this.flow = flow;
     }
 
 }

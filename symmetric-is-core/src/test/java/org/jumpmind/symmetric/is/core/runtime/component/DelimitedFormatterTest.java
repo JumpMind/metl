@@ -47,7 +47,7 @@ public class DelimitedFormatterTest {
 
         IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DelimitedFormatter delimitedFormatter = new DelimitedFormatter();
-        delimitedFormatter.setFlowStep(delimitedFormatterFlowStep);
+        delimitedFormatter.init(delimitedFormatterFlowStep, null);
         delimitedFormatter.start(executionTracker, null);        
         Message message = createInboundMessage();        
         MessageTarget msgTarget = new MessageTarget();
@@ -56,7 +56,7 @@ public class DelimitedFormatterTest {
         assertEquals(1, msgTarget.getTargetMessageCount());
         ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
         assertEquals(1,payload.size());
-        assertEquals("tt1col2_value|tt1col1_value|tt2col2_value|tt2col3_value|tt1col3_value|tt2col1_value\n", payload.get(0));
+        assertEquals("tt1col2_value|tt1col1_value|tt2col2_value|tt2col3_value|tt1col3_value|tt2col1_value", payload.get(0));
     }
 
     private static Message createInboundMessage() {
@@ -98,8 +98,9 @@ public class DelimitedFormatterTest {
     
     private static Setting[] createDelimitedFormatterSettings() {
 
-        Setting[] settingData = new Setting[1];
+        Setting[] settingData = new Setting[2];
         settingData[0] = new Setting(DelimitedFormatter.DELIMITED_FORMATTER_DELIMITER,"|");
+        settingData[1] = new Setting(DelimitedFormatter.DELIMITED_FORMATTER_QUOTE_CHARACTER,"");
 
         return settingData;
     }

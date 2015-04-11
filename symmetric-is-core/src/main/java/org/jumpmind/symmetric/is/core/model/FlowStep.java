@@ -52,8 +52,8 @@ public class FlowStep extends AbstractObject {
         return flowId;
     }
 
-    public void setFlowId(String flowVersionId) {
-        this.flowId = flowVersionId;
+    public void setFlowId(String flowId) {
+        this.flowId = flowId;
     }
     
     public void setX(int x) {

@@ -1,7 +1,9 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class MessageHeader implements Serializable, Cloneable {
@@ -15,6 +17,8 @@ public class MessageHeader implements Serializable, Cloneable {
     boolean lastMessage;
     
     String originatingStepId;
+    
+    Collection<String> targetStepIds;
 
     Map<String, Serializable> parameters = new HashMap<String, Serializable>();
     
@@ -52,6 +56,17 @@ public class MessageHeader implements Serializable, Cloneable {
 
     public void setLastMessage(boolean lastMessage) {
         this.lastMessage = lastMessage;
+    }
+
+    public void setTargetStepIds(Collection<String> targetStepIds) {
+        this.targetStepIds = targetStepIds;
+    }
+    
+    public Collection<String> getTargetStepIds() {
+        if (targetStepIds == null) {
+            targetStepIds = new HashSet<String>();
+        }
+        return targetStepIds;
     }
 
     public Map<String, Serializable> getParameters() {

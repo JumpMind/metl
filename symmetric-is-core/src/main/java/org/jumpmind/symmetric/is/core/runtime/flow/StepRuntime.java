@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.core.runtime.flow;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -12,6 +13,7 @@ import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
+import org.jumpmind.symmetric.is.core.runtime.component.AbstractComponent;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.slf4j.Logger;
@@ -24,9 +26,6 @@ public class StepRuntime implements Runnable {
     protected BlockingQueue<Message> inQueue;
 
     boolean running = true;
-
-    // TODO make this a setting for component
-    int capacity = 10000;
 
     Exception error;
 
@@ -44,6 +43,7 @@ public class StepRuntime implements Runnable {
         this.executionId = executionId;
         this.executionTracker = tracker;
         this.component = component;
+        int capacity = component.getFlowStep().getComponent().getInt(AbstractComponent.INBOUND_QUEUE_CAPACITY, 1000);
         inQueue = new LinkedBlockingQueue<Message>(capacity);
     }
 
@@ -157,14 +157,21 @@ public class StepRuntime implements Runnable {
     class MessageTarget implements IMessageTarget {
         @Override
         public void put(Message message) {
+            Collection<String> targetStepIds = message.getHeader().getTargetStepIds();
+            // clear out the target step id as we are done using it
+            message.getHeader().setTargetStepIds(null);
             for (StepRuntime targetRuntime : targetStepRuntimes) {
-                try {
-                    targetRuntime.put(message);
-                } catch (Exception e) {
-                    if (e instanceof RuntimeException) {
-                        throw (RuntimeException) e;
-                    } else {
-                        throw new RuntimeException(e);
+                boolean forward = targetStepIds == null || targetStepIds.size() == 0
+                        || targetStepIds.contains(targetRuntime.getComponent().getFlowStep().getId());
+                if (forward) {
+                    try {
+                        targetRuntime.put(message);
+                    } catch (Exception e) {
+                        if (e instanceof RuntimeException) {
+                            throw (RuntimeException) e;
+                        } else {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             }

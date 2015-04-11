@@ -33,7 +33,7 @@ public class TestUtils {
         Flow flow = new Flow(folder);
         flow.setCreateBy("Test");
         flow.setCreateTime(new Date());
-        flow.setFolderId(folder.getId());
+        flow.setFolderId(folder != null ? folder.getId() : null);
         flow.setId("FlowId");
         flow.setName("Flow");
         flow.setId(name);

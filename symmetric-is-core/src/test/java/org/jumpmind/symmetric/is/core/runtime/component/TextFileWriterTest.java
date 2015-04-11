@@ -16,6 +16,7 @@ import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
+import org.jumpmind.symmetric.is.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
@@ -46,8 +47,8 @@ public class TextFileWriterTest {
     @Test
     public void testTextWriterMultipleRowsPerMessage() throws Exception {
         TextFileWriter writer = new TextFileWriter();
-        writer.setFlowStep(writerFlowStep);
-        writer.start(null, resourceFactory);
+        writer.init(writerFlowStep, null);
+        writer.start(new ExecutionTrackerNoOp(), resourceFactory);
         writer.handle("test", createMultipleRowTextMessageToWrite(), null);
         checkTextFile();
     }
@@ -55,8 +56,8 @@ public class TextFileWriterTest {
     @Test
     public void testTextWriterSingleRowPerMessage() throws Exception {
         TextFileWriter writer = new TextFileWriter();
-        writer.setFlowStep(writerFlowStep);
-        writer.start(null, resourceFactory);
+        writer.init(writerFlowStep, null);
+        writer.start(new ExecutionTrackerNoOp(), resourceFactory);
         writer.handle("test", createSingleRowTextMessageToWrite(1, false), null);
         writer.handle("test", createSingleRowTextMessageToWrite(2, false), null);
         writer.handle("test", createSingleRowTextMessageToWrite(3, false), null);

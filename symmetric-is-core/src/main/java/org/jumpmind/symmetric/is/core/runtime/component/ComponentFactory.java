@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.AbstractFactory;
@@ -50,13 +51,13 @@ public class ComponentFactory extends AbstractFactory<IComponent> implements ICo
     }
 
     @Override
-    public IComponent create(FlowStep flowStep) {
+    public IComponent create(FlowStep flowStep, Flow flow) {
         try {
             String componentType = flowStep.getComponent().getType();
             Class<? extends IComponent> clazz = componentTypes.get(componentType);
             if (clazz != null) {
                 IComponent component = clazz.newInstance();
-                component.setFlowStep(flowStep);
+                component.init(flowStep, null);
                 return component;
             } else {
                 throw new IllegalStateException(

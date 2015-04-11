@@ -69,6 +69,15 @@ abstract public class AbstractObjectWithSettings extends AbstractObject {
         return defaultValue;
     }
     
+    public int getInt(String name, int defaultValue) {
+        String value = get(name);
+        if (value != null) {
+            return Integer.parseInt(value);
+        } else {
+            return defaultValue;
+        }
+    }
+    
     public String get(String name) {
         return get(name, null);
     }

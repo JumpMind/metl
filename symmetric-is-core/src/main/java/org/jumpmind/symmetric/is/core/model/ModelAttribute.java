@@ -7,9 +7,7 @@ public class ModelAttribute extends AbstractObject {
 
     ModelEntity entity;
     
-    ModelEntity typeEntity;
-    
-    String entityId;
+    ModelEntity typeEntity;    
 
     String name;
 
@@ -23,7 +21,13 @@ public class ModelAttribute extends AbstractObject {
     
     public ModelAttribute(String id, String entityId, String name) {
         this.id = id;
-        this.entityId = entityId;
+        setEntityId(entityId);
+        this.name = name;
+    }
+    
+    public ModelAttribute(String id, ModelEntity entity, String name) {
+        this.id = id;
+        this.entity = entity;
         this.name = name;
     }
     
@@ -44,11 +48,15 @@ public class ModelAttribute extends AbstractObject {
 	}
 
 	public String getEntityId() {
-		return entityId;
+		return entity != null ? entity.getId() : null;
 	}
 
 	public void setEntityId(String entityId) {
-		this.entityId = entityId;
+		if (entityId != null) {
+		    entity = new ModelEntity(entityId, entityId);
+		} else {
+		    entityId = null;
+		}
 	}
 
 	public String getName() {
@@ -89,7 +97,6 @@ public class ModelAttribute extends AbstractObject {
 
 	public void setEntity(ModelEntity entity) {
 		this.entity = entity;
-		this.entityId = entity.getId();
 	}
 
 }

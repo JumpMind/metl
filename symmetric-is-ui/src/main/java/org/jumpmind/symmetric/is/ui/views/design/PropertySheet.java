@@ -22,6 +22,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdatePasswordField;
+import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextArea;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -305,6 +306,21 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                 textField.setDescription(description);
                 formLayout.addComponent(textField);
                 break;
+            case TEXT:
+                ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(
+                        definition.label()) {
+                    private static final long serialVersionUID = 1L;
+
+                    protected void save() {
+                        saveSetting(key, this, obj);
+                    };
+                };
+                area.setValue(obj.get(key));
+                area.setRows(4);
+                area.setRequired(required);
+                area.setDescription(description);
+                formLayout.addComponent(area);
+                break;                
             case XML:
                 // TODO - similar to sql
                 break;

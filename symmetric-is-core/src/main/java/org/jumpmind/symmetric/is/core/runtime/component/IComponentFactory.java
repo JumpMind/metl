@@ -3,12 +3,13 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 import java.util.List;
 import java.util.Map;
 
+import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 
 public interface IComponentFactory {
 
-    public IComponent create(FlowStep flowStep);
+    public IComponent create(FlowStep flowStep, Flow flow);
 
     public void register(Class<IComponent> clazz);
 
