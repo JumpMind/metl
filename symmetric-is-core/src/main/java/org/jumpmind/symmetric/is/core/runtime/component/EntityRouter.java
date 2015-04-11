@@ -42,7 +42,7 @@ public class EntityRouter extends AbstractComponent {
     @SettingDefinition(order = 10, required = true, type = Type.INTEGER, defaultValue = "1", label = "Rows/Msg")
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
-    Set<Route> routes;
+    List<Route> routes;
 
     ScriptEngine scriptEngine;
 
@@ -53,9 +53,8 @@ public class EntityRouter extends AbstractComponent {
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         String json = flowStep.getComponent().get(SETTING_CONFIG);
         if (isNotBlank(json)) {
-            ObjectMapper mapper = new ObjectMapper();
             try {
-                routes = mapper.readValue(json, new TypeReference<Set<Route>>() {
+                routes = new ObjectMapper().readValue(json, new TypeReference<List<Route>>() {
                 });
             } catch (Exception e) {
                 throw new IoException(e);

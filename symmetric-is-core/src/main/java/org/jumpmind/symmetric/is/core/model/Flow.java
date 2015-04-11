@@ -10,9 +10,9 @@ public class Flow extends AbstractObject {
     private static final long serialVersionUID = 1L;
 
     String rowId = UUID.randomUUID().toString();
-    
+
     Folder folder;
-    
+
     String projectVersionId;
 
     String name;
@@ -83,6 +83,18 @@ public class Flow extends AbstractObject {
         return null;
     }
 
+    public List<FlowStepLink> findFlowStepLinksWithSource(String sourceNodeId) {
+        List<FlowStepLink> links = new ArrayList<FlowStepLink>();
+        if (flowStepLinks != null) {
+            for (FlowStepLink flowStepLink : flowStepLinks) {
+                if (flowStepLink.getSourceStepId().equals(sourceNodeId)) {
+                    links.add(flowStepLink);
+                }
+            }
+        }
+        return links;
+    }
+
     public FlowStep findFlowStepWithId(String id) {
         for (FlowStep flowStep : flowSteps) {
             if (flowStep.getId().equals(id)) {
@@ -142,19 +154,19 @@ public class Flow extends AbstractObject {
         }
         return link;
     }
-    
+
     public void setProjectVersionId(String projectVersionId) {
         this.projectVersionId = projectVersionId;
     }
-    
+
     public String getProjectVersionId() {
         return projectVersionId;
     }
-    
+
     public void setRowId(String rowId) {
         this.rowId = rowId;
     }
-    
+
     public String getRowId() {
         return rowId;
     }
@@ -162,7 +174,7 @@ public class Flow extends AbstractObject {
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
-    
+
     public boolean isDeleted() {
         return deleted;
     }
