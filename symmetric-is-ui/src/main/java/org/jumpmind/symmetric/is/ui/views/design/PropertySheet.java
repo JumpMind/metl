@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -228,7 +230,11 @@ public class PropertySheet extends Panel implements ValueChangeListener {
             case BOOLEAN:
                 final CheckBox checkBox = new CheckBox(definition.label());
                 checkBox.setImmediate(true);
-                checkBox.setValue(obj.getBoolean(key));
+                boolean defaultValue = false;
+                if (isNotBlank(definition.defaultValue())) {
+                    defaultValue = Boolean.parseBoolean(definition.defaultValue());
+                }
+                checkBox.setValue(obj.getBoolean(key, defaultValue));
                 checkBox.setRequired(required);
                 checkBox.setDescription(description);
                 checkBox.addValueChangeListener(new ValueChangeListener() {
@@ -272,7 +278,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                         saveSetting(key, this, obj);
                     };
                 };
-                passwordField.setValue(obj.get(key));
+                passwordField.setValue(obj.get(key, definition.defaultValue()));
                 passwordField.setRequired(required);
                 passwordField.setDescription(description);
                 formLayout.addComponent(passwordField);
@@ -287,7 +293,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                     };
                 };
                 integerField.setConverter(Integer.class);
-                integerField.setValue(obj.get(key));
+                integerField.setValue(obj.get(key, definition.defaultValue()));
                 integerField.setRequired(required);
                 integerField.setDescription(description);
                 formLayout.addComponent(integerField);
@@ -301,12 +307,13 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                         saveSetting(key, this, obj);
                     };
                 };
-                textField.setValue(obj.get(key));
+                textField.setValue(obj.get(key, definition.defaultValue()));
                 textField.setRequired(required);
                 textField.setDescription(description);
                 formLayout.addComponent(textField);
                 break;
             case TEXT:
+            case XML:
                 ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(
                         definition.label()) {
                     private static final long serialVersionUID = 1L;
@@ -315,15 +322,12 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                         saveSetting(key, this, obj);
                     };
                 };
-                area.setValue(obj.get(key));
+                area.setValue(obj.get(key, definition.defaultValue()));
                 area.setRows(4);
                 area.setRequired(required);
                 area.setDescription(description);
                 formLayout.addComponent(area);
                 break;                
-            case XML:
-                // TODO - similar to sql
-                break;
             default:
                 break;
 
@@ -335,8 +339,6 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         Setting data = obj.findSetting(key);
         data.setValue(field.getValue() != null ? field.getValue().toString() : null);
         configurationService.save(data);
-        // componentSettingsChangedListener.componentSettingsChanges(flowNode,
-        // false);
     }
 
 }

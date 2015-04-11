@@ -82,10 +82,10 @@ abstract public class AbstractObjectWithSettings extends AbstractObject {
         return get(name, null);
     }
     
-    public boolean getBoolean(String name) {
+    public boolean getBoolean(String name, boolean defaultValue) {
         String value = get(name);
         if (isBlank(value)) {
-            return false;
+            return defaultValue;
         } else {
             return Boolean.parseBoolean(value);
         }
