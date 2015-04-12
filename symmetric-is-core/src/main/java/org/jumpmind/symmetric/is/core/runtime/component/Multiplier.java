@@ -7,6 +7,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
 @ComponentDefinition(category = ComponentCategory.PROCESSOR, 
 typeName = Multiplier.TYPE, 
+iconImage = "multiplier.png",
 inputMessage=MessageType.ENTITY_MESSAGE,
 outgoingMessage=MessageType.ENTITY_MESSAGE)
 public class Multiplier extends AbstractComponent {

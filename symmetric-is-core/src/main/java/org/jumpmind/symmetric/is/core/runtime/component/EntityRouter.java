@@ -32,7 +32,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@ComponentDefinition(category = ComponentCategory.PROCESSOR, typeName = EntityRouter.TYPE, inputMessage = MessageType.ENTITY_MESSAGE, outgoingMessage = MessageType.ENTITY_MESSAGE)
+@ComponentDefinition(category = ComponentCategory.PROCESSOR, typeName = EntityRouter.TYPE, iconImage="entityrouter.png", inputMessage = MessageType.ENTITY_MESSAGE, outgoingMessage = MessageType.ENTITY_MESSAGE)
 public class EntityRouter extends AbstractComponent {
 
     public static final String TYPE = "Entity Router";

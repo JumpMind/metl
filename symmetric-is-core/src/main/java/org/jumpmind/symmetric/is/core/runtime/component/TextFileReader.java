@@ -18,7 +18,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamableResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
-@ComponentDefinition(typeName = TextFileReader.TYPE, category = ComponentCategory.READER, iconImage="filereader.png",
+@ComponentDefinition(typeName = TextFileReader.TYPE, category = ComponentCategory.READER, iconImage="textfilereader.png",
         outgoingMessage=MessageType.TEXT_MESSAGE,
         resourceCategory = ResourceCategory.STREAMABLE)
 public class TextFileReader extends AbstractComponent {

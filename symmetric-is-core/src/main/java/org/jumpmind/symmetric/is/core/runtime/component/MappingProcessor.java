@@ -15,7 +15,8 @@ import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
-@ComponentDefinition(category = ComponentCategory.PROCESSOR, typeName = MappingProcessor.TYPE, inputMessage=MessageType.ENTITY_MESSAGE,
+@ComponentDefinition(category = ComponentCategory.PROCESSOR, iconImage="mapping.png", 
+typeName = MappingProcessor.TYPE, inputMessage=MessageType.ENTITY_MESSAGE,
 outgoingMessage=MessageType.ENTITY_MESSAGE)
 public class MappingProcessor extends AbstractComponent {
 
