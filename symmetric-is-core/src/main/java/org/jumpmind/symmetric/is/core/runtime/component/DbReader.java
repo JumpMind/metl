@@ -30,7 +30,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 
 @ComponentDefinition(typeName = DbReader.TYPE, category = ComponentCategory.READER, iconImage="dbreader.png",
         inputMessage=MessageType.NONE,
-        outgoingMessage=MessageType.ENTITY_MESSAGE,
+        outgoingMessage=MessageType.ENTITY,
         resourceCategory = ResourceCategory.DATASOURCE)
 public class DbReader extends AbstractComponent {
 

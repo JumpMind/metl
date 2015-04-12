@@ -21,7 +21,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IStreamableResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
 @ComponentDefinition(typeName = TextFileWriter.TYPE, category = ComponentCategory.WRITER, iconImage="textfilewriter.png",
-        inputMessage=MessageType.TEXT_MESSAGE,
+        inputMessage=MessageType.TEXT,
         resourceCategory = ResourceCategory.STREAMABLE)
 public class TextFileWriter extends AbstractComponent {
 

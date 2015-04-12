@@ -8,8 +8,8 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.util.AppUtils;
 
-@ComponentDefinition(category = ComponentCategory.PROCESSOR, typeName = Delay.TYPE, inputMessage=MessageType.ANY_MESSAGE,
-outgoingMessage=MessageType.ANY_MESSAGE, iconImage="timer.png")
+@ComponentDefinition(category = ComponentCategory.PROCESSOR, typeName = Delay.TYPE, inputMessage=MessageType.ANY,
+outgoingMessage=MessageType.ANY, iconImage="timer.png")
 public class Delay extends AbstractComponent {
 
     public static final String TYPE = "Delay";

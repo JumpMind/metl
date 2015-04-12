@@ -27,7 +27,7 @@ import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
-@ComponentDefinition(typeName = DelimitedFormatter.TYPE, category = ComponentCategory.PROCESSOR, iconImage = "format.png", inputMessage = MessageType.ENTITY_MESSAGE, outgoingMessage = MessageType.TEXT_MESSAGE)
+@ComponentDefinition(typeName = DelimitedFormatter.TYPE, category = ComponentCategory.PROCESSOR, iconImage = "format.png", inputMessage = MessageType.ENTITY, outgoingMessage = MessageType.TEXT)
 public class DelimitedFormatter extends AbstractComponent {
 
     public static final String TYPE = "Delimited Formatter";

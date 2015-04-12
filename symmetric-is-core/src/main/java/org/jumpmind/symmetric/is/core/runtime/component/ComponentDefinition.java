@@ -21,6 +21,8 @@ public @interface ComponentDefinition {
     
     MessageType outgoingMessage() default MessageType.NONE;
     
+    boolean inputOutputModelsMatch() default false;
+    
     ResourceCategory resourceCategory() default ResourceCategory.NONE;
     
 }

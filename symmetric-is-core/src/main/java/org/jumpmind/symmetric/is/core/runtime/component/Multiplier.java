@@ -8,8 +8,8 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 @ComponentDefinition(category = ComponentCategory.PROCESSOR, 
 typeName = Multiplier.TYPE, 
 iconImage = "multiplier.png",
-inputMessage=MessageType.ENTITY_MESSAGE,
-outgoingMessage=MessageType.ENTITY_MESSAGE)
+inputMessage=MessageType.ENTITY,
+outgoingMessage=MessageType.ENTITY)
 public class Multiplier extends AbstractComponent {
 
     public static final String TYPE = "Multiplier";

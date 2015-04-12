@@ -29,7 +29,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
 @ComponentDefinition(typeName = DbWriter.TYPE, category = ComponentCategory.WRITER, iconImage="dbwriter.png",
-        inputMessage=MessageType.ENTITY_MESSAGE, outgoingMessage=MessageType.NONE, resourceCategory = ResourceCategory.DATASOURCE)
+        inputMessage=MessageType.ENTITY, outgoingMessage=MessageType.NONE, resourceCategory = ResourceCategory.DATASOURCE)
 public class DbWriter extends AbstractComponent {
 
     public static final String TYPE = "Database Writer";

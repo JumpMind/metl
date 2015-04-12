@@ -15,7 +15,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IStreamableResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
 @ComponentDefinition(typeName = BinaryFileWriter.TYPE, category = ComponentCategory.WRITER, iconImage="binaryfilewriter.png",
-        inputMessage=MessageType.BINARY_MESSAGE,
+        inputMessage=MessageType.BINARY,
         resourceCategory = ResourceCategory.STREAMABLE)
 public class BinaryFileWriter extends AbstractComponent {
 

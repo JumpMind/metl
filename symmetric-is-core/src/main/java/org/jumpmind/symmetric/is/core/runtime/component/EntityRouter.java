@@ -32,14 +32,25 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@ComponentDefinition(category = ComponentCategory.PROCESSOR, typeName = EntityRouter.TYPE, iconImage="entityrouter.png", inputMessage = MessageType.ENTITY_MESSAGE, outgoingMessage = MessageType.ENTITY_MESSAGE)
+@ComponentDefinition(
+        category = ComponentCategory.PROCESSOR,
+        typeName = EntityRouter.TYPE,
+        iconImage = "entityrouter.png",
+        inputMessage = MessageType.ENTITY,
+        outgoingMessage = MessageType.ENTITY,
+        inputOutputModelsMatch = true)
 public class EntityRouter extends AbstractComponent {
 
     public static final String TYPE = "Entity Router";
 
     public static final String SETTING_CONFIG = "config";
 
-    @SettingDefinition(order = 10, required = true, type = Type.INTEGER, defaultValue = "1", label = "Rows/Msg")
+    @SettingDefinition(
+            order = 10,
+            required = true,
+            type = Type.INTEGER,
+            defaultValue = "1",
+            label = "Rows/Msg")
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
     List<Route> routes;
@@ -117,9 +128,9 @@ public class EntityRouter extends AbstractComponent {
         List<ModelEntity> entities = model.getModelEntities();
         for (ModelEntity modelEntity : entities) {
             HashMap<String, Object> boundEntity = new HashMap<String, Object>();
-            bindings.put(modelEntity.getName(), boundEntity);            
-        }        
-        
+            bindings.put(modelEntity.getName(), boundEntity);
+        }
+
         Set<String> attributeIds = entityData.keySet();
         for (String attributeId : attributeIds) {
             ModelAttribute attribute = model.getAttributeById(attributeId);
