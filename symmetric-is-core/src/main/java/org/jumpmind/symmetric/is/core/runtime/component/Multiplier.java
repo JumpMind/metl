@@ -23,7 +23,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 public class Multiplier extends AbstractComponent {
 
     public static final String TYPE = "Multiplier";
-    
+
     @SettingDefinition(
             order = 20,
             required = false,
@@ -31,22 +31,22 @@ public class Multiplier extends AbstractComponent {
             defaultValue = "10",
             label = "Rows/Msg")
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
-    
+
     @SettingDefinition(
             order = 10,
             required = true,
             type = Type.SOURCE_STEP,
             label = "Multiplier Source")
     public final static String MULTIPLIER_SOURCE_STEP = "multiplier.source.step";
-    
+
     boolean multipliersInitialized = false;
-    
+
     String sourceStepId;
-    
+
     int rowsPerMessage;
-    
+
     List<EntityData> multipliers = new ArrayList<EntityData>();
-    
+
     List<Message> queuedWhileWaitingForMultiplier = new ArrayList<Message>();
 
     @Override
@@ -54,10 +54,10 @@ public class Multiplier extends AbstractComponent {
         super.start(executionTracker, resourceFactory);
 
         multipliersInitialized = false;
-        
+
         sourceStepId = flowStep.getComponent().get(MULTIPLIER_SOURCE_STEP);
         rowsPerMessage = flowStep.getComponent().getInt(ROWS_PER_MESSAGE, 10);
-        
+
         if (isBlank(sourceStepId) || flow.findFlowStepWithId(sourceStepId) == null) {
             throw new IllegalStateException("The source step must be specified");
         }
@@ -66,7 +66,7 @@ public class Multiplier extends AbstractComponent {
     @Override
     public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
         componentStatistics.incrementInboundMessages();
-        
+
         if (inputMessage.getHeader().getOriginatingStepId().equals(sourceStepId)) {
             List<EntityData> datas = inputMessage.getPayload();
             multipliers.addAll(datas);
@@ -79,24 +79,30 @@ public class Multiplier extends AbstractComponent {
                 Message message = messages.next();
                 multiply(message, messageTarget);
             }
-            
+
             multiply(inputMessage, messageTarget);
         }
-        
+
     }
-    
+
     protected void multiply(Message message, IMessageTarget messageTarget) {
         ArrayList<EntityData> multiplied = new ArrayList<EntityData>();
-        for (EntityData multiplierData : multipliers) {
+        for (int i = 0; i < multipliers.size(); i++) {
+            EntityData multiplierData = multipliers.get(i);
+
             List<EntityData> datas = message.getPayload();
-            for (EntityData entityData : datas) {
+            for (int j = 0; j < datas.size(); j++) {
+                EntityData oldData = datas.get(j);
                 EntityData newData = new EntityData();
-                newData.putAll(entityData);
+                newData.putAll(oldData);
                 newData.putAll(multiplierData);
                 multiplied.add(newData);
-                
+
                 if (multiplied.size() >= rowsPerMessage) {
                     Message newMessage = new Message(flowStep.getId());
+                    newMessage.getHeader().setLastMessage(
+                            message.getHeader().isLastMessage() && datas.size() - 1 == j
+                                    && multipliers.size() - 1 == i);
                     newMessage.setPayload(multiplied);
                     componentStatistics.incrementOutboundMessages();
                     messageTarget.put(newMessage);
@@ -104,12 +110,13 @@ public class Multiplier extends AbstractComponent {
                 }
             }
         }
-        
+
         if (multiplied.size() > 0) {
             Message newMessage = new Message(flowStep.getId());
             newMessage.setPayload(multiplied);
+            newMessage.getHeader().setLastMessage(message.getHeader().isLastMessage());
             componentStatistics.incrementOutboundMessages();
-            messageTarget.put(newMessage);            
+            messageTarget.put(newMessage);
         }
     }
 
