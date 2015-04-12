@@ -170,7 +170,7 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         instance.bind("beforeDrop", function(info) {
             var source = info.connection.endpoints[0].getOverlay("label").label;
             var target = info.dropEndpoint.getOverlay("label").label;
-            return source === target;
+            return source === target || source === '*' || target == '*';
         });
         instance.bind("connection", function(info, originalEvent) {
             self.onConnection({
