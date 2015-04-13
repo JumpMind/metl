@@ -81,9 +81,12 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 		addComponent(header2);
 		
 		Panel panel = new Panel();
+		VerticalLayout vlay = new VerticalLayout();
+		vlay.setSizeFull();
 		diagram = new MappingDiagram(context, component);
 		diagram.setSizeFull();
-		panel.setContent(diagram);
+		vlay.addComponent(diagram);
+		panel.setContent(vlay);
 		panel.setSizeFull();
 		addComponent(panel);
 		setExpandRatio(panel, 1.0f);
