@@ -11,6 +11,7 @@ import org.jumpmind.symmetric.is.core.model.AbstractObjectWithSettings;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
@@ -85,7 +86,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                 Component component = (Component) obj;
                 configurationService.refresh(component);
                 addComponentProperties(formLayout, component);
-            } 
+            }
 
             if (obj instanceof AbstractObjectWithSettings) {
                 Map<String, SettingDefinition> settings = buildSettings(obj);
@@ -113,8 +114,8 @@ public class PropertySheet extends Panel implements ValueChangeListener {
             FlowStep step = (FlowStep) value;
             Flow flow = configurationService.findFlow(step.getFlowId());
             String projectVersionId = flow.getProjectVersionId();
-            if (componentDefintion.outgoingMessage() == MessageType.ENTITY && 
-                    !componentDefintion.inputOutputModelsMatch()) {
+            if (componentDefintion.outgoingMessage() == MessageType.ENTITY
+                    && !componentDefintion.inputOutputModelsMatch()) {
                 final AbstractSelect combo = new ComboBox("Output Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
@@ -313,10 +314,38 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                 textField.setDescription(description);
                 formLayout.addComponent(textField);
                 break;
+            case SOURCE_STEP:
+                if (value instanceof FlowStep) {
+                    FlowStep step = (FlowStep) value;
+                    Flow flow = configurationService.findFlow(step.getFlowId());
+                    final AbstractSelect sourceStepsCombo = new ComboBox(definition.label());
+                    sourceStepsCombo.setImmediate(true);
+
+                    List<FlowStepLink> sourceSteps = flow.findFlowStepLinksWithTarget(step.getId());
+                    for (FlowStepLink flowStepLink : sourceSteps) {
+                        FlowStep sourceStep = flow.findFlowStepWithId(flowStepLink
+                                .getSourceStepId());
+                        sourceStepsCombo.addItem(sourceStep.getId());
+                        sourceStepsCombo.setItemCaption(sourceStep.getId(), sourceStep.getName());
+                    }
+                    sourceStepsCombo.setValue(obj.get(key));
+                    sourceStepsCombo.setDescription(description);
+                    sourceStepsCombo.setNullSelectionAllowed(false);
+                    sourceStepsCombo.addValueChangeListener(new ValueChangeListener() {
+
+                        private static final long serialVersionUID = 1L;
+
+                        @Override
+                        public void valueChange(ValueChangeEvent event) {
+                            saveSetting(key, sourceStepsCombo, obj);
+                        }
+                    });
+                    formLayout.addComponent(sourceStepsCombo);
+                }
+                break;
             case TEXT:
             case XML:
-                ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(
-                        definition.label()) {
+                ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(definition.label()) {
                     private static final long serialVersionUID = 1L;
 
                     protected void save() {
@@ -328,7 +357,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                 area.setRequired(required);
                 area.setDescription(description);
                 formLayout.addComponent(area);
-                break;                
+                break;
             default:
                 break;
 

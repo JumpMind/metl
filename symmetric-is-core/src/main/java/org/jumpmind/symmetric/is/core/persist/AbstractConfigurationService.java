@@ -575,7 +575,6 @@ abstract class AbstractConfigurationService extends AbstractService implements
                 entityParams, null, null, tableName(ModelAttribute.class));
         for (ModelAttribute attribute : attributes) {
             refresh(attribute);
-            attribute.setEntity(modelEntity);
             modelEntity.addModelAttribute(attribute);
         }
         modelEntity.getModelEntityRelationships().clear();

@@ -145,7 +145,7 @@ public class TableColumnSelectWindow extends ResizableWindow {
 				TableColumn tableColumn = (TableColumn) itemId;
 				ModelAttribute a = new ModelAttribute();
 				a.setName(tableColumn.getColumn().getName());
-				a.setEntity(e);
+				a.setEntityId(e.getId());
 				a.setType(tableColumn.getColumn().getMappedType());
 				e.addModelAttribute(a);
 			}

@@ -212,8 +212,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         addModelEntity(filter, modelEntity);
         for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
             treeTable.setChildrenAllowed(modelEntity, true);
-            modelAttribute.setEntity(modelEntity);
-            addModelAttribute(filter, modelAttribute);
+            modelAttribute.setEntityId(modelEntity.getId());
+            addModelAttribute(filter, modelEntity, modelAttribute);
         }
         treeTable.setCollapsed(modelEntity, false);
     }
@@ -252,11 +252,11 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.setChildrenAllowed(modelEntity, false);
     }
 
-    protected void addModelAttribute(String filter, ModelAttribute modelAttribute) {
+    protected void addModelAttribute(String filter, ModelEntity entity, ModelAttribute modelAttribute) {
         treeTable.addItem(modelAttribute);
         treeTable.setItemIcon(modelAttribute, FontAwesome.COLUMNS);
-        treeTable.setParent(modelAttribute, modelAttribute.getEntity());
-        treeTable.setChildrenAllowed(modelAttribute.getEntity(), true);
+        treeTable.setParent(modelAttribute, entity);
+        treeTable.setChildrenAllowed(entity, true);
         treeTable.setChildrenAllowed(modelAttribute, false);
     }
 
@@ -286,14 +286,16 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 a.setName("New Attribute");
                 a.setDataType(DataType.VARCHAR);
                 Object itemId = itemIds.iterator().next();
+                ModelEntity entity = null;
                 if (itemId instanceof ModelEntity) {
-                    a.setEntity((ModelEntity) itemId);
+                    entity = (ModelEntity) itemId;
                 } else if (itemId instanceof ModelAttribute) {
-                    a.setEntity(((ModelAttribute) itemId).getEntity());
+                    entity = (ModelEntity)treeTable.getParent(itemId);
                 }
+                a.setEntityId(entity.getId());
                 context.getConfigurationService().save(a);
-                addModelAttribute("", a);
-                treeTable.setCollapsed(a.getEntity(), false);
+                addModelAttribute("", entity, a);
+                treeTable.setCollapsed(entity, false);
                 selectOnly(a);
                 editSelectedItem();
             }
@@ -325,7 +327,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 if (itemId instanceof ModelAttribute) {
                     ModelAttribute a = (ModelAttribute) itemId;
                     context.getConfigurationService().delete((ModelAttribute) itemId);
-                    a.getEntity().removeModelAttribute(a);
+                    ModelEntity entity = (ModelEntity)treeTable.getParent(itemId);
+                    entity.removeModelAttribute(a);
                     treeTable.removeItem(itemId);
                 }
             }
@@ -367,10 +370,10 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 } else {
                     for (ModelAttribute a : e.getModelAttributes()) {
                         if (modelEntity.getModelAttributeByName(a.getName()) == null) {
-                            a.setEntity(modelEntity);
+                            a.setEntityId(modelEntity.getId());
                             context.getConfigurationService().save(a);
                             modelEntity.addModelAttribute(a);
-                            addModelAttribute("", a);
+                            addModelAttribute("", modelEntity, a);
                         }
                     }
                 }

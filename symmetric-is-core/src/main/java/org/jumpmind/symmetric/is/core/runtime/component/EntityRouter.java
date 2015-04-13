@@ -135,7 +135,7 @@ public class EntityRouter extends AbstractComponent {
         for (String attributeId : attributeIds) {
             ModelAttribute attribute = model.getAttributeById(attributeId);
             if (attribute != null) {
-                ModelEntity entity = attribute.getEntity();
+                ModelEntity entity = model.getEntityById(attribute.getEntityId());
                 Object value = entityData.get(attributeId);
                 @SuppressWarnings("unchecked")
                 Map<String, Object> boundEntity = (Map<String, Object>) bindings.get(entity

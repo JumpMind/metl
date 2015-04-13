@@ -94,6 +94,19 @@ public class Flow extends AbstractObject {
         }
         return links;
     }
+    
+    public List<FlowStepLink> findFlowStepLinksWithTarget(String targetNodeId) {
+        List<FlowStepLink> links = new ArrayList<FlowStepLink>();
+        if (flowStepLinks != null) {
+            for (FlowStepLink flowStepLink : flowStepLinks) {
+                if (flowStepLink.getTargetStepId().equals(targetNodeId)) {
+                    links.add(flowStepLink);
+                }
+            }
+        }
+        return links;
+    }
+
 
     public FlowStep findFlowStepWithId(String id) {
         for (FlowStep flowStep : flowSteps) {

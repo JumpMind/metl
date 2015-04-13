@@ -109,14 +109,14 @@ public class EntityRouterTest {
 
     private static Model createInputModel() {
         ModelEntity tt1 = new ModelEntity("tt1", "TEST_TABLE_1");
-        tt1.addModelAttribute(new ModelAttribute("tt1col1", tt1, "COL1"));
-        tt1.addModelAttribute(new ModelAttribute("tt1col2", tt1, "COL2"));
-        tt1.addModelAttribute(new ModelAttribute("tt1col3", tt1, "COL3"));
+        tt1.addModelAttribute(new ModelAttribute("tt1col1", tt1.getId(), "COL1"));
+        tt1.addModelAttribute(new ModelAttribute("tt1col2", tt1.getId(), "COL2"));
+        tt1.addModelAttribute(new ModelAttribute("tt1col3", tt1.getId(), "COL3"));
 
         ModelEntity tt2 = new ModelEntity("tt2", "TEST_TABLE_2");
-        tt2.addModelAttribute(new ModelAttribute("tt2colx", tt2, "COLX"));
-        tt2.addModelAttribute(new ModelAttribute("tt2coly", tt2, "COLY"));
-        tt2.addModelAttribute(new ModelAttribute("tt2colz", tt2, "COLZ"));
+        tt2.addModelAttribute(new ModelAttribute("tt2colx", tt2.getId(), "COLX"));
+        tt2.addModelAttribute(new ModelAttribute("tt2coly", tt2.getId(), "COLY"));
+        tt2.addModelAttribute(new ModelAttribute("tt2colz", tt2.getId(), "COLZ"));
 
         Model modelVersion = new Model();
         modelVersion.getModelEntities().add(tt1);
