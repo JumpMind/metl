@@ -123,12 +123,23 @@ public class TableColumnSelectWindow extends ResizableWindow {
 		Collection<Object> itemIds = (Collection<Object>) tree.getValue();
 		HashMap<Table, ModelEntity> tableModelEntity = new HashMap<Table, ModelEntity>();
 
-		for (Object itemId : itemIds) {					
+		for (Object itemId : itemIds) {
+            boolean includeAllColumns = true;
 			Table table = null;
 			if (itemId instanceof Table) {
 				table = (Table) itemId;
+				for (Object object : itemIds) {
+                    if (object instanceof TableColumn) {
+                        TableColumn column = (TableColumn)object;
+                        if (column.getTable().equals(table)) {
+                            includeAllColumns = false;
+                        }
+                    }
+                }
+				
 			} else if (itemId instanceof TableColumn) {
 				table = ((TableColumn) itemId).getTable();
+				includeAllColumns = false;
 			} else {
 				continue;
 			}
@@ -148,6 +159,15 @@ public class TableColumnSelectWindow extends ResizableWindow {
 				a.setEntityId(e.getId());
 				a.setType(tableColumn.getColumn().getMappedType());
 				e.addModelAttribute(a);
+			} else if (includeAllColumns) {
+			    Column[] columns = table.getColumns();
+			    for (Column column : columns) {
+			        ModelAttribute a = new ModelAttribute();
+	                a.setName(column.getName());
+	                a.setEntityId(e.getId());
+	                a.setType(column.getMappedType());
+	                e.addModelAttribute(a);
+                }
 			}
 			tree.unselect(itemId);
 		}
