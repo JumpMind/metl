@@ -54,6 +54,14 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
     	}
     }
 
+    public void filterInputModel(String text) {
+        callFunction("filterInputModel", text);
+    }
+
+    public void filterOutputModel(String text) {
+        callFunction("filterOutputModel", text);
+    }
+
     protected void removeConnection(String sourceId, String targetId) {
     	List<ComponentAttributeSetting> settings = component.getAttributeSetting(sourceId, MappingProcessor.ATTRIBUTE_MAPS_TO);
     	for (ComponentAttributeSetting setting : settings) {

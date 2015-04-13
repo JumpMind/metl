@@ -1,21 +1,14 @@
 window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
 	self = this;
 	state = this.getState();
-
-    parentDiv = document.getElementById("mapping-diagram");
-
-    selectedDstId = null;
     selectedSrcId = null;
-    
-    isScrolling = false;
-    scrollMultiple = 1;
-    scrollDiv = parentDiv.parentNode.parentNode.parentNode.parentNode;
-    parentDiv.addEventListener("mousemove", function(event) {
-    	if (event.pageY < 100) startScrolling(-60);
-    	else if (event.pageY < 125) startScrolling(-40);
-    	else if (event.pageY < 150) startScrolling(-20);
-    	else isScrolling = false;
-    }, false);
+    selectedDstId = null;
+    inputModelFilter = null;
+    outputModelFilter = null;
+
+    mappingDiv = document.getElementById("mapping-diagram");
+    scrollDiv = mappingDiv.parentNode;
+    topDiv = scrollDiv.parentNode;    
 
     scrollDiv.parentNode.addEventListener("click", function(event) {
     	if (event.target.tagName == "DIV") {
@@ -24,7 +17,7 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
     	}
     	if (event.target.classList !== undefined && !event.target.classList.contains("dst")) {
 			selectedSrcId = selectedDstId = null;
-			unselectAllDivs();			
+			unselectAllNodes();			
 		}
     }, false);
 
@@ -42,7 +35,7 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
     instance.registerEndpointType("selected", { paintStyle : { fillStyle: "orange" } });
 
     instance.bind("connection", function(info, originalEvent) {
-    	unselectAllDivs();
+    	unselectAllNodes();
         self.onConnection({
             "sourceId" : info.connection.sourceId,
             "targetId" : info.connection.targetId,
@@ -51,7 +44,7 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
     });
 
     instance.bind("connectionDetached", function(info, originalEvent) {
-    	unselectAllDivs();
+    	unselectAllNodes();
         self.onConnection({
             "sourceId" : info.connection.sourceId,
             "targetId" : info.connection.targetId,
@@ -60,7 +53,7 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
     });
 
     instance.bind("connectionMoved", function(info, originalEvent) {
-    	unselectAllDivs();
+    	unselectAllNodes();
     	if (info.connection.getType().indexOf("selected") != -1) {
             for (var i = 0; i < info.connection.endpoints.length; i++) {
             	info.connection.endpoints[i].toggleType("selected");
@@ -115,67 +108,111 @@ window.org_jumpmind_symmetric_is_ui_mapping_MappingDiagram = function() {
         }
     }
 
+    removeConnections = function() {
+        var connections = instance.getAllConnections();
+        while (connections.length > 0) {
+        	instance.detach(connections[0], { fireEvent: false });            	
+        }
+    }
+
     this.onStateChange = function() {
     	instance.batch(function() {
-            var connections = instance.getAllConnections();
-            while (connections.length > 0) {
-            	instance.detach(connections[0], { fireEvent: false });            	
-            }
+    		removeConnections();
             addConnections();
     	});
-    	instance.repaintEverything();
+    };
+    
+    this.filterInputModel = function(text) {
+    	inputModelFilter = text;
+    	rebuildAll();
+    };
+
+    this.filterOutputModel = function(text) {
+    	outputModelFilter = text;
+    	rebuildAll();
     };
 
     instance.ready(function () {
-        var widest = appendChildren(parentDiv, state.inputModel.modelEntities, "src", 1, 1);
-        appendChildren(parentDiv, state.outputModel.modelEntities, "dst", (widest / 2) + 10, 1)
-        addConnections();
-
-        instance.makeSource(jsPlumb.getSelector(".mapping-diagram .src"));
-        
-        instance.makeTarget(jsPlumb.getSelector(".mapping-diagram .dst"),
-        	{ dropOptions: { hoverClass: "dragHover" }});
+    	rebuildAll();
     });
 }
 
-function appendChildren(parentDiv, entities, prefix, x, y) {
-	var widest = 0;
-    for (var i = 0; i < entities.length; i++, y += 2) {
-    	var entity = entities[i];
-    	createDiv(parentDiv, prefix + entity.id, entity.name, "entity", x, y);    	
-    	attrs = entity.modelAttributes;
-    	for (j = 0, y += 2; j < attrs.length; j++, y += 2) {
-    		var attr = attrs[j];
-    		createDiv(parentDiv, prefix + attr.id, attr.name, "entity " + prefix, x + 1, y);
-    		if (attr.name.length > widest) {
-    			widest = attr.name.length;
-    		}
-    	}
+function rebuildAll() {
+	removeConnections();
+	removeNodes();
+	appendNodes(mappingDiv, state.inputModel.modelEntities, "src", 10, 10, inputModelFilter);
+    appendNodes(mappingDiv, state.outputModel.modelEntities, "dst", (mappingDiv.clientWidth / 2) + 12, 10, outputModelFilter);
+
+    var srcNodes = jsPlumb.getSelector(".mapping-diagram .src");
+    if (srcNodes.length > 0) {
+    	instance.makeSource(srcNodes);
     }
-    return widest;
+    var dstNodes = jsPlumb.getSelector(".mapping-diagram .dst");
+    if (dstNodes.length > 0) {
+    	instance.makeTarget(dstNodes, { dropOptions: { hoverClass: "dragHover" }});
+    }
+    addConnections();
 }
 
-function createDiv(parentDiv, id, name, className, x, y) {
+function removeNodes() {
+	while (mappingDiv.childNodes.length > 0) {
+		var child = mappingDiv.childNodes[0];
+		if (child.classList !== undefined && child.classList.contains("entity")) {
+			instance.remove(mappingDiv.childNodes[0]);
+		}
+	}	
+}
+
+function appendNodes(parentDiv, entities, prefix, left, top, filterText) {
+	var lineHeight = 23;
+	var filteredEntities = [];
+    for (var i = 0; i < entities.length; i++) {
+    	var entity = entities[i];
+    	if (filterText == null || entity.name.toUpperCase().indexOf(filterText.toUpperCase()) != -1) {
+    		filteredEntities[filteredEntities.length] = entity;
+    	} else {
+    		var attrs = entity.modelAttributes;
+        	for (var j = 0; j < attrs.length; j++) {
+        		var attr = attrs[j];
+        		if (filterText == null || attr.name.toUpperCase().indexOf(filterText.toUpperCase()) != -1) {
+        			filteredEntities[filteredEntities.length] = entity;
+        			break;
+        		}
+        	}
+    	}
+    }
+	for (var i = 0; i < filteredEntities.length; i++, top += lineHeight) {
+    	var entity = filteredEntities[i];
+    	var attrs = entity.modelAttributes;
+    	createNode(parentDiv, prefix + entity.id, entity.name, "entity", left, top);
+    	for (j = 0, top += lineHeight; j < attrs.length; j++, top += lineHeight) {
+    		var attr = attrs[j];
+    		createNode(parentDiv, prefix + attr.id, attr.name, "entity " + prefix, left + 10, top);
+    	}
+    }
+}
+
+function createNode(parentDiv, id, name, className, left, top) {
     var div = document.createElement("div");
     div.id = id;
-    div.style.top = y + "em";
-    div.style.left = x + "em";
+    div.style.top = top + "px";
+    div.style.left = left + "px";
     div.innerHTML = name;
     div.className = className;
-    div.onmousedown = divClick;
+    div.onmousedown = nodeClick;
 	parentDiv.appendChild(div);
 }
 
-function divClick(event) {
+function nodeClick(event) {
 	if (event.currentTarget.className.indexOf("src") != -1) {
 		selectedSrcId = event.currentTarget.id;
-		unselectDivs("src");
+		unselectNodes("src");
 		unselectAllConnections();
-		selectDiv(event.currentTarget);
+		selectNode(event.currentTarget);
 	} else if (event.currentTarget.className.indexOf("dst") != -1) {
 		selectedDstId = event.currentTarget.id;
-		unselectDivs("dst");
-		selectDiv(event.currentTarget);
+		unselectNodes("dst");
+		selectNode(event.currentTarget);
 	} else {
 		selectedSrcId = selectedDstId = null;
 	}
@@ -185,46 +222,24 @@ function divClick(event) {
 	}
 }
 
-function selectDiv(div) {
+function selectNode(div) {
 	if (!div.classList.contains("selected")) {
 		div.classList.add("selected");
 	}
 }
 
-function unselectAllDivs() {
-	unselectDivs("src");
-	unselectDivs("dst");
+function unselectAllNodes() {
+	unselectNodes("src");
+	unselectNodes("dst");
+	selectedSrcId = selectedDstId = null;
 }
 
-function unselectDivs(className) {
-	var children = parentDiv.childNodes;
+function unselectNodes(className) {
+	var children = mappingDiv.childNodes;
 	for (var child in children) {
 		var div = children[child];
 		if (div.classList !== undefined && div.classList.contains(className)) {
 			div.classList.remove("selected");
-		}
-	}
-}
-
-function startScrolling(multiple) {
-	scrollMultiple = multiple
-	if (!isScrolling) {
-		isScrolling = true;
-		scrolling();		
-	}
-}
-
-function scrolling() {
-	var scrollY = scrollDiv.scrollTop;
-	if (isScrolling) {
-		if (scrollMultiple < 0 && scrollY > 0) {
-			scrollY += (1 * scrollMultiple);
-			scrollDiv.scrollTop = scrollY;
-			setTimeout(scrolling, 100);
-		} else if (scrollMultiple > 0) {
-			scrollY += (1 * scrollMultiple);
-			scrollDiv.scrollTop = scrollY;
-			setTimeout(scrolling, 100);
 		}
 	}
 }

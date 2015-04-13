@@ -9,11 +9,21 @@ import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class EditMappingPanel extends VerticalLayout implements IUiPanel {
@@ -38,9 +48,45 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 		autoMapButton.addClickListener(new AutoMapListener());
 		removeButton.addClickListener(new RemoveListener());
 
+		HorizontalLayout header1 = new HorizontalLayout();
+		header1.setSpacing(true);
+        header1.setMargin(new MarginInfo(false, true, false, true));
+        header1.setWidth(100f, Unit.PERCENTAGE);
+        header1.addComponent(new Label("<b>Input Model:</b> &nbsp;" + component.getInputModel().getName(), ContentMode.HTML));
+        header1.addComponent(new Label("<b>Output Model:</b> &nbsp;" + component.getOutputModel().getName(), ContentMode.HTML));
+        addComponent(header1);
+		
+        HorizontalLayout header2 = new HorizontalLayout();
+        header2.setSpacing(true);
+        header2.setMargin(new MarginInfo(true, true, true, true));
+        header2.setWidth(100f, Unit.PERCENTAGE);
+        TextField srcFilter = new TextField();
+        srcFilter.setInputPrompt("Filter");
+        srcFilter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
+        srcFilter.setIcon(FontAwesome.SEARCH);
+        srcFilter.setImmediate(true);
+        srcFilter.setTextChangeEventMode(TextChangeEventMode.LAZY);
+        srcFilter.setTextChangeTimeout(200);
+        srcFilter.addTextChangeListener(new FilterInputModelListener());
+        header2.addComponent(srcFilter);
+        TextField dstFilter = new TextField();
+        dstFilter.setInputPrompt("Filter");
+        dstFilter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
+        dstFilter.setIcon(FontAwesome.SEARCH);
+        dstFilter.setImmediate(true);
+        dstFilter.setTextChangeEventMode(TextChangeEventMode.LAZY);
+        dstFilter.setTextChangeTimeout(200);
+        dstFilter.addTextChangeListener(new FilterOutputModelListener());
+        header2.addComponent(dstFilter);
+		addComponent(header2);
+		
+		Panel panel = new Panel();
 		diagram = new MappingDiagram(context, component);
-		addComponent(diagram);
-		setExpandRatio(diagram, 1.0f);
+		diagram.setSizeFull();
+		panel.setContent(diagram);
+		panel.setSizeFull();
+		addComponent(panel);
+		setExpandRatio(panel, 1.0f);
 		diagram.addListener(new EventListener());
 	}
 
@@ -136,4 +182,16 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 			}
 		}
 	}
+	
+	class FilterInputModelListener implements TextChangeListener {
+        public void textChange(TextChangeEvent event) {
+            diagram.filterInputModel((String) event.getText());
+        }	    
+	}
+
+    class FilterOutputModelListener implements TextChangeListener {
+        public void textChange(TextChangeEvent event) {
+            diagram.filterOutputModel((String) event.getText());
+        }       
+    }
 }
