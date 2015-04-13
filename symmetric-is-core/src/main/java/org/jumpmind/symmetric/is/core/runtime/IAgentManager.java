@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.Agent;
@@ -20,7 +21,7 @@ public interface IAgentManager {
     
     public void undeploy(AgentDeployment deployment);
     
-    public AgentDeployment deploy(String agentId, Flow flow);
+    public AgentDeployment deploy(String agentId, Flow flow, Map<String, String> parameters);
     
     public void start();
     

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,9 +16,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.AgentDeploymentParameter;
 import org.jumpmind.symmetric.is.core.model.AgentStatus;
 import org.jumpmind.symmetric.is.core.model.DeploymentStatus;
 import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowParameter;
 import org.jumpmind.symmetric.is.core.model.StartType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
@@ -170,15 +173,27 @@ public class AgentRuntime {
         return started;
     }
 
-    public AgentDeployment deploy(Flow flow) {
+    public AgentDeployment deploy(Flow flow, Map<String,String> parameters) {
         AgentDeployment deployment = agent.getAgentDeploymentFor(flow);
         if (deployment == null) {
             deployment = new AgentDeployment(flow);
             deployment.setAgentId(agent.getId());
             deployment.setFlow(flow);
+            
+            List<FlowParameter> defaultParameters = flow.getFlowParameters();
+            for (FlowParameter flowParameter : defaultParameters) {
+                if (!parameters.containsKey(flowParameter.getName())) {
+                    parameters.put(flowParameter.getName(), flowParameter.getDefaultValue());
+                }
+            }
+            
+            Set<String> paramKeys = parameters.keySet();
+            for (String paramKey : paramKeys) {
+                deployment.getAgentDeploymentParameters().add(new AgentDeploymentParameter(paramKey, parameters.get(paramKey), deployment.getId()));
+            }
             configurationService.save(deployment);
 
-            List<AgentDeployment> deployments = agent.getAgentDeployments();
+            List<AgentDeployment> deployments = agent.getAgentDeployments();            
             deployments.remove(deployment);
             deployments.add(deployment);
 
@@ -279,7 +294,7 @@ public class AgentRuntime {
 
         FlowRuntime flowRuntime;
         
-        String executionId;
+        String executionId;       
 
         public FlowRunner(String executionId, FlowRuntime flowRuntime) {
             this.flowRuntime = flowRuntime;

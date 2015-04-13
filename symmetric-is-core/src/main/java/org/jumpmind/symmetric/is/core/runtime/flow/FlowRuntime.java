@@ -104,7 +104,7 @@ public class FlowRuntime {
         }
 
         StartupMessage startMessage = new StartupMessage();
-        // TODO set parameters on start message
+        startMessage.getHeader().setParameters(deployment.parameters());
         /*
          * for each start step (step that has no input msgs), send a start
          * message to that step

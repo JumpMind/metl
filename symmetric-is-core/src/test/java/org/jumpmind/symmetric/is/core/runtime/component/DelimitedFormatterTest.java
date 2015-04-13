@@ -90,8 +90,8 @@ public class DelimitedFormatterTest {
         formatterFlowStep.setComponentId(component.getId());
         formatterFlowStep.setCreateBy("Test");
         formatterFlowStep.setCreateTime(new Date());
-        formatterFlowStep.setLastModifyBy("Test");
-        formatterFlowStep.setLastModifyTime(new Date());
+        formatterFlowStep.setLastUpdateBy("Test");
+        formatterFlowStep.setLastUpdateTime(new Date());
         formatterFlowStep.setComponent(component);
         return formatterFlowStep;
     }

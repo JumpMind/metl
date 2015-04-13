@@ -4,6 +4,8 @@ import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
 
 public interface IExecutionTracker {
     
+    public void flowStepStarted(String executionId, IComponent component);
+    
     public void beforeHandle(String executionId, IComponent component);
     
     public void afterHandle(String executionId, IComponent component, Throwable error);

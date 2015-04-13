@@ -67,6 +67,8 @@ public interface IConfigurationService {
     
     public void refresh(Component component);
     
+    public void save(AgentDeployment agentDeployment);
+    
     public void save(Resource resource);
     
     public void save(FlowStep flowStep);    

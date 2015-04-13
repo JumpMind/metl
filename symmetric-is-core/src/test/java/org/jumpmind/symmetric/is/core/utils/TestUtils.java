@@ -53,8 +53,8 @@ public class TestUtils {
         step.setCreateBy("Test");
         step.setCreateTime(new Date());
         step.setId(name);
-        step.setLastModifyBy("Test");
-        step.setLastModifyTime(new Date());
+        step.setLastUpdateBy("Test");
+        step.setLastUpdateTime(new Date());
         return step;
     }
 
@@ -67,8 +67,8 @@ public class TestUtils {
         agent.setHeartbeatTime(new Date());
         agent.setHost("localhost");
         agent.setId(name);
-        agent.setLastModifyBy("Test");
-        agent.setLastModifyTime(new Date());
+        agent.setLastUpdateBy("Test");
+        agent.setLastUpdateTime(new Date());
         agent.setLastStartTime(new Date());
         agent.setName(name);
         return agent;
@@ -80,8 +80,8 @@ public class TestUtils {
         deployment.setCreateBy("Test");
         deployment.setCreateTime(new Date());
         deployment.setId(name);
-        deployment.setLastModifyBy("Test");
-        deployment.setLastModifyTime(new Date());
+        deployment.setLastUpdateBy("Test");
+        deployment.setLastUpdateTime(new Date());
         return deployment;
     }
 
@@ -95,7 +95,7 @@ public class TestUtils {
         Component component = new Component();
         component.setCreateBy("Test");
         component.setCreateTime(new Date());
-        component.setLastModifyBy("Test");
+        component.setLastUpdateBy("Test");
         component.setCreateTime(new Date());
         return component;
     }
@@ -111,8 +111,8 @@ public class TestUtils {
         component.setCreateBy("Test");
         component.setCreateTime(new Date());
         component.setId("Test");
-        component.setLastModifyBy("Test");
-        component.setLastModifyTime(new Date());
+        component.setLastUpdateBy("Test");
+        component.setLastUpdateTime(new Date());
         return component;
     }
 }

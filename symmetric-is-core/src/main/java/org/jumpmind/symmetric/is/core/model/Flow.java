@@ -20,12 +20,15 @@ public class Flow extends AbstractObject {
     List<FlowStep> flowSteps;
 
     List<FlowStepLink> flowStepLinks;
+    
+    List<FlowParameter> flowParameters;
 
     boolean deleted = false;
 
     public Flow() {
         this.flowSteps = new ArrayList<FlowStep>();
         this.flowStepLinks = new ArrayList<FlowStepLink>();
+        this.flowParameters = new ArrayList<FlowParameter>();
     }
 
     public Flow(Folder folder) {
@@ -190,5 +193,13 @@ public class Flow extends AbstractObject {
 
     public boolean isDeleted() {
         return deleted;
+    }
+    
+    public List<FlowParameter> getFlowParameters() {
+        return flowParameters;
+    }
+    
+    public void setFlowParameters(List<FlowParameter> flowParameters) {
+        this.flowParameters = flowParameters;
     }
 }

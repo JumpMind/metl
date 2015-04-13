@@ -78,7 +78,8 @@ public class StepRuntime implements Runnable {
              * runtime to kick things off. If we have input links, we must loop
              * until we get a shutdown message from one of our sources
              */
-            while (running) {
+            executionTracker.flowStepStarted(executionId, component);
+            while (running) {                
                 Message inputMessage = inQueue.take();
                 if (inputMessage instanceof ShutdownMessage) {
                     String fromStepId = inputMessage.getHeader().getOriginatingStepId();

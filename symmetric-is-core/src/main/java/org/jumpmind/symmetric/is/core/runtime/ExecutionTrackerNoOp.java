@@ -28,4 +28,7 @@ public class ExecutionTrackerNoOp implements IExecutionTracker {
     public void log(String executionId, LogLevel level, IComponent component, String output) {
     }
 
+    @Override
+    public void flowStepStarted(String executionId, IComponent component) {
+    }
 }

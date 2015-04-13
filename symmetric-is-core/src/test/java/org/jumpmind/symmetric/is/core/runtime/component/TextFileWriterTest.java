@@ -109,8 +109,8 @@ public class TextFileWriterTest {
         writerComponent.setComponentId(component.getId());
         writerComponent.setCreateBy("Test");
         writerComponent.setCreateTime(new Date());
-        writerComponent.setLastModifyBy("Test");
-        writerComponent.setLastModifyTime(new Date());
+        writerComponent.setLastUpdateBy("Test");
+        writerComponent.setLastUpdateTime(new Date());
         writerComponent.setComponent(component);
         return writerComponent;
     }

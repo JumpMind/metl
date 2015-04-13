@@ -23,6 +23,7 @@ import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
+import org.jumpmind.util.FormatUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -93,8 +94,10 @@ public class DbReader extends AbstractComponent {
             } else {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
             }
-            executionTracker.log(executionId, LogLevel.DEBUG, this, "About to run: " + sql);
-            template.query(sql, paramMap, new ResultSetExtractor<Object>() {
+            
+            final String sqlToExecute = FormatUtils.replaceTokens(this.sql, inputMessage.getHeader().getParametersAsString(), true);
+            executionTracker.log(executionId, LogLevel.DEBUG, this, "About to run: " + sqlToExecute);
+            template.query(sqlToExecute, paramMap, new ResultSetExtractor<Object>() {
                 @Override
                 public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
                     
@@ -108,7 +111,7 @@ public class DbReader extends AbstractComponent {
                             message = createMessage(inputMessage);
                         }
                         if (outputRecCount == 0) {
-                            attributeIds = getAttributeIds(meta, getSqlColumnEntityHints(sql));
+                            attributeIds = getAttributeIds(meta, getSqlColumnEntityHints(sqlToExecute));
                         }
                         EntityData rowData = new EntityData();
                         for (int i = 1; i <= meta.getColumnCount(); i++) {
@@ -130,7 +133,7 @@ public class DbReader extends AbstractComponent {
                             message = null;
                         }
                         outputRecCount++;
-                    } // loop for resultset for a given query
+                    } 
                     rs.close();
                     if (message != null) {
                         componentStatistics.incrementOutboundMessages();
@@ -139,9 +142,9 @@ public class DbReader extends AbstractComponent {
                         messageTarget.put(message);
                     }
                     return null;
-                } /* end while for each result set msg from query */
+                } 
             });
-        } /* for record count within message */
+        } 
     }
 
     private Message createMessage(Message inputMessage) {

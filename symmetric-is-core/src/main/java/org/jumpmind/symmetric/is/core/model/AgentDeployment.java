@@ -2,6 +2,12 @@ package org.jumpmind.symmetric.is.core.model;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 
 public class AgentDeployment extends AbstractObject {
@@ -15,17 +21,21 @@ public class AgentDeployment extends AbstractObject {
     String status = DeploymentStatus.UNKNOWN.name();
 
     String message;
-
+    
     String logLevel = LogLevel.DEBUG.name();
 
     String startType = StartType.MANUAL.name();
 
     String startExpression;
+    
+    List<AgentDeploymentParameter> agentDeploymentParameters;
 
     public AgentDeployment() {
+        agentDeploymentParameters = new ArrayList<AgentDeploymentParameter>();
     }
 
     public AgentDeployment(Flow flow) {
+        this();
         setFlow(flow);
     }
 
@@ -123,6 +133,23 @@ public class AgentDeployment extends AbstractObject {
 
     public void setLogLevel(String logLevel) {
         this.logLevel = logLevel;
+    }
+    
+    public void setAgentDeploymentParameters(
+            List<AgentDeploymentParameter> agentDeploymentParameters) {
+        this.agentDeploymentParameters = agentDeploymentParameters;
+    }
+    
+    public List<AgentDeploymentParameter> getAgentDeploymentParameters() {
+        return agentDeploymentParameters;
+    }
+    
+    public Map<String, Serializable> parameters() {
+        Map<String, Serializable> params = new HashMap<String, Serializable>();
+        for (AgentDeploymentParameter agentDeploymentParameter : agentDeploymentParameters) {
+            params.put(agentDeploymentParameter.getName(), agentDeploymentParameter.getValue());
+        }
+        return params;
     }
 
     @Override

@@ -58,11 +58,11 @@ public class AgentManager implements IAgentManager {
     }
     
     @Override
-    public AgentDeployment deploy(String agentId, Flow flow) {
+    public AgentDeployment deploy(String agentId, Flow flow, Map<String, String> parameters) {
         AgentDeployment deployment = null;
         AgentRuntime engine = getAgentRuntime(agentId);
         if (engine != null) {
-            deployment = engine.deploy(flow);
+            deployment = engine.deploy(flow, parameters);
         }
         return deployment;
     }

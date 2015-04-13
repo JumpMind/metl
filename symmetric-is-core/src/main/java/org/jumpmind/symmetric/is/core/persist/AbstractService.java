@@ -57,7 +57,7 @@ public abstract class AbstractService {
     }
     
     public void save(AbstractObject data) {
-        data.setLastModifyTime(new Date());
+        data.setLastUpdateTime(new Date());
         persistenceManager.save(data, null, null, tableName(data.getClass()));
     }
 

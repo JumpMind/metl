@@ -15,13 +15,13 @@ public class MessageHeader implements Serializable, Cloneable {
     int sequenceNumber;
 
     boolean lastMessage;
-    
+
     String originatingStepId;
-    
+
     Collection<String> targetStepIds;
 
     Map<String, Serializable> parameters = new HashMap<String, Serializable>();
-    
+
     public MessageHeader(String originatingStepId) {
         this.originatingStepId = originatingStepId;
     }
@@ -29,11 +29,11 @@ public class MessageHeader implements Serializable, Cloneable {
     public void setOriginatingStepId(String originatingStepId) {
         this.originatingStepId = originatingStepId;
     }
-    
+
     public String getOriginatingStepId() {
         return originatingStepId;
     }
-    
+
     public String getExecutionId() {
         return executionId;
     }
@@ -61,7 +61,7 @@ public class MessageHeader implements Serializable, Cloneable {
     public void setTargetStepIds(Collection<String> targetStepIds) {
         this.targetStepIds = targetStepIds;
     }
-    
+
     public Collection<String> getTargetStepIds() {
         if (targetStepIds == null) {
             targetStepIds = new HashSet<String>();
@@ -71,6 +71,19 @@ public class MessageHeader implements Serializable, Cloneable {
 
     public Map<String, Serializable> getParameters() {
         return parameters;
+    }
+
+    public Map<String, String> getParametersAsString() {
+        Map<String, String> params = new HashMap<String, String>();
+        for (String key : parameters.keySet()) {
+            Serializable value = parameters.get(key);
+            if (value != null) {
+                params.put(key, value.toString());
+            } else {
+                params.put(key, null);
+            }
+        }
+        return params;
     }
 
     public void setParameters(Map<String, Serializable> parameters) {

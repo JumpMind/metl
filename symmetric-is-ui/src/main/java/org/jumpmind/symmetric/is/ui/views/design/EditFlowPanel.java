@@ -1,6 +1,10 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -10,6 +14,7 @@ import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentStartMode;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowParameter;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
@@ -30,9 +35,15 @@ import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.symmetric.is.ui.views.IDesignNavigator;
 import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
+import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
+import org.jumpmind.symmetric.ui.common.ResizableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.data.Container;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
@@ -45,15 +56,18 @@ import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTargetDetails;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.TableFieldFactory;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.ValoTheme;
 
+@SuppressWarnings("serial")
 public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgroundRefreshable {
-
-    private static final long serialVersionUID = 1L;
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -76,6 +90,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     Button runButton;
 
     Button delButton;
+
+    Button parametersButton;
 
     AbstractObject selected;
 
@@ -133,17 +149,15 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         ButtonBar buttonBar = new ButtonBar();
         runButton = buttonBar.addButton("Run", Icons.RUN);
         runButton.addClickListener(new ClickListener() {
-            private static final long serialVersionUID = 1L;
 
             @Override
             public void buttonClick(ClickEvent event) {
-                openExecution();
+                runFlow();
             }
         });
 
         delButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
         delButton.addClickListener(new ClickListener() {
-            private static final long serialVersionUID = 1L;
 
             @Override
             public void buttonClick(ClickEvent event) {
@@ -151,6 +165,15 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             }
         });
         delButton.setEnabled(false);
+
+        parametersButton = buttonBar.addButton("Parameters", FontAwesome.LIST_OL);
+        parametersButton.addClickListener(new ClickListener() {
+
+            @Override
+            public void buttonClick(ClickEvent event) {
+                new EditParametersWindow().showAtSize(.50);
+            }
+        });
 
         return buttonBar;
     }
@@ -184,11 +207,11 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     public void selected() {
         designNavigator.setPropertySheet(propertySheet);
     }
-    
+
     public Flow getFlow() {
         return flow;
     }
-    
+
     public void selected(FlowStep step) {
         if (step != null) {
             diagram.setNodes(getNodes());
@@ -199,11 +222,11 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             propertySheet.valueChange((Object) null);
         }
     }
-    
+
     @Override
     public void deselected() {
     }
-    
+
     protected void deleteSelected() {
         IConfigurationService configurationService = context.getConfigurationService();
         if (selected instanceof FlowStep) {
@@ -267,7 +290,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
         diagram.setNodes(getNodes());
     }
-    
+
     protected List<Node> getNodes() {
         List<FlowStep> flowSteps = flow.getFlowSteps();
         List<FlowStepLink> links = flow.getFlowStepLinks();
@@ -278,31 +301,30 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             String type = flowStep.getComponent().getType();
             String imageText = String
                     .format("<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>",
-                            componentPalette
-                                    .getBase64RepresentationOfImageForComponentType(type));
+                            componentPalette.getBase64RepresentationOfImageForComponentType(type));
             node.setText(imageText + "<br><i>" + name + "</i>");
             node.setId(flowStep.getId());
             node.setX(flowStep.getX());
             node.setY(flowStep.getY());
-            
-            ComponentDefinition definition = context.getComponentFactory().getComponentDefinitionForComponentType(type);
+
+            ComponentDefinition definition = context.getComponentFactory()
+                    .getComponentDefinitionForComponentType(type);
             node.setInputLabel(definition.inputMessage().getLetter());
             node.setOutputLabel(definition.outgoingMessage().getLetter());
-            
+
             for (FlowStepLink link : links) {
                 if (link.getSourceStepId().equals(node.getId())) {
                     node.getTargetNodeIds().add(link.getTargetStepId());
                 }
             }
-            
+
             list.add(node);
-            
-            
+
         }
         return list;
     }
 
-    protected void openExecution() {
+    protected void runFlow() {
         IAgentManager agentManager = context.getAgentManager();
         Set<Agent> agents = agentManager.getLocalAgents();
         Agent localAgent = null;
@@ -328,7 +350,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
         }
 
-        deployment = agentManager.deploy(localAgent.getId(), flow);
+        deployment = agentManager.deploy(localAgent.getId(), flow, new HashMap<String, String>());
 
         String executionId = agentManager.getAgentRuntime(localAgent).scheduleNow(deployment);
         if (executionId != null) {
@@ -338,7 +360,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     }
 
     class DiagramChangedListener implements Listener {
-        private static final long serialVersionUID = 1L;
 
         @Override
         public void componentEvent(Event e) {
@@ -371,8 +392,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                             new FlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
                     configurationService.save(flow);
                 } else {
-                    FlowStepLink link = flow.removeFlowStepLink(
-                            event.getSourceNodeId(), event.getTargetNodeId());
+                    FlowStepLink link = flow.removeFlowStepLink(event.getSourceNodeId(),
+                            event.getTargetNodeId());
                     if (link != null) {
                         configurationService.delete(link);
                         redrawFlow();
@@ -380,15 +401,13 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                 }
             } else if (e instanceof LinkSelectedEvent) {
                 LinkSelectedEvent event = (LinkSelectedEvent) e;
-                selected = flow.findFlowStepLink(event.getSourceNodeId(),
-                        event.getTargetNodeId());
+                selected = flow.findFlowStepLink(event.getSourceNodeId(), event.getTargetNodeId());
                 delButton.setEnabled(true);
             }
         }
     }
 
     class DropHandler implements com.vaadin.event.dd.DropHandler {
-        private static final long serialVersionUID = 1L;
 
         @Override
         public void drop(DragAndDropEvent event) {
@@ -407,6 +426,115 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         public AcceptCriterion getAcceptCriterion() {
             return AcceptAll.get();
         }
+    }
+
+    class EditParametersWindow extends ResizableWindow {
+
+        Table table;
+
+        public EditParametersWindow() {
+            super("Flow Parameters");
+            Button closeButton = new Button("Close");
+            closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+            closeButton.addClickListener(new ClickListener() {
+
+                @Override
+                public void buttonClick(ClickEvent event) {
+                    EditParametersWindow.this.close();
+                }
+            });
+
+            ButtonBar buttonBar = new ButtonBar();
+            buttonBar.addButton("Add", FontAwesome.PLUS, new ClickListener() {
+
+                @Override
+                public void buttonClick(ClickEvent event) {
+                    FlowParameter parameter = new FlowParameter();
+                    parameter.setFlowId(flow.getId());
+                    parameter.setName("Parameter " + (flow.getFlowParameters().size() + 1));
+                    parameter.setPosition(flow.getFlowParameters().size() + 1);
+                    context.getConfigurationService().save(parameter);
+                    flow.getFlowParameters().add(parameter);
+                    table.addItem(parameter);
+
+                }
+            });
+            final Button removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O,
+                    new ClickListener() {
+
+                        @Override
+                        public void buttonClick(ClickEvent event) {
+                            FlowParameter parameter = (FlowParameter) table.getValue();
+                            if (parameter != null) {
+                                flow.getFlowParameters().remove(parameter);
+                                context.getConfigurationService()
+                                        .delete((AbstractObject) parameter);
+                                table.removeItem(parameter);
+
+                                @SuppressWarnings("unchecked")
+                                Collection<FlowParameter> parameters = (Collection<FlowParameter>) table
+                                        .getItemIds();
+                                int count = 1;
+                                for (FlowParameter p : parameters) {
+                                    p.setPosition(count++);
+                                    context.getConfigurationService().save(p);
+                                }
+                            }
+                        }
+                    });
+            removeButton.setEnabled(false);
+            addComponent(buttonBar);
+
+            table = new Table();
+            table.setSizeFull();
+            BeanItemContainer<FlowParameter> container = new BeanItemContainer<FlowParameter>(
+                    FlowParameter.class);
+            table.setContainerDataSource(container);
+            table.setEditable(true);
+            table.setSelectable(true);
+            table.setTableFieldFactory(new EditFieldFactory());
+            table.setVisibleColumns("name", "defaultValue");
+            table.setColumnHeaders("Name", "Default Value");
+            table.addValueChangeListener(new ValueChangeListener() {
+
+                @Override
+                public void valueChange(ValueChangeEvent event) {
+                    removeButton.setEnabled(table.getValue() != null);
+                }
+            });
+            addComponent(table, 1);
+
+            addComponent(buildButtonFooter(closeButton));
+
+            List<FlowParameter> params = flow.getFlowParameters();
+            Collections.sort(params, new Comparator<FlowParameter>() {
+                @Override
+                public int compare(FlowParameter o1, FlowParameter o2) {
+                    return new Integer(o1.getPosition()).compareTo(new Integer(o2.getPosition()));
+                }
+            });
+
+            for (FlowParameter flowParameter : params) {
+                table.addItem(flowParameter);
+            }
+
+        }
+
+        class EditFieldFactory implements TableFieldFactory {
+            public Field<?> createField(final Container dataContainer, final Object itemId,
+                    final Object propertyId, com.vaadin.ui.Component uiContext) {
+                final FlowParameter parameter = (FlowParameter) itemId;
+                final TextField textField = new ImmediateUpdateTextField(null) {
+                    @Override
+                    protected void save() {
+                        context.getConfigurationService().save(parameter);
+                    }
+                };
+                textField.setWidth(100, Unit.PERCENTAGE);
+                return textField;
+            }
+        }
+
     }
 
 }

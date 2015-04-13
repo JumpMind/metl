@@ -15,12 +15,14 @@ import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.AgentDeploymentParameter;
 import org.jumpmind.symmetric.is.core.model.AgentSetting;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.ComponentEntitySetting;
 import org.jumpmind.symmetric.is.core.model.ComponentSetting;
 import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowParameter;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.model.Folder;
@@ -83,7 +85,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     protected Map<String, Folder> foldersById(FolderType type) {
         Map<String, Object> byType = new HashMap<String, Object>();
         byType.put("type", type.name());
-        List<Folder> folders = find(Folder.class, byType);        
+        List<Folder> folders = find(Folder.class, byType);
 
         Map<String, Folder> all = new HashMap<String, Folder>();
         for (Folder folder : folders) {
@@ -121,11 +123,11 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public List<Project> findProjects() {
-        List<Project> list = persistenceManager.find(Project.class, new NameValue("deleted", 0), null, null,
-                tableName(Project.class));
-        
-        List<ProjectVersion> versions = persistenceManager.find(ProjectVersion.class, new NameValue("deleted", 0), null, null,
-                tableName(ProjectVersion.class));
+        List<Project> list = persistenceManager.find(Project.class, new NameValue("deleted", 0),
+                null, null, tableName(Project.class));
+
+        List<ProjectVersion> versions = persistenceManager.find(ProjectVersion.class,
+                new NameValue("deleted", 0), null, null, tableName(ProjectVersion.class));
         for (ProjectVersion projectVersion : versions) {
             for (Project project : list) {
                 if (project.getId().equals(projectVersion.getProjectId())) {
@@ -137,7 +139,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         }
         return list;
     }
-    
+
     @Override
     public List<Flow> findFlowsInProject(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
@@ -150,7 +152,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         }
         return flows;
     }
-    
+
     @Override
     public List<Model> findModelsInProject(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
@@ -163,7 +165,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         }
         return models;
     }
-    
+
     @Override
     public List<Resource> findResourcesInProject(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
@@ -220,11 +222,12 @@ abstract class AbstractConfigurationService extends AbstractService implements
             List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class,
                     settingParams, null, null, tableName(AgentDeployment.class));
             for (AgentDeployment agentDeployment : deployments) {
+                refreshAgentDeploymentRelations(agentDeployment);
                 refresh(agentDeployment.getFlow());
                 agent.getAgentDeployments().add(agentDeployment);
-            }            
+            }
         }
-        
+
         Collections.sort(list, new Comparator<Agent>() {
             @Override
             public int compare(Agent o1, Agent o2) {
@@ -232,6 +235,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
             }
         });
         return list;
+    }
+
+    protected void refreshAgentDeploymentRelations(AgentDeployment agentDeployment) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("agentDeploymentId", agentDeployment.getId());
+        agentDeployment.setAgentDeploymentParameters(persistenceManager.find(
+                AgentDeploymentParameter.class, params, null, null,
+                tableName(AgentDeploymentParameter.class)));
     }
 
     @Override
@@ -260,11 +271,11 @@ abstract class AbstractConfigurationService extends AbstractService implements
         refresh(component);
         return component;
     }
-    
+
     @Override
     public void refresh(ProjectVersion projectVersion) {
-        refresh((AbstractObject)projectVersion);
-        refresh((AbstractObject)projectVersion.getProject());
+        refresh((AbstractObject) projectVersion);
+        refresh((AbstractObject) projectVersion.getProject());
     }
 
     @Override
@@ -333,6 +344,10 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void delete(AgentDeployment agentDeployment) {
+        List<AgentDeploymentParameter> params = agentDeployment.getAgentDeploymentParameters();
+        for (AgentDeploymentParameter agentDeploymentParameter : params) {
+            delete((AbstractObject) agentDeploymentParameter);
+        }
         delete((AbstractObject) agentDeployment);
     }
 
@@ -345,16 +360,16 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
         flow.removeFlowStep(flowStep);
         delete(flowStep);
-        
+
         Component comp = flowStep.getComponent();
         if (!comp.isShared()) {
             delete(comp);
         }
     }
-    
+
     public void delete(Component comp) {
         comp.setDeleted(true);
-        save((AbstractObject)comp);
+        save((AbstractObject) comp);
     }
 
     @Override
@@ -371,7 +386,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void delete(Resource resource) {
         resource.setDeleted(true);
-        save((AbstractObject)resource);
+        save((AbstractObject) resource);
     }
 
     @Override
@@ -391,7 +406,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void deleteFlow(Flow flow) {
         flow.setDeleted(true);
-        save((AbstractObject)flow);
+        save((AbstractObject) flow);
     }
 
     @Override
@@ -426,9 +441,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
         flow.getFlowStepLinks().clear();
         Map<String, Object> versionParams = new HashMap<String, Object>();
         versionParams.put("flowId", flow.getId());
+
+        flow.setFlowParameters(persistenceManager.find(FlowParameter.class, versionParams, null,
+                null, tableName(FlowParameter.class)));
+
         List<FlowStep> steps = persistenceManager.find(FlowStep.class, versionParams, null, null,
                 tableName(FlowStep.class));
-        
+
         Collections.sort(steps, new Comparator<FlowStep>() {
             @Override
             public int compare(FlowStep o1, FlowStep o2) {
@@ -447,6 +466,15 @@ abstract class AbstractConfigurationService extends AbstractService implements
             for (FlowStepLink dataLink : dataLinks) {
                 flow.getFlowStepLinks().add(dataLink);
             }
+        }
+    }
+    
+    @Override
+    public void save(AgentDeployment agentDeployment) {
+        save((AbstractObject)agentDeployment);
+        List<AgentDeploymentParameter> parameters =agentDeployment.getAgentDeploymentParameters();
+        for (AgentDeploymentParameter agentDeploymentParameter : parameters) {
+            save((AbstractObject)agentDeploymentParameter);
         }
     }
 
@@ -489,7 +517,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
         List<FlowStepLink> links = flow.getFlowStepLinks();
         for (FlowStepLink link : links) {
-            link.setLastModifyTime(new Date());
+            link.setLastUpdateTime(new Date());
             persistenceManager.save(link, null, null, tableName(link.getClass()));
         }
 
@@ -498,7 +526,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void delete(Model model) {
         model.setDeleted(true);
-        save((AbstractObject)model);
+        save((AbstractObject) model);
     }
 
     @Override
@@ -618,8 +646,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void save(Model model) {
         save((AbstractObject) model);
-        for (ModelEntity modelEntity: model.getModelEntities()) {
-        	save(modelEntity);
+        for (ModelEntity modelEntity : model.getModelEntities()) {
+            save(modelEntity);
         }
     }
 

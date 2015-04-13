@@ -14,9 +14,9 @@ abstract public class AbstractObject implements Serializable {
 
     String createBy;
 
-    Date lastModifyTime = new Date();
+    Date lastUpdateTime = new Date();
 
-    String lastModifyBy;
+    String lastUpdateBy;
     
     public AbstractObject() {
     }
@@ -53,20 +53,20 @@ abstract public class AbstractObject implements Serializable {
         this.createBy = createBy;
     }
 
-    public Date getLastModifyTime() {
-        return lastModifyTime;
+    public Date getLastUpdateTime() {
+        return lastUpdateTime;
     }
 
-    public void setLastModifyTime(Date lastModifyTime) {
-        this.lastModifyTime = lastModifyTime;
+    public void setLastUpdateTime(Date lastModifyTime) {
+        this.lastUpdateTime = lastModifyTime;
     }
 
-    public String getLastModifyBy() {
-        return lastModifyBy;
+    public String getLastUpdateBy() {
+        return lastUpdateBy;
     }
 
-    public void setLastModifyBy(String lastModifyBy) {
-        this.lastModifyBy = lastModifyBy;
+    public void setLastUpdateBy(String lastModifyBy) {
+        this.lastUpdateBy = lastModifyBy;
     }
     
     @Override

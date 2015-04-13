@@ -125,8 +125,8 @@ public class TextFileReaderTest {
         readerComponent.setComponentId(component.getId());
         readerComponent.setCreateBy("Test");
         readerComponent.setCreateTime(new Date());
-        readerComponent.setLastModifyBy("Test");
-        readerComponent.setLastModifyTime(new Date());
+        readerComponent.setLastUpdateBy("Test");
+        readerComponent.setLastUpdateTime(new Date());
         readerComponent.setComponent(component);
         return readerComponent;
     }
