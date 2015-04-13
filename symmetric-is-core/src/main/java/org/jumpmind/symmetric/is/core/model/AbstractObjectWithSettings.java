@@ -68,15 +68,33 @@ abstract public class AbstractObjectWithSettings extends AbstractObject {
         }
         return defaultValue;
     }
+
+    public long getLong(String name, long defaultValue) {
+        String value = get(name);
+        if (value != null) {
+            return Long.parseLong(value);
+        } else {
+            return defaultValue;
+        }
+    }
+
+    public int getInt(String name, int defaultValue) {
+        String value = get(name);
+        if (value != null) {
+            return Integer.parseInt(value);
+        } else {
+            return defaultValue;
+        }
+    }
     
     public String get(String name) {
         return get(name, null);
     }
     
-    public boolean getBoolean(String name) {
+    public boolean getBoolean(String name, boolean defaultValue) {
         String value = get(name);
         if (isBlank(value)) {
-            return false;
+            return defaultValue;
         } else {
             return Boolean.parseBoolean(value);
         }

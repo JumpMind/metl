@@ -18,6 +18,7 @@ import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 //github.com/JumpMind/symmetric-is-all.git
 import org.jumpmind.symmetric.is.core.runtime.component.DbReader;
 import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
+import org.jumpmind.symmetric.is.core.runtime.component.EntityRouter;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.MappingProcessor;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
@@ -28,6 +29,7 @@ import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.is.ui.mapping.EditMappingPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditDbReaderPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditEntityRouterPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
@@ -701,6 +703,11 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
                         editFormat);
                 unselectAll();
+            } else if (type.equals(EntityRouter.TYPE)) {
+                EditEntityRouterPanel editPanel = new EditEntityRouterPanel(context,
+                        flowStep, (Flow)treeTable.getParent(flowStep));
+                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
+                        editPanel);                
             } else if (type.equals(MappingProcessor.TYPE)) {
                 EditMappingPanel editMapping = new EditMappingPanel(context,
                         flowStep.getComponent());

@@ -1,0 +1,123 @@
+package org.jumpmind.symmetric.is.core.runtime.component;
+
+import static org.apache.commons.lang.StringUtils.isBlank;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.jumpmind.symmetric.is.core.model.SettingDefinition;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
+import org.jumpmind.symmetric.is.core.runtime.EntityData;
+import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
+import org.jumpmind.symmetric.is.core.runtime.Message;
+import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+
+@ComponentDefinition(
+        category = ComponentCategory.PROCESSOR,
+        typeName = Multiplier.TYPE,
+        iconImage = "multiplier.png",
+        inputMessage = MessageType.ENTITY,
+        outgoingMessage = MessageType.ENTITY)
+public class Multiplier extends AbstractComponent {
+
+    public static final String TYPE = "Multiplier";
+
+    @SettingDefinition(
+            order = 20,
+            required = false,
+            type = Type.INTEGER,
+            defaultValue = "10",
+            label = "Rows/Msg")
+    public final static String ROWS_PER_MESSAGE = "rows.per.message";
+
+    @SettingDefinition(
+            order = 10,
+            required = true,
+            type = Type.SOURCE_STEP,
+            label = "Multiplier Source")
+    public final static String MULTIPLIER_SOURCE_STEP = "multiplier.source.step";
+
+    boolean multipliersInitialized = false;
+
+    String sourceStepId;
+
+    int rowsPerMessage;
+
+    List<EntityData> multipliers = new ArrayList<EntityData>();
+
+    List<Message> queuedWhileWaitingForMultiplier = new ArrayList<Message>();
+
+    @Override
+    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
+        super.start(executionTracker, resourceFactory);
+
+        multipliersInitialized = false;
+
+        sourceStepId = flowStep.getComponent().get(MULTIPLIER_SOURCE_STEP);
+        rowsPerMessage = flowStep.getComponent().getInt(ROWS_PER_MESSAGE, 10);
+
+        if (isBlank(sourceStepId) || flow.findFlowStepWithId(sourceStepId) == null) {
+            throw new IllegalStateException("The source step must be specified");
+        }
+    }
+
+    @Override
+    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
+        componentStatistics.incrementInboundMessages();
+
+        if (inputMessage.getHeader().getOriginatingStepId().equals(sourceStepId)) {
+            List<EntityData> datas = inputMessage.getPayload();
+            multipliers.addAll(datas);
+            multipliersInitialized = inputMessage.getHeader().isLastMessage();
+        } else if (!multipliersInitialized) {
+            queuedWhileWaitingForMultiplier.add(inputMessage);
+        } else {
+            Iterator<Message> messages = queuedWhileWaitingForMultiplier.iterator();
+            while (messages.hasNext()) {
+                Message message = messages.next();
+                multiply(message, messageTarget);
+            }
+
+            multiply(inputMessage, messageTarget);
+        }
+
+    }
+
+    protected void multiply(Message message, IMessageTarget messageTarget) {
+        ArrayList<EntityData> multiplied = new ArrayList<EntityData>();
+        for (int i = 0; i < multipliers.size(); i++) {
+            EntityData multiplierData = multipliers.get(i);
+
+            List<EntityData> datas = message.getPayload();
+            for (int j = 0; j < datas.size(); j++) {
+                EntityData oldData = datas.get(j);
+                EntityData newData = new EntityData();
+                newData.putAll(oldData);
+                newData.putAll(multiplierData);
+                multiplied.add(newData);
+
+                if (multiplied.size() >= rowsPerMessage) {
+                    Message newMessage = new Message(flowStep.getId());
+                    newMessage.getHeader().setLastMessage(
+                            message.getHeader().isLastMessage() && datas.size() - 1 == j
+                                    && multipliers.size() - 1 == i);
+                    newMessage.setPayload(multiplied);
+                    componentStatistics.incrementOutboundMessages();
+                    messageTarget.put(newMessage);
+                    multiplied = new ArrayList<EntityData>();
+                }
+            }
+        }
+
+        if (multiplied.size() > 0) {
+            Message newMessage = new Message(flowStep.getId());
+            newMessage.setPayload(multiplied);
+            newMessage.getHeader().setLastMessage(message.getHeader().isLastMessage());
+            componentStatistics.incrementOutboundMessages();
+            messageTarget.put(newMessage);
+        }
+    }
+
+}

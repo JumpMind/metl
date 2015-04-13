@@ -46,7 +46,7 @@ public class BinaryFileWriterTest {
     @Test
     public void testBinaryWriter() throws Exception {
         BinaryFileWriter writer = new BinaryFileWriter();
-        writer.setFlowStep(writerFlowStep);
+        writer.init(writerFlowStep, null);
         writer.start(null, resourceFactory);
         writer.handle("test", createBinaryMessageToWrite(), null);
         checkBinaryFile();

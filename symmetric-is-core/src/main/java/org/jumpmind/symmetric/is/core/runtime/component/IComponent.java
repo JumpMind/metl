@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
+import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
@@ -18,6 +19,6 @@ public interface IComponent {
     
     public FlowStep getFlowStep();
     
-    public void setFlowStep(FlowStep flowStep);
+    public void init(FlowStep flowStep, Flow flow);
 
 }

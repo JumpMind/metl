@@ -15,7 +15,7 @@ import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
-import org.jumpmind.symmetric.is.core.runtime.component.NoOpProcessor;
+import org.jumpmind.symmetric.is.core.runtime.component.NoOp;
 
 public class TestUtils {
 
@@ -33,7 +33,7 @@ public class TestUtils {
         Flow flow = new Flow(folder);
         flow.setCreateBy("Test");
         flow.setCreateTime(new Date());
-        flow.setFolderId(folder.getId());
+        flow.setFolderId(folder != null ? folder.getId() : null);
         flow.setId("FlowId");
         flow.setName("Flow");
         flow.setId(name);
@@ -46,7 +46,7 @@ public class TestUtils {
 
     public static FlowStep createNoOpProcessorFlowStep(Flow flow, String name,
             Folder folder) {
-        Component component = createComponent(NoOpProcessor.TYPE, false, null, null, null,
+        Component component = createComponent(NoOp.TYPE, false, null, null, null,
                 null, null, (Setting[]) null);
         FlowStep step = new FlowStep(component);
         step.setFlowId(flow.getId());

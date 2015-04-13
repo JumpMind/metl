@@ -22,6 +22,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
         commonsBeanUtils = '1.9.2'
         httpComponentsVersion = '4.3.2'
         jaxenVersion = '1.1.4'
+        jacksonVersion = '2.5.2'
         javaMailVersion = '1.4.7'
         jdomVersion = '2.0.5'
         springVersion = '4.0.2.RELEASE'

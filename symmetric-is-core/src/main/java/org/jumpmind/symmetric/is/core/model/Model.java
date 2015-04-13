@@ -80,6 +80,15 @@ public class Model extends AbstractObject {
     public void setShared(boolean shared) {
         this.shared = shared;
     }
+    
+    public ModelEntity getEntityById(String entityId) {
+        for (ModelEntity entity : modelEntities) {
+            if (entity.getId().equalsIgnoreCase(entityId)) {
+                return entity;
+            }
+        }
+        return null;        
+    }
 
     public ModelEntity getEntityByName(String entityName) {
         for (ModelEntity entity : modelEntities) {
@@ -88,6 +97,17 @@ public class Model extends AbstractObject {
             }
         }
         return null;
+    }
+    
+    public ModelAttribute getAttributeById(String attributeId) {
+        for (ModelEntity entity : modelEntities) {
+            for (ModelAttribute modelAttribute : entity.getModelAttributes()) {
+                if (modelAttribute.getId().equalsIgnoreCase(attributeId)) {
+                    return modelAttribute;
+                }
+            }
+        }
+        return null;        
     }
 
     public ModelAttribute getAttributeByName(String entityName, String attributeName) {

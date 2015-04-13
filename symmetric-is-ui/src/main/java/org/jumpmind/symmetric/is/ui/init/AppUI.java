@@ -104,6 +104,7 @@ public class AppUI extends AbstractSpringUI {
     		layout.addComponent(labelIntro);
     		addComponent(layout);
     		Label labelMessage = new Label(message, ContentMode.HTML);
+    		labelMessage.setSizeUndefined();
     		addComponent(labelMessage);
     		content.setExpandRatio(labelMessage, 1.0f);
     		addComponent(buildButtonFooter(buildCloseButton()));

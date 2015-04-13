@@ -51,7 +51,7 @@ public class TextFileReaderTest {
     public void testTextReaderFlowFromStartupMsgSingleRowPerMessage() throws Exception {
 
         TextFileReader reader = new TextFileReader();
-        reader.setFlowStep(readerFlow);
+        reader.init(readerFlow, null);
         reader.start(null, resourceFactory);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
@@ -74,7 +74,7 @@ public class TextFileReaderTest {
     public void testTextReaderFlowFromStartupMsgMultipleRowsPerMessage() throws Exception {
 
         TextFileReader reader = new TextFileReader();
-        reader.setFlowStep(readerFlow);
+        reader.init(readerFlow, null);
         reader.start(null, resourceFactory);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();

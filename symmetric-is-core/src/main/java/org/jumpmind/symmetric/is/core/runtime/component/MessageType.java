@@ -2,7 +2,7 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 
 public enum MessageType {
         
-    NONE(null), ENTITY_MESSAGE("E"), TEXT_MESSAGE("T"), BINARY_MESSAGE("B");
+    NONE(null), ENTITY("E"), TEXT("T"), BINARY("B"), ANY("*");
     
     private String letter;
     

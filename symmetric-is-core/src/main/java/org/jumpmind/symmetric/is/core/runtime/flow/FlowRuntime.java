@@ -67,7 +67,7 @@ public class FlowRuntime {
 
         /* create a step runtime for every component in the flow */
         for (FlowStep flowStep : steps) {
-            StepRuntime stepRuntime = new StepRuntime(executionId, componentFactory.create(flowStep), executionTracker);
+            StepRuntime stepRuntime = new StepRuntime(executionId, componentFactory.create(flowStep, flow), executionTracker);
             stepRuntimes.put(flowStep.getId(), stepRuntime);
         }
 

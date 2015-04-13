@@ -15,8 +15,8 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamableResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
-@ComponentDefinition(typeName = BinaryFileReader.TYPE, category = ComponentCategory.READER, iconImage="filereader.png",
-        outgoingMessage=MessageType.BINARY_MESSAGE,
+@ComponentDefinition(typeName = BinaryFileReader.TYPE, category = ComponentCategory.READER, iconImage="binaryfilereader.png",
+        outgoingMessage=MessageType.BINARY,
         resourceCategory = ResourceCategory.STREAMABLE)
 public class BinaryFileReader extends AbstractComponent {
 

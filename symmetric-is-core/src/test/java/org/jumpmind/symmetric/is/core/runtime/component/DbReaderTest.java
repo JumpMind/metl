@@ -120,7 +120,7 @@ public class DbReaderTest {
 
         IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DbReader reader = new DbReader();
-        reader.setFlowStep(readerFlowStep);
+        reader.init(readerFlowStep, null);
         reader.start(executionTracker, resourceFactory);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
@@ -137,7 +137,7 @@ public class DbReaderTest {
 
         IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DbReader reader = new DbReader();
-        reader.setFlowStep(readerFlowStep);
+        reader.init(readerFlowStep, null);
         reader.start(executionTracker, resourceFactory);
         Message message = new Message("fake step id");
         ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();

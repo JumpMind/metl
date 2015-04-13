@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +11,7 @@ import org.jumpmind.symmetric.is.core.model.AbstractObjectWithSettings;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
@@ -22,6 +25,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdatePasswordField;
+import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextArea;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +86,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                 Component component = (Component) obj;
                 configurationService.refresh(component);
                 addComponentProperties(formLayout, component);
-            } 
+            }
 
             if (obj instanceof AbstractObjectWithSettings) {
                 Map<String, SettingDefinition> settings = buildSettings(obj);
@@ -110,7 +114,8 @@ public class PropertySheet extends Panel implements ValueChangeListener {
             FlowStep step = (FlowStep) value;
             Flow flow = configurationService.findFlow(step.getFlowId());
             String projectVersionId = flow.getProjectVersionId();
-            if (componentDefintion.outgoingMessage() == MessageType.ENTITY_MESSAGE) {
+            if (componentDefintion.outgoingMessage() == MessageType.ENTITY
+                    && !componentDefintion.inputOutputModelsMatch()) {
                 final AbstractSelect combo = new ComboBox("Output Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
@@ -142,7 +147,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
             FlowStep step = (FlowStep) value;
             Flow flow = configurationService.findFlow(step.getFlowId());
             String projectVersionId = flow.getProjectVersionId();
-            if (componentDefintion.inputMessage() == MessageType.ENTITY_MESSAGE) {
+            if (componentDefintion.inputMessage() == MessageType.ENTITY) {
                 final AbstractSelect combo = new ComboBox("Input Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
@@ -227,7 +232,11 @@ public class PropertySheet extends Panel implements ValueChangeListener {
             case BOOLEAN:
                 final CheckBox checkBox = new CheckBox(definition.label());
                 checkBox.setImmediate(true);
-                checkBox.setValue(obj.getBoolean(key));
+                boolean defaultValue = false;
+                if (isNotBlank(definition.defaultValue())) {
+                    defaultValue = Boolean.parseBoolean(definition.defaultValue());
+                }
+                checkBox.setValue(obj.getBoolean(key, defaultValue));
                 checkBox.setRequired(required);
                 checkBox.setDescription(description);
                 checkBox.addValueChangeListener(new ValueChangeListener() {
@@ -271,7 +280,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                         saveSetting(key, this, obj);
                     };
                 };
-                passwordField.setValue(obj.get(key));
+                passwordField.setValue(obj.get(key, definition.defaultValue()));
                 passwordField.setRequired(required);
                 passwordField.setDescription(description);
                 formLayout.addComponent(passwordField);
@@ -286,7 +295,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                     };
                 };
                 integerField.setConverter(Integer.class);
-                integerField.setValue(obj.get(key));
+                integerField.setValue(obj.get(key, definition.defaultValue()));
                 integerField.setRequired(required);
                 integerField.setDescription(description);
                 formLayout.addComponent(integerField);
@@ -300,13 +309,54 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                         saveSetting(key, this, obj);
                     };
                 };
-                textField.setValue(obj.get(key));
+                textField.setValue(obj.get(key, definition.defaultValue()));
                 textField.setRequired(required);
                 textField.setDescription(description);
                 formLayout.addComponent(textField);
                 break;
+            case SOURCE_STEP:
+                if (value instanceof FlowStep) {
+                    FlowStep step = (FlowStep) value;
+                    Flow flow = configurationService.findFlow(step.getFlowId());
+                    final AbstractSelect sourceStepsCombo = new ComboBox(definition.label());
+                    sourceStepsCombo.setImmediate(true);
+
+                    List<FlowStepLink> sourceSteps = flow.findFlowStepLinksWithTarget(step.getId());
+                    for (FlowStepLink flowStepLink : sourceSteps) {
+                        FlowStep sourceStep = flow.findFlowStepWithId(flowStepLink
+                                .getSourceStepId());
+                        sourceStepsCombo.addItem(sourceStep.getId());
+                        sourceStepsCombo.setItemCaption(sourceStep.getId(), sourceStep.getName());
+                    }
+                    sourceStepsCombo.setValue(obj.get(key));
+                    sourceStepsCombo.setDescription(description);
+                    sourceStepsCombo.setNullSelectionAllowed(false);
+                    sourceStepsCombo.addValueChangeListener(new ValueChangeListener() {
+
+                        private static final long serialVersionUID = 1L;
+
+                        @Override
+                        public void valueChange(ValueChangeEvent event) {
+                            saveSetting(key, sourceStepsCombo, obj);
+                        }
+                    });
+                    formLayout.addComponent(sourceStepsCombo);
+                }
+                break;
+            case TEXT:
             case XML:
-                // TODO - similar to sql
+                ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(definition.label()) {
+                    private static final long serialVersionUID = 1L;
+
+                    protected void save() {
+                        saveSetting(key, this, obj);
+                    };
+                };
+                area.setValue(obj.get(key, definition.defaultValue()));
+                area.setRows(4);
+                area.setRequired(required);
+                area.setDescription(description);
+                formLayout.addComponent(area);
                 break;
             default:
                 break;
@@ -319,8 +369,6 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         Setting data = obj.findSetting(key);
         data.setValue(field.getValue() != null ? field.getValue().toString() : null);
         configurationService.save(data);
-        // componentSettingsChangedListener.componentSettingsChanges(flowNode,
-        // false);
     }
 
 }

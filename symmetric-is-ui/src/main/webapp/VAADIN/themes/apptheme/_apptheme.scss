@@ -21,7 +21,11 @@
   
 @mixin apptheme {
 	
-  @include valo; 
+  @include valo;
+  
+  .highlight {
+    background-color: #FCEE89;
+   } 
    
   .leftAligned.v-button {
     text-align: left; 

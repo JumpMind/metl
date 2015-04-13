@@ -1,15 +1,14 @@
 package org.jumpmind.symmetric.is.core.model;
 
 
+
 public class ModelAttribute extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
-
-    ModelEntity entity;
-    
-    ModelEntity typeEntity;
     
     String entityId;
+    
+    ModelEntity typeEntity;    
 
     String name;
 
@@ -23,7 +22,7 @@ public class ModelAttribute extends AbstractObject {
     
     public ModelAttribute(String id, String entityId, String name) {
         this.id = id;
-        this.entityId = entityId;
+        setEntityId(entityId);
         this.name = name;
     }
     
@@ -43,13 +42,13 @@ public class ModelAttribute extends AbstractObject {
 		this.id = id;
 	}
 
-	public String getEntityId() {
-		return entityId;
-	}
-
 	public void setEntityId(String entityId) {
-		this.entityId = entityId;
-	}
+        this.entityId = entityId;
+    }
+	
+	public String getEntityId() {
+        return entityId;
+    }
 
 	public String getName() {
 		return name;
@@ -81,15 +80,6 @@ public class ModelAttribute extends AbstractObject {
 
 	public void setTypeEntityId(String typeEntityId) {
 		this.typeEntityId = typeEntityId;
-	}
-
-	public ModelEntity getEntity() {
-		return entity;
-	}
-
-	public void setEntity(ModelEntity entity) {
-		this.entity = entity;
-		this.entityId = entity.getId();
 	}
 
 }

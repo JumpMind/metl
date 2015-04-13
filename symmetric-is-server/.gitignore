@@ -7,3 +7,7 @@
 /.project
 /symmetricis-dev.trace.db
 /build/
+/as400.h2.db
+/as400.lock.db
+/as400.trace.db
+/co.h2.db

@@ -20,8 +20,8 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamableResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
-@ComponentDefinition(typeName = TextFileWriter.TYPE, category = ComponentCategory.WRITER, iconImage="filewriter.png",
-        inputMessage=MessageType.TEXT_MESSAGE,
+@ComponentDefinition(typeName = TextFileWriter.TYPE, category = ComponentCategory.WRITER, iconImage="textfilewriter.png",
+        inputMessage=MessageType.TEXT,
         resourceCategory = ResourceCategory.STREAMABLE)
 public class TextFileWriter extends AbstractComponent {
 
