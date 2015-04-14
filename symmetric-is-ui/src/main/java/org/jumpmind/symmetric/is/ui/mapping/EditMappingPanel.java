@@ -52,8 +52,10 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 		header1.setSpacing(true);
         header1.setMargin(new MarginInfo(false, true, false, true));
         header1.setWidth(100f, Unit.PERCENTAGE);
-        header1.addComponent(new Label("<b>Input Model:</b> &nbsp;" + component.getInputModel().getName(), ContentMode.HTML));
-        header1.addComponent(new Label("<b>Output Model:</b> &nbsp;" + component.getOutputModel().getName(), ContentMode.HTML));
+        header1.addComponent(new Label("<b>Input Model:</b> &nbsp;" + 
+                (component.getInputModel() != null ? component.getInputModel().getName() : "?"), ContentMode.HTML));
+        header1.addComponent(new Label("<b>Output Model:</b> &nbsp;" + 
+                (component.getOutputModel() != null ? component.getOutputModel().getName() : "?"), ContentMode.HTML));
         addComponent(header1);
 		
         HorizontalLayout header2 = new HorizontalLayout();
