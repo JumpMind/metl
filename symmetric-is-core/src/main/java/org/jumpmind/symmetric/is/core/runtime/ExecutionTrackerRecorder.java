@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +50,13 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     public void afterFlow(String executionId) {
         super.afterFlow(executionId);
         execution.setEndTime(new Date());
-        execution.setStatus(ExecutionStatus.DONE.name());
+        ExecutionStatus status = ExecutionStatus.DONE;
+        for (ExecutionStep executionStep : steps.values()) {
+            if (ExecutionStatus.ERROR.name().equals(executionStep.getStatus())) {
+                status = ExecutionStatus.ERROR;
+            }
+        }        
+        execution.setStatus(status.name());
         execution.setLastUpdateTime(new Date());
         this.recorder.record(execution);
     }
@@ -83,8 +90,10 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         super.afterHandle(executionId, component, error);
         ExecutionStep step = steps.get(component.getFlowStep().getId());
         step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.RUNNING.name());
-        step.setMessagesReceived(component.getComponentStatistics().getNumberInboundMessages());
-        step.setMessagesProduced(component.getComponentStatistics().getNumberOutboundMessages());
+        if (component.getComponentStatistics() != null) {
+            step.setMessagesReceived(component.getComponentStatistics().getNumberInboundMessages());
+            step.setMessagesProduced(component.getComponentStatistics().getNumberOutboundMessages());
+        }
         this.recorder.record(step);
     }
     
@@ -94,8 +103,10 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         ExecutionStep step = steps.get(component.getFlowStep().getId());
         step.setEndTime(new Date());
         step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.DONE.name());
-        step.setMessagesReceived(component.getComponentStatistics().getNumberInboundMessages());
-        step.setMessagesProduced(component.getComponentStatistics().getNumberOutboundMessages());
+        if (component.getComponentStatistics() != null) {
+            step.setMessagesReceived(component.getComponentStatistics().getNumberInboundMessages());
+            step.setMessagesProduced(component.getComponentStatistics().getNumberOutboundMessages());
+        }
         this.recorder.record(step);
     }
 

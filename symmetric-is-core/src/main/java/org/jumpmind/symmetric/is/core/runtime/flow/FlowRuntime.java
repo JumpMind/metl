@@ -100,7 +100,12 @@ public class FlowRuntime {
 
         /* start up each step runtime */
         for (StepRuntime stepRuntime : stepRuntimes.values()) {
-            stepRuntime.start(executionTracker, resourceFactory);
+            try {
+                stepRuntime.start(executionTracker, resourceFactory);
+            } catch (RuntimeException ex) {
+                stepRuntime.error = ex;
+                throw ex;
+            }
         }
 
         StartupMessage startMessage = new StartupMessage();
@@ -117,7 +122,7 @@ public class FlowRuntime {
     /*
      * Waiting until all steps have exited
      */
-    public void waitForFlowCompletion() throws InterruptedException {
+    public void waitForFlowCompletion() {
         while (isRunning()) {
             AppUtils.sleep(500);
         }
@@ -157,12 +162,15 @@ public class FlowRuntime {
         return starterSteps;
     }
 
-    public void stop() throws InterruptedException {
+    public void stop() {
         if (isRunning()) {
             List<StepRuntime> startSteps = findStartSteps();
             for (StepRuntime stepRuntime : startSteps) {
-                stepRuntime.put(new ShutdownMessage(stepRuntime.getComponent()
-                        .getFlowStep().getId()));
+                try {
+                    stepRuntime.put(new ShutdownMessage(stepRuntime.getComponent()
+                            .getFlowStep().getId()));
+                } catch (InterruptedException e) {
+                }
             }
         }
     }

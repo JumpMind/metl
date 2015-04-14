@@ -67,6 +67,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     public EditModelPanel(ApplicationContext context, Model model) {
         this.context = context;
         this.model = model;
+        
+        context.getConfigurationService().refresh(model);
 
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
