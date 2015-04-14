@@ -113,11 +113,12 @@ public class EntityRouter extends AbstractComponent {
                 }
             }
 
-            Collection<Message> messages = outboundMessages.values();
-            for (Message message : messages) {
-                componentStatistics.incrementOutboundMessages();
-                messageTarget.put(message);
-            }
+        }
+
+        Collection<Message> messages = outboundMessages.values();
+        for (Message message : messages) {
+            componentStatistics.incrementOutboundMessages();
+            messageTarget.put(message);
         }
 
     }

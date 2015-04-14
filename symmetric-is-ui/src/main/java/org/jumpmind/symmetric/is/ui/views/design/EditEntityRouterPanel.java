@@ -76,6 +76,7 @@ public class EditEntityRouterPanel extends VerticalLayout implements IUiPanel {
             public void buttonClick(ClickEvent event) {
                 if (table.getValue() != null) {
                     table.removeItem(table.getValue());
+                    save();
                 }
             }
         });

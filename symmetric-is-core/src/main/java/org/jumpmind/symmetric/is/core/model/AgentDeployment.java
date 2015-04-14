@@ -38,6 +38,7 @@ public class AgentDeployment extends AbstractObject {
 
     public AgentDeployment(Flow flow) {
         this();
+        this.name = flow.getName();
         setFlow(flow);
     }
 

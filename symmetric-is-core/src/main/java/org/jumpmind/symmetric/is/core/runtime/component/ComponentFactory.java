@@ -57,7 +57,7 @@ public class ComponentFactory extends AbstractFactory<IComponent> implements ICo
             Class<? extends IComponent> clazz = componentTypes.get(componentType);
             if (clazz != null) {
                 IComponent component = clazz.newInstance();
-                component.init(flowStep, null);
+                component.init(flowStep, flow);
                 return component;
             } else {
                 throw new IllegalStateException(

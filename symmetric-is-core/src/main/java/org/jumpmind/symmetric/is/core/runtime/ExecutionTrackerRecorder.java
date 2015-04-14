@@ -1,6 +1,5 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;

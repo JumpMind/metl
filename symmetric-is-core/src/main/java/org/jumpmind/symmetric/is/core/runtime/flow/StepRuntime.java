@@ -27,7 +27,7 @@ public class StepRuntime implements Runnable {
 
     boolean running = true;
 
-    Exception error;
+    Throwable error;
 
     IComponent component;
 
@@ -64,7 +64,22 @@ public class StepRuntime implements Runnable {
     }
 
     public void start(IExecutionTracker tracker, IResourceFactory resourceFactory) {
+        try {
         component.start(tracker, resourceFactory);
+        } catch (RuntimeException ex) {
+            recordError(ex);
+            throw ex;
+        }
+    }
+    
+    protected void recordError(Throwable ex) {
+        error = ex;
+        String msg = ex.getMessage();
+        if (isBlank(msg)) {
+            msg = ExceptionUtils.getFullStackTrace(ex);
+        }
+        executionTracker.log(executionId, LogLevel.ERROR, component, msg);
+        log.error("", ex);
     }
 
     @Override
@@ -99,13 +114,7 @@ public class StepRuntime implements Runnable {
                         executionTracker.beforeHandle(executionId, component);
                         component.handle(executionId, inputMessage, target);
                     } catch (Exception ex) {
-                        error = ex;
-                        String msg = ex.getMessage();
-                        if (isBlank(msg)) {
-                            msg = ExceptionUtils.getFullStackTrace(ex);
-                        }
-                        executionTracker.log(executionId, LogLevel.ERROR, component, msg);
-                        log.error("", ex);
+                        recordError(ex);
                     }
                     executionTracker.afterHandle(executionId, component, error);
                     if (isStartStep()) {
