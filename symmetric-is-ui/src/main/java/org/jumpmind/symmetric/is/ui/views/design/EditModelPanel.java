@@ -255,8 +255,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     protected void addModelAttribute(String filter, ModelEntity entity, ModelAttribute modelAttribute) {
         treeTable.addItem(modelAttribute);
         treeTable.setItemIcon(modelAttribute, FontAwesome.COLUMNS);
-        treeTable.setParent(modelAttribute, entity);
         treeTable.setChildrenAllowed(entity, true);
+        treeTable.setParent(modelAttribute, entity);
         treeTable.setChildrenAllowed(modelAttribute, false);
     }
 
