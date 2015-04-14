@@ -959,11 +959,10 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         public boolean onOk() {
             String flowId = toDelete.getFlowId();
             Flow flow = context.getConfigurationService().findFlow(flowId);
-
             context.getConfigurationService().delete(flow, toDelete);
             Object parent = treeTable.getParent(toDelete);
             if (tabs.closeTab(flowId)) {
-                open(context.getConfigurationService().findFlow(flowId));
+                open(flow);
             }
             refresh();
             treeTable.setValue(parent);
