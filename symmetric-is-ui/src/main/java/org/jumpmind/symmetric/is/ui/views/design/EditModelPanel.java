@@ -178,7 +178,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         Set<Object> selected = getSelectedItems();
         addEntityButton.setEnabled(noFilter);
         importButton.setEnabled(noFilter);
-        addAttributeButton.setEnabled(noFilter);
+        addAttributeButton.setEnabled(noFilter && selected.size() > 0);
         removeButton.setEnabled(selected.size() > 0);
         editButton.setEnabled(selected.size() > 0);
     }
@@ -255,8 +255,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     protected void addModelAttribute(String filter, ModelEntity entity, ModelAttribute modelAttribute) {
         treeTable.addItem(modelAttribute);
         treeTable.setItemIcon(modelAttribute, FontAwesome.COLUMNS);
-        treeTable.setParent(modelAttribute, entity);
         treeTable.setChildrenAllowed(entity, true);
+        treeTable.setParent(modelAttribute, entity);
         treeTable.setChildrenAllowed(modelAttribute, false);
     }
 
@@ -290,14 +290,18 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 if (itemId instanceof ModelEntity) {
                     entity = (ModelEntity) itemId;
                 } else if (itemId instanceof ModelAttribute) {
-                    entity = (ModelEntity)treeTable.getParent(itemId);
+                    entity = (ModelEntity) treeTable.getParent(itemId);
                 }
-                a.setEntityId(entity.getId());
-                context.getConfigurationService().save(a);
-                addModelAttribute("", entity, a);
-                treeTable.setCollapsed(entity, false);
-                selectOnly(a);
-                editSelectedItem();
+
+                if (entity != null) {
+                    a.setEntityId(entity.getId());
+                    entity.addModelAttribute(a);
+                    context.getConfigurationService().save(a);
+                    addModelAttribute("", entity, a);
+                    treeTable.setCollapsed(entity, false);
+                    selectOnly(a);
+                    editSelectedItem();
+                }
             }
         }
     }
