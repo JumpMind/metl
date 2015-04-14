@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
@@ -18,6 +17,7 @@ import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
+import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -106,26 +106,22 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.setMultiSelect(true);
         treeTable.addGeneratedColumn("name", new ColumnGenerator() {
 
-            Map<Object, TextField> fields = new HashMap<Object, TextField>();
-
             @Override
             public Object generateCell(Table source, Object itemId, Object columnId) {
-                AbstractObject obj = (AbstractObject) itemId;
+                final AbstractObject obj = (AbstractObject) itemId;
                 if (lastEditItemIds.contains(itemId)) {
-                    TextField t = new TextField();
-                    t.setImmediate(true);
+                    ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
+                        protected void save() {
+                            obj.setName(getValue());
+                            EditModelPanel.this.context.getConfigurationService().save(obj);                            
+                        };
+                    };
                     t.setWidth(100, Unit.PERCENTAGE);
+                    t.setValue(obj.getName());
                     t.focus();
                     t.selectAll();
-                    t.setValue(obj.getName());
-                    fields.put(itemId, t);
                     return t;
                 } else {
-                    TextField t = fields.get(itemId);
-                    if (t != null) {
-                        obj.setName(t.getValue());
-                        fields.remove(itemId);
-                    }
                     return getName(filterField.getValue(), obj.getName());
                 }
             }
@@ -134,27 +130,27 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
         treeTable.addGeneratedColumn("type", new ColumnGenerator() {
 
-            Map<Object, ComboBox> fields = new HashMap<Object, ComboBox>();
-
             @Override
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 if (itemId instanceof ModelAttribute) {
-                    ModelAttribute obj = (ModelAttribute) itemId;
+                    final ModelAttribute obj = (ModelAttribute) itemId;
                     if (lastEditItemIds.contains(itemId)) {
-                        ComboBox cbox = new ComboBox();
+                        final ComboBox cbox = new ComboBox();
                         cbox.setNullSelectionAllowed(false);
                         for (DataType dataType : DataType.values()) {
                             cbox.addItem(dataType.name());
                         }
                         cbox.setValue(obj.getType());
-                        fields.put(itemId, cbox);
+                        cbox.addValueChangeListener(new ValueChangeListener() {
+                            
+                            @Override
+                            public void valueChange(ValueChangeEvent event) {
+                                obj.setType((String)cbox.getValue());
+                                EditModelPanel.this.context.getConfigurationService().save(obj);
+                            }
+                        });
                         return cbox;
                     } else {
-                        ComboBox t = fields.get(itemId);
-                        if (t != null) {
-                            obj.setType((String) t.getValue());
-                            fields.remove(itemId);
-                        }
                         return obj.getType();
                     }
                 } else {
@@ -399,15 +395,6 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
     class TreeTableValueChangeListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
-            for (Object itemId : lastEditItemIds) {
-                if (itemId instanceof ModelEntity) {
-                    ModelEntity e = (ModelEntity) itemId;
-                    context.getConfigurationService().save(e);
-                } else if (itemId instanceof ModelAttribute) {
-                    ModelAttribute a = (ModelAttribute) itemId;
-                    context.getConfigurationService().save(a);
-                }
-            }
             lastEditItemIds = Collections.emptySet();
             treeTable.refreshRowCache();
             setButtonsEnabled(filterField.getValue());
