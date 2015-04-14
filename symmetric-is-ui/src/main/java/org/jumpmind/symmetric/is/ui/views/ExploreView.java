@@ -45,8 +45,10 @@ public class ExploreView extends VerticalLayout implements View {
 
     @Autowired
     ApplicationContext context;
-
-    List<IDb> dbs = new ArrayList<IDb>();
+    
+    DbProvider dbProvider;
+    
+    SqlExplorer explorer;
 
     public ExploreView() {
         setSizeFull();
@@ -54,60 +56,16 @@ public class ExploreView extends VerticalLayout implements View {
     
     @PostConstruct
     protected void init () {
-        SqlExplorer explorer = new SqlExplorer(System.getProperty("java.io.tmpdir"),
-                new IDbProvider() {
-                    @Override
-                    public List<IDb> getDatabases() {
-                        for (IDb db : dbs) {
-                            BasicDataSource ds = db.getPlatform().getDataSource();
-                            try {
-                                ds.close();
-                            } catch (SQLException e) {
-                            }
-                        }
-
-                        dbs.clear();
-
-                        dbs.add(new IDb() {
-                            @Override
-                            public IDatabasePlatform getPlatform() {
-                                return platform;
-                            }
-
-                            @Override
-                            public String getName() {
-                                return "SymmetricIS DB";
-                            }
-                        });
-
-                        List<ProjectVersion> projects = context.getOpenProjects();
-                        for (ProjectVersion projectVersion : projects) {
-                            List<Resource> resources = context.getConfigurationService()
-                                    .findResourcesInProject(projectVersion.getId());
-                            for (Resource resource : resources) {
-                                if (resource.getType().equals(DataSourceResource.TYPE)) {
-                                    DbResource db = new DbResource(projectVersion, resource);
-                                    dbs.add(db);
-                                }
-                            }
-                        }
-
-                        Collections.sort(dbs, new Comparator<IDb>() {
-                            @Override
-                            public int compare(IDb o1, IDb o2) {
-                                return o1.getName().compareTo(o2.getName());
-                            }
-                        });
-
-                        return dbs;
-                    }
-                }, "admin", AppConstants.DEFAULT_LEFT_SPLIT);
+        dbProvider = new DbProvider();
+        explorer = new SqlExplorer(System.getProperty("java.io.tmpdir"),
+                dbProvider, "admin", AppConstants.DEFAULT_LEFT_SPLIT);
         addComponent(explorer);
-        explorer.refresh();
     }
 
     @Override
     public void enter(ViewChangeEvent event) {
+        dbProvider.refresh();
+        explorer.refresh();
     }
 
     class DbResource implements IDb {
@@ -166,6 +124,59 @@ public class ExploreView extends VerticalLayout implements View {
             }
         }
 
+    }
+    
+    class DbProvider implements IDbProvider {
+        
+        List<IDb> dbs = new ArrayList<IDb>();
+        
+        public void refresh() {
+            for (IDb db : dbs) {
+                BasicDataSource ds = db.getPlatform().getDataSource();
+                try {
+                    ds.close();
+                } catch (SQLException e) {
+                }
+            }
+
+            dbs.clear();
+
+            dbs.add(new IDb() {
+                @Override
+                public IDatabasePlatform getPlatform() {
+                    return platform;
+                }
+
+                @Override
+                public String getName() {
+                    return "SymmetricIS DB";
+                }
+            });
+
+            List<ProjectVersion> projects = context.getOpenProjects();
+            for (ProjectVersion projectVersion : projects) {
+                List<Resource> resources = context.getConfigurationService()
+                        .findResourcesInProject(projectVersion.getId());
+                for (Resource resource : resources) {
+                    if (resource.getType().equals(DataSourceResource.TYPE)) {
+                        DbResource db = new DbResource(projectVersion, resource);
+                        dbs.add(db);
+                    }
+                }
+            }
+
+            Collections.sort(dbs, new Comparator<IDb>() {
+                @Override
+                public int compare(IDb o1, IDb o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });            
+        }
+        
+        @Override
+        public List<IDb> getDatabases() {
+            return dbs;
+        }
     }
 
 }

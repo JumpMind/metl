@@ -303,16 +303,18 @@ public class AgentRuntime {
 
         @Override
         public void run() {
+            AgentDeployment deployment = flowRuntime.getDeployment();                
             try {
-                AgentDeployment deployment = flowRuntime.getDeployment();                
                 log.info("Scheduled '{}' on '{}' is running", deployment.getFlow()
                         .toString(), agent.getName());
                 flowRuntime.start(executionId);
+            } catch (Exception e) {
+                log.error("Error while waiting for the flow to complete", e);
+                flowRuntime.stop();
+            } finally {
                 flowRuntime.waitForFlowCompletion();
                 log.info("Scheduled '{}' on '{}' is finished", deployment.getFlow()
                         .toString(), agent.getName());
-            } catch (Exception e) {
-                log.error("Error while waiting for the flow to complete", e);
             }
         }
     }
