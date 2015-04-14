@@ -19,7 +19,9 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
         typeName = Multiplier.TYPE,
         iconImage = "multiplier.png",
         inputMessage = MessageType.ENTITY,
-        outgoingMessage = MessageType.ENTITY)
+        outgoingMessage = MessageType.ENTITY,
+        inputOutputModelsMatch=true
+        )
 public class Multiplier extends AbstractComponent {
 
     public static final String TYPE = "Multiplier";

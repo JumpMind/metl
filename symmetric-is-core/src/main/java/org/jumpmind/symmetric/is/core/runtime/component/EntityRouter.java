@@ -123,6 +123,7 @@ public class EntityRouter extends AbstractComponent {
     }
 
     protected void bind(String executionId, EntityData entityData) {
+        long ts = System.currentTimeMillis();
         Bindings bindings = scriptEngine.createBindings();
         Model model = flowStep.getComponent().getInputModel();
         List<ModelEntity> entities = model.getModelEntities();
@@ -147,6 +148,7 @@ public class EntityRouter extends AbstractComponent {
             }
         }
         scriptEngine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
+        log.info("It took " + (System.currentTimeMillis()-ts) + " to bind variables");
     }
 
     static public class Route {
