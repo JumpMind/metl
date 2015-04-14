@@ -43,6 +43,7 @@ import com.vaadin.ui.Field;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -62,6 +63,8 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
     Button removeButton;
 
     Button editButton;
+    
+    FlowSelectWindow flowSelectWindow;
 
     public EditAgentPanel(ApplicationContext context, Agent agent) {
         this.context = context;
@@ -156,7 +159,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
         table.setMultiSelect(true);
 
         table.setContainerDataSource(container);
-        table.setVisibleColumns(new Object[] { "flow", "status", "logLevel", "startType",
+        table.setVisibleColumns(new Object[] { "name", "status", "logLevel", "startType",
                 "startExpression" });
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
@@ -277,14 +280,41 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
 
     }
 
-    class AddDeploymentClickListener implements ClickListener {
+    class AddDeploymentClickListener implements ClickListener, FlowSelectListener {
         public void buttonClick(ClickEvent event) {
-            AgentDeployment deployment = new AgentDeployment();
-            deployment.setAgentId(agent.getId());
-            deployment.setFlow(new Flow());
-            container.addItem(deployment, deployment);
-            selectOnly(deployment);
-            editSelectedItem();
+            if (flowSelectWindow == null) {
+                String introText = "Select one or more flows for deployment to this agent.";
+                flowSelectWindow = new FlowSelectWindow(context, "Add Deployment", introText);
+                flowSelectWindow.setFlowSelectListener(this);
+            }
+            UI.getCurrent().addWindow(flowSelectWindow);
+        }
+        
+        public void selected(Collection<Flow> flowCollection) {
+            for (Flow flow : flowCollection) {
+                AgentDeployment deployment = new AgentDeployment();
+                deployment.setAgentId(agent.getId());
+                deployment.setFlow(flow);
+                deployment.setName(getName(flow.getName()));
+                container.addItem(deployment, deployment);
+                context.getConfigurationService().save(deployment);
+            }
+            System.out.println("I got: " + flowCollection);
+        }
+
+        protected String getName(String name) {
+            for (AgentDeployment deployment : container.getItemIds()) {
+                if (name.equals(deployment.getName())) {
+                    if (name.matches(".*\\([0-9]+\\)$")) {
+                        String num = name.substring(name.lastIndexOf("(") + 1, name.lastIndexOf(")"));
+                        name = name.replaceAll("\\([0-9]+\\)$", "(" + (Integer.parseInt(num) + 1) + ")");
+                    } else {
+                        name += " (1)";
+                    }
+                    return getName(name); 
+                }
+            }
+            return name;
         }
     }
 

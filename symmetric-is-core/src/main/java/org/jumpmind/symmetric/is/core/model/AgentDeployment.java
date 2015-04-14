@@ -14,6 +14,8 @@ public class AgentDeployment extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
+    String name;
+
     Flow flow;
 
     String agentId;
@@ -85,10 +87,11 @@ public class AgentDeployment extends AbstractObject {
     }
 
     public String getName() {
-        return flow.getName();
+        return name;
     }
 
     public void setName(String name) {
+        this.name = name;
     }
 
     public Flow getFlow() {
