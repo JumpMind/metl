@@ -450,7 +450,7 @@ public class DeployNavigator extends VerticalLayout {
     protected void openItem(Object item) {
         if (item instanceof Agent) {
             Agent agent = (Agent)item;
-            tabbedPanel.addCloseableTab(agent.getId(), agent.getName(), Icons.AGENT, new EditAgentPanel(context, agent));
+            tabbedPanel.addCloseableTab(agent.getId(), agent.getName(), Icons.AGENT, new EditAgentPanel(context, tabbedPanel, agent));
         }
     }
 

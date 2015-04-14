@@ -18,6 +18,7 @@ import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.Icons;
+import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.util.AppUtils;
 
@@ -64,10 +65,13 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
 
     Button editButton;
     
+    TabbedPanel tabbedPanel;
+
     FlowSelectWindow flowSelectWindow;
 
-    public EditAgentPanel(ApplicationContext context, Agent agent) {
+    public EditAgentPanel(ApplicationContext context, TabbedPanel tabbedPanel, Agent agent) {
         this.context = context;
+        this.tabbedPanel = tabbedPanel;
         this.agent = agent;
         
         HorizontalLayout editAgentLayout = new HorizontalLayout();
@@ -299,7 +303,6 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
                 container.addItem(deployment, deployment);
                 context.getConfigurationService().save(deployment);
             }
-            System.out.println("I got: " + flowCollection);
         }
 
         protected String getName(String name) {
@@ -320,7 +323,9 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
 
     class EditClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            editSelectedItem();
+            AgentDeployment deployment = (AgentDeployment) getSelectedItems().iterator().next();
+            EditAgentDeploymentPanel editPanel = new EditAgentDeploymentPanel(context, deployment);
+            tabbedPanel.addCloseableTab(deployment.getId(), deployment.getName(), Icons.DEPLOYMENT, editPanel);
         }
     }
 
