@@ -89,27 +89,29 @@ public class EntityRouter extends AbstractComponent {
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
         for (EntityData entityData : inputRows) {
             bind(executionId, entityData);
-            for (Route route : routes) {
-                try {
-                    if (Boolean.TRUE.equals(scriptEngine.eval(route.getMatchExpression()))) {
-                        Message message = outboundMessages.get(route.getTargetStepId());
-                        if (message == null) {
-                            message = new Message(flowStep.getId());
-                            message.setPayload(new ArrayList<EntityData>());
-                            message.getHeader().getTargetStepIds().add(route.getTargetStepId());
-                            outboundMessages.put(route.getTargetStepId(), message);
-                        }
-                        ArrayList<EntityData> outputRows = message.getPayload();
-                        outputRows.add(entityData);
+            if (routes != null) {
+                for (Route route : routes) {
+                    try {
+                        if (Boolean.TRUE.equals(scriptEngine.eval(route.getMatchExpression()))) {
+                            Message message = outboundMessages.get(route.getTargetStepId());
+                            if (message == null) {
+                                message = new Message(flowStep.getId());
+                                message.setPayload(new ArrayList<EntityData>());
+                                message.getHeader().getTargetStepIds().add(route.getTargetStepId());
+                                outboundMessages.put(route.getTargetStepId(), message);
+                            }
+                            ArrayList<EntityData> outputRows = message.getPayload();
+                            outputRows.add(entityData);
 
-                        if (outputRows.size() >= rowsPerMessage) {
-                            outboundMessages.remove(route.getTargetStepId());
-                            componentStatistics.incrementOutboundMessages();
-                            messageTarget.put(message);
+                            if (outputRows.size() >= rowsPerMessage) {
+                                outboundMessages.remove(route.getTargetStepId());
+                                componentStatistics.incrementOutboundMessages();
+                                messageTarget.put(message);
+                            }
                         }
+                    } catch (ScriptException e) {
+                        throw new RuntimeException(e);
                     }
-                } catch (ScriptException e) {
-                    throw new RuntimeException(e);
                 }
             }
 

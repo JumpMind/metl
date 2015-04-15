@@ -9,16 +9,16 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
 public interface IComponent {
 
+    public void init(FlowStep flowStep, Flow flow);
+    
     public void start(IExecutionTracker tracker, IResourceFactory resourceFactory);
 
+    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget);
+    
     public void stop();
     
     public ComponentStatistics getComponentStatistics();
 
-    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget);
-    
-    public FlowStep getFlowStep();
-    
-    public void init(FlowStep flowStep, Flow flow);
+    public FlowStep getFlowStep();    
 
 }

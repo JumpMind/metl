@@ -699,7 +699,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
                         editFormat);
             } else if (type.equals(DbReader.TYPE)) {
                 EditDbReaderPanel editFormat = new EditDbReaderPanel(context,
-                        flowStep.getComponent());
+                        flowStep.getComponent(), propertySheet);
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
                         editFormat);
                 unselectAll();

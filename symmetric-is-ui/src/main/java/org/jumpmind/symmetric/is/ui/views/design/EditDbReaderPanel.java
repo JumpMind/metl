@@ -47,10 +47,13 @@ public class EditDbReaderPanel extends VerticalLayout implements IUiPanel {
     Button executeButton;
 
     ExecuteSqlClickListener executeSqlClickListener;
+    
+    PropertySheet propertySheet;
 
-    public EditDbReaderPanel(ApplicationContext context, Component component) {
+    public EditDbReaderPanel(ApplicationContext context, Component component, PropertySheet propertySheet) {
         this.context = context;
         this.component = component;
+        this.propertySheet = propertySheet;
 
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
@@ -159,6 +162,9 @@ public class EditDbReaderPanel extends VerticalLayout implements IUiPanel {
                 dataSource.close();
             } catch (SQLException e) {
             }
+        }
+        if (propertySheet != null) {
+            propertySheet.valueChange(component);
         }
         return true;
     }
