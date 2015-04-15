@@ -79,6 +79,14 @@ public class DbWriter extends AbstractComponent {
             defaultValue = "false")
     public final static String FIT_TO_COLUMN = "db.writer.fit.to.column";
 
+    @SettingDefinition(
+            order = 6,
+            required = false,
+            type = Type.BOOLEAN,
+            label = "Stop Processing Msgs on Error",
+            defaultValue = "true")
+    public final static String STOP_PROCESSING_ON_ERROR = "stop.processing.on.error";
+
     boolean replaceRows = false;
 
     boolean updateFirst = false;
@@ -89,18 +97,24 @@ public class DbWriter extends AbstractComponent {
 
     boolean fitToColumn = false;
 
+    boolean stopProcessingOnError = true;
+
     IDatabasePlatform platform;
 
     List<TargetTable> targetTables;
 
+    Throwable error;
+
     @Override
     public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
         super.start(executionTracker, resourceFactory);
+        error = null;
         TypedProperties properties = flowStep.getComponent().toTypedProperties(this, false);
         replaceRows = properties.is(REPLACE);
         updateFirst = properties.is(UPDATE_FIRST);
         insertFallback = properties.is(INSERT_FALLBACK);
         quoteIdentifiers = properties.is(QUOTE_IDENTIFIERS);
+        stopProcessingOnError = properties.is(STOP_PROCESSING_ON_ERROR, true);
         fitToColumn = properties.is(FIT_TO_COLUMN);
 
         DataSource dataSource = (DataSource) resource.reference();
@@ -138,78 +152,83 @@ public class DbWriter extends AbstractComponent {
 
         componentStatistics.incrementInboundMessages();
 
-        if (resource == null) {
-            throw new RuntimeException(
-                    "The data source resource has not been configured.  Please configure it.");
+        if (error == null || !stopProcessingOnError) {
+            if (resource == null) {
+                throw new RuntimeException(
+                        "The data source resource has not been configured.  Please configure it.");
+            }
+
+            ArrayList<EntityData> inputRows = inputMessage.getPayload();
+            if (inputRows == null) {
+                return;
+            }
+
+            ISqlTransaction transaction = platform.getSqlTemplate().startSqlTransaction();
+            try {
+                write(transaction, inputRows);
+                transaction.commit();
+            } catch (Throwable ex) {
+                error = ex;
+                transaction.rollback();
+                if (ex instanceof RuntimeException) {
+                    throw (RuntimeException) ex;
+                } else {
+                    throw new RuntimeException(ex);
+                }
+            } finally {
+                transaction.close();
+            }
         }
+    }
 
-        ArrayList<EntityData> inputRows = inputMessage.getPayload();
-        if (inputRows == null) {
-            return;
-        }
-
-        ISqlTransaction transaction = platform.getSqlTemplate().startSqlTransaction();
-        try {
-
-            for (EntityData inputRow : inputRows) {
-                for (TargetTable modelTable : targetTables) {
-                    if (modelTable.shouldProcess(inputRow)) {
-                        ArrayList<Object> data = new ArrayList<Object>();
-                        for (TargetColumn modelColumn : modelTable.getTargetColumns()) {
-                            Object value = inputRow.get(modelColumn.getModelAttribute().getId());
-                            if (fitToColumn && value != null && value instanceof String) {
-                                value = fitToColumn(modelTable.getTable(), modelColumn
-                                        .getModelAttribute().getName(), (String) value);
-                            }
-                            data.add(value);
+    private void write(ISqlTransaction transaction, List<EntityData> inputRows) {
+        for (EntityData inputRow : inputRows) {
+            for (TargetTable modelTable : targetTables) {
+                if (modelTable.shouldProcess(inputRow)) {
+                    ArrayList<Object> data = new ArrayList<Object>();
+                    for (TargetColumn modelColumn : modelTable.getTargetColumns()) {
+                        Object value = inputRow.get(modelColumn.getModelAttribute().getId());
+                        if (fitToColumn && value != null && value instanceof String) {
+                            value = fitToColumn(modelTable.getTable(), modelColumn
+                                    .getModelAttribute().getName(), (String) value);
                         }
-                        if (updateFirst) {
-                            for (TargetColumn modelColumn : modelTable.getKeyTargetColumns()) {
-                                data.add(inputRow.get(modelColumn.getModelAttribute().getId()));
-                            }
-                            int count = execute(transaction, modelTable.getUpdateStatement(),
+                        data.add(value);
+                    }
+                    if (updateFirst) {
+                        for (TargetColumn modelColumn : modelTable.getKeyTargetColumns()) {
+                            data.add(inputRow.get(modelColumn.getModelAttribute().getId()));
+                        }
+                        int count = execute(transaction, modelTable.getUpdateStatement(),
+                                new Object(), data);
+                        componentStatistics.incrementNumberEntitiesProcessed(count);
+                        if (insertFallback && count == 0) {
+                            log.debug("Falling back to insert");
+                            int endIndex = data.size() - modelTable.getKeyTargetColumns().size();
+                            count = execute(transaction, modelTable.getInsertStatement(),
+                                    new Object(), data.subList(0, endIndex));
+                            componentStatistics.incrementNumberEntitiesProcessed(count);
+                        }
+                    } else {
+                        try {
+                            int count = execute(transaction, modelTable.getInsertStatement(),
                                     new Object(), data);
-
-                            if (insertFallback && count == 0) {
-                                log.debug("Falling back to insert");
-                                int endIndex = data.size()
-                                        - modelTable.getKeyTargetColumns().size();
-                                count = execute(transaction, modelTable.getInsertStatement(),
-                                        new Object(), data.subList(0, endIndex));
-                            }
-                        } else {
-                            try {
-                                int count = execute(transaction, modelTable.getInsertStatement(), new Object(),
-                                        data);
-                                componentStatistics.incrementNumberEntitiesProcessed(count);
-                            } catch (UniqueKeyException e) {
-                                if (replaceRows) {
-                                    log.debug("Falling back to update");
-                                    for (TargetColumn modelColumn : modelTable
-                                            .getKeyTargetColumns()) {
-                                        data.add(inputRow.get(modelColumn.getModelAttribute()
-                                                .getId()));
-                                    }
-                                    execute(transaction, modelTable.getUpdateStatement(),
-                                            new Object(), data);
-                                } else {
-                                    throw e;
+                            componentStatistics.incrementNumberEntitiesProcessed(count);
+                        } catch (UniqueKeyException e) {
+                            if (replaceRows) {
+                                log.debug("Falling back to update");
+                                for (TargetColumn modelColumn : modelTable.getKeyTargetColumns()) {
+                                    data.add(inputRow.get(modelColumn.getModelAttribute().getId()));
                                 }
+                                int count = execute(transaction, modelTable.getUpdateStatement(),
+                                        new Object(), data);
+                                componentStatistics.incrementNumberEntitiesProcessed(count);
+                            } else {
+                                throw e;
                             }
                         }
                     }
                 }
             }
-            transaction.commit();
-        } catch (Throwable ex) {
-            transaction.rollback();
-            if (ex instanceof RuntimeException) {
-                throw (RuntimeException) ex;
-            } else {
-                throw new RuntimeException(ex);
-            }
-        } finally {
-            transaction.close();
         }
     }
 
@@ -282,7 +301,7 @@ public class DbWriter extends AbstractComponent {
         public List<TargetColumn> getKeyTargetColumns() {
             return keyTargetColumns;
         }
-        
+
         public boolean shouldProcess(EntityData entityData) {
             for (TargetColumn targetColumn : targetColumns) {
                 if (entityData.containsKey(targetColumn.getModelAttribute().getId())) {
