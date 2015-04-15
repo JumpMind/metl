@@ -13,6 +13,7 @@ import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
+import org.jumpmind.symmetric.is.ui.common.Table;
 import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.common.ReadOnlyTextAreaDialog;
@@ -29,7 +30,6 @@ import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
@@ -91,9 +91,14 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
         stepTable.setImmediate(true);
         stepTable.setSizeFull();
         stepTable.setVisibleColumns(new Object[] { "componentName", "status", "messagesReceived",
-                "messagesProduced", "startTime", "endTime" });
+                "messagesProduced", "entitiesProcessed", "startTime", "endTime" });
         stepTable.setColumnHeaders(new String[] { "Component Name", "Status", "Msgs Recvd",
-                "Msgs Sent", "Start", "End" });
+                "Msgs Sent", "Entites Prcd", "Start", "End" });
+        stepTable.setColumnWidth("status", 100);
+        stepTable.setColumnWidth("messagesReceived", 100);
+        stepTable.setColumnWidth("messagesProduced", 100);
+        stepTable.setColumnWidth("entitiesProcessed", 100);
+        stepTable.setColumnExpandRatio("endTime", 1);
         stepTable.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
                 @SuppressWarnings("unchecked")
@@ -221,7 +226,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
 
     public class ComponentNameColumnGenerator implements ColumnGenerator {
         @SuppressWarnings("unchecked")
-        public Object generateCell(Table source, Object itemId, Object columnId) {
+        public Object generateCell(com.vaadin.ui.Table source, Object itemId, Object columnId) {
             BeanItem<ExecutionStepLog> logItem = (BeanItem<ExecutionStepLog>) source
                     .getItem(itemId);
             String executionStepId = (String) logItem.getItemProperty("executionStepId").getValue();

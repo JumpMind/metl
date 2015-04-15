@@ -37,7 +37,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
                 "started handing step message for execution: %s,  for deployment: %s,  component: %s:%s",
                 executionId, deployment.getId(), flowStep.getComponent().getName(), flowStep
                         .getComponent().getId());
-        log.info(msg);
+        log.debug(msg);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
                 "finished handing step message for execution: %s,  for deployment: %s,  component: %s:%s",
                 executionId, deployment.getId(), flowStep.getComponent().getName(), flowStep
                         .getComponent().getId());
-        log.info(msg);
+        log.debug(msg);
     }
     
     @Override

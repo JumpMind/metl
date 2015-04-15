@@ -179,8 +179,9 @@ public class DbWriter extends AbstractComponent {
                             }
                         } else {
                             try {
-                                execute(transaction, modelTable.getInsertStatement(), new Object(),
+                                int count = execute(transaction, modelTable.getInsertStatement(), new Object(),
                                         data);
+                                componentStatistics.incrementNumberEntitiesProcessed(count);
                             } catch (UniqueKeyException e) {
                                 if (replaceRows) {
                                     log.debug("Falling back to update");

@@ -107,6 +107,7 @@ public class DbReader extends AbstractComponent {
                     int outputRecCount = 0;
                     
                     while (rs.next()) {
+                        componentStatistics.incrementNumberEntitiesProcessed();
                         if (message == null) {
                             message = createMessage(inputMessage);
                         }

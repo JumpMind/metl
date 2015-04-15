@@ -18,6 +18,8 @@ public class ExecutionStep extends AbstractObject {
     
     private long messagesProduced;
     
+    private long entitiesProcessed;
+    
     private Date startTime;
     
     private Date endTime;
@@ -94,5 +96,13 @@ public class ExecutionStep extends AbstractObject {
 	public void setEndTime(Date endTime) {
 		this.endTime = endTime;
 	}
+	
+	public void setEntitiesProcessed(long entitiesProcessed) {
+        this.entitiesProcessed = entitiesProcessed;
+    }
+	
+	public long getEntitiesProcessed() {
+        return entitiesProcessed;
+    }
 
 }

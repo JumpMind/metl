@@ -94,12 +94,12 @@ public class Multiplier extends AbstractComponent {
 
             List<EntityData> datas = message.getPayload();
             for (int j = 0; j < datas.size(); j++) {
+                componentStatistics.incrementNumberEntitiesProcessed();
                 EntityData oldData = datas.get(j);
                 EntityData newData = new EntityData();
                 newData.putAll(oldData);
                 newData.putAll(multiplierData);
                 multiplied.add(newData);
-
                 if (multiplied.size() >= rowsPerMessage) {
                     Message newMessage = new Message(flowStep.getId());
                     newMessage.getHeader().setLastMessage(

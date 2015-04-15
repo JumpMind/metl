@@ -10,6 +10,7 @@ import org.jumpmind.symmetric.is.core.model.Execution;
 import org.jumpmind.symmetric.is.core.model.ExecutionStatus;
 import org.jumpmind.symmetric.is.core.model.ExecutionStep;
 import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
+import org.jumpmind.symmetric.is.core.runtime.component.ComponentStatistics;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
 import org.jumpmind.symmetric.is.core.runtime.flow.AsyncRecorder;
 
@@ -83,15 +84,17 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         step.setLastUpdateTime(new Date());
         this.recorder.record(step);
     }
-
+ 
     @Override
     public void afterHandle(String executionId, IComponent component, Throwable error) {
         super.afterHandle(executionId, component, error);
         ExecutionStep step = steps.get(component.getFlowStep().getId());
         step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.RUNNING.name());
-        if (component.getComponentStatistics() != null) {
-            step.setMessagesReceived(component.getComponentStatistics().getNumberInboundMessages());
-            step.setMessagesProduced(component.getComponentStatistics().getNumberOutboundMessages());
+        ComponentStatistics stats = component.getComponentStatistics();
+        if (stats != null) {
+            step.setEntitiesProcessed(stats.getNumberEntitiesProcessed());
+            step.setMessagesReceived(stats.getNumberInboundMessages());
+            step.setMessagesProduced(stats.getNumberOutboundMessages());
         }
         this.recorder.record(step);
     }
