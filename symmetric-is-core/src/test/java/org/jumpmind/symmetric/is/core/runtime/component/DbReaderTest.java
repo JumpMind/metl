@@ -157,7 +157,30 @@ public class DbReaderTest {
     public void testReaderFlowFromMultipleContentMsgs() throws Exception {
 
     }
+    
+    @Test
+    public void testCountColumnSeparatingCommas() {
+        
+        DbReader reader = new DbReader();
+        
+        int count = reader.countColumnSeparatingCommas("ISNULL(a,''), b, *");
+        assertEquals(count, 2);        
+        count = reader.countColumnSeparatingCommas("ISNULL(a,('')), b, *");
+        assertEquals(count,2);
+    }
 
+    @Test
+    public void testGetSqlColumnEntityHints() throws Exception {
+        
+        DbReader reader = new DbReader();
+        String sql = "select\r\n ISNULL(a,ISNULL(z,'')) /*COLA*/, b/*COLB*/, c/*  COLC */ from test;";
+        Map<Integer, String> hints = reader.getSqlColumnEntityHints(sql);
+        assertEquals(hints.get(1), "COLA");
+        assertEquals(hints.get(2), "COLB");
+        assertEquals(hints.get(3), "COLC");
+        
+    }
+    
     private static FlowStep createReaderFlowStep() {
 
         Folder folder = TestUtils.createFolder("Test Folder");

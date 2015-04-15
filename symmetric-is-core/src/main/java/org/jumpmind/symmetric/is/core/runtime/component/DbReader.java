@@ -9,7 +9,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.lang.StringUtils;
+import org.springframework.util.StringUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
@@ -174,7 +174,7 @@ public class DbReader extends AbstractComponent {
                     tableName = hint;
                 }
             }
-            if (StringUtils.isBlank(tableName)) {
+            if (StringUtils.isEmpty(tableName)) {
                 throw new SQLException(
                         "Table name could not be determined from metadata or hints.  Please check column and hint.  "
                         + "Note that on some databases metadata is only returned if instructed.  "
@@ -245,16 +245,47 @@ public class DbReader extends AbstractComponent {
 
     protected Map<Integer, String> getSqlColumnEntityHints(String sql) {
         Map<Integer, String> columnEntityHints = new HashMap<Integer, String>();
-        String columns = sql.substring(sql.toLowerCase().indexOf("select ") + 7, sql.toLowerCase()
-                .indexOf("from "));
+        String columns = sql.substring(sql.toLowerCase().indexOf("select") + 6, 
+                getFromIndex(sql));
         int commentIdx = 0;
         while (columns.indexOf("/*", commentIdx) != -1) {
             commentIdx = columns.indexOf("/*", commentIdx) + 2;
-            int columnIdx = StringUtils.countMatches(columns.substring(0, commentIdx), ",") + 1;
-            String entity = StringUtils.trim(columns.substring(commentIdx,
+            int columnIdx = countColumnSeparatingCommas(columns.substring(0, commentIdx)) + 1;
+            String entity = StringUtils.trimWhitespace(columns.substring(commentIdx,
                     columns.indexOf("*/", commentIdx)));
             columnEntityHints.put(columnIdx, entity);
         }
         return columnEntityHints;
     }
+    
+    protected int countColumnSeparatingCommas(String value) {
+        int count = 0;
+        
+        int p = 0;
+        for (char c : value.toCharArray()) {
+            if (c=='(') {
+                p++;
+            } else if (c==')') {
+                p--;
+            } else if (c==',' && p==0) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    protected int getFromIndex(String sql) {
+        sql = sql.toLowerCase();
+        int idx = -1;
+        
+        idx = sql.toLowerCase().indexOf("from ");
+        if (idx == -1) {
+            idx = sql.toLowerCase().indexOf("from\n");
+        }
+        if (idx == -1) {
+            idx = sql.toLowerCase().indexOf("from\r\n");
+        }
+        return idx;
+    }
+
 }
