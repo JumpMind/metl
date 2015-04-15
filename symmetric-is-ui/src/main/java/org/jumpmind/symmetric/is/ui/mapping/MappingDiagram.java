@@ -36,6 +36,7 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
 
         MappingDiagramState state = getState();
         state.component = component;
+        
         state.inputModel = component.getInputModel();
         state.outputModel = component.getOutputModel();
 
