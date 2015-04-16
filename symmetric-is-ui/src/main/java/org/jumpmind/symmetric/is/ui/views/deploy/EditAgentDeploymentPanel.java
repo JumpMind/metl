@@ -35,7 +35,9 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     AgentDeployment agentDeployment;
 
     Table table;
-    
+
+    ComboBox startTypeCombo;
+
     HorizontalLayout cronLayout;
     
     TextField cronTextField;
@@ -44,13 +46,14 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         this.context = context;
         this.agentDeployment = agentDeployment;
 
-        FormLayout cronForm = new FormLayout();
-        cronForm.setSpacing(true);
-        cronForm.setMargin(true);
-        cronTextField = new TextField("Cron");
-        cronTextField.setWidth(250, Unit.PIXELS);
-        cronForm.addComponent(cronTextField);
-
+        VerticalLayout vlay = new VerticalLayout();
+        FormLayout form = new FormLayout();
+        form.setSpacing(true);
+        form.setMargin(true);
+        form.addComponent(getNameComponent());
+        form.addComponent(getLogLevelComponent());
+        form.addComponent(getStartTypeComponent());
+        vlay.addComponent(form);
         cronLayout = new HorizontalLayout();
         cronLayout.setSpacing(true);
         cronLayout.setMargin(true);
@@ -61,16 +64,12 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         cronLayout.addComponent(getScheduleComponent("Month"));
         cronLayout.addComponent(getScheduleComponent("Day of Week"));
         cronLayout.addComponent(getScheduleComponent("Year"));
-
-        VerticalLayout vlay = new VerticalLayout();
-        FormLayout form = new FormLayout();
-        form.setSpacing(true);
-        form.setMargin(true);
-        form.addComponent(getNameComponent());
-        form.addComponent(getLogLevelComponent());
-        form.addComponent(getStartTypeComponent());
-        vlay.addComponent(form);        
         vlay.addComponent(cronLayout);
+
+        FormLayout cronForm = new FormLayout();
+        cronForm.setSpacing(true);
+        cronForm.setMargin(true);
+        cronForm.addComponent(getCronComponent());
         vlay.addComponent(cronForm);
 
         table = new Table();
@@ -82,16 +81,13 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         table.setTableFieldFactory(new EditFieldFactory());
         table.setVisibleColumns("name", "value");
         table.setColumnHeaders("Parameter Name", "Value");
-        table.addValueChangeListener(new ValueChangeListener() {
-            public void valueChange(ValueChangeEvent event) {
-            }
-        });
 
         container.addAll(agentDeployment.getAgentDeploymentParameters());
 
         setSplitPosition(55f);
         setFirstComponent(vlay);
         setSecondComponent(table);
+        checkScheduleEnable();
     }
     
     @Override
@@ -108,14 +104,19 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     }
 
     protected TextField getNameComponent() {
-        TextField textField = new TextField("Name");
+        ImmediateUpdateTextField textField = new ImmediateUpdateTextField("Name") {
+            protected void save() {
+                agentDeployment.setName(getValue());
+                context.getConfigurationService().save(agentDeployment);
+            }            
+        };
         textField.setWidth(300, Unit.PIXELS);
         textField.setValue(agentDeployment.getName());
         return textField;
     }
 
     protected ComboBox getLogLevelComponent() {
-        ComboBox combo = new ComboBox("Log Level");
+        final ComboBox combo = new ComboBox("Log Level");
         combo.setNullSelectionAllowed(false);
         combo.setWidth(200, Unit.PIXELS);
         LogLevel[] levels = LogLevel.values();
@@ -123,30 +124,32 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
             combo.addItem(logLevel.name());
         }
         combo.setValue(agentDeployment.getLogLevel());
+        combo.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(ValueChangeEvent event) {
+                agentDeployment.setLogLevel((String) combo.getValue());
+                context.getConfigurationService().save(agentDeployment);
+            }
+        });
         return combo;
     }
 
     protected ComboBox getStartTypeComponent() {
-        final ComboBox combo = new ComboBox("Start Type");
-        combo.setWidth(200, Unit.PIXELS);
-        combo.setNullSelectionAllowed(false);
+        startTypeCombo = new ComboBox("Start Type");
+        startTypeCombo.setWidth(200, Unit.PIXELS);
+        startTypeCombo.setNullSelectionAllowed(false);
         StartType[] values = StartType.values();
         for (StartType value : values) {
-            combo.addItem(value.name());
+            startTypeCombo.addItem(value.name());
         }
-        combo.addValueChangeListener(new ValueChangeListener() {
+        startTypeCombo.setValue(agentDeployment.getStartType());
+        startTypeCombo.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
-                boolean isCron = combo.getValue().equals(StartType.SCHEDULED_CRON.name());
-                cronTextField.setEnabled(isCron);
-                Iterator<Component> iter = cronLayout.iterator();
-                while (iter.hasNext()) {
-                    iter.next().setEnabled(isCron);
-                }
-                cronTextField.setEnabled(isCron);
+                agentDeployment.setStartType((String) startTypeCombo.getValue());
+                context.getConfigurationService().save(agentDeployment);
+                checkScheduleEnable();
             }
         });
-        combo.setValue(agentDeployment.getStartType());
-        return combo;
+        return startTypeCombo;
     }
 
     protected ListSelect getScheduleComponent(String caption) {
@@ -180,7 +183,29 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         listSelect.select(listSelect.getItemIds().iterator().next());
         return listSelect;
     }
-    
+
+    protected TextField getCronComponent() {
+        cronTextField = new ImmediateUpdateTextField("Start Expression") {
+            protected void save() {
+                agentDeployment.setStartExpression(getValue());
+                context.getConfigurationService().save(agentDeployment);
+            }
+        };
+        cronTextField.setWidth(275, Unit.PIXELS);
+        cronTextField.setValue(agentDeployment.getStartExpression());
+        return cronTextField;
+    }
+
+    protected void checkScheduleEnable() {
+        boolean isCron = startTypeCombo.getValue().equals(StartType.SCHEDULED_CRON.name());
+        cronTextField.setEnabled(isCron);
+        Iterator<Component> iter = cronLayout.iterator();
+        while (iter.hasNext()) {
+            iter.next().setEnabled(isCron);
+        }
+        cronTextField.setEnabled(isCron);
+    }
+
     class EditFieldFactory implements TableFieldFactory {
         public Field<?> createField(final Container dataContainer, final Object itemId,
                 final Object propertyId, com.vaadin.ui.Component uiContext) {
