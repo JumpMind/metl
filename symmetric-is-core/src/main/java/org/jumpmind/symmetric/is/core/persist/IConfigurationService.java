@@ -5,6 +5,7 @@ import java.util.List;
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.AgentDeploymentSummary;
 import org.jumpmind.symmetric.is.core.model.AgentSummary;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
@@ -54,6 +55,10 @@ public interface IConfigurationService {
     public List<Agent> findAgentsForHost(String hostName);
     
     public List<AgentDeployment> findAgentDeploymentsFor(Flow flow);
+    
+    public AgentDeployment findAgentDeployment(String id);
+    
+    public List<AgentDeploymentSummary> findAgentDeploymentSummary(String agentId);
     
     public void deleteFlow(Flow flow);
 

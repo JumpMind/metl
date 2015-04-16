@@ -246,6 +246,15 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
+    public AgentDeployment findAgentDeployment(String id) {
+        AgentDeployment agentDeployment = findOne(AgentDeployment.class, new NameValue("id", id));
+        if (agentDeployment != null) {
+            refresh(agentDeployment);
+        }
+        return agentDeployment;        
+    }
+    
+    @Override
     public List<AgentDeployment> findAgentDeploymentsFor(Flow flow) {
         List<AgentDeployment> deployments = persistenceManager
                 .find(AgentDeployment.class, new NameValue("flowId", flow.getId()), null, null,

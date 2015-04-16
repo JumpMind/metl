@@ -10,8 +10,10 @@ import java.util.Set;
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.AgentDeploymentSummary;
 import org.jumpmind.symmetric.is.core.model.AgentStartMode;
 import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.StartType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
@@ -25,8 +27,7 @@ import org.jumpmind.util.AppUtils;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.AbstractBeanContainer.BeanIdResolver;
-import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
@@ -55,11 +56,11 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
 
     Table table;
 
-    BeanContainer<AgentDeployment, AgentDeployment> container;
+    BeanItemContainer<AgentDeploymentSummary> container;
 
     Agent agent;
 
-    Set<Object> lastEditItemIds = Collections.emptySet();
+    Set<AgentDeploymentSummary> lastEditItemIds = Collections.emptySet();
 
     Button removeButton;
 
@@ -89,8 +90,6 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
         }
         startModeCombo.setValue(agent.getStartMode());
         startModeCombo.addValueChangeListener(new ValueChangeListener() {
-            
-            @Override
             public void valueChange(ValueChangeEvent event) {
                 EditAgentPanel.this.agent.setStartMode((String)startModeCombo.getValue());
                 EditAgentPanel.this.context.getConfigurationService().save((AbstractObject)EditAgentPanel.this.agent);
@@ -109,8 +108,6 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
         hostNameField.setNullRepresentation("");
         hostNameField.setValue(agent.getHost());
         hostNameField.addValueChangeListener(new ValueChangeListener() {
-            
-            @Override
             public void valueChange(ValueChangeEvent event) {
                 EditAgentPanel.this.agent.setHost((String)hostNameField.getValue());
                 EditAgentPanel.this.context.getConfigurationService().save((AbstractObject)EditAgentPanel.this.agent);                
@@ -121,8 +118,6 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
         
         Button getHostNameButton = new Button("Get Host");
         getHostNameButton.addClickListener(new ClickListener() {
-            
-            @Override
             public void buttonClick(ClickEvent event) {
                 hostNameField.setValue(AppUtils.getHostName());
             }
@@ -146,13 +141,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
         removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
-        container = new BeanContainer<AgentDeployment, AgentDeployment>(AgentDeployment.class);
-        container.setBeanIdResolver(new BeanIdResolver<AgentDeployment, AgentDeployment>() {
-            @Override
-            public AgentDeployment getIdForBean(AgentDeployment bean) {
-                return bean;
-            }
-        });       
+        container = new BeanItemContainer<AgentDeploymentSummary>(AgentDeploymentSummary.class);
 
         table = new Table();
         table.setSizeFull();
@@ -163,8 +152,8 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
         table.setMultiSelect(true);
 
         table.setContainerDataSource(container);
-        table.setVisibleColumns(new Object[] { "name", "status", "logLevel", "startType",
-                "startExpression" });
+        table.setVisibleColumns("projectName", "name", "type", "status", "logLevel", "startType", "startExpression");
+        table.setColumnHeaders("Project Name", "Deployment", "Type", "Status", "Log Level", "Start Type", "Start Expression");
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
         table.setTableFieldFactory(new EditableFieldFactory());
@@ -172,7 +161,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
         addComponent(table);
         setExpandRatio(table, 1.0f);
 
-        container.addAll(agent.getAgentDeployments());
+        container.addAll(context.getConfigurationService().findAgentDeploymentSummary(agent.getId()));
 
         if (agent.getAgentDeployments().size() > 0) {
             table.setValue(agent.getAgentDeployments().iterator().next());
@@ -199,13 +188,20 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
 
     protected void setButtonsEnabled() {
         boolean selected = getSelectedItems().size() > 0;
-        removeButton.setEnabled(selected);
+        boolean removable = false;
+        Set<AgentDeploymentSummary> selectedIds = getSelectedItems();
+        for (AgentDeploymentSummary summary : selectedIds) {
+            if (summary.isFlow()) {
+                removable = true;
+            }
+        }
+        removeButton.setEnabled(removable);
         editButton.setEnabled(selected);
     }
 
     @SuppressWarnings("unchecked")
-    protected Set<Object> getSelectedItems() {
-        return (Set<Object>) table.getValue();
+    protected Set<AgentDeploymentSummary> getSelectedItems() {
+        return (Set<AgentDeploymentSummary>) table.getValue();
     }
 
     protected void selectOnly(Object itemId) {
@@ -300,21 +296,24 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
                 deployment.setAgentId(agent.getId());
                 deployment.setFlow(flow);
                 deployment.setName(getName(flow.getName()));
-                container.addItem(deployment, deployment);
+                container.addItem(deployment);
                 context.getConfigurationService().save(deployment);
             }
         }
 
         protected String getName(String name) {
-            for (AgentDeployment deployment : container.getItemIds()) {
-                if (name.equals(deployment.getName())) {
-                    if (name.matches(".*\\([0-9]+\\)$")) {
-                        String num = name.substring(name.lastIndexOf("(") + 1, name.lastIndexOf(")"));
-                        name = name.replaceAll("\\([0-9]+\\)$", "(" + (Integer.parseInt(num) + 1) + ")");
-                    } else {
-                        name += " (1)";
-                    }
-                    return getName(name); 
+            for (Object deployment : container.getItemIds()) {
+                if (deployment instanceof AgentDeployment) {
+                    AgentDeployment agentDeployment = (AgentDeployment) deployment;
+                    if (name.equals(agentDeployment.getName())) {
+                        if (name.matches(".*\\([0-9]+\\)$")) {
+                            String num = name.substring(name.lastIndexOf("(") + 1, name.lastIndexOf(")"));
+                            name = name.replaceAll("\\([0-9]+\\)$", "(" + (Integer.parseInt(num) + 1) + ")");
+                        } else {
+                            name += " (1)";
+                        }
+                        return getName(name); 
+                    }                    
                 }
             }
             return name;
@@ -323,18 +322,28 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
 
     class EditClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            AgentDeployment deployment = (AgentDeployment) getSelectedItems().iterator().next();
-            EditAgentDeploymentPanel editPanel = new EditAgentDeploymentPanel(context, deployment);
-            tabbedPanel.addCloseableTab(deployment.getId(), deployment.getName(), Icons.DEPLOYMENT, editPanel);
+            AgentDeploymentSummary summary = (AgentDeploymentSummary) getSelectedItems().iterator().next();
+            if (summary.isFlow()) {
+                AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
+                EditAgentDeploymentPanel editPanel = new EditAgentDeploymentPanel(context, deployment);
+                tabbedPanel.addCloseableTab(deployment.getId(), deployment.getName(), Icons.DEPLOYMENT, editPanel);
+            } else {
+                Resource resource = context.getConfigurationService().findResource(summary.getId());
+                EditAgentResourcePanel editPanel = new EditAgentResourcePanel(context, resource);
+                tabbedPanel.addCloseableTab(resource.getId(), resource.getName(), Icons.DEPLOYMENT, editPanel);
+            }
         }
     }
 
     class RemoveClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            Set<Object> selectedIds = getSelectedItems();
-            for (Object itemId : selectedIds) {
-                table.removeItem(itemId);
-                context.getConfigurationService().delete((AgentDeployment) itemId);
+            Set<AgentDeploymentSummary> selectedIds = getSelectedItems();
+            for (AgentDeploymentSummary summary : selectedIds) {
+                if (summary.isFlow()) {
+                    AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
+                    table.removeItem(summary);
+                    context.getConfigurationService().delete(deployment);
+                }
             }
         }
     }
