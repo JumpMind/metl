@@ -19,10 +19,15 @@ import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
-@ComponentDefinition(typeName = FixedLengthFormatter.TYPE, category = ComponentCategory.PROCESSOR, iconImage = "format.png", inputMessage = MessageType.ENTITY, outgoingMessage = MessageType.TEXT)
+@ComponentDefinition(
+        typeName = FixedLengthFormatter.TYPE,
+        category = ComponentCategory.PROCESSOR,
+        iconImage = "fixedlengthformatter.png",
+        inputMessage = MessageType.ENTITY,
+        outgoingMessage = MessageType.TEXT)
 public class FixedLengthFormatter extends AbstractComponent {
 
-    public static final String TYPE = "Fixed Length Formatter";
+    public static final String TYPE = "Format Fixed";
 
     public final static String FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL = "fixed.length.formatter.attribute.ordinal";
     public final static String FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH = "fixed.length.formatter.attribute.length";
@@ -76,7 +81,7 @@ public class FixedLengthFormatter extends AbstractComponent {
         for (AttributeFormat attribute : attributesList) {
             Object value = inputRow.get(attribute.getAttributeId());
             if (isNotBlank(attribute.getFormatFunction())) {
-               value = Transformer.eval(value, attribute.getFormatFunction());
+                value = TransformHelper.eval(value, attribute.getFormatFunction());
             }
             String paddedValue = StringUtils.pad(value != null ? value.toString() : "",
                     attribute.getLength(), " ", true);
@@ -126,7 +131,7 @@ public class FixedLengthFormatter extends AbstractComponent {
             }
         });
     }
-    
+
     private class AttributeFormat {
 
         String attributeId;

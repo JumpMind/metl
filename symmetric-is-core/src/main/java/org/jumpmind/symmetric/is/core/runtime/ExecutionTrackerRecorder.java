@@ -70,10 +70,9 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             this.steps.put(component.getFlowStep().getId(), step);
         }
         step.setExecutionId(executionId);
-        step.setStartTime(new Date());
         step.setComponentName(component.getFlowStep().getComponent().getName());
         step.setFlowStepId(component.getFlowStep().getId());
-        step.setStatus(ExecutionStatus.RUNNING.name());
+        step.setStatus(ExecutionStatus.READY.name());
         this.recorder.record(step);
     }
 
@@ -81,6 +80,12 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     public void beforeHandle(String executionId, IComponent component) {
         super.beforeHandle(executionId, component);
         ExecutionStep step = steps.get(component.getFlowStep().getId());
+        if (step.getStartTime() == null) {
+            step.setStartTime(new Date());
+        }
+        if (!step.getStatus().equals(ExecutionStatus.ERROR.name())) {
+            step.setStatus(ExecutionStatus.RUNNING.name());
+        }
         step.setLastUpdateTime(new Date());
         this.recorder.record(step);
     }
@@ -89,7 +94,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     public void afterHandle(String executionId, IComponent component, Throwable error) {
         super.afterHandle(executionId, component, error);
         ExecutionStep step = steps.get(component.getFlowStep().getId());
-        step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.RUNNING.name());
+        step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.READY.name());
         ComponentStatistics stats = component.getComponentStatistics();
         if (stats != null) {
             step.setEntitiesProcessed(stats.getNumberEntitiesProcessed());

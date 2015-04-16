@@ -9,6 +9,12 @@ public class ComponentAttributeSetting extends Setting {
 
     public ComponentAttributeSetting() {
     }
+    
+    public ComponentAttributeSetting(String attributeId, String componentId, String name, String value) {
+        super(name, value);
+        this.componentId = componentId;
+        this.attributeId = attributeId;
+    }
 
     public ComponentAttributeSetting(String attributeId, String name, String value) {
         super(name, value);

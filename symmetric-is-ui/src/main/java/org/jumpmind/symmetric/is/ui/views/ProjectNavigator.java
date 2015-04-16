@@ -21,6 +21,7 @@ import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.EntityRouter;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.MappingProcessor;
+import org.jumpmind.symmetric.is.core.runtime.component.Transformer;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
@@ -33,6 +34,7 @@ import org.jumpmind.symmetric.is.ui.views.design.EditEntityRouterPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditTransformerPanel;
 import org.jumpmind.symmetric.is.ui.views.design.ManageProjectsPanel;
 import org.jumpmind.symmetric.is.ui.views.design.PropertySheet;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
@@ -694,25 +696,25 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             // infrastructure
             String type = flowStep.getComponent().getType();
             if (type.equals(FixedLengthFormatter.TYPE) || type.equals(DelimitedFormatter.TYPE)) {
-                EditFormatPanel editFormat = new EditFormatPanel(context, flowStep.getComponent());
-                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
-                        editFormat);
+                EditFormatPanel panel = new EditFormatPanel(context, flowStep.getComponent());
+                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
             } else if (type.equals(DbReader.TYPE)) {
-                EditDbReaderPanel editFormat = new EditDbReaderPanel(context,
-                        flowStep.getComponent(), propertySheet);
-                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
-                        editFormat);
+                EditDbReaderPanel panel = new EditDbReaderPanel(context, flowStep.getComponent(),
+                        propertySheet);
+                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+                unselectAll();
+            } else if (type.equals(Transformer.TYPE)) {
+                EditTransformerPanel panel = new EditTransformerPanel(context,
+                        flowStep.getComponent());
+                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
                 unselectAll();
             } else if (type.equals(EntityRouter.TYPE)) {
-                EditEntityRouterPanel editPanel = new EditEntityRouterPanel(context,
-                        flowStep, (Flow)treeTable.getParent(flowStep));
-                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
-                        editPanel);                
+                EditEntityRouterPanel panel = new EditEntityRouterPanel(context, flowStep,
+                        (Flow) treeTable.getParent(flowStep));
+                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
             } else if (type.equals(MappingProcessor.TYPE)) {
-                EditMappingPanel editMapping = new EditMappingPanel(context,
-                        flowStep.getComponent());
-                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT,
-                        editMapping);
+                EditMappingPanel panel = new EditMappingPanel(context, flowStep.getComponent());
+                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
             } else {
                 item = context.getConfigurationService().findFlow(flowStep.getFlowId());
             }
