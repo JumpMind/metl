@@ -1,17 +1,17 @@
 package org.jumpmind.symmetric.is.core.model;
 
-public class AgentResourceSetting extends ResourceSetting {
+public class AgentResource extends Resource {
 
     private static final long serialVersionUID = 1L;
 
     String agentId;
 
-    public AgentResourceSetting() {
+    public AgentResource() {
     }
 
-    public AgentResourceSetting(String resourceId, String agentId) {
-        this.resourceId = resourceId;
-        this.agentId = agentId;
+    @Override
+    protected Setting createSettingData() {
+        return new AgentResourceSetting(id, agentId);
     }
 
     public String getAgentId() {

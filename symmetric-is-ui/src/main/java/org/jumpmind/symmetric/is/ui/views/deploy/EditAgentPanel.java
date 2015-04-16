@@ -11,9 +11,9 @@ import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentDeploymentSummary;
+import org.jumpmind.symmetric.is.core.model.AgentResource;
 import org.jumpmind.symmetric.is.core.model.AgentStartMode;
 import org.jumpmind.symmetric.is.core.model.Flow;
-import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.StartType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
@@ -328,9 +328,9 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
                 EditAgentDeploymentPanel editPanel = new EditAgentDeploymentPanel(context, deployment);
                 tabbedPanel.addCloseableTab(deployment.getId(), deployment.getName(), Icons.DEPLOYMENT, editPanel);
             } else {
-                Resource resource = context.getConfigurationService().findResource(summary.getId());
-                EditAgentResourcePanel editPanel = new EditAgentResourcePanel(context, resource);
-                tabbedPanel.addCloseableTab(resource.getId(), resource.getName(), Icons.DEPLOYMENT, editPanel);
+                AgentResource agentResource = context.getConfigurationService().findAgentResource(agent.getId(), summary.getId());
+                EditAgentResourcePanel editPanel = new EditAgentResourcePanel(context, agentResource);
+                tabbedPanel.addCloseableTab(summary.getId(), summary.getName(), Icons.DEPLOYMENT, editPanel);
             }
         }
     }

@@ -1,21 +1,26 @@
 package org.jumpmind.symmetric.is.ui.views.deploy;
 
-import org.jumpmind.symmetric.is.core.model.Resource;
+import org.jumpmind.symmetric.is.core.model.AgentResource;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
+import org.jumpmind.symmetric.is.ui.views.design.PropertySheet;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 
-import com.vaadin.ui.VerticalSplitPanel;
+import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class EditAgentResourcePanel extends VerticalSplitPanel implements IUiPanel {
+public class EditAgentResourcePanel extends VerticalLayout implements IUiPanel {
 
     ApplicationContext context;
     
-    Resource resource;
+    AgentResource agentResource;
     
-    public EditAgentResourcePanel(ApplicationContext context, Resource resource) {
+    public EditAgentResourcePanel(ApplicationContext context, AgentResource agentResource) {
         this.context = context;
-        this.resource = resource;
+        this.agentResource = agentResource;
+
+        PropertySheet propertySheet = new PropertySheet(context);
+        addComponent(propertySheet);
+        propertySheet.valueChange(agentResource);
     }
 
     @Override

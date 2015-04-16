@@ -6,6 +6,8 @@ import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentDeploymentSummary;
+import org.jumpmind.symmetric.is.core.model.AgentResource;
+import org.jumpmind.symmetric.is.core.model.AgentResourceSetting;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
@@ -58,6 +60,8 @@ public interface IConfigurationService {
     public AgentDeployment findAgentDeployment(String id);
     
     public List<AgentDeploymentSummary> findAgentDeploymentSummary(String agentId);
+
+    public AgentResource findAgentResource(String agentId, String resourceId);
     
     public void deleteFlow(Flow flow);
 

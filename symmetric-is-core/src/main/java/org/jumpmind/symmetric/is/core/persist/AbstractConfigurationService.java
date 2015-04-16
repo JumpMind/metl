@@ -16,6 +16,8 @@ import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentDeploymentParameter;
+import org.jumpmind.symmetric.is.core.model.AgentResource;
+import org.jumpmind.symmetric.is.core.model.AgentResourceSetting;
 import org.jumpmind.symmetric.is.core.model.AgentSetting;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
@@ -263,6 +265,39 @@ abstract class AbstractConfigurationService extends AbstractService implements
             deployment.setFlow(flow);
         }
         return deployments;
+    }
+
+    @Override
+    public AgentResource findAgentResource(String agentId, String resourceId) {       
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("agentId", agentId);
+        params.put("resourceId", resourceId);
+        List<AgentResourceSetting> settings = persistenceManager
+                .find(AgentResourceSetting.class, params, null, null, tableName(AgentResourceSetting.class));
+        
+        Resource resource = findResource(resourceId);
+        for (Setting resourceSetting : resource.getSettings()) {
+            boolean exists = false;
+            for (AgentResourceSetting setting : settings) {
+                if (setting.getName().equals(resourceSetting.getName())) {
+                    exists = true;
+                }
+            }
+            if (!exists) {
+                AgentResourceSetting setting = new AgentResourceSetting();
+                setting.setId(resourceId);
+                setting.setName(resourceSetting.getName());
+                setting.setValue(resourceSetting.getValue());
+                settings.add(setting);
+            }
+        }
+
+        AgentResource agentResource = new AgentResource();
+        agentResource.setId(resource.getId());
+        agentResource.setAgentId(agentId);
+        agentResource.setType(resource.getType());
+        agentResource.setSettings(settings);
+        return agentResource;
     }
 
     @Override
