@@ -1,7 +1,9 @@
 package org.jumpmind.symmetric.is.ui.views.deploy;
 
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentDeploymentParameter;
@@ -87,7 +89,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         setSplitPosition(55f);
         setFirstComponent(vlay);
         setSecondComponent(table);
-        checkScheduleEnable();
+        updateScheduleEnable();
     }
     
     @Override
@@ -146,7 +148,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
             public void valueChange(ValueChangeEvent event) {
                 agentDeployment.setStartType((String) startTypeCombo.getValue());
                 context.getConfigurationService().save(agentDeployment);
-                checkScheduleEnable();
+                updateScheduleEnable();
             }
         });
         return startTypeCombo;
@@ -158,7 +160,8 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         listSelect.setMultiSelect(true);
         listSelect.setRows(10);
         listSelect.setImmediate(true);
-        listSelect.addItem("<All>");
+        listSelect.addItem("*");
+        listSelect.setItemCaption("*", "<All>");
         if (caption.equals("Second") || caption.equals("Minute")) {
             for (int i = 0; i <= 59; i++) {
                 listSelect.addItem(i);
@@ -181,6 +184,11 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
             }            
         }
         listSelect.select(listSelect.getItemIds().iterator().next());
+        listSelect.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(ValueChangeEvent event) {
+                updateScheduleExpression();
+            }            
+        });
         return listSelect;
     }
 
@@ -196,7 +204,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         return cronTextField;
     }
 
-    protected void checkScheduleEnable() {
+    protected void updateScheduleEnable() {
         boolean isCron = startTypeCombo.getValue().equals(StartType.SCHEDULED_CRON.name());
         cronTextField.setEnabled(isCron);
         Iterator<Component> iter = cronLayout.iterator();
@@ -204,6 +212,60 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
             iter.next().setEnabled(isCron);
         }
         cronTextField.setEnabled(isCron);
+    }
+
+    protected void updateScheduleExpression() {
+        StringBuilder sb = new StringBuilder();
+        Set<Object> secondValues = getCronValue(0);
+        Set<Object> minuteValues = getCronValue(1);
+        Set<Object> hourValues = getCronValue(2);
+        Set<Object> dayValues = getCronValue(3);
+        Set<Object> monthValues = getCronValue(4);
+        Set<Object> dayOfWeekValues = getCronValue(5);
+        Set<Object> yearValues = getCronValue(6);
+        
+        if (dayOfWeekValues.contains("*")) {
+            dayOfWeekValues = new HashSet<Object>();
+            dayOfWeekValues.add("?");
+        } else if (dayValues.contains("*")) {
+            dayValues = new HashSet<Object>();
+            dayValues.add("?");
+        }
+        if (yearValues.contains("*")) {
+            yearValues = new HashSet<Object>();
+        }
+        
+        append(sb, secondValues).append(" ");
+        append(sb, minuteValues).append(" ");
+        append(sb, hourValues).append(" ");
+        append(sb, dayValues).append(" ");
+        append(sb, monthValues).append(" ");
+        append(sb, dayOfWeekValues).append(" ");
+        append(sb, yearValues);
+        cronTextField.setValue(sb.toString());
+        agentDeployment.setStartExpression(sb.toString());
+        context.getConfigurationService().save(agentDeployment);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Set<Object> getCronValue(int index) {
+        Set<Object> values = (Set<Object>) ((ListSelect) cronLayout.getComponent(index)).getValue();
+        if (values.contains("*") && values.size() > 1) {
+            values = new HashSet<Object>();
+            values.add("*");
+        }
+        return values;
+    }
+    
+    protected StringBuilder append(StringBuilder sb, Set<Object> values) {
+        Iterator<Object> valueIter = values.iterator();
+        while (valueIter.hasNext()) {
+            sb.append(valueIter.next().toString());
+            if (valueIter.hasNext()) {
+                sb.append(",");
+            }
+        }
+        return sb;
     }
 
     class EditFieldFactory implements TableFieldFactory {
