@@ -328,6 +328,12 @@ abstract class AbstractConfigurationService extends AbstractService implements
         versionParams.put("modelId", model.getId());
         List<ModelEntity> entities = persistenceManager.find(ModelEntity.class, versionParams,
                 null, null, tableName(ModelEntity.class));
+        Collections.sort(entities, new Comparator<ModelEntity>() {
+            @Override
+            public int compare(ModelEntity o1, ModelEntity o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         for (ModelEntity entity : entities) {
             refresh(entity);
             model.getModelEntities().add(entity);
@@ -603,13 +609,18 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void refresh(ModelEntity modelEntity) {
-
         refresh((AbstractObject) modelEntity);
         Map<String, Object> entityParams = new HashMap<String, Object>();
         entityParams.put("entityId", modelEntity.getId());
         modelEntity.getModelAttributes().clear();
         List<ModelAttribute> attributes = persistenceManager.find(ModelAttribute.class,
                 entityParams, null, null, tableName(ModelAttribute.class));
+        Collections.sort(attributes, new Comparator<ModelAttribute>() {
+            @Override
+            public int compare(ModelAttribute o1, ModelAttribute o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         for (ModelAttribute attribute : attributes) {
             refresh(attribute);
             modelEntity.addModelAttribute(attribute);

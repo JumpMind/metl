@@ -115,8 +115,9 @@ public class StepRuntime implements Runnable {
                         component.handle(executionId, inputMessage, target);
                     } catch (Exception ex) {
                         recordError(ex);
+                    } finally {
+                        executionTracker.afterHandle(executionId, component, error);
                     }
-                    executionTracker.afterHandle(executionId, component, error);
                     if (isStartStep()) {
                         shutdown();
                     }

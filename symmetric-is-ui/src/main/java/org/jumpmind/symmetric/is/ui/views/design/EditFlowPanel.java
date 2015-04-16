@@ -215,6 +215,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
     public void selected(FlowStep step) {
         if (step != null) {
+            context.getConfigurationService().refresh(flow.findFlowStepWithId(step.getId()).getComponent());
             diagram.setNodes(getNodes());
             diagram.setSelectedNodeId(step.getId());
             propertySheet.valueChange(step);

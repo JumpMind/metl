@@ -101,8 +101,7 @@ public class MappingProcessor extends AbstractComponent {
         outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
 
         for (EntityData inputRow : inputRows) {
-            EntityData outputRow = new EntityData();
-            outputRows.add(outputRow);
+            EntityData outputRow = new EntityData();            
             
             for (Entry<String, Object> attrEntry : inputRow.entrySet()) {
                 Set<String> newAttrIds = attrToAttrMap.get(attrEntry.getKey());
@@ -122,6 +121,11 @@ public class MappingProcessor extends AbstractComponent {
                         }
                     }
                 }
+            }
+            
+            if (outputRow.size() > 0) {
+                outputRows.add(outputRow);
+                componentStatistics.incrementNumberEntitiesProcessed();
             }
         }
 

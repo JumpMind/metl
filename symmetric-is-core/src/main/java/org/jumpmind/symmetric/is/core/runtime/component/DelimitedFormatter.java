@@ -27,15 +27,29 @@ import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
-@ComponentDefinition(typeName = DelimitedFormatter.TYPE, category = ComponentCategory.PROCESSOR, iconImage = "format.png", inputMessage = MessageType.ENTITY, outgoingMessage = MessageType.TEXT)
+@ComponentDefinition(
+        typeName = DelimitedFormatter.TYPE,
+        category = ComponentCategory.PROCESSOR,
+        iconImage = "delimitedformatter.png",
+        inputMessage = MessageType.ENTITY,
+        outgoingMessage = MessageType.TEXT)
 public class DelimitedFormatter extends AbstractComponent {
 
-    public static final String TYPE = "Delimited Formatter";
+    public static final String TYPE = "Format Delimited";
 
-    @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Delimiter", defaultValue = ",")
+    @SettingDefinition(
+            order = 10,
+            required = true,
+            type = Type.STRING,
+            label = "Delimiter",
+            defaultValue = ",")
     public final static String DELIMITED_FORMATTER_DELIMITER = "delimited.formatter.delimiter";
 
-    @SettingDefinition(order = 20, type = Type.STRING, label = "Quote Character", defaultValue = "\"")
+    @SettingDefinition(
+            order = 20,
+            type = Type.STRING,
+            label = "Quote Character",
+            defaultValue = "\"")
     public final static String DELIMITED_FORMATTER_QUOTE_CHARACTER = "delimited.formatter.quote.character";
 
     public final static String DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = "delimited.formatter.attribute.format.function";
@@ -103,7 +117,7 @@ public class DelimitedFormatter extends AbstractComponent {
                 for (AttributeFormat attribute : attributes) {
                     Object object = inputRow.get(attribute.getAttributeId());
                     if (isNotBlank(attribute.getFormatFunction())) {
-                        object = Transformer.eval(object, attribute.getFormatFunction());
+                        object = TransformHelper.eval(object, attribute.getFormatFunction());
                     }
 
                     csvWriter.write(object != null ? object.toString() : null);

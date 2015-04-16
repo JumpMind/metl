@@ -6,7 +6,6 @@ import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentDeploymentSummary;
-import org.jumpmind.symmetric.is.core.model.AgentSummary;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
@@ -85,8 +84,6 @@ public interface IConfigurationService {
     public void save(Project project);
     
     public void save(ProjectVersion projectVersion);
-    
-    public List<AgentSummary> findUndeployedAgentsFor(String flowId);
     
     public void delete(AbstractObject obj);
     
