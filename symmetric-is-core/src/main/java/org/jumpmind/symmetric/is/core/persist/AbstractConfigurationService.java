@@ -251,7 +251,11 @@ abstract class AbstractConfigurationService extends AbstractService implements
     public AgentDeployment findAgentDeployment(String id) {
         AgentDeployment agentDeployment = findOne(AgentDeployment.class, new NameValue("id", id));
         if (agentDeployment != null) {
-            refresh(agentDeployment);
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("agentDeploymentId", agentDeployment.getId());
+            List<AgentDeploymentParameter> deploymentParams = persistenceManager.find(AgentDeploymentParameter.class,
+                    params, null, null, tableName(AgentDeploymentParameter.class));
+            agentDeployment.setAgentDeploymentParameters(deploymentParams);
         }
         return agentDeployment;        
     }

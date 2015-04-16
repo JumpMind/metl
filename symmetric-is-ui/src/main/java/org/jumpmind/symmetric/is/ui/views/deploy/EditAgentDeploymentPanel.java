@@ -1,13 +1,10 @@
 package org.jumpmind.symmetric.is.ui.views.deploy;
 
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
-import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
-import org.jumpmind.symmetric.is.core.model.FlowParameter;
+import org.jumpmind.symmetric.is.core.model.AgentDeploymentParameter;
 import org.jumpmind.symmetric.is.core.model.StartType;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
@@ -78,28 +75,19 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
 
         table = new Table();
         table.setSizeFull();
-        BeanItemContainer<FlowParameter> container = new BeanItemContainer<FlowParameter>(FlowParameter.class);
+        BeanItemContainer<AgentDeploymentParameter> container = new BeanItemContainer<AgentDeploymentParameter>(AgentDeploymentParameter.class);
         table.setContainerDataSource(container);
         table.setEditable(true);
         table.setSelectable(true);
         table.setTableFieldFactory(new EditFieldFactory());
-        table.setVisibleColumns("name", "defaultValue");
+        table.setVisibleColumns("name", "value");
         table.setColumnHeaders("Parameter Name", "Value");
         table.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
             }
         });
 
-        List<FlowParameter> params = agentDeployment.getFlow().getFlowParameters();
-        Collections.sort(params, new Comparator<FlowParameter>() {
-            public int compare(FlowParameter o1, FlowParameter o2) {
-                return new Integer(o1.getPosition()).compareTo(new Integer(o2.getPosition()));
-            }
-        });
-
-        for (FlowParameter flowParameter : params) {
-            table.addItem(flowParameter);
-        }
+        container.addAll(agentDeployment.getAgentDeploymentParameters());
 
         setSplitPosition(55f);
         setFirstComponent(vlay);
@@ -196,11 +184,11 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     class EditFieldFactory implements TableFieldFactory {
         public Field<?> createField(final Container dataContainer, final Object itemId,
                 final Object propertyId, com.vaadin.ui.Component uiContext) {
-            if (propertyId.equals("defaultValue")) {
-                final FlowParameter parameter = (FlowParameter) itemId;
+            if (propertyId.equals("value")) {
+                final AgentDeploymentParameter parameter = (AgentDeploymentParameter) itemId;
                 final TextField textField = new ImmediateUpdateTextField(null) {
                     protected void save() {
-                        //context.getConfigurationService().save(parameter);
+                        context.getConfigurationService().save(parameter);
                     }
                 };
                 textField.setWidth(100, Unit.PERCENTAGE);
