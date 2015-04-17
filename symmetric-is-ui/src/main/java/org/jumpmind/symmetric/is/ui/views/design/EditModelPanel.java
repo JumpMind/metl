@@ -1,7 +1,6 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -16,6 +15,7 @@ import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
+import org.jumpmind.symmetric.is.ui.common.UiUtils;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 
@@ -26,12 +26,10 @@ import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TextField;
@@ -124,7 +122,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                     t.selectAll();
                     return t;
                 } else {
-                    return getName(filterField.getValue(), obj.getName());
+                    return UiUtils.getName(filterField.getValue(), obj.getName());
                 }
             }
         });
@@ -229,19 +227,6 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 add(filter, modelEntity);
             }
         }
-    }
-
-    protected Label getName(String filter, String name) {
-        if (isNotBlank(filter) && name.contains(filter)) {
-            int start = name.indexOf(filter);
-            String pre = start < name.length() ? name.substring(0, start) : "";
-            String highlighted = name.substring(start, start + filter.length());
-            String post = start + filter.length() < name.length() ? name.substring(start
-                    + filter.length()) : "";
-            name = pre + "<span class='highlight'>" + highlighted + "</span>" + post;
-        }
-        Label label = new Label(name, ContentMode.HTML);
-        return label;
     }
 
     protected void addModelEntity(String filter, ModelEntity modelEntity) {

@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -12,17 +14,22 @@ import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.component.TransformHelper;
 import org.jumpmind.symmetric.is.core.runtime.component.Transformer;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
+import org.jumpmind.symmetric.is.ui.common.ButtonBar;
+import org.jumpmind.symmetric.is.ui.common.UiUtils;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TableFieldFactory;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
@@ -34,6 +41,10 @@ public class EditTransformerPanel extends VerticalLayout implements IUiPanel {
 
     Table table = new Table();
 
+    TextField filterField;
+
+    List<ComponentAttributeSetting> componentAttributes;
+
     BeanItemContainer<ComponentAttributeSetting> container = new BeanItemContainer<ComponentAttributeSetting>(
             ComponentAttributeSetting.class);
 
@@ -41,11 +52,27 @@ public class EditTransformerPanel extends VerticalLayout implements IUiPanel {
         this.context = context;
         this.component = c;
 
+        ButtonBar buttonBar = new ButtonBar();
+        addComponent(buttonBar);
+
+        filterField = buttonBar.addFilter();
+        filterField.addTextChangeListener(new TextChangeListener() {
+
+            @Override
+            public void textChange(TextChangeEvent event) {
+                filterField.setValue(event.getText());
+                updateTable(event.getText());
+            }
+        });
+
+        addComponent(buttonBar);
+
         table.setContainerDataSource(container);
 
         table.setSelectable(true);
         table.setSortEnabled(false);
         table.setImmediate(true);
+        table.setSortEnabled(true);
         table.setSizeFull();
         table.addGeneratedColumn("entityName", new ColumnGenerator() {
 
@@ -55,7 +82,7 @@ public class EditTransformerPanel extends VerticalLayout implements IUiPanel {
                 Model model = component.getInputModel();
                 ModelAttribute attribute = model.getAttributeById(setting.getAttributeId());
                 ModelEntity entity = model.getEntityById(attribute.getEntityId());
-                return entity.getName();
+                return UiUtils.getName(filterField.getValue(), entity.getName());
             }
         });
         table.addGeneratedColumn("attributeName", new ColumnGenerator() {
@@ -65,10 +92,12 @@ public class EditTransformerPanel extends VerticalLayout implements IUiPanel {
                 ComponentAttributeSetting setting = (ComponentAttributeSetting) itemId;
                 Model model = component.getInputModel();
                 ModelAttribute attribute = model.getAttributeById(setting.getAttributeId());
-                return attribute.getName();
+                return UiUtils.getName(filterField.getValue(), attribute.getName());
             }
         });
         table.setVisibleColumns(new Object[] { "entityName", "attributeName", "value" });
+        table.setColumnWidth("entityName", 250);
+        table.setColumnWidth("attributeName", 250);
         table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Transform" });
         table.setColumnExpandRatio("value", 1);
         table.setTableFieldFactory(new EditFieldFactory());
@@ -78,7 +107,7 @@ public class EditTransformerPanel extends VerticalLayout implements IUiPanel {
 
         if (component.getInputModel() != null) {
 
-            List<ComponentAttributeSetting> componentAttributes = component.getAttributeSettings();
+            componentAttributes = component.getAttributeSettings();
 
             for (ModelEntity entity : component.getInputModel().getModelEntities()) {
                 for (ModelAttribute attr : entity.getModelAttributes()) {
@@ -101,14 +130,40 @@ public class EditTransformerPanel extends VerticalLayout implements IUiPanel {
             Collections.sort(componentAttributes, new Comparator<ComponentAttributeSetting>() {
                 @Override
                 public int compare(ComponentAttributeSetting o1, ComponentAttributeSetting o2) {
-                    return o1.getName().compareTo(o2.getName());
+                    Model model = component.getInputModel();
+                    ModelAttribute attribute1 = model.getAttributeById(o1.getAttributeId());
+                    ModelEntity entity1 = model.getEntityById(attribute1.getEntityId());
+
+                    ModelAttribute attribute2 = model.getAttributeById(o2.getAttributeId());
+                    ModelEntity entity2 = model.getEntityById(attribute2.getEntityId());
+
+                    int compare = entity1.getName().compareTo(entity2.getName());
+                    if (compare == 0) {
+                        compare = attribute1.getName().compareTo(attribute2.getName());
+                    }
+                    return compare;
                 }
             });
+        }
 
+        updateTable(null);
+
+    }
+
+    protected void updateTable(String filter) {
+        if (componentAttributes != null) {
+            filter = filter != null ? filter.toLowerCase() : null;
+            table.removeAllItems();
             for (ComponentAttributeSetting componentAttribute : componentAttributes) {
-                table.addItem(componentAttribute);
+                Model model = component.getInputModel();
+                ModelAttribute attribute = model.getAttributeById(componentAttribute
+                        .getAttributeId());
+                ModelEntity entity = model.getEntityById(attribute.getEntityId());
+                if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)
+                        || attribute.getName().toLowerCase().contains(filter)) {
+                    table.addItem(componentAttribute);
+                }
             }
-
         }
     }
 
