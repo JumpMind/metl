@@ -42,7 +42,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
 
     HorizontalLayout cronLayout;
     
-    TextField cronTextField;
+    TextField startExpressionTextField;
         
     public EditAgentDeploymentPanel(ApplicationContext context, AgentDeployment agentDeployment) {
         this.context = context;
@@ -90,6 +90,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         setFirstComponent(vlay);
         setSecondComponent(table);
         updateScheduleEnable();
+        updateScheduleFields();
     }
     
     @Override
@@ -147,8 +148,19 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         startTypeCombo.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
                 agentDeployment.setStartType((String) startTypeCombo.getValue());
-                context.getConfigurationService().save(agentDeployment);
                 updateScheduleEnable();
+                for (int i = 0; i < 7; i++) {
+                    ListSelect listSelect = ((ListSelect) cronLayout.getComponent(i));
+                    for (Object itemId : listSelect.getItemIds()) {
+                        listSelect.unselect(itemId);
+                    }
+                    listSelect.select(listSelect.getItemIds().iterator().next());
+                }
+                if (!agentDeployment.getStartType().equals(StartType.SCHEDULED_CRON.name())) {
+                    startExpressionTextField.setValue("");
+                    agentDeployment.setStartExpression("");
+                }
+                context.getConfigurationService().save(agentDeployment);
             }
         });
         return startTypeCombo;
@@ -164,15 +176,15 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         listSelect.setItemCaption("*", "<All>");
         if (caption.equals("Second") || caption.equals("Minute")) {
             for (int i = 0; i <= 59; i++) {
-                listSelect.addItem(i);
+                listSelect.addItem(String.valueOf(i));
             }
         } else if (caption.equals("Hour")) {
             for (int i = 0; i <= 23; i++) {
-                listSelect.addItem(i);
+                listSelect.addItem(String.valueOf(i));
             }            
         } else if (caption.equals("Day")) {
             for (int i = 1; i <= 31; i++) {
-                listSelect.addItem(i);
+                listSelect.addItem(String.valueOf(i));
             }            
         } else if (caption.equals("Month")) {
             listSelect.addItems("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC");
@@ -180,8 +192,8 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
             listSelect.addItems("SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT");
         } else if (caption.equals("Year")) {
             for (int i = Calendar.getInstance().get(Calendar.YEAR); i <= 2099; i++) {
-                listSelect.addItem(i);
-            }            
+                listSelect.addItem(String.valueOf(i));
+            }
         }
         listSelect.select(listSelect.getItemIds().iterator().next());
         listSelect.addValueChangeListener(new ValueChangeListener() {
@@ -193,25 +205,25 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     }
 
     protected TextField getCronComponent() {
-        cronTextField = new ImmediateUpdateTextField("Start Expression") {
+        startExpressionTextField = new ImmediateUpdateTextField("Start Expression") {
             protected void save() {
                 agentDeployment.setStartExpression(getValue());
+                updateScheduleFields();
                 context.getConfigurationService().save(agentDeployment);
             }
         };
-        cronTextField.setWidth(275, Unit.PIXELS);
-        cronTextField.setValue(agentDeployment.getStartExpression());
-        return cronTextField;
+        startExpressionTextField.setWidth(275, Unit.PIXELS);
+        startExpressionTextField.setValue(agentDeployment.getStartExpression());
+        return startExpressionTextField;
     }
 
     protected void updateScheduleEnable() {
         boolean isCron = startTypeCombo.getValue().equals(StartType.SCHEDULED_CRON.name());
-        cronTextField.setEnabled(isCron);
         Iterator<Component> iter = cronLayout.iterator();
         while (iter.hasNext()) {
             iter.next().setEnabled(isCron);
         }
-        cronTextField.setEnabled(isCron);
+        startExpressionTextField.setEnabled(false);
     }
 
     protected void updateScheduleExpression() {
@@ -242,11 +254,28 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         append(sb, monthValues).append(" ");
         append(sb, dayOfWeekValues).append(" ");
         append(sb, yearValues);
-        cronTextField.setValue(sb.toString());
+        startExpressionTextField.setValue(sb.toString());
         agentDeployment.setStartExpression(sb.toString());
         context.getConfigurationService().save(agentDeployment);
     }
 
+    protected void updateScheduleFields() {
+        String[] fields = agentDeployment.getStartExpression().split(" ");
+        for (int i = 0; i < fields.length; i++) {
+            if (fields[i].equals("?")) {
+                fields[i] = "*";
+            }
+            String[] values = fields[i].split(",");
+            ListSelect listSelect = ((ListSelect) cronLayout.getComponent(i));
+            for (Object itemId : listSelect.getItemIds()) {
+                listSelect.unselect(itemId);
+            }
+            for (String value : values) {
+                listSelect.select(value);
+            }
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     protected Set<Object> getCronValue(int index) {
         Set<Object> values = (Set<Object>) ((ListSelect) cronLayout.getComponent(index)).getValue();
