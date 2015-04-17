@@ -13,16 +13,30 @@ import javax.script.ScriptException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
+import org.jumpmind.symmetric.is.core.model.ModelAttribute;
+import org.jumpmind.symmetric.is.core.model.ModelEntity;
+import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
 public class TransformHelper {
 
     Object value;
+    
+    EntityData data;
+    
+    ModelAttribute attribute;
+    
+    ModelEntity entity;
+    
+    public static final RemoveAttribute REMOVE_ATTRIBUTE = new RemoveAttribute();
 
     static private ThreadLocal<ScriptEngine> scriptEngine = new ThreadLocal<ScriptEngine>();
 
-    public TransformHelper(Object value) {
+    public TransformHelper(ModelAttribute attribute, ModelEntity entity, EntityData data, Object value) {
         this.value = value;
+        this.data = data;
+        this.attribute = attribute;
+        this.entity = entity;
     }
     
     public String abbreviate(int maxwidth) {
@@ -80,6 +94,10 @@ public class TransformHelper {
     public Date currentdate() {
         return new Date();
     }
+    
+    public RemoveAttribute remove() {
+        return REMOVE_ATTRIBUTE;
+    }
 
     public String formatdate(String pattern) {
         if (value instanceof Date) {
@@ -124,7 +142,7 @@ public class TransformHelper {
         return signatures.toArray(new String[signatures.size()]);
     }
 
-    public static Object eval(Object value, String expression) {
+    public static Object eval(ModelAttribute attribute, Object value, ModelEntity entity, EntityData data, String expression) {
         ScriptEngine engine = scriptEngine.get();
         if (engine == null) {
             ScriptEngineManager factory = new ScriptEngineManager();
@@ -133,16 +151,23 @@ public class TransformHelper {
         }
 
         engine.put("value", value);
+        engine.put("data", data);
+        engine.put("entity", entity);
+        engine.put("attribute", attribute);
 
         try {
             String importString = "import org.jumpmind.symmetric.is.core.runtime.component.TransformHelper;\n";
             String code = String.format(
-                    "return new TransformHelper(value) { public Object eval() { return %s } }.eval()",
+                    "return new TransformHelper(attribute, entity, data, value) { public Object eval() { return %s } }.eval()",
                     expression);
             return engine.eval(importString + code);
         } catch (ScriptException e) {
             throw new RuntimeException("Unable to evaluate groovy script", e);
         }
+    }
+    
+    static class RemoveAttribute {
+        
     }
 
 }

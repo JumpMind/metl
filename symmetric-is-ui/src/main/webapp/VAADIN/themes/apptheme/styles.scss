@@ -10,7 +10,7 @@ html {
 	min-width: 100%;
 }
 
-.v-button.v-widget.button-bar.v-button-button-bar {
+.v-button.v-widget.button-bar.v-button-button-bar, .v-label-button-bar {
 	height: 55px;
 }
 .v-button.v-widget.button-bar.v-button-button-bar::before {

@@ -18,6 +18,9 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.csv.CsvWriter;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
+import org.jumpmind.symmetric.is.core.model.Model;
+import org.jumpmind.symmetric.is.core.model.ModelAttribute;
+import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
@@ -117,7 +120,8 @@ public class DelimitedFormatter extends AbstractComponent {
                 for (AttributeFormat attribute : attributes) {
                     Object object = inputRow.get(attribute.getAttributeId());
                     if (isNotBlank(attribute.getFormatFunction())) {
-                        object = TransformHelper.eval(object, attribute.getFormatFunction());
+                        object = TransformHelper.eval(attribute.getAttribute(), object, 
+                                attribute.getEntity() , inputRow, attribute.getFormatFunction());
                     }
 
                     csvWriter.write(object != null ? object.toString() : null);
@@ -149,7 +153,10 @@ public class DelimitedFormatter extends AbstractComponent {
         for (ComponentAttributeSetting attributeSetting : attributeSettings) {
             AttributeFormat format = formats.get(attributeSetting.getAttributeId());
             if (format == null) {
-                format = new AttributeFormat(attributeSetting.getAttributeId());
+                Model inputModel = flowStep.getComponent().getInputModel();
+                ModelAttribute attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
+                ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+                format = new AttributeFormat(attributeSetting.getAttributeId(), entity, attribute);
                 formats.put(attributeSetting.getAttributeId(), format);
             }
             if (attributeSetting.getName().equalsIgnoreCase(DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL)) {
@@ -172,9 +179,13 @@ public class DelimitedFormatter extends AbstractComponent {
 
     private class AttributeFormat {
 
-        public AttributeFormat(String attributeId) {
+        public AttributeFormat(String attributeId, ModelEntity entity, ModelAttribute attribute) {
             this.attributeId = attributeId;
         }
+        
+        ModelEntity entity;
+        
+        ModelAttribute attribute;
 
         String attributeId;
 
@@ -200,6 +211,14 @@ public class DelimitedFormatter extends AbstractComponent {
 
         public void setFormatFunction(String formatFunction) {
             this.formatFunction = formatFunction;
+        }
+        
+        public ModelAttribute getAttribute() {
+            return attribute;
+        }
+        
+        public ModelEntity getEntity() {
+            return entity;
         }
     }
 
