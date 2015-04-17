@@ -35,6 +35,7 @@ public class ButtonBar extends HorizontalLayout {
         wrapper.addComponent(bar);
         
         Label spacer = new Label();
+        spacer.addStyleName(STYLE);
         wrapper.addComponent(spacer);
         wrapper.setExpandRatio(spacer, 1);
         

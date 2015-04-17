@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
+import org.jumpmind.symmetric.is.core.model.Model;
+import org.jumpmind.symmetric.is.core.model.ModelAttribute;
+import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
@@ -52,6 +55,7 @@ public class Transformer extends AbstractComponent {
     public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
         componentStatistics.incrementInboundMessages();
         
+        Model inputModel = flowStep.getComponent().getInputModel();
         Message outputMessage = new Message(flowStep.getId());
         outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
         outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
@@ -68,15 +72,19 @@ public class Transformer extends AbstractComponent {
                 String transform = transformsByAttributeId.get(attributeId);
                 Object value = inData.get(attributeId);
                 if (isNotBlank(transform)) {
-                    value = TransformHelper.eval(value, transform);
-                }                
-                outData.put(attributeId, value);
+                    ModelAttribute attribute = inputModel.getAttributeById(attributeId);
+                    ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());                    
+                    value = TransformHelper.eval(attribute, value, entity, inData, transform);
+                }
+                if (value != TransformHelper.REMOVE_ATTRIBUTE) {
+                    outData.put(attributeId, value);
+                }
             }            
             componentStatistics.incrementNumberEntitiesProcessed();
         }
         
         componentStatistics.incrementOutboundMessages();
         messageTarget.put(outputMessage);
-    }
+    }    
 
 }

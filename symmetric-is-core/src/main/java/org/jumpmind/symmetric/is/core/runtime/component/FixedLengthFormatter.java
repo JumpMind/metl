@@ -12,6 +12,9 @@ import java.util.Map;
 import org.h2.util.StringUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
+import org.jumpmind.symmetric.is.core.model.Model;
+import org.jumpmind.symmetric.is.core.model.ModelAttribute;
+import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
@@ -81,7 +84,8 @@ public class FixedLengthFormatter extends AbstractComponent {
         for (AttributeFormat attribute : attributesList) {
             Object value = inputRow.get(attribute.getAttributeId());
             if (isNotBlank(attribute.getFormatFunction())) {
-                value = TransformHelper.eval(value, attribute.getFormatFunction());
+                value = TransformHelper.eval(attribute.getAttribute(), value, attribute.getEntity(), 
+                        inputRow, attribute.getFormatFunction());
             }
             String paddedValue = StringUtils.pad(value != null ? value.toString() : "",
                     attribute.getLength(), " ", true);
@@ -103,8 +107,10 @@ public class FixedLengthFormatter extends AbstractComponent {
                 .getAttributeSettings();
         for (ComponentAttributeSetting attributeSetting : attributeSettings) {
             if (!attributesMap.containsKey(attributeSetting.getAttributeId())) {
-                attributesMap.put(attributeSetting.getAttributeId(), new AttributeFormat(
-                        attributeSetting.getAttributeId()));
+                Model inputModel = flowStep.getComponent().getInputModel();
+                ModelAttribute attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
+                ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+                attributesMap.put(attributeSetting.getAttributeId(), new AttributeFormat(attribute, entity));
             }
 
             if (attributeSetting.getName().equalsIgnoreCase(
@@ -134,17 +140,19 @@ public class FixedLengthFormatter extends AbstractComponent {
 
     private class AttributeFormat {
 
-        String attributeId;
+        ModelAttribute attribute;
+        ModelEntity entity;
         int ordinal;
         int length;
         String formatFunction;
 
-        public AttributeFormat(String attributeId) {
-            this.attributeId = attributeId;
+        public AttributeFormat(ModelAttribute attribute, ModelEntity entity) {
+            this.attribute = attribute;
+            this.entity = entity;
         }
 
         public String getAttributeId() {
-            return attributeId;
+            return attribute.getId();
         }
 
         public int getOrdinal() {
@@ -169,6 +177,14 @@ public class FixedLengthFormatter extends AbstractComponent {
 
         public String getFormatFunction() {
             return formatFunction;
+        }
+        
+        public ModelAttribute getAttribute() {
+            return attribute;
+        }
+        
+        public ModelEntity getEntity() {
+            return entity;
         }
     }
 

@@ -215,11 +215,12 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     }
 
     protected void addAll(String filter, Collection<ModelEntity> modelEntityList) {
+        filter = filter != null ? filter.toLowerCase() : null;
         for (ModelEntity modelEntity : modelEntityList) {
-            boolean add = isBlank(filter) || modelEntity.getName().contains(filter);
+            boolean add = isBlank(filter) || modelEntity.getName().toLowerCase().contains(filter);
             if (!add) {
                 for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
-                    add |= modelAttribute.getName().contains(filter);
+                    add |= modelAttribute.getName().toLowerCase().contains(filter);
                 }
             }
 
