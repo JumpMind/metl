@@ -1,14 +1,19 @@
 package org.jumpmind.symmetric.is.core.persist;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.ISqlRowMapper;
 import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.Row;
+import org.jumpmind.exception.IoException;
 import org.jumpmind.persist.IPersistenceManager;
+import org.jumpmind.symmetric.io.data.DbExport;
+import org.jumpmind.symmetric.io.data.DbExport.Format;
 import org.jumpmind.symmetric.is.core.model.AgentDeploymentSummary;
 import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 
 public class ConfigurationSqlService extends AbstractConfigurationService {
 
@@ -67,5 +72,62 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                     }
                 }, agentId, agentId);
     }
+
+    @Override
+    public String export(ProjectVersion projectVersion) {
+        try {
+            StringBuilder out = new StringBuilder();
+            
+            /* @formatter:off */
+            String[][] CONFIG = {
+                    {"PROJECT", "WHERE ID='%3$s'",                                                                                                                                                                              },
+                    {"PROJECT_VERSION", "WHERE ID='%2$s'",                                                                                                                                                                                                                                },
+                    {"FOLDER", "WHERE PROJECT_VERSION_ID='%2$s'",                                                                                                                                                                                                                         },
+                    {"MODEL", "WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0",                                                                                                                                                                                                            },
+                    {"MODEL_ENTITY", "WHERE MODEL_ID in (SELECT ID FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)",                                                                                                                                                       },
+                    {"MODEL_ATTRIBUTE", "WHERE ENTITY_ID IN (SELECT ID FROM %1$s_MODEL_ENTITY WHERE MODEL_ID in (SELECT ID FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0))",                                                                                              },
+                    {"MODEL_ENTITY_RELATIONSHIP", "WHERE SOURCE_ENTITY_ID IN (SELECT ID FROM %1$s_MODEL_ENTITY WHERE ID in (SELECT ID FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0))",                                                                                   },
+                    {"MODEL_ATTRIBUTE_RELATIONSHIP", "WHERE SOURCE_ATTRIBUTE_ID IN (SELECT ID FROM %1$s_MODEL_ATTRIBUTE WHERE ENTITY_ID IN (SELECT ID FROM %1$s_MODEL_ENTITY WHERE MODEL_ID in (SELECT ID FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)))",              },
+                    {"RESOURCE", "WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0",                                                                                                                                                                                                         },
+                    {"RESOURCE_SETTING", "WHERE RESOURCE_ID IN (SELECT ID FROM %1$s_RESOURCE WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)",                                                                                                                                             },
+                    {"COMPONENT", "WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0",                                                                                                                                                                                                        },
+                    {"COMPONENT_SETTING", "WHERE COMPONENT_ID IN (SELECT ID FROM %1$s_COMPONENT WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)",                                                                                                                                          },
+                    {"COMPONENT_ENTITY_SETTING", "WHERE COMPONENT_ID IN (SELECT ID FROM %1$s_COMPONENT WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)",                                                                                                                                   },
+                    {"COMPONENT_ATTRIBUTE_SETTING", "WHERE COMPONENT_ID IN (SELECT ID FROM %1$s_COMPONENT WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)",                                                                                                                                },
+                    {"FLOW", "WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0",                                                                                                                                                                                                             },
+                    {"FLOW_PARAMETER", "WHERE FLOW_ID IN (SELECT ID FROM %1$s_FLOW WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)",                                                                                                                                                       },
+                    {"FLOW_STEP", "WHERE FLOW_ID IN (SELECT ID FROM %1$s_FLOW WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)",                                                                                                                                                            },
+                    {"FLOW_STEP_LINK", "WHERE SOURCE_STEP_ID IN (SELECT ID FROM %1$s_FLOW_STEP WHERE FLOW_ID IN (SELECT ID FROM %1$s_FLOW WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0))",                                                                                               },
+            };
+            /* @formatter:on */
+
+            for (int i = CONFIG.length-1; i >= 0; i--) {
+                String[] entry = CONFIG[i];
+                out.append(String.format("DELETE FROM %s_%s %s;\n", tablePrefix, entry[0], String.format(
+                        entry[1],
+                        tablePrefix, projectVersion.getId(), projectVersion.getProjectId())).replace("AND DELETED=0", ""));
+            }
+
+            for (int i = 0; i < CONFIG.length; i++) {
+                String[] entry = CONFIG[i];
+                out.append(export(entry[0], entry[1], projectVersion));
+            }
+            
+            return out.toString();   
+        } catch (IOException e) {
+            throw new IoException(e);
+        }
+    }
     
+    protected String export (String table, String where, ProjectVersion projectVersion) throws IOException {
+        DbExport export = new DbExport(databasePlatform);        
+        export.setWhereClause(String.format(
+                where,
+                tablePrefix, projectVersion.getId(), projectVersion.getProjectId()));
+        export.setFormat(Format.SQL);
+        export.setUseQuotedIdentifiers(false);
+        export.setNoCreateInfo(true);
+        return export.exportTables(new String[] { String
+                .format("%s_%s", tablePrefix, table) });
+    }
 }

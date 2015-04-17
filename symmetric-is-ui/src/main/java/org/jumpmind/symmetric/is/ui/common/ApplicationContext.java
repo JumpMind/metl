@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.User;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
@@ -39,6 +40,9 @@ public class ApplicationContext implements Serializable {
 
     @Autowired
     IAgentManager agentManager;
+    
+    @Autowired
+    IDatabasePlatform configDatabasePlatform;
 
     User user = new User();
     
@@ -80,4 +84,7 @@ public class ApplicationContext implements Serializable {
         return openProjects;
     }
 
+    public IDatabasePlatform getConfigDatabasePlatform() {
+        return configDatabasePlatform;
+    }
 }

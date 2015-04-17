@@ -732,4 +732,5 @@ abstract class AbstractConfigurationService extends AbstractService implements
             save(attributeRelationship);
         }
     }
+    
 }
