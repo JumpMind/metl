@@ -27,6 +27,20 @@ public class AgentDeploymentSummary extends AbstractObject {
     public AgentDeploymentSummary() {
     }
 
+    public AgentDeploymentSummary(AgentDeployment agentDeployment) {
+        copy(agentDeployment);
+    }
+
+    public void copy(AgentDeployment agentDeployment) {
+        id = agentDeployment.getId();
+        name = agentDeployment.getName();
+        type = TYPE_FLOW;
+        status = agentDeployment.getStatus();
+        logLevel = agentDeployment.getLogLevel();
+        startType = agentDeployment.getStartType();
+        startExpression = agentDeployment.getStartExpression();
+    }
+
     public boolean isFlow() {
         return type.equals(TYPE_FLOW);
     }

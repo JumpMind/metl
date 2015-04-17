@@ -43,7 +43,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class EditAgentPanel extends VerticalLayout implements IUiPanel {
+public class EditAgentPanel extends VerticalLayout implements IUiPanel, AgentDeploymentChangeListener {
 
     ApplicationContext context;
 
@@ -55,6 +55,8 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
 
     BeanItemContainer<AgentDeploymentSummary> container;
 
+    Button addDeploymentButton;
+    
     Button removeButton;
 
     Button editButton;    
@@ -123,7 +125,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        Button addDeploymentButton = buttonBar.addButton("Add Deployment", Icons.DEPLOYMENT);
+        addDeploymentButton = buttonBar.addButton("Add Deployment", Icons.DEPLOYMENT);
         addDeploymentButton.addClickListener(new AddDeploymentClickListener());
 
         editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
@@ -150,17 +152,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
 
         addComponent(table);
         setExpandRatio(table, 1.0f);
-
-        container.addAll(context.getConfigurationService().findAgentDeploymentSummary(agent.getId()));
-
-        if (agent.getAgentDeployments().size() > 0) {
-            table.setValue(agent.getAgentDeployments().iterator().next());
-            table.focus();
-        } else {
-            addDeploymentButton.focus();
-        }
-
-        setButtonsEnabled();
+        refresh();
     }
 
     @Override
@@ -174,6 +166,34 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
     
     @Override
     public void deselected() {
+    }
+
+    public void changed(AgentDeployment agentDeployment) {
+        for (AgentDeploymentSummary summary : container.getItemIds()) {
+            if (summary.getId().equals(agentDeployment.getId())) {
+                summary.copy(agentDeployment);
+            }
+        }
+    }
+
+    public void refresh() {
+        Set<AgentDeploymentSummary> selectedItems = getSelectedItems();
+        container.removeAllItems();
+        container.addAll(context.getConfigurationService().findAgentDeploymentSummary(agent.getId()));
+
+        if (selectedItems.size() > 0) {
+            for (Object itemId : selectedItems) {
+                table.select(itemId);
+            }
+            table.focus();
+        } else if (container.size() > 0) {
+            table.select(container.firstItemId());
+            table.focus();
+        } else {
+            addDeploymentButton.focus();
+        }
+
+        setButtonsEnabled();
     }
 
     protected void setButtonsEnabled() {
@@ -220,7 +240,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
                     deployParams.add(deployParam);
                 }
                 context.getConfigurationService().save(deployment);
-                container.addItem(deployment);
+                refresh();
             }
         }
 
@@ -248,7 +268,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
             AgentDeploymentSummary summary = (AgentDeploymentSummary) getSelectedItems().iterator().next();
             if (summary.isFlow()) {
                 AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
-                EditAgentDeploymentPanel editPanel = new EditAgentDeploymentPanel(context, deployment);
+                EditAgentDeploymentPanel editPanel = new EditAgentDeploymentPanel(context, deployment, EditAgentPanel.this);
                 tabbedPanel.addCloseableTab(deployment.getId(), deployment.getName(), Icons.DEPLOYMENT, editPanel);
             } else {
                 AgentResource agentResource = context.getConfigurationService().findAgentResource(agent.getId(), summary.getId());
@@ -272,7 +292,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel {
                     AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
                     context.getConfigurationService().delete(deployment);
                     table.removeItem(summary);
-                    // TODO: remove Resources that are no longer referenced
+                    refresh();
                 }
             }
         }

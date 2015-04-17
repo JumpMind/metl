@@ -43,10 +43,13 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     HorizontalLayout cronLayout;
     
     TextField startExpressionTextField;
+    
+    AgentDeploymentChangeListener listener;
         
-    public EditAgentDeploymentPanel(ApplicationContext context, AgentDeployment agentDeployment) {
+    public EditAgentDeploymentPanel(ApplicationContext context, AgentDeployment agentDeployment, AgentDeploymentChangeListener listener) {
         this.context = context;
         this.agentDeployment = agentDeployment;
+        this.listener = listener;
 
         VerticalLayout vlay = new VerticalLayout();
         FormLayout form = new FormLayout();
@@ -106,11 +109,16 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     public void selected() {
     }
 
+    protected void saveAgentDeployment(AgentDeployment agentDeployment) {
+        context.getConfigurationService().save(agentDeployment);
+        listener.changed(agentDeployment);
+    }
+
     protected TextField getNameComponent() {
         ImmediateUpdateTextField textField = new ImmediateUpdateTextField("Name") {
             protected void save() {
                 agentDeployment.setName(getValue());
-                context.getConfigurationService().save(agentDeployment);
+                saveAgentDeployment(agentDeployment);
             }            
         };
         textField.setWidth(300, Unit.PIXELS);
@@ -130,7 +138,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         combo.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
                 agentDeployment.setLogLevel((String) combo.getValue());
-                context.getConfigurationService().save(agentDeployment);
+                saveAgentDeployment(agentDeployment);
             }
         });
         return combo;
@@ -156,11 +164,14 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
                     }
                     listSelect.select(listSelect.getItemIds().iterator().next());
                 }
-                if (!agentDeployment.getStartType().equals(StartType.SCHEDULED_CRON.name())) {
-                    startExpressionTextField.setValue("");
-                    agentDeployment.setStartExpression("");
+                String startExpression = null;
+                if (agentDeployment.getStartType().equals(StartType.SCHEDULED_CRON.name())) {
+                    startExpression = "0 0 0 * * ?";
                 }
-                context.getConfigurationService().save(agentDeployment);
+                startExpressionTextField.setValue(startExpression);
+                agentDeployment.setStartExpression(startExpression);
+                updateScheduleFields();
+                saveAgentDeployment(agentDeployment);
             }
         });
         return startTypeCombo;
@@ -209,7 +220,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
             protected void save() {
                 agentDeployment.setStartExpression(getValue());
                 updateScheduleFields();
-                context.getConfigurationService().save(agentDeployment);
+                saveAgentDeployment(agentDeployment);
             }
         };
         startExpressionTextField.setWidth(275, Unit.PIXELS);
@@ -256,22 +267,24 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         append(sb, yearValues);
         startExpressionTextField.setValue(sb.toString());
         agentDeployment.setStartExpression(sb.toString());
-        context.getConfigurationService().save(agentDeployment);
+        saveAgentDeployment(agentDeployment);
     }
 
     protected void updateScheduleFields() {
-        String[] fields = agentDeployment.getStartExpression().split(" ");
-        for (int i = 0; i < fields.length; i++) {
-            if (fields[i].equals("?")) {
-                fields[i] = "*";
-            }
-            String[] values = fields[i].split(",");
-            ListSelect listSelect = ((ListSelect) cronLayout.getComponent(i));
-            for (Object itemId : listSelect.getItemIds()) {
-                listSelect.unselect(itemId);
-            }
-            for (String value : values) {
-                listSelect.select(value);
+        if (agentDeployment.getStartExpression() != null) {
+            String[] fields = agentDeployment.getStartExpression().split(" ");
+            for (int i = 0; i < fields.length; i++) {
+                if (fields[i].equals("?")) {
+                    fields[i] = "*";
+                }
+                String[] values = fields[i].split(",");
+                ListSelect listSelect = ((ListSelect) cronLayout.getComponent(i));
+                for (Object itemId : listSelect.getItemIds()) {
+                    listSelect.unselect(itemId);
+                }
+                for (String value : values) {
+                    listSelect.select(value);
+                }
             }
         }
     }
