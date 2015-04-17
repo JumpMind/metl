@@ -263,6 +263,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
         component.setName(component.getType() + " "
                 + (countComponentsOfType(component.getType()) + 1));
+        component.setProjectVersionId(flow.getProjectVersionId());
 
         FlowStep flowStep = new FlowStep(component);
         flowStep.setX(x);

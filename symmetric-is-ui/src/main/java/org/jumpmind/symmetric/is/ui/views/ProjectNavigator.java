@@ -1,9 +1,13 @@
 package org.jumpmind.symmetric.is.ui.views;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,8 +41,11 @@ import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditTransformerPanel;
 import org.jumpmind.symmetric.is.ui.views.design.ManageProjectsPanel;
 import org.jumpmind.symmetric.is.ui.views.design.PropertySheet;
+import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -52,7 +59,12 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
+import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.server.ResourceReference;
+import com.vaadin.server.StreamResource;
+import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
@@ -67,6 +79,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.ColumnHeaderMode;
@@ -81,6 +94,8 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class ProjectNavigator extends VerticalLayout implements IDesignNavigator {
+
+    final Logger log = LoggerFactory.getLogger(getClass());
 
     ApplicationContext context;
 
@@ -118,7 +133,11 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
     MenuItem closeProject;
 
+    MenuItem exportProject;
+
     MenuItem search;
+
+    FileDownloader fileDownloader;
 
     HorizontalLayout searchBarLayout;
 
@@ -182,6 +201,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         }
 
         closeProject.setEnabled(selected instanceof ProjectVersion);
+        exportProject.setEnabled(selected instanceof ProjectVersion);
 
         boolean deleteEnabled = false;
         deleteEnabled |= isDeleteButtonEnabled(treeTable.getValue());
@@ -204,6 +224,13 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 viewProjects();
+            }
+        });
+
+        exportProject = projectMenu.addItem("Export", new Command() {
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                exportProject();
             }
         });
 
@@ -450,7 +477,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         } else {
             return null;
         }
-    }    
+    }
 
     protected boolean startEditingItem(AbstractObject obj) {
         if (obj.isSettingNameAllowed()) {
@@ -488,7 +515,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             }
             itemBeingEdited = null;
             treeTable.refreshRowCache();
-            treeTable.focus();            
+            treeTable.focus();
             treeTable.setValue(selected);
         }
     }
@@ -740,6 +767,34 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     protected void viewProjects() {
         tabs.addCloseableTab("projectslist", "Manage Projects", Icons.PROJECT,
                 new ManageProjectsPanel(context, this));
+    }
+
+    protected void exportProject() {
+        Object selected = treeTable.getValue();
+        if (selected instanceof ProjectVersion) {
+            ProjectVersion project = (ProjectVersion)selected;
+            final String export = context.getConfigurationService().export(project);
+            StreamSource ss = new StreamSource() {
+                private static final long serialVersionUID = 1L;
+
+                public InputStream getStream() {
+                    try {                        
+                        return new ByteArrayInputStream(export.getBytes());
+                    } catch (Exception e) {
+                        log.error("Failed to export configuration", e);
+                        CommonUiUtils.notify("Failed to export configuration.", Type.ERROR_MESSAGE);
+                        return null;
+                    }
+
+                }
+            };
+            String datetime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+            StreamResource resource = new StreamResource(ss, String.format("%s-config-%s.sql",
+                    project.getName().toLowerCase().replaceAll(" ", "-"), datetime));
+            final String KEY = "export";
+            setResource(KEY, resource);
+            Page.getCurrent().open(ResourceReference.create(resource, this, KEY).getURL(), null);
+        }
     }
 
     protected void closeProject() {

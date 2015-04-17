@@ -384,9 +384,6 @@
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
-        <foreign-key foreignTable="flow" name="fk_agntd_2_flwv">
-            <reference local="flow_id" foreign="id" />
-        </foreign-key>
         <foreign-key foreignTable="agent" name="fk_agntd_2_agnt">
             <reference local="agent_id" foreign="id" />
         </foreign-key>
