@@ -21,6 +21,7 @@ import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 //github.com/JumpMind/symmetric-is-all.git
 import org.jumpmind.symmetric.is.core.runtime.component.DbReader;
+import org.jumpmind.symmetric.is.core.runtime.component.DbWriter;
 import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.EntityRouter;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
@@ -34,6 +35,7 @@ import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.is.ui.mapping.EditMappingPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditDbReaderPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditEntityRouterPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel;
@@ -719,8 +721,9 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     public void open(Object item) {
         if (item instanceof FlowStep) {
             FlowStep flowStep = (FlowStep) item;
-            // TODO: these ui's need to come from component plugin
-            // infrastructure
+            /* TODO: these ui's need to come from component plugin
+             infrastructure.  Maybe dynamically try to create edit class based on
+             The component type name.  EditXxxxXxxxPanel */
             String type = flowStep.getComponent().getType();
             if (type.equals(FixedLengthFormatter.TYPE) || type.equals(DelimitedFormatter.TYPE)) {
                 EditFormatPanel panel = new EditFormatPanel(context, flowStep.getComponent());
@@ -734,7 +737,10 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
                 EditTransformerPanel panel = new EditTransformerPanel(context,
                         flowStep.getComponent());
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-                unselectAll();
+            } else if (type.equals(DbWriter.TYPE)) {
+                EditDbWriterPanel panel = new EditDbWriterPanel(context,
+                        flowStep.getComponent());
+                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel); 
             } else if (type.equals(EntityRouter.TYPE)) {
                 EditEntityRouterPanel panel = new EditEntityRouterPanel(context, flowStep,
                         (Flow) treeTable.getParent(flowStep));
