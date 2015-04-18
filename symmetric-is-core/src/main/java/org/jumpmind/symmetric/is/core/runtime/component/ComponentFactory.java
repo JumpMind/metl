@@ -80,7 +80,13 @@ public class ComponentFactory extends AbstractFactory<IComponent> implements ICo
     @Override
     public ComponentDefinition getComponentDefinitionForComponentType(String componentType) {
         Class<? extends IComponent> clazz = componentTypes.get(componentType);
-        return clazz.getAnnotation(ComponentDefinition.class);
+        if (clazz != null) {
+            return clazz.getAnnotation(ComponentDefinition.class);
+        } else {
+            throw new IllegalStateException(
+                    "Could not find a class associated with the component type of "
+                            + componentType);
+        }
     }
 
 }
