@@ -12,3 +12,6 @@
 /as400.trace.db
 /co.h2.db
 /co.trace.db
+/test.h2.db
+/test.lock.db
+/test.trace.db
