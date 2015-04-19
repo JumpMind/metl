@@ -74,9 +74,9 @@ public class Transformer extends AbstractComponent {
                 if (isNotBlank(transform)) {
                     ModelAttribute attribute = inputModel.getAttributeById(attributeId);
                     ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());                    
-                    value = ScriptHelper.eval(attribute, value, entity, inData, transform);
+                    value = ModelAttributeScriptHelper.eval(attribute, value, entity, inData, transform);
                 }
-                if (value != ScriptHelper.REMOVE_ATTRIBUTE) {
+                if (value != ModelAttributeScriptHelper.REMOVE_ATTRIBUTE) {
                     outData.put(attributeId, value);
                 }
             }            

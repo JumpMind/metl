@@ -11,7 +11,7 @@ import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.runtime.component.ScriptHelper;
+import org.jumpmind.symmetric.is.core.runtime.component.ModelAttributeScriptHelper;
 import org.jumpmind.symmetric.is.core.runtime.component.Transformer;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
@@ -189,7 +189,7 @@ public class EditTransformerPanel extends VerticalLayout implements IUiPanel {
             if (propertyId.equals("value")) {
                 final ComboBox combo = new ComboBox();
                 combo.setWidth(100, Unit.PERCENTAGE);
-                String[] functions = ScriptHelper.getSignatures();
+                String[] functions = ModelAttributeScriptHelper.getSignatures();
                 for (String function : functions) {
                     combo.addItem(function);
                 }

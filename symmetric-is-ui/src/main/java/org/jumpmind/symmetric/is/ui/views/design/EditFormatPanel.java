@@ -14,7 +14,7 @@ import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
-import org.jumpmind.symmetric.is.core.runtime.component.ScriptHelper;
+import org.jumpmind.symmetric.is.core.runtime.component.ModelAttributeScriptHelper;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
@@ -275,7 +275,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
             } else if (propertyId.equals("transformText")) {
                 final ComboBox combo = new ComboBox();
                 combo.setWidth(100, Unit.PERCENTAGE);
-                String[] functions = ScriptHelper.getSignatures();
+                String[] functions = ModelAttributeScriptHelper.getSignatures();
                 for (String function : functions) {
                     combo.addItem(function);
                 }

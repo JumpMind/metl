@@ -84,7 +84,7 @@ public class FixedLengthFormatter extends AbstractComponent {
         for (AttributeFormat attribute : attributesList) {
             Object value = inputRow.get(attribute.getAttributeId());
             if (isNotBlank(attribute.getFormatFunction())) {
-                value = ScriptHelper.eval(attribute.getAttribute(), value, attribute.getEntity(), 
+                value = ModelAttributeScriptHelper.eval(attribute.getAttribute(), value, attribute.getEntity(), 
                         inputRow, attribute.getFormatFunction());
             }
             String paddedValue = StringUtils.pad(value != null ? value.toString() : "",

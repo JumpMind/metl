@@ -120,7 +120,7 @@ public class DelimitedFormatter extends AbstractComponent {
                 for (AttributeFormat attribute : attributes) {
                     Object object = inputRow.get(attribute.getAttributeId());
                     if (isNotBlank(attribute.getFormatFunction())) {
-                        object = ScriptHelper.eval(attribute.getAttribute(), object, 
+                        object = ModelAttributeScriptHelper.eval(attribute.getAttribute(), object, 
                                 attribute.getEntity() , inputRow, attribute.getFormatFunction());
                     }
 

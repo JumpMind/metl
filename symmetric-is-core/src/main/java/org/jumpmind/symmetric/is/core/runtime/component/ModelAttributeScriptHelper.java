@@ -18,7 +18,7 @@ import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
-public class ScriptHelper {
+public class ModelAttributeScriptHelper {
 
     Object value;
     
@@ -32,7 +32,7 @@ public class ScriptHelper {
 
     static private ThreadLocal<ScriptEngine> scriptEngine = new ThreadLocal<ScriptEngine>();
 
-    public ScriptHelper(ModelAttribute attribute, ModelEntity entity, EntityData data, Object value) {
+    public ModelAttributeScriptHelper(ModelAttribute attribute, ModelEntity entity, EntityData data, Object value) {
         this.value = value;
         this.data = data;
         this.attribute = attribute;
@@ -116,10 +116,10 @@ public class ScriptHelper {
 
     public static String[] getSignatures() {
         List<String> signatures = new ArrayList<String>();
-        Method[] methods = ScriptHelper.class.getMethods();
+        Method[] methods = ModelAttributeScriptHelper.class.getMethods();
         LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
         for (Method method : methods) {
-            if (method.getDeclaringClass().equals(ScriptHelper.class)
+            if (method.getDeclaringClass().equals(ModelAttributeScriptHelper.class)
                     && Modifier.isPublic(method.getModifiers())
                     && !Modifier.isStatic(method.getModifiers())) {
                 StringBuilder sig = new StringBuilder(method.getName());
@@ -156,15 +156,16 @@ public class ScriptHelper {
         engine.put("attribute", attribute);
 
         try {
-            String importString = "import org.jumpmind.symmetric.is.core.runtime.component.TransformHelper;\n";
+            String importString = "import org.jumpmind.symmetric.is.core.runtime.component.ModelAttributeScriptHelper;\n";
             String code = String.format(
-                    "return new TransformHelper(attribute, entity, data, value) { public Object eval() { return %s } }.eval()",
+                    "return new ModelAttributeScriptHelper(attribute, entity, data, value) { public Object eval() { return %s } }.eval()",
                     expression);
             return engine.eval(importString + code);
         } catch (ScriptException e) {
             throw new RuntimeException("Unable to evaluate groovy script", e);
         }
     }
+    
     
     static class RemoveAttribute {
         
