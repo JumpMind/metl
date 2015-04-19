@@ -115,7 +115,7 @@ public class FlowRuntime {
          * message to that step
          */
         for (StepRuntime stepRuntime : startSteps) {
-            stepRuntime.put(startMessage);
+            stepRuntime.queue(startMessage);
         }
     }
 
@@ -128,6 +128,24 @@ public class FlowRuntime {
         }
         
         executionTracker.afterFlow(executionId);
+    }
+    
+    public void notifyStepsTheFlowIsComplete() {
+        Collection<StepRuntime> allSteps = stepRuntimes.values();
+        List<Throwable> allErrors = new ArrayList<Throwable>();
+        for (StepRuntime stepRuntime : allSteps) {
+            if (stepRuntime.getError() != null) {
+               allErrors.add(stepRuntime.getError());
+            }
+        }
+
+        for (StepRuntime stepRuntime : allSteps) {
+            if (allErrors.size() > 0) {
+                stepRuntime.getComponent().flowCompletedWithErrors(stepRuntime.getError(), allErrors);
+            } else {
+                stepRuntime.getComponent().flowCompletedWithoutError();
+            }
+        }
     }
 
     public boolean isRunning() {
@@ -167,7 +185,7 @@ public class FlowRuntime {
             List<StepRuntime> startSteps = findStartSteps();
             for (StepRuntime stepRuntime : startSteps) {
                 try {
-                    stepRuntime.put(new ShutdownMessage(stepRuntime.getComponent()
+                    stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponent()
                             .getFlowStep().getId()));
                 } catch (InterruptedException e) {
                 }

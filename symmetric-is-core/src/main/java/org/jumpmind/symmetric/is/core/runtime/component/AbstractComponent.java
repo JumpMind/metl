@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
+import java.util.List;
+
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.Resource;
@@ -59,5 +61,13 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     	this.flowStep = flowStep;
     	this.flow = flow;
     }
-
+    
+    @Override
+    public void flowCompletedWithoutError() {
+    }
+    
+    @Override
+    public void flowCompletedWithErrors(Throwable myError, List<Throwable> allErrors) {
+    }
+    
 }

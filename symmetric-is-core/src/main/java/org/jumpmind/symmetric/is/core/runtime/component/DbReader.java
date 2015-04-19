@@ -44,7 +44,7 @@ public class DbReader extends AbstractComponent {
             label = "Rows/Msg")
     public final static String ROWS_PER_MESSAGE = "db.reader.rows.per.message";
 
-    @SettingDefinition(order = 10, required = true, type = Type.BOOLEAN, defaultValue = "false",
+    @SettingDefinition(order = 20, required = true, type = Type.BOOLEAN, defaultValue = "false",
             label = "Trim Columns")
     public final static String TRIM_COLUMNS = "db.reader.trim.columns";
 

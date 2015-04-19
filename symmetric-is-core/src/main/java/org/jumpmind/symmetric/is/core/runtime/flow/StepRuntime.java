@@ -59,7 +59,7 @@ public class StepRuntime implements Runnable {
         this.sourceStepRuntimes = sourceStepRuntimes;
     }
 
-    protected void put(Message message) throws InterruptedException {
+    protected void queue(Message message) throws InterruptedException {
         inQueue.put(message);
     }
 
@@ -145,7 +145,7 @@ public class StepRuntime implements Runnable {
 
     private void shutdown() throws InterruptedException {
         for (StepRuntime targetStepRuntime : targetStepRuntimes) {
-            targetStepRuntime.put(new ShutdownMessage(component.getFlowStep().getId()));
+            targetStepRuntime.queue(new ShutdownMessage(component.getFlowStep().getId()));
         }
         this.component.stop();
         running = false;
@@ -164,6 +164,10 @@ public class StepRuntime implements Runnable {
     public IComponent getComponent() {
         return this.component;
     }
+    
+    public Throwable getError() {
+        return error;
+    }
 
     class MessageTarget implements IMessageTarget {
         @Override
@@ -176,7 +180,7 @@ public class StepRuntime implements Runnable {
                         || targetStepIds.contains(targetRuntime.getComponent().getFlowStep().getId());
                 if (forward) {
                     try {
-                        targetRuntime.put(message);
+                        targetRuntime.queue(message);
                     } catch (Exception e) {
                         if (e instanceof RuntimeException) {
                             throw (RuntimeException) e;

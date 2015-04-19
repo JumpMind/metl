@@ -313,6 +313,9 @@ public class AgentRuntime {
                 flowRuntime.stop();
             } finally {
                 flowRuntime.waitForFlowCompletion();
+                
+                flowRuntime.notifyStepsTheFlowIsComplete();
+                
                 log.info("Scheduled '{}' on '{}' is finished", deployment.getFlow()
                         .toString(), agent.getName());
             }
