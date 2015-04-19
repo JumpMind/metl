@@ -18,7 +18,7 @@ import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
-public class TransformHelper {
+public class ScriptHelper {
 
     Object value;
     
@@ -32,7 +32,7 @@ public class TransformHelper {
 
     static private ThreadLocal<ScriptEngine> scriptEngine = new ThreadLocal<ScriptEngine>();
 
-    public TransformHelper(ModelAttribute attribute, ModelEntity entity, EntityData data, Object value) {
+    public ScriptHelper(ModelAttribute attribute, ModelEntity entity, EntityData data, Object value) {
         this.value = value;
         this.data = data;
         this.attribute = attribute;
@@ -116,10 +116,10 @@ public class TransformHelper {
 
     public static String[] getSignatures() {
         List<String> signatures = new ArrayList<String>();
-        Method[] methods = TransformHelper.class.getMethods();
+        Method[] methods = ScriptHelper.class.getMethods();
         LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
         for (Method method : methods) {
-            if (method.getDeclaringClass().equals(TransformHelper.class)
+            if (method.getDeclaringClass().equals(ScriptHelper.class)
                     && Modifier.isPublic(method.getModifiers())
                     && !Modifier.isStatic(method.getModifiers())) {
                 StringBuilder sig = new StringBuilder(method.getName());
