@@ -316,6 +316,7 @@ public class DbWriter extends AbstractComponent {
         List<TargetColumn> targetColumns = new ArrayList<TargetColumn>();
 
         public TargetTable(DmlType dmlType, ModelEntity entity, Table table) {
+            this.table = table;
             List<ModelAttribute> attributes = entity.getModelAttributes();
             String[] columnNames = table.getColumnNames();
 
