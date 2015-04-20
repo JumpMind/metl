@@ -27,7 +27,6 @@ import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,7 +59,7 @@ public class EntityRouter extends AbstractComponent {
     long rowsPerMessage;
 
     protected void applySettings() {
-        TypedProperties properties = flowStep.getComponent().toTypedProperties(this, false);
+        TypedProperties properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         String json = flowStep.getComponent().get(SETTING_CONFIG);
         if (isNotBlank(json)) {
@@ -74,9 +73,8 @@ public class EntityRouter extends AbstractComponent {
     }
 
     @Override
-    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
-        super.start(executionTracker, resourceFactory);
-
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         ScriptEngineManager factory = new ScriptEngineManager();
         scriptEngine = factory.getEngineByName("groovy");
         applySettings();

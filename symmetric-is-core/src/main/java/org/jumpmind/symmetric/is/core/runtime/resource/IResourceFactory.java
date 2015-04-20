@@ -3,12 +3,13 @@ package org.jumpmind.symmetric.is.core.runtime.resource;
 import java.util.List;
 import java.util.Map;
 
+import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 
 public interface IResourceFactory {
 
-    public IResource create(Resource resource);
+    public IResource create(Resource resource, TypedProperties agentOverrides);
 
     public void register(Class<IResource> clazz);
 

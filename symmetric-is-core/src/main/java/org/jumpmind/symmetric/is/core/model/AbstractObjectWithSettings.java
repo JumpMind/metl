@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 
 abstract public class AbstractObjectWithSettings extends AbstractObject {
 
@@ -100,10 +99,8 @@ abstract public class AbstractObjectWithSettings extends AbstractObject {
         }
     }
 
-    public TypedProperties toTypedProperties(AbstractRuntimeObject object, boolean provided) {
+    public TypedProperties toTypedProperties(Map<String, SettingDefinition> definitions) {
         TypedProperties properties = new TypedProperties();
-
-        Map<String, SettingDefinition> definitions = object.getSettingDefinitions(provided);
         for (String name : definitions.keySet()) {
             properties.put(name, definitions.get(name).defaultValue());
         }

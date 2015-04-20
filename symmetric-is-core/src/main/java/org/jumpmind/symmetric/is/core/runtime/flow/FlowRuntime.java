@@ -56,7 +56,7 @@ public class FlowRuntime {
         return deployment;
     }
 
-    public void start(String executionId) throws InterruptedException {
+    public void start(String executionId, Map<String, IResource> resources) throws InterruptedException {
         
         this.executionId = executionId == null ? UUID.randomUUID().toString() : executionId;
         this.stepRuntimes = new HashMap<String, StepRuntime>();
@@ -67,7 +67,7 @@ public class FlowRuntime {
 
         /* create a step runtime for every component in the flow */
         for (FlowStep flowStep : steps) {
-            StepRuntime stepRuntime = new StepRuntime(executionId, componentFactory.create(flowStep, flow), executionTracker);
+            StepRuntime stepRuntime = new StepRuntime(executionId, componentFactory.create(flowStep, flow, resources), executionTracker);
             stepRuntimes.put(flowStep.getId(), stepRuntime);
         }
 

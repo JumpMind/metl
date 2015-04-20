@@ -1,13 +1,11 @@
 package org.jumpmind.symmetric.is.core.runtime.resource;
 
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
-import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 
 @ResourceDefinition(typeName=LocalFileResource.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
-public class LocalFileResource extends AbstractRuntimeObject implements
+public class LocalFileResource extends AbstractResource implements
 		IResource {
 
 	public static final String TYPE = "Local File System";
@@ -21,8 +19,7 @@ public class LocalFileResource extends AbstractRuntimeObject implements
 	IStreamableResource streamableResource;
 
 	@Override
-	public void start(Resource resource) {
-		TypedProperties properties = resource.toTypedProperties(this, false);
+	protected void start(TypedProperties properties) {
 		streamableResource = new FileStreamableResource(resource,
 				properties.getProperty(LOCALFILE_PATH), 
 				properties.is(LOCALFILE_MUST_EXIST));
@@ -39,5 +36,5 @@ public class LocalFileResource extends AbstractRuntimeObject implements
 		// TODO think about renaming reference to resource or something more meaningful
 		return (T) streamableResource;
 	}
-
+	
 }

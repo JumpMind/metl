@@ -94,7 +94,7 @@ public class ExploreView extends VerticalLayout implements View {
                 resource.put(BasicDataSourcePropertyConstants.DB_POOL_MAX_IDLE, "2");
                 resource.put(BasicDataSourcePropertyConstants.DB_POOL_MIN_IDLE, "2");
                 DataSourceResource dataSourceResource = (DataSourceResource) context
-                        .getResourceFactory().create(resource);
+                        .getResourceFactory().create(resource, null);
                 DataSource dataSource = dataSourceResource.reference();
                 platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource,
                         new SqlTemplateSettings(), false);

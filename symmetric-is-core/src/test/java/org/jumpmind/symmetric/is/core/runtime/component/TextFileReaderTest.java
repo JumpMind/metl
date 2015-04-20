@@ -6,7 +6,9 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
@@ -17,7 +19,7 @@ import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
 import org.jumpmind.symmetric.is.core.utils.TestUtils;
@@ -30,17 +32,17 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class TextFileReaderTest {
 
-    private static IResourceFactory resourceFactory;
+    private static Map<String, IResource> resources = new HashMap<String, IResource>();
     private static FlowStep readerFlow;
     private static final String FILE_PATH = "build/files/";
     private static final String FILE_NAME = "text_test.txt";
 
     @BeforeClass
     public static void setup() throws Exception {
-
-        resourceFactory = new ResourceFactory();
         createTestFileToRead();
         readerFlow = createTextReaderFlowStep();
+        Resource resource = readerFlow.getComponent().getResource();
+        resources.put(resource.getId(), new ResourceFactory().create(resource, null));
     }
 
     @After
@@ -51,8 +53,8 @@ public class TextFileReaderTest {
     public void testTextReaderFlowFromStartupMsgSingleRowPerMessage() throws Exception {
 
         TextFileReader reader = new TextFileReader();
-        reader.init(readerFlow, null);
-        reader.start(null, resourceFactory);
+        reader.init(readerFlow, null, resources);
+        reader.start(null);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle("test", msg, msgTarget);
@@ -74,8 +76,8 @@ public class TextFileReaderTest {
     public void testTextReaderFlowFromStartupMsgMultipleRowsPerMessage() throws Exception {
 
         TextFileReader reader = new TextFileReader();
-        reader.init(readerFlow, null);
-        reader.start(null, resourceFactory);
+        reader.init(readerFlow, null, resources);
+        reader.start(null);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle("test", msg, msgTarget);

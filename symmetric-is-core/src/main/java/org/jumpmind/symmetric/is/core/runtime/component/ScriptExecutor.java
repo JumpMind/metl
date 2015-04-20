@@ -5,7 +5,6 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
 @ComponentDefinition(
         category = ComponentCategory.PROCESSOR,
@@ -25,8 +24,8 @@ public class ScriptExecutor extends AbstractComponent {
     String script;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
-        super.start(executionTracker, resourceFactory);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
 
         script = flowStep.getComponent().get(SCRIPT);
 

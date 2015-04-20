@@ -5,7 +5,6 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.util.AppUtils;
 
 @ComponentDefinition(category = ComponentCategory.PROCESSOR, typeName = Delay.TYPE, inputMessage=MessageType.ANY,
@@ -20,8 +19,8 @@ public class Delay extends AbstractComponent {
     long delay = 1000;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
-        super.start(executionTracker, resourceFactory);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         delay = flowStep.getComponent().getLong(DELAY_TIME, 1000l);
     }
     

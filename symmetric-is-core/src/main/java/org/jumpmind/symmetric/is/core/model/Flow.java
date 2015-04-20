@@ -1,8 +1,10 @@
 package org.jumpmind.symmetric.is.core.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class Flow extends AbstractObject {
@@ -72,6 +74,17 @@ public class Flow extends AbstractObject {
     @Override
     public boolean isSettingNameAllowed() {
         return true;
+    }
+    
+    public Set<Resource> findResources() {
+        HashSet<Resource> resources = new HashSet<Resource>();
+        for (FlowStep flowStep : flowSteps) {
+            Resource resource = flowStep.getComponent().getResource();
+            if (resource != null) {
+                resources.add(resource);
+            }
+        }
+        return resources;
     }
 
     public FlowStepLink findFlowStepLink(String sourceNodeId, String targetNodeId) {

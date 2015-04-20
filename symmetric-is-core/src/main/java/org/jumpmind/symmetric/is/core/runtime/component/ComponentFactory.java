@@ -10,6 +10,7 @@ import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.AbstractFactory;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 
 public class ComponentFactory extends AbstractFactory<IComponent> implements IComponentFactory {
 
@@ -51,13 +52,13 @@ public class ComponentFactory extends AbstractFactory<IComponent> implements ICo
     }
 
     @Override
-    public IComponent create(FlowStep flowStep, Flow flow) {
+    public IComponent create(FlowStep flowStep, Flow flow, Map<String, IResource> resources) {
         try {
             String componentType = flowStep.getComponent().getType();
             Class<? extends IComponent> clazz = componentTypes.get(componentType);
             if (clazz != null) {
                 IComponent component = clazz.newInstance();
-                component.init(flowStep, flow);
+                component.init(flowStep, flow, resources);
                 return component;
             } else {
                 throw new IllegalStateException(

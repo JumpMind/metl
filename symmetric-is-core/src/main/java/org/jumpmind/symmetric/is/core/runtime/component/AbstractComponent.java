@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
 import java.util.List;
+import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
@@ -10,7 +11,6 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
 abstract public class AbstractComponent extends AbstractRuntimeObject implements IComponent {
 
@@ -18,29 +18,15 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     public final static String INBOUND_QUEUE_CAPACITY = "inbound.queue.capacity";
     
     protected Flow flow;
-    protected FlowStep flowStep;    
+    protected FlowStep flowStep; 
+    protected Map<String, IResource> resources;
     protected IResource resource;
-    protected IResourceFactory resourceFactory;
     protected IExecutionTracker executionTracker;
     protected ComponentStatistics componentStatistics;
 
-    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
+    public void start(IExecutionTracker executionTracker) {
         this.componentStatistics = new ComponentStatistics();
     	this.executionTracker = executionTracker;
-        this.resourceFactory = resourceFactory;
-
-        Resource resource = flowStep.getComponent().getResource();
-        if (resource != null) {
-            try {
-                this.resource = resourceFactory.create(resource);
-                this.resource.start(resource);
-                //TODO: resource.start gets called twice here...  Once during the create and again in the start after it.
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     public void stop() {
@@ -57,9 +43,14 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     	return this.flowStep;
     }
     
-    public void init(FlowStep flowStep, Flow flow) {
+    public void init(FlowStep flowStep, Flow flow, Map<String, IResource> resources) {
     	this.flowStep = flowStep;
     	this.flow = flow;
+    	this.resources = resources;
+    	Resource r = flowStep.getComponent().getResource();
+    	if (r != null) {
+    	    resource = resources.get(r.getId());
+    	}
     }
     
     @Override

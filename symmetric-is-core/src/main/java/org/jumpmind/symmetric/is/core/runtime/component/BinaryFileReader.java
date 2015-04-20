@@ -11,7 +11,6 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamableResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
@@ -43,8 +42,8 @@ public class BinaryFileReader extends AbstractComponent {
     InputStream inStream = null;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
-        super.start(executionTracker, resourceFactory);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         applySettings();
     }
 
@@ -81,7 +80,7 @@ public class BinaryFileReader extends AbstractComponent {
     }
     
     private void applySettings() {
-        properties = flowStep.getComponent().toTypedProperties(this, false);
+        properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
         relativePathAndFile = properties.get(BINARYFILEREADER_RELATIVE_PATH);
         mustExist = properties.is(BINARYFILEREADER_MUST_EXIST);
         sizePerMessage = properties.getInt(BINARYFILEREADER_SIZE_PER_MESSAGE);

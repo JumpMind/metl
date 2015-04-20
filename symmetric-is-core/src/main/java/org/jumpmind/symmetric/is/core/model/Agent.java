@@ -3,6 +3,9 @@ package org.jumpmind.symmetric.is.core.model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import org.jumpmind.properties.TypedProperties;
 
 public class Agent extends AbstractObjectWithSettings {
 
@@ -143,6 +146,24 @@ public class Agent extends AbstractObjectWithSettings {
             }
         }
         return null;
+    }
+    
+    public TypedProperties toTypedProperties(Resource resource, Map<String, SettingDefinition> definitions) {
+        TypedProperties properties = new TypedProperties();
+        for (String name : definitions.keySet()) {
+            properties.put(name, definitions.get(name).defaultValue());
+        }
+
+        for (Setting settingObject : settings) {
+            if (settingObject instanceof AgentResourceSetting) {
+                AgentResourceSetting resourceSetting = (AgentResourceSetting)settingObject;
+                if (resourceSetting.getResourceId().equals(resource.getId())) {
+                    properties.setProperty(settingObject.getName(), settingObject.getValue());
+                }
+            }
+            
+        }
+        return properties;
     }
 
 }

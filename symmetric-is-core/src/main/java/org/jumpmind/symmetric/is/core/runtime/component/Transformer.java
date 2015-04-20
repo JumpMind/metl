@@ -17,7 +17,6 @@ import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
 @ComponentDefinition(
         category = ComponentCategory.PROCESSOR,
@@ -36,8 +35,8 @@ public class Transformer extends AbstractComponent {
    
     
     @Override
-    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
-        super.start(executionTracker, resourceFactory);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         
         transformsByAttributeId.clear();
         

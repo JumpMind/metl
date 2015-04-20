@@ -28,7 +28,6 @@ import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
 @ComponentDefinition(
         typeName = DelimitedFormatter.TYPE,
@@ -72,8 +71,8 @@ public class DelimitedFormatter extends AbstractComponent {
     List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
 
     @Override
-    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
-        super.start(executionTracker, resourceFactory);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         applySettings();
     }
 
@@ -120,8 +119,8 @@ public class DelimitedFormatter extends AbstractComponent {
                 for (AttributeFormat attribute : attributes) {
                     Object object = inputRow.get(attribute.getAttributeId());
                     if (isNotBlank(attribute.getFormatFunction())) {
-                        object = ModelAttributeScriptHelper.eval(attribute.getAttribute(), object, 
-                                attribute.getEntity() , inputRow, attribute.getFormatFunction());
+                        object = ModelAttributeScriptHelper.eval(attribute.getAttribute(), object,
+                                attribute.getEntity(), inputRow, attribute.getFormatFunction());
                     }
 
                     csvWriter.write(object != null ? object.toString() : null);
@@ -140,7 +139,7 @@ public class DelimitedFormatter extends AbstractComponent {
     }
 
     private void applySettings() {
-        properties = flowStep.getComponent().toTypedProperties(this, false);
+        properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
         delimiter = properties.get(DELIMITED_FORMATTER_DELIMITER);
         quoteCharacter = properties.get(DELIMITED_FORMATTER_QUOTE_CHARACTER);
         convertAttributeSettingsToAttributeFormat();
@@ -154,7 +153,8 @@ public class DelimitedFormatter extends AbstractComponent {
             AttributeFormat format = formats.get(attributeSetting.getAttributeId());
             if (format == null) {
                 Model inputModel = flowStep.getComponent().getInputModel();
-                ModelAttribute attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
+                ModelAttribute attribute = inputModel.getAttributeById(attributeSetting
+                        .getAttributeId());
                 ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
                 format = new AttributeFormat(attributeSetting.getAttributeId(), entity, attribute);
                 formats.put(attributeSetting.getAttributeId(), format);
@@ -182,9 +182,9 @@ public class DelimitedFormatter extends AbstractComponent {
         public AttributeFormat(String attributeId, ModelEntity entity, ModelAttribute attribute) {
             this.attributeId = attributeId;
         }
-        
+
         ModelEntity entity;
-        
+
         ModelAttribute attribute;
 
         String attributeId;
@@ -212,11 +212,11 @@ public class DelimitedFormatter extends AbstractComponent {
         public void setFormatFunction(String formatFunction) {
             this.formatFunction = formatFunction;
         }
-        
+
         public ModelAttribute getAttribute() {
             return attribute;
         }
-        
+
         public ModelEntity getEntity() {
             return entity;
         }

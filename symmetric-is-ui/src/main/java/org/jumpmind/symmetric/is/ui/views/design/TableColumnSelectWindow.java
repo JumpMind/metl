@@ -175,7 +175,7 @@ public class TableColumnSelectWindow extends ResizableWindow {
 	}
 	
 	protected void addCatalogsToResource(Resource resource) {
-		DataSourceResource dataSourceResource = (DataSourceResource) context.getResourceFactory().create(resource);
+		DataSourceResource dataSourceResource = (DataSourceResource) context.getResourceFactory().create(resource, null);
 		DataSource dataSource = (DataSource) dataSourceResource.reference();
 		IDatabasePlatform platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), true);
 		for (String catalogName : platform.getDdlReader().getCatalogNames()) {

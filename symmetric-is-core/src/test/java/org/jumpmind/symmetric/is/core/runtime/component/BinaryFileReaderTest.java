@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
@@ -18,7 +20,7 @@ import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
 import org.jumpmind.symmetric.is.core.utils.TestUtils;
@@ -31,7 +33,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class BinaryFileReaderTest {
 
-    private static IResourceFactory resourceFactory;
+    private static Map<String, IResource> resources = new HashMap<String, IResource>();
     private static FlowStep readerFlowStep;
     private static final String FILE_PATH = "build/files/";
     private static final String FILE_NAME = "binary_test.bin";
@@ -39,10 +41,11 @@ public class BinaryFileReaderTest {
 
     @BeforeClass
     public static void setup() throws Exception {
-
-        resourceFactory = new ResourceFactory();
         createTestFileToRead();
         readerFlowStep = createReaderFlowStep();
+        ResourceFactory resourceFactory = new ResourceFactory();
+        Resource resource = readerFlowStep.getComponent().getResource();
+        resources.put(resource.getId(), resourceFactory.create(resource, null));
     }
 
     @After
@@ -53,15 +56,14 @@ public class BinaryFileReaderTest {
     public void testBinarytReaderFlowFromStartupMsg() throws Exception {
 
         BinaryFileReader reader = new BinaryFileReader();
-        reader.init(readerFlowStep, null);
-        reader.start(null, resourceFactory);
+        reader.init(readerFlowStep, null, resources);
+        reader.start(null);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle("test", msg, msgTarget);
 
         assertEquals(1, msgTarget.getTargetMessageCount());
-        assertArrayEquals((byte[]) msgTarget.getMessage(0).getPayload(),
-                FILE_DATA.getBytes());
+        assertArrayEquals((byte[]) msgTarget.getMessage(0).getPayload(), FILE_DATA.getBytes());
     }
 
     private static void createTestFileToRead() throws Exception {
@@ -84,9 +86,8 @@ public class BinaryFileReaderTest {
         Folder folder = TestUtils.createFolder("Test Folder");
         Flow flow = TestUtils.createFlow("TestFlow", folder);
         Setting[] settingData = createReaderSettings();
-        Component component = TestUtils.createComponent(BinaryFileReader.TYPE, false, 
-                createResource(createResourceSettings()), null, null,
-                null, null, settingData);
+        Component component = TestUtils.createComponent(BinaryFileReader.TYPE, false,
+                createResource(createResourceSettings()), null, null, null, null, settingData);
         FlowStep readerComponent = new FlowStep();
         readerComponent.setFlowId(flow.getId());
         readerComponent.setComponentId(component.getId());

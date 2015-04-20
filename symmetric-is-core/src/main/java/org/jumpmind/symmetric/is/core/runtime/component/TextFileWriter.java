@@ -16,7 +16,6 @@ import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamableResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
@@ -58,8 +57,8 @@ public class TextFileWriter extends AbstractComponent {
     String executionId;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
-        super.start(executionTracker, resourceFactory);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         applySettings();
     }
 
@@ -108,7 +107,7 @@ public class TextFileWriter extends AbstractComponent {
     }
     
     private void applySettings() {
-        properties = flowStep.getComponent().toTypedProperties(this, false);
+        properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
         relativePathAndFile = properties.get(TEXTFILEWRITER_RELATIVE_PATH);
         mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
         append = properties.is(TEXTFILEWRITER_APPEND);

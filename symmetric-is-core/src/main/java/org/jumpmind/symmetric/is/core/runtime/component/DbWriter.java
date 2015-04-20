@@ -25,7 +25,6 @@ import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
 @ComponentDefinition(
@@ -110,10 +109,10 @@ public class DbWriter extends AbstractComponent {
     Throwable error;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
-        super.start(executionTracker, resourceFactory);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         error = null;
-        TypedProperties properties = flowStep.getComponent().toTypedProperties(this, false);
+        TypedProperties properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
         replaceRows = properties.is(REPLACE);
         updateFirst = properties.is(UPDATE_FIRST);
         insertFallback = properties.is(INSERT_FALLBACK);
@@ -316,6 +315,7 @@ public class DbWriter extends AbstractComponent {
         List<TargetColumn> targetColumns = new ArrayList<TargetColumn>();
 
         public TargetTable(DmlType dmlType, ModelEntity entity, Table table) {
+            this.table = table;
             List<ModelAttribute> attributes = entity.getModelAttributes();
             String[] columnNames = table.getColumnNames();
 

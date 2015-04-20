@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.AbstractFactory;
@@ -55,13 +56,13 @@ public class ResourceFactory extends AbstractFactory<IResource> implements IReso
     }
 
     @Override
-    public IResource create(Resource resource) {
+    public IResource create(Resource resource, TypedProperties agentOverrides) {
         try {
             String resourceType = resource.getType();
             Class<? extends IResource> clazz = resourceTypes.get(resourceType);
             if (clazz != null) {
                 IResource runtime = clazz.newInstance();
-                runtime.start(resource);
+                runtime.start(this, resource, agentOverrides);
                 return runtime;
             } else {
                 throw new IllegalStateException(

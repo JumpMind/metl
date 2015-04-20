@@ -14,7 +14,6 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamableResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
@@ -54,8 +53,8 @@ public class TextFileReader extends AbstractComponent {
     String encoding = DEFAULT_CHARSET;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IResourceFactory resoureFactory) {
-        super.start(executionTracker, resoureFactory);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         applySettings();
     }
 
@@ -89,7 +88,7 @@ public class TextFileReader extends AbstractComponent {
     }
 
     private void applySettings() {
-        properties = flowStep.getComponent().toTypedProperties(this, false);
+        properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
         relativePathAndFile = properties.get(TEXTFILEREADER_RELATIVE_PATH);
         mustExist = properties.is(TEXTFILEREADER_MUST_EXIST);
         textRowsPerMessage = properties.getInt(TEXTFILEREADER_ROWS_PER_MESSAGE);

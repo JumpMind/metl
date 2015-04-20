@@ -6,10 +6,11 @@ import java.util.Map;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 
 public interface IComponentFactory {
 
-    public IComponent create(FlowStep flowStep, Flow flow);
+    public IComponent create(FlowStep flowStep, Flow flow, Map<String, IResource> resources);
 
     public void register(Class<IComponent> clazz);
 

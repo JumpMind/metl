@@ -98,6 +98,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
         stepTable.setColumnWidth("messagesReceived", 100);
         stepTable.setColumnWidth("messagesProduced", 100);
         stepTable.setColumnWidth("entitiesProcessed", 100);
+        stepTable.setColumnWidth("startTime", 100);
         stepTable.setColumnExpandRatio("endTime", 1);
         stepTable.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {

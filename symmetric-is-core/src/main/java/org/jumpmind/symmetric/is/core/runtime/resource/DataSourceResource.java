@@ -2,13 +2,12 @@ package org.jumpmind.symmetric.is.core.runtime.resource;
 
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ResettableBasicDataSource;
-import org.jumpmind.symmetric.is.core.model.Resource;
+import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
-import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 
 @ResourceDefinition(typeName=DataSourceResource.TYPE, resourceCategory=ResourceCategory.DATASOURCE)
-public class DataSourceResource extends AbstractRuntimeObject implements IResource {
+public class DataSourceResource extends AbstractResource implements IResource {
 
     public static final String TYPE = "Database";
     
@@ -82,11 +81,12 @@ public class DataSourceResource extends AbstractRuntimeObject implements IResour
     public final static String DB_RESULTSET_HOLDABILITY = "db.resultset.holdability";
 
     ResettableBasicDataSource dataSource = new ResettableBasicDataSource();
+
     
     @Override
-    public void start(Resource resource) {
-        dataSource = BasicDataSourceFactory
-                .create(resource.toTypedProperties(this, false));
+    protected void start(TypedProperties properties) {
+        this.dataSource = BasicDataSourceFactory
+                .create(properties);
     }
 
     @Override
@@ -104,5 +104,6 @@ public class DataSourceResource extends AbstractRuntimeObject implements IResour
     public <T> T reference() {
         return (T)dataSource;
     }
+    
 
 }

@@ -34,7 +34,7 @@ import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
 import org.jumpmind.symmetric.is.core.utils.DbTestUtils;
 import org.jumpmind.symmetric.is.core.utils.TestUtils;
@@ -47,16 +47,17 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class DbReaderTest {
 
-    private static IResourceFactory resourceFactory;
+    private static Map<String, IResource> resources = new HashMap<String, IResource>();
     private static IDatabasePlatform platform;
     private static FlowStep readerFlowStep;
 
     @BeforeClass
     public static void setup() throws Exception {
-
-        resourceFactory = new ResourceFactory();
         platform = createPlatformAndTestDatabase();
         readerFlowStep = createReaderFlowStep();
+        Resource resource = readerFlowStep.getComponent().getResource();
+        resources.put(resource.getId(), new ResourceFactory().create(resource, null));
+
     }
 
     @After
@@ -120,8 +121,8 @@ public class DbReaderTest {
 
         IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DbReader reader = new DbReader();
-        reader.init(readerFlowStep, null);
-        reader.start(executionTracker, resourceFactory);
+        reader.init(readerFlowStep, null, resources);
+        reader.start(executionTracker);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle("test", msg, msgTarget);
@@ -137,8 +138,8 @@ public class DbReaderTest {
 
         IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DbReader reader = new DbReader();
-        reader.init(readerFlowStep, null);
-        reader.start(executionTracker, resourceFactory);
+        reader.init(readerFlowStep, null, resources);
+        reader.start(executionTracker);
         Message message = new Message("fake step id");
         ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
         inboundPayload.add(new EntityData());

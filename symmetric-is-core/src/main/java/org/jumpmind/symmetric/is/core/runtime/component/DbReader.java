@@ -9,7 +9,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.springframework.util.StringUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
@@ -21,13 +20,13 @@ import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.MessageManipulationStrategy;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.util.StringUtils;
 
 @ComponentDefinition(typeName = DbReader.TYPE, category = ComponentCategory.READER, iconImage="dbreader.png",
         inputMessage=MessageType.NONE,
@@ -58,8 +57,8 @@ public class DbReader extends AbstractComponent {
     boolean trimColumns = false;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
-        super.start(executionTracker, resourceFactory);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         applySettings();
     }
 
@@ -235,8 +234,7 @@ public class DbReader extends AbstractComponent {
     }
 
     protected void applySettings() {
-        TypedProperties properties = flowStep.getComponent().toTypedProperties(this,
-                false);
+        TypedProperties properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
         sql = properties.get(SQL);
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         messageManipulationStrategy = MessageManipulationStrategy.valueOf(properties

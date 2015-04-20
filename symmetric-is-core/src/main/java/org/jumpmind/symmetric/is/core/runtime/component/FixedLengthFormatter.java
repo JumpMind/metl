@@ -20,7 +20,6 @@ import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 
 @ComponentDefinition(
         typeName = FixedLengthFormatter.TYPE,
@@ -45,8 +44,8 @@ public class FixedLengthFormatter extends AbstractComponent {
     List<AttributeFormat> attributesList;
 
     @Override
-    public void start(IExecutionTracker executionTracker, IResourceFactory resourceFactory) {
-        super.start(executionTracker, resourceFactory);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         applySettings();
     }
 
@@ -95,7 +94,7 @@ public class FixedLengthFormatter extends AbstractComponent {
     }
 
     private void applySettings() {
-        properties = flowStep.getComponent().toTypedProperties(this, false);
+        properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
         convertAttributeSettingsToAttributeFormat();
     }
 

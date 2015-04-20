@@ -65,7 +65,7 @@ public class StepRuntime implements Runnable {
 
     public void start(IExecutionTracker tracker, IResourceFactory resourceFactory) {
         try {
-        component.start(tracker, resourceFactory);
+            component.start(tracker);
         } catch (RuntimeException ex) {
             recordError(ex);
             throw ex;
