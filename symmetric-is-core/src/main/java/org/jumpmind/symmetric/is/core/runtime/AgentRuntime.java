@@ -225,7 +225,7 @@ public class AgentRuntime {
             Map<String, SettingDefinition> settings = resourceFactory
                     .getSettingDefinitionsForResourceType(flowResource.getType());
             TypedProperties defaultSettings = flowResource.toTypedProperties(settings);
-            TypedProperties overrideSettings = agent.toTypedProperties(flowResource, settings);
+            TypedProperties overrideSettings = agent.toTypedProperties(flowResource);
             TypedProperties combined = new TypedProperties(defaultSettings);
             combined.putAll(overrideSettings);
 

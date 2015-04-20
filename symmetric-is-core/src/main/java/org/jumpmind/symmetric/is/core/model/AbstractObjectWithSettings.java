@@ -22,7 +22,7 @@ abstract public class AbstractObjectWithSettings extends AbstractObject {
             }
         }
     }
-    
+
     public void put(String name, String value) {
         for (Setting settingData : settings) {
             if (name.equals(settingData.getName())) {
@@ -30,35 +30,34 @@ abstract public class AbstractObjectWithSettings extends AbstractObject {
                 return;
             }
         }
-        
+
         Setting settingData = createSettingData();
         settingData.setName(name);
         settingData.setValue(value);
         settings.add(settingData);
 
     }
-    
+
     @SuppressWarnings("unchecked")
     public void setSettings(List<? extends Setting> settings) {
-        this.settings = (List<Setting>)settings;
+        this.settings = (List<Setting>) settings;
     }
-    
+
     abstract protected Setting createSettingData();
-    
-    
+
     public Setting findSetting(String name) {
         for (Setting settingData : settings) {
             if (name.equals(settingData.getName())) {
                 return settingData;
             }
         }
-        
+
         Setting settingData = createSettingData();
         settingData.setName(name);
         settings.add(settingData);
         return settingData;
     }
-    
+
     public String get(String name, String defaultValue) {
         for (Setting settingData : settings) {
             if (name.equals(settingData.getName())) {
@@ -85,11 +84,11 @@ abstract public class AbstractObjectWithSettings extends AbstractObject {
             return defaultValue;
         }
     }
-    
+
     public String get(String name) {
         return get(name, null);
     }
-    
+
     public boolean getBoolean(String name, boolean defaultValue) {
         String value = get(name);
         if (isBlank(value)) {
@@ -110,7 +109,7 @@ abstract public class AbstractObjectWithSettings extends AbstractObject {
         }
         return properties;
     }
-    
+
     public List<Setting> getSettings() {
         return settings;
     }
