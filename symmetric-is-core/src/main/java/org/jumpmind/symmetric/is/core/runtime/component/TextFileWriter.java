@@ -87,13 +87,10 @@ public class TextFileWriter extends AbstractComponent {
                 }
             }
             bufferedWriter.flush();
-            if (inputMessage.getHeader().isLastMessage()) {
-                close();
-            }
         } catch (IOException e) {
             throw new IoException("Error writing to file " + e.getMessage());
         }
-    }
+    }    
 
     @Override
     public void stop() {
