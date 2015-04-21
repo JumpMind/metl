@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.builder.CompareToBuilder;
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
@@ -11,20 +12,26 @@ import org.jumpmind.symmetric.is.core.model.AgentDeploymentParameter;
 import org.jumpmind.symmetric.is.core.model.AgentDeploymentSummary;
 import org.jumpmind.symmetric.is.core.model.AgentResource;
 import org.jumpmind.symmetric.is.core.model.AgentStartMode;
+import org.jumpmind.symmetric.is.core.model.DeploymentStatus;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowParameter;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
+import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
+import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.util.AppUtils;
 
+import com.vaadin.data.Container.Sortable;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.DefaultItemSorter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
@@ -43,7 +50,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class EditAgentPanel extends VerticalLayout implements IUiPanel, AgentDeploymentChangeListener {
+public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable, AgentDeploymentChangeListener {
 
     ApplicationContext context;
 
@@ -56,17 +63,24 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, AgentDep
     BeanItemContainer<AgentDeploymentSummary> container;
 
     Button addDeploymentButton;
-    
+
+    Button enableButton;
+
+    Button disableButton;
+
     Button removeButton;
 
     Button editButton;    
 
     FlowSelectWindow flowSelectWindow;
+    
+    BackgroundRefresherService backgroundRefresherService;
 
     public EditAgentPanel(ApplicationContext context, TabbedPanel tabbedPanel, Agent agent) {
         this.context = context;
         this.tabbedPanel = tabbedPanel;
         this.agent = agent;
+        this.backgroundRefresherService = context.getBackgroundRefresherService();
         
         HorizontalLayout editAgentLayout = new HorizontalLayout();
         editAgentLayout.setSpacing(true);
@@ -131,10 +145,17 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, AgentDep
         editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
+        enableButton = buttonBar.addButton("Enable", FontAwesome.CHAIN);
+        enableButton.addClickListener(new EnableClickListener());
+
+        disableButton = buttonBar.addButton("Disable", FontAwesome.CHAIN_BROKEN);
+        disableButton.addClickListener(new DisableClickListener());
+
         removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
 
         container = new BeanItemContainer<AgentDeploymentSummary>(AgentDeploymentSummary.class);
+        container.setItemSorter(new TableItemSorter());
 
         table = new Table();
         table.setSizeFull();
@@ -149,14 +170,18 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, AgentDep
         table.setColumnHeaders("Project Name", "Deployment", "Type", "Status", "Log Level", "Start Type", "Start Expression");
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
+        table.setSortContainerPropertyId("projectName");
+        table.setSortAscending(true);
 
         addComponent(table);
         setExpandRatio(table, 1.0f);
         refresh();
+        backgroundRefresherService.register(this);
     }
 
     @Override
     public boolean closing() {
+        backgroundRefresherService.unregister(this);
         return true;
     }
 
@@ -176,42 +201,87 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, AgentDep
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object onBackgroundDataRefresh() {
+        return getRefreshData();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void onBackgroundUIRefresh(Object backgroundData) {
+        updateItems((List<AgentDeploymentSummary>) backgroundData);
+    }
+
+    protected List<AgentDeploymentSummary> getRefreshData() {
+        return context.getConfigurationService().findAgentDeploymentSummary(agent.getId());
+    }
+
     public void refresh() {
+        updateItems(getRefreshData());
+    }
+    
+    protected void updateItem(AgentDeploymentSummary summary) {
         Set<AgentDeploymentSummary> selectedItems = getSelectedItems();
-        container.removeAllItems();
-        container.addAll(context.getConfigurationService().findAgentDeploymentSummary(agent.getId()));
-
-        if (selectedItems.size() > 0) {
-            for (Object itemId : selectedItems) {
-                table.select(itemId);
-            }
-            table.focus();
-        } else if (container.size() > 0) {
-            table.select(container.firstItemId());
-            table.focus();
-        } else {
-            addDeploymentButton.focus();
-        }
-
+        container.removeItem(summary);
+        container.addItem(summary);
+        table.sort();
+        setSelectedItems(selectedItems);
         setButtonsEnabled();
     }
 
+    protected void updateItems(List<AgentDeploymentSummary> summaries) {
+        boolean isChanged = false;
+        Set<AgentDeploymentSummary> selectedItems = getSelectedItems();
+        for (AgentDeploymentSummary summary : summaries) {
+            BeanItem<AgentDeploymentSummary> beanItem = container.getItem(summary);
+            if (beanItem == null || beanItem.getBean().isChanged(summary)) {
+                container.removeItem(summary);
+                container.addItem(summary);
+                isChanged = true;
+            }
+        }
+        if (isChanged) {
+            table.sort();
+            setSelectedItems(selectedItems);
+            setButtonsEnabled();
+        }
+    }
+
     protected void setButtonsEnabled() {
-        boolean selected = getSelectedItems().size() > 0;
-        boolean removable = false;
+        boolean canRemove = false;
+        boolean canEnable = false;
+        boolean canDisable = false;
         Set<AgentDeploymentSummary> selectedIds = getSelectedItems();
         for (AgentDeploymentSummary summary : selectedIds) {
             if (summary.isFlow()) {
-                removable = true;
+                if (summary.getStatus().equals(DeploymentStatus.DEPLOYED.name()) || 
+                        summary.getStatus().equals(DeploymentStatus.DISABLED.name())) {
+                    canRemove = true;
+                }
+                if (summary.getStatus().equals(DeploymentStatus.DEPLOYED.name())) {
+                    canDisable = true;
+                }
+                if (summary.getStatus().equals(DeploymentStatus.DISABLED.name())) {
+                    canEnable = true;
+                }
             }
         }
-        removeButton.setEnabled(removable);
-        editButton.setEnabled(selected);
+        enableButton.setEnabled(canEnable);
+        disableButton.setEnabled(canDisable);
+        removeButton.setEnabled(canRemove);
+        editButton.setEnabled(getSelectedItems().size() > 0);
     }
 
     @SuppressWarnings("unchecked")
     protected Set<AgentDeploymentSummary> getSelectedItems() {
         return (Set<AgentDeploymentSummary>) table.getValue();
+    }
+
+    protected void setSelectedItems(Set<AgentDeploymentSummary> selectedItems) {
+        for (AgentDeploymentSummary summary : selectedItems) {
+            table.select(summary);
+        }
     }
 
     class AddDeploymentClickListener implements ClickListener, FlowSelectListener {
@@ -284,15 +354,46 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, AgentDep
         }
     }
 
+    class EnableClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            Set<AgentDeploymentSummary> selectedIds = getSelectedItems();
+            for (AgentDeploymentSummary summary : selectedIds) {
+                if (summary.isFlow()) {
+                    AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
+                    deployment.setStatus(DeploymentStatus.REQUEST_DEPLOY.name());
+                    summary.setStatus(DeploymentStatus.REQUEST_DEPLOY.name());
+                    context.getConfigurationService().save(deployment);
+                    updateItem(summary);
+                }
+            }
+        }
+    }
+
+    class DisableClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            Set<AgentDeploymentSummary> selectedIds = getSelectedItems();
+            for (AgentDeploymentSummary summary : selectedIds) {
+                if (summary.isFlow()) {
+                    AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
+                    deployment.setStatus(DeploymentStatus.REQUEST_DISABLE.name());
+                    summary.setStatus(DeploymentStatus.REQUEST_DISABLE.name());
+                    context.getConfigurationService().save(deployment);
+                    updateItem(summary);
+                }
+            }
+        }
+    }
+
     class RemoveClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
             Set<AgentDeploymentSummary> selectedIds = getSelectedItems();
             for (AgentDeploymentSummary summary : selectedIds) {
                 if (summary.isFlow()) {
                     AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
-                    context.getConfigurationService().delete(deployment);
-                    table.removeItem(summary);
-                    refresh();
+                    deployment.setStatus(DeploymentStatus.REQUEST_UNDEPLOY.name());
+                    summary.setStatus(DeploymentStatus.REQUEST_UNDEPLOY.name());
+                    context.getConfigurationService().save(deployment);
+                    updateItem(summary);
                 }
             }
         }
@@ -314,9 +415,29 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, AgentDep
 
     class TableValueChangeListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
-            table.setEditable(false);
             setButtonsEnabled();
         }
     }
 
+    class TableItemSorter extends DefaultItemSorter {
+        Object[] propertyId;
+        
+        boolean[] ascending;
+        
+        public void setSortProperties(Sortable container, Object[] propertyId, boolean[] ascending) {
+            super.setSortProperties(container, propertyId, ascending);
+            this.propertyId = propertyId;
+            this.ascending = ascending;
+        }
+
+        public int compare(Object o1, Object o2) {
+            AgentDeploymentSummary s1 = (AgentDeploymentSummary) o1;
+            AgentDeploymentSummary s2 = (AgentDeploymentSummary) o2;
+            if (propertyId != null && propertyId.length > 0 && propertyId[0].equals("projectName")) {
+                return new CompareToBuilder().append(s1.getProjectName(), s2.getProjectName())
+                        .append(s1.getName(), s2.getName()).toComparison() * (ascending[0] ? 1 : -1);
+            }
+            return super.compare(o1, o2);
+        }        
+    }
 }

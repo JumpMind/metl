@@ -20,7 +20,7 @@ public class AgentDeployment extends AbstractObject {
 
     String agentId;
 
-    String status = DeploymentStatus.UNKNOWN.name();
+    String status = DeploymentStatus.DISABLED.name();
 
     String message;
     
