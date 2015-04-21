@@ -164,6 +164,7 @@ public class TableColumnSelectWindow extends ResizableWindow {
 				a.setType(tableColumn.getType());
 				e.addModelAttribute(a);
 			} else if (includeAllColumns) {
+			    tree.expandItem(table);
 			    Collection<?> children = tree.getChildren(table);
 			    for (Object object : children) {
 	                TableColumn tableColumn = (TableColumn) object;
