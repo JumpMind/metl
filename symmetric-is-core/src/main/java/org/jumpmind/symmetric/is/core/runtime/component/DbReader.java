@@ -5,10 +5,12 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.jumpmind.db.sql.SqlException;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
@@ -46,15 +48,24 @@ public class DbReader extends AbstractComponent {
     @SettingDefinition(order = 20, required = true, type = Type.BOOLEAN, defaultValue = "false",
             label = "Trim Columns")
     public final static String TRIM_COLUMNS = "db.reader.trim.columns";
+    
+    @SettingDefinition(order = 20, required = true, type = Type.BOOLEAN, defaultValue = "false",
+            label = "Match On Column Name")
+    public final static String MATCH_ON_COLUMN_NAME_ONLY = "db.reader.match.on.column.name";
 
     @SettingDefinition(order = 200, type = Type.CHOICE, choices = { "REPLACE", "ENHANCE" },
             defaultValue = "REPLACE", label = "Msg Strategy")
     public final static String MESSAGE_MANIPULATION_STRATEGY = "db.reader.message.manipulation.strategy";
 
     String sql;
+    
     long rowsPerMessage;
+    
     MessageManipulationStrategy messageManipulationStrategy = MessageManipulationStrategy.REPLACE;
+    
     boolean trimColumns = false;
+    
+    boolean matchOnColumnNameOnly = false;
 
     @Override
     public void start(IExecutionTracker executionTracker) {
@@ -174,37 +185,56 @@ public class DbReader extends AbstractComponent {
                     tableName = hint;
                 }
             }
-            if (StringUtils.isEmpty(tableName)) {
-                throw new SQLException(
-                        "Table name could not be determined from metadata or hints.  Please check column and hint.  "
-                        + "Note that on some databases metadata is only returned if instructed.  "
-                        + "For example, on SQL Server if you append 'FOR BROWSE' on the end of the query metadata will be returned."
-                        + "Query column = " + i);
+            
+            if (matchOnColumnNameOnly) {
+                attributeIds.addAll(getAttributeIds(columnName));
+            } else {
+                if (StringUtils.isEmpty(tableName)) {
+                    throw new SQLException(
+                            "Table name could not be determined from metadata or hints.  Please check column and hint.  "
+                                    + "Note that on some databases metadata is only returned if instructed.  "
+                                    + "For example, on SQL Server if you append 'FOR BROWSE' on the end of the query metadata will be returned."
+                                    + "Query column = " + i);
+                }
+                String attributeId = getAttributeId(tableName, columnName);
+                attributeIds.add(attributeId);
             }
-            String attributeId = getAttributeId(tableName, columnName);
-            attributeIds.add(attributeId);
         }
         
         return attributeIds;
     }
     
-    private String getAttributeId(String tableName, String columnName)
-            throws SQLException {
-        
+    private List<String> getAttributeIds(String columnName) {
+        List<String> attributeIds = new ArrayList<String>();
+        if (this.flowStep.getComponent().getOutputModel() != null) {
+            List<ModelAttribute> attributes = this.flowStep.getComponent().getOutputModel().getAttributesByName(columnName);
+            if (attributes.size() == 0) {
+                throw new SqlException("Column not found in output model and not specified via hint.  Column Name = " + columnName);
+            } else {
+                for (ModelAttribute modelAttribute : attributes) {
+                    attributeIds.add(modelAttribute.getId());
+                }
+            }
+            return attributeIds;
+        } else {
+            throw new SqlException("No output model was specified for the db reader component.  An output model is required.");
+        }        
+    }
+    
+    private String getAttributeId(String tableName, String columnName) {        
         if (this.flowStep.getComponent().getOutputModel() != null) {
         	ModelAttribute modelAttribute = this.flowStep.getComponent().getOutputModel().getAttributeByName(tableName, columnName);
             if (modelAttribute == null) {
-                throw new SQLException("Table and Column not found in output model and not specified via hint.  "
+                throw new SqlException("Table and Column not found in output model and not specified via hint.  "
                         + "Table Name = " + tableName + " Column Name = " + columnName);
             }        
             return modelAttribute.getId();            
         } else {
-            throw new SQLException("No output model was specified for the db reader component.  An output model is required.");
+            throw new SqlException("No output model was specified for the db reader component.  An output model is required.");
         }
     }
 
     protected NamedParameterJdbcTemplate getJdbcTemplate() {
-
         return new NamedParameterJdbcTemplate((DataSource) this.resource.reference());
     }
 
@@ -240,6 +270,7 @@ public class DbReader extends AbstractComponent {
         messageManipulationStrategy = MessageManipulationStrategy.valueOf(properties
                 .get(MESSAGE_MANIPULATION_STRATEGY));
         trimColumns = properties.is(TRIM_COLUMNS);
+        matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
     }
 
     protected Map<Integer, String> getSqlColumnEntityHints(String sql) {

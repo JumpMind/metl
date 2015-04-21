@@ -122,6 +122,18 @@ public class Model extends AbstractObject {
         return null;
     }
     
+    public List<ModelAttribute> getAttributesByName(String attributeName) {
+        List<ModelAttribute> attributes = new ArrayList<ModelAttribute>();        
+        for (ModelEntity entity : modelEntities) {
+            for (ModelAttribute modelAttribute : entity.getModelAttributes()) {
+                if (modelAttribute.getName().equalsIgnoreCase(attributeName)) {
+                    attributes.add(modelAttribute);
+                }
+            }
+        }
+        return attributes;
+    }
+    
     public List<ModelEntity> getModelEntities() {
         return modelEntities;
     }
