@@ -17,6 +17,7 @@ dependencies {
     compile "javax.el:javax.el-api:3.0.0"
     compile "com.h2database:h2:$h2Version"
     compile "net.sourceforge.jtds:jtds:$jtdsVersion"
+    compile "net.sf.jt400:jt400:$jt400Version"
     compile "org.apache.httpcomponents:httpclient:$httpComponentsVersion"
     compile "org.apache.httpcomponents:httpmime:$httpComponentsVersion"
     compile "org.jumpmind.symmetric.schemaspy:schemaspy:5.0.0"
