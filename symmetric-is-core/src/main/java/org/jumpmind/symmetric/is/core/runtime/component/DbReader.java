@@ -116,14 +116,24 @@ public class DbReader extends AbstractComponent {
                     Message message = null;
                     int outputRecCount = 0;
                     
-                    while (rs.next()) {
+                    while (rs.next()) {                    	
+                        if (outputRecCount%rowsPerMessage==0 && message != null) {
+                            componentStatistics.incrementOutboundMessages();
+                            message.getHeader().setSequenceNumber(componentStatistics.getNumberOutboundMessages());
+                            messageTarget.put(message);
+                            message = null;
+                        }
+                        
                         componentStatistics.incrementNumberEntitiesProcessed();
+                        
                         if (message == null) {
                             message = createMessage(inputMessage);
                         }
+                        
                         if (outputRecCount == 0) {
                             attributeIds = getAttributeIds(meta, getSqlColumnEntityHints(sqlToExecute));
                         }
+                        
                         EntityData rowData = new EntityData();
                         for (int i = 1; i <= meta.getColumnCount(); i++) {
                             Object value = JdbcUtils.getResultSetValue(rs, i);
@@ -134,15 +144,6 @@ public class DbReader extends AbstractComponent {
                         }
                         ArrayList<EntityData> payload = message.getPayload();                        
                         payload.add(rowData);
-                        if (payload.size() >= rowsPerMessage) {
-                            componentStatistics.incrementOutboundMessages();
-                            message.getHeader().setSequenceNumber(componentStatistics.getNumberOutboundMessages());
-                            if (rs.isLast()) {
-                                message.getHeader().setLastMessage(true);
-                            }
-                            messageTarget.put(message);
-                            message = null;
-                        }
                         outputRecCount++;
                     } 
                     rs.close();
