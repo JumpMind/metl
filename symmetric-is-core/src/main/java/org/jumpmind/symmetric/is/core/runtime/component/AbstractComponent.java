@@ -30,9 +30,6 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     }
 
     public void stop() {
-        if (this.resource != null) {
-            this.resource.stop();
-        }
     }
     
     public ComponentStatistics getComponentStatistics() {
