@@ -292,10 +292,9 @@ public class AgentRuntime {
                             new FlowRunner(null, flowRuntime), new CronTrigger(cron));
                     scheduled.put(deployment, future);
                 }
-
-                deployment.setStatus(DeploymentStatus.STOPPED.name());
             }
 
+            deployment.setStatus(DeploymentStatus.DEPLOYED.name());
             deployment.setMessage("");
             log.info("Flow '{}' has been deployed", deployment.getFlow().getName());
         } catch (Exception e) {

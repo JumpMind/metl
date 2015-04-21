@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.model;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 
 public class AgentDeploymentSummary extends AbstractObject {
@@ -16,7 +17,7 @@ public class AgentDeploymentSummary extends AbstractObject {
     
     String name;
 
-    String status = DeploymentStatus.UNKNOWN.name();
+    String status = DeploymentStatus.DISABLED.name();
 
     String logLevel = LogLevel.DEBUG.name();
 
@@ -41,6 +42,11 @@ public class AgentDeploymentSummary extends AbstractObject {
         startExpression = agentDeployment.getStartExpression();
     }
 
+    public boolean isChanged(AgentDeploymentSummary o) {
+        return ! new EqualsBuilder().append(id, o.id).append(projectName, o.projectName).append(type, o.type).append(name, o.name).append(status, o.status)
+            .append(logLevel, o.logLevel).append(startType, o.startType).append(startExpression, o.startExpression).isEquals();
+    }
+        
     public boolean isFlow() {
         return type.equals(TYPE_FLOW);
     }
