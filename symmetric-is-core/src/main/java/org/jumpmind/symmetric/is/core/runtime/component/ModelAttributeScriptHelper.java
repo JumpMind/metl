@@ -110,6 +110,10 @@ public class ModelAttributeScriptHelper {
         }
     }
 
+    public String stringConstant(String value) {
+        return value;
+    }
+    
     protected Object eval() {
         return value;
     }

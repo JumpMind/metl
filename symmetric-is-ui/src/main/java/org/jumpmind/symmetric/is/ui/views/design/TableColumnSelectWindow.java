@@ -1,17 +1,21 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.jumpmind.db.model.Column;
-import org.jumpmind.db.model.Database;
-import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
+import org.jumpmind.db.sql.IConnectionCallback;
+import org.jumpmind.db.sql.JdbcSqlTemplate;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
@@ -155,17 +159,19 @@ public class TableColumnSelectWindow extends ResizableWindow {
 			if (itemId instanceof TableColumn) {
 				TableColumn tableColumn = (TableColumn) itemId;
 				ModelAttribute a = new ModelAttribute();
-				a.setName(tableColumn.getColumn().getName());
+				a.setName(tableColumn.getName());
 				a.setEntityId(e.getId());
-				a.setType(tableColumn.getColumn().getMappedType());
+				a.setType(tableColumn.getType());
 				e.addModelAttribute(a);
 			} else if (includeAllColumns) {
-			    Column[] columns = table.getColumns();
-			    for (Column column : columns) {
-			        ModelAttribute a = new ModelAttribute();
-	                a.setName(column.getName());
+			    tree.expandItem(table);
+			    Collection<?> children = tree.getChildren(table);
+			    for (Object object : children) {
+	                TableColumn tableColumn = (TableColumn) object;
+	                ModelAttribute a = new ModelAttribute();
+	                a.setName(tableColumn.getName());
 	                a.setEntityId(e.getId());
-	                a.setType(column.getMappedType());
+	                a.setType(tableColumn.getType());
 	                e.addModelAttribute(a);
                 }
 			}
@@ -192,19 +198,58 @@ public class TableColumnSelectWindow extends ResizableWindow {
 		}
     }
 
-	protected void addTablesToSchema(Schema schema) {
-		IDatabasePlatform platform = platformByItemId.get(schema);
-		Database database = platform.getDdlReader().readTables(schema.getCatalog().getName(), schema.getName(), null);
-		for (Table table : database.getTables()) {
-			addItem(table, platform, table.getName(), FontAwesome.TABLE, schema, true);
-		}
+    protected void addTablesToSchema(final Schema schema) {
+        final IDatabasePlatform platform = platformByItemId.get(schema);
+        JdbcSqlTemplate sqlTemplate = (JdbcSqlTemplate) platform.getSqlTemplate();
+        sqlTemplate.execute(new IConnectionCallback<List<String>>() {
+            public List<String> execute(Connection connection) throws SQLException {
+                DatabaseMetaData meta = connection.getMetaData();
+                ResultSet rs = null;
+                try {
+                    HashSet<String> tableTypes = new HashSet<String>();
+                    rs = meta.getTableTypes();
+                    while (rs.next()) {
+                        tableTypes.add(rs.getString(1));
+                    }
+                    rs.close();
+
+                    rs = meta.getTables(schema.getCatalog().getName(), schema.getName(), null,
+                            tableTypes.toArray(new String[tableTypes.size()]));
+                    while (rs.next()) {
+                        addItem(new Table(schema, rs.getString(3)), platform, rs.getString(3),
+                                FontAwesome.TABLE, schema, true);
+                    }
+                } finally {
+                    if (rs != null) {
+                        rs.close();
+                    }
+                }
+                return null;
+            }
+        });
     }
 
-	protected void addColumnsToTable(Table table) {
-		IDatabasePlatform platform = platformByItemId.get(table);
-		for (Column column : table.getColumns()) {
-			addItem(new TableColumn(table, column), platform, column.getName(), FontAwesome.COLUMNS, table, false);
-		}
+	protected void addColumnsToTable(final Table table) {
+        final IDatabasePlatform platform = platformByItemId.get(table);
+        JdbcSqlTemplate sqlTemplate = (JdbcSqlTemplate) platform.getSqlTemplate();
+        sqlTemplate.execute(new IConnectionCallback<List<String>>() {
+            public List<String> execute(Connection connection) throws SQLException {
+                DatabaseMetaData meta = connection.getMetaData();
+                ResultSet rs = null;
+                try {
+                    rs = meta.getColumns(table.getSchema().getCatalog().getName(), table.getSchema().getName(), table.getName(), null);
+                    while (rs.next()) {
+                        addItem(new TableColumn(table, rs.getString(4), rs.getString(6)), platform, rs.getString(4),
+                                FontAwesome.COLUMNS, table, true);
+                    }
+                } finally {
+                    if (rs != null) {
+                        rs.close();
+                    }
+                }
+                return null;
+            }
+        });
     }
 
 	@SuppressWarnings("unchecked")
@@ -265,26 +310,55 @@ public class TableColumnSelectWindow extends ResizableWindow {
 		}
 	}
 	
+	class Table {
+	    
+	    Schema schema;
+	    String name;
+	    
+        public Table(Schema schema, String name) {
+            super();
+            this.schema = schema;
+            this.name = name;
+        }
+        
+        public String getName() {
+            return name;
+        }
+        
+        public Schema getSchema() {
+            return schema;
+        }
+
+	}
+	
 	class TableColumn {
-		Column column;
+	    
+	    String type;
+	    
+		String name;
 		
 		Table table;
 		
-		TableColumn(Table table, Column column) {
+		TableColumn(Table table, String name, String type) {
 			this.table = table;
-			this.column = column;
+			this.name = name;
+			this.type = type;
 		}
 		
 		public Table getTable() {
 			return table;
 		}
 		
-		public Column getColumn() {
-			return column;
-		}
+		public String getName() {
+            return name;
+        }
+		
+		public String getType() {
+            return type;
+        }
 		
 	    public int hashCode() {
-	        return table.hashCode() + column.hashCode();
+	        return table.hashCode() + name.hashCode() + type.hashCode();
 	    }
 
 	    public boolean equals(Object obj) {
