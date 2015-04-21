@@ -107,17 +107,31 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
     @Override
     public void deselected() {
     }
+    
+    protected void autoMap(boolean fuzzy) {
+        for (ModelEntity entity : component.getInputModel().getModelEntities()) {
+            for (ModelAttribute attr : entity.getModelAttributes()) {
+                for (ModelEntity entity2 : component.getOutputModel().getModelEntities()) {
+                    for (ModelAttribute attr2 : entity2.getModelAttributes()) {
+                        autoMap(attr, attr2, fuzzy);
+                    }
+                }
+            }
+        }
+    }
 
-	protected void autoMap(ModelAttribute attr, ModelAttribute attr2) {
+	protected void autoMap(ModelAttribute attr, ModelAttribute attr2, boolean fuzzy) {
 		boolean isMapped = false;
 		for (ComponentAttributeSetting setting : component.getAttributeSettings()) {
-			if (setting.getName().equals(MappingProcessor.ATTRIBUTE_MAPS_TO) &&
+			if (setting.getName().equals(MappingProcessor.ATTRIBUTE_MAPS_TO) && 
 					setting.getValue().equals(attr2.getId())) {
 				isMapped = true;
 				break;
 			}
 		}
-		if (!isMapped && fuzzyMatches(attr.getName(), attr2.getName())) {
+		if (!isMapped && (
+		        (fuzzy && fuzzyMatches(attr.getName(), attr2.getName())) || 
+		        attr.getName().equalsIgnoreCase(attr2.getName()))) {
 			ComponentAttributeSetting setting = new ComponentAttributeSetting();
 			setting.setAttributeId(attr.getId());
 			setting.setComponentId(component.getId());
@@ -176,15 +190,8 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 
 	class AutoMapListener implements ClickListener {
 		public void buttonClick(ClickEvent event) {
-			for (ModelEntity entity : component.getInputModel().getModelEntities()) {
-				for (ModelAttribute attr : entity.getModelAttributes()) {
-					for (ModelEntity entity2 : component.getOutputModel().getModelEntities()) {
-						for (ModelAttribute attr2 : entity2.getModelAttributes()) {
-							autoMap(attr, attr2);
-						}
-					}
-				}
-			}
+			autoMap(false);
+			autoMap(true);
 		}
 	}
 	
