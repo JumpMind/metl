@@ -132,11 +132,11 @@ public class ExploreView extends VerticalLayout implements View {
         
         public void refresh() {
             for (IDb db : dbs) {
-                BasicDataSource ds = db.getPlatform().getDataSource();
-                try {
-                    ds.close();
-                } catch (SQLException e) {
-                }
+				try {
+					BasicDataSource ds = db.getPlatform().getDataSource();
+					ds.close();
+				} catch (SQLException e) {
+				}
             }
 
             dbs.clear();
