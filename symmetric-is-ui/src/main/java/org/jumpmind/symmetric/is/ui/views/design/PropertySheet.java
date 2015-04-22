@@ -356,7 +356,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                 editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
                 editor.setTextChangeTimeout(200);
                 editor.setMode(AceMode.java);
-                editor.setHeight(5, Unit.EM);
+                editor.setHeight(10, Unit.EM);
                 editor.setCaption(definition.label());
                 editor.setShowGutter(false);
                 editor.setShowPrintMargin(false);

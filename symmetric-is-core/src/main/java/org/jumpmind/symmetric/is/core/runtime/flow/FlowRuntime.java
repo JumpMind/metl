@@ -15,6 +15,7 @@ import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
+import org.jumpmind.symmetric.is.core.runtime.component.AbstractComponent;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentStatistics;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
@@ -67,8 +68,11 @@ public class FlowRuntime {
 
         /* create a step runtime for every component in the flow */
         for (FlowStep flowStep : steps) {
-            StepRuntime stepRuntime = new StepRuntime(executionId, componentFactory.create(flowStep, flow, resources), executionTracker);
-            stepRuntimes.put(flowStep.getId(), stepRuntime);
+            boolean enabled = flowStep.getComponent().getBoolean(AbstractComponent.ENABLED, true);
+            if (enabled) {
+                StepRuntime stepRuntime = new StepRuntime(executionId, componentFactory.create(flowStep, flow, resources), executionTracker);
+                stepRuntimes.put(flowStep.getId(), stepRuntime);
+            }
         }
 
         List<FlowStepLink> links = flow.getFlowStepLinks();
@@ -87,8 +91,10 @@ public class FlowRuntime {
                 }
             }
             StepRuntime runtime = stepRuntimes.get(stepId);
-            runtime.setTargetStepRuntimes(targetStepRuntimes);
-            runtime.setSourceStepRuntimes(sourceStepRuntimes);
+            if (runtime != null) {
+                runtime.setTargetStepRuntimes(targetStepRuntimes);
+                runtime.setSourceStepRuntimes(sourceStepRuntimes);
+            }
         }
 
         List<StepRuntime> startSteps = findStartSteps();

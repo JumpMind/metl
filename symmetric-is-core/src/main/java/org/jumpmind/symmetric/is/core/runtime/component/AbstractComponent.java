@@ -17,6 +17,9 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     @SettingDefinition(order = 100, required = false, type = Type.INTEGER, defaultValue = "10000", label = "Inbound Queue Capacity")
     public final static String INBOUND_QUEUE_CAPACITY = "inbound.queue.capacity";
     
+    @SettingDefinition(order = 0, required = false, type = Type.BOOLEAN, defaultValue = "true", label = "Enabled")
+    public final static String ENABLED = "enabled";
+    
     protected Flow flow;
     protected FlowStep flowStep; 
     protected Map<String, IResource> resources;
@@ -24,6 +27,7 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     protected IExecutionTracker executionTracker;
     protected ComponentStatistics componentStatistics;
     protected String executionId;
+    protected boolean enabled = true;
 
     @Override
     public void start(String executionId, IExecutionTracker executionTracker) {
