@@ -51,8 +51,8 @@ public class Multiplier extends AbstractComponent {
     List<Message> queuedWhileWaitingForMultiplier = new ArrayList<Message>();
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start(String executionId, IExecutionTracker executionTracker) {
+        super.start(executionId, executionTracker);
 
         multipliersInitialized = false;
 
@@ -65,7 +65,7 @@ public class Multiplier extends AbstractComponent {
     }
 
     @Override
-    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
+    public void handle( Message inputMessage, IMessageTarget messageTarget) {
         componentStatistics.incrementInboundMessages();
 
         if (inputMessage.getHeader().getOriginatingStepId().equals(sourceStepId)) {

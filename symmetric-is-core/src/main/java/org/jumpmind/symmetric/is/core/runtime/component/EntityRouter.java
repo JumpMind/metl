@@ -73,15 +73,15 @@ public class EntityRouter extends AbstractComponent {
     }
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start(String executionId, IExecutionTracker executionTracker) {
+        super.start(executionId, executionTracker);
         ScriptEngineManager factory = new ScriptEngineManager();
         scriptEngine = factory.getEngineByName("groovy");
         applySettings();
     }
 
     @Override
-    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
+    public void handle( Message inputMessage, IMessageTarget messageTarget) {
         componentStatistics.incrementInboundMessages();
         Map<String, Message> outboundMessages = new HashMap<String, Message>();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();

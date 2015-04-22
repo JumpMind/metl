@@ -55,6 +55,10 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             if (ExecutionStatus.ERROR.name().equals(executionStep.getStatus())) {
                 status = ExecutionStatus.ERROR;
             }
+            
+            if (ExecutionStatus.CANCELLED.name().equals(executionStep.getStatus())) {
+                status = ExecutionStatus.CANCELLED;
+            }
         }        
         execution.setStatus(status.name());
         execution.setLastUpdateTime(new Date());
@@ -105,11 +109,18 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
     
     @Override
-    public void flowStepFinished(String executionId, IComponent component, Throwable error) {
-        super.flowStepFinished(executionId, component, error);
+    public void flowStepFinished(String executionId, IComponent component, Throwable error, boolean cancelled) {
+        super.flowStepFinished(executionId, component, error, cancelled);
         ExecutionStep step = steps.get(component.getFlowStep().getId());
         step.setEndTime(new Date());
-        step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.DONE.name());
+        ExecutionStatus status = ExecutionStatus.DONE;
+        if (error != null) {
+            status = ExecutionStatus.ERROR;
+        }
+        if (cancelled) {
+            status = ExecutionStatus.CANCELLED;
+        }
+        step.setStatus(status.name());
         if (component.getComponentStatistics() != null) {
             step.setMessagesReceived(component.getComponentStatistics().getNumberInboundMessages());
             step.setMessagesProduced(component.getComponentStatistics().getNumberOutboundMessages());

@@ -68,13 +68,13 @@ public class DbReader extends AbstractComponent {
     boolean matchOnColumnNameOnly = false;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start(String executionId, IExecutionTracker executionTracker) {
+        super.start(executionId, executionTracker);
         applySettings();
     }
 
     @Override
-    public void handle(String executionId, final Message inputMessage, final IMessageTarget messageTarget) {
+    public void handle( final Message inputMessage, final IMessageTarget messageTarget) {
 
         componentStatistics.incrementInboundMessages();
         

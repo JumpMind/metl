@@ -44,13 +44,13 @@ public class FixedLengthFormatter extends AbstractComponent {
     List<AttributeFormat> attributesList;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start(String executionId, IExecutionTracker executionTracker) {
+        super.start(executionId, executionTracker);
         applySettings();
     }
 
     @Override
-    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
+    public void handle( Message inputMessage, IMessageTarget messageTarget) {
 
         if (attributesList == null || attributesList.size() == 0) {
             throw new IllegalStateException(

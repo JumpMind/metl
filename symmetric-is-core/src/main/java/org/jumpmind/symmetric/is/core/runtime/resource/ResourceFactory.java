@@ -49,6 +49,14 @@ public class ResourceFactory extends AbstractFactory<IResource> implements IReso
                 categoryToTypeMapping.put(definition.resourceCategory(), types);
             }
             types.add(definition.typeName());
+            
+            types = categoryToTypeMapping.get(ResourceCategory.ANY);
+            if (types == null) {
+                types = new ArrayList<String>();
+                categoryToTypeMapping.put(ResourceCategory.ANY, types);
+            }
+            types.add(definition.typeName());
+            
         } else {
             throw new IllegalStateException("A resource is required to define the "
                     + ResourceDefinition.class.getName() + " annotation");

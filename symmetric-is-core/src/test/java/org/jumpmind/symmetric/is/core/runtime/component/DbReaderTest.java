@@ -122,10 +122,10 @@ public class DbReaderTest {
         IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DbReader reader = new DbReader();
         reader.init(readerFlowStep, null, resources);
-        reader.start(executionTracker);
+        reader.start("test", executionTracker);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
-        reader.handle("test", msg, msgTarget);
+        reader.handle( msg, msgTarget);
 
         assertEquals(2, msgTarget.getTargetMessageCount());
         ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
@@ -139,14 +139,14 @@ public class DbReaderTest {
         IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DbReader reader = new DbReader();
         reader.init(readerFlowStep, null, resources);
-        reader.start(executionTracker);
+        reader.start("test", executionTracker);
         Message message = new Message("fake step id");
         ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
         inboundPayload.add(new EntityData());
         message.setPayload(inboundPayload);
         
         MessageTarget msgTarget = new MessageTarget();
-        reader.handle("test", message, msgTarget);
+        reader.handle(message, msgTarget);
 
         assertEquals(2, msgTarget.getTargetMessageCount());
         ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();

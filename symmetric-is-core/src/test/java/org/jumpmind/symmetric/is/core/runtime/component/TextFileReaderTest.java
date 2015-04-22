@@ -54,10 +54,10 @@ public class TextFileReaderTest {
 
         TextFileReader reader = new TextFileReader();
         reader.init(readerFlow, null, resources);
-        reader.start(null);
+        reader.start("test", null);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
-        reader.handle("test", msg, msgTarget);
+        reader.handle(msg, msgTarget);
 
         assertEquals(4, msgTarget.getTargetMessageCount());
         ArrayList<String> payload;
@@ -77,10 +77,10 @@ public class TextFileReaderTest {
 
         TextFileReader reader = new TextFileReader();
         reader.init(readerFlow, null, resources);
-        reader.start(null);
+        reader.start("test", null);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
-        reader.handle("test", msg, msgTarget);
+        reader.handle(msg, msgTarget);
 
         assertEquals(4, msgTarget.getTargetMessageCount());
         ArrayList<String> payload;

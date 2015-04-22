@@ -26,6 +26,8 @@ public class StepRuntime implements Runnable {
     protected BlockingQueue<Message> inQueue;
 
     boolean running = true;
+    
+    boolean cancelled = false;
 
     Throwable error;
 
@@ -65,7 +67,8 @@ public class StepRuntime implements Runnable {
 
     public void start(IExecutionTracker tracker, IResourceFactory resourceFactory) {
         try {
-            component.start(tracker);
+            executionTracker.flowStepStarted(executionId, component);
+            component.start(executionId, tracker);
         } catch (RuntimeException ex) {
             recordError(ex);
             throw ex;
@@ -93,10 +96,13 @@ public class StepRuntime implements Runnable {
              * runtime to kick things off. If we have input links, we must loop
              * until we get a shutdown message from one of our sources
              */
-            executionTracker.flowStepStarted(executionId, component);
             while (running) {                
                 Message inputMessage = inQueue.take();
                 if (inputMessage instanceof ShutdownMessage) {
+                    ShutdownMessage shutdownMessage = (ShutdownMessage)inputMessage;
+                    
+                    cancelled = shutdownMessage.isCancelled();
+                    
                     String fromStepId = inputMessage.getHeader().getOriginatingStepId();
                     removeSourceStepRuntime(fromStepId);
                     /*
@@ -104,7 +110,7 @@ public class StepRuntime implements Runnable {
                      * when the shutdown message comes from myself, then go
                      * ahead and shutdown
                      */
-                    if (fromStepId == null || sourceStepRuntimes == null
+                    if (cancelled || fromStepId == null || sourceStepRuntimes == null
                             || sourceStepRuntimes.size() == 0
                             || fromStepId.equals(component.getFlowStep().getId())) {
                         shutdown();
@@ -112,7 +118,7 @@ public class StepRuntime implements Runnable {
                 } else {
                     try {
                         executionTracker.beforeHandle(executionId, component);
-                        component.handle(executionId, inputMessage, target);
+                        component.handle(inputMessage, target);
                     } catch (Exception ex) {
                         recordError(ex);
                     } finally {
@@ -149,7 +155,7 @@ public class StepRuntime implements Runnable {
         }
         this.component.stop();
         running = false;
-        executionTracker.flowStepFinished(executionId, component, error);
+        executionTracker.flowStepFinished(executionId, component, error, cancelled);
     }
 
     public boolean isRunning() {

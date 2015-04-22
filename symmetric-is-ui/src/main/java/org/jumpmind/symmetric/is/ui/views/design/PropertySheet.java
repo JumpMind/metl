@@ -24,15 +24,21 @@ import org.jumpmind.symmetric.is.core.runtime.component.MessageType;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
+import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdatePasswordField;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextArea;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vaadin.aceeditor.AceEditor;
+import org.vaadin.aceeditor.AceMode;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
@@ -115,7 +121,8 @@ public class PropertySheet extends Panel implements ValueChangeListener {
             FlowStep step = (FlowStep) value;
             Flow flow = configurationService.findFlow(step.getFlowId());
             String projectVersionId = flow.getProjectVersionId();
-            if (componentDefintion.outgoingMessage() == MessageType.ENTITY
+            if ((componentDefintion.outgoingMessage() == MessageType.ENTITY || componentDefintion
+                    .outgoingMessage() == MessageType.ANY)
                     && !componentDefintion.inputOutputModelsMatch()) {
                 final AbstractSelect combo = new ComboBox("Output Model");
                 combo.setImmediate(true);
@@ -165,7 +172,8 @@ public class PropertySheet extends Panel implements ValueChangeListener {
             FlowStep step = (FlowStep) value;
             Flow flow = configurationService.findFlow(step.getFlowId());
             String projectVersionId = flow.getProjectVersionId();
-            if (componentDefintion.inputMessage() == MessageType.ENTITY) {
+            if (componentDefintion.inputMessage() == MessageType.ENTITY
+                    || componentDefintion.outgoingMessage() == MessageType.ANY) {
                 final AbstractSelect combo = new ComboBox("Input Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
@@ -361,6 +369,26 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                     formLayout.addComponent(sourceStepsCombo);
                 }
                 break;
+            case SCRIPT:
+                final AceEditor editor = CommonUiUtils.createAceEditor();
+                editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
+                editor.setTextChangeTimeout(200);
+                editor.setMode(AceMode.java);
+                editor.setHeight(5, Unit.EM);
+                editor.setCaption(definition.label());
+                editor.setShowGutter(false);
+                editor.setShowPrintMargin(false);
+                editor.setValue(obj.get(key, definition.defaultValue()));
+                editor.addTextChangeListener(new TextChangeListener() {                    
+                    @Override
+                    public void textChange(TextChangeEvent event) {                        
+                        Setting data = obj.findSetting(key);
+                        data.setValue(event.getText());
+                        configurationService.save(data);
+                    }
+                });
+                formLayout.addComponent(editor);
+                break;
             case TEXT:
             case XML:
                 ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(definition.label()) {
@@ -371,7 +399,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                     };
                 };
                 area.setValue(obj.get(key, definition.defaultValue()));
-                area.setRows(4);
+                area.setRows(5);
                 area.setRequired(required);
                 area.setDescription(description);
                 formLayout.addComponent(area);

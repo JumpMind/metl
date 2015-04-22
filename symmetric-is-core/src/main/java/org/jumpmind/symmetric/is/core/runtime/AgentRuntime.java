@@ -70,7 +70,7 @@ public class AgentRuntime {
 
     ThreadPoolTaskScheduler flowExecutionScheduler;
 
-    ScheduledFuture<AgentWatchdogRunner> watchdogScheduled;
+    ScheduledFuture<AgentRequestHandler> agentRequestHandler;
 
     AsyncRecorder recorder;
 
@@ -131,7 +131,7 @@ public class AgentRuntime {
                 deploy(deployment);
             }
 
-            this.flowExecutionScheduler.scheduleWithFixedDelay(new AgentWatchdogRunner(), 1000);
+            this.flowExecutionScheduler.scheduleWithFixedDelay(new AgentRequestHandler(), 10000);
 
             agent.setAgentStatus(AgentStatus.RUNNING);
             configurationService.save(agent);
@@ -146,7 +146,7 @@ public class AgentRuntime {
         if (started && !stopping) {
             stopping = true;
 
-            watchdogScheduled.cancel(true);
+            agentRequestHandler.cancel(true);
 
             List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(
                     agent.getAgentDeployments());
@@ -186,7 +186,7 @@ public class AgentRuntime {
         return started;
     }
 
-    public AgentDeployment deploy(Flow flow, Map<String, String> parameters) {
+    public synchronized AgentDeployment deploy(Flow flow, Map<String, String> parameters) {
         AgentDeployment deployment = agent.getAgentDeploymentFor(flow);
         if (deployment == null) {
             deployment = new AgentDeployment(flow);
@@ -266,43 +266,45 @@ public class AgentRuntime {
     }
 
     private void deploy(final AgentDeployment deployment) {
-        try {
-            log.info("Deploying '{}' to '{}'", deployment.getFlow().toString(), agent.getName());
-
-            configurationService.refresh(deployment.getFlow());
-            
-            deployResources(deployment.getFlow());
-
-            FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory,
-                    resourceFactory, new ExecutionTrackerRecorder(agent, deployment, recorder),
-                    flowStepsExecutionThreads);
-            coordinators.put(deployment, flowRuntime);
-
-            if (deployment.asStartType() == StartType.ON_DEPLOY) {
-                scheduleNow(deployment);
-            } else {
-                if (deployment.asStartType() == StartType.SCHEDULED_CRON) {
+        DeploymentStatus status = deployment.getDeploymentStatus();
+        if (!status.equals(DeploymentStatus.DISABLED) && !status.equals(DeploymentStatus.REQUEST_DISABLE) &&
+                !status.equals(DeploymentStatus.REQUEST_UNDEPLOY)) {
+            try {
+                log.info("Deploying '{}' to '{}'", deployment.getFlow().toString(), agent.getName());
+    
+                configurationService.refresh(deployment.getFlow());
+                
+                deployResources(deployment.getFlow());
+    
+                FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory,
+                        resourceFactory, new ExecutionTrackerRecorder(agent, deployment, recorder),
+                        flowStepsExecutionThreads);
+                coordinators.put(deployment, flowRuntime);
+    
+                if (deployment.asStartType() == StartType.ON_DEPLOY) {
+                    scheduleNow(deployment);
+                } else if (deployment.asStartType() == StartType.SCHEDULED_CRON) {
                     String cron = deployment.getStartExpression();
                     log.info(
                             "Scheduling '{}' on '{}' with a cron expression of '{}'  The next run time should be at: {}",
                             new Object[] { deployment.getFlow().toString(), agent.getName(), cron,
                                     new CronSequenceGenerator(cron).next(new Date()) });
-
+    
                     ScheduledFuture<?> future = this.flowExecutionScheduler.schedule(
                             new FlowRunner(null, flowRuntime), new CronTrigger(cron));
                     scheduled.put(deployment, future);
                 }
+    
+                deployment.setStatus(DeploymentStatus.DEPLOYED.name());
+                deployment.setMessage("");
+                log.info("Flow '{}' has been deployed", deployment.getFlow().getName());
+            } catch (Exception e) {
+                log.warn("Failed to start '{}'", deployment.getFlow().getName(), e);
+                deployment.setStatus(DeploymentStatus.ERROR.name());
+                deployment.setMessage(ExceptionUtils.getRootCauseMessage(e));
             }
-
-            deployment.setStatus(DeploymentStatus.DEPLOYED.name());
-            deployment.setMessage("");
-            log.info("Flow '{}' has been deployed", deployment.getFlow().getName());
-        } catch (Exception e) {
-            log.warn("Failed to start '{}'", deployment.getFlow().getName(), e);
-            deployment.setStatus(DeploymentStatus.ERROR.name());
-            deployment.setMessage(ExceptionUtils.getRootCauseMessage(e));
+            configurationService.save(deployment);
         }
-        configurationService.save(deployment);
     }
 
     public String scheduleNow(AgentDeployment deployment) {
@@ -323,8 +325,6 @@ public class AgentRuntime {
     }
 
     protected void stop(AgentDeployment deployment) {
-        agent.getAgentDeployments().remove(deployment);
-
         ScheduledFuture<?> future = scheduled.get(deployment);
         if (future != null) {
             future.cancel(true);
@@ -342,9 +342,10 @@ public class AgentRuntime {
         }
     }
 
-    public void undeploy(AgentDeployment deployment) {
+    public synchronized void undeploy(AgentDeployment deployment) {
         stop(deployment);
         configurationService.delete(deployment);
+        agent.getAgentDeployments().remove(deployment);
     }
 
     protected FlowRuntime getFlowCoordinator(AgentDeployment deployment) {
@@ -383,9 +384,24 @@ public class AgentRuntime {
         }
     }
 
-    class AgentWatchdogRunner implements Runnable {
+    class AgentRequestHandler implements Runnable {
         @Override
         public void run() {
+            synchronized (AgentRuntime.this) {
+                configurationService.refresh(agent);
+                for (AgentDeployment deployment : agent.getAgentDeployments()) {
+                    DeploymentStatus status = deployment.getDeploymentStatus();
+                    if (status.equals(DeploymentStatus.REQUEST_DEPLOY)) {
+                        deploy(deployment);
+                    } else if (status.equals(DeploymentStatus.REQUEST_UNDEPLOY)) {
+                        undeploy(deployment);
+                    } else if (status.equals(DeploymentStatus.REQUEST_DISABLE)) {
+                        stop(deployment);
+                        deployment.setStatus(DeploymentStatus.DISABLED.name());
+                        configurationService.save(deployment);
+                    }
+                }
+            }
         }
     }
 

@@ -61,7 +61,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     }
     
     @Override
-    public void flowStepFinished(String executionId, IComponent component, Throwable error) {
+    public void flowStepFinished(String executionId, IComponent component, Throwable error, boolean cancelled) {
         FlowStep flowStep = component.getFlowStep();
         String msg = String.format(
                 "step completed for execution: %s,  for deployment: %s,  component: %s:%s",

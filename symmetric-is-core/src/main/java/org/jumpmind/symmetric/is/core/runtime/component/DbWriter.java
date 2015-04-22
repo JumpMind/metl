@@ -109,8 +109,8 @@ public class DbWriter extends AbstractComponent {
     Throwable error;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start(String executionId, IExecutionTracker executionTracker) {
+        super.start(executionId, executionTracker);
         error = null;
         TypedProperties properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
         replaceRows = properties.is(REPLACE);
@@ -139,7 +139,7 @@ public class DbWriter extends AbstractComponent {
     }
 
     @Override
-    public void handle(String executionId, final Message inputMessage,
+    public void handle( final Message inputMessage,
             final IMessageTarget messageTarget) {
 
         componentStatistics.incrementInboundMessages();

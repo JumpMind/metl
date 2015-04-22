@@ -14,9 +14,9 @@ public interface IComponent {
 
     public void init(FlowStep flowStep, Flow flow, Map<String, IResource> resources);
     
-    public void start(IExecutionTracker tracker);
+    public void start(String executionId, IExecutionTracker tracker);
 
-    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget);
+    public void handle(Message inputMessage, IMessageTarget messageTarget);
     
     public void flowCompletedWithoutError();
     
@@ -26,6 +26,14 @@ public interface IComponent {
     
     public ComponentStatistics getComponentStatistics();
 
-    public FlowStep getFlowStep();    
+    public FlowStep getFlowStep(); 
+    
+    public Flow getFlow();
+    
+    public IExecutionTracker getExecutionTracker();
+    
+    public IResource getResource();
+    
+    public String getExecutionId();
 
 }
