@@ -24,16 +24,16 @@ public class ScriptExecutor extends AbstractComponent {
 
 	public static final String TYPE = "Script";
 
-	@SettingDefinition(order = 5, required = true, type = Type.TEXT, label = "Import Statements")
+	@SettingDefinition(order = 5, required = true, type = Type.SCRIPT, label = "Import Statements")
 	public final static String IMPORTS = "imports";
 
-	@SettingDefinition(order = 10, required = true, type = Type.TEXT, label = "Init Script")
+	@SettingDefinition(order = 10, required = true, type = Type.SCRIPT, label = "Init Script")
 	public final static String INIT_SCRIPT = "init.script";
 
-	@SettingDefinition(order = 15, required = true, type = Type.TEXT, label = "Handle Msg Script")
+	@SettingDefinition(order = 15, required = true, type = Type.SCRIPT, label = "Handle Msg Script")
 	public final static String HANDLE_SCRIPT = "handle.msg.script";
 
-	@SettingDefinition(order = 20, required = true, type = Type.TEXT, label = "On Complete Script")
+	@SettingDefinition(order = 20, required = true, type = Type.SCRIPT, label = "On Complete Script")
 	public final static String ON_FLOW_COMPLETE = "on.flow.complete.script";
 
 	public static String TRANSFORM_EXPRESSION = "transform.expression";
