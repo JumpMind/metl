@@ -214,10 +214,8 @@ public class DbWriter extends AbstractComponent {
                             if (modelTable.shouldProcess(inputRow)) {
                                 log.debug("Falling back to insert");
                                 data = getValues(false, modelTable, inputRow);
-                                int endIndex = data.size()
-                                        - modelTable.getKeyTargetColumns().size();
                                 count = execute(transaction, modelTable.getStatement(),
-                                        new Object(), data.subList(0, endIndex));
+                                        new Object(), data);
                                 componentStatistics.incrementNumberEntitiesProcessed(count);
                             }
                         }
