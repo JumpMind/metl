@@ -42,13 +42,13 @@ public class BinaryFileReader extends AbstractComponent {
     InputStream inStream = null;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start(String executionId, IExecutionTracker executionTracker) {
+        super.start(executionId, executionTracker);
         applySettings();
     }
 
     @Override
-    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
+    public void handle( Message inputMessage, IMessageTarget messageTarget) {
         int numberMessages = 0;
         ByteBuffer buffer = ByteBuffer.allocate(sizePerMessage * 1024);
         open();

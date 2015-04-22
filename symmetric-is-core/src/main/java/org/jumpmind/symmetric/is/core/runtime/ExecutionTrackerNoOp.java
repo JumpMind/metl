@@ -5,15 +5,16 @@ import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
 public class ExecutionTrackerNoOp implements IExecutionTracker {
 
     @Override
-    public void beforeHandle(String executionId, IComponent component) {
-    }
-
-    @Override
     public void afterHandle(String executionId, IComponent component, Throwable error) {
     }
 
     @Override
-    public void flowStepFinished(String executionId, IComponent component, Throwable error) {
+    public void beforeHandle(String executionId, IComponent component) {
+    }
+
+    @Override
+    public void flowStepFinished(String executionId, IComponent component, Throwable error,
+            boolean cancelled) {
     }
 
     @Override

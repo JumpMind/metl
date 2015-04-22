@@ -10,7 +10,7 @@ public interface IExecutionTracker {
     
     public void afterHandle(String executionId, IComponent component, Throwable error);
     
-    public void flowStepFinished(String executionId, IComponent component, Throwable error);
+    public void flowStepFinished(String executionId, IComponent component, Throwable error, boolean cancelled);
     
     public void beforeFlow(String executionId);
     

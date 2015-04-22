@@ -51,8 +51,8 @@ public class TextFileWriterTest {
     public void testTextWriterMultipleRowsPerMessage() throws Exception {
         TextFileWriter writer = new TextFileWriter();
         writer.init(writerFlowStep, null, resources);
-        writer.start(new ExecutionTrackerNoOp());
-        writer.handle("test", createMultipleRowTextMessageToWrite(), null);
+        writer.start("test", new ExecutionTrackerNoOp());
+        writer.handle(createMultipleRowTextMessageToWrite(), null);
         checkTextFile();
     }
 
@@ -60,11 +60,11 @@ public class TextFileWriterTest {
     public void testTextWriterSingleRowPerMessage() throws Exception {
         TextFileWriter writer = new TextFileWriter();
         writer.init(writerFlowStep, null, resources);
-        writer.start(new ExecutionTrackerNoOp());
-        writer.handle("test", createSingleRowTextMessageToWrite(1, false), null);
-        writer.handle("test", createSingleRowTextMessageToWrite(2, false), null);
-        writer.handle("test", createSingleRowTextMessageToWrite(3, false), null);
-        writer.handle("test", createSingleRowTextMessageToWrite(4, true), null);
+        writer.start("test", new ExecutionTrackerNoOp());
+        writer.handle(createSingleRowTextMessageToWrite(1, false), null);
+        writer.handle(createSingleRowTextMessageToWrite(2, false), null);
+        writer.handle(createSingleRowTextMessageToWrite(3, false), null);
+        writer.handle(createSingleRowTextMessageToWrite(4, true), null);
         checkTextFile();
     }
 

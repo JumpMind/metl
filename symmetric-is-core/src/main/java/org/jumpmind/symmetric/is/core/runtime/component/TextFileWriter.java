@@ -57,13 +57,13 @@ public class TextFileWriter extends AbstractComponent {
     String executionId;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start(String executionId, IExecutionTracker executionTracker) {
+        super.start(executionId, executionTracker);
         applySettings();
     }
 
     @Override
-    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
+    public void handle( Message inputMessage, IMessageTarget messageTarget) {
         this.executionId = executionId;
 
         componentStatistics.incrementInboundMessages();

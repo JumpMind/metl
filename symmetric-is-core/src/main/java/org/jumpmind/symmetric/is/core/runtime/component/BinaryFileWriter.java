@@ -44,13 +44,13 @@ public class BinaryFileWriter extends AbstractComponent {
     OutputStream outStream;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start(String executionId, IExecutionTracker executionTracker) {
+        super.start(executionId, executionTracker);
         applySettings();
     }
 
     @Override
-    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
+    public void handle( Message inputMessage, IMessageTarget messageTarget) {
         byte[] payload = (byte[]) inputMessage.getPayload();
         if (inputMessage.getHeader().getSequenceNumber() == 1) {
             initStream();
