@@ -64,13 +64,13 @@ public class FlowRuntime {
         Flow flow = deployment.getFlow();
         List<FlowStep> steps = flow.getFlowSteps();
         
-        executionTracker.beforeFlow(executionId);
+        executionTracker.beforeFlow(this.executionId);
 
         /* create a step runtime for every component in the flow */
         for (FlowStep flowStep : steps) {
             boolean enabled = flowStep.getComponent().getBoolean(AbstractComponent.ENABLED, true);
             if (enabled) {
-                StepRuntime stepRuntime = new StepRuntime(executionId, componentFactory.create(flowStep, flow, resources), executionTracker);
+                StepRuntime stepRuntime = new StepRuntime(this.executionId, componentFactory.create(flowStep, flow, resources), executionTracker);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
         }
