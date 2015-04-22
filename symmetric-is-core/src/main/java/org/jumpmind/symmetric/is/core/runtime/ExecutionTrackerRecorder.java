@@ -109,23 +109,28 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
     
     @Override
-    public void flowStepFinished(String executionId, IComponent component, Throwable error, boolean cancelled) {
+    public void flowStepFinished(String executionId, IComponent component, Throwable error,
+            boolean cancelled) {
         super.flowStepFinished(executionId, component, error, cancelled);
         ExecutionStep step = steps.get(component.getFlowStep().getId());
-        step.setEndTime(new Date());
-        ExecutionStatus status = ExecutionStatus.DONE;
-        if (error != null) {
-            status = ExecutionStatus.ERROR;
+        if (step != null) {
+            step.setEndTime(new Date());
+            ExecutionStatus status = ExecutionStatus.DONE;
+            if (error != null) {
+                status = ExecutionStatus.ERROR;
+            }
+            if (cancelled) {
+                status = ExecutionStatus.CANCELLED;
+            }
+            step.setStatus(status.name());
+            if (component.getComponentStatistics() != null) {
+                step.setMessagesReceived(component.getComponentStatistics()
+                        .getNumberInboundMessages());
+                step.setMessagesProduced(component.getComponentStatistics()
+                        .getNumberOutboundMessages());
+            }
+            this.recorder.record(step);
         }
-        if (cancelled) {
-            status = ExecutionStatus.CANCELLED;
-        }
-        step.setStatus(status.name());
-        if (component.getComponentStatistics() != null) {
-            step.setMessagesReceived(component.getComponentStatistics().getNumberInboundMessages());
-            step.setMessagesProduced(component.getComponentStatistics().getNumberOutboundMessages());
-        }
-        this.recorder.record(step);
     }
 
     @Override

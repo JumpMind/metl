@@ -108,7 +108,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             
             @Override
             public void componentNameChanged(Component component) {
-                selected(EditFlowPanel.this.flow.findFlowStepWithComponentId(component.getId()));
+                refreshStepOnDiagram(EditFlowPanel.this.flow.findFlowStepWithComponentId(component.getId()));
             }
         });
         this.propertySheet.setCaption("Property Sheet");
@@ -226,14 +226,18 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         }
         
         if (step != null) {
-            context.getConfigurationService().refresh(step.getComponent());
-            diagram.setNodes(getNodes());
-            diagram.setSelectedNodeId(step.getId());
+            refreshStepOnDiagram(step);
             propertySheet.valueChange(step);
         } else {
             diagram.setSelectedNodeId(null);
             propertySheet.valueChange((Object) null);
         }
+    }
+    
+    protected void refreshStepOnDiagram(FlowStep step) {
+        context.getConfigurationService().refresh(step.getComponent());
+        diagram.setNodes(getNodes());
+        diagram.setSelectedNodeId(step.getId());
     }
 
     @Override

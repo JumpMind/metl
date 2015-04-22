@@ -207,6 +207,8 @@ public class AgentRuntime {
                         new AgentDeploymentParameter(paramKey, parameters.get(paramKey), deployment
                                 .getId()));
             }
+            agent.getAgentDeployments().remove(deployment);
+            agent.getAgentDeployments().add(deployment);
             configurationService.save(deployment);
 
             List<AgentDeployment> deployments = agent.getAgentDeployments();
