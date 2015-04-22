@@ -29,7 +29,7 @@ public class ModelAttributeScriptHelper {
     ModelEntity entity;
     
     public static final RemoveAttribute REMOVE_ATTRIBUTE = new RemoveAttribute();
-
+    
     static private ThreadLocal<ScriptEngine> scriptEngine = new ThreadLocal<ScriptEngine>();
 
     public ModelAttributeScriptHelper(ModelAttribute attribute, ModelEntity entity, EntityData data, Object value) {
@@ -98,7 +98,7 @@ public class ModelAttributeScriptHelper {
     public RemoveAttribute remove() {
         return REMOVE_ATTRIBUTE;
     }
-
+    
     public String formatdate(String pattern) {
         if (value instanceof Date) {
             FastDateFormat formatter = FastDateFormat.getInstance(pattern);
@@ -169,7 +169,6 @@ public class ModelAttributeScriptHelper {
             throw new RuntimeException("Unable to evaluate groovy script", e);
         }
     }
-    
     
     static class RemoveAttribute {
         

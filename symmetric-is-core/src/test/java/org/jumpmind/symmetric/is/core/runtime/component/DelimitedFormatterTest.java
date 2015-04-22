@@ -48,10 +48,10 @@ public class DelimitedFormatterTest {
         IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DelimitedFormatter delimitedFormatter = new DelimitedFormatter();
         delimitedFormatter.init(delimitedFormatterFlowStep, null, null);
-        delimitedFormatter.start(executionTracker);        
+        delimitedFormatter.start("test", executionTracker);        
         Message message = createInboundMessage();        
         MessageTarget msgTarget = new MessageTarget();
-        delimitedFormatter.handle("test", message, msgTarget);
+        delimitedFormatter.handle(message, msgTarget);
 
         assertEquals(1, msgTarget.getTargetMessageCount());
         ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();

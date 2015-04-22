@@ -45,8 +45,8 @@ public class MappingProcessor extends AbstractComponent {
     boolean setUnmappedAttributesToNull;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start(String executionId, IExecutionTracker executionTracker) {
+        super.start(executionId, executionTracker);
 
         validate();
 
@@ -87,7 +87,7 @@ public class MappingProcessor extends AbstractComponent {
     }
 
     @Override
-    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
+    public void handle( Message inputMessage, IMessageTarget messageTarget) {
         componentStatistics.incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
         if (inputRows == null) {

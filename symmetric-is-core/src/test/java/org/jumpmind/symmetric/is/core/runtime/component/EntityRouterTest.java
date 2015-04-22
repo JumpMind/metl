@@ -96,14 +96,14 @@ public class EntityRouterTest {
         MessageTarget target = new MessageTarget();
         EntityRouter router = new EntityRouter();
         router.init(step, flow, null);
-        router.start(new ExecutionTrackerNoOp());
+        router.start("test", new ExecutionTrackerNoOp());
         Message inputMessage = new Message("");
         ArrayList<EntityData> datas = new ArrayList<EntityData>();
         for (EntityData entityData : data) {
             datas.add(entityData);
         }
         inputMessage.setPayload(datas);
-        router.handle("", inputMessage, target);
+        router.handle(inputMessage, target);
         return target;
     }
 

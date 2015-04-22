@@ -23,21 +23,47 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     protected IResource resource;
     protected IExecutionTracker executionTracker;
     protected ComponentStatistics componentStatistics;
+    protected String executionId;
 
-    public void start(IExecutionTracker executionTracker) {
+    @Override
+    public void start(String executionId, IExecutionTracker executionTracker) {
         this.componentStatistics = new ComponentStatistics();
     	this.executionTracker = executionTracker;
+    	this.executionId = executionId;
     }
 
     public void stop() {
     }
     
+    @Override
+    public String getExecutionId() {
+        return executionId;
+    }
+    
+    @Override
     public ComponentStatistics getComponentStatistics() {
     	return componentStatistics;
     }
     
+    @Override
     public FlowStep getFlowStep() {
     	return this.flowStep;
+    }
+    
+    @Override
+    public IResource getResource() {
+        return resource;
+    }
+    
+    
+    @Override
+    public IExecutionTracker getExecutionTracker() {
+        return executionTracker;
+    }
+    
+    @Override
+    public Flow getFlow() {
+        return flow;
     }
     
     public void init(FlowStep flowStep, Flow flow, Map<String, IResource> resources) {

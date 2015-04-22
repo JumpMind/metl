@@ -19,13 +19,13 @@ public class Delay extends AbstractComponent {
     long delay = 1000;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start(String executionId, IExecutionTracker executionTracker) {
+        super.start(executionId, executionTracker);
         delay = flowStep.getComponent().getLong(DELAY_TIME, 1000l);
     }
     
     @Override
-    public void handle(String executionId, Message inputMessage, IMessageTarget messageTarget) {
+    public void handle( Message inputMessage, IMessageTarget messageTarget) {
         componentStatistics.incrementInboundMessages();
         AppUtils.sleep(delay);
         componentStatistics.incrementOutboundMessages();
