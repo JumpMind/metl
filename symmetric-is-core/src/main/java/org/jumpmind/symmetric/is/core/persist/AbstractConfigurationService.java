@@ -214,20 +214,10 @@ abstract class AbstractConfigurationService extends AbstractService implements
         }
 
         for (Agent agent : list) {
-            Map<String, Object> settingParams = new HashMap<String, Object>();
-            settingParams.put("agentId", agent.getId());
-            List<AgentSetting> settings = persistenceManager.find(AgentSetting.class,
-                    settingParams, null, null, tableName(AgentSetting.class));
             agent.setFolder(folderMapById.get(agent.getFolderId()));
-            agent.setSettings(settings);
-
-            List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class,
-                    settingParams, null, null, tableName(AgentDeployment.class));
-            for (AgentDeployment agentDeployment : deployments) {
-                refreshAgentDeploymentRelations(agentDeployment);
-                refresh(agentDeployment.getFlow());
-                agent.getAgentDeployments().add(agentDeployment);
-            }
+            refreshAgentSettings(agent);
+            refreshAgentResourceSettings(agent);
+            refreshAgentDeployments(agent);
         }
 
         Collections.sort(list, new Comparator<Agent>() {
@@ -239,6 +229,34 @@ abstract class AbstractConfigurationService extends AbstractService implements
         return list;
     }
 
+    protected void refreshAgentSettings(Agent agent) {
+        Map<String, Object> settingParams = new HashMap<String, Object>();
+        settingParams.put("agentId", agent.getId());
+        List<AgentSetting> settings = persistenceManager.find(AgentSetting.class,
+                settingParams, null, null, tableName(AgentSetting.class));
+        agent.setSettings(settings);
+    }
+
+    protected void refreshAgentResourceSettings(Agent agent) {
+        Map<String, Object> settingParams = new HashMap<String, Object>();
+        settingParams.put("agentId", agent.getId());
+        List<AgentResourceSetting> settings = persistenceManager.find(AgentResourceSetting.class,
+                settingParams, null, null, tableName(AgentResourceSetting.class));
+        agent.setAgentResourceSettings(settings);        
+    }
+
+    protected void refreshAgentDeployments(Agent agent) {
+        Map<String, Object> settingParams = new HashMap<String, Object>();
+        settingParams.put("agentId", agent.getId());
+        List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class,
+                settingParams, null, null, tableName(AgentDeployment.class));
+        for (AgentDeployment agentDeployment : deployments) {
+            refreshAgentDeploymentRelations(agentDeployment);
+            refresh(agentDeployment.getFlow());
+            agent.getAgentDeployments().add(agentDeployment);
+        }
+    }
+    
     protected void refreshAgentDeploymentRelations(AgentDeployment agentDeployment) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("agentDeploymentId", agentDeployment.getId());
@@ -480,15 +498,9 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void refresh(Agent agent) {
         refresh((AbstractObject) agent);
-        Map<String, Object> param = new HashMap<String, Object>();
-        param.put("agentId", agent.getId());
-        List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class,
-                param, null, null, tableName(AgentDeployment.class));
-        for (AgentDeployment agentDeployment : deployments) {
-            refreshAgentDeploymentRelations(agentDeployment);
-            refresh(agentDeployment.getFlow());
-        }
-        agent.setAgentDeployments(deployments);
+        refreshAgentSettings(agent);
+        refreshAgentResourceSettings(agent);
+        refreshAgentDeployments(agent);
     }
 
     @Override

@@ -25,6 +25,8 @@ public class Agent extends AbstractObjectWithSettings {
     Date heartbeatTime;
 
     List<AgentDeployment> agentDeployments;
+    
+    List<AgentResourceSetting> agentResourceSettings;
 
     public Agent() {
         this.agentDeployments = new ArrayList<AgentDeployment>();
@@ -129,6 +131,14 @@ public class Agent extends AbstractObjectWithSettings {
         this.agentDeployments = agentDeployments;
     }
 
+    public List<AgentResourceSetting> getAgentResourceSettings() {
+        return agentResourceSettings;
+    }
+
+    public void setAgentResourceSettings(List<AgentResourceSetting> agentResourceSettings) {
+        this.agentResourceSettings = agentResourceSettings;
+    }
+
     public boolean isDeployed(Flow flow) {
         return getAgentDeploymentFor(flow) != null;
     }
@@ -149,14 +159,10 @@ public class Agent extends AbstractObjectWithSettings {
     
     public TypedProperties toTypedProperties(Resource resource) {
         TypedProperties properties = new TypedProperties();
-        for (Setting settingObject : settings) {
-            if (settingObject instanceof AgentResourceSetting) {
-                AgentResourceSetting resourceSetting = (AgentResourceSetting)settingObject;
-                if (resourceSetting.getResourceId().equals(resource.getId())) {
-                    properties.setProperty(settingObject.getName(), settingObject.getValue());
-                }
+        for (AgentResourceSetting setting : agentResourceSettings) {
+            if (setting.getResourceId().equals(resource.getId())) {
+                properties.setProperty(setting.getName(), setting.getValue());
             }
-            
         }
         return properties;
     }
