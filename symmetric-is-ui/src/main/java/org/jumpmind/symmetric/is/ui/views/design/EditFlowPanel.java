@@ -104,6 +104,13 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         this.designNavigator = designNavigator;
 
         this.propertySheet = new PropertySheet(context);
+        this.propertySheet.setListener(new IPropertySheetChangeListener() {
+            
+            @Override
+            public void componentNameChanged(Component component) {
+                selected(EditFlowPanel.this.flow.findFlowStepWithComponentId(component.getId()));
+            }
+        });
         this.propertySheet.setCaption("Property Sheet");
 
         this.componentPalette = new EditFlowPalette(this, context.getComponentFactory());

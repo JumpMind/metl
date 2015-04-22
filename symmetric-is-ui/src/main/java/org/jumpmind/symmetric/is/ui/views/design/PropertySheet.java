@@ -56,6 +56,8 @@ public class PropertySheet extends Panel implements ValueChangeListener {
     IConfigurationService configurationService;
 
     IResourceFactory resourceFactory;
+    
+    IPropertySheetChangeListener listener;
 
     Object value;
 
@@ -65,6 +67,10 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         this.resourceFactory = context.getResourceFactory();
         setSizeFull();
         addStyleName("noborder");
+    }
+    
+    public void setListener(IPropertySheetChangeListener listener) {
+        this.listener = listener;
     }
 
     public Object getValue() {
@@ -158,6 +164,9 @@ public class PropertySheet extends Panel implements ValueChangeListener {
             protected void save() {
                 component.setName(this.getValue());
                 configurationService.save(component);
+                if (listener != null) {
+                    listener.componentNameChanged(component);
+                }
             };
         };
         textField.setValue(component.getName());

@@ -133,6 +133,15 @@ public class Flow extends AbstractObject {
         return null;
     }
 
+    public FlowStep findFlowStepWithComponentId(String id) {
+        for (FlowStep flowStep : flowSteps) {
+            if (flowStep.getComponentId().equals(id)) {
+                return flowStep;
+            }
+        }
+        return null;
+    }
+
     public String getFolderName() {
         return folder.getName();
     }
