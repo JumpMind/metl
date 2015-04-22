@@ -83,11 +83,15 @@ public class FlowRuntime {
             List<StepRuntime> sourceStepRuntimes = new ArrayList<StepRuntime>();
             for (FlowStepLink flowStepLink : links) {
                 if (stepId.equals(flowStepLink.getSourceStepId())) {
-                    targetStepRuntimes.add(stepRuntimes.get(flowStepLink
-                            .getTargetStepId()));
+                    StepRuntime runtime = stepRuntimes.get(flowStepLink.getTargetStepId());
+                    if (runtime != null) {
+                        targetStepRuntimes.add(runtime);
+                    }
                 } else if (stepId.equals(flowStepLink.getTargetStepId())) {
-                    sourceStepRuntimes.add(stepRuntimes.get(flowStepLink
-                            .getSourceStepId()));
+                    StepRuntime runtime = stepRuntimes.get(flowStepLink.getSourceStepId());
+                    if (runtime != null) {
+                        sourceStepRuntimes.add(runtime);
+                    }
                 }
             }
             StepRuntime runtime = stepRuntimes.get(stepId);
@@ -174,7 +178,8 @@ public class FlowRuntime {
                     .getFlowStepLinks();
             boolean isTargetStep = false;
             for (FlowStepLink flowStepLink : links) {
-                if (stepId.equals(flowStepLink.getTargetStepId())) {
+                if (stepRuntimes.get(flowStepLink.getSourceStepId()) != null 
+                        && stepId.equals(flowStepLink.getTargetStepId())) {
                     isTargetStep = true;
                 }
             }

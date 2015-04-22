@@ -190,6 +190,7 @@ public class AgentRuntime {
         AgentDeployment deployment = agent.getAgentDeploymentFor(flow);
         if (deployment == null) {
             deployment = new AgentDeployment(flow);
+            deployment.setStatus(DeploymentStatus.REQUEST_DEPLOY.name());
             deployment.setAgentId(agent.getId());
             deployment.setFlow(flow);
 
@@ -375,9 +376,7 @@ public class AgentRuntime {
                 flowRuntime.stop();
             } finally {
                 flowRuntime.waitForFlowCompletion();
-
                 flowRuntime.notifyStepsTheFlowIsComplete();
-
                 log.info("Scheduled '{}' on '{}' is finished", deployment.getFlow().toString(),
                         agent.getName());
             }
