@@ -250,10 +250,10 @@ abstract class AbstractConfigurationService extends AbstractService implements
         settingParams.put("agentId", agent.getId());
         List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class,
                 settingParams, null, null, tableName(AgentDeployment.class));
+        agent.setAgentDeployments(deployments);
         for (AgentDeployment agentDeployment : deployments) {
             refreshAgentDeploymentRelations(agentDeployment);
             refresh(agentDeployment.getFlow());
-            agent.getAgentDeployments().add(agentDeployment);
         }
     }
     

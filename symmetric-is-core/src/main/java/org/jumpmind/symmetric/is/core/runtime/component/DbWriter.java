@@ -112,6 +112,11 @@ public class DbWriter extends AbstractComponent {
     public void start(String executionId, IExecutionTracker executionTracker) {
         super.start(executionId, executionTracker);
         error = null;
+        
+        if (resource == null) {
+            throw new IllegalStateException("A database writer must have a datasoure defined");
+        }
+        
         TypedProperties properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
         replaceRows = properties.is(REPLACE);
         updateFirst = properties.is(UPDATE_FIRST);
@@ -120,9 +125,6 @@ public class DbWriter extends AbstractComponent {
         stopProcessingOnError = properties.is(STOP_PROCESSING_ON_ERROR, true);
         fitToColumn = properties.is(FIT_TO_COLUMN);
 
-        /*
-         * TODO this needs to come from shared agent resources
-         */
         DataSource dataSource = (DataSource) resource.reference();
         platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource,
                 new SqlTemplateSettings(), quoteIdentifiers);

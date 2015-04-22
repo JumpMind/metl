@@ -371,7 +371,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
             @Override
             public void valueChange(ValueChangeEvent event) {
-                selectionChanged(event);
+                selectionChanged();
             }
         });
         table.addItemClickListener(new ItemClickListener() {
@@ -519,6 +519,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             treeTable.refreshRowCache();
             treeTable.focus();
             treeTable.setValue(selected);
+            selectionChanged();
         }
     }
 
@@ -700,7 +701,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         }
     }
 
-    protected void selectionChanged(ValueChangeEvent event) {
+    protected void selectionChanged() {
         setMenuItemsEnabled();
         updatePropertySheet();
         treeTable.removeShortcutListener(treeTableEnterKeyShortcutListener);

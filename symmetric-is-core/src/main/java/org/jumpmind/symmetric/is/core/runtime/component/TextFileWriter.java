@@ -64,8 +64,6 @@ public class TextFileWriter extends AbstractComponent {
 
     @Override
     public void handle( Message inputMessage, IMessageTarget messageTarget) {
-        this.executionId = executionId;
-
         componentStatistics.incrementInboundMessages();
         
         if (this.resource == null) {
