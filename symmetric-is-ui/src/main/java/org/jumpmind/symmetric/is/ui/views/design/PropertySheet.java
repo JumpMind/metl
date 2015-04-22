@@ -103,6 +103,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
     protected void addComponentProperties(FormLayout formLayout, Component component) {
         ComponentDefinition componentDefintion = componentFactory
                 .getComponentDefinitionForComponentType(component.getType());
+        addComponentName(formLayout, component);
         addResourceCombo(componentDefintion, formLayout, component);
         addInputModelCombo(componentDefintion, formLayout, component);
         addOutputModelCombo(componentDefintion, formLayout, component);
@@ -141,6 +142,23 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         }
     }
 
+    protected void addComponentName(FormLayout formLayout, final Component component) {
+        
+        ImmediateUpdateTextField textField = new ImmediateUpdateTextField(
+                "Component Name") {
+            private static final long serialVersionUID = 1L;
+
+            protected void save() {
+                component.setName(this.getValue());
+                configurationService.save(component);
+            };
+        };
+        textField.setValue(component.getName());
+        textField.setRequired(true);
+        textField.setDescription("Name for the component on the flow");
+        formLayout.addComponent(textField);
+    }
+    
     protected void addInputModelCombo(ComponentDefinition componentDefintion,
             FormLayout formLayout, final Component component) {
         if (value instanceof FlowStep) {
