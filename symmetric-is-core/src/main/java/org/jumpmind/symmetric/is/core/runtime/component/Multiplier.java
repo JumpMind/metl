@@ -74,7 +74,9 @@ public class Multiplier extends AbstractComponent {
             multipliersInitialized = inputMessage.getHeader().isLastMessage();
         } else if (!multipliersInitialized) {
             queuedWhileWaitingForMultiplier.add(inputMessage);
-        } else {
+        } 
+        
+        if (multipliersInitialized) {
             Iterator<Message> messages = queuedWhileWaitingForMultiplier.iterator();
             while (messages.hasNext()) {
                 Message message = messages.next();
@@ -83,6 +85,7 @@ public class Multiplier extends AbstractComponent {
 
             multiply(inputMessage, messageTarget);
         }
+    
 
     }
 
