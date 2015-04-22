@@ -202,7 +202,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     protected List<Agent> findAgents(Map<String, Object> params) {
         return findAgents(params, null);
     }
-
+    
     protected List<Agent> findAgents(Map<String, Object> params, Folder folder) {
         List<Agent> list = persistenceManager.find(Agent.class, params, null, null,
                 tableName(Agent.class));
@@ -480,8 +480,15 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void refresh(Agent agent) {
         refresh((AbstractObject) agent);
-
-        // TODO refresh settings
+        Map<String, Object> param = new HashMap<String, Object>();
+        param.put("agentId", agent.getId());
+        List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class,
+                param, null, null, tableName(AgentDeployment.class));
+        for (AgentDeployment agentDeployment : deployments) {
+            refreshAgentDeploymentRelations(agentDeployment);
+            refresh(agentDeployment.getFlow());
+        }
+        agent.setAgentDeployments(deployments);
     }
 
     @Override
