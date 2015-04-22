@@ -117,7 +117,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
                 params.put("deleted", 0);
                 params.put("projectVersionId", projectVersionId);
                 List<Resource> datas = find(Resource.class, params);
-                list = buildResource(datas);
+                list.addAll(buildResource(datas));
             }
         }
         return list;

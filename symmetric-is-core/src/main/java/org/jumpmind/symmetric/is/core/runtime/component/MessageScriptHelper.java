@@ -22,13 +22,13 @@ import com.ibm.as400.access.CharacterDataArea;
 
 public class MessageScriptHelper {
 
-    IComponent component;
+	protected IComponent component;
 
-    Iterator<EntityData> entityDataIterator;
+    protected Iterator<EntityData> entityDataIterator;
 
-    Message inputMessage;
+    protected Message inputMessage;
 
-    IMessageTarget messageTarget;
+    protected IMessageTarget messageTarget;
 
     public MessageScriptHelper(IComponent component) {
         this.component = component;
@@ -91,25 +91,30 @@ public class MessageScriptHelper {
 
     protected void onHandle() {
         try {
-            Row config = nextRowFromInputMessage();
-            String dsLib = config.getString("DSLIB");
-            String dbUser = config.getString("user");
-            String dbPassword = config.getString("secret");
-            AS400 as400 = new AS400(getBasicDataSource().getUrl().substring(
-                    "jdbc:as400://".length()), dbUser, dbPassword);
-            CharacterDataArea updateArea = new CharacterDataArea();
-            updateArea.setSystem(as400);
-            updateArea.setPath("/QSYS.LIB/" + dsLib + ".LIB/" + "UO360NRUN" + ".DTAARA");
-            String status = updateArea.read();
-            if (status != null) {
-                status = status.trim();
-            }
-            info("The status file currently reads %s", status);
-            if ("Data Ready".equals(status)) {
-                messageTarget.put(inputMessage);
-            } else {
-                messageTarget.put(new ShutdownMessage(component.getFlowStep().getId(), true));
-            }
+Row config = nextRowFromInputMessage();
+String dsLib = config.getString("DSLIB");
+String dbUser = config.getString("user");
+String dbPassword = config.getString("secret");
+String url = getBasicDataSource().getUrl();
+url = url.substring("jdbc:as400://".length());
+int nextSlash = url.indexOf("/");
+if (nextSlash >= 0) {
+	url = url.substring(0, nextSlash);
+}
+AS400 as400 = new AS400(url, dbUser, dbPassword);
+CharacterDataArea updateArea = new CharacterDataArea();
+updateArea.setSystem(as400);
+updateArea.setPath("/QSYS.LIB/" + dsLib + ".LIB/UO360NRUN.DTAARA");
+String status = updateArea.read();
+if (status != null) {
+    status = status.trim();
+}
+info("The status file currently reads %s", status);
+if ("Data Ready".equals(status)) {
+    messageTarget.put(inputMessage);
+} else {
+    messageTarget.put(new ShutdownMessage(component.getFlowStep().getId(), true));
+}
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {

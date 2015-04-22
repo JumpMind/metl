@@ -67,6 +67,7 @@ public class StepRuntime implements Runnable {
 
     public void start(IExecutionTracker tracker, IResourceFactory resourceFactory) {
         try {
+            executionTracker.flowStepStarted(executionId, component);
             component.start(executionId, tracker);
         } catch (RuntimeException ex) {
             recordError(ex);
@@ -95,7 +96,6 @@ public class StepRuntime implements Runnable {
              * runtime to kick things off. If we have input links, we must loop
              * until we get a shutdown message from one of our sources
              */
-            executionTracker.flowStepStarted(executionId, component);
             while (running) {                
                 Message inputMessage = inQueue.take();
                 if (inputMessage instanceof ShutdownMessage) {
