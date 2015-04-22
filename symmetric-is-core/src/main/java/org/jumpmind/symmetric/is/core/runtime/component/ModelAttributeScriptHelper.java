@@ -39,6 +39,15 @@ public class ModelAttributeScriptHelper {
         this.entity = entity;
     }
     
+    public Object nullvalue() {
+        return null;
+    }
+    
+    public Integer integer() {
+        String text = value != null ? value.toString() : "";
+        return Integer.parseInt(text);
+    }
+    
     public String abbreviate(int maxwidth) {
         String text = value != null ? value.toString() : "";
         return StringUtils.abbreviate(text, maxwidth);
