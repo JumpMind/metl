@@ -222,17 +222,17 @@ public class AgentRuntime {
         Set<Resource> flowResources = flow.findResources();
         for (Resource flowResource : flowResources) {
             IResource alreadyDeployed = resources.get(flowResource.getId());
-
+    
             Map<String, SettingDefinition> settings = resourceFactory
                     .getSettingDefinitionsForResourceType(flowResource.getType());
             TypedProperties defaultSettings = flowResource.toTypedProperties(settings);
             TypedProperties overrideSettings = agent.toTypedProperties(flowResource);
             TypedProperties combined = new TypedProperties(defaultSettings);
             combined.putAll(overrideSettings);
-
-            boolean redeploy = true;
+    
+            boolean deploy = true;
             if (alreadyDeployed != null) {
-                redeploy = false;
+                deploy = false;
                 Resource deployedResource = alreadyDeployed.getResource();
                 TypedProperties alreadyDeployedOverrides = alreadyDeployed.getAgentOverrides();
                 TypedProperties alreadyDeployedDefaultSettings = deployedResource
@@ -240,30 +240,28 @@ public class AgentRuntime {
                 TypedProperties alreadyDeployedCombined = new TypedProperties(
                         alreadyDeployedDefaultSettings);
                 alreadyDeployedCombined.putAll(alreadyDeployedOverrides);
-
+    
                 for (Object key : combined.keySet()) {
                     Object newObj = combined.get(key);
                     Object oldObj = alreadyDeployedCombined.get(key);
                     if (!ObjectUtils.equals(newObj, oldObj)) {
-                        redeploy = true;
+                        deploy = true;
                         break;
                     }
                 }
-
-                if (redeploy) {
+    
+                if (deploy) {
                     log.info("Undeploying the {} resource to the {} agent", flowResource.getName(), agent.getName());
                     alreadyDeployed.stop();
                 }
-
             }
-
-            if (redeploy) {
+    
+            if (deploy) {
                 log.info("Deploying the {} resource to the {} agent", flowResource.getName(), agent.getName());
                 IResource resource = resourceFactory.create(flowResource, overrideSettings);
                 resources.put(flowResource.getId(), resource);
             }
         }
-
     }
 
     private void deploy(final AgentDeployment deployment) {
@@ -398,6 +396,8 @@ public class AgentRuntime {
                         stop(deployment);
                         deployment.setStatus(DeploymentStatus.DISABLED.name());
                         configurationService.save(deployment);
+                    } else {
+                        deployResources(deployment.getFlow());
                     }
                 }
             }
