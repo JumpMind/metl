@@ -72,17 +72,16 @@ public class Multiplier extends AbstractComponent {
             List<EntityData> datas = inputMessage.getPayload();
             multipliers.addAll(datas);
             multipliersInitialized = inputMessage.getHeader().isLastMessage();
-        } else if (!multipliersInitialized) {
-            queuedWhileWaitingForMultiplier.add(inputMessage);
-        } 
-        
-        if (multipliersInitialized) {
+            
             Iterator<Message> messages = queuedWhileWaitingForMultiplier.iterator();
             while (messages.hasNext()) {
                 Message message = messages.next();
                 multiply(message, messageTarget);
             }
 
+        } else if (!multipliersInitialized) {
+            queuedWhileWaitingForMultiplier.add(inputMessage);
+        } else if (multipliersInitialized) {
             multiply(inputMessage, messageTarget);
         }
     
