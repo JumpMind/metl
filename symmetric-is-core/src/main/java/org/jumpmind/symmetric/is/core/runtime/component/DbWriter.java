@@ -13,6 +13,7 @@ import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.DmlStatement;
 import org.jumpmind.db.sql.DmlStatement.DmlType;
 import org.jumpmind.db.sql.ISqlTransaction;
+import org.jumpmind.db.sql.SqlException;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.sql.UniqueKeyException;
 import org.jumpmind.properties.TypedProperties;
@@ -23,6 +24,7 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
+import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
@@ -260,7 +262,14 @@ public class DbWriter extends AbstractComponent {
             log.debug("Submitting data {} with types {}", Arrays.toString(data.toArray()),
                     Arrays.toString(dmlStatement.getTypes()));
         }
-        return transaction.addRow(marker, data.toArray(), dmlStatement.getTypes());
+        
+        try {
+            return transaction.addRow(marker, data.toArray(), dmlStatement.getTypes());
+        } catch (SqlException ex) {
+            executionTracker.log(executionId, LogLevel.WARN, this, String.format("Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n", dmlStatement.getSql(), Arrays.toString(data.toArray()),
+                    Arrays.toString(dmlStatement.getTypes())));
+            throw ex;
+        }
     }
 
     private String fitToColumn(Table table, String columnName, String value) {
