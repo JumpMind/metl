@@ -36,7 +36,7 @@ dependencies {
     compile "org.vaadin.addons:aceeditor:0.8.13"
     compile "org.springframework:spring-webmvc:$springVersion"
     compile "org.peimari:maddon:1.20"
-    
+    compile "org.apache.poi:poi:3.11"    
     //compile "com.vaadin:vaadin-push:$vaadinVersion"
     //compile "com.vaadin:vaadin-server:$vaadinVersion"
     //compile "com.vaadin:vaadin-themes:$vaadinVersion"
