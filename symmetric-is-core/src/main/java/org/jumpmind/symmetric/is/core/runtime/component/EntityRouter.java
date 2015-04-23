@@ -7,24 +7,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import javax.script.Bindings;
-import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.jumpmind.exception.IoException;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.symmetric.is.core.model.Model;
-import org.jumpmind.symmetric.is.core.model.ModelAttribute;
-import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
-import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
@@ -86,7 +79,7 @@ public class EntityRouter extends AbstractComponent {
         Map<String, Message> outboundMessages = new HashMap<String, Message>();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
         for (EntityData entityData : inputRows) {
-            bind(executionId, entityData);
+            bindEntityData(scriptEngine, executionId, entityData);
             if (routes != null) {
                 for (Route route : routes) {
                     try {
@@ -121,33 +114,6 @@ public class EntityRouter extends AbstractComponent {
             messageTarget.put(message);
         }
 
-    }
-
-    protected void bind(String executionId, EntityData entityData) {
-        Bindings bindings = scriptEngine.createBindings();
-        Model model = flowStep.getComponent().getInputModel();
-        List<ModelEntity> entities = model.getModelEntities();
-        for (ModelEntity modelEntity : entities) {
-            HashMap<String, Object> boundEntity = new HashMap<String, Object>();
-            bindings.put(modelEntity.getName(), boundEntity);
-        }
-
-        Set<String> attributeIds = entityData.keySet();
-        for (String attributeId : attributeIds) {
-            ModelAttribute attribute = model.getAttributeById(attributeId);
-            if (attribute != null) {
-                ModelEntity entity = model.getEntityById(attribute.getEntityId());
-                Object value = entityData.get(attributeId);
-                @SuppressWarnings("unchecked")
-                Map<String, Object> boundEntity = (Map<String, Object>) bindings.get(entity
-                        .getName());
-                boundEntity.put(attribute.getName(), value);
-            } else {
-                executionTracker.log(executionId, LogLevel.WARN, this,
-                        "Could not find attribute in the input model with an id of " + attributeId);
-            }
-        }
-        scriptEngine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
     }
 
     static public class Route {

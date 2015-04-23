@@ -2,7 +2,11 @@ package org.jumpmind.symmetric.is.core.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+
+import org.jumpmind.db.sql.Row;
+import org.jumpmind.symmetric.is.core.runtime.EntityData;
 
 public class Component extends AbstractObjectWithSettings {
 
@@ -202,5 +206,17 @@ public class Component extends AbstractObjectWithSettings {
 
     public boolean isDeleted() {
         return deleted;
+    }
+    
+    public Row toRow(EntityData data) {
+        Row row = new Row(data.size());
+        Set<String> attributeIds = data.keySet();
+        for (String attributeId : attributeIds) {
+            ModelAttribute attribute = inputModel.getAttributeById(attributeId);
+            if (attribute != null) {
+                row.put(attribute.getName(), data.get(attributeId));
+            }
+        }
+        return row;
     }
 }

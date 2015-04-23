@@ -1,15 +1,26 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.script.Bindings;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
 
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.Model;
+import org.jumpmind.symmetric.is.core.model.ModelAttribute;
+import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
+import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
+import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 
 abstract public class AbstractComponent extends AbstractRuntimeObject implements IComponent {
@@ -86,6 +97,34 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     
     @Override
     public void flowCompletedWithErrors(Throwable myError, List<Throwable> allErrors) {
+    }
+    
+    protected Bindings bindEntityData(ScriptEngine scriptEngine, String executionId, EntityData entityData) {
+        Bindings bindings = scriptEngine.createBindings();
+        Model model = flowStep.getComponent().getInputModel();
+        List<ModelEntity> entities = model.getModelEntities();
+        for (ModelEntity modelEntity : entities) {
+            HashMap<String, Object> boundEntity = new HashMap<String, Object>();
+            bindings.put(modelEntity.getName(), boundEntity);
+        }
+
+        Set<String> attributeIds = entityData.keySet();
+        for (String attributeId : attributeIds) {
+            ModelAttribute attribute = model.getAttributeById(attributeId);
+            if (attribute != null) {
+                ModelEntity entity = model.getEntityById(attribute.getEntityId());
+                Object value = entityData.get(attributeId);
+                @SuppressWarnings("unchecked")
+                Map<String, Object> boundEntity = (Map<String, Object>) bindings.get(entity
+                        .getName());
+                boundEntity.put(attribute.getName(), value);
+            } else {
+                executionTracker.log(executionId, LogLevel.WARN, this,
+                        "Could not find attribute in the input model with an id of " + attributeId);
+            }
+        }
+        scriptEngine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
+        return bindings;
     }
     
 }

@@ -135,9 +135,7 @@ public class FlowRuntime {
     public void waitForFlowCompletion() {
         while (isRunning()) {
             AppUtils.sleep(500);
-        }
-        
-        executionTracker.afterFlow(executionId);
+        }        
     }
     
     public void notifyStepsTheFlowIsComplete() {
@@ -156,6 +154,8 @@ public class FlowRuntime {
                 stepRuntime.getComponent().flowCompletedWithoutError();
             }
         }
+        
+        executionTracker.afterFlow(executionId);
     }
 
     public boolean isRunning() {

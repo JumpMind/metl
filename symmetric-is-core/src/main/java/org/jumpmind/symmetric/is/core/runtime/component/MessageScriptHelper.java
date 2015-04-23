@@ -2,14 +2,11 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.jumpmind.db.sql.Row;
-import org.jumpmind.symmetric.is.core.model.Model;
-import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
@@ -48,17 +45,7 @@ public class MessageScriptHelper {
 
             if (entityDataIterator.hasNext()) {
                 EntityData data = entityDataIterator.next();
-                Model model = component.getFlowStep().getComponent().getInputModel();
-                Row row = new Row(data.size());
-
-                Set<String> attributeIds = data.keySet();
-                for (String attributeId : attributeIds) {
-                    ModelAttribute attribute = model.getAttributeById(attributeId);
-                    if (attribute != null) {
-                        row.put(attribute.getName(), data.get(attributeId));
-                    }
-                }
-                return row;
+                return component.getFlowStep().getComponent().toRow(data);
             } else {
                 return null;
             }
