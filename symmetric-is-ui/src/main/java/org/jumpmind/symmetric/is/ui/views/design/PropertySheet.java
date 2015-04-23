@@ -182,7 +182,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
             Flow flow = configurationService.findFlow(step.getFlowId());
             String projectVersionId = flow.getProjectVersionId();
             if (componentDefintion.inputMessage() == MessageType.ENTITY
-                    || componentDefintion.outgoingMessage() == MessageType.ANY) {
+                    || componentDefintion.inputMessage() == MessageType.ANY) {
                 final AbstractSelect combo = new ComboBox("Input Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
