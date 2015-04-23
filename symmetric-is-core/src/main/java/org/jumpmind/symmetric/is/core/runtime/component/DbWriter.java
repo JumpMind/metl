@@ -220,6 +220,9 @@ public class DbWriter extends AbstractComponent {
                                         new Object(), data);
                                 componentStatistics.incrementNumberEntitiesProcessed(count);
                             }
+                        } else if (count == 0){
+                            executionTracker.log(executionId, LogLevel.DEBUG, this, String.format("Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n", modelTable.getStatement().getSql(), Arrays.toString(data.toArray()),
+                                    Arrays.toString(modelTable.getStatement().getTypes())));
                         }
                     }
                 } else {
