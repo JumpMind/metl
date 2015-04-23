@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -108,6 +109,21 @@ public class EditTransformerPanel extends VerticalLayout implements IUiPanel {
         if (component.getInputModel() != null) {
 
             componentAttributes = component.getAttributeSettings();
+            
+            List<ComponentAttributeSetting> toRemove = new ArrayList<ComponentAttributeSetting>();
+            for (ComponentAttributeSetting componentAttribute : componentAttributes) {
+                Model model = component.getInputModel();
+                ModelAttribute attribute1 = model.getAttributeById(componentAttribute.getAttributeId());
+                if (attribute1 == null) {
+                    /* invalid attribute.  model must have changed.  lets remove it */
+                    toRemove.add(componentAttribute);
+                }
+            }
+            
+            for (ComponentAttributeSetting componentAttributeSetting : toRemove) {
+                componentAttributes.remove(componentAttributeSetting);
+                context.getConfigurationService().delete(componentAttributeSetting);
+            }
 
             for (ModelEntity entity : component.getInputModel().getModelEntities()) {
                 for (ModelAttribute attr : entity.getModelAttributes()) {
