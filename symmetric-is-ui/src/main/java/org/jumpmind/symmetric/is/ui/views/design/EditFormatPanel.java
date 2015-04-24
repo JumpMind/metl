@@ -137,19 +137,19 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         if (component.getType().equals(DelimitedFormatter.TYPE)) {
             return;
         }
-        int pos = 1;
+        long pos = 1;
         boolean needsRefreshed = false;
         for (RecordFormat record : container.getItemIds()) {
             if (record.getStartPos() != pos) {
                 record.setStartPos(pos);
                 needsRefreshed = true;
             }
-            long endPos = pos + record.getWidth();
+            long endPos = pos + record.getWidth() - 1;
             if (record.getEndPos() != endPos) {
                 record.setEndPos(endPos);
                 needsRefreshed = true;
             }
-            pos += record.getWidth() + 1;
+            pos = endPos + 1;
         }
 
         if (needsRefreshed) {
