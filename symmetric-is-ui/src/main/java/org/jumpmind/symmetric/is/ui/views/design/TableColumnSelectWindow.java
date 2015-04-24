@@ -17,6 +17,7 @@ import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.IConnectionCallback;
 import org.jumpmind.db.sql.JdbcSqlTemplate;
 import org.jumpmind.db.sql.SqlTemplateSettings;
+import org.jumpmind.symmetric.is.core.model.DataType;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
@@ -239,7 +240,15 @@ public class TableColumnSelectWindow extends ResizableWindow {
                 try {
                     rs = meta.getColumns(table.getSchema().getCatalog().getName(), table.getSchema().getName(), table.getName(), null);
                     while (rs.next()) {
-                        addItem(new TableColumn(table, rs.getString(4), rs.getString(6)), platform, rs.getString(4),
+                        
+                        DataType dataType = DataType.OTHER;
+                        String type = rs.getString(6).toUpperCase();
+                        try {
+                            dataType = DataType.valueOf(type);
+                        } catch (Exception ex) {
+                            log.info("Could not map the data type of {} to a known datatype.", type);
+                        }
+                        addItem(new TableColumn(table, rs.getString(4), dataType.name()), platform, rs.getString(4),
                                 FontAwesome.COLUMNS, table, true);
                     }
                 } finally {
