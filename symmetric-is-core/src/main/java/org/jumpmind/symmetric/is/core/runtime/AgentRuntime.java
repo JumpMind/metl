@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -388,7 +389,7 @@ public class AgentRuntime {
         public void run() {
             synchronized (AgentRuntime.this) {
                 configurationService.refresh(agent);
-                for (AgentDeployment deployment : agent.getAgentDeployments()) {
+                for (AgentDeployment deployment : new HashSet<AgentDeployment>(agent.getAgentDeployments())) {
                     DeploymentStatus status = deployment.getDeploymentStatus();
                     if (status.equals(DeploymentStatus.REQUEST_DEPLOY)) {
                         deploy(deployment);

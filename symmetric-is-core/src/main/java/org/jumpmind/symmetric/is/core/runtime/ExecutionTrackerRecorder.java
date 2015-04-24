@@ -42,7 +42,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         execution.setAgentId(deployment.getAgentId());
         execution.setFlowId(deployment.getFlowId());
         execution.setAgentName(agent.getName());
-        execution.setFlowName(deployment.getFlow().getName());
+        execution.setFlowName(deployment.getName());
         this.recorder.record(execution);
     }
 

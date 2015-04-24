@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Execution;
+import org.jumpmind.symmetric.is.core.model.ExecutionStatus;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.ui.common.AppConstants;
@@ -32,14 +33,18 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
@@ -52,7 +57,9 @@ import com.vaadin.ui.themes.ValoTheme;
 @TopBarLink(category = Category.MANAGE, name = "Manage", id = "manage", icon = FontAwesome.GEARS, menuOrder = 20)
 public class ManageView extends HorizontalLayout implements View, IUiPanel, IBackgroundRefreshable {
 
-	private static final long serialVersionUID = 1L;
+    private static final String ANY = "<Any>";
+
+    private static final long serialVersionUID = 1L;
 
 	static final int DEFAULT_LIMIT = 100;
     
@@ -69,6 +76,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 	
 	Button viewButton;
 	
+	AbstractSelect statusSelect;
+	
 	int limit = DEFAULT_LIMIT;
 		
     @SuppressWarnings("serial")
@@ -78,7 +87,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         viewButton.setEnabled(false);
         viewButton.addClickListener(new ClickListener() {
 			public void buttonClick(ClickEvent event) {
-				viewLog();
+				viewLog(table.getValue());
 			}        	
         });
         
@@ -86,6 +95,25 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         mainTab.setSizeFull();
 		HorizontalLayout header = new HorizontalLayout();
 		header.addComponent(viewButton);
+		header.setComponentAlignment(viewButton, Alignment.BOTTOM_RIGHT);
+		
+		statusSelect = new ComboBox("Status");
+		statusSelect.setNewItemsAllowed(false);
+		statusSelect.setNullSelectionAllowed(false);
+		statusSelect.addItem(ANY);
+		statusSelect.setValue(ANY);
+		for (ExecutionStatus status : ExecutionStatus.values()) {
+		    statusSelect.addItem(status.toString());    
+        };
+        statusSelect.addValueChangeListener(new ValueChangeListener() {            
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                refreshUI(getBackgroundData());
+            }
+        });
+        header.addComponent(statusSelect);
+        header.setComponentAlignment(statusSelect, Alignment.BOTTOM_RIGHT);
+		
 		HorizontalLayout limitLayout = new HorizontalLayout();
 		limitLayout.setSpacing(true);
 		Label limitLabel = new Label("Limit:");
@@ -106,8 +134,9 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 			}		
 		});
 		limitLayout.addComponent(limitField);
+		limitLayout.setComponentAlignment(limitField, Alignment.BOTTOM_RIGHT);
 		header.addComponent(limitLayout);
-		header.setComponentAlignment(limitLayout, Alignment.MIDDLE_RIGHT);
+		header.setComponentAlignment(limitLayout, Alignment.BOTTOM_RIGHT);
 		header.setExpandRatio(limitLayout, 1.0f);
 		
         TextField filterField = new TextField();
@@ -127,6 +156,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
             }
         });
         header.addComponent(filterField);
+        header.setComponentAlignment(filterField, Alignment.BOTTOM_RIGHT);
 
 		header.setSpacing(true);
 		header.setMargin(true);
@@ -138,6 +168,14 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 		table.setSelectable(true);
 		table.setMultiSelect(false);
 		table.setSizeFull();
+		table.addItemClickListener(new ItemClickListener() {            
+            @Override
+            public void itemClick(ItemClickEvent event) {
+                if (event.isDoubleClick()) {
+                    viewLog(event.getItemId());
+                }
+            }
+        });
 		table.setVisibleColumns(new Object[] { "agentName", "hostName", "flowName", "status", "startTime", "endTime" });
 		table.setColumnHeaders(new String[] { "Agent", "Host", "Flow", "Status", "Start", "End"});
 		table.setSortContainerPropertyId("startTime");
@@ -221,6 +259,10 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     		if (currentSelectionParent instanceof Agent) {
                 params.put("agentId", ((Agent)currentSelectionParent).getId());
             }
+    		
+    		if (!statusSelect.getValue().equals("<Any>")) {
+    		    params.put("status", statusSelect.getValue());
+    		}
 
     		if (params.size() > 0) {
     			return context.getExecutionService().findExecutions(params, limit);		
@@ -242,8 +284,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     	viewButton.setEnabled(table.getValue() != null);
     }
 
-    protected void viewLog() {
-    	Execution execution = (Execution) table.getValue();
+    protected void viewLog(Object item) {
+    	Execution execution = (Execution) item;
         ExecutionLogPanel logPanel = new ExecutionLogPanel(execution.getId(),context);
         tabs.addCloseableTab(execution.getId(), "Log " + execution.getFlowName(), Icons.LOG, logPanel);
     }

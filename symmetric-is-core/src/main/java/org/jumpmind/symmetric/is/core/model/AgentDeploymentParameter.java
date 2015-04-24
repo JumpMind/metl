@@ -6,6 +6,7 @@ public class AgentDeploymentParameter extends AbstractObject {
 
     String name;
     String value;
+    String flowParameterId;
     String agentDeploymentId;
     
     public AgentDeploymentParameter() {
@@ -33,6 +34,14 @@ public class AgentDeploymentParameter extends AbstractObject {
     
     public String getAgentDeploymentId() {
         return agentDeploymentId;
+    }
+    
+    public void setFlowParameterId(String flowParameterId) {
+        this.flowParameterId = flowParameterId;
+    }
+    
+    public String getFlowParameterId() {
+        return flowParameterId;
     }
     
     public void setValue(String value) {

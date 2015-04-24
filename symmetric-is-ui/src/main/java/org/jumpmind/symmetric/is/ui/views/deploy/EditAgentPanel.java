@@ -305,7 +305,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
                 List<AgentDeploymentParameter> deployParams = deployment.getAgentDeploymentParameters();
                 for (FlowParameter flowParam : flow.getFlowParameters()) {
                     AgentDeploymentParameter deployParam = new AgentDeploymentParameter();
-                    deployParam.setId(flowParam.getId());
+                    deployParam.setFlowParameterId(flowParam.getId());
                     deployParam.setAgentDeploymentId(deployment.getId());
                     deployParam.setName(flowParam.getName());
                     deployParam.setValue(flowParam.getDefaultValue());
