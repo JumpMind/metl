@@ -316,6 +316,9 @@ public class DbReader extends AbstractComponent {
         if (idx == -1) {
             idx = sql.toLowerCase().indexOf("from\r\n");
         }
+        if (idx == -1) {
+            idx=sql.length()-1;
+        }
         return idx;
     }
 
