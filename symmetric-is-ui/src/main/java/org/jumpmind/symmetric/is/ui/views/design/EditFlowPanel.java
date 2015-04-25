@@ -32,7 +32,7 @@ import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeDoubleClickedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
-import org.jumpmind.symmetric.is.ui.views.IDesignNavigator;
+import org.jumpmind.symmetric.is.ui.views.ProjectNavigator;
 import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
@@ -77,7 +77,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
     PropertySheet propertySheet;
 
-    IDesignNavigator designNavigator;
+    ProjectNavigator projectNavigator;
 
     EditFlowPalette componentPalette;
 
@@ -96,12 +96,12 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     AbstractObject selected;
 
     public EditFlowPanel(ApplicationContext context, Flow flow,
-            IDesignNavigator designNavigator, TabbedPanel tabs) {
+            ProjectNavigator designNavigator, TabbedPanel tabs) {
         context.getConfigurationService().refresh(flow);
         this.flow = flow;
         this.context = context;
         this.tabs = tabs;
-        this.designNavigator = designNavigator;
+        this.projectNavigator = designNavigator;
 
         this.propertySheet = new PropertySheet(context);
         this.propertySheet.setListener(new IPropertySheetChangeListener() {
@@ -207,13 +207,11 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     @Override
     public boolean closing() {
         context.getBackgroundRefresherService().unregister(this);
-        designNavigator.setPropertySheet(null);
         return true;
     }
 
     @Override
     public void selected() {
-        designNavigator.setPropertySheet(propertySheet);
     }
 
     public Flow getFlow() {
@@ -249,7 +247,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         if (selected instanceof FlowStep) {
             FlowStep flowStep = (FlowStep) selected;
             configurationService.delete(flow, flowStep);
-            designNavigator.refresh();
+            projectNavigator.refresh();
             redrawFlow();
         } else if (selected instanceof FlowStepLink) {
             FlowStepLink link = (FlowStepLink) selected;
@@ -288,8 +286,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
         propertySheet.valueChange(component);
 
-        designNavigator.refresh();
-        designNavigator.select(flowStep);
+        projectNavigator.refresh();
+        projectNavigator.select(flowStep);
 
     }
 
@@ -375,7 +373,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context);
             tabs.addCloseableTab(executionId, "Run " + flow.getName(), Icons.LOG, logPanel);
         }
-    }
+    }   
 
     class DiagramChangedListener implements Listener {
 
@@ -386,14 +384,13 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                 NodeSelectedEvent event = (NodeSelectedEvent) e;
                 Node node = event.getNode();
                 FlowStep flowStep = flow.findFlowStepWithId(node.getId());
-                designNavigator.select(flowStep);
                 selected = flowStep;
                 delButton.setEnabled(true);
             } else if (e instanceof NodeDoubleClickedEvent) {
                 NodeDoubleClickedEvent event = (NodeDoubleClickedEvent) e;
                 Node node = event.getNode();
                 FlowStep flowStep = flow.findFlowStepWithId(node.getId());
-                designNavigator.open(flowStep);
+                projectNavigator.open(flowStep, flow, propertySheet);
             } else if (e instanceof NodeMovedEvent) {
                 NodeMovedEvent event = (NodeMovedEvent) e;
                 Node node = event.getNode();
@@ -423,6 +420,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                 delButton.setEnabled(true);
             }
         }
+        
     }
 
     class DropHandler implements com.vaadin.event.dd.DropHandler {

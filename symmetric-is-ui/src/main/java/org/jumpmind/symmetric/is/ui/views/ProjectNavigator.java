@@ -95,7 +95,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class ProjectNavigator extends VerticalLayout implements IDesignNavigator {
+public class ProjectNavigator extends VerticalLayout {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -110,10 +110,6 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     ShortcutListener treeTableDeleteKeyShortcutListener;
 
     AbstractObject itemBeingEdited;
-
-    long itemClickTimeInMs;
-
-    PropertySheet propertySheet;
 
     MenuItem newMenu;
 
@@ -542,7 +538,6 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         }
     }
 
-    @Override
     public void refresh() {
         refreshOpenProjects();
 
@@ -577,32 +572,6 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             setExpandRatio(treeTable, 1);
             treeTable.refreshRowCache();
         }
-    }
-
-    protected void updatePropertySheet() {
-        Object obj = treeTable.getValue();
-        if (propertySheet != null && obj != null) {
-            if (obj instanceof FlowStep) {
-                FlowStep step = (FlowStep) obj;
-                if (tabs.getSelectedTab() instanceof EditFlowPanel) {
-                    EditFlowPanel panel = (EditFlowPanel) tabs.getSelectedTab();
-                    if (panel.getFlow().getId().equals(step.getFlowId())) {
-                        panel.selected(step);
-                    }
-                }
-            } else {
-                if (tabs.getSelectedTab() instanceof EditFlowPanel) {
-                    EditFlowPanel panel = (EditFlowPanel) tabs.getSelectedTab();
-                    panel.selected(null);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void setPropertySheet(PropertySheet propertySheet) {
-        this.propertySheet = propertySheet;
-        updatePropertySheet();
     }
 
     protected void refreshOpenProjects() {
@@ -682,18 +651,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
             this.treeTable.addItem(flow);
             this.treeTable.setItemIcon(flow, Icons.FLOW);
             this.treeTable.setParent(flow, folder);
-
-            List<FlowStep> flowSteps = flow.getFlowSteps();
-
-            this.treeTable.setChildrenAllowed(flow, flowSteps.size() > 0);
-
-            for (FlowStep flowStep : flowSteps) {
-                this.treeTable.addItem(flowStep);
-                this.treeTable.setItemCaption(flowStep, flowStep.getName());
-                this.treeTable.setItemIcon(flowStep, Icons.COMPONENT);
-                this.treeTable.setParent(flowStep, flow);
-                this.treeTable.setChildrenAllowed(flowStep, false);
-            }
+            this.treeTable.setChildrenAllowed(flow, false);
         }
     }
 
@@ -711,7 +669,6 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
     protected void selectionChanged() {
         setMenuItemsEnabled();
-        updatePropertySheet();
         treeTable.removeShortcutListener(treeTableEnterKeyShortcutListener);
         if (treeTable.getValue() != null) {
             treeTable.addShortcutListener(treeTableEnterKeyShortcutListener);
@@ -726,43 +683,41 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         return selected instanceof Flow || selected instanceof FlowStep
                 || selected instanceof Model || selected instanceof Resource;
     }
+    
+    public void open(FlowStep flowStep, Flow flow, PropertySheet propertySheet) {
+        /*
+         * TODO: these ui's need to come from component plugin
+         * infrastructure. Maybe dynamically try to create edit class based
+         * on The component type name. EditXxxxXxxxPanel
+         */
+
+        String type = flowStep.getComponent().getType();
+        if (type.equals(FixedLengthFormatter.TYPE) || type.equals(DelimitedFormatter.TYPE)) {
+            EditFormatPanel panel = new EditFormatPanel(context, flowStep.getComponent());
+            tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+        } else if (type.equals(DbReader.TYPE)) {
+            EditDbReaderPanel panel = new EditDbReaderPanel(context, flowStep.getComponent(),
+                    propertySheet);
+            tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+            unselectAll();
+        } else if (type.equals(Transformer.TYPE)) {
+            EditTransformerPanel panel = new EditTransformerPanel(context,
+                    flowStep.getComponent());
+            tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+        } else if (type.equals(DbWriter.TYPE)) {
+            EditDbWriterPanel panel = new EditDbWriterPanel(context, flowStep.getComponent());
+            tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+        } else if (type.equals(EntityRouter.TYPE)) {
+            EditEntityRouterPanel panel = new EditEntityRouterPanel(context, flowStep,
+                    flow);
+            tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+        } else if (type.equals(MappingProcessor.TYPE)) {
+            EditMappingPanel panel = new EditMappingPanel(context, flowStep.getComponent());
+            tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+        } 
+    }
 
     public void open(Object item) {
-        if (item instanceof FlowStep) {
-            FlowStep flowStep = (FlowStep) item;
-            /*
-             * TODO: these ui's need to come from component plugin
-             * infrastructure. Maybe dynamically try to create edit class based
-             * on The component type name. EditXxxxXxxxPanel
-             */
-            String type = flowStep.getComponent().getType();
-            if (type.equals(FixedLengthFormatter.TYPE) || type.equals(DelimitedFormatter.TYPE)) {
-                EditFormatPanel panel = new EditFormatPanel(context, flowStep.getComponent());
-                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-            } else if (type.equals(DbReader.TYPE)) {
-                EditDbReaderPanel panel = new EditDbReaderPanel(context, flowStep.getComponent(),
-                        propertySheet);
-                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-                unselectAll();
-            } else if (type.equals(Transformer.TYPE)) {
-                EditTransformerPanel panel = new EditTransformerPanel(context,
-                        flowStep.getComponent());
-                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-            } else if (type.equals(DbWriter.TYPE)) {
-                EditDbWriterPanel panel = new EditDbWriterPanel(context, flowStep.getComponent());
-                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-            } else if (type.equals(EntityRouter.TYPE)) {
-                EditEntityRouterPanel panel = new EditEntityRouterPanel(context, flowStep,
-                        (Flow) treeTable.getParent(flowStep));
-                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-            } else if (type.equals(MappingProcessor.TYPE)) {
-                EditMappingPanel panel = new EditMappingPanel(context, flowStep.getComponent());
-                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-            } else {
-                item = context.getConfigurationService().findFlow(flowStep.getFlowId());
-            }
-        }
-
         if (item instanceof Flow) {
             Flow flow = (Flow) item;
             EditFlowPanel flowLayout = new EditFlowPanel(context, flow, this, tabs);
@@ -821,7 +776,6 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         }
     }
 
-    @Override
     public void select(Object obj) {
         Object parent = obj;
         do {
