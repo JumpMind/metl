@@ -149,6 +149,11 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
         addComponent(rightLayout);
         setExpandRatio(rightLayout, 1);
+        
+        if (flow.getFlowSteps().size() > 0) {
+            selected = flow.getFlowSteps().get(0);
+            propertySheet.valueChange(selected);
+        }
 
         redrawFlow();
 
@@ -185,8 +190,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             }
         });
                 
-        //buttonBar.addFullScreenButton("Full Screen", diagramLayout);
-
         return buttonBar;
     }
 
@@ -221,20 +224,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     public Flow getFlow() {
         return flow;
     }
-
-    public void selected(FlowStep step) {
-        if (step != null) {
-            step = flow.findFlowStepWithId(step.getId());
-        }
-        
-        if (step != null) {
-            refreshStepOnDiagram(step);
-            propertySheet.valueChange(step);
-        } else {
-            diagram.setSelectedNodeId(null);
-            propertySheet.valueChange((Object) null);
-        }
-    }
     
     protected void refreshStepOnDiagram(FlowStep step) {
         context.getConfigurationService().refresh(step.getComponent());
@@ -251,7 +240,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         if (selected instanceof FlowStep) {
             FlowStep flowStep = (FlowStep) selected;
             configurationService.delete(flow, flowStep);
-            projectNavigator.refresh();
+            selected = null;
             redrawFlow();
         } else if (selected instanceof FlowStepLink) {
             FlowStepLink link = (FlowStepLink) selected;
@@ -296,13 +285,15 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     }
 
     protected void redrawFlow() {
-        selected = null;
         delButton.setEnabled(false);
         if (diagram != null) {
             diagramLayout.removeComponent(diagram);
         }
 
         diagram = new Diagram();
+        if (selected != null && selected instanceof FlowStep) {
+           diagram.setSelectedNodeId(((FlowStep)selected).getId());
+        }
         diagram.setSizeFull();
         diagram.addListener(new DiagramChangedListener());
 
@@ -322,7 +313,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             String imageText = String
                     .format("<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>",
                             componentPalette.getBase64RepresentationOfImageForComponentType(type));
-            node.setText(imageText + "<br><i>" + name + "</i>");
+            node.setText(imageText + "<br><div style='width: 100px; margin-left:-25px'><i>" + name + "</i></div>");
             node.setId(flowStep.getId());
             node.setX(flowStep.getX());
             node.setY(flowStep.getY());
