@@ -52,6 +52,7 @@ public class Diagram extends AbstractJavaScriptComponent {
                         DiagramState state = getState();
                         for (Node node : state.nodes) {
                             if (node.getId().equals(id)) {
+                                state.selectedNodeId = id;
                                 fireEvent(new NodeSelectedEvent(Diagram.this, node));
                                 break;
                             }

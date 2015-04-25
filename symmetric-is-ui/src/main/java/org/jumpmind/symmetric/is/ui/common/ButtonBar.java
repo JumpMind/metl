@@ -2,9 +2,9 @@ package org.jumpmind.symmetric.is.ui.common;
 
 import com.vaadin.server.Resource;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
@@ -58,7 +58,7 @@ public class ButtonBar extends HorizontalLayout {
 
     public Button addButton(String name, Resource icon) {
         return addButton(name, icon, null);
-    }
+    }    
 
     public Button addButton(String name, Resource icon, ClickListener clickListener) {
         Button button = new Button(name);
@@ -70,4 +70,5 @@ public class ButtonBar extends HorizontalLayout {
         bar.addComponent(button);
         return button;
     }
+    
 }

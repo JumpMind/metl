@@ -49,10 +49,10 @@ import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
+import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTargetDetails;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
@@ -84,8 +84,10 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     TabbedPanel tabs;
 
     Diagram diagram;
+    
+    Panel flowPanel;
 
-    CssLayout diagramLayout;
+    AbstractLayout diagramLayout;
 
     Button runButton;
 
@@ -126,7 +128,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         splitPanel.setSizeFull();
         splitPanel.setSplitPosition(50, Unit.PERCENTAGE);
 
-        diagramLayout = new CssLayout();
+        diagramLayout = new VerticalLayout();
         diagramLayout.setWidth(10000, Unit.PIXELS);
         diagramLayout.setHeight(10000, Unit.PIXELS);
 
@@ -134,12 +136,12 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         wrapper.setSizeUndefined();
         wrapper.setDropHandler(new DropHandler());
 
-        Panel panel = new Panel();
-        panel.setSizeFull();
-        panel.addStyleName(ValoTheme.PANEL_WELL);
-        panel.setContent(wrapper);
+        flowPanel = new Panel();
+        flowPanel.setSizeFull();
+        flowPanel.addStyleName(ValoTheme.PANEL_WELL);
+        flowPanel.setContent(wrapper);
 
-        splitPanel.addComponent(panel);
+        splitPanel.addComponent(flowPanel);
         splitPanel.addComponent(propertySheet);
 
         rightLayout.addComponent(splitPanel);
@@ -182,6 +184,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                 new EditParametersWindow().showAtSize(.50);
             }
         });
+                
+        //buttonBar.addFullScreenButton("Full Screen", diagramLayout);
 
         return buttonBar;
     }
@@ -385,6 +389,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                 Node node = event.getNode();
                 FlowStep flowStep = flow.findFlowStepWithId(node.getId());
                 selected = flowStep;
+                propertySheet.valueChange(flowStep);
                 delButton.setEnabled(true);
             } else if (e instanceof NodeDoubleClickedEvent) {
                 NodeDoubleClickedEvent event = (NodeDoubleClickedEvent) e;
