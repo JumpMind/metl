@@ -111,13 +111,13 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
 
     AbstractObject itemBeingEdited;
 
-    AbstractObject itemClicked;
-
     long itemClickTimeInMs;
 
     PropertySheet propertySheet;
 
     MenuItem newMenu;
+
+    MenuItem editMenu;
 
     MenuItem newFlow;
 
@@ -177,6 +177,7 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     protected void setMenuItemsEnabled() {
         Object selected = treeTable.getValue();
 
+        editMenu.setEnabled(false);
         newMenu.setEnabled(true);
         blank.setVisible(false);
         newComponent.setVisible(false);
@@ -200,6 +201,11 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         } else {
             blank.setVisible(true);
             newMenu.setEnabled(false);
+            
+            if (selected != null && 
+                    !(selected instanceof ProjectVersion)) {
+                editMenu.setEnabled(true);
+            }
         }
 
         closeProject.setEnabled(selected instanceof ProjectVersion);
@@ -220,6 +226,23 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         leftMenuBar.setWidth(100, Unit.PERCENTAGE);
 
         newMenu = leftMenuBar.addItem("New", null);
+
+        editMenu = leftMenuBar.addItem("Edit", null);
+
+        editMenu.addItem("Open", new Command() {
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                open(treeTable.getValue());
+            }
+        });
+
+        editMenu.addItem("Rename", new Command() {
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                startEditingItem((AbstractObject) treeTable.getValue());
+            }
+        });
 
         MenuItem projectMenu = leftMenuBar.addItem("Project", null);
         projectMenu.addItem("Manage", new Command() {
@@ -383,25 +406,11 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
                     if (event.isDoubleClick()) {
                         abortEditingItem();
                         open(event.getItemId());
-                        itemClicked = null;
-
                         if (table.areChildrenAllowed(event.getItemId())) {
                             Object item = event.getItemId();
                             table.setCollapsed(item, !table.isCollapsed(item));
                         }
-                    } else {
-                        if (itemClicked != null && itemClicked.equals(event.getItemId())) {
-                            long timeSinceClick = System.currentTimeMillis() - itemClickTimeInMs;
-                            if (timeSinceClick > 600 && timeSinceClick < 2000) {
-                                startEditingItem(itemClicked);
-                            } else {
-                                itemClicked = null;
-                            }
-                        } else if (event.getItemId() instanceof AbstractObject) {
-                            itemClicked = (AbstractObject) event.getItemId();
-                            itemClickTimeInMs = System.currentTimeMillis();
-                        }
-                    }
+                    } 
                 }
             }
         });
@@ -527,7 +536,6 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
         if (itemBeingEdited != null) {
             Object selected = itemBeingEdited;
             itemBeingEdited = null;
-            itemClicked = null;
             refresh();
             treeTable.focus();
             treeTable.setValue(selected);
@@ -722,9 +730,11 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     public void open(Object item) {
         if (item instanceof FlowStep) {
             FlowStep flowStep = (FlowStep) item;
-            /* TODO: these ui's need to come from component plugin
-             infrastructure.  Maybe dynamically try to create edit class based on
-             The component type name.  EditXxxxXxxxPanel */
+            /*
+             * TODO: these ui's need to come from component plugin
+             * infrastructure. Maybe dynamically try to create edit class based
+             * on The component type name. EditXxxxXxxxPanel
+             */
             String type = flowStep.getComponent().getType();
             if (type.equals(FixedLengthFormatter.TYPE) || type.equals(DelimitedFormatter.TYPE)) {
                 EditFormatPanel panel = new EditFormatPanel(context, flowStep.getComponent());
@@ -739,9 +749,8 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
                         flowStep.getComponent());
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
             } else if (type.equals(DbWriter.TYPE)) {
-                EditDbWriterPanel panel = new EditDbWriterPanel(context,
-                        flowStep.getComponent());
-                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel); 
+                EditDbWriterPanel panel = new EditDbWriterPanel(context, flowStep.getComponent());
+                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
             } else if (type.equals(EntityRouter.TYPE)) {
                 EditEntityRouterPanel panel = new EditEntityRouterPanel(context, flowStep,
                         (Flow) treeTable.getParent(flowStep));
@@ -779,13 +788,13 @@ public class ProjectNavigator extends VerticalLayout implements IDesignNavigator
     protected void exportProject() {
         Object selected = treeTable.getValue();
         if (selected instanceof ProjectVersion) {
-            ProjectVersion project = (ProjectVersion)selected;
+            ProjectVersion project = (ProjectVersion) selected;
             final String export = context.getConfigurationService().export(project);
             StreamSource ss = new StreamSource() {
                 private static final long serialVersionUID = 1L;
 
                 public InputStream getStream() {
-                    try {                        
+                    try {
                         return new ByteArrayInputStream(export.getBytes());
                     } catch (Exception e) {
                         log.error("Failed to export configuration", e);
