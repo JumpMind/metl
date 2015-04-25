@@ -126,17 +126,17 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
             nodeDiv.className = "diagram-node";
 
             nodeDiv.addEventListener("click", function(event) {
-                unselectAll();
-                event.currentTarget.className = event.currentTarget.className + " selected ";
-                self.onNodeSelected({
-                    'id' : event.currentTarget.id
-                });
-            }, false);
-            
-            nodeDiv.addEventListener("dblclick", function(event) {                
-                self.onNodeDoubleClick({
-                    'id' : event.currentTarget.id
-                });
+                if (state.selectedNodeId !== event.currentTarget.id) {
+                    unselectAll();
+                    event.currentTarget.className = event.currentTarget.className + " selected ";
+                    self.onNodeSelected({
+                        'id' : event.currentTarget.id
+                    });
+                } else {
+                    self.onNodeDoubleClick({
+                        'id' : event.currentTarget.id
+                    });
+                }
             }, false);
 
             parentDiv.appendChild(nodeDiv);

@@ -10,7 +10,7 @@ import com.vaadin.ui.JavaScriptFunction;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
-@JavaScript({ "dom.jsPlumb-1.7.4-min.js", "diagram.js" })
+@JavaScript({ "dom.jsPlumb-1.7.5-min.js", "diagram.js" })
 @StyleSheet({ "diagram.css" })
 public class Diagram extends AbstractJavaScriptComponent {
 

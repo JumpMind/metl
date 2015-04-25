@@ -15,7 +15,7 @@ import com.vaadin.ui.JavaScriptFunction;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
-@JavaScript({ "dom.jsPlumb-1.7.4-min.js", "mapping-diagram.js" })
+@JavaScript({ "dom.jsPlumb-1.7.5-min.js", "mapping-diagram.js" })
 @StyleSheet({ "mapping-diagram.css" })
 @SuppressWarnings("serial")
 public class MappingDiagram extends AbstractJavaScriptComponent {
