@@ -134,7 +134,7 @@ public class DeployNavigator extends VerticalLayout {
         }
 
         this.treeTable.removeAllItems();
-        List<Folder> folders = context.getConfigurationService().findFolders(FolderType.RUNTIME);
+        List<Folder> folders = context.getConfigurationService().findFolders(FolderType.DEPLOY);
         for (Folder folder : folders) {
             addChildFolder(folder);
         }
@@ -531,7 +531,7 @@ public class DeployNavigator extends VerticalLayout {
 
         Folder folder = new Folder();
         folder.setName("New Folder");
-        folder.setType(FolderType.RUNTIME.name());
+        folder.setType(FolderType.DEPLOY.name());
         folder.setParent(parentFolder);
 
         addChildFolder(folder);

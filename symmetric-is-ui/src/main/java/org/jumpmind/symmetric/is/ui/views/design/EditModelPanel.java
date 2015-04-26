@@ -62,10 +62,9 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
     TextField filterField;
 
-    public EditModelPanel(ApplicationContext context, Model model) {
+    public EditModelPanel(ApplicationContext context, String modelId) {
         this.context = context;
-        this.model = model;
-        
+        this.model = new Model(modelId);        
         context.getConfigurationService().refresh(model);
 
         ButtonBar buttonBar = new ButtonBar();

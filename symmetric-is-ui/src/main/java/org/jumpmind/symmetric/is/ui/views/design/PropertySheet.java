@@ -7,12 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.AbstractObjectWithSettings;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
-import org.jumpmind.symmetric.is.core.model.Model;
+import org.jumpmind.symmetric.is.core.model.ModelName;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
@@ -133,20 +134,27 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                 final AbstractSelect combo = new ComboBox("Output Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
-                List<Model> models = configurationService.findModelsInProject(projectVersionId);
+                List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
                 if (models != null) {
-                    for (Model model : models) {
+                    for (ModelName model : models) {
                         combo.addItem(model);
+                        if (isNotBlank(component.getOutputModelId()) && component.getOutputModelId().equals(model.getId())) {
+                            combo.setValue(model);
+                        }
                     }
-                    combo.setValue(component.getOutputModel());
                 }
                 combo.addValueChangeListener(new ValueChangeListener() {
                     private static final long serialVersionUID = 1L;
 
                     @Override
                     public void valueChange(ValueChangeEvent event) {
-                        component.setOutputModel((Model) combo.getValue());
-                        configurationService.save(component);
+                        ModelName model = (ModelName)combo.getValue();
+                        if (model != null) {
+                            component.setOutputModel(configurationService.findModel(model.getId()));
+                        } else {
+                            component.setOutputModel(null);
+                        }
+                        configurationService.save((AbstractObject)component);
                     }
                 });
 
@@ -186,20 +194,27 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                 final AbstractSelect combo = new ComboBox("Input Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
-                List<Model> models = configurationService.findModelsInProject(projectVersionId);
+                List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
                 if (models != null) {
-                    for (Model model : models) {
+                    for (ModelName model : models) {
                         combo.addItem(model);
+                        if (isNotBlank(component.getInputModelId()) && component.getInputModelId().equals(model.getId())) {
+                            combo.setValue(model);
+                        }
                     }
-                    combo.setValue(component.getInputModel());
                 }
                 combo.addValueChangeListener(new ValueChangeListener() {
                     private static final long serialVersionUID = 1L;
 
                     @Override
                     public void valueChange(ValueChangeEvent event) {
-                        component.setInputModel((Model) combo.getValue());
-                        configurationService.save(component);
+                        ModelName model = (ModelName)combo.getValue();
+                        if (model != null) {
+                            component.setInputModel(configurationService.findModel(model.getId()));
+                        } else {
+                            component.setInputModel(null);
+                        }
+                        configurationService.save((AbstractObject)component);
                     }
                 });
 

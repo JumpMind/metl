@@ -8,25 +8,42 @@ import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentDeploymentSummary;
 import org.jumpmind.symmetric.is.core.model.AgentResource;
 import org.jumpmind.symmetric.is.core.model.Component;
+import org.jumpmind.symmetric.is.core.model.ComponentName;
 import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowName;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.FolderName;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelAttributeRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.ModelEntityRelationship;
+import org.jumpmind.symmetric.is.core.model.ModelName;
 import org.jumpmind.symmetric.is.core.model.Project;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
+import org.jumpmind.symmetric.is.core.model.ResourceName;
 
 public interface IConfigurationService {
+    
+    public List<FolderName> findFoldersInProject(String projectVersionId);
+    
+    public List<ComponentName> findComponentsInProject(String projectVersionId);
+    
+    public List<ModelName> findModelsInProject(String projectVersionId);
+    
+    public List<ResourceName> findResourcesInProject(String projectVersionId);
+    
+    public List<FlowName> findFlowsInProject(String projectVersionId);
 
     public List<Folder> findFolders(FolderType type);
     
     public Flow findFlow(String id);
+    
+    public Model findModel(String id);
 
     public void deleteFolder(String folderId);
 
@@ -118,11 +135,5 @@ public interface IConfigurationService {
 
     public List<Project> findProjects();
     
-    public List<Flow> findFlowsInProject(String projectVersionId);
-    
-    public List<Model> findModelsInProject(String projectVersionId);
-
-    public List<Resource> findResourcesInProject(String projectVersionId);
-
     public String export(ProjectVersion projectVersion);
 }

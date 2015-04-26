@@ -97,10 +97,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
     AbstractObject selected;
 
-    public EditFlowPanel(ApplicationContext context, Flow flow,
+    public EditFlowPanel(ApplicationContext context, String flowId,
             ProjectNavigator designNavigator, TabbedPanel tabs) {
-        context.getConfigurationService().refresh(flow);
-        this.flow = flow;
+        this.flow = context.getConfigurationService().findFlow(flowId);
         this.context = context;
         this.tabs = tabs;
         this.projectNavigator = designNavigator;

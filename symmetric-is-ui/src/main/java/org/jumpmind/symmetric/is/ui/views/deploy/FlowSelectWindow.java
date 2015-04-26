@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
-import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowName;
 import org.jumpmind.symmetric.is.core.model.Project;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
@@ -95,7 +95,7 @@ public class FlowSelectWindow extends ResizableWindow {
 
         selectButton.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {
-                Collection<Flow> flowCollection = getFlowCollection();
+                Collection<FlowName> flowCollection = getFlowCollection();
                 listener.selected(flowCollection);
                 close();
             }
@@ -103,16 +103,16 @@ public class FlowSelectWindow extends ResizableWindow {
     }
 
     @SuppressWarnings("unchecked")
-    protected Collection<Flow> getFlowCollection() {
-        Collection<Flow> flowCollection = new HashSet<Flow>();
+    protected Collection<FlowName> getFlowCollection() {
+        Collection<FlowName> flowCollection = new HashSet<FlowName>();
         addFlowsToCollection(flowCollection, (Collection<Object>) tree.getValue());
         return flowCollection;
     }
 
-    protected void addFlowsToCollection(Collection<Flow> flowCollection, Collection<?> itemIds) {
+    protected void addFlowsToCollection(Collection<FlowName> flowCollection, Collection<?> itemIds) {
         for (Object itemId : itemIds) {
-            if (itemId instanceof Flow) {
-                flowCollection.add((Flow) itemId);    
+            if (itemId instanceof FlowName) {
+                flowCollection.add((FlowName) itemId);    
             } else {
                 Collection<?> children = tree.getChildren(itemId);
                 if (children == null) {
@@ -137,8 +137,8 @@ public class FlowSelectWindow extends ResizableWindow {
     }
 
     protected void addFlowsToVersion(ProjectVersion version) {
-        List<Flow> flows = context.getConfigurationService().findFlowsInProject(version.getId());
-        for (Flow flow : flows) {
+        List<FlowName> flows = context.getConfigurationService().findFlowsInProject(version.getId());
+        for (FlowName flow : flows) {
             addItem(flow, flow.getName(), Icons.FLOW, version, false);
         }
     }

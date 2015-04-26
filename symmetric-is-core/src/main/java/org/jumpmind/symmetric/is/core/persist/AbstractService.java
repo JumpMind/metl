@@ -33,6 +33,10 @@ public abstract class AbstractService {
         }
         return name.toString();
     }
+    
+    protected <T> List<T> find(Class<T> clazzToMap, Map<String, Object> params, Class<?> tableClazz) {
+        return persistenceManager.find(clazzToMap, params, null, null, tableName(tableClazz));
+    }
 
     protected <T> List<T> find(Class<T> clazz, Map<String, Object> params) {
         return persistenceManager.find(clazz, params, null, null, tableName(clazz));

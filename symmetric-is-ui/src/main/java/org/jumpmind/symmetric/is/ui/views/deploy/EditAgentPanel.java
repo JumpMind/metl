@@ -14,6 +14,7 @@ import org.jumpmind.symmetric.is.core.model.AgentResource;
 import org.jumpmind.symmetric.is.core.model.AgentStartMode;
 import org.jumpmind.symmetric.is.core.model.DeploymentStatus;
 import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowName;
 import org.jumpmind.symmetric.is.core.model.FlowParameter;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
@@ -296,8 +297,9 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
             UI.getCurrent().addWindow(flowSelectWindow);
         }
         
-        public void selected(Collection<Flow> flowCollection) {
-            for (Flow flow : flowCollection) {
+        public void selected(Collection<FlowName> flowCollection) {
+            for (FlowName flowName : flowCollection) {
+                Flow flow = context.getConfigurationService().findFlow(flowName.getId());
                 AgentDeployment deployment = new AgentDeployment();
                 deployment.setAgentId(agent.getId());
                 deployment.setFlow(flow);

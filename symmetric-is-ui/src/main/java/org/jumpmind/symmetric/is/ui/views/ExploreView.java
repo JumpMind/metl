@@ -16,6 +16,7 @@ import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourcePropertyConstants;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
+import org.jumpmind.symmetric.is.core.model.ResourceName;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
 import org.jumpmind.symmetric.is.ui.common.AppConstants;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
@@ -155,10 +156,11 @@ public class ExploreView extends VerticalLayout implements View {
 
             List<ProjectVersion> projects = context.getOpenProjects();
             for (ProjectVersion projectVersion : projects) {
-                List<Resource> resources = context.getConfigurationService()
+                List<ResourceName> resources = context.getConfigurationService()
                         .findResourcesInProject(projectVersion.getId());
-                for (Resource resource : resources) {
-                    if (resource.getType().equals(DataSourceResource.TYPE)) {
+                for (ResourceName resourceName : resources) {
+                    if (resourceName.getType().equals(DataSourceResource.TYPE)) {
+                        Resource resource = context.getConfigurationService().findResource(resourceName.getId());
                         DbResource db = new DbResource(projectVersion, resource);
                         dbs.add(db);
                     }

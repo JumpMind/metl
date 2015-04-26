@@ -13,13 +13,15 @@ import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowName;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
-import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.FolderName;
 import org.jumpmind.symmetric.is.core.model.Model;
+import org.jumpmind.symmetric.is.core.model.ModelName;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
+import org.jumpmind.symmetric.is.core.model.ResourceName;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-//github.com/JumpMind/symmetric-is-all.git
 import org.jumpmind.symmetric.is.core.runtime.component.DbReader;
 import org.jumpmind.symmetric.is.core.runtime.component.DbWriter;
 import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
@@ -181,8 +183,8 @@ public class ProjectNavigator extends VerticalLayout {
         newModel.setVisible(false);
         newDataSource.setVisible(false);
         newFileResource.setVisible(false);
-        if (selected instanceof Folder) {
-            Folder folder = (Folder) selected;
+        if (selected instanceof FolderName) {
+            FolderName folder = (FolderName) selected;
             if (folder.getName().equals("Flows")) {
                 newFlow.setVisible(true);
             } else if (folder.getName().equals("Models")) {
@@ -197,9 +199,8 @@ public class ProjectNavigator extends VerticalLayout {
         } else {
             blank.setVisible(true);
             newMenu.setEnabled(false);
-            
-            if (selected != null && 
-                    !(selected instanceof ProjectVersion)) {
+
+            if (selected != null && !(selected instanceof ProjectVersion)) {
                 editMenu.setEnabled(true);
             }
         }
@@ -406,14 +407,14 @@ public class ProjectNavigator extends VerticalLayout {
                             Object item = event.getItemId();
                             table.setCollapsed(item, !table.isCollapsed(item));
                         }
-                    } 
+                    }
                 }
             }
         });
         table.addExpandListener(new ExpandListener() {
             @Override
             public void nodeExpand(ExpandEvent event) {
-                if (event.getItemId() instanceof Folder) {
+                if (event.getItemId() instanceof FolderName) {
                     table.setItemIcon(event.getItemId(), Icons.FOLDER_OPEN);
                 }
             }
@@ -421,7 +422,7 @@ public class ProjectNavigator extends VerticalLayout {
         table.addCollapseListener(new CollapseListener() {
             @Override
             public void nodeCollapse(CollapseEvent event) {
-                if (event.getItemId() instanceof Folder) {
+                if (event.getItemId() instanceof FolderName) {
                     table.setItemIcon(event.getItemId(), Icons.FOLDER_CLOSED);
                 }
             }
@@ -431,11 +432,14 @@ public class ProjectNavigator extends VerticalLayout {
 
             @Override
             public String getStyle(Table source, Object itemId, Object propertyId) {
-                if (itemId instanceof Folder && "name".equals(propertyId)) {
-                    return "folder";
-                } else {
-                    return null;
+                if ("name".equals(propertyId)) {
+                    if (itemId instanceof FolderName) {
+                        return "folder";
+                    } else if (itemId instanceof ProjectVersion) {
+                        return "project";
+                    }
                 }
+                return null;
 
             }
         });
@@ -599,7 +603,7 @@ public class ProjectNavigator extends VerticalLayout {
             treeTable.addItem(projectVersion);
             treeTable.setItemIcon(projectVersion, Icons.PROJECT);
             treeTable.setItemCaption(projectVersion, projectVersion.getProject().getName());
-            treeTable.setChildrenAllowed(projectVersion, true);
+            treeTable.setChildrenAllowed(projectVersion, true);            
 
             addFlowsToFolder(addVirtualFolder("Flows", projectVersion), projectVersion);
             addModelsToFolder(addVirtualFolder("Models", projectVersion), projectVersion);
@@ -609,11 +613,9 @@ public class ProjectNavigator extends VerticalLayout {
         }
     }
 
-    protected Folder addVirtualFolder(String name, ProjectVersion projectVersion) {
+    protected FolderName addVirtualFolder(String name, ProjectVersion projectVersion) {
         String folderId = name + "-" + projectVersion.getId();
-        Folder folder = new Folder();
-        folder.makeVirtual();
-        folder.getProjectVersionId();
+        FolderName folder = new FolderName();
         folder.setId(folderId);
         folder.setName(name);
 
@@ -625,11 +627,11 @@ public class ProjectNavigator extends VerticalLayout {
         return folder;
     }
 
-    protected void addResourcesToFolder(Folder folder, ProjectVersion projectVersion) {
+    protected void addResourcesToFolder(FolderName folder, ProjectVersion projectVersion) {
         IConfigurationService configurationService = context.getConfigurationService();
-        List<Resource> resources = configurationService.findResourcesInProject(projectVersion
+        List<ResourceName> resources = configurationService.findResourcesInProject(projectVersion
                 .getId());
-        for (Resource resource : resources) {
+        for (ResourceName resource : resources) {
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(resource);
             if (DataSourceResource.TYPE.equals(resource.getType())) {
@@ -643,10 +645,10 @@ public class ProjectNavigator extends VerticalLayout {
 
     }
 
-    protected void addFlowsToFolder(Folder folder, ProjectVersion projectVersion) {
+    protected void addFlowsToFolder(FolderName folder, ProjectVersion projectVersion) {
         IConfigurationService configurationService = context.getConfigurationService();
-        List<Flow> flows = configurationService.findFlowsInProject(projectVersion.getId());
-        for (Flow flow : flows) {
+        List<FlowName> flows = configurationService.findFlowsInProject(projectVersion.getId());
+        for (FlowName flow : flows) {
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(flow);
             this.treeTable.setItemIcon(flow, Icons.FLOW);
@@ -655,10 +657,10 @@ public class ProjectNavigator extends VerticalLayout {
         }
     }
 
-    protected void addModelsToFolder(Folder folder, ProjectVersion projectVersion) {
+    protected void addModelsToFolder(FolderName folder, ProjectVersion projectVersion) {
         IConfigurationService configurationService = context.getConfigurationService();
-        List<Model> models = configurationService.findModelsInProject(projectVersion.getId());
-        for (Model model : models) {
+        List<ModelName> models = configurationService.findModelsInProject(projectVersion.getId());
+        for (ModelName model : models) {
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(model);
             this.treeTable.setItemIcon(model, Icons.MODEL);
@@ -680,15 +682,15 @@ public class ProjectNavigator extends VerticalLayout {
     }
 
     protected boolean isDeleteButtonEnabled(Object selected) {
-        return selected instanceof Flow || selected instanceof FlowStep
-                || selected instanceof Model || selected instanceof Resource;
+        return selected instanceof FlowName || selected instanceof FlowStep
+                || selected instanceof ModelName || selected instanceof ResourceName;
     }
-    
+
     public void open(FlowStep flowStep, Flow flow, PropertySheet propertySheet) {
         /*
-         * TODO: these ui's need to come from component plugin
-         * infrastructure. Maybe dynamically try to create edit class based
-         * on The component type name. EditXxxxXxxxPanel
+         * TODO: these ui's need to come from component plugin infrastructure.
+         * Maybe dynamically try to create edit class based on The component
+         * type name. EditXxxxXxxxPanel
          */
 
         String type = flowStep.getComponent().getType();
@@ -701,35 +703,33 @@ public class ProjectNavigator extends VerticalLayout {
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
             unselectAll();
         } else if (type.equals(Transformer.TYPE)) {
-            EditTransformerPanel panel = new EditTransformerPanel(context,
-                    flowStep.getComponent());
+            EditTransformerPanel panel = new EditTransformerPanel(context, flowStep.getComponent());
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
         } else if (type.equals(DbWriter.TYPE)) {
             EditDbWriterPanel panel = new EditDbWriterPanel(context, flowStep.getComponent());
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
         } else if (type.equals(EntityRouter.TYPE)) {
-            EditEntityRouterPanel panel = new EditEntityRouterPanel(context, flowStep,
-                    flow);
+            EditEntityRouterPanel panel = new EditEntityRouterPanel(context, flowStep, flow);
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
         } else if (type.equals(MappingProcessor.TYPE)) {
             EditMappingPanel panel = new EditMappingPanel(context, flowStep.getComponent());
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-        } 
+        }
     }
 
     public void open(Object item) {
-        if (item instanceof Flow) {
-            Flow flow = (Flow) item;
-            EditFlowPanel flowLayout = new EditFlowPanel(context, flow, this, tabs);
+        if (item instanceof FlowName) {
+            FlowName flow = (FlowName) item;
+            EditFlowPanel flowLayout = new EditFlowPanel(context, flow.getId(), this, tabs);
             tabs.addCloseableTab(flow.getId(), flow.getName(), Icons.FLOW, flowLayout);
-        } else if (item instanceof Model) {
-            Model model = (Model) item;
-            EditModelPanel editModel = new EditModelPanel(context, model);
+        } else if (item instanceof ModelName) {
+            ModelName model = (ModelName) item;
+            EditModelPanel editModel = new EditModelPanel(context, model.getId());
             tabs.addCloseableTab(model.getId(), model.getName(), Icons.MODEL, editModel);
-        } else if (item instanceof Resource) {
-            Resource resource = (Resource) item;
-            PropertySheet sheet = new PropertySheet(context);
-            sheet.valueChange(resource);
+        } else if (item instanceof ResourceName) {
+            ResourceName resource = (ResourceName) item;
+            PropertySheet sheet = new PropertySheet(context);            
+            sheet.valueChange(context.getConfigurationService().findResource(resource.getId()));
             tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item),
                     sheet);
         }
@@ -790,25 +790,19 @@ public class ProjectNavigator extends VerticalLayout {
 
     protected void handleDelete() {
         Object object = treeTable.getValue();
-        if (object instanceof Flow) {
-            Flow flow = (Flow) object;
+        if (object instanceof FlowName) {
+            FlowName flow = (FlowName) object;
             ConfirmDialog.show("Delete Flow?",
                     "Are you sure you want to delete the '" + flow.getName() + "' flow?",
                     new DeleteFlowConfirmationListener(flow));
-        } else if (object instanceof Resource) {
-            Resource resource = (Resource) object;
+        } else if (object instanceof ResourceName) {
+            ResourceName resource = (ResourceName) object;
             ConfirmDialog.show("Delete Resource?", "Are you sure you want to delete the '"
                     + resource.getName() + "' resource?", new DeleteResourceConfirmationListener(
                     resource));
 
-        } else if (object instanceof FlowStep) {
-            FlowStep flowStep = (FlowStep) object;
-            ConfirmDialog.show("Delete Step?",
-                    "Are you sure you want to delete the '" + flowStep.getName() + "' step?",
-                    new DeleteFlowStepConfirmationListener(flowStep));
-
-        } else if (object instanceof Model) {
-            Model model = (Model) object;
+        } else if (object instanceof ModelName) {
+            ModelName model = (ModelName) object;
             ConfirmDialog.show("Delete Model?",
                     "Are you sure you want to delete the '" + model.getName() + "' model?",
                     new DeleteModelConfirmationListener(model));
@@ -816,7 +810,7 @@ public class ProjectNavigator extends VerticalLayout {
 
     }
 
-    protected Folder findFolderWithName(String name) {
+    protected FolderName findFolderWithName(String name) {
         Object value = treeTable.getValue();
         while (!(value instanceof ProjectVersion) && value != null) {
             value = treeTable.getParent(value);
@@ -825,8 +819,8 @@ public class ProjectNavigator extends VerticalLayout {
         if (value instanceof ProjectVersion) {
             Collection<?> children = treeTable.getChildren(value);
             for (Object object : children) {
-                if (object instanceof Folder) {
-                    Folder folder = (Folder) object;
+                if (object instanceof FolderName) {
+                    FolderName folder = (FolderName) object;
                     if (folder.getName().equals(name)) {
                         return folder;
                     }
@@ -851,7 +845,7 @@ public class ProjectNavigator extends VerticalLayout {
 
     protected void addNewFlow() {
 
-        Folder folder = findFolderWithName("Flows");
+        FolderName folder = findFolderWithName("Flows");
         if (folder != null) {
             treeTable.setChildrenAllowed(folder, true);
 
@@ -882,7 +876,7 @@ public class ProjectNavigator extends VerticalLayout {
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {
-        Folder folder = findFolderWithName("Resources");
+        FolderName folder = findFolderWithName("Resources");
         if (folder != null) {
             treeTable.setChildrenAllowed(folder, true);
 
@@ -905,7 +899,7 @@ public class ProjectNavigator extends VerticalLayout {
     }
 
     protected void addNewModel() {
-        Folder folder = findFolderWithName("Models");
+        FolderName folder = findFolderWithName("Models");
         if (folder != null) {
             treeTable.setChildrenAllowed(folder, true);
 
@@ -928,17 +922,17 @@ public class ProjectNavigator extends VerticalLayout {
 
     class DeleteFlowConfirmationListener implements IConfirmListener {
 
-        Flow toDelete;
+        FlowName toDelete;
 
         private static final long serialVersionUID = 1L;
 
-        public DeleteFlowConfirmationListener(Flow toDelete) {
+        public DeleteFlowConfirmationListener(FlowName toDelete) {
             this.toDelete = toDelete;
         }
 
         @Override
         public boolean onOk() {
-            context.getConfigurationService().deleteFlow(toDelete);
+            context.getConfigurationService().deleteFlow(new Flow(toDelete.getId()));
             tabs.closeTab(toDelete.getId());
             Object parent = treeTable.getParent(toDelete);
             refresh();
@@ -951,17 +945,17 @@ public class ProjectNavigator extends VerticalLayout {
 
     class DeleteResourceConfirmationListener implements IConfirmListener {
 
-        Resource toDelete;
+        ResourceName toDelete;
 
         private static final long serialVersionUID = 1L;
 
-        public DeleteResourceConfirmationListener(Resource toDelete) {
+        public DeleteResourceConfirmationListener(ResourceName toDelete) {
             this.toDelete = toDelete;
         }
 
         @Override
         public boolean onOk() {
-            context.getConfigurationService().delete(toDelete);
+            context.getConfigurationService().delete(new Resource(toDelete.getId()));
             tabs.closeTab(toDelete.getId());
             Object parent = treeTable.getParent(toDelete);
             refresh();
@@ -972,46 +966,19 @@ public class ProjectNavigator extends VerticalLayout {
 
     }
 
-    class DeleteFlowStepConfirmationListener implements IConfirmListener {
-
-        FlowStep toDelete;
-
-        private static final long serialVersionUID = 1L;
-
-        public DeleteFlowStepConfirmationListener(FlowStep toDelete) {
-            this.toDelete = toDelete;
-        }
-
-        @Override
-        public boolean onOk() {
-            String flowId = toDelete.getFlowId();
-            Flow flow = context.getConfigurationService().findFlow(flowId);
-            context.getConfigurationService().delete(flow, toDelete);
-            Object parent = treeTable.getParent(toDelete);
-            if (tabs.closeTab(flowId)) {
-                open(flow);
-            }
-            refresh();
-            treeTable.setValue(parent);
-            treeTable.setCollapsed(parent, false);
-
-            return true;
-        }
-    }
-
     class DeleteModelConfirmationListener implements IConfirmListener {
 
-        Model toDelete;
+        ModelName toDelete;
 
         private static final long serialVersionUID = 1L;
 
-        public DeleteModelConfirmationListener(Model toDelete) {
+        public DeleteModelConfirmationListener(ModelName toDelete) {
             this.toDelete = toDelete;
         }
 
         @Override
         public boolean onOk() {
-            context.getConfigurationService().delete(toDelete);
+            context.getConfigurationService().delete(new Model(toDelete.getId()));
             tabs.closeTab(toDelete.getId());
             Object parent = treeTable.getParent(toDelete);
             refresh();

@@ -82,18 +82,13 @@ public class ManageNavigator extends Panel {
         treeTable.setItemIcon(agentsFolder, FontAwesome.FOLDER);
         addAgentsToFolder(agentsFolder);
 
-        List<Folder> folders = configurationService.findFolders(FolderType.RUNTIME);
+        List<Folder> folders = configurationService.findFolders(FolderType.DEPLOY);
         for (Folder folder : folders) {
             addChildFolder(folder, agentsFolder);
         }
 
         treeTable.addItem(flowsFolder);
         treeTable.setItemIcon(flowsFolder, FontAwesome.FOLDER);
-
-        folders = configurationService.findFolders(FolderType.DESIGN);
-        for (Folder folder : folders) {
-            addChildFolder(folder, flowsFolder);
-        }
 
         for (Object object : expandedItems) {
             treeTable.setCollapsed(object, false);

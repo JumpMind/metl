@@ -22,21 +22,26 @@ import org.jumpmind.symmetric.is.core.model.AgentSetting;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.ComponentEntitySetting;
+import org.jumpmind.symmetric.is.core.model.ComponentName;
 import org.jumpmind.symmetric.is.core.model.ComponentSetting;
 import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowName;
 import org.jumpmind.symmetric.is.core.model.FlowParameter;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.FolderName;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelAttributeRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.ModelEntityRelationship;
+import org.jumpmind.symmetric.is.core.model.ModelName;
 import org.jumpmind.symmetric.is.core.model.Project;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
+import org.jumpmind.symmetric.is.core.model.ResourceName;
 import org.jumpmind.symmetric.is.core.model.ResourceSetting;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.util.NameValue;
@@ -48,7 +53,47 @@ abstract class AbstractConfigurationService extends AbstractService implements
     AbstractConfigurationService(IPersistenceManager persistenceManager, String tablePrefix) {
         super(persistenceManager, tablePrefix);
     }
+    
+    @Override
+    public List<FlowName> findFlowsInProject(String projectVersionId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("projectVersionId", projectVersionId);
+        params.put("deleted", 0);
+        return find(FlowName.class, params, Flow.class);
+    }
 
+    @Override
+    public List<ModelName> findModelsInProject(String projectVersionId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("projectVersionId", projectVersionId);
+        params.put("deleted", 0);
+        return find(ModelName.class, params, Model.class);
+    }
+    
+    @Override
+    public List<ResourceName> findResourcesInProject(String projectVersionId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("projectVersionId", projectVersionId);
+        params.put("deleted", 0);
+        return find(ResourceName.class, params, Resource.class);
+    }
+    
+    @Override
+    public List<ComponentName> findComponentsInProject(String projectVersionId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("projectVersionId", projectVersionId);
+        params.put("deleted", 0);
+        return find(ComponentName.class, params, Component.class);
+    }
+    
+    @Override
+    public List<FolderName> findFoldersInProject(String projectVersionId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("projectVersionId", projectVersionId);
+        params.put("deleted", 0);
+        return find(FolderName.class, params, Folder.class);
+    }
+    
     @Override
     public Flow findFlow(String id) {
         Flow flowVersion = new Flow();
@@ -56,7 +101,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         refresh(flowVersion);
         return flowVersion;
     }
-
+    
     @Override
     public List<Folder> findFolders(FolderType type) {
         ArrayList<Folder> allFolders = new ArrayList<Folder>(foldersById(type).values());
@@ -143,41 +188,6 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
-    public List<Flow> findFlowsInProject(String projectVersionId) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("projectVersionId", projectVersionId);
-        params.put("deleted", 0);
-        List<Flow> flows = find(Flow.class, params);
-        for (Flow flow : flows) {
-            flow.setProjectVersionId(projectVersionId);
-            refreshFlowRelations(flow);
-        }
-        return flows;
-    }
-
-    @Override
-    public List<Model> findModelsInProject(String projectVersionId) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("projectVersionId", projectVersionId);
-        params.put("deleted", 0);
-        List<Model> models = find(Model.class, params);
-        for (Model model : models) {
-            model.setProjectVersionId(projectVersionId);
-            refreshModelRelations(model);
-        }
-        return models;
-    }
-
-    @Override
-    public List<Resource> findResourcesInProject(String projectVersionId) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("projectVersionId", projectVersionId);
-        params.put("deleted", 0);
-        List<Resource> datas = find(Resource.class, params);
-        return buildResource(datas);
-    }
-
-    @Override
     public List<Agent> findAgentsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
         String folderId = null;
@@ -210,7 +220,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         if (folder != null) {
             folderMapById.put(folder.getId(), folder);
         } else {
-            folderMapById = foldersById(FolderType.RUNTIME);
+            folderMapById = foldersById(FolderType.DEPLOY);
         }
 
         for (Agent agent : list) {
@@ -372,11 +382,11 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     }
 
-    protected Model findModel(String id) {
-        Model model = new Model();
-        model.setId(id);
-        persistenceManager.refresh(model, null, null, tableName(Model.class));
-        return refreshModelRelations(model);
+    @Override
+    public Model findModel(String id) {
+        Model model = new Model(id);
+        refresh(model);
+        return model;
     }
 
     protected Model refreshModelRelations(Model model) {
@@ -751,5 +761,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
             save(attributeRelationship);
         }
     }
+    
+    
     
 }
