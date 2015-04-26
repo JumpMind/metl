@@ -12,10 +12,12 @@ public class AgentDeploymentParameter extends AbstractObject {
     public AgentDeploymentParameter() {
     }
     
-    public AgentDeploymentParameter(String name, String value, String agentDeploymentId) {
+    public AgentDeploymentParameter(String name, String value, 
+            String agentDeploymentId, String flowParameterId) {
         this.name = name;
         this.value = value;
         this.agentDeploymentId = agentDeploymentId;
+        this.flowParameterId = flowParameterId;
     }
     
     @Override

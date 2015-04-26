@@ -197,17 +197,16 @@ public class AgentRuntime {
 
             List<FlowParameter> defaultParameters = flow.getFlowParameters();
             for (FlowParameter flowParameter : defaultParameters) {
-                if (!parameters.containsKey(flowParameter.getName())) {
-                    parameters.put(flowParameter.getName(), flowParameter.getDefaultValue());
+                String value = flowParameter.getDefaultValue();
+                if (parameters.containsKey(flowParameter.getName())) {
+                    value = parameters.get(flowParameter.getName());
                 }
+                deployment.getAgentDeploymentParameters().add(
+                        new AgentDeploymentParameter(flowParameter.getName(), value, deployment
+                                .getId(), flowParameter.getId()));
+
             }
 
-            Set<String> paramKeys = parameters.keySet();
-            for (String paramKey : paramKeys) {
-                deployment.getAgentDeploymentParameters().add(
-                        new AgentDeploymentParameter(paramKey, parameters.get(paramKey), deployment
-                                .getId()));
-            }
             agent.getAgentDeployments().remove(deployment);
             agent.getAgentDeployments().add(deployment);
             configurationService.save(deployment);
