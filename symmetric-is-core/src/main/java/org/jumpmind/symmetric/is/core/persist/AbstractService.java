@@ -21,7 +21,7 @@ public abstract class AbstractService {
     
     protected String tableName(Class<?> clazz) {
         StringBuilder name = new StringBuilder(tablePrefix);
-        int end = clazz.getSimpleName().indexOf("Data");
+        int end = clazz.getSimpleName().indexOf("Name");
         if (end < 0) {
             end = clazz.getSimpleName().length();
         }

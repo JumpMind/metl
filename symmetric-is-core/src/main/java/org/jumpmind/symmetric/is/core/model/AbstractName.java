@@ -6,7 +6,9 @@ abstract public class AbstractName extends AbstractObject {
     private static final long serialVersionUID = 1L;
     
     String name;
+    
     boolean deleted;
+    
     String projectVersionId;
     
     @Override
@@ -38,6 +40,11 @@ abstract public class AbstractName extends AbstractObject {
     
     public String getProjectVersionId() {
         return projectVersionId;
+    }
+    
+    @Override
+    public boolean isSettingNameAllowed() {
+        return true;
     }
 
     @Override
