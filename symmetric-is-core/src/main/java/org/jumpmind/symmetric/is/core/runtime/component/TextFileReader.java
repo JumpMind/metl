@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
@@ -22,7 +23,7 @@ import org.jumpmind.util.FormatUtils;
         typeName = TextFileReader.TYPE,
         category = ComponentCategory.READER,
         iconImage = "textfilereader.png",
-        inputMessage = MessageType.ANY,
+        inputMessage = MessageType.TEXT,
         outgoingMessage = MessageType.TEXT,
         resourceCategory = ResourceCategory.STREAMABLE)
 public class TextFileReader extends AbstractComponent {
@@ -60,8 +61,8 @@ public class TextFileReader extends AbstractComponent {
             defaultValue = "false",
             label = "Delete On Complete")
     public final static String SETTING_DELETE_ON_COMPLETE = "delete.on.complete";
-    
-    @SettingDefinition(order = 60, type = Type.STRING, label = "Encoding", defaultValue="UTF-8")
+
+    @SettingDefinition(order = 60, type = Type.STRING, label = "Encoding", defaultValue = "UTF-8")
     public final static String SETTING_ENCODING = "textfilereader.encoding";
 
     String relativePathAndFile;
@@ -69,7 +70,7 @@ public class TextFileReader extends AbstractComponent {
     boolean mustExist;
 
     boolean getFileNameFromMessage = false;
-    
+
     boolean deleteOnComplete = false;
 
     int textRowsPerMessage;
@@ -86,38 +87,51 @@ public class TextFileReader extends AbstractComponent {
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
+        componentStatistics.incrementInboundMessages();
         String currentLine;
         int linesRead = 0;
         int linesInMessage = 0;
         int numberMessages = 0;
-
-        InputStream inStream = null;
-        BufferedReader reader = null;
-        try {
-            IStreamableResource resource = (IStreamableResource) this.resource.reference();
-            String filePath = FormatUtils.replaceTokens(relativePathAndFile, inputMessage
-                    .getHeader().getParametersAsString(), true);
-            inStream = resource.getInputStream(filePath, mustExist);
-            reader = new BufferedReader(new InputStreamReader(inStream, encoding));
-            ArrayList<String> payload = new ArrayList<String>();
-            while ((currentLine = reader.readLine()) != null) {
-                linesRead++;
-                if (linesRead > textHeaderLinesToSkip) {
-                    if (linesInMessage >= textRowsPerMessage) {
-                        initAndSendMessage(payload, messageTarget, numberMessages, false);
-                        linesInMessage = 0;
-                    }
-                    payload.add(currentLine);
-                    linesInMessage++;
-                }
-            }
-            initAndSendMessage(payload, messageTarget, numberMessages, true);
-        } catch (IOException e) {
-            throw new IoException("Error reading from file " + e.getMessage());
-        } finally {
-            IOUtils.closeQuietly(reader);
-            IOUtils.closeQuietly(inStream);
+        List<String> files = new ArrayList<String>();
+        if (getFileNameFromMessage) {
+            files = inputMessage.getPayload();
+        } else {
+            files.add(relativePathAndFile);
         }
+
+        for (String file : files) {
+
+            InputStream inStream = null;
+            BufferedReader reader = null;
+            try {
+                IStreamableResource resource = (IStreamableResource) this.resource.reference();
+                String filePath = FormatUtils.replaceTokens(file, inputMessage.getHeader()
+                        .getParametersAsString(), true);
+                inStream = resource.getInputStream(filePath, mustExist);
+                reader = new BufferedReader(new InputStreamReader(inStream, encoding));
+                ArrayList<String> payload = new ArrayList<String>();
+                while ((currentLine = reader.readLine()) != null) {
+                    linesRead++;
+                    componentStatistics.incrementNumberEntitiesProcessed();
+                    if (linesRead > textHeaderLinesToSkip) {
+                        if (linesInMessage >= textRowsPerMessage) {
+                            initAndSendMessage(payload, inputMessage, messageTarget, numberMessages, false);
+                            linesInMessage = 0;
+                        }
+                        payload.add(currentLine);
+                        linesInMessage++;
+                    }
+                }
+                initAndSendMessage(payload, inputMessage, messageTarget, numberMessages, true);
+            } catch (IOException e) {
+                throw new IoException("Error reading from file " + e.getMessage());
+            } finally {
+                IOUtils.closeQuietly(reader);
+                IOUtils.closeQuietly(inStream);
+            }
+
+        }
+
     }
 
     private void applySettings() {
@@ -125,19 +139,21 @@ public class TextFileReader extends AbstractComponent {
         relativePathAndFile = component.get(SETTING_RELATIVE_PATH, relativePathAndFile);
         mustExist = component.getBoolean(SETTING_MUST_EXIST, mustExist);
         textRowsPerMessage = component.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
-        textHeaderLinesToSkip = component.getInt(SETTING_HEADER_LINES_TO_SKIP, textHeaderLinesToSkip);
-        getFileNameFromMessage = component.getBoolean(SETTING_GET_FILE_FROM_MESSAGE, getFileNameFromMessage);
+        textHeaderLinesToSkip = component.getInt(SETTING_HEADER_LINES_TO_SKIP,
+                textHeaderLinesToSkip);
+        getFileNameFromMessage = component.getBoolean(SETTING_GET_FILE_FROM_MESSAGE,
+                getFileNameFromMessage);
         deleteOnComplete = component.getBoolean(SETTING_DELETE_ON_COMPLETE, deleteOnComplete);
         encoding = component.get(SETTING_ENCODING, encoding);
     }
 
-    private void initAndSendMessage(ArrayList<String> payload, IMessageTarget messageTarget,
+    private void initAndSendMessage(ArrayList<String> payload, Message inputMessage, IMessageTarget messageTarget,
             int numberMessages, boolean lastMessage) {
         numberMessages++;
-        Message message = new Message(flowStep.getId());
+        Message message = inputMessage.copy(flowStep.getId(), new ArrayList<String>(payload));
         message.getHeader().setSequenceNumber(numberMessages);
         message.getHeader().setLastMessage(lastMessage);
-        message.setPayload(new ArrayList<String>(payload));
+        componentStatistics.incrementOutboundMessages();
         messageTarget.put(message);
         payload.clear();
     }

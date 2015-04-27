@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -129,10 +130,10 @@ public class FilePoller extends AbstractComponent {
     protected void pollForFiles(String path, Message inputMessage, IMessageTarget messageTarget) {
         File pathDir = new File(path);
         ArrayList<String> filePaths = new ArrayList<String>();
-        List<File> files = FileFilterUtils.filterList(fileFilter, pathDir);
-        filesSent.addAll(files);
-        if (files.size() > 0) {
+        File[] files = pathDir.listFiles((FilenameFilter)fileFilter);
+        if (files.length > 0) {
             for (File file : files) {
+                filesSent.add(file);
                 executionTracker.log(executionId, LogLevel.INFO, this, "File polled: " + file.getAbsolutePath());
                 String filePath = file.getAbsolutePath(); 
                 filePaths.add(filePath.substring(pathDir.getAbsolutePath().length()));
@@ -158,7 +159,9 @@ public class FilePoller extends AbstractComponent {
     }
     
     protected void archive(String archivePath) {
-        File destDir = new File(archivePath);
+        Resource resource = this.resource.getResource();
+        String path = resource.get(LocalFileResource.LOCALFILE_PATH);
+        File destDir = new File(path, archivePath);
         for (File srcFile : filesSent) {
             try {
                 FileUtils.moveFileToDirectory(srcFile, destDir, true);
