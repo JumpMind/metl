@@ -30,7 +30,7 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         typeName = DelimitedParser.TYPE,
         category = ComponentCategory.PROCESSOR,
         iconImage = "delimitedformatter.png",
-        inputMessage = MessageType.NONE,
+        inputMessage = MessageType.TEXT,
         outgoingMessage = MessageType.ENTITY)
 public class DelimitedParser extends AbstractComponent {
 
