@@ -164,7 +164,7 @@ public class DbReader extends AbstractComponent {
         if (messageManipulationStrategy == MessageManipulationStrategy.ENHANCE) {
             message = inputMessage.copy(flowStep.getId());
         } else {
-            message = new Message(flowStep.getId());
+            message = inputMessage.copy(flowStep.getId(), new ArrayList<EntityData>());
             message.setPayload(new ArrayList<EntityData>());
         }
         return message;
