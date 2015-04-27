@@ -84,8 +84,7 @@ public class BinaryFileWriter extends AbstractComponent {
 
 
     private OutputStream getOutputStream(IStreamableResource conn) {
-        conn.appendPath(relativePathAndFile, mustExist);
-        return conn.getOutputStream();
+        return conn.getOutputStream(relativePathAndFile, mustExist);
     }
 
 

@@ -94,8 +94,7 @@ public class BinaryFileReader extends AbstractComponent {
 
     private void open() {
         IStreamableResource resource = (IStreamableResource) this.resource.reference();
-        resource.appendPath(relativePathAndFile, mustExist);
-        inStream = resource.getInputStream();
+        inStream = resource.getInputStream(relativePathAndFile, mustExist);
     }
 
     protected void close() {

@@ -13,20 +13,16 @@ public interface IStreamableResource {
     
     public boolean supportsInputStream();
     
-    public InputStream getInputStream();
+    public InputStream getInputStream(String relativePath, boolean mustExist);
     
     public boolean supportsOutputStream();
     
-    public OutputStream getOutputStream();
+    public OutputStream getOutputStream(String relativePath, boolean mustExist);
     
     public void close();
     
-    public boolean delete();
+    public boolean delete(String relativePath);
     
     public boolean supportsDelete();
-    
-    public void appendPath(String relativePath, boolean mustExist);
-    
-    public void resetPath();
-    
+        
 }

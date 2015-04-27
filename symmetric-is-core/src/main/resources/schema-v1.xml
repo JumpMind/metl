@@ -61,7 +61,6 @@
         <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />
         <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>                        
         <column name="name" type="VARCHAR" size="255" description="" />
-        <column name="type" type="VARCHAR" size="50" required="true" description="RELATIONAL" />
         <column name="shared" type="BOOLEANINT" size="1" default="0" description="Indicator as to whether this is a shared model." />
         <column name="folder_id" type="CHAR" size="36"/>
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
