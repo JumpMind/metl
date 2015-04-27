@@ -73,7 +73,7 @@ public class TextFileReader extends AbstractComponent {
 
     boolean deleteOnComplete = false;
 
-    int textRowsPerMessage;
+    int textRowsPerMessage = 1000;
 
     int textHeaderLinesToSkip;
 
@@ -112,12 +112,12 @@ public class TextFileReader extends AbstractComponent {
                 ArrayList<String> payload = new ArrayList<String>();
                 while ((currentLine = reader.readLine()) != null) {
                     linesRead++;
-                    componentStatistics.incrementNumberEntitiesProcessed();
-                    if (linesRead > textHeaderLinesToSkip) {
+                    if (linesRead > textHeaderLinesToSkip) {                        
                         if (linesInMessage >= textRowsPerMessage) {
                             initAndSendMessage(payload, inputMessage, messageTarget, numberMessages, false);
                             linesInMessage = 0;
                         }
+                        componentStatistics.incrementNumberEntitiesProcessed();
                         payload.add(currentLine);
                         linesInMessage++;
                     }
@@ -141,6 +141,7 @@ public class TextFileReader extends AbstractComponent {
         textRowsPerMessage = component.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
         textHeaderLinesToSkip = component.getInt(SETTING_HEADER_LINES_TO_SKIP,
                 textHeaderLinesToSkip);
+        textRowsPerMessage = component.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
         getFileNameFromMessage = component.getBoolean(SETTING_GET_FILE_FROM_MESSAGE,
                 getFileNameFromMessage);
         deleteOnComplete = component.getBoolean(SETTING_DELETE_ON_COMPLETE, deleteOnComplete);
