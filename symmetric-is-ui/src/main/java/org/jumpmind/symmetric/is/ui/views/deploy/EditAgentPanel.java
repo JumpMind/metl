@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.ui.views.deploy;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -242,6 +243,13 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
                 isChanged = true;
             }
         }
+        Set<AgentDeploymentSummary> items = new HashSet<AgentDeploymentSummary>(container.getItemIds());
+        for (AgentDeploymentSummary summary : items) {
+            if (!summaries.contains(summary)) {
+                container.removeItem(summary);
+                isChanged = true;
+            }
+        }
         if (isChanged) {
             table.sort();
             setSelectedItems(selectedItems);
@@ -282,8 +290,11 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
     protected void setSelectedItems(Set<AgentDeploymentSummary> selectedItems) {
         table.setValue(null);
         for (AgentDeploymentSummary summary : selectedItems) {
-            AgentDeploymentSummary updatedSummary = container.getItem(summary).getBean();
-            table.select(updatedSummary);
+            BeanItem<AgentDeploymentSummary> beanItem = container.getItem(summary);
+            if (beanItem != null) {
+                AgentDeploymentSummary updatedSummary = beanItem.getBean();
+                table.select(updatedSummary);
+            }
         }
     }
 
