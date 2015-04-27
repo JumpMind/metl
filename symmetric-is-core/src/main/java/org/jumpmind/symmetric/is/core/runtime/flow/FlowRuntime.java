@@ -149,9 +149,9 @@ public class FlowRuntime {
 
         for (StepRuntime stepRuntime : allSteps) {
             if (allErrors.size() > 0) {
-                stepRuntime.getComponent().flowCompletedWithErrors(stepRuntime.getError(), allErrors);
+                stepRuntime.flowCompletedWithErrors(stepRuntime.getError(), allErrors);
             } else {
-                stepRuntime.getComponent().flowCompletedWithoutError();
+                stepRuntime.flowCompletedWithoutError();
             }
         }
         

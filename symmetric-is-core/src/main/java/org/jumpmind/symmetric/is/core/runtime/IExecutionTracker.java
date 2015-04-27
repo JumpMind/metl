@@ -15,6 +15,8 @@ public interface IExecutionTracker {
     public void beforeFlow(String executionId);
     
     public void afterFlow(String executionId);
+    
+    public void flowStepFailedOnComplete(String executionId, IComponent component, Throwable error);
 
     public void log (String executionId, LogLevel level, IComponent component, String output);
     

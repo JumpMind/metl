@@ -116,11 +116,11 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         if (step != null) {
             step.setEndTime(new Date());
             ExecutionStatus status = ExecutionStatus.DONE;
-            if (error != null) {
-                status = ExecutionStatus.ERROR;
-            }
             if (cancelled) {
                 status = ExecutionStatus.CANCELLED;
+            }
+            if (error != null) {
+                status = ExecutionStatus.ERROR;
             }
             step.setStatus(status.name());
             if (component.getComponentStatistics() != null) {
@@ -132,18 +132,27 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             this.recorder.record(step);
         }
     }
+    
+    @Override
+    public void flowStepFailedOnComplete(String executionId, IComponent component, Throwable error) {
+        super.flowStepFailedOnComplete(executionId, component, error);
+        ExecutionStep step = steps.get(component.getFlowStep().getId());
+        if (step != null) {
+            step.setStatus(ExecutionStatus.ERROR.name());
+            this.recorder.record(step);
+        }
+    }
 
     @Override
     public void log(String executionId, LogLevel level, IComponent component, String output) {
         super.log(executionId, level, component, output);
-
         if (deployment.asLogLevel().log(level)) {
             ExecutionStepLog log = new ExecutionStepLog();
             log.setExecutionStepId(steps.get(component.getFlowStep().getId()).getId());
             log.setLevel(level.name());
             log.setLogText(output);
             this.recorder.record(log);
-        }
+        }        
     }
 
 }

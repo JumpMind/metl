@@ -32,4 +32,8 @@ public class ExecutionTrackerNoOp implements IExecutionTracker {
     @Override
     public void flowStepStarted(String executionId, IComponent component) {
     }
+    
+    @Override
+    public void flowStepFailedOnComplete(String executionId, IComponent component, Throwable error) {
+    }
 }

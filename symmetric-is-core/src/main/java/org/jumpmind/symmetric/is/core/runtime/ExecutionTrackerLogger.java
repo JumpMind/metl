@@ -69,6 +69,10 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
                         .getComponent().getId());
         log.info(msg);
     }
+    
+    @Override
+    public void flowStepFailedOnComplete(String executionId, IComponent component, Throwable error) {
+    }
 
     @Override
     public void log(String executionId, LogLevel level, IComponent component, String output) {

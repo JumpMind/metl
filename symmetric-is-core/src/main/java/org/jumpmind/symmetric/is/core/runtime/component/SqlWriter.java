@@ -11,7 +11,9 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
+import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
+import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.util.FormatUtils;
@@ -24,7 +26,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
         inputMessage = MessageType.ANY,
         outgoingMessage = MessageType.ANY,
         resourceCategory = ResourceCategory.DATASOURCE,
-        inputOutputModelsMatch=true)
+        inputOutputModelsMatch = true)
 public class SqlWriter extends AbstractComponent {
 
     private static final String ON_SUCCESS = "ON SUCCESS";
@@ -43,12 +45,15 @@ public class SqlWriter extends AbstractComponent {
     public final static String RUN_WHEN = "run.when";
 
     String sql;
-    
+
     String runWhen = PER_MESSAGE;
+
+    StartupMessage startupMessage;
 
     @Override
     public void start(String executionId, IExecutionTracker executionTracker) {
         super.start(executionId, executionTracker);
+        startupMessage = null;
         applySettings();
         if (resource == null) {
             throw new IllegalStateException("This component requires a data source");
@@ -62,6 +67,9 @@ public class SqlWriter extends AbstractComponent {
     @Override
     public void handle(final Message inputMessage, final IMessageTarget messageTarget) {
         componentStatistics.incrementInboundMessages();
+        if (inputMessage instanceof StartupMessage) {
+            startupMessage = (StartupMessage) inputMessage;
+        }
         final String sqlToExecute = FormatUtils.replaceTokens(this.sql, inputMessage.getHeader()
                 .getParametersAsString(), true);
         NamedParameterJdbcTemplate template = getJdbcTemplate();
@@ -73,9 +81,9 @@ public class SqlWriter extends AbstractComponent {
         } else if (runWhen.equals(PER_ENTITY)) {
             List<EntityData> datas = inputMessage.getPayload();
             for (EntityData entityData : datas) {
-               params.putAll(flowStep.getComponent().toRow(entityData));
-               int count = template.update(sqlToExecute, params);
-               componentStatistics.incrementNumberEntitiesProcessed(count);
+                params.putAll(flowStep.getComponent().toRow(entityData));
+                int count = template.update(sqlToExecute, params);
+                componentStatistics.incrementNumberEntitiesProcessed(count);
             }
         }
         componentStatistics.incrementOutboundMessages();
@@ -84,7 +92,20 @@ public class SqlWriter extends AbstractComponent {
 
     @Override
     public void flowCompletedWithoutError() {
-
+        if (runWhen.equals(ON_SUCCESS)) {
+            NamedParameterJdbcTemplate template = getJdbcTemplate();
+            String sqlToExecute = sql;
+            Map<String, Object> params = new HashMap<String, Object>();
+            if (startupMessage != null) {
+                sqlToExecute = FormatUtils.replaceTokens(this.sql, startupMessage.getHeader()
+                        .getParametersAsString(), true);
+                params.putAll(startupMessage.getHeader().getParametersAsString());
+            }
+            executionTracker.log(executionId, LogLevel.INFO, this, 
+                    "Executing the following sql after a successful completion: " + sqlToExecute);
+            int count = template.update(sqlToExecute, params);
+            componentStatistics.incrementNumberEntitiesProcessed(count);
+        }
     }
 
     protected void applySettings() {

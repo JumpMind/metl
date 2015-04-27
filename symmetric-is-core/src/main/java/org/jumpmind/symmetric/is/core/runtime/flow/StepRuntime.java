@@ -26,7 +26,7 @@ public class StepRuntime implements Runnable {
     protected BlockingQueue<Message> inQueue;
 
     boolean running = true;
-    
+
     boolean cancelled = false;
 
     Throwable error;
@@ -45,7 +45,8 @@ public class StepRuntime implements Runnable {
         this.executionId = executionId;
         this.executionTracker = tracker;
         this.component = component;
-        int capacity = component.getFlowStep().getComponent().getInt(AbstractComponent.INBOUND_QUEUE_CAPACITY, 1000);
+        int capacity = component.getFlowStep().getComponent()
+                .getInt(AbstractComponent.INBOUND_QUEUE_CAPACITY, 1000);
         inQueue = new LinkedBlockingQueue<Message>(capacity);
     }
 
@@ -74,7 +75,7 @@ public class StepRuntime implements Runnable {
             throw ex;
         }
     }
-    
+
     protected void recordError(Throwable ex) {
         error = ex;
         String msg = ex.getMessage();
@@ -96,13 +97,13 @@ public class StepRuntime implements Runnable {
              * runtime to kick things off. If we have input links, we must loop
              * until we get a shutdown message from one of our sources
              */
-            while (running) {                
+            while (running) {
                 Message inputMessage = inQueue.take();
                 if (inputMessage instanceof ShutdownMessage) {
-                    ShutdownMessage shutdownMessage = (ShutdownMessage)inputMessage;
-                    
+                    ShutdownMessage shutdownMessage = (ShutdownMessage) inputMessage;
+
                     cancelled = shutdownMessage.isCancelled();
-                    
+
                     String fromStepId = inputMessage.getHeader().getOriginatingStepId();
                     removeSourceStepRuntime(fromStepId);
                     /*
@@ -167,10 +168,32 @@ public class StepRuntime implements Runnable {
         this.inQueue.put(new ShutdownMessage(component.getFlowStep().getId()));
     }
 
+    public void flowCompletedWithoutError() {
+        if (!cancelled) {
+            try {
+                component.flowCompletedWithoutError();
+            } catch (Exception ex) {
+                recordError(ex);
+                executionTracker.flowStepFailedOnComplete(executionId, component, ex);
+            }
+        }
+    }
+
+    public void flowCompletedWithErrors(Throwable myError, List<Throwable> allErrors) {
+        if (!cancelled) {
+            try {
+                component.flowCompletedWithErrors(myError, allErrors);
+            } catch (Exception ex) {
+                recordError(ex);
+                executionTracker.flowStepFailedOnComplete(executionId, component, ex);
+            }
+        }
+    }
+
     public IComponent getComponent() {
         return this.component;
     }
-    
+
     public Throwable getError() {
         return error;
     }
@@ -182,8 +205,10 @@ public class StepRuntime implements Runnable {
             // clear out the target step id as we are done using it
             message.getHeader().setTargetStepIds(null);
             for (StepRuntime targetRuntime : targetStepRuntimes) {
-                boolean forward = targetStepIds == null || targetStepIds.size() == 0
-                        || targetStepIds.contains(targetRuntime.getComponent().getFlowStep().getId());
+                boolean forward = targetStepIds == null
+                        || targetStepIds.size() == 0
+                        || targetStepIds.contains(targetRuntime.getComponent().getFlowStep()
+                                .getId());
                 if (forward) {
                     try {
                         targetRuntime.queue(message);
