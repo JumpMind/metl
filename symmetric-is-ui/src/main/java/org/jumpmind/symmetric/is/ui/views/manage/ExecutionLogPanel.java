@@ -187,7 +187,8 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
     }
 
     protected void refreshUI(ExecutionData data) {
-        if (!ExecutionStatus.DONE.name().equals(statusLabel.getValue()) && 
+        if (!ExecutionStatus.DONE.name().equals(statusLabel.getValue()) &&
+                !ExecutionStatus.CANCELLED.name().equals(statusLabel.getValue()) && 
                 !ExecutionStatus.ERROR.name().equals(statusLabel.getValue())) {
             flowLabel.setValue(data.execution.getFlowName());
             startLabel.setValue(formatDate(data.execution.getStartTime()));
