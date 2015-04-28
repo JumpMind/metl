@@ -59,7 +59,7 @@ public interface IConfigurationService {
     
     public boolean isDeployed(Flow flow);
     
-    public List<Flow> findFlows();
+    public List<FlowName> findFlows();
            
     public Resource findResource(String id);
     

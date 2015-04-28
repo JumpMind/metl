@@ -17,6 +17,8 @@ import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowParameter;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
+import org.jumpmind.symmetric.is.core.model.Folder;
+import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
@@ -346,11 +348,18 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         }
 
         if (localAgent == null) {
+            IConfigurationService configurationService = context.getConfigurationService();
+            Folder folder = new Folder();
+            folder.setType(FolderType.AGENT.name());
+            folder.setName("<Design Time>");
+            configurationService.save(folder);
+            
             localAgent = new Agent();
             localAgent.setHost("localhost");
             localAgent.setName("local");
+            localAgent.setFolder(folder);
             localAgent.setStartMode(AgentStartMode.AUTO.name());
-            context.getConfigurationService().save(localAgent);
+            configurationService.save(localAgent);
             agentManager.refresh(localAgent);
         }
 

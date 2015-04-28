@@ -139,17 +139,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
             all.put(folder.getId(), folder);
         }
         return all;
-    }
+    }   
 
     @Override
-    public List<Flow> findFlows() {
+    public List<FlowName> findFlows() {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("deleted", 0);
-        List<Flow> flows = find(Flow.class, params);
-        for (Flow flow : flows) {
-            refreshFlowRelations(flow);
-        }
-        return flows;
+        return find(FlowName.class, params);
     }
 
     @Override
@@ -220,7 +216,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         if (folder != null) {
             folderMapById.put(folder.getId(), folder);
         } else {
-            folderMapById = foldersById(FolderType.DEPLOY);
+            folderMapById = foldersById(FolderType.AGENT);
         }
 
         for (Agent agent : list) {
