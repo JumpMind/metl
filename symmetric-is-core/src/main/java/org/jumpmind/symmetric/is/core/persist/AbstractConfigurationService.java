@@ -79,6 +79,15 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
     
     @Override
+    public List<ComponentName> findSharedComponentsInProject(String projectVersionId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("projectVersionId", projectVersionId);
+        params.put("deleted", 0);
+        params.put("shared", 1);
+        return find(ComponentName.class, params, Component.class);
+    }
+    
+    @Override
     public List<ComponentName> findComponentsInProject(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("projectVersionId", projectVersionId);

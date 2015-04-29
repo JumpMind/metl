@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
+import org.jumpmind.symmetric.is.core.model.ComponentName;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowName;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
@@ -607,8 +608,8 @@ public class ProjectNavigator extends VerticalLayout {
             addFlowsToFolder(addVirtualFolder("Flows", projectVersion), projectVersion);
             addModelsToFolder(addVirtualFolder("Models", projectVersion), projectVersion);
             addResourcesToFolder(addVirtualFolder("Resources", projectVersion), projectVersion);
-            // addComponentsToFolder(addFolder("Components", projectVersion),
-            // projectVersion);
+            //TODO: determine if we want to show shared components here too...
+            //addSharedComponentsToFolder(addVirtualFolder("Shared Components", projectVersion), projectVersion);
         }
     }
 
@@ -644,6 +645,19 @@ public class ProjectNavigator extends VerticalLayout {
 
     }
 
+    protected void addSharedComponentsToFolder(FolderName folder, ProjectVersion projectVersion) {
+        IConfigurationService configurationService = context.getConfigurationService();
+        List<ComponentName> components = configurationService.findSharedComponentsInProject(projectVersion
+                .getId());
+        for (ComponentName component : components) {
+            this.treeTable.setChildrenAllowed(folder, true);
+            this.treeTable.addItem(component);
+            this.treeTable.setItemIcon(component, Icons.COMPONENT);
+            this.treeTable.setParent(component, folder);
+            this.treeTable.setChildrenAllowed(component, false);         
+        }
+    }
+    
     protected void addFlowsToFolder(FolderName folder, ProjectVersion projectVersion) {
         IConfigurationService configurationService = context.getConfigurationService();
         List<FlowName> flows = configurationService.findFlowsInProject(projectVersion.getId());

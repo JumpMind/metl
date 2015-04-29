@@ -98,9 +98,13 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     Button parametersButton;
 
     AbstractObject selected;
+    
+    IConfigurationService configurationService;
 
     public EditFlowPanel(ApplicationContext context, String flowId,
             ProjectNavigator designNavigator, TabbedPanel tabs) {
+        
+        this.configurationService = context.getConfigurationService();
         this.flow = context.getConfigurationService().findFlow(flowId);
         this.context = context;
         this.tabs = tabs;
@@ -116,7 +120,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         });
         this.propertySheet.setCaption("Property Sheet");
 
-        this.componentPalette = new EditFlowPalette(this, context.getComponentFactory());
+        this.componentPalette = new EditFlowPalette(this, context, flow.getProjectVersionId());
 
         addComponent(componentPalette);
 
@@ -434,12 +438,20 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             WrapperTransferable t = (WrapperTransferable) event.getTransferable();
             WrapperTargetDetails details = (WrapperTargetDetails) event.getTargetDetails();
             DragAndDropWrapper wrapper = (DragAndDropWrapper) t.getSourceComponent();
-            Button button = (Button) wrapper.iterator().next();
-            Component component = new Component();
-            component.setType(button.getCaption());
-            component.setShared(false);
-            addComponent(details.getMouseEvent().getClientX() - details.getAbsoluteLeft(), details
-                    .getMouseEvent().getClientY() - details.getAbsoluteTop(), component);
+            FlowPaletteItem flowPaletteItem = (FlowPaletteItem) wrapper.iterator().next();
+            if (flowPaletteItem.isShared) {
+                Component component = new Component();
+                component.setId(flowPaletteItem.getComponentId());
+                configurationService.refresh(component);
+                addComponent(details.getMouseEvent().getClientX() - details.getAbsoluteLeft(), details
+                        .getMouseEvent().getClientY() - details.getAbsoluteTop(), component);                                
+            } else {
+                Component component = new Component();
+                component.setType(flowPaletteItem.getCaption());
+                component.setShared(false);
+                addComponent(details.getMouseEvent().getClientX() - details.getAbsoluteLeft(), details
+                        .getMouseEvent().getClientY() - details.getAbsoluteTop(), component);                
+            }
         }
 
         @Override

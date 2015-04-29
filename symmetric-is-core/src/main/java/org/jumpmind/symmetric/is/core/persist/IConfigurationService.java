@@ -37,6 +37,8 @@ public interface IConfigurationService {
     
     public List<ResourceName> findResourcesInProject(String projectVersionId);
     
+    public List<ComponentName> findSharedComponentsInProject(String projectVersionId);
+    
     public List<FlowName> findFlowsInProject(String projectVersionId);
 
     public List<Folder> findFolders(FolderType type);

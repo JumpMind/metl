@@ -11,6 +11,8 @@ abstract public class AbstractName extends AbstractObject {
     
     boolean deleted;
     
+    boolean shared;
+    
     String projectVersionId;
     
     String rowId = UUID.randomUUID().toString();
@@ -36,6 +38,14 @@ abstract public class AbstractName extends AbstractObject {
     
     public boolean isDeleted() {
         return deleted;
+    }
+    
+    public void setShared(boolean shared) {
+        this.shared = shared;
+    }
+    
+    public boolean isShared() {
+        return shared;
     }
     
     public void setProjectVersionId(String projectVersionId) {

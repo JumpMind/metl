@@ -117,6 +117,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         ComponentDefinition componentDefintion = componentFactory
                 .getComponentDefinitionForComponentType(component.getType());
         addComponentName(formLayout, component);
+        addComponentShared(formLayout, component);
         addResourceCombo(componentDefintion, formLayout, component);
         addInputModelCombo(componentDefintion, formLayout, component);
         addOutputModelCombo(componentDefintion, formLayout, component);
@@ -181,6 +182,34 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         textField.setRequired(true);
         textField.setDescription("Name for the component on the flow");
         formLayout.addComponent(textField);
+    }
+    
+    protected void addComponentShared(FormLayout formLayout, final Component component) {
+        
+        final CheckBox checkBox = new CheckBox("Shared");
+        checkBox.setImmediate(true);
+
+        if (component.isShared()) {
+            checkBox.setValue(true);
+        } else {
+            checkBox.setValue(false);
+        }        
+        checkBox.setRequired(true);
+        checkBox.setDescription("Whether this component can be reused");
+        checkBox.addValueChangeListener(new ValueChangeListener() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                //TODO: Don't allow unshare if component is already on more than 1 flow?
+                //TODO: Refresh palette for the existing flow to have this item display in shared definitions
+                component.setShared((boolean) event.getProperty().getValue());
+                configurationService.save(component);
+            }
+        });
+        formLayout.addComponent(checkBox);
+        
     }
     
     protected void addInputModelCombo(ComponentDefinition componentDefintion,

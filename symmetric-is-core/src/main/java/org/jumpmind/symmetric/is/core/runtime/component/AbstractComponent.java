@@ -30,7 +30,7 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     
     @SettingDefinition(order = 0, required = false, type = Type.BOOLEAN, defaultValue = "true", label = "Enabled")
     public final static String ENABLED = "enabled";
-    
+
     protected Flow flow;
     protected FlowStep flowStep; 
     protected Map<String, IResource> resources;
@@ -39,6 +39,7 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     protected ComponentStatistics componentStatistics;
     protected String executionId;
     protected boolean enabled = true;
+    protected boolean shared = false;
 
     @Override
     public void start(String executionId, IExecutionTracker executionTracker) {
@@ -69,7 +70,6 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     public IResource getResource() {
         return resource;
     }
-    
     
     @Override
     public IExecutionTracker getExecutionTracker() {
