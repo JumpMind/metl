@@ -162,7 +162,7 @@ public class AppConfig {
     public IExecutionService executionService() {
         if (executionService == null) {
             executionService = new ExecutionSqlService(configDatabasePlatform(),
-                    persistenceManager(), tablePrefix());
+                    persistenceManager(), tablePrefix(), env);
         }
         return executionService;
     }    

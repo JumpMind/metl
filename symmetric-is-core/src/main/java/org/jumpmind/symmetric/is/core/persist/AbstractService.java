@@ -7,8 +7,12 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractService {
+    
+    final protected Logger log = LoggerFactory.getLogger(getClass()); 
 
     protected IPersistenceManager persistenceManager;
     

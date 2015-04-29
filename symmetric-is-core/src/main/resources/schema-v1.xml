@@ -417,15 +417,13 @@
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
-        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />               
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />    
+        <index name="idx_ex_sts_time)">
+            <index-column name="status"/>
+            <index-column name="last_update_time"/>
+        </index>           
     </table>    
 
-    <table name="execution_params" description="">
-       <column name="execution_id" type="CHAR" size="36" required="true" description="A unique identifer" />
-       <column name="name" type="VARCHAR" size="255" primaryKey="true" required="true" description="" />
-       <column name="value" type="VARCHAR" size="255" description="" />       
-    </table>    
-    
      <table name="execution_step" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
         <column name="execution_id" type="CHAR" size="36" required="true" description="A unique identifer" />
