@@ -58,9 +58,9 @@ public class DelimitedParser extends AbstractComponent {
             defaultValue = "UTF-8")
     public final static String SETTING_ENCODING = "encoding";
 
-    public final static String DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = "delimited.formatter.attribute.format.function";
+    public final static String DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION;
 
-    public final static String DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL = "delimited.formatter.attribute.ordinal";
+    public final static String DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL = DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL;
 
     String delimiter = ",";
 

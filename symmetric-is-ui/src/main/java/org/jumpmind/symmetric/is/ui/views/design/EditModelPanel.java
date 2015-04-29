@@ -21,6 +21,8 @@ import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.event.FieldEvents.BlurEvent;
+import com.vaadin.event.FieldEvents.BlurListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.event.ItemClickEvent;
@@ -64,7 +66,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
     public EditModelPanel(ApplicationContext context, String modelId) {
         this.context = context;
-        this.model = new Model(modelId);        
+        this.model = new Model(modelId);
         context.getConfigurationService().refresh(model);
 
         ButtonBar buttonBar = new ButtonBar();
@@ -112,7 +114,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                     ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
                         protected void save() {
                             obj.setName(getValue());
-                            EditModelPanel.this.context.getConfigurationService().save(obj);                            
+                            EditModelPanel.this.context.getConfigurationService().save(obj);
                         };
                     };
                     t.setWidth(100, Unit.PERCENTAGE);
@@ -128,7 +130,6 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.setColumnHeader("name", "Name");
 
         treeTable.addGeneratedColumn("type", new ColumnGenerator() {
-
             @Override
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 if (itemId instanceof ModelAttribute) {
@@ -141,13 +142,31 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                         }
                         cbox.setValue(obj.getType());
                         cbox.addValueChangeListener(new ValueChangeListener() {
-                            
+
                             @Override
                             public void valueChange(ValueChangeEvent event) {
-                                obj.setType((String)cbox.getValue());
+                                obj.setType((String) cbox.getValue());
                                 EditModelPanel.this.context.getConfigurationService().save(obj);
                             }
                         });
+                        cbox.addBlurListener(new BlurListener() {
+                            @Override
+                            public void blur(BlurEvent event) {
+                                Collection<?> items = treeTable.getItemIds();
+                                boolean found = false;
+                                for (Object item : items) {
+                                    if (item.equals(obj)) {
+                                        found = true;
+                                    } else if (found) {
+                                        selectOnly(item);
+                                        editSelectedItem();
+                                        break;
+                                    }
+
+                                }
+                            }
+                        });
+
                         return cbox;
                     } else {
                         return obj.getType();
@@ -235,7 +254,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.setChildrenAllowed(modelEntity, false);
     }
 
-    protected void addModelAttribute(String filter, ModelEntity entity, ModelAttribute modelAttribute) {
+    protected void addModelAttribute(String filter, ModelEntity entity,
+            ModelAttribute modelAttribute) {
         treeTable.addItem(modelAttribute);
         treeTable.setItemIcon(modelAttribute, FontAwesome.COLUMNS);
         treeTable.setChildrenAllowed(entity, true);
@@ -314,7 +334,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 if (itemId instanceof ModelAttribute) {
                     ModelAttribute a = (ModelAttribute) itemId;
                     context.getConfigurationService().delete((ModelAttribute) itemId);
-                    ModelEntity entity = (ModelEntity)treeTable.getParent(itemId);
+                    ModelEntity entity = (ModelEntity) treeTable.getParent(itemId);
                     entity.removeModelAttribute(a);
                     treeTable.removeItem(itemId);
                 }
@@ -370,10 +390,12 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
     class TreeTableItemClickListener implements ItemClickListener {
         long lastClick;
+
         public void itemClick(ItemClickEvent event) {
             if (event.isDoubleClick()) {
                 editSelectedItem();
-            } else if (System.currentTimeMillis() - lastClick > 1000 && getSelectedItems().size() > 0) {
+            } else if (System.currentTimeMillis() - lastClick > 1000
+                    && getSelectedItems().size() > 0) {
                 treeTable.setValue(null);
             }
             lastClick = System.currentTimeMillis();
