@@ -28,6 +28,7 @@ import org.jumpmind.symmetric.is.core.runtime.component.DelimitedParser;
 import org.jumpmind.symmetric.is.core.runtime.component.EntityRouter;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.MappingProcessor;
+import org.jumpmind.symmetric.is.core.runtime.component.ScriptExecutor;
 import org.jumpmind.symmetric.is.core.runtime.component.Transformer;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
@@ -42,6 +43,7 @@ import org.jumpmind.symmetric.is.ui.views.design.EditEntityRouterPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditScriptPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditTransformerPanel;
 import org.jumpmind.symmetric.is.ui.views.design.ManageProjectsPanel;
 import org.jumpmind.symmetric.is.ui.views.design.PropertySheet;
@@ -715,7 +717,6 @@ public class ProjectNavigator extends VerticalLayout {
             EditDbReaderPanel panel = new EditDbReaderPanel(context, flowStep.getComponent(),
                     propertySheet);
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-            unselectAll();
         } else if (type.equals(Transformer.TYPE)) {
             EditTransformerPanel panel = new EditTransformerPanel(context, flowStep.getComponent());
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
@@ -727,6 +728,10 @@ public class ProjectNavigator extends VerticalLayout {
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
         } else if (type.equals(MappingProcessor.TYPE)) {
             EditMappingPanel panel = new EditMappingPanel(context, flowStep.getComponent());
+            tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+        } else if (type.equals(ScriptExecutor.TYPE)) {
+            EditScriptPanel panel = new EditScriptPanel(context, flowStep.getComponent(),
+                    propertySheet);
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
         }
     }

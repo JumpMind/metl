@@ -7,24 +7,39 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.jumpmind.db.sql.Row;
+import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class MessageScriptHelper {
 
 	protected IComponent component;
+	
+	protected FlowStep flowStep;
+	
+	protected Flow flow;
 
     protected Iterator<EntityData> entityDataIterator;
 
     protected Message inputMessage;
 
     protected IMessageTarget messageTarget;
+    
+    protected ComponentStatistics componentStatistics;
+    
+    protected IResource resource;
 
     public MessageScriptHelper(IComponent component) {
         this.component = component;
+        this.flowStep = component.getFlowStep();
+        this.flow = component.getFlow();
+        this.componentStatistics = component.getComponentStatistics();
+        this.resource = component.getResource();
     }
 
     protected JdbcTemplate getJdbcTemplate() {
@@ -75,7 +90,11 @@ public class MessageScriptHelper {
     protected void onHandle() {
     }
 
-    protected void onComplete(Throwable myError, List<Throwable> allErrors) {
+    protected void onError(Throwable myError, List<Throwable> allErrors) {
     }
+    
+    protected void onSuccess() {
+    }
+
 
 }
