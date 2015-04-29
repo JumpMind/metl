@@ -26,6 +26,7 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.HorizontalLayout;
@@ -49,7 +50,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
 
     Label flowLabel = new Label();
 
-    Label statusLabel = new Label();
+    Label statusLabel = new Label("", ContentMode.HTML);
 
     Label startLabel = new Label();
 
@@ -191,8 +192,20 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
                 !ExecutionStatus.CANCELLED.name().equals(statusLabel.getValue()) && 
                 !ExecutionStatus.ERROR.name().equals(statusLabel.getValue())) {
             flowLabel.setValue(data.execution.getFlowName());
-            startLabel.setValue(formatDate(data.execution.getStartTime()));
-            statusLabel.setValue(data.execution.getStatus());
+            startLabel.setValue(formatDate(data.execution.getStartTime()));           
+            if (data.execution.getStatus().equals(ExecutionStatus.ERROR.name())) {
+                statusLabel.setStyleName("error");
+                statusLabel.setValue(FontAwesome.WARNING.getHtml() + " " + data.execution.getStatus());
+            } else if (data.execution.getStatus().equals(ExecutionStatus.DONE.name())) {
+                statusLabel.setStyleName("done");
+                statusLabel.setValue(FontAwesome.CHECK.getHtml() + " " + data.execution.getStatus());
+            } else if (data.execution.getStatus().equals(ExecutionStatus.RUNNING.name())) {
+                statusLabel.setStyleName("running");
+                statusLabel.setValue(FontAwesome.SPINNER.getHtml() + " " + data.execution.getStatus());
+            } else {
+                statusLabel.setStyleName("");
+                statusLabel.setValue(data.execution.getStatus());
+            }
             endLabel.setValue(formatDate(data.execution.getEndTime()));
 
             stepContainer.removeAllItems();

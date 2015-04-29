@@ -41,6 +41,18 @@
      text-shadow: 1px 1px 1px #bb9d7f;
   }
   
+  .done .v-icon {
+     color: green;
+  }
+  
+  .error .v-icon {
+     color: #cc0012;
+  }
+  
+  .running .v-icon {
+     color: $v-focus-color;
+  }
+  
   .v-table-cell-content-project .v-icon {
      color: #0072C6;     
   }
