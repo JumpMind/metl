@@ -5,9 +5,12 @@ import java.text.NumberFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import org.jumpmind.symmetric.is.core.model.User;
+import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.DesignAgentSelect;
 import org.jumpmind.symmetric.is.ui.common.TopBar;
 import org.jumpmind.symmetric.is.ui.common.ViewManager;
+import org.jumpmind.symmetric.is.ui.init.LoginDialog.LoginListener;
 import org.jumpmind.symmetric.ui.common.ResizableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +45,7 @@ import com.vaadin.ui.VerticalLayout;
 @Theme("apptheme")
 @Title("SymmetricIS")
 @PreserveOnRefresh
-public class AppUI extends UI {
+public class AppUI extends UI implements LoginListener {
 
     private static final long serialVersionUID = 1L;
     
@@ -58,27 +61,10 @@ public class AppUI extends UI {
         
         setPollInterval(5000);
         
-        VerticalLayout root = new VerticalLayout();
-        root.setSizeFull();
-        setContent(root);
-
-        VerticalLayout contentArea = new VerticalLayout();
-        contentArea.setSizeFull();
-        
         WebApplicationContext ctx = getWebApplicationContext();
         
         backgroundRefresherService = ctx.getBean(BackgroundRefresherService.class);
         backgroundRefresherService.init(this);
-        
-        viewManager = ctx.getBean(ViewManager.class);
-        viewManager.init(this, contentArea);
-        
-        DesignAgentSelect designAgentSelect = ctx.getBean(DesignAgentSelect.class);
-
-        TopBar menu = new TopBar(viewManager, designAgentSelect);
-
-        root.addComponents(menu, contentArea);
-        root.setExpandRatio(contentArea, 1);
 
         UI.getCurrent().setErrorHandler(new DefaultErrorHandler() {
             public void error(com.vaadin.server.ErrorEvent event) {
@@ -150,6 +136,14 @@ public class AppUI extends UI {
         });        
 
         Responsive.makeResponsive(this);
+        ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
+        if (appCtx.getConfigurationService().isUserLoginEnabled()) {
+            LoginDialog login = new LoginDialog(appCtx, this);   
+            UI.getCurrent().addWindow(login);
+        } else {
+            appCtx.getUser().setLoginId("admin");
+            login(appCtx.getUser());
+        }
     }
 
     public WebApplicationContext getWebApplicationContext() {
@@ -195,6 +189,31 @@ public class AppUI extends UI {
     		
     		addComponent(buildButtonFooter(buildCloseButton()));
     	}
+    }
+
+    @Override
+    public void login(User user) {
+        WebApplicationContext ctx = getWebApplicationContext();
+
+        VerticalLayout root = new VerticalLayout();
+        root.setSizeFull();
+        setContent(root);
+
+        VerticalLayout contentArea = new VerticalLayout();
+        contentArea.setSizeFull();
+
+        ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
+        appCtx.setUser(user);
+
+        viewManager = ctx.getBean(ViewManager.class);
+        viewManager.init(this, contentArea);
+                
+        DesignAgentSelect designAgentSelect = ctx.getBean(DesignAgentSelect.class);
+
+        TopBar menu = new TopBar(viewManager, designAgentSelect, appCtx);
+
+        root.addComponents(menu, contentArea);
+        root.setExpandRatio(contentArea, 1);
     }
 
 }

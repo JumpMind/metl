@@ -130,4 +130,11 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
         return export.exportTables(new String[] { String
                 .format("%s_%s", tablePrefix, table) });
     }
+    
+    @Override
+    public boolean isUserLoginEnabled() {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        return template.queryForInt(String.format("select count(*) from %1$s_user", tablePrefix)) > 0;
+    }
+
 }

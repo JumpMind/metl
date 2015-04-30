@@ -122,7 +122,7 @@ public class EditDbReaderPanel extends VerticalLayout implements IUiPanel {
                 @Override
                 public void setCommitButtonEnabled(boolean enabled) {
                 }
-            }, context.getUser().getUserId());
+            }, context.getUser().getLoginId());
 
             queryPanel.appendSql(component.get(DbReader.SQL));
 
