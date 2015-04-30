@@ -162,7 +162,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
     @Override
     public void selected() {
     }
-    
+
     @Override
     public void deselected() {
     }
@@ -188,11 +188,13 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
     }
 
     protected void refreshUI(ExecutionData data) {
-        if (!ExecutionStatus.DONE.name().equals(statusLabel.getValue()) &&
-                !ExecutionStatus.CANCELLED.name().equals(statusLabel.getValue()) && 
-                !ExecutionStatus.ERROR.name().equals(statusLabel.getValue())) {
+        String status = statusLabel.getValue();
+        if (status == null
+                || !(status.endsWith(ExecutionStatus.DONE.name())
+                        || status.endsWith(ExecutionStatus.CANCELLED.name()) || status
+                            .endsWith(ExecutionStatus.ERROR.name()))) {
             flowLabel.setValue(data.execution.getFlowName());
-            startLabel.setValue(formatDate(data.execution.getStartTime())); 
+            startLabel.setValue(formatDate(data.execution.getStartTime()));
             if (data.execution.getStatus() != null) {
                 if (data.execution.getStatus().equals(ExecutionStatus.ERROR.name())) {
                     statusLabel.setStyleName("error");
