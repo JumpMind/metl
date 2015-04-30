@@ -132,18 +132,24 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
                     self.onNodeSelected({
                         'id' : event.currentTarget.id
                     });
-                } else {
+                } 
+            }, false);
+            
+            nodeDiv.addEventListener("dblclick", function(event) {
                     self.onNodeDoubleClick({
                         'id' : event.currentTarget.id
                     });
-                }
             }, false);
 
             parentDiv.appendChild(nodeDiv);
             
             instance.draggable(nodeDiv, {
                 constrain:true,
+                start : function(event) {
+                    event.el.dragging = true;
+                },
                 stop : function(event) {
+                    event.el.dragging = false;
                     self.onNodeMoved({
                         'id' : event.el.id,
                         'x' : event.pos[0],
