@@ -10,9 +10,11 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
+import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
+import org.jumpmind.symmetric.is.core.runtime.component.DelimitedParser;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.ModelAttributeScriptHelper;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
@@ -90,12 +92,19 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         table.setDropHandler(new TableDropHandler());
         addComponent(table);
         setExpandRatio(table, 1.0f);
+        
+        Model model = component.getInputModel();
+        if (component.getType().equals(DelimitedParser.TYPE)) {
+            model = component.getOutputModel();
+        }
 
-        if (component.getInputModel() != null) {
+        if (model != null) {
+            
+            model = context.getConfigurationService().findModel(model.getId());
 
             List<RecordFormat> attributes = new ArrayList<RecordFormat>();
 
-            for (ModelEntity entity : component.getInputModel().getModelEntities()) {
+            for (ModelEntity entity : model.getModelEntities()) {
                 for (ModelAttribute attr : entity.getModelAttributes()) {
                     attributes.add(new RecordFormat(entity, attr));
                 }
@@ -134,7 +143,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
     }
 
     protected void calculatePositions() {
-        if (component.getType().equals(DelimitedFormatter.TYPE)) {
+        if (!component.getType().equals(FixedLengthFormatter.TYPE)) {
             return;
         }
         long pos = 1;
@@ -173,7 +182,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 
     protected void saveOrdinalSettings() {
         String attrName = FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL;
-        if (component.getType().equals(DelimitedFormatter.TYPE)) {
+        if (!component.getType().equals(FixedLengthFormatter.TYPE)) {
             attrName = DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL;
         }
         int ordinal = 1;
@@ -184,7 +193,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
     }
 
     protected void saveLengthSettings() {
-        if (component.getType().equals(DelimitedFormatter.TYPE)) {
+        if (!component.getType().equals(FixedLengthFormatter.TYPE)) {
             return;
         }
         for (RecordFormat record : container.getItemIds()) {
@@ -196,7 +205,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 
     protected void saveTransformSettings() {
         String attrName = FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION;
-        if (component.getType().equals(DelimitedFormatter.TYPE)) {
+        if (!component.getType().equals(FixedLengthFormatter.TYPE)) {
             attrName = DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION;
         }
 
@@ -331,15 +340,10 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         public RecordFormat(ModelEntity modelEntity, ModelAttribute modelAttribute) {
             this.modelEntity = modelEntity;
             this.modelAttribute = modelAttribute;
-            ComponentAttributeSetting setting = component.getSingleAttributeSetting(
-                    modelAttribute.getId(),
-                    FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH);
-            if (setting != null) {
-                this.width = Long.parseLong(setting.getValue());
-            }
 
-            if (component.getType().equals(DelimitedFormatter.TYPE)) {
-                setting = component.getSingleAttributeSetting(modelAttribute.getId(),
+
+            if (component.getType().equals(DelimitedFormatter.TYPE) || component.getType().equals(DelimitedParser.TYPE)) {
+                ComponentAttributeSetting setting = component.getSingleAttributeSetting(modelAttribute.getId(),
                         DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL);
                 if (setting != null) {
                     this.ordinalSetting = Integer.parseInt(setting.getValue());
@@ -352,6 +356,13 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
                 }
 
             } else if (component.getType().equals(FixedLengthFormatter.TYPE)) {
+                ComponentAttributeSetting setting = component.getSingleAttributeSetting(
+                        modelAttribute.getId(),
+                        FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH);
+                if (setting != null) {
+                    this.width = Long.parseLong(setting.getValue());
+                }
+                
                 setting = component.getSingleAttributeSetting(modelAttribute.getId(),
                         FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL);
                 if (setting != null) {

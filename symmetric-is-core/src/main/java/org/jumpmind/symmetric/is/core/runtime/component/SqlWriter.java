@@ -1,11 +1,15 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.io.IOUtils;
+import org.jumpmind.db.sql.SqlScriptReader;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
@@ -44,7 +48,7 @@ public class SqlWriter extends AbstractComponent {
             ON_SUCCESS, PER_ENTITY }, defaultValue = PER_MESSAGE, label = "Run When")
     public final static String RUN_WHEN = "run.when";
 
-    String sql;
+    List<String> sqls;
 
     String runWhen = PER_MESSAGE;
 
@@ -63,6 +67,21 @@ public class SqlWriter extends AbstractComponent {
     protected NamedParameterJdbcTemplate getJdbcTemplate() {
         return new NamedParameterJdbcTemplate((DataSource) this.resource.reference());
     }
+    
+    protected List<String> getSqlStatements(String script) {
+        List<String> sqlStatements = new ArrayList<String>();
+        SqlScriptReader scriptReader = new SqlScriptReader(new StringReader(script));
+        try {
+            String sql = scriptReader.readSqlStatement();
+            while (sql != null) {
+                sqlStatements.add(sql);
+                sql = scriptReader.readSqlStatement();
+            }
+            return sqlStatements;
+        } finally {
+            IOUtils.closeQuietly(scriptReader);
+        }
+    }
 
     @Override
     public void handle(final Message inputMessage, final IMessageTarget messageTarget) {
@@ -70,20 +89,22 @@ public class SqlWriter extends AbstractComponent {
         if (inputMessage instanceof StartupMessage) {
             startupMessage = (StartupMessage) inputMessage;
         }
-        final String sqlToExecute = FormatUtils.replaceTokens(this.sql, inputMessage.getHeader()
-                .getParametersAsString(), true);
-        NamedParameterJdbcTemplate template = getJdbcTemplate();
-        Map<String, Object> params = new HashMap<String, Object>(inputMessage.getHeader()
-                .getParametersAsString());
-        if (runWhen.equals(PER_MESSAGE)) {
-            int count = template.update(sqlToExecute, params);
-            componentStatistics.incrementNumberEntitiesProcessed(count);
-        } else if (runWhen.equals(PER_ENTITY)) {
-            List<EntityData> datas = inputMessage.getPayload();
-            for (EntityData entityData : datas) {
-                params.putAll(flowStep.getComponent().toRow(entityData));
+        for (String sql : this.sqls) {
+            final String sqlToExecute = FormatUtils.replaceTokens(sql, inputMessage.getHeader()
+                    .getParametersAsString(), true);
+            NamedParameterJdbcTemplate template = getJdbcTemplate();
+            Map<String, Object> params = new HashMap<String, Object>(inputMessage.getHeader()
+                    .getParametersAsString());
+            if (runWhen.equals(PER_MESSAGE)) {
                 int count = template.update(sqlToExecute, params);
                 componentStatistics.incrementNumberEntitiesProcessed(count);
+            } else if (runWhen.equals(PER_ENTITY)) {
+                List<EntityData> datas = inputMessage.getPayload();
+                for (EntityData entityData : datas) {
+                    params.putAll(flowStep.getComponent().toRow(entityData));
+                    int count = template.update(sqlToExecute, params);
+                    componentStatistics.incrementNumberEntitiesProcessed(count);
+                }
             }
         }
         componentStatistics.incrementOutboundMessages();
@@ -94,24 +115,27 @@ public class SqlWriter extends AbstractComponent {
     public void flowCompletedWithoutError() {
         if (runWhen.equals(ON_SUCCESS)) {
             NamedParameterJdbcTemplate template = getJdbcTemplate();
-            String sqlToExecute = sql;
-            Map<String, Object> params = new HashMap<String, Object>();
-            if (startupMessage != null) {
-                sqlToExecute = FormatUtils.replaceTokens(this.sql, startupMessage.getHeader()
-                        .getParametersAsString(), true);
-                params.putAll(startupMessage.getHeader().getParametersAsString());
+            for (String sql : this.sqls) {
+                String sqlToExecute = sql;
+                Map<String, Object> params = new HashMap<String, Object>();
+                if (startupMessage != null) {
+                    sqlToExecute = FormatUtils.replaceTokens(sql, startupMessage.getHeader()
+                            .getParametersAsString(), true);
+                    params.putAll(startupMessage.getHeader().getParametersAsString());
+                }
+                executionTracker.log(executionId, LogLevel.INFO, this,
+                        "Executing the following sql after a successful completion: "
+                                + sqlToExecute);
+                int count = template.update(sqlToExecute, params);
+                componentStatistics.incrementNumberEntitiesProcessed(count);
             }
-            executionTracker.log(executionId, LogLevel.INFO, this, 
-                    "Executing the following sql after a successful completion: " + sqlToExecute);
-            int count = template.update(sqlToExecute, params);
-            componentStatistics.incrementNumberEntitiesProcessed(count);
         }
     }
 
     protected void applySettings() {
         TypedProperties properties = flowStep.getComponent().toTypedProperties(
                 getSettingDefinitions(false));
-        sql = properties.get(SQL);
+        sqls = getSqlStatements(properties.get(SQL));
         runWhen = properties.get(RUN_WHEN, PER_MESSAGE);
     }
 

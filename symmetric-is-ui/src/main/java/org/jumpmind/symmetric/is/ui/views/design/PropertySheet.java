@@ -57,7 +57,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
     IConfigurationService configurationService;
 
     IResourceFactory resourceFactory;
-    
+
     IPropertySheetChangeListener listener;
 
     Object value;
@@ -69,7 +69,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         setSizeFull();
         addStyleName("noborder");
     }
-    
+
     public void setListener(IPropertySheetChangeListener listener) {
         this.listener = listener;
     }
@@ -117,6 +117,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         ComponentDefinition componentDefintion = componentFactory
                 .getComponentDefinitionForComponentType(component.getType());
         addComponentName(formLayout, component);
+        addComponentShared(formLayout, component);
         addResourceCombo(componentDefintion, formLayout, component);
         addInputModelCombo(componentDefintion, formLayout, component);
         addOutputModelCombo(componentDefintion, formLayout, component);
@@ -138,7 +139,8 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                 if (models != null) {
                     for (ModelName model : models) {
                         combo.addItem(model);
-                        if (isNotBlank(component.getOutputModelId()) && component.getOutputModelId().equals(model.getId())) {
+                        if (isNotBlank(component.getOutputModelId())
+                                && component.getOutputModelId().equals(model.getId())) {
                             combo.setValue(model);
                         }
                     }
@@ -148,13 +150,13 @@ public class PropertySheet extends Panel implements ValueChangeListener {
 
                     @Override
                     public void valueChange(ValueChangeEvent event) {
-                        ModelName model = (ModelName)combo.getValue();
+                        ModelName model = (ModelName) combo.getValue();
                         if (model != null) {
                             component.setOutputModel(configurationService.findModel(model.getId()));
                         } else {
                             component.setOutputModel(null);
                         }
-                        configurationService.save((AbstractObject)component);
+                        configurationService.save((AbstractObject) component);
                     }
                 });
 
@@ -164,9 +166,8 @@ public class PropertySheet extends Panel implements ValueChangeListener {
     }
 
     protected void addComponentName(FormLayout formLayout, final Component component) {
-        
-        ImmediateUpdateTextField textField = new ImmediateUpdateTextField(
-                "Component Name") {
+
+        ImmediateUpdateTextField textField = new ImmediateUpdateTextField("Component Name") {
             private static final long serialVersionUID = 1L;
 
             protected void save() {
@@ -182,7 +183,37 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         textField.setDescription("Name for the component on the flow");
         formLayout.addComponent(textField);
     }
-    
+
+    protected void addComponentShared(FormLayout formLayout, final Component component) {
+
+        final CheckBox checkBox = new CheckBox("Shared");
+        checkBox.setImmediate(true);
+
+        if (component.isShared()) {
+            checkBox.setValue(true);
+        } else {
+            checkBox.setValue(false);
+        }
+        checkBox.setRequired(true);
+        checkBox.setDescription("Whether this component can be reused");
+        checkBox.addValueChangeListener(new ValueChangeListener() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                // TODO: Don't allow unshare if component is already on more
+                // than 1 flow?
+                // TODO: Refresh palette for the existing flow to have this item
+                // display in shared definitions
+                component.setShared((boolean) event.getProperty().getValue());
+                configurationService.save(component);
+            }
+        });
+        formLayout.addComponent(checkBox);
+
+    }
+
     protected void addInputModelCombo(ComponentDefinition componentDefintion,
             FormLayout formLayout, final Component component) {
         if (value instanceof FlowStep) {
@@ -198,7 +229,8 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                 if (models != null) {
                     for (ModelName model : models) {
                         combo.addItem(model);
-                        if (isNotBlank(component.getInputModelId()) && component.getInputModelId().equals(model.getId())) {
+                        if (isNotBlank(component.getInputModelId())
+                                && component.getInputModelId().equals(model.getId())) {
                             combo.setValue(model);
                         }
                     }
@@ -208,13 +240,13 @@ public class PropertySheet extends Panel implements ValueChangeListener {
 
                     @Override
                     public void valueChange(ValueChangeEvent event) {
-                        ModelName model = (ModelName)combo.getValue();
+                        ModelName model = (ModelName) combo.getValue();
                         if (model != null) {
                             component.setInputModel(configurationService.findModel(model.getId()));
                         } else {
                             component.setInputModel(null);
                         }
-                        configurationService.save((AbstractObject)component);
+                        configurationService.save((AbstractObject) component);
                     }
                 });
 
@@ -276,161 +308,165 @@ public class PropertySheet extends Panel implements ValueChangeListener {
     protected void addSettingField(final String key, final SettingDefinition definition,
             final AbstractObjectWithSettings obj, FormLayout formLayout) {
         boolean required = definition.required();
-        String description = "Represents the " + key + " setting";
-        Type type = definition.type();
-        switch (type) {
-            case BOOLEAN:
-                final CheckBox checkBox = new CheckBox(definition.label());
-                checkBox.setImmediate(true);
-                boolean defaultValue = false;
-                if (isNotBlank(definition.defaultValue())) {
-                    defaultValue = Boolean.parseBoolean(definition.defaultValue());
-                }
-                checkBox.setValue(obj.getBoolean(key, defaultValue));
-                checkBox.setRequired(required);
-                checkBox.setDescription(description);
-                checkBox.addValueChangeListener(new ValueChangeListener() {
-
-                    private static final long serialVersionUID = 1L;
-
-                    @Override
-                    public void valueChange(ValueChangeEvent event) {
-                        saveSetting(key, checkBox, obj);
+        if (definition.visible()) {
+            String description = "Represents the " + key + " setting";
+            Type type = definition.type();
+            switch (type) {
+                case BOOLEAN:
+                    final CheckBox checkBox = new CheckBox(definition.label());
+                    checkBox.setImmediate(true);
+                    boolean defaultValue = false;
+                    if (isNotBlank(definition.defaultValue())) {
+                        defaultValue = Boolean.parseBoolean(definition.defaultValue());
                     }
-                });
-                formLayout.addComponent(checkBox);
-                break;
-            case CHOICE:
-                final AbstractSelect choice = new ComboBox(definition.label());
-                choice.setImmediate(true);
-                String[] choices = definition.choices();
-                for (String c : choices) {
-                    choice.addItem(c);
-                }
-                choice.setValue(obj.get(key, definition.defaultValue()));
-                choice.setDescription(description);
-                choice.setNullSelectionAllowed(false);
-                choice.addValueChangeListener(new ValueChangeListener() {
-
-                    private static final long serialVersionUID = 1L;
-
-                    @Override
-                    public void valueChange(ValueChangeEvent event) {
-                        saveSetting(key, choice, obj);
-                    }
-                });
-                formLayout.addComponent(choice);
-                break;
-            case PASSWORD:
-                ImmediateUpdatePasswordField passwordField = new ImmediateUpdatePasswordField(
-                        definition.label()) {
-                    private static final long serialVersionUID = 1L;
-
-                    protected void save() {
-                        saveSetting(key, this, obj);
-                    };
-                };
-                passwordField.setValue(obj.get(key, definition.defaultValue()));
-                passwordField.setRequired(required);
-                passwordField.setDescription(description);
-                formLayout.addComponent(passwordField);
-                break;
-            case INTEGER:
-                ImmediateUpdateTextField integerField = new ImmediateUpdateTextField(
-                        definition.label()) {
-                    private static final long serialVersionUID = 1L;
-
-                    protected void save() {
-                        saveSetting(key, this, obj);
-                    };
-                };
-                integerField.setConverter(Integer.class);
-                integerField.setValue(obj.get(key, definition.defaultValue()));
-                integerField.setRequired(required);
-                integerField.setDescription(description);
-                formLayout.addComponent(integerField);
-                break;
-            case STRING:
-                ImmediateUpdateTextField textField = new ImmediateUpdateTextField(
-                        definition.label()) {
-                    private static final long serialVersionUID = 1L;
-
-                    protected void save() {
-                        saveSetting(key, this, obj);
-                    };
-                };
-                textField.setValue(obj.get(key, definition.defaultValue()));
-                textField.setRequired(required);
-                textField.setDescription(description);
-                formLayout.addComponent(textField);
-                break;
-            case SOURCE_STEP:
-                if (value instanceof FlowStep) {
-                    FlowStep step = (FlowStep) value;
-                    Flow flow = configurationService.findFlow(step.getFlowId());
-                    final AbstractSelect sourceStepsCombo = new ComboBox(definition.label());
-                    sourceStepsCombo.setImmediate(true);
-
-                    List<FlowStepLink> sourceSteps = flow.findFlowStepLinksWithTarget(step.getId());
-                    for (FlowStepLink flowStepLink : sourceSteps) {
-                        FlowStep sourceStep = flow.findFlowStepWithId(flowStepLink
-                                .getSourceStepId());
-                        sourceStepsCombo.addItem(sourceStep.getId());
-                        sourceStepsCombo.setItemCaption(sourceStep.getId(), sourceStep.getName());
-                    }
-                    sourceStepsCombo.setValue(obj.get(key));
-                    sourceStepsCombo.setDescription(description);
-                    sourceStepsCombo.setNullSelectionAllowed(false);
-                    sourceStepsCombo.addValueChangeListener(new ValueChangeListener() {
+                    checkBox.setValue(obj.getBoolean(key, defaultValue));
+                    checkBox.setRequired(required);
+                    checkBox.setDescription(description);
+                    checkBox.addValueChangeListener(new ValueChangeListener() {
 
                         private static final long serialVersionUID = 1L;
 
                         @Override
                         public void valueChange(ValueChangeEvent event) {
-                            saveSetting(key, sourceStepsCombo, obj);
+                            saveSetting(key, checkBox, obj);
                         }
                     });
-                    formLayout.addComponent(sourceStepsCombo);
-                }
-                break;
-            case SCRIPT:
-                final AceEditor editor = CommonUiUtils.createAceEditor();
-                editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
-                editor.setTextChangeTimeout(200);
-                editor.setMode(AceMode.java);
-                editor.setHeight(10, Unit.EM);
-                editor.setCaption(definition.label());
-                editor.setShowGutter(false);
-                editor.setShowPrintMargin(false);
-                editor.setValue(obj.get(key, definition.defaultValue()));
-                editor.addTextChangeListener(new TextChangeListener() {                    
-                    @Override
-                    public void textChange(TextChangeEvent event) {                        
-                        Setting data = obj.findSetting(key);
-                        data.setValue(event.getText());
-                        configurationService.save(data);
+                    formLayout.addComponent(checkBox);
+                    break;
+                case CHOICE:
+                    final AbstractSelect choice = new ComboBox(definition.label());
+                    choice.setImmediate(true);
+                    String[] choices = definition.choices();
+                    for (String c : choices) {
+                        choice.addItem(c);
                     }
-                });
-                formLayout.addComponent(editor);
-                break;
-            case TEXT:
-            case XML:
-                ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(definition.label()) {
-                    private static final long serialVersionUID = 1L;
+                    choice.setValue(obj.get(key, definition.defaultValue()));
+                    choice.setDescription(description);
+                    choice.setNullSelectionAllowed(false);
+                    choice.addValueChangeListener(new ValueChangeListener() {
 
-                    protected void save() {
-                        saveSetting(key, this, obj);
+                        private static final long serialVersionUID = 1L;
+
+                        @Override
+                        public void valueChange(ValueChangeEvent event) {
+                            saveSetting(key, choice, obj);
+                        }
+                    });
+                    formLayout.addComponent(choice);
+                    break;
+                case PASSWORD:
+                    ImmediateUpdatePasswordField passwordField = new ImmediateUpdatePasswordField(
+                            definition.label()) {
+                        private static final long serialVersionUID = 1L;
+
+                        protected void save() {
+                            saveSetting(key, this, obj);
+                        };
                     };
-                };
-                area.setValue(obj.get(key, definition.defaultValue()));
-                area.setRows(5);
-                area.setRequired(required);
-                area.setDescription(description);
-                formLayout.addComponent(area);
-                break;
-            default:
-                break;
+                    passwordField.setValue(obj.get(key, definition.defaultValue()));
+                    passwordField.setRequired(required);
+                    passwordField.setDescription(description);
+                    formLayout.addComponent(passwordField);
+                    break;
+                case INTEGER:
+                    ImmediateUpdateTextField integerField = new ImmediateUpdateTextField(
+                            definition.label()) {
+                        private static final long serialVersionUID = 1L;
 
+                        protected void save() {
+                            saveSetting(key, this, obj);
+                        };
+                    };
+                    integerField.setConverter(Integer.class);
+                    integerField.setValue(obj.get(key, definition.defaultValue()));
+                    integerField.setRequired(required);
+                    integerField.setDescription(description);
+                    formLayout.addComponent(integerField);
+                    break;
+                case STRING:
+                    ImmediateUpdateTextField textField = new ImmediateUpdateTextField(
+                            definition.label()) {
+                        private static final long serialVersionUID = 1L;
+
+                        protected void save() {
+                            saveSetting(key, this, obj);
+                        };
+                    };
+                    textField.setValue(obj.get(key, definition.defaultValue()));
+                    textField.setRequired(required);
+                    textField.setDescription(description);
+                    formLayout.addComponent(textField);
+                    break;
+                case SOURCE_STEP:
+                    if (value instanceof FlowStep) {
+                        FlowStep step = (FlowStep) value;
+                        Flow flow = configurationService.findFlow(step.getFlowId());
+                        final AbstractSelect sourceStepsCombo = new ComboBox(definition.label());
+                        sourceStepsCombo.setImmediate(true);
+
+                        List<FlowStepLink> sourceSteps = flow.findFlowStepLinksWithTarget(step
+                                .getId());
+                        for (FlowStepLink flowStepLink : sourceSteps) {
+                            FlowStep sourceStep = flow.findFlowStepWithId(flowStepLink
+                                    .getSourceStepId());
+                            sourceStepsCombo.addItem(sourceStep.getId());
+                            sourceStepsCombo.setItemCaption(sourceStep.getId(),
+                                    sourceStep.getName());
+                        }
+                        sourceStepsCombo.setValue(obj.get(key));
+                        sourceStepsCombo.setDescription(description);
+                        sourceStepsCombo.setNullSelectionAllowed(false);
+                        sourceStepsCombo.addValueChangeListener(new ValueChangeListener() {
+
+                            private static final long serialVersionUID = 1L;
+
+                            @Override
+                            public void valueChange(ValueChangeEvent event) {
+                                saveSetting(key, sourceStepsCombo, obj);
+                            }
+                        });
+                        formLayout.addComponent(sourceStepsCombo);
+                    }
+                    break;
+                case SCRIPT:
+                    final AceEditor editor = CommonUiUtils.createAceEditor();
+                    editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
+                    editor.setTextChangeTimeout(200);
+                    editor.setMode(AceMode.java);
+                    editor.setHeight(10, Unit.EM);
+                    editor.setCaption(definition.label());
+                    editor.setShowGutter(false);
+                    editor.setShowPrintMargin(false);
+                    editor.setValue(obj.get(key, definition.defaultValue()));
+                    editor.addTextChangeListener(new TextChangeListener() {
+                        @Override
+                        public void textChange(TextChangeEvent event) {
+                            Setting data = obj.findSetting(key);
+                            data.setValue(event.getText());
+                            configurationService.save(data);
+                        }
+                    });
+                    formLayout.addComponent(editor);
+                    break;
+                case TEXT:
+                case XML:
+                    ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(definition.label()) {
+                        private static final long serialVersionUID = 1L;
+
+                        protected void save() {
+                            saveSetting(key, this, obj);
+                        };
+                    };
+                    area.setValue(obj.get(key, definition.defaultValue()));
+                    area.setRows(5);
+                    area.setRequired(required);
+                    area.setDescription(description);
+                    formLayout.addComponent(area);
+                    break;
+                default:
+                    break;
+
+            }
         }
 
     }

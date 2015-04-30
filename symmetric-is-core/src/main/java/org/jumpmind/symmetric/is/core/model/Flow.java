@@ -188,6 +188,7 @@ public class Flow extends AbstractObject {
             if (link.getSourceStepId().equals(sourceStepId)
                     && link.getTargetStepId().equals(targetStepId)) {
                 i.remove();
+                break;
             }
         }
         return link;

@@ -5,15 +5,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
-import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.Execution;
 import org.jumpmind.symmetric.is.core.model.ExecutionStep;
 import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 
 public interface IExecutionService {
 
-    public List<Execution> findActiveExecutions(Agent agent);
-    
     public void save(AbstractObject object);
 
     public List<Execution> findExecutions(Map<String, Object> params, int limit);

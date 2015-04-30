@@ -54,7 +54,6 @@ public class TextFileWriter extends AbstractComponent {
     TypedProperties properties;
     OutputStream outStream;
     BufferedWriter bufferedWriter = null;
-    String executionId;
 
     @Override
     public void start(String executionId, IExecutionTracker executionTracker) {
@@ -110,10 +109,8 @@ public class TextFileWriter extends AbstractComponent {
     }
 
     private OutputStream getOutputStream(IStreamableResource conn) {
-        conn.resetPath();
-        conn.appendPath(relativePathAndFile, mustExist);
         executionTracker.log(executionId, LogLevel.INFO, this, String.format("Writing text file to %s", conn.toString()));
-        return conn.getOutputStream();
+        return conn.getOutputStream(relativePathAndFile, mustExist);
     }
 
     private BufferedWriter initializeWriter(OutputStream stream) {

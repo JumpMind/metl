@@ -2,21 +2,18 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.symmetric.csv.CsvWriter;
+import org.jumpmind.symmetric.csv.CsvReader;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
@@ -30,14 +27,14 @@ import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
 @ComponentDefinition(
-        typeName = DelimitedFormatter.TYPE,
+        typeName = DelimitedParser.TYPE,
         category = ComponentCategory.PROCESSOR,
         iconImage = "delimitedformatter.png",
-        inputMessage = MessageType.ENTITY,
-        outgoingMessage = MessageType.TEXT)
-public class DelimitedFormatter extends AbstractComponent {
+        inputMessage = MessageType.TEXT,
+        outgoingMessage = MessageType.ENTITY)
+public class DelimitedParser extends AbstractComponent {
 
-    public static final String TYPE = "Format Delimited";
+    public static final String TYPE = "Parse Delimited";
 
     @SettingDefinition(
             order = 10,
@@ -45,58 +42,67 @@ public class DelimitedFormatter extends AbstractComponent {
             type = Type.STRING,
             label = "Delimiter",
             defaultValue = ",")
-    public final static String DELIMITED_FORMATTER_DELIMITER = "delimited.formatter.delimiter";
+    public final static String SETTING_DELIMITER = "delimiter";
 
     @SettingDefinition(
             order = 20,
             type = Type.STRING,
             label = "Quote Character",
             defaultValue = "\"")
-    public final static String DELIMITED_FORMATTER_QUOTE_CHARACTER = "delimited.formatter.quote.character";
+    public final static String SETTING_QUOTE_CHARACTER = "quote.character";
 
-    public final static String DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = "delimited.formatter.attribute.format.function";
+    @SettingDefinition(
+            order = 30,
+            type = Type.STRING,
+            label = "Encoding",
+            defaultValue = "UTF-8")
+    public final static String SETTING_ENCODING = "encoding";
 
-    public final static String DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL = "delimited.formatter.attribute.ordinal";
+    public final static String DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION;
 
-    /* settings */
+    public final static String DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL = DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL;
 
-    String delimiter;
+    String delimiter = ",";
 
-    String quoteCharacter;
+    String quoteCharacter = "\"";
 
-    /* other vars */
-
-    TypedProperties properties;
+    String encoding = "UTF-8";
 
     List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
 
     @Override
     public void start(String executionId, IExecutionTracker executionTracker) {
         super.start(executionId, executionTracker);
-        applySettings();
+        delimiter = flowStep.getComponent().get(SETTING_DELIMITER, delimiter);
+        quoteCharacter = flowStep.getComponent().get(SETTING_QUOTE_CHARACTER, quoteCharacter);
+        encoding = flowStep.getComponent().get(SETTING_ENCODING, encoding);
+        convertAttributeSettingsToAttributeFormat();
+        if (flowStep.getComponent().getOutputModel() == null) {
+            throw new IllegalStateException(
+                    "This component requires an output model.  Please select one.");
+        }
+
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget) {
-
-        if (attributes.size() == 0) {
-            executionTracker
-                    .log(executionId, LogLevel.INFO, this,
-                            "There are no format attributes configured.  Writing all entity fields to the output.");
-        }
-
+    public void handle(Message inputMessage, IMessageTarget messageTarget) {
         componentStatistics.incrementInboundMessages();
-        ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
-        Message outputMessage = new Message(flowStep.getId());
-        ArrayList<String> outputPayload = new ArrayList<String>();
+        ArrayList<String> inputRows = inputMessage.getPayload();
 
-        String outputRec;
-        for (EntityData inputRow : inputRows) {
-            outputRec = processInputRow(inputRow);
-            outputPayload.add(outputRec);
+        ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
+        Message outputMessage = inputMessage.copy(flowStep.getId(), outputPayload);
+
+        try {
+            // TODO support headers
+            for (String inputRow : inputRows) {
+                EntityData data = processInputRow(inputRow);
+                outputPayload.add(data);
+            }
+        } catch (IOException e) {
+            throw new IoException(e);
         }
-        outputMessage.setPayload(outputPayload);
+
         executionTracker.log(executionId, LogLevel.INFO, this, outputPayload.toString());
         componentStatistics.incrementOutboundMessages();
         outputMessage.getHeader()
@@ -105,54 +111,53 @@ public class DelimitedFormatter extends AbstractComponent {
         messageTarget.put(outputMessage);
     }
 
-    private String processInputRow(EntityData inputRow) {
+    private EntityData processInputRow(String inputRow) throws IOException {
 
-        Writer writer = new StringWriter();
-        CsvWriter csvWriter = new CsvWriter(writer, delimiter.charAt(0));
-        if (!StringUtils.isEmpty(quoteCharacter)) {
-            csvWriter.setUseTextQualifier(true);
-            csvWriter.setTextQualifier(quoteCharacter.charAt(0));
-            csvWriter.setForceQualifier(true);
+        CsvReader csvReader = new CsvReader(new ByteArrayInputStream(inputRow.getBytes()),
+                Charset.forName(encoding));
+        csvReader.setDelimiter(delimiter.charAt(0));
+        if (isNotBlank(quoteCharacter)) {
+            csvReader.setTextQualifier(quoteCharacter.charAt(0));
+            csvReader.setUseTextQualifier(true);
         }
-        try {
+        if (csvReader.readRecord()) {
+            EntityData data = new EntityData();
             if (attributes.size() > 0) {
                 for (AttributeFormat attribute : attributes) {
-                    Object object = inputRow.get(attribute.getAttributeId());
+                    Object value = csvReader.get(attribute.getOrdinal()-1);
                     if (isNotBlank(attribute.getFormatFunction())) {
-                        object = ModelAttributeScriptHelper.eval(attribute.getAttribute(), object,
-                                attribute.getEntity(), inputRow, attribute.getFormatFunction());
+                        value = ModelAttributeScriptHelper.eval(attribute.getAttribute(), value,
+                                attribute.getEntity(), data, attribute.getFormatFunction());
                     }
 
-                    csvWriter.write(object != null ? object.toString() : null);
+                    data.put(attribute.getAttributeId(), value);
                 }
             } else {
-                Collection<Object> values = inputRow.values();
-                for (Object object : values) {
-                    csvWriter.write(object != null ? object.toString() : null);
+                Model model = flowStep.getComponent().getOutputModel();
+                List<ModelEntity> entities = model.getModelEntities();
+                int index = 0;
+                for (ModelEntity modelEntity : entities) {
+                    List<ModelAttribute> attributes = modelEntity.getModelAttributes();
+                    for (ModelAttribute modelAttribute : attributes) {
+                        data.put(modelAttribute.getId(), csvReader.get(index));
+                    }
                 }
-
             }
-        } catch (IOException e) {
-            throw new IoException("Error writing to stream for formatted output. " + e.getMessage());
-        }
-        return writer.toString();
-    }
 
-    private void applySettings() {
-        properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
-        delimiter = properties.get(DELIMITED_FORMATTER_DELIMITER);
-        quoteCharacter = properties.get(DELIMITED_FORMATTER_QUOTE_CHARACTER);
-        convertAttributeSettingsToAttributeFormat();
+            return data;
+        }
+        return null;
+
     }
 
     private void convertAttributeSettingsToAttributeFormat() {
         List<ComponentAttributeSetting> attributeSettings = flowStep.getComponent()
                 .getAttributeSettings();
-        Map<String, AttributeFormat> formats = new HashMap<String, DelimitedFormatter.AttributeFormat>();
+        Map<String, AttributeFormat> formats = new HashMap<String, DelimitedParser.AttributeFormat>();
         for (ComponentAttributeSetting attributeSetting : attributeSettings) {
             AttributeFormat format = formats.get(attributeSetting.getAttributeId());
             if (format == null) {
-                Model inputModel = flowStep.getComponent().getInputModel();
+                Model inputModel = flowStep.getComponent().getOutputModel();
                 ModelAttribute attribute = inputModel.getAttributeById(attributeSetting
                         .getAttributeId());
                 ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());

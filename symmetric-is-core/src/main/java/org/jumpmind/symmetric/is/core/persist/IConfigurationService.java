@@ -39,6 +39,8 @@ public interface IConfigurationService {
     
     public List<ResourceName> findResourcesInProject(String projectVersionId);
     
+    public List<ComponentName> findSharedComponentsInProject(String projectVersionId);
+    
     public List<FlowName> findFlowsInProject(String projectVersionId);
 
     public List<Folder> findFolders(FolderType type);
@@ -63,13 +65,13 @@ public interface IConfigurationService {
     
     public void delete(Flow flow, FlowStep flowStep);
     
-    public void delete(FlowStepLink link);
+    public boolean delete(FlowStepLink link);
     
     public void delete(Resource resource);    
     
     public boolean isDeployed(Flow flow);
     
-    public List<Flow> findFlows();
+    public List<FlowName> findFlows();
            
     public Resource findResource(String id);
     

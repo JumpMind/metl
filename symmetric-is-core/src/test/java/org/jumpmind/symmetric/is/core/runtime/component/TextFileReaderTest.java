@@ -148,9 +148,9 @@ public class TextFileReaderTest {
     private static Setting[] createReaderSettings() {
 
         Setting[] settingData = new Setting[3];
-        settingData[0] = new Setting(TextFileReader.TEXTFILEREADER_RELATIVE_PATH, FILE_NAME);
-        settingData[1] = new Setting(TextFileReader.TEXTFILEREADER_HEADER_LINES_TO_SKIP, "1");
-        settingData[2] = new Setting(TextFileReader.TEXTFILEREADER_ROWS_PER_MESSAGE, "1");
+        settingData[0] = new Setting(TextFileReader.SETTING_RELATIVE_PATH, FILE_NAME);
+        settingData[1] = new Setting(TextFileReader.SETTING_HEADER_LINES_TO_SKIP, "1");
+        settingData[2] = new Setting(TextFileReader.SETTING_ROWS_PER_MESSAGE, "1");
 
         return settingData;
     }

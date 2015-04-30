@@ -6,13 +6,27 @@ import java.util.Map;
 
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.model.Execution;
+import org.jumpmind.symmetric.is.core.model.ExecutionStatus;
 import org.jumpmind.symmetric.is.core.model.ExecutionStep;
 import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
+import org.springframework.core.env.Environment;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 abstract public class AbstractExecutionService extends AbstractService implements IExecutionService {
     
-    public AbstractExecutionService(IPersistenceManager persistenceManager, String tablePrefix) {
+    ThreadPoolTaskScheduler purgeScheduler;
+    
+    Environment environment;
+    
+    public AbstractExecutionService(IPersistenceManager persistenceManager, String tablePrefix, Environment env) {
         super(persistenceManager, tablePrefix);
+        this.environment = env;
+        this.purgeScheduler = new ThreadPoolTaskScheduler();
+        this.purgeScheduler.setThreadNamePrefix("execution-purge-job-");
+        this.purgeScheduler.setPoolSize(1);
+        this.purgeScheduler.initialize();
+        this.purgeScheduler.scheduleWithFixedDelay(new PurgeExecutionHandler(), 60000*5);
+        
     }
 
     public Execution findExecution(String id) {
@@ -32,6 +46,20 @@ abstract public class AbstractExecutionService extends AbstractService implement
     	Map<String, Object> args = new HashMap<String, Object>();
     	args.put("executionStepId", executionStepId);
     	return persistenceManager.find(ExecutionStepLog.class, args, null, null, tableName(ExecutionStepLog.class));
+    }
+    
+    abstract public void purgeExecutions(String status, int retentionTimeInMs);
+    
+    class PurgeExecutionHandler implements Runnable {
+        @Override
+        public void run() {
+            ExecutionStatus[] toPurge = new ExecutionStatus[] { ExecutionStatus.CANCELLED, ExecutionStatus.DONE, ExecutionStatus.ERROR, };
+            for (ExecutionStatus executionStatus : toPurge) {
+                String retentionTimeInMs = environment.getProperty("execution.retention.time.ms", Long.toString(1000*60*60*24*7));
+                retentionTimeInMs = environment.getProperty("execution.retention.time.ms." + executionStatus.name().toLowerCase(), retentionTimeInMs);
+                purgeExecutions(executionStatus.name(), Integer.parseInt(retentionTimeInMs));
+            }
+        }
     }
 
 }

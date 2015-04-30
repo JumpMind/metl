@@ -114,7 +114,7 @@ public class StepRuntime implements Runnable {
                     if (cancelled || fromStepId == null || sourceStepRuntimes == null
                             || sourceStepRuntimes.size() == 0
                             || fromStepId.equals(component.getFlowStep().getId())) {
-                        shutdown();
+                        shutdown(target);
                     }
                 } else {
                     try {
@@ -126,7 +126,7 @@ public class StepRuntime implements Runnable {
                         executionTracker.afterHandle(executionId, component, error);
                     }
                     if (isStartStep()) {
-                        shutdown();
+                        shutdown(target);
                     }
                 }
             }
@@ -150,9 +150,10 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    private void shutdown() throws InterruptedException {
+    private void shutdown(MessageTarget target) throws InterruptedException {
+        this.component.finalize(target);
         for (StepRuntime targetStepRuntime : targetStepRuntimes) {
-            targetStepRuntime.queue(new ShutdownMessage(component.getFlowStep().getId()));
+            targetStepRuntime.queue(new ShutdownMessage(component.getFlowStep().getId(), cancelled));
         }
         this.component.stop();
         running = false;

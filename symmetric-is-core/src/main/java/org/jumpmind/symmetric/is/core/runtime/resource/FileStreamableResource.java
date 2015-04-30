@@ -13,97 +13,81 @@ import org.jumpmind.symmetric.is.core.model.Resource;
 
 public class FileStreamableResource implements IStreamableResource {
 
-	protected File file;
-	String basePath;
-	
-	public FileStreamableResource(Resource resource, String basePath, boolean mustExist) {
-	    this.basePath = basePath;
-		file = new File(basePath);
-		if (!file.exists()) {
-			if (!mustExist) {
-				file.mkdirs();
-			} else {
-				throw new IoException("Could not find " + file.getAbsolutePath());
-			}
-		}
-		//todo: get rid of basepath and must exist and get them from resource settings
-	}
-	
-	@Override
-	public void appendPath(String relativePath, boolean mustExist) {
-		this.file = new File(file, relativePath);
-		if (!file.exists()) {
-			if (!mustExist) {
-				file.getParentFile().mkdirs();
-			} else {
-				throw new IoException("Could not find " + file.getAbsolutePath());
-			}
-		}
-	}
-	
-	@Override
-	public void resetPath() {
-	    file = new File(basePath);
-	}
-	
-	@Override
-	public void open() {
-	}
+    String basePath;
 
-	@Override
-	public boolean requiresContentLength() {
-		return false;
-	}
+    public FileStreamableResource(Resource resource, String basePath, boolean mustExist) {
+        this.basePath = basePath;
+    }
 
-	@Override
-	public void setContentLength(int length) {
-	}
+    @Override
+    public void open() {
+    }
 
-	@Override
-	public boolean supportsInputStream() {
-		return file.exists();
-	}
+    @Override
+    public boolean requiresContentLength() {
+        return false;
+    }
 
-	@Override
-	public InputStream getInputStream() {
+    @Override
+    public void setContentLength(int length) {
+    }
+
+    @Override
+    public boolean supportsInputStream() {
+        return true;
+    }
+
+    protected File toFile(String relativePath, boolean mustExist) {
+        File file = new File(basePath, relativePath);
+        if (!file.exists()) {
+            if (!mustExist) {
+                file.getParentFile().mkdirs();
+            } else {
+                throw new IoException("Could not find " + file.getAbsolutePath());
+            }
+        }
+        return file;
+    }
+
+    @Override
+    public InputStream getInputStream(String relativePath, boolean mustExist) {
         try {
-            return new FileInputStream(file);
+            return new FileInputStream(toFile(relativePath, mustExist));
         } catch (FileNotFoundException e) {
             throw new IoException(e);
         }
-	}
+    }
 
-	@Override
-	public boolean supportsOutputStream() {
-		return true;
-	}
+    @Override
+    public boolean supportsOutputStream() {
+        return true;
+    }
 
-	@Override
-	public OutputStream getOutputStream() {
+    @Override
+    public OutputStream getOutputStream(String relativePath, boolean mustExist) {
         try {
-            return new FileOutputStream(file);
+            return new FileOutputStream(toFile(relativePath, mustExist));
         } catch (FileNotFoundException e) {
             throw new IoException(e);
         }
-	}
+    }
 
-	@Override
-	public void close() {
-		//TODO: should i close the output stream here or in the filewriter itself
-	}
+    @Override
+    public void close() {
+    }
 
-	@Override
-	public boolean delete() {
-        return FileUtils.deleteQuietly(file);
-	}
+    @Override
+    public boolean delete(String relativePath) {
+        return FileUtils.deleteQuietly(toFile(relativePath, false));
+    }
 
-	@Override
-	public boolean supportsDelete() {
-		return true;
-	}
-	
-	@Override
-	public String toString() {
-	    return file.getAbsolutePath();
-	}
+    @Override
+    public boolean supportsDelete() {
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return basePath;
+    }
 }

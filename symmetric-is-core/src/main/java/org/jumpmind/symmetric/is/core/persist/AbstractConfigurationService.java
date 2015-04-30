@@ -84,6 +84,15 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
     
     @Override
+    public List<ComponentName> findSharedComponentsInProject(String projectVersionId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("projectVersionId", projectVersionId);
+        params.put("deleted", 0);
+        params.put("shared", 1);
+        return find(ComponentName.class, params, Component.class);
+    }
+    
+    @Override
     public List<ComponentName> findComponentsInProject(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("projectVersionId", projectVersionId);
@@ -144,17 +153,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
             all.put(folder.getId(), folder);
         }
         return all;
-    }
+    }   
 
     @Override
-    public List<Flow> findFlows() {
+    public List<FlowName> findFlows() {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("deleted", 0);
-        List<Flow> flows = find(Flow.class, params);
-        for (Flow flow : flows) {
-            refreshFlowRelations(flow);
-        }
-        return flows;
+        return find(FlowName.class, params);
     }
 
     @Override
@@ -225,7 +230,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         if (folder != null) {
             folderMapById.put(folder.getId(), folder);
         } else {
-            folderMapById = foldersById(FolderType.DEPLOY);
+            folderMapById = foldersById(FolderType.AGENT);
         }
 
         for (Agent agent : list) {
@@ -533,8 +538,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
-    public void delete(FlowStepLink link) {
-        persistenceManager.delete(link, null, null, tableName(FlowStepLink.class));
+    public boolean delete(FlowStepLink link) {
+        return persistenceManager.delete(link, null, null, tableName(FlowStepLink.class));
     }
 
     @Override

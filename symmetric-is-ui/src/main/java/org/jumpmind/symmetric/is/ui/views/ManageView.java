@@ -11,7 +11,7 @@ import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Execution;
 import org.jumpmind.symmetric.is.core.model.ExecutionStatus;
-import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowName;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.ui.common.AppConstants;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
@@ -195,7 +195,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         split.setSizeFull();
         split.setSplitPosition(AppConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS, false);
         
-        manageNavigator = new ManageNavigator(FolderType.DEPLOY, context.getConfigurationService());
+        manageNavigator = new ManageNavigator(FolderType.AGENT, context.getConfigurationService());
         manageNavigator.addValueChangeListener(new ValueChangeListener() {
 			public void valueChange(ValueChangeEvent event) {
 				refreshUI(getBackgroundData());
@@ -250,8 +250,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         	Map<String, Object> params = new HashMap<String, Object>();
     		if (currentSelection instanceof Agent) {
     			params.put("agentId", ((Agent) currentSelection).getId());
-    		} else if (currentSelection instanceof Flow) {    		    
-    			params.put("flowId", ((Flow) currentSelection).getId());    			
+    		} else if (currentSelection instanceof FlowName) {    		    
+    			params.put("flowId", ((FlowName) currentSelection).getId());    			
     		} else if (currentSelection instanceof AgentDeployment) {
     			params.put("flowId", ((AgentDeployment) currentSelection).getFlowId());
     		}

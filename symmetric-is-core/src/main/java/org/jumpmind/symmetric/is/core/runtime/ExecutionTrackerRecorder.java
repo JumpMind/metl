@@ -114,6 +114,9 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         super.flowStepFinished(executionId, component, error, cancelled);
         ExecutionStep step = steps.get(component.getFlowStep().getId());
         if (step != null) {
+            if (step.getStartTime() == null) {
+                step.setStartTime(new Date());
+            }
             step.setEndTime(new Date());
             ExecutionStatus status = ExecutionStatus.DONE;
             if (cancelled) {

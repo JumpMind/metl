@@ -18,6 +18,7 @@ import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.sql.UniqueKeyException;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
+import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
@@ -116,8 +117,13 @@ public class DbWriter extends AbstractComponent {
         error = null;
         
         if (resource == null) {
-            throw new IllegalStateException("A database writer must have a datasoure defined");
+            throw new IllegalStateException("A database writer must have a datasource defined");
         }
+        
+        Model model = flowStep.getComponent().getInputModel();
+        if (model == null) {
+            throw new IllegalStateException("A database writer must have an input model defined");
+        }        
         
         TypedProperties properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
         replaceRows = properties.is(REPLACE);
@@ -132,7 +138,7 @@ public class DbWriter extends AbstractComponent {
                 new SqlTemplateSettings(), quoteIdentifiers);
         targetTables = new ArrayList<TargetTableDefintion>();
 
-        for (ModelEntity entity : flowStep.getComponent().getInputModel().getModelEntities()) {
+        for (ModelEntity entity : model.getModelEntities()) {
             Table table = platform.getTableFromCache(entity.getName(), true);
             if (table != null) {
                 targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE,

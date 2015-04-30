@@ -9,7 +9,7 @@ import java.util.Set;
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
-import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.FlowName;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
@@ -82,7 +82,7 @@ public class ManageNavigator extends Panel {
         treeTable.setItemIcon(agentsFolder, FontAwesome.FOLDER);
         addAgentsToFolder(agentsFolder);
 
-        List<Folder> folders = configurationService.findFolders(FolderType.DEPLOY);
+        List<Folder> folders = configurationService.findFolders(FolderType.AGENT);
         for (Folder folder : folders) {
             addChildFolder(folder, agentsFolder);
         }
@@ -219,11 +219,12 @@ public class ManageNavigator extends Panel {
     }
 
     protected void addFlowsToFolder(Folder folder) {
-        List<Flow> flows = configurationService.findFlows();
-        for (Flow flow : flows) {
+        List<FlowName> flows = configurationService.findFlows();
+        for (FlowName flow : flows) {
             treeTable.addItem(flow);
             treeTable.setItemIcon(flow, Icons.FLOW);
             treeTable.setParent(flow, folder);
+            treeTable.setChildrenAllowed(flow, false);
         }
     }
 

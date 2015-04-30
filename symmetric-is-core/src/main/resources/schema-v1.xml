@@ -61,7 +61,6 @@
         <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />
         <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>                        
         <column name="name" type="VARCHAR" size="255" description="" />
-        <column name="type" type="VARCHAR" size="50" required="true" description="RELATIONAL" />
         <column name="shared" type="BOOLEANINT" size="1" default="0" description="Indicator as to whether this is a shared model." />
         <column name="folder_id" type="CHAR" size="36"/>
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
@@ -418,15 +417,13 @@
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
-        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />               
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />    
+        <index name="idx_ex_sts_time)">
+            <index-column name="status"/>
+            <index-column name="last_update_time"/>
+        </index>           
     </table>    
 
-    <table name="execution_params" description="">
-       <column name="execution_id" type="CHAR" size="36" required="true" description="A unique identifer" />
-       <column name="name" type="VARCHAR" size="255" primaryKey="true" required="true" description="" />
-       <column name="value" type="VARCHAR" size="255" description="" />       
-    </table>    
-    
      <table name="execution_step" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
         <column name="execution_id" type="CHAR" size="36" required="true" description="A unique identifer" />
