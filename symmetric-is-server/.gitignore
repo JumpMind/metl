@@ -19,3 +19,4 @@
 /symmetricis-dev.h2.db.save
 /codb13.h2.db
 /codb13.trace.db
+/codb13.lock.db
