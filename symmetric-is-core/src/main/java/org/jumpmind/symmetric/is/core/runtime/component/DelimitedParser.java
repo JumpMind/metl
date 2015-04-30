@@ -157,7 +157,7 @@ public class DelimitedParser extends AbstractComponent {
         for (ComponentAttributeSetting attributeSetting : attributeSettings) {
             AttributeFormat format = formats.get(attributeSetting.getAttributeId());
             if (format == null) {
-                Model inputModel = flowStep.getComponent().getInputModel();
+                Model inputModel = flowStep.getComponent().getOutputModel();
                 ModelAttribute attribute = inputModel.getAttributeById(attributeSetting
                         .getAttributeId());
                 ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
