@@ -32,15 +32,11 @@ public class Message implements Serializable, Cloneable {
     }
     
     public Message copy (String originatingStepId, Serializable newPayload) {
-        try {
-            Message message = (Message)this.clone();
+            Message message = new Message(originatingStepId);
             message.header = header.copy();
             message.header.setOriginatingStepId(originatingStepId);
             message.setPayload(newPayload);
             return message;
-        } catch (CloneNotSupportedException e) {
-            throw new InternalError();
-        }
     }
     
 }

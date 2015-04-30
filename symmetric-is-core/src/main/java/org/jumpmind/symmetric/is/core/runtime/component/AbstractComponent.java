@@ -21,6 +21,7 @@ import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
+import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 
 abstract public class AbstractComponent extends AbstractRuntimeObject implements IComponent {
@@ -48,6 +49,11 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     	this.executionId = executionId;
     }
 
+    @Override
+    public void finalize(IMessageTarget messageTarget) {
+        
+    }
+    
     public void stop() {
     }
     

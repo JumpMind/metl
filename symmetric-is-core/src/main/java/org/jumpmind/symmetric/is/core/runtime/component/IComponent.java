@@ -16,6 +16,8 @@ public interface IComponent {
     
     public void start(String executionId, IExecutionTracker tracker);
 
+    public void finalize(IMessageTarget messageTarget);
+    
     public void handle(Message inputMessage, IMessageTarget messageTarget);
     
     public void flowCompletedWithoutError();
