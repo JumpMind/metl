@@ -17,6 +17,10 @@ public class EntityData extends LinkedCaseInsensitiveMap<Object> {
             }
         }
     }
+    
+    public EntityData copy() {
+        return (EntityData)this.clone();
+    }
 
 
 }

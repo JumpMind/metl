@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -50,6 +51,8 @@ public class EntityRouter extends AbstractComponent {
     ScriptEngine scriptEngine;
 
     long rowsPerMessage;
+    
+    Map<String,Serializable> parameters;
 
     protected void applySettings() {
         TypedProperties properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
@@ -76,9 +79,12 @@ public class EntityRouter extends AbstractComponent {
     @Override
     public void handle( Message inputMessage, IMessageTarget messageTarget) {
         componentStatistics.incrementInboundMessages();
+        if (parameters == null) {
+            parameters = inputMessage.getHeader().getParameters();
+        }
         Map<String, Message> outboundMessages = new HashMap<String, Message>();
-        ArrayList<EntityData> inputRows = inputMessage.getPayload();
-        for (EntityData entityData : inputRows) {
+        ArrayList<EntityData> inputDatas = inputMessage.getPayload();
+        for (EntityData entityData : inputDatas) {
             bindEntityData(scriptEngine, executionId, entityData);
             if (routes != null) {
                 for (Route route : routes) {
@@ -87,12 +93,13 @@ public class EntityRouter extends AbstractComponent {
                             Message message = outboundMessages.get(route.getTargetStepId());
                             if (message == null) {
                                 message = new Message(flowStep.getId());
+                                message.getHeader().setParameters(parameters);
                                 message.setPayload(new ArrayList<EntityData>());
                                 message.getHeader().getTargetStepIds().add(route.getTargetStepId());
                                 outboundMessages.put(route.getTargetStepId(), message);
                             }
                             ArrayList<EntityData> outputRows = message.getPayload();
-                            outputRows.add(entityData);
+                            outputRows.add(entityData.copy());
 
                             if (outputRows.size() >= rowsPerMessage) {
                                 outboundMessages.remove(route.getTargetStepId());
