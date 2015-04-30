@@ -1,14 +1,85 @@
 package org.jumpmind.symmetric.is.core.model;
 
-public class User {
+import java.util.Date;
+import java.util.List;
 
-    String userId;
+import org.apache.commons.codec.digest.DigestUtils;
+
+public class User extends AbstractObjectWithSettings {
+
+    private static final long serialVersionUID = 1L;
     
-    public void setUserId(String userId) {
-        this.userId = userId;
+    String loginId;
+
+    String name;
+
+    String password;
+    
+    Date lastLoginTime;
+    
+    List<UserSetting> userSettings;
+    
+    List<Group> groups;
+    
+    public static String hashValue(String password) {
+        if (password != null) {
+            return DigestUtils.sha256Hex(password.getBytes());
+        }
+        return "";
     }
-    
-    public String getUserId() {
-        return userId;
+
+    @Override
+    protected Setting createSettingData() {
+        return new UserSetting();
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    public String getLoginId() {
+        return loginId;
+    }
+
+    public void setLoginId(String loginId) {
+        this.loginId = loginId;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public List<UserSetting> getUserSettings() {
+        return userSettings;
+    }
+
+    public void setUserSettings(List<UserSetting> userSettings) {
+        this.userSettings = userSettings;
+    }
+
+    public Date getLastLoginTime() {
+        return lastLoginTime;
+    }
+
+    public void setLastLoginTime(Date lastLoginTime) {
+        this.lastLoginTime = lastLoginTime;
+    }
+
+    public List<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<Group> groups) {
+        this.groups = groups;
     }
 }

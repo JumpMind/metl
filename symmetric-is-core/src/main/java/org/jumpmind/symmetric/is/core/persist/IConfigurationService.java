@@ -16,6 +16,7 @@ import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderName;
 import org.jumpmind.symmetric.is.core.model.FolderType;
+import org.jumpmind.symmetric.is.core.model.Group;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelAttributeRelationship;
@@ -26,6 +27,7 @@ import org.jumpmind.symmetric.is.core.model.Project;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.ResourceName;
+import org.jumpmind.symmetric.is.core.model.User;
 
 public interface IConfigurationService {
     
@@ -44,6 +46,14 @@ public interface IConfigurationService {
     public Flow findFlow(String id);
     
     public Model findModel(String id);
+    
+    public User findUser(String id);
+    
+    public User findUserByLoginId(String loginId);
+    
+    public List<User> findUsers();
+    
+    public Group findGroup(String id);
 
     public void deleteFolder(String folderId);
 
@@ -91,6 +101,8 @@ public interface IConfigurationService {
     
     public void refresh(Component component);
     
+    public void refresh(User user);
+
     public void save(AgentDeployment agentDeployment);
     
     public void save(Resource resource);
@@ -116,7 +128,9 @@ public interface IConfigurationService {
     public void delete(ModelEntityRelationship modelEntityRelationship);
     
     public void delete(ModelAttributeRelationship modelAttributeRelationship);
-    
+
+    public void delete(User user);
+
     public void refresh(Model model);
     
     public void refresh(ModelEntity modelEntity);
@@ -136,4 +150,6 @@ public interface IConfigurationService {
     public List<Project> findProjects();
     
     public String export(ProjectVersion projectVersion);
+    
+    public boolean isUserLoginEnabled();
 }

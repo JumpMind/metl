@@ -32,6 +32,8 @@ import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderName;
 import org.jumpmind.symmetric.is.core.model.FolderType;
+import org.jumpmind.symmetric.is.core.model.Group;
+import org.jumpmind.symmetric.is.core.model.GroupPrivilege;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelAttributeRelationship;
@@ -44,6 +46,9 @@ import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.ResourceName;
 import org.jumpmind.symmetric.is.core.model.ResourceSetting;
 import org.jumpmind.symmetric.is.core.model.Setting;
+import org.jumpmind.symmetric.is.core.model.User;
+import org.jumpmind.symmetric.is.core.model.UserGroup;
+import org.jumpmind.symmetric.is.core.model.UserSetting;
 import org.jumpmind.symmetric.is.core.util.NameValue;
 
 // TODO make methods transactional
@@ -423,6 +428,53 @@ abstract class AbstractConfigurationService extends AbstractService implements
         }
         return list;
     }
+    
+    @Override
+    public User findUser(String id) {
+        User user = null;
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("id", id);
+        List<User> users = persistenceManager.find(User.class, params, null, null, tableName(User.class));
+        if (users.size() > 0) {
+            user = users.get(0);
+            refresh(user);
+        }
+        return user;
+    }
+
+    @Override
+    public User findUserByLoginId(String loginId) {
+        User user = null;
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("loginId", loginId);
+        List<User> users = persistenceManager.find(User.class, params, null, null, tableName(User.class));
+        if (users.size() > 0) {
+            user = users.get(0);
+            refresh(user);
+        }
+        return user;
+    }
+
+    @Override
+    public List<User> findUsers() {
+        return persistenceManager.find(User.class, null, null, null, tableName(User.class));
+    }
+
+    @Override
+    public Group findGroup(String id) {
+        Group group = null;
+        Map<String, Object> params = new HashMap<String, Object>();
+        params = new HashMap<String, Object>();
+        params.put("id", id);
+        List<Group> groups = persistenceManager.find(Group.class, params, null, null, tableName(Group.class));
+        if (groups.size() > 0) {
+            group = groups.get(0);
+            params = new HashMap<String, Object>();
+            params.put("groupId", group.getId());
+            group.setGroupPrivileges(persistenceManager.find(GroupPrivilege.class, params, null, null, tableName(GroupPrivilege.class)));
+        }
+        return group;
+    }
 
     @Override
     public void delete(AgentDeployment agentDeployment) {
@@ -492,6 +544,15 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
+    public void delete(User user) {
+        refresh(user);
+        for (UserSetting setting : user.getUserSettings()) {
+            persistenceManager.delete(setting, null, null, tableName(UserSetting.class));
+        }
+        persistenceManager.delete(user, null, null, tableName(User.class));
+    }
+
+    @Override
     public void refresh(Resource resource) {
         refresh((AbstractObject) resource);
 
@@ -517,6 +578,21 @@ abstract class AbstractConfigurationService extends AbstractService implements
     public void refresh(Flow flow) {
         refresh((AbstractObject) flow);
         refreshFlowRelations(flow);
+    }
+
+    @Override
+    public void refresh(User user) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params = new HashMap<String, Object>();
+        params.put("userId", user.getId());
+        user.setUserSettings(persistenceManager.find(UserSetting.class, params, null, null, tableName(UserSetting.class)));
+        
+        List<Group> groups = new ArrayList<Group>();
+        List<UserGroup> userGroups = persistenceManager.find(UserGroup.class, params, null, null, tableName(UserGroup.class));
+        for (UserGroup userGroup : userGroups) {
+            groups.add(findGroup(userGroup.getGroupId()));
+        }
+        user.setGroups(groups);
     }
 
     private void refreshFlowRelations(Flow flow) {

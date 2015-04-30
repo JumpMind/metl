@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.ui.common;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +10,14 @@ import java.util.Map;
 import java.util.Set;
 
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.server.VaadinSession;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -28,7 +36,7 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
 
     DesignAgentSelect designAgentSelect;
 
-    public TopBar(ViewManager vm, DesignAgentSelect das) {
+    public TopBar(ViewManager vm, DesignAgentSelect das, ApplicationContext context) {
         setWidth(100, Unit.PERCENTAGE);
 
         this.designAgentSelect = das;
@@ -40,6 +48,26 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
         menuBar = new MenuBar();
         menuBar.setWidth(100, Unit.PERCENTAGE);
         addComponent(menuBar);
+        setExpandRatio(menuBar, 1.0f);
+        
+        Label userLabel = new Label("user");
+        addComponent(userLabel);
+        
+        Button settingsButton = new Button(context.getUser().getLoginId(), FontAwesome.GEAR);
+        addComponent(settingsButton);
+
+        Button logoutButton = new Button("Logout", FontAwesome.SIGN_OUT);
+        logoutButton.addClickListener(new ClickListener() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void buttonClick(ClickEvent event) {
+                URI uri = Page.getCurrent().getLocation();
+                VaadinSession.getCurrent().close();        
+                Page.getCurrent().setLocation(uri.getPath());
+            }            
+        });
+        addComponent(logoutButton);
 
         Map<Category, List<TopBarLink>> menuItemsByCategory = viewManager.getMenuItemsByCategory();
         Set<Category> categories = menuItemsByCategory.keySet();
@@ -73,7 +101,7 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
                 viewToButtonMapping.put(menuLink.id(), menuItem);
             }
         }
-
+        viewManager.navigateTo(viewManager.getDefaultView());
     }
 
     protected void uncheckAll() {
