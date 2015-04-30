@@ -101,8 +101,6 @@ public class ScriptExecutor extends AbstractComponent {
                         .format(" protected void onSuccess() { %s } \n",
                                 onSuccess));
             }
-            script.append("\n};\n");
-
             if (isNotBlank(onError)) {
                 script.append("\n");
                 script.append(String

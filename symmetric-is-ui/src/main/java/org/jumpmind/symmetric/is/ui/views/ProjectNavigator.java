@@ -707,7 +707,7 @@ public class ProjectNavigator extends VerticalLayout {
          * Maybe dynamically try to create edit class based on The component
          * type name. EditXxxxXxxxPanel
          */
-
+        context.getConfigurationService().refresh(flowStep.getComponent());
         String type = flowStep.getComponent().getType();
         if (type.equals(FixedLengthFormatter.TYPE) || type.equals(DelimitedFormatter.TYPE) || 
                 type.equals(DelimitedParser.TYPE)) {

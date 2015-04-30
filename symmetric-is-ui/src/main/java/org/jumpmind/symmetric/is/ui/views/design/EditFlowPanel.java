@@ -22,6 +22,7 @@ import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
+import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
@@ -415,6 +416,35 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                 if (!event.isRemoved()) {
                     flow.getFlowStepLinks().add(
                             new FlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
+                    Component sourceComp = flow.findFlowStepWithId(event.getSourceNodeId())
+                            .getComponent();
+                    Component targetComp = flow.findFlowStepWithId(event.getTargetNodeId())
+                            .getComponent();
+                    IComponentFactory factory = context.getComponentFactory();
+                    ComponentDefinition sourceDefn = factory
+                            .getComponentDefinitionForComponentType(sourceComp.getType());
+
+                    if (targetComp.getInputModel() == null) {
+                        if (sourceComp.getOutputModel() != null) {
+                            targetComp.setInputModel(sourceComp.getOutputModel());
+                        } else if (sourceDefn.inputOutputModelsMatch()
+                                && sourceComp.getInputModel() != null) {
+                            targetComp.setInputModel(sourceComp.getInputModel());
+                        }
+                    }
+
+                    if (sourceComp.getOutputModel() == null) {
+                        if (targetComp.getInputModel() != null) {
+                            sourceComp.setOutputModel(targetComp.getInputModel());
+                        }
+                    }
+                    
+                    if (sourceComp.getInputModel() == null && sourceDefn.inputOutputModelsMatch()) {
+                        if (targetComp.getInputModel() != null) {
+                            sourceComp.setInputModel(targetComp.getInputModel());
+                        }
+                    }
+
                     configurationService.save(flow);
                 } else {
                     FlowStepLink link = flow.removeFlowStepLink(event.getSourceNodeId(),

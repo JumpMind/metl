@@ -3,7 +3,7 @@
 }
 
 .diagram-node {
-	padding: 18px;
+	padding: 12px;
 	position: absolute;
 	z-index: 1;
 	text-align: center;

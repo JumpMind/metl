@@ -13,6 +13,7 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         typeName = MessageLogger.TYPE,
         inputMessage = MessageType.ANY,
         outgoingMessage = MessageType.ANY,
+        inputOutputModelsMatch=true,
         iconImage = "log.png")
 public class MessageLogger extends AbstractComponent {
 
