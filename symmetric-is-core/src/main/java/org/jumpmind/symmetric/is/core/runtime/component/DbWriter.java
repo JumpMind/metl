@@ -116,7 +116,7 @@ public class DbWriter extends AbstractComponent {
         error = null;
         
         if (resource == null) {
-            throw new IllegalStateException("A database writer must have a datasoure defined");
+            throw new IllegalStateException("A database writer must have a datasource defined");
         }
         
         TypedProperties properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
