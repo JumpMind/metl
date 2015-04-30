@@ -25,6 +25,11 @@
     <category name="org.springframework">
         <priority value="ERROR" />
     </category>    
+    <!-- To print out SQL    
+    <category name="org.jumpmind.db.sql">
+        <priority value="DEBUG" />
+    </category>    
+     --> 
     <category name="org.atmosphere.cpr">
         <priority value="ERROR" />
     </category>        

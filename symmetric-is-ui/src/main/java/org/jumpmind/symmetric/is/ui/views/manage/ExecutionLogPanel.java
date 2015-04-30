@@ -192,19 +192,24 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
                 !ExecutionStatus.CANCELLED.name().equals(statusLabel.getValue()) && 
                 !ExecutionStatus.ERROR.name().equals(statusLabel.getValue())) {
             flowLabel.setValue(data.execution.getFlowName());
-            startLabel.setValue(formatDate(data.execution.getStartTime()));           
-            if (data.execution.getStatus().equals(ExecutionStatus.ERROR.name())) {
-                statusLabel.setStyleName("error");
-                statusLabel.setValue(FontAwesome.WARNING.getHtml() + " " + data.execution.getStatus());
-            } else if (data.execution.getStatus().equals(ExecutionStatus.DONE.name())) {
-                statusLabel.setStyleName("done");
-                statusLabel.setValue(FontAwesome.CHECK.getHtml() + " " + data.execution.getStatus());
-            } else if (data.execution.getStatus().equals(ExecutionStatus.RUNNING.name())) {
-                statusLabel.setStyleName("running");
-                statusLabel.setValue(FontAwesome.SPINNER.getHtml() + " " + data.execution.getStatus());
-            } else {
-                statusLabel.setStyleName("");
-                statusLabel.setValue(data.execution.getStatus());
+            startLabel.setValue(formatDate(data.execution.getStartTime())); 
+            if (data.execution.getStatus() != null) {
+                if (data.execution.getStatus().equals(ExecutionStatus.ERROR.name())) {
+                    statusLabel.setStyleName("error");
+                    statusLabel.setValue(FontAwesome.WARNING.getHtml() + " "
+                            + data.execution.getStatus());
+                } else if (data.execution.getStatus().equals(ExecutionStatus.DONE.name())) {
+                    statusLabel.setStyleName("done");
+                    statusLabel.setValue(FontAwesome.CHECK.getHtml() + " "
+                            + data.execution.getStatus());
+                } else if (data.execution.getStatus().equals(ExecutionStatus.RUNNING.name())) {
+                    statusLabel.setStyleName("running");
+                    statusLabel.setValue(FontAwesome.SPINNER.getHtml() + " "
+                            + data.execution.getStatus());
+                } else {
+                    statusLabel.setStyleName("");
+                    statusLabel.setValue(data.execution.getStatus());
+                }
             }
             endLabel.setValue(formatDate(data.execution.getEndTime()));
 

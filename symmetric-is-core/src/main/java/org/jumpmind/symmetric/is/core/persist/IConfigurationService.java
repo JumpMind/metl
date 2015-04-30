@@ -55,7 +55,7 @@ public interface IConfigurationService {
     
     public void delete(Flow flow, FlowStep flowStep);
     
-    public void delete(FlowStepLink link);
+    public boolean delete(FlowStepLink link);
     
     public void delete(Resource resource);    
     

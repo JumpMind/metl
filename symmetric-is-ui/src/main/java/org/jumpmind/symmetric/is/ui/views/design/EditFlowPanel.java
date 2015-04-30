@@ -86,7 +86,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     TabbedPanel tabs;
 
     Diagram diagram;
-    
+
     Panel flowPanel;
 
     AbstractLayout diagramLayout;
@@ -98,12 +98,12 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     Button parametersButton;
 
     AbstractObject selected;
-    
+
     IConfigurationService configurationService;
 
     public EditFlowPanel(ApplicationContext context, String flowId,
             ProjectNavigator designNavigator, TabbedPanel tabs) {
-        
+
         this.configurationService = context.getConfigurationService();
         this.flow = context.getConfigurationService().findFlow(flowId);
         this.context = context;
@@ -112,10 +112,11 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
         this.propertySheet = new PropertySheet(context);
         this.propertySheet.setListener(new IPropertySheetChangeListener() {
-            
+
             @Override
             public void componentNameChanged(Component component) {
-                refreshStepOnDiagram(EditFlowPanel.this.flow.findFlowStepWithComponentId(component.getId()));
+                refreshStepOnDiagram(EditFlowPanel.this.flow.findFlowStepWithComponentId(component
+                        .getId()));
             }
         });
         this.propertySheet.setCaption("Property Sheet");
@@ -154,7 +155,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
         addComponent(rightLayout);
         setExpandRatio(rightLayout, 1);
-        
+
         if (flow.getFlowSteps().size() > 0) {
             selected = flow.getFlowSteps().get(0);
             propertySheet.valueChange(selected);
@@ -194,7 +195,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                 new EditParametersWindow().showAtSize(.50);
             }
         });
-                
+
         return buttonBar;
     }
 
@@ -229,7 +230,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     public Flow getFlow() {
         return flow;
     }
-    
+
     protected void refreshStepOnDiagram(FlowStep step) {
         context.getConfigurationService().refresh(step.getComponent());
         diagram.setNodes(getNodes());
@@ -297,7 +298,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
         diagram = new Diagram();
         if (selected != null && selected instanceof FlowStep) {
-           diagram.setSelectedNodeId(((FlowStep)selected).getId());
+            diagram.setSelectedNodeId(((FlowStep) selected).getId());
         }
         diagram.setSizeFull();
         diagram.addListener(new DiagramChangedListener());
@@ -318,7 +319,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             String imageText = String
                     .format("<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>",
                             componentPalette.getBase64RepresentationOfImageForComponentType(type));
-            node.setText(imageText + "<br><div style='width: 100px; margin-left:-25px'><i>" + name + "</i></div>");
+            node.setText(imageText + "<br><div style='width: 100px; margin-left:-25px'><i>" + name
+                    + "</i></div>");
             node.setId(flowStep.getId());
             node.setX(flowStep.getX());
             node.setY(flowStep.getY());
@@ -357,7 +359,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             folder.setType(FolderType.AGENT.name());
             folder.setName("<Design Time>");
             configurationService.save(folder);
-            
+
             localAgent = new Agent();
             localAgent.setHost("localhost");
             localAgent.setName("local");
@@ -380,7 +382,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context);
             tabs.addCloseableTab(executionId, "Run " + flow.getName(), Icons.LOG, logPanel);
         }
-    }   
+    }
 
     class DiagramChangedListener implements Listener {
 
@@ -418,8 +420,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                     FlowStepLink link = flow.removeFlowStepLink(event.getSourceNodeId(),
                             event.getTargetNodeId());
                     if (link != null) {
-                        configurationService.delete(link);
-                        redrawFlow();
+                        if (configurationService.delete(link)) {
+                            redrawFlow();
+                        }
                     }
                 }
             } else if (e instanceof LinkSelectedEvent) {
@@ -428,7 +431,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                 delButton.setEnabled(true);
             }
         }
-        
+
     }
 
     class DropHandler implements com.vaadin.event.dd.DropHandler {
@@ -443,14 +446,14 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                 Component component = new Component();
                 component.setId(flowPaletteItem.getComponentId());
                 configurationService.refresh(component);
-                addComponent(details.getMouseEvent().getClientX() - details.getAbsoluteLeft(), details
-                        .getMouseEvent().getClientY() - details.getAbsoluteTop(), component);                                
+                addComponent(details.getMouseEvent().getClientX() - details.getAbsoluteLeft(),
+                        details.getMouseEvent().getClientY() - details.getAbsoluteTop(), component);
             } else {
                 Component component = new Component();
                 component.setType(flowPaletteItem.getCaption());
                 component.setShared(false);
-                addComponent(details.getMouseEvent().getClientX() - details.getAbsoluteLeft(), details
-                        .getMouseEvent().getClientY() - details.getAbsoluteTop(), component);                
+                addComponent(details.getMouseEvent().getClientX() - details.getAbsoluteLeft(),
+                        details.getMouseEvent().getClientY() - details.getAbsoluteTop(), component);
             }
         }
 

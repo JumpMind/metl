@@ -486,8 +486,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
-    public void delete(FlowStepLink link) {
-        persistenceManager.delete(link, null, null, tableName(FlowStepLink.class));
+    public boolean delete(FlowStepLink link) {
+        return persistenceManager.delete(link, null, null, tableName(FlowStepLink.class));
     }
 
     @Override
