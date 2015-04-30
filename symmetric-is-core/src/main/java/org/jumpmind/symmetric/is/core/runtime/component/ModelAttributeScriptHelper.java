@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ import org.apache.commons.lang.time.FastDateFormat;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
+import org.jumpmind.util.FormatUtils;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
 public class ModelAttributeScriptHelper {
@@ -106,6 +109,24 @@ public class ModelAttributeScriptHelper {
     
     public RemoveAttribute remove() {
         return REMOVE_ATTRIBUTE;
+    }
+    
+    public Date parsedate(String pattern, String nulldate) {
+        String text = value != null ? value.toString() : "";
+        if (isNotBlank(text) && !text.equals(nulldate)) {
+            return FormatUtils.parseDate(text, new String[] { pattern});
+        } else {
+            return null;
+        }
+    }
+    
+    public Date parsedate(String pattern) {
+        String text = value != null ? value.toString() : "";
+        if (isNotBlank(text)) {
+            return FormatUtils.parseDate(text, new String[] { pattern});
+        } else {
+            return null;
+        }
     }
     
     public String formatdate(String pattern) {
