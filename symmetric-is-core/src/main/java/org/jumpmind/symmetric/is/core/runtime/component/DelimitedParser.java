@@ -124,7 +124,7 @@ public class DelimitedParser extends AbstractComponent {
             EntityData data = new EntityData();
             if (attributes.size() > 0) {
                 for (AttributeFormat attribute : attributes) {
-                    Object value = csvReader.get(attribute.getOrdinal());
+                    Object value = csvReader.get(attribute.getOrdinal()-1);
                     if (isNotBlank(attribute.getFormatFunction())) {
                         value = ModelAttributeScriptHelper.eval(attribute.getAttribute(), value,
                                 attribute.getEntity(), data, attribute.getFormatFunction());
