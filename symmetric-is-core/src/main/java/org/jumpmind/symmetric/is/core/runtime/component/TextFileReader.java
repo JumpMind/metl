@@ -150,10 +150,12 @@ public class TextFileReader extends AbstractComponent {
 
     private void initAndSendMessage(ArrayList<String> payload, Message inputMessage, IMessageTarget messageTarget,
             int numberMessages, boolean lastMessage) {
-        numberMessages++;
-        Message message = inputMessage.copy(flowStep.getId(), new ArrayList<String>(payload));
+        numberMessages++;        
+        Message message = new Message(flowStep.getId()); 
+        message.getHeader().setParameters(inputMessage.getHeader().getParameters());
         message.getHeader().setSequenceNumber(numberMessages);
         message.getHeader().setLastMessage(lastMessage);
+        message.setPayload(payload);
         componentStatistics.incrementOutboundMessages();
         messageTarget.put(message);
         payload.clear();
