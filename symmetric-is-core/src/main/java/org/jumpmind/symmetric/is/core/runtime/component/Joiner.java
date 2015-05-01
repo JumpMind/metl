@@ -1,8 +1,8 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jumpmind.properties.TypedProperties;
@@ -45,7 +45,7 @@ public class Joiner extends AbstractComponent {
     int rowsPerMessage;
     String joinAttribute;
     String joinAttributeId;
-    Map<Object, EntityData> joinedData = new HashMap<Object, EntityData>();
+    Map<Object, EntityData> joinedData = new LinkedHashMap<Object, EntityData>();
 
     @Override
     public void start(String executionId, IExecutionTracker executionTracker) {
