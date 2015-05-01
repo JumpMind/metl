@@ -143,6 +143,47 @@ public class Diagram extends AbstractJavaScriptComponent {
                 }
             }
         });
+        
+        addFunction("onConnectionMoved", new JavaScriptFunction() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void call(JsonArray arguments) {
+                if (arguments.length() > 0) {
+                    Object obj = arguments.get(0);
+                    if (obj instanceof JsonObject) {
+                        JsonObject json = arguments.getObject(0);
+                        String sourceNodeId = json.getString("sourceNodeId");
+                        String targetNodeId = json.getString("targetNodeId");
+                        String origSourceNodeId = json.getString("origSourceNodeId");
+                        String origTargetNodeId = json.getString("origTargetNodeId");
+
+                        DiagramState state = getState();
+                        for (Node node : state.nodes) {
+                            if (node.getId().equals(sourceNodeId)) {
+                                if (!node.getTargetNodeIds().contains(targetNodeId)) {
+                                    node.getTargetNodeIds().add(targetNodeId);
+                                }
+                                fireEvent(new LinkEvent(Diagram.this, sourceNodeId, targetNodeId,
+                                        false));
+                                break;
+                            }
+                        }
+                        
+                        for (Node node : state.nodes) {
+                            if (node.getId().equals(origSourceNodeId)) {
+                                    node.getTargetNodeIds().remove(origTargetNodeId);
+                                fireEvent(new LinkEvent(Diagram.this, origSourceNodeId, origTargetNodeId,
+                                        true));
+                                break;
+                            }
+                        }                       
+
+                    }
+                }
+            }
+        });
 
     }
     
