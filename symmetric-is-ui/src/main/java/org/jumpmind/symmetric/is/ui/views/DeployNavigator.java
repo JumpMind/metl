@@ -81,7 +81,7 @@ public class DeployNavigator extends VerticalLayout {
     ShortcutListener treeTableDeleteKeyShortcutListener;
 
     TabbedPanel tabbedPanel;
-    
+
     MenuItem search;
 
     HorizontalLayout searchBarLayout;
@@ -96,7 +96,7 @@ public class DeployNavigator extends VerticalLayout {
         addStyleName(ValoTheme.MENU_ROOT);
 
         addComponent(buildMenuBar());
-        
+
         searchBarLayout = buildSearchBar();
         addComponent(searchBarLayout);
 
@@ -129,10 +129,10 @@ public class DeployNavigator extends VerticalLayout {
             }
         }
 
-        this.treeTable.removeAllItems();
+        treeTable.removeAllItems();
         List<Folder> folders = context.getConfigurationService().findFolders(FolderType.AGENT);
         for (Folder folder : folders) {
-            addChildFolder(folder);
+            addChildren(folder);
         }
 
         for (Object object : expandedItems) {
@@ -150,7 +150,7 @@ public class DeployNavigator extends VerticalLayout {
 
         treeTable.focus();
     }
-    
+
     protected HorizontalLayout buildSearchBar() {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setMargin(new MarginInfo(false, true, true, true));
@@ -189,7 +189,7 @@ public class DeployNavigator extends VerticalLayout {
                 addAgent();
             }
         });
-        
+
         MenuItem editMenu = leftMenuBar.addItem("Edit", null);
 
         editMenu.addItem("Open", new Command() {
@@ -206,7 +206,7 @@ public class DeployNavigator extends VerticalLayout {
                 startEditingItem((AbstractObject) treeTable.getValue());
             }
         });
-        
+
         delete = editMenu.addItem("Remove", new Command() {
 
             @Override
@@ -226,8 +226,6 @@ public class DeployNavigator extends VerticalLayout {
                 searchBarLayout.setVisible(search.isChecked());
             }
         });
-        
-       
 
         layout.addComponent(leftMenuBar);
         layout.addComponent(rightMenuBar);
@@ -326,7 +324,6 @@ public class DeployNavigator extends VerticalLayout {
                 if (event.getItemId() instanceof Folder) {
                     Folder folder = (Folder) event.getItemId();
                     table.setItemIcon(folder, FontAwesome.FOLDER_OPEN);
-                    folderExpanded(folder);
                 }
             }
         });
@@ -448,8 +445,9 @@ public class DeployNavigator extends VerticalLayout {
 
     protected void openItem(Object item) {
         if (item instanceof Agent) {
-            Agent agent = (Agent)item;
-            tabbedPanel.addCloseableTab(agent.getId(), agent.getName(), Icons.AGENT, new EditAgentPanel(context, tabbedPanel, agent));
+            Agent agent = (Agent) item;
+            tabbedPanel.addCloseableTab(agent.getId(), agent.getName(), Icons.AGENT,
+                    new EditAgentPanel(context, tabbedPanel, agent));
         }
     }
 
@@ -470,26 +468,21 @@ public class DeployNavigator extends VerticalLayout {
         return null;
     }
 
-    protected void folderExpanded(Folder folder) {
-        List<Agent> agents = context.getConfigurationService().findAgentsInFolder(folder);
-        for (Agent agent : agents) {
-            addAgent(folder, agent);                       
-        }
-    }
-
     protected void selectionChanged(ValueChangeEvent event) {
         AbstractObject selected = getSelectedValue();
         Folder selectedFolder = getSelectedFolder();
         boolean showNewFolder = itemBeingEdited == null
                 && (selected == null || selectedFolder != null);
         newFolder.setVisible(showNewFolder);
-        newAgent.setVisible(selectedFolder != null);
+        newAgent.setVisible(selectedFolder != null && !selectedFolder.getName().startsWith("<"));
 
         delete.setEnabled(isDeleteButtonEnabled(selected));
     }
 
     protected boolean isDeleteButtonEnabled(Object selected) {
-        return selected instanceof Folder;
+        Folder selectedFolder = getSelectedFolder();
+        return (selectedFolder != null && !selectedFolder.getName().startsWith("<"))
+                || selected instanceof Agent;
     }
 
     protected void handleDelete() {
@@ -533,7 +526,7 @@ public class DeployNavigator extends VerticalLayout {
         folder.setType(FolderType.AGENT.name());
         folder.setParent(parentFolder);
 
-        addChildFolder(folder);
+        addChildren(folder);
 
         while (parentFolder != null) {
             treeTable.setCollapsed(parentFolder, false);
@@ -551,31 +544,42 @@ public class DeployNavigator extends VerticalLayout {
             agent.setFolder(folder);
             context.getConfigurationService().save(agent);
             addAgent(folder, agent);
+            expand(folder, agent);
+            startEditingItem(agent);
         }
 
     }
 
     protected void addAgent(Folder folder, Agent agent) {
+        treeTable.setChildrenAllowed(folder, true);
         treeTable.addItem(agent);
         treeTable.setItemIcon(agent, Icons.AGENT);
         treeTable.setParent(agent, folder);
         treeTable.setChildrenAllowed(agent, false);
-        this.treeTable.setChildrenAllowed(folder, true);
     }
-    
-    protected void addChildFolder(Folder folder) {
-        this.treeTable.addItem(folder);
-        this.treeTable.setItemIcon(folder, FontAwesome.FOLDER);
-        this.treeTable.setCollapsed(folder, true);
-        this.treeTable.setChildrenAllowed(folder, false);
+
+    protected void addChildren(Folder folder) {
         if (folder.getParent() != null) {
-            this.treeTable.setParent(folder, folder.getParent());
-            this.treeTable.setChildrenAllowed(folder.getParent(), true);
+            treeTable.setChildrenAllowed(folder.getParent(), true);
         }
+        treeTable.addItem(folder);
+        treeTable.setItemIcon(folder, FontAwesome.FOLDER);
+        treeTable.setCollapsed(folder, true);
+        treeTable.setChildrenAllowed(folder, false);
+        if (folder.getParent() != null) {
+            treeTable.setParent(folder, folder.getParent());
+        }
+
         List<Folder> children = folder.getChildren();
         for (Folder child : children) {
-            addChildFolder(child);
+            addChildren(child);
         }
+
+        List<Agent> agents = context.getConfigurationService().findAgentsInFolder(folder);
+        for (Agent agent : agents) {
+            addAgent(folder, agent);
+        }
+
     }
 
     protected void deleteTreeItems(AbstractObject obj) {
