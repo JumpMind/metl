@@ -76,10 +76,6 @@ public class DeployNavigator extends VerticalLayout {
 
     AbstractObject itemBeingEdited;
 
-    AbstractObject itemClicked;
-
-    long itemClickTimeInMs;
-
     ShortcutListener treeTableEnterKeyShortcutListener;
 
     ShortcutListener treeTableDeleteKeyShortcutListener;
@@ -193,6 +189,31 @@ public class DeployNavigator extends VerticalLayout {
                 addAgent();
             }
         });
+        
+        MenuItem editMenu = leftMenuBar.addItem("Edit", null);
+
+        editMenu.addItem("Open", new Command() {
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                openItem(treeTable.getValue());
+            }
+        });
+
+        editMenu.addItem("Rename", new Command() {
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                startEditingItem((AbstractObject) treeTable.getValue());
+            }
+        });
+        
+        delete = editMenu.addItem("Remove", new Command() {
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                handleDelete();
+            }
+        });
 
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
@@ -206,14 +227,7 @@ public class DeployNavigator extends VerticalLayout {
             }
         });
         
-        delete = rightMenuBar.addItem("", Icons.DELETE, new Command() {
-
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                handleDelete();
-            }
-        });
-        delete.setDescription("Remove");
+       
 
         layout.addComponent(leftMenuBar);
         layout.addComponent(rightMenuBar);
@@ -286,23 +300,9 @@ public class DeployNavigator extends VerticalLayout {
                     if (event.isDoubleClick()) {
                         abortEditingItem();
                         openItem(event.getItemId());
-                        itemClicked = null;
-
                         if (table.areChildrenAllowed(event.getItemId())) {
                             Object item = event.getItemId();
                             table.setCollapsed(item, !table.isCollapsed(item));
-                        }
-                    } else {
-                        if (itemClicked != null && itemClicked.equals(event.getItemId())) {
-                            long timeSinceClick = System.currentTimeMillis() - itemClickTimeInMs;
-                            if (timeSinceClick > 600 && timeSinceClick < 2000) {
-                                startEditingItem(itemClicked);
-                            } else {
-                                itemClicked = null;
-                            }
-                        } else if (event.getItemId() instanceof AbstractObject) {
-                            itemClicked = (AbstractObject) event.getItemId();
-                            itemClickTimeInMs = System.currentTimeMillis();
                         }
                     }
                 }
@@ -393,7 +393,6 @@ public class DeployNavigator extends VerticalLayout {
         if (itemBeingEdited != null) {
             Object selected = itemBeingEdited;
             itemBeingEdited = null;
-            itemClicked = null;
             refresh();
             treeTable.focus();
             treeTable.setValue(selected);
@@ -551,7 +550,6 @@ public class DeployNavigator extends VerticalLayout {
             agent.setName("New Agent");
             agent.setFolder(folder);
             context.getConfigurationService().save(agent);
-
             addAgent(folder, agent);
         }
 
@@ -562,14 +560,17 @@ public class DeployNavigator extends VerticalLayout {
         treeTable.setItemIcon(agent, Icons.AGENT);
         treeTable.setParent(agent, folder);
         treeTable.setChildrenAllowed(agent, false);
+        this.treeTable.setChildrenAllowed(folder, true);
     }
     
     protected void addChildFolder(Folder folder) {
         this.treeTable.addItem(folder);
         this.treeTable.setItemIcon(folder, FontAwesome.FOLDER);
         this.treeTable.setCollapsed(folder, true);
+        this.treeTable.setChildrenAllowed(folder, false);
         if (folder.getParent() != null) {
             this.treeTable.setParent(folder, folder.getParent());
+            this.treeTable.setChildrenAllowed(folder.getParent(), true);
         }
         List<Folder> children = folder.getChildren();
         for (Folder child : children) {

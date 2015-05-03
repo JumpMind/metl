@@ -242,6 +242,16 @@ public class ProjectNavigator extends VerticalLayout {
                 startEditingItem((AbstractObject) treeTable.getValue());
             }
         });
+        
+        delete = editMenu.addItem("Remove", new Command() {
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                handleDelete();
+            }
+        });
+
+
 
         MenuItem projectMenu = leftMenuBar.addItem("Project", null);
         projectMenu.addItem("Manage", new Command() {
@@ -316,14 +326,6 @@ public class ProjectNavigator extends VerticalLayout {
             public void menuSelected(MenuItem selectedItem) {
                 search.setChecked(!search.isChecked());
                 searchBarLayout.setVisible(search.isChecked());
-            }
-        });
-
-        delete = rightMenuBar.addItem("", Icons.DELETE, new Command() {
-
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                handleDelete();
             }
         });
 
