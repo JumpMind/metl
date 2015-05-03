@@ -113,6 +113,7 @@ public class Joiner extends AbstractComponent {
     private void join(ArrayList<EntityData> records) {
         
         for (int i=0;i<records.size();i++) {
+            componentStatistics.incrementNumberEntitiesProcessed();
             EntityData record = records.get(i);
             Object keyValue = record.get(joinAttributeId);
             EntityData existingRecord = joinedData.get(keyValue);

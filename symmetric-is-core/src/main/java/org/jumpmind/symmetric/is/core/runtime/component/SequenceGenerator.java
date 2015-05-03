@@ -102,6 +102,7 @@ public class SequenceGenerator extends AbstractDbComponent {
             for (EntityData entityData : payload) {
                 entityData = entityData.copy();
                 entityData.put(sequenceAttributeId, ++currentSequence);
+                componentStatistics.incrementNumberEntitiesProcessed();
                 outgoingPayload.add(entityData);
             }
             sendMessage(outgoingPayload, messageTarget, inputMessage.getHeader().isLastMessage());
