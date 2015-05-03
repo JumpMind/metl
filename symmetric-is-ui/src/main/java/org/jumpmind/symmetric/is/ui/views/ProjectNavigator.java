@@ -32,6 +32,7 @@ import org.jumpmind.symmetric.is.core.runtime.component.ScriptExecutor;
 import org.jumpmind.symmetric.is.core.runtime.component.Transformer;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.SSHFileResource;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.EnableFocusTextField;
 import org.jumpmind.symmetric.is.ui.common.Icons;
@@ -126,6 +127,8 @@ public class ProjectNavigator extends VerticalLayout {
     MenuItem newComponent;
 
     MenuItem newFileResource;
+    
+    MenuItem newSSHResource;
 
     MenuItem newDataSource;
 
@@ -302,9 +305,18 @@ public class ProjectNavigator extends VerticalLayout {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
-                addNewFileSystem();
+                addNewLocalFileSystem();
             }
 
+        });
+        
+        newSSHResource = newMenu.addItem("SSH File System", new Command() {
+            
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                addNewSSHFileSystem();
+            }
+            
         });
 
         MenuBar rightMenuBar = new MenuBar();
@@ -891,8 +903,12 @@ public class ProjectNavigator extends VerticalLayout {
         addNewResource(DataSourceResource.TYPE, "Database", Icons.DATABASE);
     }
 
-    protected void addNewFileSystem() {
+    protected void addNewLocalFileSystem() {
         addNewResource(LocalFileResource.TYPE, "Directory", Icons.FILE_SYSTEM);
+    }
+    
+    protected void addNewSSHFileSystem() {
+        addNewResource(SSHFileResource.TYPE, "Directory", Icons.FILE_SYSTEM);
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {
