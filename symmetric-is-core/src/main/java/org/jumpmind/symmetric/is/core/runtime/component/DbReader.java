@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
 import org.jumpmind.db.sql.SqlException;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
@@ -34,7 +32,7 @@ import org.springframework.util.StringUtils;
         inputMessage=MessageType.ANY,
         outgoingMessage=MessageType.ENTITY,
         resourceCategory = ResourceCategory.DATASOURCE)
-public class DbReader extends AbstractComponent {
+public class DbReader extends AbstractDbComponent {
 
     public static final String TYPE = "Database Reader";
 
@@ -233,10 +231,6 @@ public class DbReader extends AbstractComponent {
         } else {
             throw new SqlException("No output model was specified for the db reader component.  An output model is required.");
         }
-    }
-
-    protected NamedParameterJdbcTemplate getJdbcTemplate() {
-        return new NamedParameterJdbcTemplate((DataSource) this.resource.reference());
     }
 
     protected void setParamsFromInboundMsgAndRec(Map<String, Object> paramMap,
