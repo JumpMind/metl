@@ -1,15 +1,9 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
-import org.apache.commons.io.IOUtils;
-import org.jumpmind.db.sql.SqlScriptReader;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
@@ -31,7 +25,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
         outgoingMessage = MessageType.ANY,
         resourceCategory = ResourceCategory.DATASOURCE,
         inputOutputModelsMatch = true)
-public class SqlWriter extends AbstractComponent {
+public class SqlWriter extends AbstractDbComponent {
 
     private static final String ON_SUCCESS = "ON SUCCESS";
 
@@ -61,25 +55,6 @@ public class SqlWriter extends AbstractComponent {
         applySettings();
         if (resource == null) {
             throw new IllegalStateException("This component requires a data source");
-        }
-    }
-
-    protected NamedParameterJdbcTemplate getJdbcTemplate() {
-        return new NamedParameterJdbcTemplate((DataSource) this.resource.reference());
-    }
-    
-    protected List<String> getSqlStatements(String script) {
-        List<String> sqlStatements = new ArrayList<String>();
-        SqlScriptReader scriptReader = new SqlScriptReader(new StringReader(script));
-        try {
-            String sql = scriptReader.readSqlStatement();
-            while (sql != null) {
-                sqlStatements.add(sql);
-                sql = scriptReader.readSqlStatement();
-            }
-            return sqlStatements;
-        } finally {
-            IOUtils.closeQuietly(scriptReader);
         }
     }
 
