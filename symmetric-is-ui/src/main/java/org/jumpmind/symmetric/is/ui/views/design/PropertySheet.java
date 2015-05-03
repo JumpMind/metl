@@ -109,6 +109,12 @@ public class PropertySheet extends Panel implements ValueChangeListener {
                     addSettingField(key, definition, (AbstractObjectWithSettings) obj, formLayout);
                 }
             }
+            
+            if (obj instanceof Component) {
+                Component component = (Component) obj;
+                addComponentShared(formLayout, component);
+            }
+
         }
         setContent(formLayout);
     }
@@ -117,7 +123,6 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         ComponentDefinition componentDefintion = componentFactory
                 .getComponentDefinitionForComponentType(component.getType());
         addComponentName(formLayout, component);
-        addComponentShared(formLayout, component);
         addResourceCombo(componentDefintion, formLayout, component);
         addInputModelCombo(componentDefintion, formLayout, component);
         addOutputModelCombo(componentDefintion, formLayout, component);
