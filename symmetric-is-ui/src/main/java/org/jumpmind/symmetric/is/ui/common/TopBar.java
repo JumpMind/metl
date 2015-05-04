@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jumpmind.symmetric.ui.common.ReadOnlyTextAreaDialog;
-
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
@@ -60,11 +58,6 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
         settingsButton.addClickListener(new ClickListener() {            
             @Override
             public void buttonClick(ClickEvent event) {
-                ReadOnlyTextAreaDialog.show("This is embarassing", "You should not click on buttons that you don't know what they do.  "
-                        + "\n\n********************************************************************************"
-                        + "\nIn order to be helpful we are currently in the process of DELETING your flows!! "
-                        + "\n********************************************************************************"
-                        + "\n\nBetter luck next time." , false);
             }
         });
         addComponent(settingsButton);
