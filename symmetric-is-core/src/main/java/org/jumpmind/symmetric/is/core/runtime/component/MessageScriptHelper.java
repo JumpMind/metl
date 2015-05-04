@@ -43,6 +43,9 @@ public class MessageScriptHelper {
     }
 
     protected JdbcTemplate getJdbcTemplate() {
+        if (component.getResource() == null) {
+            throw new IllegalStateException("In order to create a jdbc template, a datasource resource must be defined");
+        }
         DataSource ds = component.getResource().reference();
         return new JdbcTemplate(ds);
     }
