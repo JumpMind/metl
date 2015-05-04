@@ -82,9 +82,6 @@ public class EditScriptPanel extends VerticalLayout {
             @Override
             public void textChange(TextChangeEvent event) {
                 String key = (String) select.getValue();
-                int cursorPos = event.getCursorPosition();
-                editor.setValue(event.getText());
-                editor.setCursorPosition(cursorPos);
                 EditScriptPanel.this.component.put(key, event.getText());
                 EditScriptPanel.this.context.getConfigurationService().save(
                         EditScriptPanel.this.component.findSetting(key));
