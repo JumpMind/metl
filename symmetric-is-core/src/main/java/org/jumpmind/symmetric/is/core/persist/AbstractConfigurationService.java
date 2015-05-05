@@ -328,6 +328,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
             if (!exists) {
                 AgentResourceSetting setting = new AgentResourceSetting();
                 setting.setId(resourceId);
+                setting.setAgentId(agentId);
+                setting.setResourceId(resourceId);
                 setting.setName(resourceSetting.getName());
                 setting.setValue(resourceSetting.getValue());
                 settings.add(setting);

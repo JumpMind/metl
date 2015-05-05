@@ -47,7 +47,8 @@ public class ModelAttributeScriptHelper {
     }
     
     public Integer integer() {
-        String text = value != null ? value.toString() : "";
+        String text = value != null ? value.toString() : "0";
+        text = isNotBlank(text) ? text : "0";
         return Integer.parseInt(text);
     }
     

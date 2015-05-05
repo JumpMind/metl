@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.ui.views;
 
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,7 +70,9 @@ public class ExploreView extends VerticalLayout implements View {
         explorer.refresh();
     }
 
-    class DbResource implements IDb {
+    class DbResource implements IDb, Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         Resource resource;
 
@@ -127,7 +130,9 @@ public class ExploreView extends VerticalLayout implements View {
 
     }
     
-    class DbProvider implements IDbProvider {
+    class DbProvider implements IDbProvider, Serializable {
+        
+        private static final long serialVersionUID = 1L;
         
         List<IDb> dbs = new ArrayList<IDb>();
         
