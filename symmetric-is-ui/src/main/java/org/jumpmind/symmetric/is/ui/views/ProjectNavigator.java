@@ -762,7 +762,7 @@ public class ProjectNavigator extends VerticalLayout {
         } else if (item instanceof ResourceName) {
             ResourceName resource = (ResourceName) item;
             PropertySheet sheet = new PropertySheet(context);            
-            sheet.valueChange(context.getConfigurationService().findResource(resource.getId()));
+            sheet.setSource(context.getConfigurationService().findResource(resource.getId()));
             tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item),
                     sheet);
         }

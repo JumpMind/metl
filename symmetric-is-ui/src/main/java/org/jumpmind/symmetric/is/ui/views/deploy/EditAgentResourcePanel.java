@@ -20,7 +20,7 @@ public class EditAgentResourcePanel extends VerticalLayout implements IUiPanel {
 
         PropertySheet propertySheet = new PropertySheet(context);
         addComponent(propertySheet);
-        propertySheet.valueChange(agentResource);
+        propertySheet.setSource(agentResource);
     }
 
     @Override

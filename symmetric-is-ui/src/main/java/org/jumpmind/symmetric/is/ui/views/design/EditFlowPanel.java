@@ -159,7 +159,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
         if (flow.getFlowSteps().size() > 0) {
             selected = flow.getFlowSteps().get(0);
-            propertySheet.valueChange(selected);
+            propertySheet.setSource(selected);
         }
 
         redrawFlow();
@@ -284,7 +284,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
         redrawFlow();
 
-        propertySheet.valueChange(component);
+        propertySheet.setSource(component);
 
         projectNavigator.refresh();
         projectNavigator.select(flowStep);
@@ -395,7 +395,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                 Node node = event.getNode();
                 FlowStep flowStep = flow.findFlowStepWithId(node.getId());
                 selected = flowStep;
-                propertySheet.valueChange(flowStep);
+                propertySheet.setSource(flowStep);
                 delButton.setEnabled(true);
             } else if (e instanceof NodeDoubleClickedEvent) {
                 NodeDoubleClickedEvent event = (NodeDoubleClickedEvent) e;

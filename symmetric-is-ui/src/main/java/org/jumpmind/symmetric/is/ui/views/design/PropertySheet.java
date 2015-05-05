@@ -48,7 +48,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class PropertySheet extends Panel implements ValueChangeListener {
+public class PropertySheet extends Panel {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -78,12 +78,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
         return value;
     }
 
-    @Override
-    public void valueChange(ValueChangeEvent event) {
-        valueChange(event.getProperty().getValue());
-    }
-
-    public void valueChange(Object obj) {
+    public void setSource(Object obj) {
         value = obj;
         FormLayout formLayout = new FormLayout();
         formLayout.setWidth(100, Unit.PERCENTAGE);
@@ -132,8 +127,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
             FormLayout formLayout, final Component component) {
         if (value instanceof FlowStep) {
             FlowStep step = (FlowStep) value;
-            Flow flow = configurationService.findFlow(step.getFlowId());
-            String projectVersionId = flow.getProjectVersionId();
+            String projectVersionId = step.getComponent().getProjectVersionId();
             if ((componentDefintion.outgoingMessage() == MessageType.ENTITY || componentDefintion
                     .outgoingMessage() == MessageType.ANY)
                     && !componentDefintion.inputOutputModelsMatch()) {
@@ -223,8 +217,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
             FormLayout formLayout, final Component component) {
         if (value instanceof FlowStep) {
             FlowStep step = (FlowStep) value;
-            Flow flow = configurationService.findFlow(step.getFlowId());
-            String projectVersionId = flow.getProjectVersionId();
+            String projectVersionId = step.getComponent().getProjectVersionId();
             if (componentDefintion.inputMessage() == MessageType.ENTITY
                     || componentDefintion.inputMessage() == MessageType.ANY) {
                 final AbstractSelect combo = new ComboBox("Input Model");
@@ -271,8 +264,7 @@ public class PropertySheet extends Panel implements ValueChangeListener {
             resourcesCombo.setRequired(true);
             List<String> types = resourceFactory.getResourceTypes(componentDefintion
                     .resourceCategory());
-            Flow flow = configurationService.findFlow(step.getFlowId());
-            String projectVersionId = flow.getProjectVersionId();
+            String projectVersionId = step.getComponent().getProjectVersionId();
             if (types != null) {
                 List<Resource> resources = configurationService.findResourcesByTypes(
                         projectVersionId, types.toArray(new String[types.size()]));

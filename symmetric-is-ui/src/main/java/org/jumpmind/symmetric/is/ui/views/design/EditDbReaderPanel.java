@@ -164,7 +164,7 @@ public class EditDbReaderPanel extends VerticalLayout implements IUiPanel {
             }
         }
         if (propertySheet != null) {
-            propertySheet.valueChange(component);
+            propertySheet.setSource(component);
         }
         return true;
     }
