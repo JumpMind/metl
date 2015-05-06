@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.ISqlRowMapper;
 import org.jumpmind.db.sql.ISqlTemplate;
@@ -89,26 +90,31 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
 
     @Override
     public void purgeExecutions(String status, int retentionTimeInMs) {
-        Date purgeBefore = DateUtils.addMilliseconds(new Date(), -retentionTimeInMs);
-        log.info("Purging executions with the status of {} before {}", status, purgeBefore);
-        ISqlTemplate template = databasePlatform.getSqlTemplate();
-        long count = template
-                .update(String
-                        .format("delete from %1$s_execution_step_log where execution_step_id in "
-                                + "(select id from %1$s_execution_step where execution_id in "
-                                + "(select id from %1$s_execution where status=? and last_update_time <= ?))",
-                                tablePrefix), status, purgeBefore);
-        count += template
-                .update(String
-                        .format("delete from %1$s_execution_step where execution_id in "
-                                + "(select id from %1$s_execution where status=? and last_update_time <= ?)",
-                                tablePrefix), status, purgeBefore);
-        count += template.update(
-                String.format(
-                        "delete from %1$s_execution where status=? and last_update_time <= ?",
-                        tablePrefix), status, purgeBefore);
-        log.info("Purged {} execution records with the status of {}", new Object[] {
-                count, status });
+        Table table = databasePlatform
+                .readTableFromDatabase(null, null, tableName(Execution.class));
+        if (table != null) {
+            Date purgeBefore = DateUtils.addMilliseconds(new Date(), -retentionTimeInMs);
+            log.info("Purging executions with the status of {} before {}", status, purgeBefore);
+            ISqlTemplate template = databasePlatform.getSqlTemplate();
+            long count = template
+                    .update(String
+                            .format("delete from %1$s_execution_step_log where execution_step_id in "
+                                    + "(select id from %1$s_execution_step where execution_id in "
+                                    + "(select id from %1$s_execution where status=? and last_update_time <= ?))",
+                                    tablePrefix), status, purgeBefore);
+            count += template
+                    .update(String
+                            .format("delete from %1$s_execution_step where execution_id in "
+                                    + "(select id from %1$s_execution where status=? and last_update_time <= ?)",
+                                    tablePrefix), status, purgeBefore);
+            count += template.update(String.format(
+                    "delete from %1$s_execution where status=? and last_update_time <= ?",
+                    tablePrefix), status, purgeBefore);
+            log.info("Purged {} execution records with the status of {}", new Object[] { count,
+                    status });
+        } else {
+            log.info("Could not run execution purge because table had not been created yet");
+        }
     }
 
 }
