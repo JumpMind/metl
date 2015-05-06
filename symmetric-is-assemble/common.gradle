@@ -33,16 +33,16 @@ import org.apache.tools.ant.filters.ReplaceTokens
         jtdsVersion = '1.3.1'
         mockitoVersion = '1.9.5'
         powerMockVersion = '1.5.3'
+        springfoxSwaggerVersion = '2.0.0'
                 
         env = System.getenv()                
     }
 
     repositories {
         mavenCentral()        
-       // maven { url "http://repository.codehaus.org" }
-       // maven { url "http://snapshots.repository.codehaus.org" }
         maven { url "http://maven.vaadin.com/vaadin-addons" }
         maven { url "http://maven.jumpmind.com/repo" }
+        jcenter()        
     }
     
     eclipse {

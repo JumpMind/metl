@@ -3,6 +3,7 @@ package org.jumpmind.symmetric.is.core.model;
 import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
+import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 
 public class ExecutionStepLog extends AbstractObject {
 
@@ -39,6 +40,10 @@ public class ExecutionStepLog extends AbstractObject {
 
 	public void setLevel(String level) {
 		this.level = level;
+	}
+	
+	public LogLevel getLogLevel() {
+	    return level == null ? null : LogLevel.valueOf(level);
 	}
 
 	public String getLogText() {

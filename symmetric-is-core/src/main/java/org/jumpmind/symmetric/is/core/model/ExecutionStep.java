@@ -56,6 +56,10 @@ public class ExecutionStep extends AbstractObject {
 	public void setComponentName(String componentName) {
 		this.componentName = componentName;
 	}
+	
+    public ExecutionStatus getExecutionStatus() {
+        return status == null ? null : ExecutionStatus.valueOf(status);
+    }
 
 	public String getStatus() {
 		return status;

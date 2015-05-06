@@ -53,8 +53,6 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         applicationContextRef.set(dispatchContext);
 
         ServletRegistration.Dynamic vaadin = servletContext.addServlet("vaadin", new AppServlet());
-//        vaadin.setInitParameter("org.atmosphere.cpr.broadcasterCacheClass",
-//                "org.atmosphere.cache.UUIDBroadcasterCache");
         vaadin.addMapping("/VAADIN/*", "/app/*");
         vaadin.setInitParameter("beanName", "appUI");
         vaadin.setAsyncSupported(true);

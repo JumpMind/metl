@@ -37,18 +37,8 @@ dependencies {
     compile "org.springframework:spring-webmvc:$springVersion"
     compile "org.peimari:maddon:1.20"
     compile "org.apache.poi:poi:3.11"    
-    //compile "org.vaadin.alump.gofullscreen:gofullscreen-addon:0.4.1"
-    //compile "com.vaadin:vaadin-push:$vaadinVersion"
-    //compile "com.vaadin:vaadin-server:$vaadinVersion"
-    //compile "com.vaadin:vaadin-themes:$vaadinVersion"
-    //compile "org.hibernate:hibernate-validator:5.1.0.Final"
-
-    //providedCompile "com.vaadin:vaadin-client:$vaadinVersion"
-    //providedCompile "com.vaadin:vaadin-client-compiler:$vaadinVersion"        
-    //providedCompile "javax.servlet:javax.servlet-api:$servletVersion"
-    //providedCompile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
-    //providedCompile "org.eclipse.jetty:jetty-jmx:$jettyVersion"
-    //providedCompile "org.eclipse.jetty:jetty-annotations:$jettyVersion"
+    compile "io.springfox:springfox-swagger2:$springfoxSwaggerVersion"
+    compile "io.springfox:springfox-swagger-ui:$springfoxSwaggerVersion"
     
 }
 

@@ -207,4 +207,8 @@ public class FlowRuntime {
     public ComponentStatistics getComponentStatistics(String flowStepId) {
         return stepRuntimes.get(flowStepId).getComponent().getComponentStatistics();
     }
+    
+    public String getExecutionId() {
+        return executionId;
+    }
 }

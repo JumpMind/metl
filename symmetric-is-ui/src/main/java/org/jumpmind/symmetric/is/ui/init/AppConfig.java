@@ -19,6 +19,9 @@ import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_VALI
 import static org.jumpmind.symmetric.is.core.util.EnvConstants.DEFAULT_PROPERTY_ENV;
 import static org.jumpmind.symmetric.is.core.util.EnvConstants.PROPERTY_ENV;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.sql.DataSource;
 
 import org.h2.Driver;
@@ -50,15 +53,25 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.env.Environment;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import com.cybercom.vaadin.spring.UIScope;
 
 @Configuration
 @EnableTransactionManagement
 @EnableWebMvc
-public class AppConfig {
+@EnableSwagger2
+public class AppConfig extends WebMvcConfigurerAdapter {
 
     protected static final Logger log = LoggerFactory.getLogger(AppConfig.class);
 
@@ -74,8 +87,35 @@ public class AppConfig {
     IResourceFactory resourceFactory;
 
     IPersistenceManager persistenceManager;
-    
+
     IExecutionService executionService;
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("swagger-ui.html").addResourceLocations(
+                "classpath:/META-INF/resources/");
+
+        registry.addResourceHandler("/webjars/**").addResourceLocations(
+                "classpath:/META-INF/resources/webjars/");
+    }
+    
+    @Override
+    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+        configurer.defaultContentType(MediaType.APPLICATION_JSON);
+    }
+
+    @Bean
+    public Docket swaggerSpringMvcPlugin() {
+      return new Docket(DocumentationType.SWAGGER_2).pathMapping("/api").produces(contentTypes()).consumes(contentTypes()).
+              apiInfo(new ApiInfo("SymmetricIS API", "This is the REST API for SymmetricIS", "1.0", null, null, null, null));
+    }
+
+    protected Set<String> contentTypes() {
+        Set<String> set = new HashSet<String>();
+        set.add("application/xml");
+        set.add("application/json");
+        return set;
+    }
 
     @Bean
     @Scope(value = "singleton")
@@ -156,7 +196,7 @@ public class AppConfig {
         }
         return configurationService;
     }
-    
+
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IExecutionService executionService() {
@@ -165,7 +205,7 @@ public class AppConfig {
                     persistenceManager(), tablePrefix(), env);
         }
         return executionService;
-    }    
+    }
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
@@ -188,8 +228,8 @@ public class AppConfig {
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IAgentManager agentManager() {
-        IAgentManager agentManager = new AgentManager(configurationService(), executionService(), componentFactory(),
-                resourceFactory());
+        IAgentManager agentManager = new AgentManager(configurationService(), executionService(),
+                componentFactory(), resourceFactory());
         return agentManager;
     }
 

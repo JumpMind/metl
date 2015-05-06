@@ -53,6 +53,7 @@ public class AdminNavigator extends VerticalLayout {
         
         addPanel(new UserPanel(context, tabbedPanel));
         addPanel(new GroupPanel(context, tabbedPanel));
+        addPanel(new ApiPanel(context, tabbedPanel));
 
         table.addStyleName("noselect");
         addComponent(table);

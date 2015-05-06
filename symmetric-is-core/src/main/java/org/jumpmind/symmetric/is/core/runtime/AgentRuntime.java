@@ -53,7 +53,7 @@ public class AgentRuntime {
 
     boolean stopping = false;
 
-    Map<AgentDeployment, FlowRuntime> coordinators = new HashMap<AgentDeployment, FlowRuntime>();
+    Map<AgentDeployment, FlowRuntime> flowRuntimes = new HashMap<AgentDeployment, FlowRuntime>();
 
     Map<AgentDeployment, ScheduledFuture<?>> scheduled = new HashMap<AgentDeployment, ScheduledFuture<?>>();
 
@@ -280,7 +280,7 @@ public class AgentRuntime {
                 FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory,
                         resourceFactory, new ExecutionTrackerRecorder(agent, deployment, recorder),
                         flowStepsExecutionThreads);
-                coordinators.put(deployment, flowRuntime);
+                flowRuntimes.put(deployment, flowRuntime);
     
                 if (deployment.asStartType() == StartType.ON_DEPLOY) {
                     scheduleNow(deployment);
@@ -306,22 +306,23 @@ public class AgentRuntime {
             }
             configurationService.save(deployment);
         }
-    }
+    }    
 
     public String scheduleNow(AgentDeployment deployment) {
         ScheduledFuture<?> future = scheduled.get(deployment);
         if (future == null || future.isDone()) {
             log.info("Scheduling '{}' on '{}' for now", new Object[] {
-                    deployment.getFlow().toString(), agent.getName() });
+                    deployment.getName(), agent.getName() });
 
-            FlowRuntime flowRuntime = coordinators.get(deployment);
+            FlowRuntime flowRuntime = flowRuntimes.get(deployment);
             String executionId = UUID.randomUUID().toString();
             future = this.flowExecutionScheduler.schedule(new FlowRunner(executionId, flowRuntime),
                     new Date());
             scheduled.put(deployment, future);
             return executionId;
         } else {
-            return null;
+            log.info("Returning reference to currently running deployment '{}' on agent '{}'", deployment.getName(), agent.getName());
+            return flowRuntimes.get(deployment).getExecutionId();
         }
     }
 
@@ -332,7 +333,7 @@ public class AgentRuntime {
             scheduled.remove(future);
         }
 
-        FlowRuntime coordinator = coordinators.get(deployment);
+        FlowRuntime coordinator = flowRuntimes.get(deployment);
         if (coordinator != null) {
             try {
                 coordinator.stop();
@@ -350,7 +351,7 @@ public class AgentRuntime {
     }
 
     protected FlowRuntime getFlowCoordinator(AgentDeployment deployment) {
-        return coordinators.get(deployment);
+        return flowRuntimes.get(deployment);
     }
 
     class FlowRunner implements Runnable {

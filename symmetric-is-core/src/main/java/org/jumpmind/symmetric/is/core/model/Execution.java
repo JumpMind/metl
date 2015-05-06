@@ -34,7 +34,7 @@ public class Execution extends AbstractObject {
     }
 
     public ExecutionStatus getExecutionStatus() {
-        return ExecutionStatus.valueOf(status);
+        return status == null ? null : ExecutionStatus.valueOf(status);
     }
 
     public void setName(String name) {
