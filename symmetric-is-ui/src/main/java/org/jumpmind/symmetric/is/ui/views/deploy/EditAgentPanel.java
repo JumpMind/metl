@@ -17,6 +17,7 @@ import org.jumpmind.symmetric.is.core.model.DeploymentStatus;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowName;
 import org.jumpmind.symmetric.is.core.model.FlowParameter;
+import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
@@ -25,6 +26,7 @@ import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
+import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.util.AppUtils;
 
@@ -73,6 +75,8 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
     Button removeButton;
 
     Button editButton;    
+    
+    Button runButton;
 
     FlowSelectWindow flowSelectWindow;
     
@@ -155,6 +159,9 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
 
         removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
         removeButton.addClickListener(new RemoveClickListener());
+        
+        runButton = buttonBar.addButton("Run", Icons.RUN);
+        runButton.addClickListener(new RunClickListener());
 
         container = new BeanItemContainer<AgentDeploymentSummary>(AgentDeploymentSummary.class);
         container.setItemSorter(new TableItemSorter());
@@ -261,6 +268,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         boolean canRemove = false;
         boolean canEnable = false;
         boolean canDisable = false;
+        boolean canRun = false;
         Set<AgentDeploymentSummary> selectedIds = getSelectedItems();
         for (AgentDeploymentSummary summary : selectedIds) {
             if (summary.isFlow()) {
@@ -270,12 +278,16 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
                 }
                 if (summary.getStatus().equals(DeploymentStatus.DEPLOYED.name())) {
                     canDisable = true;
+                    if (summary.isFlow()) {
+                       canRun = true;
+                    }
                 }
                 if (summary.getStatus().equals(DeploymentStatus.DISABLED.name())) {
                     canEnable = true;
                 }
             }
         }
+        runButton.setEnabled(canRun && selectedIds.size() == 1); 
         enableButton.setEnabled(canEnable);
         disableButton.setEnabled(canDisable);
         removeButton.setEnabled(canRemove);
@@ -345,6 +357,21 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
                 }
             }
             return name;
+        }
+    }
+    
+    class RunClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            AgentDeploymentSummary summary = (AgentDeploymentSummary) getSelectedItems().iterator().next();
+            if (summary.isFlow()) {
+                AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
+                IAgentManager agentManager = context.getAgentManager();
+                String executionId = agentManager.getAgentRuntime(deployment.getAgentId()).scheduleNow(deployment);
+                if (executionId != null) {
+                    ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context);
+                    tabbedPanel.addCloseableTab(executionId, "Run " + deployment.getName(), Icons.LOG, logPanel);
+                }
+            }
         }
     }
 

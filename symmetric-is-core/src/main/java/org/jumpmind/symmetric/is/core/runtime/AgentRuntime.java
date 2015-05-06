@@ -53,11 +53,11 @@ public class AgentRuntime {
 
     boolean stopping = false;
 
-    Map<AgentDeployment, FlowRuntime> flowRuntimes = new HashMap<AgentDeployment, FlowRuntime>();
+    Map<AgentDeployment, FlowRuntime> deployedFlows = new HashMap<AgentDeployment, FlowRuntime>();
 
-    Map<AgentDeployment, ScheduledFuture<?>> scheduled = new HashMap<AgentDeployment, ScheduledFuture<?>>();
+    Map<AgentDeployment, ScheduledFuture<?>> scheduledDeployments = new HashMap<AgentDeployment, ScheduledFuture<?>>();
 
-    Map<String, IResource> resources = new HashMap<String, IResource>();
+    Map<String, IResource> deployedResources = new HashMap<String, IResource>();
 
     IConfigurationService configurationService;
 
@@ -173,7 +173,7 @@ public class AgentRuntime {
                 this.flowStepsExecutionThreads = null;
             }
             
-            Collection<IResource> resourceCollection = resources.values();
+            Collection<IResource> resourceCollection = deployedResources.values();
                 for (IResource resource : resourceCollection) {
                     log.info("Stopping the {} resource on the {} agent", resource.getResource().getName(), agent.getName());
                     resource.stop();
@@ -223,7 +223,7 @@ public class AgentRuntime {
     protected void deployResources(Flow flow) {
         Set<Resource> flowResources = flow.findResources();
         for (Resource flowResource : flowResources) {
-            IResource alreadyDeployed = resources.get(flowResource.getId());
+            IResource alreadyDeployed = deployedResources.get(flowResource.getId());
     
             Map<String, SettingDefinition> settings = resourceFactory
                     .getSettingDefinitionsForResourceType(flowResource.getType());
@@ -261,7 +261,7 @@ public class AgentRuntime {
             if (deploy) {
                 log.info("Deploying the {} resource to the {} agent", flowResource.getName(), agent.getName());
                 IResource resource = resourceFactory.create(flowResource, overrideSettings);
-                resources.put(flowResource.getId(), resource);
+                deployedResources.put(flowResource.getId(), resource);
             }
         }
     }
@@ -280,7 +280,7 @@ public class AgentRuntime {
                 FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory,
                         resourceFactory, new ExecutionTrackerRecorder(agent, deployment, recorder),
                         flowStepsExecutionThreads);
-                flowRuntimes.put(deployment, flowRuntime);
+                deployedFlows.put(deployment, flowRuntime);
     
                 if (deployment.asStartType() == StartType.ON_DEPLOY) {
                     scheduleNow(deployment);
@@ -293,7 +293,7 @@ public class AgentRuntime {
     
                     ScheduledFuture<?> future = this.flowExecutionScheduler.schedule(
                             new FlowRunner(null, flowRuntime), new CronTrigger(cron));
-                    scheduled.put(deployment, future);
+                    scheduledDeployments.put(deployment, future);
                 }
     
                 deployment.setStatus(DeploymentStatus.DEPLOYED.name());
@@ -309,31 +309,31 @@ public class AgentRuntime {
     }    
 
     public String scheduleNow(AgentDeployment deployment) {
-        ScheduledFuture<?> future = scheduled.get(deployment);
+        ScheduledFuture<?> future = scheduledDeployments.get(deployment);
         if (future == null || future.isDone()) {
             log.info("Scheduling '{}' on '{}' for now", new Object[] {
                     deployment.getName(), agent.getName() });
 
-            FlowRuntime flowRuntime = flowRuntimes.get(deployment);
+            FlowRuntime flowRuntime = deployedFlows.get(deployment);
             String executionId = UUID.randomUUID().toString();
             future = this.flowExecutionScheduler.schedule(new FlowRunner(executionId, flowRuntime),
                     new Date());
-            scheduled.put(deployment, future);
+            scheduledDeployments.put(deployment, future);
             return executionId;
         } else {
             log.info("Returning reference to currently running deployment '{}' on agent '{}'", deployment.getName(), agent.getName());
-            return flowRuntimes.get(deployment).getExecutionId();
+            return deployedFlows.get(deployment).getExecutionId();
         }
     }
 
     protected void stop(AgentDeployment deployment) {
-        ScheduledFuture<?> future = scheduled.get(deployment);
+        ScheduledFuture<?> future = scheduledDeployments.get(deployment);
         if (future != null) {
             future.cancel(true);
-            scheduled.remove(future);
+            scheduledDeployments.remove(future);
         }
 
-        FlowRuntime coordinator = flowRuntimes.get(deployment);
+        FlowRuntime coordinator = deployedFlows.get(deployment);
         if (coordinator != null) {
             try {
                 coordinator.stop();
@@ -343,6 +343,10 @@ public class AgentRuntime {
             }
         }
     }
+    
+    public Collection<IResource> getDeployedResources() {
+        return new HashSet<IResource>(deployedResources.values());
+    }
 
     public synchronized void undeploy(AgentDeployment deployment) {
         stop(deployment);
@@ -351,7 +355,7 @@ public class AgentRuntime {
     }
 
     protected FlowRuntime getFlowCoordinator(AgentDeployment deployment) {
-        return flowRuntimes.get(deployment);
+        return deployedFlows.get(deployment);
     }
 
     class FlowRunner implements Runnable {
@@ -371,7 +375,7 @@ public class AgentRuntime {
             try {
                 log.info("Scheduled '{}' on '{}' is running", deployment.getFlow().toString(),
                         agent.getName());
-                flowRuntime.start(executionId, resources);
+                flowRuntime.start(executionId, deployedResources);
             } catch (Exception e) {
                 log.error("Error while waiting for the flow to complete", e);
                 flowRuntime.stop();

@@ -3,6 +3,7 @@ package org.jumpmind.symmetric.is.ui.views;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -14,11 +15,11 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlTemplateSettings;
-import org.jumpmind.db.util.BasicDataSourcePropertyConstants;
-import org.jumpmind.symmetric.is.core.model.ProjectVersion;
-import org.jumpmind.symmetric.is.core.model.Resource;
-import org.jumpmind.symmetric.is.core.model.ResourceName;
+import org.jumpmind.symmetric.is.core.model.Agent;
+import org.jumpmind.symmetric.is.core.runtime.AgentRuntime;
+import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 import org.jumpmind.symmetric.is.ui.common.AppConstants;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.Category;
@@ -74,43 +75,37 @@ public class ExploreView extends VerticalLayout implements View {
 
         private static final long serialVersionUID = 1L;
 
-        Resource resource;
+        IResource resource;
 
-        ProjectVersion projectVersion;
+        Agent agent;
 
         IDatabasePlatform platform;
 
-        public DbResource(ProjectVersion projectVersion, Resource resource) {
+        public DbResource(Agent agent, IResource resource) {
             this.resource = resource;
-            this.projectVersion = projectVersion;
+            this.agent = agent;
         }
 
         @Override
         public String getName() {
-            return projectVersion.getName() + " " + resource.getName();
+            return agent.getName() + " > " + resource.getResource().getName();
         }
 
         @Override
         public IDatabasePlatform getPlatform() {
-            if (platform == null) {
-                resource.put(BasicDataSourcePropertyConstants.DB_POOL_INITIAL_SIZE, "2");
-                resource.put(BasicDataSourcePropertyConstants.DB_POOL_MAX_ACTIVE, "2");
-                resource.put(BasicDataSourcePropertyConstants.DB_POOL_MAX_IDLE, "2");
-                resource.put(BasicDataSourcePropertyConstants.DB_POOL_MIN_IDLE, "2");
-                DataSourceResource dataSourceResource = (DataSourceResource) context
-                        .getResourceFactory().create(resource, null);
-                DataSource dataSource = dataSourceResource.reference();
+            if (platform == null) {                
+                DataSource dataSource = resource.reference();
                 platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource,
                         new SqlTemplateSettings(), false);
             }
             return platform;
         }
-
-        public ProjectVersion getProjectVersion() {
-            return projectVersion;
+        
+        public Agent getAgent() {
+            return agent;
         }
 
-        public Resource getResource() {
+        public IResource getResource() {
             return resource;
         }
 
@@ -158,18 +153,19 @@ public class ExploreView extends VerticalLayout implements View {
                     return "SymmetricIS DB";
                 }
             });
-
-            List<ProjectVersion> projects = context.getOpenProjects();
-            for (ProjectVersion projectVersion : projects) {
-                List<ResourceName> resources = context.getConfigurationService()
-                        .findResourcesInProject(projectVersion.getId());
-                for (ResourceName resourceName : resources) {
-                    if (resourceName.getType().equals(DataSourceResource.TYPE)) {
-                        Resource resource = context.getConfigurationService().findResource(resourceName.getId());
-                        DbResource db = new DbResource(projectVersion, resource);
-                        dbs.add(db);
+            
+            IAgentManager agentManager = context.getAgentManager();
+            Collection<Agent> agents = agentManager.getLocalAgents();
+            for (Agent agent : agents) {
+                AgentRuntime runtime = agentManager.getAgentRuntime(agent);
+                Collection<IResource> resources = runtime.getDeployedResources();
+                for (IResource iResource : resources) {
+                    if (iResource.getResource().getType().equals(DataSourceResource.TYPE)) {
+                        DbResource db = new DbResource(agent, iResource);
+                        dbs.add(db);                        
                     }
                 }
+
             }
 
             Collections.sort(dbs, new Comparator<IDb>() {
