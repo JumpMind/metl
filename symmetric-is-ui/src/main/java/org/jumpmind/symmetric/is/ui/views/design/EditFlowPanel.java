@@ -363,7 +363,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
             localAgent = new Agent();
             localAgent.setHost("localhost");
-            localAgent.setName("local");
+            localAgent.setName("Design");
             localAgent.setFolder(folder);
             localAgent.setStartMode(AgentStartMode.AUTO.name());
             configurationService.save(localAgent);
