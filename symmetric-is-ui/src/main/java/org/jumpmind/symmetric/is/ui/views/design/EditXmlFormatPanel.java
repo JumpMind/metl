@@ -16,7 +16,6 @@ import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.Setting;
-import org.jumpmind.symmetric.is.core.runtime.component.DelimitedParser;
 import org.jumpmind.symmetric.is.core.runtime.component.XmlFormatter;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
@@ -66,8 +65,11 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        Button moveUpButton = buttonBar.addButton("Edit Template", FontAwesome.FILE_CODE_O);
-        moveUpButton.addClickListener(new EditTemplateClickListener());
+        Button editButton = buttonBar.addButton("Edit Template", FontAwesome.FILE_CODE_O);
+        editButton.addClickListener(new EditTemplateClickListener());
+
+        Button importButton = buttonBar.addButton("Import Template", FontAwesome.DOWNLOAD);
+        importButton.addClickListener(new ImportTemplateClickListener());
 
         filterField = buttonBar.addFilter();
         filterField.addTextChangeListener(this);
@@ -154,7 +156,7 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
             try {
                 Document document = builder.build(new StringReader(setting.getValue()));
                 xpathChoices = new HashSet<String>();
-                buildXpathChoicesFromElement("", document.getRootElement());
+                buildXpathChoicesFromElement("/" + document.getRootElement().getName(), document.getRootElement());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -166,7 +168,7 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
             String text = prefix + "/" + element.getName();
             xpathChoices.add(text);
             for (Attribute attr : element.getAttributes()) {
-                String attrText = text + "[@" + attr.getName() + "]";
+                String attrText = text + "/@" + attr.getName();
                 xpathChoices.add(attrText);
             }
             buildXpathChoicesFromElement(text, element);
@@ -216,6 +218,7 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
         public Field<?> createField(final Container dataContainer, final Object itemId,
                 final Object propertyId, com.vaadin.ui.Component uiContext) {
             Field<?> field = null;
+            Record record = (Record) itemId;
             if (propertyId.equals("xpath")) {
                 final ComboBox combo = new ComboBox();
                 combo.setWidth(100, Unit.PERCENTAGE);
@@ -223,6 +226,9 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
                 combo.setPageLength(xpathChoices.size() > 20 ? 20 : xpathChoices.size());
                 combo.setImmediate(true);
                 combo.setNewItemsAllowed(true);
+                combo.setInvalidAllowed(true);
+                combo.setTextInputAllowed(true);
+                combo.setValue(record.getXpath());
                 combo.addValueChangeListener(new ValueChangeListener() {
                     public void valueChange(ValueChangeEvent event) {
                         saveXPathSettings();
@@ -236,6 +242,11 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
                 field = combo;
             }
             return field;
+        }
+    }
+
+    class ImportTemplateClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
         }
     }
 
