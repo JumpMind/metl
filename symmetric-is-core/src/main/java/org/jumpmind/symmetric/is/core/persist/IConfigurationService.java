@@ -43,7 +43,7 @@ public interface IConfigurationService {
     
     public List<FlowName> findFlowsInProject(String projectVersionId);
 
-    public List<Folder> findFolders(FolderType type);
+    public List<Folder> findFolders(String projectVersionId, FolderType type);
     
     public Flow findFlow(String id);
     
@@ -57,7 +57,7 @@ public interface IConfigurationService {
     
     public Group findGroup(String id);
 
-    public void deleteFolder(String folderId);
+    public void delete(Folder folder);
 
     public void delete(Agent agent);
     

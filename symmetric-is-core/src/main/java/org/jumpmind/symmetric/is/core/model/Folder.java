@@ -21,6 +21,8 @@ public class Folder extends AbstractObject {
     boolean virtualFolder = false;
     
     String rowId = UUID.randomUUID().toString();
+    
+    boolean deleted = false;
 
     public Folder() {
     	children = new ArrayList<Folder>();
@@ -103,5 +105,13 @@ public class Folder extends AbstractObject {
     
     public String getRowId() {
         return rowId;
+    }
+    
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+    
+    public boolean isDeleted() {
+        return deleted;
     }
 }

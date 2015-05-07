@@ -27,6 +27,8 @@ public class Component extends AbstractObjectWithSettings {
     String projectVersionId;
 
     boolean deleted = false;
+    
+    String folderId;
 
     String rowId = UUID.randomUUID().toString();
 
@@ -206,6 +208,14 @@ public class Component extends AbstractObjectWithSettings {
 
     public boolean isDeleted() {
         return deleted;
+    }
+    
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
+    }
+    
+    public String getFolderId() {
+        return folderId;
     }
     
     public Row toRow(EntityData data) {

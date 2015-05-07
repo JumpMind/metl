@@ -130,7 +130,7 @@ public class DeployNavigator extends VerticalLayout {
         }
 
         treeTable.removeAllItems();
-        List<Folder> folders = context.getConfigurationService().findFolders(FolderType.AGENT);
+        List<Folder> folders = context.getConfigurationService().findFolders(null, FolderType.AGENT);
         for (Folder folder : folders) {
             addChildren(folder);
         }
@@ -499,8 +499,9 @@ public class DeployNavigator extends VerticalLayout {
                             if (obj instanceof Folder) {
                                 Folder folder = (Folder) obj;
                                 try {
-                                    context.getConfigurationService().deleteFolder(folder.getId());
+                                    context.getConfigurationService().delete(folder);
                                 } catch (Exception ex) {
+                                    log.error("", ex);
                                     CommonUiUtils.notify(
                                             "Could not delete the \"" + folder.getName()
                                                     + "\" folder", Type.WARNING_MESSAGE);
@@ -583,7 +584,12 @@ public class DeployNavigator extends VerticalLayout {
     }
 
     protected void deleteTreeItems(AbstractObject obj) {
-
+        if (obj instanceof Agent) {
+            Agent agent = (Agent) obj;
+            context.getConfigurationService().delete(agent);
+            context.getAgentManager().refresh(agent);
+            refresh();
+        }
     }
 
     protected void removeAllNonFolderChildren(Folder folder) {

@@ -328,6 +328,7 @@
     <table name="agent" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
         <column name="name" type="VARCHAR" size="255" description="" />
+        <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>
         <column name="folder_id" type="CHAR" size="36" description="" />
         <column name="host" type="VARCHAR" size="255" description="" />
         <column name="start_mode" type="VARCHAR" size="255" description="" />

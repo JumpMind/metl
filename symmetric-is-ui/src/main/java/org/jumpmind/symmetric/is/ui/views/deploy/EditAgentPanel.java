@@ -123,8 +123,10 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         hostNameField.setValue(agent.getHost());
         hostNameField.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
-                EditAgentPanel.this.agent.setHost((String)hostNameField.getValue());
-                EditAgentPanel.this.context.getConfigurationService().save((AbstractObject)EditAgentPanel.this.agent);                
+                Agent agent = EditAgentPanel.this.agent; 
+                agent.setHost((String)hostNameField.getValue());
+                EditAgentPanel.this.context.getConfigurationService().save((AbstractObject)agent);   
+                EditAgentPanel.this.context.getAgentManager().refresh(agent);
             }
         });
         buttonGroup.addComponent(hostNameField);

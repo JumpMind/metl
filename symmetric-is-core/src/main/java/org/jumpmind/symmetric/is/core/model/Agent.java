@@ -27,6 +27,8 @@ public class Agent extends AbstractObjectWithSettings {
     List<AgentDeployment> agentDeployments;
     
     List<AgentResourceSetting> agentResourceSettings;
+    
+    boolean deleted;
 
     public Agent() {
         this.agentDeployments = new ArrayList<AgentDeployment>();
@@ -146,6 +148,14 @@ public class Agent extends AbstractObjectWithSettings {
     @Override
     public boolean isSettingNameAllowed() {
         return true;
+    }
+    
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+    
+    public boolean isDeleted() {
+        return deleted;
     }
 
     public AgentDeployment getAgentDeploymentFor(Flow flow) {

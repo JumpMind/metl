@@ -71,7 +71,7 @@ public class AgentRuntime {
 
     ThreadPoolTaskScheduler flowExecutionScheduler;
 
-    ScheduledFuture<AgentRequestHandler> agentRequestHandler;
+    ScheduledFuture<?> agentRequestHandler;
 
     AsyncRecorder recorder;
 
@@ -132,7 +132,7 @@ public class AgentRuntime {
                 deploy(deployment);
             }
 
-            this.flowExecutionScheduler.scheduleWithFixedDelay(new AgentRequestHandler(), 10000);
+            agentRequestHandler = this.flowExecutionScheduler.scheduleWithFixedDelay(new AgentRequestHandler(), 10000);
 
             agent.setAgentStatus(AgentStatus.RUNNING);
             configurationService.save(agent);

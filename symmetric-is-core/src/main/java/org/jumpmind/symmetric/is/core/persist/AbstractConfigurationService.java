@@ -58,7 +58,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     AbstractConfigurationService(IPersistenceManager persistenceManager, String tablePrefix) {
         super(persistenceManager, tablePrefix);
     }
-    
+
     @Override
     public List<FlowName> findFlowsInProject(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
@@ -74,7 +74,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         params.put("deleted", 0);
         return find(ModelName.class, params, Model.class);
     }
-    
+
     @Override
     public List<ResourceName> findResourcesInProject(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
@@ -82,7 +82,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         params.put("deleted", 0);
         return find(ResourceName.class, params, Resource.class);
     }
-    
+
     @Override
     public List<ComponentName> findSharedComponentsInProject(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
@@ -91,7 +91,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         params.put("shared", 1);
         return find(ComponentName.class, params, Component.class);
     }
-    
+
     @Override
     public List<ComponentName> findComponentsInProject(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
@@ -99,7 +99,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         params.put("deleted", 0);
         return find(ComponentName.class, params, Component.class);
     }
-    
+
     @Override
     public List<FolderName> findFoldersInProject(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
@@ -107,7 +107,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         params.put("deleted", 0);
         return find(FolderName.class, params, Folder.class);
     }
-    
+
     @Override
     public Flow findFlow(String id) {
         Flow flowVersion = new Flow();
@@ -115,10 +115,11 @@ abstract class AbstractConfigurationService extends AbstractService implements
         refresh(flowVersion);
         return flowVersion;
     }
-    
+
     @Override
-    public List<Folder> findFolders(FolderType type) {
-        ArrayList<Folder> allFolders = new ArrayList<Folder>(foldersById(type).values());
+    public List<Folder> findFolders(String projectVersionId, FolderType type) {
+        ArrayList<Folder> allFolders = new ArrayList<Folder>(foldersById(projectVersionId, type)
+                .values());
         List<Folder> rootFolders = new ArrayList<Folder>();
         Collections.sort(allFolders, new Comparator<Folder>() {
             @Override
@@ -143,9 +144,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
         return rootFolders;
     }
 
-    protected Map<String, Folder> foldersById(FolderType type) {
+    protected Map<String, Folder> foldersById(String projectVersionId, FolderType type) {
         Map<String, Object> byType = new HashMap<String, Object>();
         byType.put("type", type.name());
+        if (isNotBlank(projectVersionId)) {
+            byType.put("projectVersionId", projectVersionId);
+        }
+        byType.put("deleted", 0);
         List<Folder> folders = find(Folder.class, byType);
 
         Map<String, Folder> all = new HashMap<String, Folder>();
@@ -153,7 +158,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
             all.put(folder.getId(), folder);
         }
         return all;
-    }   
+    }
 
     @Override
     public List<FlowName> findFlows() {
@@ -205,6 +210,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
             folderId = folder.getId();
         }
         params.put("folderId", folderId);
+        params.put("deleted", 0);
         return findAgents(params, folder);
     }
 
@@ -212,6 +218,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     public List<Agent> findAgentsForHost(String hostName) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("host", hostName);
+        params.put("deleted", 0);
         return findAgents(params);
     }
 
@@ -222,7 +229,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     protected List<Agent> findAgents(Map<String, Object> params) {
         return findAgents(params, null);
     }
-    
+
     protected List<Agent> findAgents(Map<String, Object> params, Folder folder) {
         List<Agent> list = persistenceManager.find(Agent.class, params, null, null,
                 tableName(Agent.class));
@@ -230,7 +237,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         if (folder != null) {
             folderMapById.put(folder.getId(), folder);
         } else {
-            folderMapById = foldersById(FolderType.AGENT);
+            folderMapById = foldersById(null, FolderType.AGENT);
         }
 
         for (Agent agent : list) {
@@ -252,8 +259,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
     protected void refreshAgentSettings(Agent agent) {
         Map<String, Object> settingParams = new HashMap<String, Object>();
         settingParams.put("agentId", agent.getId());
-        List<AgentSetting> settings = persistenceManager.find(AgentSetting.class,
-                settingParams, null, null, tableName(AgentSetting.class));
+        List<AgentSetting> settings = persistenceManager.find(AgentSetting.class, settingParams,
+                null, null, tableName(AgentSetting.class));
         agent.setSettings(settings);
     }
 
@@ -262,7 +269,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         settingParams.put("agentId", agent.getId());
         List<AgentResourceSetting> settings = persistenceManager.find(AgentResourceSetting.class,
                 settingParams, null, null, tableName(AgentResourceSetting.class));
-        agent.setAgentResourceSettings(settings);        
+        agent.setAgentResourceSettings(settings);
     }
 
     protected void refreshAgentDeployments(Agent agent) {
@@ -276,7 +283,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
             refresh(agentDeployment.getFlow());
         }
     }
-    
+
     protected void refreshAgentDeploymentRelations(AgentDeployment agentDeployment) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("agentDeploymentId", agentDeployment.getId());
@@ -291,13 +298,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
         if (agentDeployment != null) {
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("agentDeploymentId", agentDeployment.getId());
-            List<AgentDeploymentParameter> deploymentParams = persistenceManager.find(AgentDeploymentParameter.class,
-                    params, null, null, tableName(AgentDeploymentParameter.class));
+            List<AgentDeploymentParameter> deploymentParams = persistenceManager.find(
+                    AgentDeploymentParameter.class, params, null, null,
+                    tableName(AgentDeploymentParameter.class));
             agentDeployment.setAgentDeploymentParameters(deploymentParams);
         }
-        return agentDeployment;        
+        return agentDeployment;
     }
-    
+
     @Override
     public List<AgentDeployment> findAgentDeploymentsFor(Flow flow) {
         List<AgentDeployment> deployments = persistenceManager
@@ -310,13 +318,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
-    public AgentResource findAgentResource(String agentId, String resourceId) {       
+    public AgentResource findAgentResource(String agentId, String resourceId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("agentId", agentId);
         params.put("resourceId", resourceId);
-        List<AgentResourceSetting> settings = persistenceManager
-                .find(AgentResourceSetting.class, params, null, null, tableName(AgentResourceSetting.class));
-        
+        List<AgentResourceSetting> settings = persistenceManager.find(AgentResourceSetting.class,
+                params, null, null, tableName(AgentResourceSetting.class));
+
         Resource resource = findResource(resourceId);
         for (Setting resourceSetting : resource.getSettings()) {
             boolean exists = false;
@@ -435,13 +443,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
         }
         return list;
     }
-    
+
     @Override
     public User findUser(String id) {
         User user = null;
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("id", id);
-        List<User> users = persistenceManager.find(User.class, params, null, null, tableName(User.class));
+        List<User> users = persistenceManager.find(User.class, params, null, null,
+                tableName(User.class));
         if (users.size() > 0) {
             user = users.get(0);
             refresh(user);
@@ -454,7 +463,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
         User user = null;
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("loginId", loginId);
-        List<User> users = persistenceManager.find(User.class, params, null, null, tableName(User.class));
+        List<User> users = persistenceManager.find(User.class, params, null, null,
+                tableName(User.class));
         if (users.size() > 0) {
             user = users.get(0);
             refresh(user);
@@ -473,12 +483,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
         Map<String, Object> params = new HashMap<String, Object>();
         params = new HashMap<String, Object>();
         params.put("id", id);
-        List<Group> groups = persistenceManager.find(Group.class, params, null, null, tableName(Group.class));
+        List<Group> groups = persistenceManager.find(Group.class, params, null, null,
+                tableName(Group.class));
         if (groups.size() > 0) {
             group = groups.get(0);
             params = new HashMap<String, Object>();
             params.put("groupId", group.getId());
-            group.setGroupPrivileges(persistenceManager.find(GroupPrivilege.class, params, null, null, tableName(GroupPrivilege.class)));
+            group.setGroupPrivileges(persistenceManager.find(GroupPrivilege.class, params, null,
+                    null, tableName(GroupPrivilege.class)));
         }
         return group;
     }
@@ -514,14 +526,44 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
-    public void deleteFolder(String folderId) {
-        Map<String, Object> byType = new HashMap<String, Object>();
-        byType.put("parentFolderId", folderId);
-        List<Folder> folderDatas = find(Folder.class, byType);
-        for (Folder folderData : folderDatas) {
-            deleteFolder(folderData.getId());
+    public void delete(Folder folder) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("parentFolderId", folder.getId());
+        List<Folder> folders = find(Folder.class, params);
+        for (Folder child : folders) {
+            delete(child);
         }
-        persistenceManager.delete(new Folder(folderId), null, null, tableName(Folder.class));
+
+        params = new HashMap<String, Object>();
+        params.put("folderId", folder.getId());
+
+        List<Component> comps = find(Component.class, params);
+        for (Component component : comps) {
+            delete(component);
+        }
+
+        List<Model> models = find(Model.class, params);
+        for (Model model : models) {
+            delete(model);
+        }
+
+        List<Flow> flows = find(Flow.class, params);
+        for (Flow flow : flows) {
+            delete(flow);
+        }
+
+        List<Resource> resources = find(Resource.class, params);
+        for (Resource resource : resources) {
+            delete(resource);
+        }
+
+        List<Agent> agents = find(Agent.class, params);
+        for (Agent agent : agents) {
+            delete(agent);
+        }
+
+        folder.setDeleted(true);
+        save((AbstractObject) folder);
     }
 
     @Override
@@ -532,11 +574,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void delete(Agent agent) {
-        List<Setting> settings = agent.getSettings();
-        for (Setting settingData : settings) {
-            delete(settingData);
-        }
-        persistenceManager.delete(agent, null, null, tableName(Agent.class));
+        agent.setDeleted(true);
+        save((AbstractObject) agent);
     }
 
     @Override
@@ -592,10 +631,12 @@ abstract class AbstractConfigurationService extends AbstractService implements
         Map<String, Object> params = new HashMap<String, Object>();
         params = new HashMap<String, Object>();
         params.put("userId", user.getId());
-        user.setUserSettings(persistenceManager.find(UserSetting.class, params, null, null, tableName(UserSetting.class)));
-        
+        user.setUserSettings(persistenceManager.find(UserSetting.class, params, null, null,
+                tableName(UserSetting.class)));
+
         List<Group> groups = new ArrayList<Group>();
-        List<UserGroup> userGroups = persistenceManager.find(UserGroup.class, params, null, null, tableName(UserGroup.class));
+        List<UserGroup> userGroups = persistenceManager.find(UserGroup.class, params, null, null,
+                tableName(UserGroup.class));
         for (UserGroup userGroup : userGroups) {
             groups.add(findGroup(userGroup.getGroupId()));
         }
@@ -634,13 +675,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
             }
         }
     }
-    
+
     @Override
     public void save(AgentDeployment agentDeployment) {
-        save((AbstractObject)agentDeployment);
-        List<AgentDeploymentParameter> parameters =agentDeployment.getAgentDeploymentParameters();
+        save((AbstractObject) agentDeployment);
+        List<AgentDeploymentParameter> parameters = agentDeployment.getAgentDeploymentParameters();
         for (AgentDeploymentParameter agentDeploymentParameter : parameters) {
-            save((AbstractObject)agentDeploymentParameter);
+            save((AbstractObject) agentDeploymentParameter);
         }
     }
 
@@ -844,7 +885,5 @@ abstract class AbstractConfigurationService extends AbstractService implements
             save(attributeRelationship);
         }
     }
-    
-    
-    
+
 }

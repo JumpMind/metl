@@ -110,7 +110,7 @@ public class AgentManager implements IAgentManager {
     @Override
     public AgentRuntime refresh(Agent agent) {
         AgentRuntime engine = engines.get(agent);
-        if (isAgentLocal(agent)) {
+        if (isAgentLocal(agent) && !agent.isDeleted()) {
             if (engine == null) {
                 engine = createAndStartRuntime(agent);
             } else {
