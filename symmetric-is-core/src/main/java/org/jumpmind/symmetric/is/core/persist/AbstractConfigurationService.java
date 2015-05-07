@@ -182,6 +182,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
         }
         return list;
     }
+    
+    @Override
+    public ProjectVersion findProjectVersion(String projectVersionId) {
+        ProjectVersion projectVersion = new ProjectVersion(projectVersionId);
+        refresh(projectVersion);
+        return projectVersion;
+    }
 
     @Override
     public List<Project> findProjects() {
@@ -592,7 +599,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void delete(User user) {
         refresh(user);
-        for (UserSetting setting : user.getUserSettings()) {
+        for (Setting setting : user.getSettings()) {
             persistenceManager.delete(setting, null, null, tableName(UserSetting.class));
         }
         persistenceManager.delete(user, null, null, tableName(User.class));
@@ -631,7 +638,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         Map<String, Object> params = new HashMap<String, Object>();
         params = new HashMap<String, Object>();
         params.put("userId", user.getId());
-        user.setUserSettings(persistenceManager.find(UserSetting.class, params, null, null,
+        user.setSettings(persistenceManager.find(UserSetting.class, params, null, null,
                 tableName(UserSetting.class)));
 
         List<Group> groups = new ArrayList<Group>();

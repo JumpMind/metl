@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.jumpmind.properties.TypedProperties;
 
 abstract public class AbstractObjectWithSettings extends AbstractObject {
@@ -56,6 +57,30 @@ abstract public class AbstractObjectWithSettings extends AbstractObject {
         settingData.setName(name);
         settings.add(settingData);
         return settingData;
+    }
+    
+    public Setting findSetting(String name, String value) {
+        for (Setting settingData : settings) {
+            if (name.equals(settingData.getName()) && StringUtils.equals(value, settingData.getValue())) {
+                return settingData;
+            }
+        }
+
+        Setting settingData = createSettingData();
+        settingData.setName(name);
+        settingData.setValue(value);
+        settings.add(settingData);
+        return settingData;
+    }
+    
+    public List<String> getList(String name) {
+        List<String> list = new ArrayList<String>();
+        for (Setting settingData : settings) {
+            if (name.equals(settingData.getName())) {
+                list.add(settingData.getValue());
+            }
+        }
+        return list;
     }
 
     public String get(String name, String defaultValue) {

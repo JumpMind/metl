@@ -148,6 +148,8 @@ public interface IConfigurationService {
     public void save(ModelEntity modelEntity);
     
     public void save(ModelEntityRelationship modelEntityRelationship);
+    
+    public ProjectVersion findProjectVersion(String projectVersionId);
 
     public List<Project> findProjects();
     

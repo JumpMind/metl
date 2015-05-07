@@ -20,6 +20,9 @@ import org.jumpmind.symmetric.is.core.model.FolderName;
 import org.jumpmind.symmetric.is.core.model.ModelName;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.ResourceName;
+import org.jumpmind.symmetric.is.core.model.Setting;
+import org.jumpmind.symmetric.is.core.model.User;
+import org.jumpmind.symmetric.is.core.model.UserSetting;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.component.DbReader;
 import org.jumpmind.symmetric.is.core.runtime.component.DbWriter;
@@ -353,6 +356,8 @@ public class ProjectNavigator extends VerticalLayout {
     public void addProjectVersion(ProjectVersion projectVersion) {
         context.getOpenProjects().remove(projectVersion);
         context.getOpenProjects().add(projectVersion);
+        Setting setting = context.getUser().findSetting(UserSetting.SETTING_CURRENT_PROJECT_ID_LIST, projectVersion.getId());
+        context.getConfigurationService().save(setting);
         refresh();
     }
 
@@ -597,7 +602,6 @@ public class ProjectNavigator extends VerticalLayout {
     }
 
     protected void refreshOpenProjects() {
-        // add any open projects to the tree table. check cookies
 
         Iterator<ProjectVersion> i = context.getOpenProjects().iterator();
         while (i.hasNext()) {
@@ -809,7 +813,12 @@ public class ProjectNavigator extends VerticalLayout {
     protected void closeProject() {
         Object selected = treeTable.getValue();
         if (selected instanceof ProjectVersion) {
+            ProjectVersion projectVersion = (ProjectVersion)selected;
             context.getOpenProjects().remove(selected);
+            User user = context.getUser();
+            Setting setting = user.findSetting(UserSetting.SETTING_CURRENT_PROJECT_ID_LIST, projectVersion.getId());
+            user.getSettings().remove(setting);
+            context.getConfigurationService().delete(setting);
             refresh();
         }
     }

@@ -18,6 +18,14 @@ public class ProjectVersion extends AbstractObject {
     
     boolean deleted;
     
+    public ProjectVersion(String id) {
+        this.id = id;
+    }
+    
+    public ProjectVersion() {
+    }
+    
+    
     public void setVersionLabel(String versionLabel) {
         this.versionLabel = versionLabel;
     }

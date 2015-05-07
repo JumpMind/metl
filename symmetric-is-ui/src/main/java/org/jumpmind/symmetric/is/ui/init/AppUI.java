@@ -3,9 +3,12 @@ package org.jumpmind.symmetric.is.ui.init;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
+import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.User;
+import org.jumpmind.symmetric.is.core.model.UserSetting;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.DesignAgentSelect;
 import org.jumpmind.symmetric.is.ui.common.TopBar;
@@ -204,6 +207,16 @@ public class AppUI extends UI implements LoginListener {
 
         ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
         appCtx.setUser(user);
+        List<ProjectVersion> openProjects = appCtx.getOpenProjects();
+        openProjects.clear();
+        
+        List<String> projectIds = user.getList(UserSetting.SETTING_CURRENT_PROJECT_ID_LIST);
+        for (String projectId : projectIds) {
+            ProjectVersion projectVersion = appCtx.getConfigurationService().findProjectVersion(projectId);
+            if (projectVersion != null) {
+                openProjects.add(projectVersion);
+            }
+        }
 
         viewManager = ctx.getBean(ViewManager.class);
         viewManager.init(this, contentArea);

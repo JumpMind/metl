@@ -15,9 +15,7 @@ public class User extends AbstractObjectWithSettings {
 
     String password;
     
-    Date lastLoginTime;
-    
-    List<UserSetting> userSettings;
+    Date lastLoginTime;    
     
     List<Group> groups;
     
@@ -30,7 +28,7 @@ public class User extends AbstractObjectWithSettings {
 
     @Override
     protected Setting createSettingData() {
-        return new UserSetting();
+        return new UserSetting(id);
     }
 
     @Override
@@ -57,14 +55,6 @@ public class User extends AbstractObjectWithSettings {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public List<UserSetting> getUserSettings() {
-        return userSettings;
-    }
-
-    public void setUserSettings(List<UserSetting> userSettings) {
-        this.userSettings = userSettings;
     }
 
     public Date getLastLoginTime() {
