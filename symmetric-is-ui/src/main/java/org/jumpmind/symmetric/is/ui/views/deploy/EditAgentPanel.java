@@ -118,6 +118,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         hostNameField.setImmediate(true);
         hostNameField.setTextChangeEventMode(TextChangeEventMode.LAZY);
         hostNameField.setTextChangeTimeout(100);
+        hostNameField.setWidth(20, Unit.EM);
         hostNameField.setNullRepresentation("");
         hostNameField.setValue(agent.getHost());
         hostNameField.addValueChangeListener(new ValueChangeListener() {
