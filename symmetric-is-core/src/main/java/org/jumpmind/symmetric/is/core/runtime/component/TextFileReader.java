@@ -116,6 +116,7 @@ public class TextFileReader extends AbstractComponent {
                         if (linesInMessage >= textRowsPerMessage) {
                             initAndSendMessage(payload, inputMessage, messageTarget, numberMessages, false);
                             linesInMessage = 0;
+                            payload = new ArrayList<String>();
                         }
                         componentStatistics.incrementNumberEntitiesProcessed();
                         payload.add(currentLine);
@@ -158,7 +159,6 @@ public class TextFileReader extends AbstractComponent {
         message.setPayload(payload);
         componentStatistics.incrementOutboundMessages();
         messageTarget.put(message);
-        payload.clear();
     }
 
 }
