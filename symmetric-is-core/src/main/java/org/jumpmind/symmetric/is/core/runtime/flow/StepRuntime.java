@@ -39,10 +39,7 @@ public class StepRuntime implements Runnable {
 
     IExecutionTracker executionTracker;
 
-    String executionId;
-
-    public StepRuntime(String executionId, IComponentRuntime component, IExecutionTracker tracker) {
-        this.executionId = executionId;
+    public StepRuntime(IComponentRuntime component, IExecutionTracker tracker) {
         this.executionTracker = tracker;
         this.component = component;
         int capacity = component.getFlowStep().getComponent()
@@ -68,8 +65,8 @@ public class StepRuntime implements Runnable {
 
     public void start(IExecutionTracker tracker, IResourceFactory resourceFactory) {
         try {
-            executionTracker.flowStepStarted(executionId, component);
-            component.start(executionId, tracker);
+            executionTracker.flowStepStarted(component);
+            component.start(tracker);
         } catch (RuntimeException ex) {
             recordError(ex);
             throw ex;
@@ -82,7 +79,7 @@ public class StepRuntime implements Runnable {
         if (isBlank(msg)) {
             msg = ExceptionUtils.getFullStackTrace(ex);
         }
-        executionTracker.log(executionId, LogLevel.ERROR, component, msg);
+        executionTracker.log(LogLevel.ERROR, component, msg);
         log.error("", ex);
     }
 
@@ -118,7 +115,7 @@ public class StepRuntime implements Runnable {
                     }
                 } else {
                     try {
-                        executionTracker.beforeHandle(executionId, component);
+                        executionTracker.beforeHandle(component);
                         component.handle(inputMessage, target);
                     } catch (Exception ex) {
                         /*
@@ -126,7 +123,7 @@ public class StepRuntime implements Runnable {
                          */
                         recordError(ex);
                     } finally {
-                        executionTracker.afterHandle(executionId, component, error);
+                        executionTracker.afterHandle(component, error);
                     }
                     if (isStartStep()) {
                         shutdown(target);
@@ -160,7 +157,7 @@ public class StepRuntime implements Runnable {
         }
         this.component.stop();
         running = false;
-        executionTracker.flowStepFinished(executionId, component, error, cancelled);
+        executionTracker.flowStepFinished(component, error, cancelled);
     }
 
     public boolean isRunning() {
@@ -178,7 +175,7 @@ public class StepRuntime implements Runnable {
                 component.flowCompleted();
             } catch (Exception ex) {
                 recordError(ex);
-                executionTracker.flowStepFailedOnComplete(executionId, component, ex);
+                executionTracker.flowStepFailedOnComplete(component, ex);
             }
         }
     }
@@ -189,7 +186,7 @@ public class StepRuntime implements Runnable {
                 component.flowCompletedWithErrors(myError);
             } catch (Exception ex) {
                 recordError(ex);
-                executionTracker.flowStepFailedOnComplete(executionId, component, ex);
+                executionTracker.flowStepFailedOnComplete(component, ex);
             }
         }
     }

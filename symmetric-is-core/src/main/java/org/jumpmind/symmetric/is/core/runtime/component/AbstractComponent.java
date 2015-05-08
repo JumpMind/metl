@@ -43,7 +43,7 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     protected boolean shared = false;
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
+    public void start(IExecutionTracker executionTracker) {
         this.componentStatistics = new ComponentStatistics();
     	this.executionTracker = executionTracker;
     	this.executionId = executionId;
@@ -125,8 +125,7 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
                         .getName());
                 boundEntity.put(attribute.getName(), value);
             } else {
-                executionTracker.log(executionId, LogLevel.WARN, this,
-                        "Could not find attribute in the input model with an id of " + attributeId);
+                executionTracker.log(LogLevel.WARN, this, "Could not find attribute in the input model with an id of " + attributeId);
             }
         }
         scriptEngine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);

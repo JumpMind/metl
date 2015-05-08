@@ -49,8 +49,8 @@ public class SqlWriter extends AbstractDbComponent {
     StartupMessage startupMessage;
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         startupMessage = null;
         applySettings();
         if (resource == null) {
@@ -98,9 +98,8 @@ public class SqlWriter extends AbstractDbComponent {
                             .getParametersAsString(), true);
                     params.putAll(startupMessage.getHeader().getParametersAsString());
                 }
-                executionTracker.log(executionId, LogLevel.INFO, this,
-                        "Executing the following sql after a successful completion: "
-                                + sqlToExecute);
+                executionTracker.log(LogLevel.INFO, this, "Executing the following sql after a successful completion: "
+                        + sqlToExecute);
                 int count = template.update(sqlToExecute, params);
                 componentStatistics.incrementNumberEntitiesProcessed(count);
             }

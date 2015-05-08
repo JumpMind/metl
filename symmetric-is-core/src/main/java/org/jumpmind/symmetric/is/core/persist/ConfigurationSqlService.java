@@ -134,7 +134,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
     @Override
     public boolean isUserLoginEnabled() {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
-        return template.queryForInt(String.format("select count(*) from %1$s_user", tablePrefix)) > 0;
+        return template.queryForInt(String.format("select count(*) from %1$s_user where password is not null", tablePrefix)) > 0;
     }
 
 }

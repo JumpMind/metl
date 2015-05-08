@@ -69,8 +69,8 @@ public class EntityRouter extends AbstractComponent {
     }
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         ScriptEngineManager factory = new ScriptEngineManager();
         scriptEngine = factory.getEngineByName("groovy");
         applySettings();

@@ -48,7 +48,7 @@ public class DelimitedFormatterTest {
         IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DelimitedFormatter delimitedFormatter = new DelimitedFormatter();
         delimitedFormatter.init(delimitedFormatterFlowStep, null, null);
-        delimitedFormatter.start("test", executionTracker);        
+        delimitedFormatter.start(executionTracker);        
         Message message = createInboundMessage();        
         MessageTarget msgTarget = new MessageTarget();
         delimitedFormatter.handle(message, msgTarget);

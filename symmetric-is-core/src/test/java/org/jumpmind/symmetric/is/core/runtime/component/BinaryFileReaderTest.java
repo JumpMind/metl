@@ -57,7 +57,7 @@ public class BinaryFileReaderTest {
 
         BinaryFileReader reader = new BinaryFileReader();
         reader.init(readerFlowStep, null, resources);
-        reader.start("test", null);
+        reader.start(null);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle(msg, msgTarget);

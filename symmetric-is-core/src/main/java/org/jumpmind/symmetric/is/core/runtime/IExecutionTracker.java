@@ -4,20 +4,22 @@ import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
 
 public interface IExecutionTracker {
     
-    public void flowStepStarted(String executionId, IComponentRuntime component);
+    public void flowStepStarted(IComponentRuntime component);
     
-    public void beforeHandle(String executionId, IComponentRuntime component);
+    public void beforeHandle(IComponentRuntime component);
     
-    public void afterHandle(String executionId, IComponentRuntime component, Throwable error);
+    public void afterHandle(IComponentRuntime component, Throwable error);
     
-    public void flowStepFinished(String executionId, IComponentRuntime component, Throwable error, boolean cancelled);
+    public void flowStepFinished(IComponentRuntime component, Throwable error, boolean cancelled);
     
     public void beforeFlow(String executionId);
     
-    public void afterFlow(String executionId);
+    public void afterFlow();
     
-    public void flowStepFailedOnComplete(String executionId, IComponentRuntime component, Throwable error);
+    public void flowStepFailedOnComplete(IComponentRuntime component, Throwable error);
 
-    public void log (String executionId, LogLevel level, IComponentRuntime component, String output);
+    public void log (LogLevel level, IComponentRuntime component, String output);
+    
+    public String getExecutionId();
     
 }

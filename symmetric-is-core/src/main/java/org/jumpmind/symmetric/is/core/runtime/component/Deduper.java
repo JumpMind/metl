@@ -39,8 +39,8 @@ public class Deduper extends AbstractComponent {
     LinkedHashMap<String, EntityData> deduped = new LinkedHashMap<String, EntityData>();
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         rowsPerMessage = flowStep.getComponent().getInt(ROWS_PER_MESSAGE, rowsPerMessage);
     }
 

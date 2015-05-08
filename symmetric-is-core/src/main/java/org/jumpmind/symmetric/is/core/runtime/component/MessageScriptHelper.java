@@ -74,8 +74,7 @@ public class MessageScriptHelper {
     }
 
     protected void info(String message, Object... args) {
-        component.getExecutionTracker().log(component.getExecutionId(), LogLevel.INFO, component,
-                String.format(message, args));
+        component.getExecutionTracker().log(LogLevel.INFO, component, String.format(message, args));
     }
 
     protected void setInputMessage(Message inputMessage) {

@@ -54,7 +54,7 @@ public class TextFileReaderTest {
 
         TextFileReader reader = new TextFileReader();
         reader.init(readerFlow, null, resources);
-        reader.start("test", null);
+        reader.start(null);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle(msg, msgTarget);
@@ -77,7 +77,7 @@ public class TextFileReaderTest {
 
         TextFileReader reader = new TextFileReader();
         reader.init(readerFlow, null, resources);
-        reader.start("test", null);
+        reader.start(null);
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle(msg, msgTarget);

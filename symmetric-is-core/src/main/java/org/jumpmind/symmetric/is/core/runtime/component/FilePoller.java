@@ -88,8 +88,8 @@ public class FilePoller extends AbstractComponent {
     ArrayList<File> filesSent = new ArrayList<File>();
     
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         Resource resource = this.resource.getResource();
         if (!resource.getType().equals(LocalFileResource.TYPE)) {
             throw new IllegalStateException(String.format("The resource must be of type %s",LocalFileResource.TYPE));
@@ -134,7 +134,7 @@ public class FilePoller extends AbstractComponent {
         if (files.length > 0) {
             for (File file : files) {
                 filesSent.add(file);
-                executionTracker.log(executionId, LogLevel.INFO, this, "File polled: " + file.getAbsolutePath());
+                executionTracker.log(LogLevel.INFO, this, "File polled: " + file.getAbsolutePath());
                 String filePath = file.getAbsolutePath(); 
                 filePaths.add(filePath.substring(pathDir.getAbsolutePath().length()));
             }

@@ -71,8 +71,8 @@ public class DelimitedParser extends AbstractComponent {
     List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         delimiter = flowStep.getComponent().get(SETTING_DELIMITER, delimiter);
         quoteCharacter = flowStep.getComponent().get(SETTING_QUOTE_CHARACTER, quoteCharacter);
         encoding = flowStep.getComponent().get(SETTING_ENCODING, encoding);
@@ -103,7 +103,7 @@ public class DelimitedParser extends AbstractComponent {
             throw new IoException(e);
         }
 
-        executionTracker.log(executionId, LogLevel.INFO, this, outputPayload.toString());
+        executionTracker.log(LogLevel.INFO, this, outputPayload.toString());
         componentStatistics.incrementOutboundMessages();
         outputMessage.getHeader()
                 .setSequenceNumber(componentStatistics.getNumberOutboundMessages());

@@ -48,8 +48,8 @@ public class Joiner extends AbstractComponent {
     Map<Object, EntityData> joinedData = new LinkedHashMap<Object, EntityData>();
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         applySettings();
     }
 

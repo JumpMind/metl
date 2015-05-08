@@ -52,8 +52,8 @@ public class SequenceGenerator extends AbstractDbComponent {
     Long currentSequence;
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
 
         Component component = flowStep.getComponent();
         String sequenceAttributeName = component.get(SEQ_ATTRIBUTE);
@@ -91,7 +91,7 @@ public class SequenceGenerator extends AbstractDbComponent {
             final String sqlToExecute = FormatUtils.replaceTokens(this.sql, inputMessage
                     .getHeader().getParametersAsString(), true);
             executionTracker
-                    .log(executionId, LogLevel.DEBUG, this, "About to run: " + sqlToExecute);
+                    .log(LogLevel.DEBUG, this, "About to run: " + sqlToExecute);
             currentSequence = getJdbcTemplate()
                     .queryForObject(sqlToExecute, parameters, Long.class);
         }

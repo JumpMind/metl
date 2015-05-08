@@ -58,8 +58,8 @@ public class ScriptExecutor extends AbstractComponent {
     ScriptEngine engine;
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
 
         String importStatements = flowStep.getComponent().get(IMPORTS);
         String initScript = flowStep.getComponent().get(INIT_SCRIPT);
@@ -107,7 +107,7 @@ public class ScriptExecutor extends AbstractComponent {
             }
             script.append("\n};\n");
 
-            executionTracker.log(executionId, LogLevel.DEBUG, this, script.toString());
+            executionTracker.log(LogLevel.DEBUG, this, script.toString());
             script.append("helper.onInit();");
             engine.eval(script.toString());
             this.engine = engine;

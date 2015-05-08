@@ -44,8 +44,8 @@ public class BinaryFileWriter extends AbstractComponent {
     OutputStream outStream;
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         applySettings();
     }
 

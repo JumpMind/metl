@@ -292,7 +292,7 @@ public class AgentRuntime {
                                     new CronSequenceGenerator(cron).next(new Date()) });
     
                     ScheduledFuture<?> future = this.flowExecutionScheduler.schedule(
-                            new FlowRunner(null, flowRuntime), new CronTrigger(cron));
+                            new FlowRunner(UUID.randomUUID().toString(), flowRuntime), new CronTrigger(cron));
                     scheduledDeployments.put(deployment, future);
                 }
     

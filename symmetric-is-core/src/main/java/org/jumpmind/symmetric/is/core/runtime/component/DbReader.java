@@ -66,8 +66,8 @@ public class DbReader extends AbstractDbComponent {
     boolean matchOnColumnNameOnly = false;
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         applySettings();
     }
 
@@ -104,7 +104,7 @@ public class DbReader extends AbstractDbComponent {
             }
             
             final String sqlToExecute = FormatUtils.replaceTokens(this.sql, inputMessage.getHeader().getParametersAsString(), true);
-            executionTracker.log(executionId, LogLevel.DEBUG, this, "About to run: " + sqlToExecute);
+            executionTracker.log(LogLevel.DEBUG, this, "About to run: " + sqlToExecute);
             template.query(sqlToExecute, paramMap, new ResultSetExtractor<Object>() {
                 @Override
                 public Object extractData(ResultSet rs) throws SQLException, DataAccessException {

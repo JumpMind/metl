@@ -45,8 +45,8 @@ public class MappingProcessor extends AbstractComponent {
     boolean setUnmappedAttributesToNull;
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
 
         validate();
 

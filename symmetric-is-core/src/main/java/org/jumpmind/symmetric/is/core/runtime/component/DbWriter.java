@@ -112,8 +112,8 @@ public class DbWriter extends AbstractComponent {
     Throwable error;
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         error = null;
         
         if (resource == null) {
@@ -227,7 +227,7 @@ public class DbWriter extends AbstractComponent {
                                 componentStatistics.incrementNumberEntitiesProcessed(count);
                             }
                         } else if (count == 0){
-                            executionTracker.log(executionId, LogLevel.DEBUG, this, String.format("Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n", modelTable.getStatement().getSql(), Arrays.toString(data.toArray()),
+                            executionTracker.log(LogLevel.DEBUG, this, String.format("Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n", modelTable.getStatement().getSql(), Arrays.toString(data.toArray()),
                                     Arrays.toString(modelTable.getStatement().getTypes())));
                         }
                     }
@@ -275,7 +275,7 @@ public class DbWriter extends AbstractComponent {
         try {
             return transaction.addRow(marker, data.toArray(), dmlStatement.getTypes());
         } catch (SqlException ex) {
-            executionTracker.log(executionId, LogLevel.WARN, this, String.format("Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n", dmlStatement.getSql(), Arrays.toString(data.toArray()),
+            executionTracker.log(LogLevel.WARN, this, String.format("Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n", dmlStatement.getSql(), Arrays.toString(data.toArray()),
                     Arrays.toString(dmlStatement.getTypes())));
             throw ex;
         }

@@ -50,7 +50,7 @@ public class BinaryFileWriterTest {
     public void testBinaryWriter() throws Exception {
         BinaryFileWriter writer = new BinaryFileWriter();
         writer.init(writerFlowStep, null, resources);
-        writer.start("test", null);
+        writer.start(null);
         writer.handle(createBinaryMessageToWrite(), null);
         checkBinaryFile();
     }

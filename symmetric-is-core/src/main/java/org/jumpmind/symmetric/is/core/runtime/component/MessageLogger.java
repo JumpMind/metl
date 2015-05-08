@@ -24,7 +24,7 @@ public class MessageLogger extends AbstractComponent {
         componentStatistics.incrementInboundMessages();
 
         MessageHeader header = inputMessage.getHeader();
-        executionTracker.log(executionId, LogLevel.DEBUG, this, String.format(
+        executionTracker.log(LogLevel.DEBUG, this, String.format(
                 "Message(sequenceNumber=%d,last=%s,source='%s')", header.getSequenceNumber(),
                 header.isLastMessage(), flow.findFlowStepWithId(header.getOriginatingStepId())
                         .getName()));
@@ -35,14 +35,12 @@ public class MessageLogger extends AbstractComponent {
             for (Object object : list) {
                 if (object instanceof EntityData && flowStep.getComponent().getInputModel() != null) {
                     executionTracker.log(
-                            executionId,
                             LogLevel.DEBUG,
                             this,
                             String.format("Message Payload: %s",
                                     flowStep.getComponent().toRow((EntityData) object)));
                 } else {
-                    executionTracker.log(executionId, LogLevel.DEBUG, this,
-                            String.format("Message Payload: %s", object));
+                    executionTracker.log(LogLevel.DEBUG, this, String.format("Message Payload: %s", object));
                 }
             }
         }

@@ -13,7 +13,7 @@ public interface IComponentRuntime {
 
     public void init(FlowStep flowStep, Flow flow, Map<String, IResource> resources);
     
-    public void start(String executionId, IExecutionTracker tracker);
+    public void start(IExecutionTracker tracker);
 
     public void lastMessageReceived(IMessageTarget messageTarget);
     

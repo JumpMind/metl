@@ -44,8 +44,8 @@ public class FixedLengthFormatter extends AbstractComponent {
     List<AttributeFormat> attributesList;
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         applySettings();
     }
 
@@ -66,8 +66,7 @@ public class FixedLengthFormatter extends AbstractComponent {
         String outputRec;
         for (EntityData inputRow : inputRows) {
             outputRec = processInputRow(inputRow);
-            executionTracker.log(executionId, LogLevel.DEBUG, this,
-                    String.format("Generated record: %s", outputRec));
+            executionTracker.log(LogLevel.DEBUG, this, String.format("Generated record: %s", outputRec));
             outputPayload.add(outputRec);
         }
         outputMessage.setPayload(outputPayload);

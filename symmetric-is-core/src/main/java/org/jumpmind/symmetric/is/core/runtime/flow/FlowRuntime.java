@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
@@ -17,8 +16,8 @@ import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.component.AbstractComponent;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentStatistics;
-import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.util.AppUtils;
@@ -39,9 +38,7 @@ public class FlowRuntime {
 
     ExecutorService threadService;
 
-    Map<String, StepRuntime> stepRuntimes;
-    
-    String executionId;
+    Map<String, StepRuntime> stepRuntimes;    
     
     public FlowRuntime(AgentDeployment deployment, IComponentFactory componentFactory,
             IResourceFactory resourceFactory, IExecutionTracker executionTracker,
@@ -59,18 +56,17 @@ public class FlowRuntime {
 
     public void start(String executionId, Map<String, IResource> resources) throws InterruptedException {
         
-        this.executionId = executionId == null ? UUID.randomUUID().toString() : executionId;
         this.stepRuntimes = new HashMap<String, StepRuntime>();
         Flow flow = deployment.getFlow();
         List<FlowStep> steps = flow.getFlowSteps();
         
-        executionTracker.beforeFlow(this.executionId);
+        executionTracker.beforeFlow(executionId);
 
         /* create a step runtime for every component in the flow */
         for (FlowStep flowStep : steps) {
             boolean enabled = flowStep.getComponent().getBoolean(AbstractComponent.ENABLED, true);
             if (enabled) {
-                StepRuntime stepRuntime = new StepRuntime(this.executionId, componentFactory.create(flowStep, flow, resources), executionTracker);
+                StepRuntime stepRuntime = new StepRuntime(componentFactory.create(flowStep, flow, resources), executionTracker);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
         }
@@ -155,7 +151,7 @@ public class FlowRuntime {
             }
         }
         
-        executionTracker.afterFlow(executionId);
+        executionTracker.afterFlow();
     }
 
     public boolean isRunning() {
@@ -209,6 +205,6 @@ public class FlowRuntime {
     }
     
     public String getExecutionId() {
-        return executionId;
+        return executionTracker.getExecutionId();
     }
 }

@@ -71,8 +71,8 @@ public class DelimitedFormatter extends AbstractComponent {
     List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         applySettings();
     }
 
@@ -81,8 +81,7 @@ public class DelimitedFormatter extends AbstractComponent {
 
         if (attributes.size() == 0) {
             executionTracker
-                    .log(executionId, LogLevel.INFO, this,
-                            "There are no format attributes configured.  Writing all entity fields to the output.");
+                    .log(LogLevel.INFO, this, "There are no format attributes configured.  Writing all entity fields to the output.");
         }
 
         componentStatistics.incrementInboundMessages();
@@ -97,7 +96,7 @@ public class DelimitedFormatter extends AbstractComponent {
             outputPayload.add(outputRec);
         }
         outputMessage.setPayload(outputPayload);
-        executionTracker.log(executionId, LogLevel.INFO, this, outputPayload.toString());
+        executionTracker.log(LogLevel.INFO, this, outputPayload.toString());
         componentStatistics.incrementOutboundMessages();
         outputMessage.getHeader()
                 .setSequenceNumber(componentStatistics.getNumberOutboundMessages());

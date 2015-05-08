@@ -19,8 +19,8 @@ public class Delay extends AbstractComponent {
     long delay = 1000;
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         delay = flowStep.getComponent().getLong(DELAY_TIME, 1000l);
     }
     

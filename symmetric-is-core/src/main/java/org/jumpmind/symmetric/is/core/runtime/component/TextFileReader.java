@@ -80,8 +80,8 @@ public class TextFileReader extends AbstractComponent {
     String encoding = "UTF-8";
 
     @Override
-    public void start(String executionId, IExecutionTracker executionTracker) {
-        super.start(executionId, executionTracker);
+    public void start(IExecutionTracker executionTracker) {
+        super.start(executionTracker);
         applySettings();
     }
 

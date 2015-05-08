@@ -4,36 +4,43 @@ import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
 
 public class ExecutionTrackerNoOp implements IExecutionTracker {
 
+    String executionId;
+    
     @Override
-    public void afterHandle(String executionId, IComponentRuntime component, Throwable error) {
+    public void afterHandle(IComponentRuntime component, Throwable error) {
     }
 
     @Override
-    public void beforeHandle(String executionId, IComponentRuntime component) {
+    public void beforeHandle(IComponentRuntime component) {
     }
 
     @Override
-    public void flowStepFinished(String executionId, IComponentRuntime component, Throwable error,
-            boolean cancelled) {
+    public void flowStepFinished(IComponentRuntime component, Throwable error, boolean cancelled) {
     }
 
     @Override
     public void beforeFlow(String executionId) {
+        this.executionId = executionId;
     }
 
     @Override
-    public void afterFlow(String executionId) {
+    public void afterFlow() {
     }
 
     @Override
-    public void log(String executionId, LogLevel level, IComponentRuntime component, String output) {
+    public void log(LogLevel level, IComponentRuntime component, String output) {
     }
 
     @Override
-    public void flowStepStarted(String executionId, IComponentRuntime component) {
+    public void flowStepStarted(IComponentRuntime component) {
     }
     
     @Override
-    public void flowStepFailedOnComplete(String executionId, IComponentRuntime component, Throwable error) {
+    public void flowStepFailedOnComplete(IComponentRuntime component, Throwable error) {
+    }
+    
+    @Override
+    public String getExecutionId() {
+        return executionId;
     }
 }
