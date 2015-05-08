@@ -12,7 +12,6 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamableResource;
@@ -26,7 +25,7 @@ import org.jumpmind.util.FormatUtils;
         inputMessage = MessageType.TEXT,
         outgoingMessage = MessageType.TEXT,
         resourceCategory = ResourceCategory.STREAMABLE)
-public class TextFileReader extends AbstractComponent {
+public class TextFileReader extends AbstractComponentRuntime {
 
     public static final String TYPE = "Text File Reader";
 
@@ -80,14 +79,14 @@ public class TextFileReader extends AbstractComponent {
     String encoding = "UTF-8";
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start() {
+        
         applySettings();
     }
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
-        componentStatistics.incrementInboundMessages();
+        getComponentStatistics().incrementInboundMessages();
         String currentLine;
         int linesRead = 0;
         int linesInMessage = 0;
@@ -104,9 +103,8 @@ public class TextFileReader extends AbstractComponent {
             InputStream inStream = null;
             BufferedReader reader = null;
             try {
-                IStreamableResource resource = (IStreamableResource) this.resource.reference();
-                String filePath = FormatUtils.replaceTokens(file, inputMessage.getHeader()
-                        .getParametersAsString(), true);
+                IStreamableResource resource = (IStreamableResource)getResourceReference();
+                String filePath = FormatUtils.replaceTokens(file, context.getFlowParametersAsString(), true);
                 inStream = resource.getInputStream(filePath, mustExist);
                 reader = new BufferedReader(new InputStreamReader(inStream, encoding));
                 ArrayList<String> payload = new ArrayList<String>();
@@ -118,7 +116,7 @@ public class TextFileReader extends AbstractComponent {
                             linesInMessage = 0;
                             payload = new ArrayList<String>();
                         }
-                        componentStatistics.incrementNumberEntitiesProcessed();
+                        getComponentStatistics().incrementNumberEntitiesProcessed();
                         payload.add(currentLine);
                         linesInMessage++;
                     }
@@ -136,7 +134,7 @@ public class TextFileReader extends AbstractComponent {
     }
 
     private void applySettings() {
-        Component component = flowStep.getComponent();
+        Component component = getComponent();
         relativePathAndFile = component.get(SETTING_RELATIVE_PATH, relativePathAndFile);
         mustExist = component.getBoolean(SETTING_MUST_EXIST, mustExist);
         textRowsPerMessage = component.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
@@ -152,12 +150,11 @@ public class TextFileReader extends AbstractComponent {
     private void initAndSendMessage(ArrayList<String> payload, Message inputMessage, IMessageTarget messageTarget,
             int numberMessages, boolean lastMessage) {
         numberMessages++;        
-        Message message = new Message(flowStep.getId()); 
-        message.getHeader().setParameters(inputMessage.getHeader().getParameters());
+        Message message = new Message(getFlowStepId()); 
         message.getHeader().setSequenceNumber(numberMessages);
         message.getHeader().setLastMessage(lastMessage);
         message.setPayload(payload);
-        componentStatistics.incrementOutboundMessages();
+        getComponentStatistics().incrementOutboundMessages();
         messageTarget.put(message);
     }
 

@@ -21,7 +21,6 @@ import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
@@ -32,7 +31,7 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         iconImage = "delimitedformatter.png",
         inputMessage = MessageType.TEXT,
         outgoingMessage = MessageType.ENTITY)
-public class DelimitedParser extends AbstractComponent {
+public class DelimitedParser extends AbstractComponentRuntime {
 
     public static final String TYPE = "Parse Delimited";
 
@@ -51,11 +50,7 @@ public class DelimitedParser extends AbstractComponent {
             defaultValue = "\"")
     public final static String SETTING_QUOTE_CHARACTER = "quote.character";
 
-    @SettingDefinition(
-            order = 30,
-            type = Type.STRING,
-            label = "Encoding",
-            defaultValue = "UTF-8")
+    @SettingDefinition(order = 30, type = Type.STRING, label = "Encoding", defaultValue = "UTF-8")
     public final static String SETTING_ENCODING = "encoding";
 
     public final static String DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION;
@@ -71,13 +66,12 @@ public class DelimitedParser extends AbstractComponent {
     List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
-        delimiter = flowStep.getComponent().get(SETTING_DELIMITER, delimiter);
-        quoteCharacter = flowStep.getComponent().get(SETTING_QUOTE_CHARACTER, quoteCharacter);
-        encoding = flowStep.getComponent().get(SETTING_ENCODING, encoding);
+    public void start() {
+        delimiter = getComponent().get(SETTING_DELIMITER, delimiter);
+        quoteCharacter = getComponent().get(SETTING_QUOTE_CHARACTER, quoteCharacter);
+        encoding = getComponent().get(SETTING_ENCODING, encoding);
         convertAttributeSettingsToAttributeFormat();
-        if (flowStep.getComponent().getOutputModel() == null) {
+        if (getComponent().getOutputModel() == null) {
             throw new IllegalStateException(
                     "This component requires an output model.  Please select one.");
         }
@@ -86,12 +80,12 @@ public class DelimitedParser extends AbstractComponent {
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
-        componentStatistics.incrementInboundMessages();
+        getComponentStatistics().incrementInboundMessages();
 
         ArrayList<String> inputRows = inputMessage.getPayload();
 
         ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
-        Message outputMessage = inputMessage.copy(flowStep.getId(), outputPayload);
+        Message outputMessage = inputMessage.copy(getFlowStepId(), outputPayload);
 
         try {
             // TODO support headers
@@ -103,10 +97,10 @@ public class DelimitedParser extends AbstractComponent {
             throw new IoException(e);
         }
 
-        executionTracker.log(LogLevel.INFO, this, outputPayload.toString());
-        componentStatistics.incrementOutboundMessages();
+        log(LogLevel.INFO, outputPayload.toString());
+        getComponentStatistics().incrementOutboundMessages();
         outputMessage.getHeader()
-                .setSequenceNumber(componentStatistics.getNumberOutboundMessages());
+                .setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
         outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
         messageTarget.put(outputMessage);
     }
@@ -124,7 +118,7 @@ public class DelimitedParser extends AbstractComponent {
             EntityData data = new EntityData();
             if (attributes.size() > 0) {
                 for (AttributeFormat attribute : attributes) {
-                    Object value = csvReader.get(attribute.getOrdinal()-1);
+                    Object value = csvReader.get(attribute.getOrdinal() - 1);
                     if (isNotBlank(attribute.getFormatFunction())) {
                         value = ModelAttributeScriptHelper.eval(attribute.getAttribute(), value,
                                 attribute.getEntity(), data, attribute.getFormatFunction());
@@ -133,7 +127,7 @@ public class DelimitedParser extends AbstractComponent {
                     data.put(attribute.getAttributeId(), value);
                 }
             } else {
-                Model model = flowStep.getComponent().getOutputModel();
+                Model model = getComponent().getOutputModel();
                 List<ModelEntity> entities = model.getModelEntities();
                 int index = 0;
                 for (ModelEntity modelEntity : entities) {
@@ -151,13 +145,12 @@ public class DelimitedParser extends AbstractComponent {
     }
 
     private void convertAttributeSettingsToAttributeFormat() {
-        List<ComponentAttributeSetting> attributeSettings = flowStep.getComponent()
-                .getAttributeSettings();
+        List<ComponentAttributeSetting> attributeSettings = getComponent().getAttributeSettings();
         Map<String, AttributeFormat> formats = new HashMap<String, DelimitedParser.AttributeFormat>();
         for (ComponentAttributeSetting attributeSetting : attributeSettings) {
             AttributeFormat format = formats.get(attributeSetting.getAttributeId());
             if (format == null) {
-                Model inputModel = flowStep.getComponent().getOutputModel();
+                Model inputModel = getComponent().getOutputModel();
                 ModelAttribute attribute = inputModel.getAttributeById(attributeSetting
                         .getAttributeId());
                 ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());

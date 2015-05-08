@@ -7,7 +7,6 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamableResource;
@@ -16,7 +15,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 @ComponentDefinition(typeName = BinaryFileWriter.TYPE, category = ComponentCategory.WRITER, iconImage="binaryfilewriter.png",
         inputMessage=MessageType.BINARY,
         resourceCategory = ResourceCategory.STREAMABLE)
-public class BinaryFileWriter extends AbstractComponent {
+public class BinaryFileWriter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Binary File Writer";
 
@@ -44,8 +43,7 @@ public class BinaryFileWriter extends AbstractComponent {
     OutputStream outStream;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start() {
         applySettings();
     }
 
@@ -72,11 +70,11 @@ public class BinaryFileWriter extends AbstractComponent {
     }
 
     private void initStream() {
-        outStream = getOutputStream((IStreamableResource) this.resource.reference());        
+        outStream = getOutputStream((IStreamableResource) getResourceReference());        
     }
     
     private void applySettings() {
-        properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
+        properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         relativePathAndFile = properties.get(BINARYFILEWRITER_RELATIVE_PATH);
         mustExist = properties.is(BINARYFILEWRITER_MUST_EXIST);
         append = properties.is(BINARYFILEWRITER_APPEND);

@@ -24,7 +24,6 @@ import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
@@ -35,7 +34,7 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         iconImage = "delimitedformatter.png",
         inputMessage = MessageType.ENTITY,
         outgoingMessage = MessageType.TEXT)
-public class DelimitedFormatter extends AbstractComponent {
+public class DelimitedFormatter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Format Delimited";
 
@@ -71,8 +70,8 @@ public class DelimitedFormatter extends AbstractComponent {
     List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start() {
+        
         applySettings();
     }
 
@@ -80,14 +79,13 @@ public class DelimitedFormatter extends AbstractComponent {
     public void handle( Message inputMessage, IMessageTarget messageTarget) {
 
         if (attributes.size() == 0) {
-            executionTracker
-                    .log(LogLevel.INFO, this, "There are no format attributes configured.  Writing all entity fields to the output.");
+            log(LogLevel.INFO, "There are no format attributes configured.  Writing all entity fields to the output");
         }
 
-        componentStatistics.incrementInboundMessages();
+        getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
-        Message outputMessage = new Message(flowStep.getId());
+        Message outputMessage = new Message(getFlowStepId());
         ArrayList<String> outputPayload = new ArrayList<String>();
 
         String outputRec;
@@ -96,10 +94,10 @@ public class DelimitedFormatter extends AbstractComponent {
             outputPayload.add(outputRec);
         }
         outputMessage.setPayload(outputPayload);
-        executionTracker.log(LogLevel.INFO, this, outputPayload.toString());
-        componentStatistics.incrementOutboundMessages();
+        log(LogLevel.INFO, outputPayload.toString());
+        getComponentStatistics().incrementOutboundMessages();
         outputMessage.getHeader()
-                .setSequenceNumber(componentStatistics.getNumberOutboundMessages());
+                .setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
         outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
         messageTarget.put(outputMessage);
     }
@@ -138,20 +136,20 @@ public class DelimitedFormatter extends AbstractComponent {
     }
 
     private void applySettings() {
-        properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
+        properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         delimiter = properties.get(DELIMITED_FORMATTER_DELIMITER);
         quoteCharacter = properties.get(DELIMITED_FORMATTER_QUOTE_CHARACTER);
         convertAttributeSettingsToAttributeFormat();
     }
 
     private void convertAttributeSettingsToAttributeFormat() {
-        List<ComponentAttributeSetting> attributeSettings = flowStep.getComponent()
+        List<ComponentAttributeSetting> attributeSettings = getComponent()
                 .getAttributeSettings();
         Map<String, AttributeFormat> formats = new HashMap<String, DelimitedFormatter.AttributeFormat>();
         for (ComponentAttributeSetting attributeSetting : attributeSettings) {
             AttributeFormat format = formats.get(attributeSetting.getAttributeId());
             if (format == null) {
-                Model inputModel = flowStep.getComponent().getInputModel();
+                Model inputModel = getComponent().getInputModel();
                 ModelAttribute attribute = inputModel.getAttributeById(attributeSetting
                         .getAttributeId());
                 ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());

@@ -19,7 +19,6 @@ import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
@@ -33,7 +32,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
         iconImage = "filepoller.png",
         outgoingMessage = MessageType.TEXT,
         resourceCategory = ResourceCategory.STREAMABLE)
-public class FilePoller extends AbstractComponent {
+public class FilePoller extends AbstractComponentRuntime {
 
     public static final String TYPE = "File Poller";
 
@@ -88,14 +87,13 @@ public class FilePoller extends AbstractComponent {
     ArrayList<File> filesSent = new ArrayList<File>();
     
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
-        Resource resource = this.resource.getResource();
+    public void start() {       
+        Component component = getComponent();
+        Resource resource = component.getResource();
         if (!resource.getType().equals(LocalFileResource.TYPE)) {
             throw new IllegalStateException(String.format("The resource must be of type %s",LocalFileResource.TYPE));
         }
                 
-        Component component = flowStep.getComponent();
         filePattern = component.get(SETTING_FILE_PATTERN);
         triggerFilePath = component.get(SETTING_TRIGGER_FILE_PATH);
         useTriggerFile = component.getBoolean(SETTING_USE_TRIGGER_FILE, useTriggerFile);
@@ -112,7 +110,7 @@ public class FilePoller extends AbstractComponent {
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
-        Resource resource = this.resource.getResource();
+        Resource resource = getComponent().getResource();
         String path = resource.get(LocalFileResource.LOCALFILE_PATH);
         if (useTriggerFile) {
             File triggerFile = new File(path, triggerFilePath);
@@ -120,7 +118,7 @@ public class FilePoller extends AbstractComponent {
                 pollForFiles(path, inputMessage, messageTarget);
                 FileUtils.deleteQuietly(triggerFile);
             } else if (cancelOnNoFiles) {
-                messageTarget.put(new ShutdownMessage(flowStep.getId(), true));
+                messageTarget.put(new ShutdownMessage(getFlowStepId(), true));
             }
         } else {
             pollForFiles(path, inputMessage, messageTarget);
@@ -134,13 +132,13 @@ public class FilePoller extends AbstractComponent {
         if (files.length > 0) {
             for (File file : files) {
                 filesSent.add(file);
-                executionTracker.log(LogLevel.INFO, this, "File polled: " + file.getAbsolutePath());
+                log(LogLevel.INFO,  "File polled: " + file.getAbsolutePath());
                 String filePath = file.getAbsolutePath(); 
                 filePaths.add(filePath.substring(pathDir.getAbsolutePath().length()));
             }
-            messageTarget.put(inputMessage.copy(flowStep.getFlowId(), filePaths));
+            messageTarget.put(inputMessage.copy(getFlowStepId(), filePaths));
         } else if (cancelOnNoFiles) {
-            messageTarget.put(new ShutdownMessage(flowStep.getId(), true));
+            messageTarget.put(new ShutdownMessage(getFlowStepId(), true));
         }        
     }
     
@@ -159,7 +157,7 @@ public class FilePoller extends AbstractComponent {
     }
     
     protected void archive(String archivePath) {
-        Resource resource = this.resource.getResource();
+        Resource resource = getComponent().getResource();
         String path = resource.get(LocalFileResource.LOCALFILE_PATH);
         File destDir = new File(path, archivePath);
         for (File srcFile : filesSent) {

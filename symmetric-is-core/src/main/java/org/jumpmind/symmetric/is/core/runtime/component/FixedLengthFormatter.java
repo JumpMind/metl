@@ -16,7 +16,6 @@ import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
@@ -27,7 +26,7 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         iconImage = "fixedlengthformatter.png",
         inputMessage = MessageType.ENTITY,
         outgoingMessage = MessageType.TEXT)
-public class FixedLengthFormatter extends AbstractComponent {
+public class FixedLengthFormatter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Format Fixed";
 
@@ -44,8 +43,8 @@ public class FixedLengthFormatter extends AbstractComponent {
     List<AttributeFormat> attributesList;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start() {
+        
         applySettings();
     }
 
@@ -57,22 +56,22 @@ public class FixedLengthFormatter extends AbstractComponent {
                     "There are no format attributes configured.  Writing all entity fields to the output.");
         }
 
-        componentStatistics.incrementInboundMessages();
+        getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
-        Message outputMessage = new Message(flowStep.getId());
+        Message outputMessage = new Message(getFlowStepId());
         ArrayList<String> outputPayload = new ArrayList<String>();
 
         String outputRec;
         for (EntityData inputRow : inputRows) {
             outputRec = processInputRow(inputRow);
-            executionTracker.log(LogLevel.DEBUG, this, String.format("Generated record: %s", outputRec));
+            log(LogLevel.DEBUG, String.format("Generated record: %s", outputRec));
             outputPayload.add(outputRec);
         }
         outputMessage.setPayload(outputPayload);
-        componentStatistics.incrementOutboundMessages();
+        getComponentStatistics().incrementOutboundMessages();
         outputMessage.getHeader()
-                .setSequenceNumber(componentStatistics.getNumberOutboundMessages());
+                .setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
         outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
         messageTarget.put(outputMessage);
     }
@@ -93,7 +92,7 @@ public class FixedLengthFormatter extends AbstractComponent {
     }
 
     private void applySettings() {
-        properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
+        properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         convertAttributeSettingsToAttributeFormat();
     }
 
@@ -101,11 +100,11 @@ public class FixedLengthFormatter extends AbstractComponent {
 
         Map<String, AttributeFormat> attributesMap = new HashMap<String, AttributeFormat>();
 
-        List<ComponentAttributeSetting> attributeSettings = flowStep.getComponent()
+        List<ComponentAttributeSetting> attributeSettings = getComponent()
                 .getAttributeSettings();
         for (ComponentAttributeSetting attributeSetting : attributeSettings) {
             if (!attributesMap.containsKey(attributeSetting.getAttributeId())) {
-                Model inputModel = flowStep.getComponent().getInputModel();
+                Model inputModel = getComponent().getInputModel();
                 ModelAttribute attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
                 ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
                 attributesMap.put(attributeSetting.getAttributeId(), new AttributeFormat(attribute, entity));

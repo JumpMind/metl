@@ -11,14 +11,14 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.AbstractFactory;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 
-public class ResourceFactory extends AbstractFactory<IResource> implements IResourceFactory {
+public class ResourceFactory extends AbstractFactory<IResourceRuntime> implements IResourceFactory {
 
-    Map<String, Class<? extends IResource>> resourceTypes;
+    Map<String, Class<? extends IResourceRuntime>> resourceTypes;
 
     Map<ResourceCategory, List<String>> categoryToTypeMapping;
 
     public ResourceFactory() {
-        super(IResource.class);
+        super(IResourceRuntime.class);
     }
 
     @Override
@@ -32,11 +32,11 @@ public class ResourceFactory extends AbstractFactory<IResource> implements IReso
     }
     
     @Override
-    public void register(Class<IResource> clazz) {
+    public void register(Class<IResourceRuntime> clazz) {
         ResourceDefinition definition = clazz.getAnnotation(ResourceDefinition.class);
         if (definition != null) {
             if (resourceTypes == null) {
-                resourceTypes = new LinkedHashMap<String, Class<? extends IResource>>();
+                resourceTypes = new LinkedHashMap<String, Class<? extends IResourceRuntime>>();
             }
             resourceTypes.put(definition.typeName(), clazz);
             
@@ -64,12 +64,12 @@ public class ResourceFactory extends AbstractFactory<IResource> implements IReso
     }
 
     @Override
-    public IResource create(Resource resource, TypedProperties agentOverrides) {
+    public IResourceRuntime create(Resource resource, TypedProperties agentOverrides) {
         try {
             String resourceType = resource.getType();
-            Class<? extends IResource> clazz = resourceTypes.get(resourceType);
+            Class<? extends IResourceRuntime> clazz = resourceTypes.get(resourceType);
             if (clazz != null) {
-                IResource runtime = clazz.newInstance();
+                IResourceRuntime runtime = clazz.newInstance();
                 runtime.start(this, resource, agentOverrides);
                 return runtime;
             } else {
@@ -87,7 +87,7 @@ public class ResourceFactory extends AbstractFactory<IResource> implements IReso
     @Override
     public Map<String, SettingDefinition> getSettingDefinitionsForResourceType(
             String resourceType) {
-        Class<? extends IResource> clazz = resourceTypes.get(resourceType);
+        Class<? extends IResourceRuntime> clazz = resourceTypes.get(resourceType);
         return AbstractRuntimeObject.getSettingDefinitions(clazz, false);
     }
 

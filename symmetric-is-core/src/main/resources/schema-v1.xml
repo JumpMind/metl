@@ -419,7 +419,7 @@
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />    
-        <index name="idx_ex_sts_time)">
+        <index name="idx_ex_sts_time">
             <index-column name="status"/>
             <index-column name="last_update_time"/>
         </index>           

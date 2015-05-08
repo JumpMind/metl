@@ -1,14 +1,11 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
@@ -20,7 +17,7 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         inputMessage = MessageType.ENTITY,
         outgoingMessage = MessageType.ENTITY,
         inputOutputModelsMatch = true)
-public class Deduper extends AbstractComponent {
+public class Deduper extends AbstractComponentRuntime {
 
     public static final String TYPE = "Deduper";
 
@@ -32,30 +29,25 @@ public class Deduper extends AbstractComponent {
             label = "Rows/Msg")
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
-    Map<String, Serializable> parameters;
-
     int rowsPerMessage = 1000;
 
     LinkedHashMap<String, EntityData> deduped = new LinkedHashMap<String, EntityData>();
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
-        rowsPerMessage = flowStep.getComponent().getInt(ROWS_PER_MESSAGE, rowsPerMessage);
+    public void start() {
+        
+        rowsPerMessage = getComponent().getInt(ROWS_PER_MESSAGE, rowsPerMessage);
     }
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
-        componentStatistics.incrementInboundMessages();
-        if (parameters == null) {
-            parameters = inputMessage.getHeader().getParameters();
-        }
+        getComponentStatistics().incrementInboundMessages();
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
             for (EntityData entityData : payload) {
                 String key = entityData.toString();
                 if (!deduped.containsKey(key)) {
-                    componentStatistics.incrementNumberEntitiesProcessed();
+                    getComponentStatistics().incrementNumberEntitiesProcessed();
                     deduped.put(key, entityData);
                 }
             }
@@ -83,11 +75,10 @@ public class Deduper extends AbstractComponent {
 
     private void sendMessage(ArrayList<EntityData> payload, IMessageTarget messageTarget,
             boolean lastMessage) {
-        Message newMessage = new Message(flowStep.getId());
-        newMessage.getHeader().setParameters(parameters);
+        Message newMessage = new Message(getFlowStepId());
         newMessage.getHeader().setLastMessage(lastMessage);
         newMessage.setPayload(payload);
-        componentStatistics.incrementOutboundMessages();
+        getComponentStatistics().incrementOutboundMessages();
         messageTarget.put(newMessage);
     }
 

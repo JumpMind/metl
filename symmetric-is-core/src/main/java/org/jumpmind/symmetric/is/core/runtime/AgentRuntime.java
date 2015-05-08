@@ -33,7 +33,7 @@ import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.flow.AsyncRecorder;
 import org.jumpmind.symmetric.is.core.runtime.flow.FlowRuntime;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +57,7 @@ public class AgentRuntime {
 
     Map<AgentDeployment, ScheduledFuture<?>> scheduledDeployments = new HashMap<AgentDeployment, ScheduledFuture<?>>();
 
-    Map<String, IResource> deployedResources = new HashMap<String, IResource>();
+    Map<String, IResourceRuntime> deployedResources = new HashMap<String, IResourceRuntime>();
 
     IConfigurationService configurationService;
 
@@ -173,8 +173,8 @@ public class AgentRuntime {
                 this.flowStepsExecutionThreads = null;
             }
             
-            Collection<IResource> resourceCollection = deployedResources.values();
-                for (IResource resource : resourceCollection) {
+            Collection<IResourceRuntime> resourceCollection = deployedResources.values();
+                for (IResourceRuntime resource : resourceCollection) {
                     log.info("Stopping the {} resource on the {} agent", resource.getResource().getName(), agent.getName());
                     resource.stop();
                 }
@@ -223,7 +223,7 @@ public class AgentRuntime {
     protected void deployResources(Flow flow) {
         Set<Resource> flowResources = flow.findResources();
         for (Resource flowResource : flowResources) {
-            IResource alreadyDeployed = deployedResources.get(flowResource.getId());
+            IResourceRuntime alreadyDeployed = deployedResources.get(flowResource.getId());
     
             Map<String, SettingDefinition> settings = resourceFactory
                     .getSettingDefinitionsForResourceType(flowResource.getType());
@@ -260,7 +260,7 @@ public class AgentRuntime {
     
             if (deploy) {
                 log.info("Deploying the {} resource to the {} agent", flowResource.getName(), agent.getName());
-                IResource resource = resourceFactory.create(flowResource, overrideSettings);
+                IResourceRuntime resource = resourceFactory.create(flowResource, overrideSettings);
                 deployedResources.put(flowResource.getId(), resource);
             }
         }
@@ -344,8 +344,8 @@ public class AgentRuntime {
         }
     }
     
-    public Collection<IResource> getDeployedResources() {
-        return new HashSet<IResource>(deployedResources.values());
+    public Collection<IResourceRuntime> getDeployedResources() {
+        return new HashSet<IResourceRuntime>(deployedResources.values());
     }
 
     public synchronized void undeploy(AgentDeployment deployment) {

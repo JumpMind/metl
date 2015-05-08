@@ -2,14 +2,13 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.util.AppUtils;
 
 @ComponentDefinition(category = ComponentCategory.PROCESSOR, typeName = Delay.TYPE, inputMessage=MessageType.ANY,
 outgoingMessage=MessageType.ANY, iconImage="timer.png")
-public class Delay extends AbstractComponent {
+public class Delay extends AbstractComponentRuntime {
 
     public static final String TYPE = "Delay";
     
@@ -19,16 +18,15 @@ public class Delay extends AbstractComponent {
     long delay = 1000;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
-        delay = flowStep.getComponent().getLong(DELAY_TIME, 1000l);
+    public void start() {        
+        delay = getComponent().getLong(DELAY_TIME, 1000l);
     }
     
     @Override
     public void handle( Message inputMessage, IMessageTarget messageTarget) {
-        componentStatistics.incrementInboundMessages();
+        getComponentStatistics().incrementInboundMessages();
         AppUtils.sleep(delay);
-        componentStatistics.incrementOutboundMessages();
+        getComponentStatistics().incrementOutboundMessages();
         messageTarget.put(inputMessage);
     }
 

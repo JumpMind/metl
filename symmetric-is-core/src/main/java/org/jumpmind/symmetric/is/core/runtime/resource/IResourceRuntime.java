@@ -3,7 +3,7 @@ package org.jumpmind.symmetric.is.core.runtime.resource;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.Resource;
 
-public interface IResource {
+public interface IResourceRuntime {
 
     public void start(IResourceFactory resourceFactory, Resource resource, TypedProperties agentOverrides);
     

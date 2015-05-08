@@ -8,9 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
@@ -21,7 +19,7 @@ import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
 import org.jumpmind.symmetric.is.core.utils.TestUtils;
@@ -31,7 +29,7 @@ import org.junit.Test;
 
 public class TextFileWriterTest {
 
-    private static Map<String, IResource> resources = new HashMap<String, IResource>();
+    private static IResourceRuntime resourceRuntime;
     private static FlowStep writerFlowStep;
     private static final String FILE_PATH = "build/files/";
     private static final String FILE_NAME = "text_test_writer.txt";
@@ -40,7 +38,7 @@ public class TextFileWriterTest {
     public static void setup() throws Exception {
         writerFlowStep = createWriterFlowStep();
         Resource resource = writerFlowStep.getComponent().getResource();
-        resources.put(resource.getId(), new ResourceFactory().create(resource, null));        
+        resourceRuntime = new ResourceFactory().create(resource, null);    
     }
 
     @After
@@ -50,8 +48,8 @@ public class TextFileWriterTest {
     @Test
     public void testTextWriterMultipleRowsPerMessage() throws Exception {
         TextFileWriter writer = new TextFileWriter();
-        writer.init(writerFlowStep, null, resources);
-        writer.start(new ExecutionTrackerNoOp());
+        writer.init(new ComponentContext(writerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null));
+        writer.start();
         writer.handle(createMultipleRowTextMessageToWrite(), null);
         checkTextFile();
     }
@@ -59,8 +57,8 @@ public class TextFileWriterTest {
     @Test
     public void testTextWriterSingleRowPerMessage() throws Exception {
         TextFileWriter writer = new TextFileWriter();
-        writer.init(writerFlowStep, null, resources);
-        writer.start(new ExecutionTrackerNoOp());
+        writer.init(new ComponentContext(writerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null));
+        writer.start();
         writer.handle(createSingleRowTextMessageToWrite(1, false), null);
         writer.handle(createSingleRowTextMessageToWrite(2, false), null);
         writer.handle(createSingleRowTextMessageToWrite(3, false), null);

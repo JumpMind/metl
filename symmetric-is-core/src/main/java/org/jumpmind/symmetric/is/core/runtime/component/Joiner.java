@@ -10,7 +10,6 @@ import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
@@ -23,7 +22,7 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         outgoingMessage = MessageType.ENTITY,
         inputOutputModelsMatch=true
         )
-public class Joiner extends AbstractComponent {
+public class Joiner extends AbstractComponentRuntime {
 
     public static final String TYPE = "Joiner";
 
@@ -48,15 +47,15 @@ public class Joiner extends AbstractComponent {
     Map<Object, EntityData> joinedData = new LinkedHashMap<Object, EntityData>();
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start() {
+        
         applySettings();
     }
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
 
-        componentStatistics.incrementInboundMessages();
+        getComponentStatistics().incrementInboundMessages();
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
             join(payload);
@@ -85,21 +84,21 @@ public class Joiner extends AbstractComponent {
     private void sendMessage(ArrayList<EntityData> dataToSend, IMessageTarget messageTarget,
             boolean lastMessage) {
         
-        Message newMessage = new Message(flowStep.getId());
+        Message newMessage = new Message(getFlowStepId());
         newMessage.getHeader().setLastMessage(lastMessage);
         newMessage.setPayload(dataToSend);
-        componentStatistics.incrementOutboundMessages();
+        getComponentStatistics().incrementOutboundMessages();
         messageTarget.put(newMessage);
         dataToSend = new ArrayList<EntityData>();        
     }
     
     private void applySettings() {
-        TypedProperties properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
+        TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         joinAttribute = properties.get(JOIN_ATTRIBUTE);
         if (joinAttribute == null) {
             throw new IllegalStateException("Join attribute must be specified.");
         }
-        Model inputModel = this.flowStep.getComponent().getInputModel();
+        Model inputModel = this.getComponent().getInputModel();
         String[] joinAttributeElements = joinAttribute.split("[.]");
         if (joinAttributeElements.length != 2) {
             throw new IllegalStateException("Join attribute must be specified as 'entity.attribute'");
@@ -113,7 +112,7 @@ public class Joiner extends AbstractComponent {
     private void join(ArrayList<EntityData> records) {
         
         for (int i=0;i<records.size();i++) {
-            componentStatistics.incrementNumberEntitiesProcessed();
+            getComponentStatistics().incrementNumberEntitiesProcessed();
             EntityData record = records.get(i);
             Object keyValue = record.get(joinAttributeId);
             EntityData existingRecord = joinedData.get(keyValue);

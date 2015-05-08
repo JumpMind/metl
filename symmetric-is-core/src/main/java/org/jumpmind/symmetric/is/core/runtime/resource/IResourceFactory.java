@@ -9,9 +9,9 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 
 public interface IResourceFactory {
 
-    public IResource create(Resource resource, TypedProperties agentOverrides);
+    public IResourceRuntime create(Resource resource, TypedProperties agentOverrides);
 
-    public void register(Class<IResource> clazz);
+    public void register(Class<IResourceRuntime> clazz);
 
     public List<String> getResourceTypes();
     

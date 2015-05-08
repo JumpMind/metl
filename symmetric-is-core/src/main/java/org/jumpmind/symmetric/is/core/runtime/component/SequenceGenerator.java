@@ -1,15 +1,12 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
@@ -43,8 +40,6 @@ public class SequenceGenerator extends AbstractDbComponent {
             label = "Select Starting Sequence Sql")
     public final static String SQL = "sequence.sql";
 
-    Map<String, Serializable> parameters;
-
     String sequenceAttributeId;
 
     String sql;
@@ -52,13 +47,11 @@ public class SequenceGenerator extends AbstractDbComponent {
     Long currentSequence;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
-
-        Component component = flowStep.getComponent();
+    public void start() {
+        Component component = getComponent();
         String sequenceAttributeName = component.get(SEQ_ATTRIBUTE);
 
-        sql = flowStep.getComponent().get(SQL);
+        sql = getComponent().get(SQL);
         if (sql == null) {
             throw new IllegalStateException("An sql statement is required by the " + TYPE);
         }
@@ -82,18 +75,12 @@ public class SequenceGenerator extends AbstractDbComponent {
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
-        componentStatistics.incrementInboundMessages();
-        if (parameters == null) {
-            parameters = inputMessage.getHeader().getParameters();
-        }
-
+        getComponentStatistics().incrementInboundMessages();
         if (currentSequence == null) {
-            final String sqlToExecute = FormatUtils.replaceTokens(this.sql, inputMessage
-                    .getHeader().getParametersAsString(), true);
-            executionTracker
-                    .log(LogLevel.DEBUG, this, "About to run: " + sqlToExecute);
+            final String sqlToExecute = FormatUtils.replaceTokens(this.sql, context.getFlowParametersAsString(), true);
+            log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
             currentSequence = getJdbcTemplate()
-                    .queryForObject(sqlToExecute, parameters, Long.class);
+                    .queryForObject(sqlToExecute, context.getFlowParameters(), Long.class);
         }
 
         if (!(inputMessage instanceof StartupMessage)) {
@@ -102,7 +89,7 @@ public class SequenceGenerator extends AbstractDbComponent {
             for (EntityData entityData : payload) {
                 entityData = entityData.copy();
                 entityData.put(sequenceAttributeId, ++currentSequence);
-                componentStatistics.incrementNumberEntitiesProcessed();
+                getComponentStatistics().incrementNumberEntitiesProcessed();
                 outgoingPayload.add(entityData);
             }
             sendMessage(outgoingPayload, messageTarget, inputMessage.getHeader().isLastMessage());
@@ -111,11 +98,10 @@ public class SequenceGenerator extends AbstractDbComponent {
 
     private void sendMessage(ArrayList<EntityData> payload, IMessageTarget messageTarget,
             boolean lastMessage) {
-        Message newMessage = new Message(flowStep.getId());
-        newMessage.getHeader().setParameters(parameters);
+        Message newMessage = new Message(getFlowStepId());
         newMessage.getHeader().setLastMessage(lastMessage);
         newMessage.setPayload(payload);
-        componentStatistics.incrementOutboundMessages();
+        getComponentStatistics().incrementOutboundMessages();
         messageTarget.put(newMessage);
     }
 

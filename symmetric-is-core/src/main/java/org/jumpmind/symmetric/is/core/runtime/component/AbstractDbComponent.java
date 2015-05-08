@@ -11,10 +11,10 @@ import org.jumpmind.db.sql.SqlScriptReader;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 
-abstract public class AbstractDbComponent extends AbstractComponent {
+abstract public class AbstractDbComponent extends AbstractComponentRuntime {
 
     protected NamedParameterJdbcTemplate getJdbcTemplate() {
-        return new NamedParameterJdbcTemplate((DataSource) this.resource.reference());
+        return new NamedParameterJdbcTemplate((DataSource) this.context.getResourceRuntime().reference());
     }
     
     protected List<String> getSqlStatements(String script) {

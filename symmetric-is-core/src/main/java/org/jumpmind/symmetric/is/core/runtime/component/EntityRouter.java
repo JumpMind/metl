@@ -2,7 +2,6 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,7 +17,6 @@ import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
@@ -32,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
         inputMessage = MessageType.ENTITY,
         outgoingMessage = MessageType.ENTITY,
         inputOutputModelsMatch = true)
-public class EntityRouter extends AbstractComponent {
+public class EntityRouter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Entity Router";
 
@@ -51,13 +49,11 @@ public class EntityRouter extends AbstractComponent {
     ScriptEngine scriptEngine;
 
     long rowsPerMessage;
-    
-    Map<String,Serializable> parameters;
 
     protected void applySettings() {
-        TypedProperties properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
+        TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
-        String json = flowStep.getComponent().get(SETTING_CONFIG);
+        String json = getComponent().get(SETTING_CONFIG);
         if (isNotBlank(json)) {
             try {
                 routes = new ObjectMapper().readValue(json, new TypeReference<List<Route>>() {
@@ -69,31 +65,26 @@ public class EntityRouter extends AbstractComponent {
     }
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start() {
         ScriptEngineManager factory = new ScriptEngineManager();
         scriptEngine = factory.getEngineByName("groovy");
         applySettings();
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget) {
-        componentStatistics.incrementInboundMessages();
-        if (parameters == null) {
-            parameters = inputMessage.getHeader().getParameters();
-        }
+    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+        getComponentStatistics().incrementInboundMessages();
         Map<String, Message> outboundMessages = new HashMap<String, Message>();
         ArrayList<EntityData> inputDatas = inputMessage.getPayload();
         for (EntityData entityData : inputDatas) {
-            bindEntityData(scriptEngine, executionId, entityData);
+            bindEntityData(scriptEngine, entityData);
             if (routes != null) {
                 for (Route route : routes) {
                     try {
                         if (Boolean.TRUE.equals(scriptEngine.eval(route.getMatchExpression()))) {
                             Message message = outboundMessages.get(route.getTargetStepId());
                             if (message == null) {
-                                message = new Message(flowStep.getId());
-                                message.getHeader().setParameters(parameters);
+                                message = new Message(getFlowStepId());
                                 message.setPayload(new ArrayList<EntityData>());
                                 message.getHeader().getTargetStepIds().add(route.getTargetStepId());
                                 outboundMessages.put(route.getTargetStepId(), message);
@@ -103,7 +94,7 @@ public class EntityRouter extends AbstractComponent {
 
                             if (outputRows.size() >= rowsPerMessage) {
                                 outboundMessages.remove(route.getTargetStepId());
-                                componentStatistics.incrementOutboundMessages();
+                                getComponentStatistics().incrementOutboundMessages();
                                 messageTarget.put(message);
                             }
                         }
@@ -117,7 +108,7 @@ public class EntityRouter extends AbstractComponent {
 
         Collection<Message> messages = outboundMessages.values();
         for (Message message : messages) {
-            componentStatistics.incrementOutboundMessages();
+            getComponentStatistics().incrementOutboundMessages();
             messageTarget.put(message);
         }
 

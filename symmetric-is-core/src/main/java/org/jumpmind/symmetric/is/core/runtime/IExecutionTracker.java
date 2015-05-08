@@ -1,24 +1,24 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
-import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
+import org.jumpmind.symmetric.is.core.runtime.component.ComponentContext;
 
 public interface IExecutionTracker {
     
-    public void flowStepStarted(IComponentRuntime component);
+    public void flowStepStarted(ComponentContext component);
     
-    public void beforeHandle(IComponentRuntime component);
+    public void beforeHandle(ComponentContext component);
     
-    public void afterHandle(IComponentRuntime component, Throwable error);
+    public void afterHandle(ComponentContext component, Throwable error);
     
-    public void flowStepFinished(IComponentRuntime component, Throwable error, boolean cancelled);
+    public void flowStepFinished(ComponentContext component, Throwable error, boolean cancelled);
     
     public void beforeFlow(String executionId);
     
     public void afterFlow();
     
-    public void flowStepFailedOnComplete(IComponentRuntime component, Throwable error);
+    public void flowStepFailedOnComplete(ComponentContext component, Throwable error);
 
-    public void log (LogLevel level, IComponentRuntime component, String output);
+    public void log (LogLevel level, ComponentContext component, String output, Object... args);
     
     public String getExecutionId();
     

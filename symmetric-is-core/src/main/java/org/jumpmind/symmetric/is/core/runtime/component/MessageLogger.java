@@ -13,38 +13,35 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         typeName = MessageLogger.TYPE,
         inputMessage = MessageType.ANY,
         outgoingMessage = MessageType.ANY,
-        inputOutputModelsMatch=true,
+        inputOutputModelsMatch = true,
         iconImage = "log.png")
-public class MessageLogger extends AbstractComponent {
+public class MessageLogger extends AbstractComponentRuntime {
 
     public static final String TYPE = "Message Logger";
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
-        componentStatistics.incrementInboundMessages();
+        getComponentStatistics().incrementInboundMessages();
 
         MessageHeader header = inputMessage.getHeader();
-        executionTracker.log(LogLevel.DEBUG, this, String.format(
-                "Message(sequenceNumber=%d,last=%s,source='%s')", header.getSequenceNumber(),
-                header.isLastMessage(), flow.findFlowStepWithId(header.getOriginatingStepId())
-                        .getName()));
+        log(LogLevel.DEBUG, String.format("Message(sequenceNumber=%d,last=%s,source='%s')",
+                header.getSequenceNumber(), header.isLastMessage(),
+                getFlow().findFlowStepWithId(header.getOriginatingStepId()).getName()));
         Object payload = inputMessage.getPayload();
         if (payload instanceof List) {
             @SuppressWarnings("unchecked")
             List<Object> list = (List<Object>) payload;
             for (Object object : list) {
-                if (object instanceof EntityData && flowStep.getComponent().getInputModel() != null) {
-                    executionTracker.log(
-                            LogLevel.DEBUG,
-                            this,
+                if (object instanceof EntityData && getComponent().getInputModel() != null) {
+                    log(LogLevel.DEBUG,
                             String.format("Message Payload: %s",
-                                    flowStep.getComponent().toRow((EntityData) object)));
+                                    getComponent().toRow((EntityData) object)));
                 } else {
-                    executionTracker.log(LogLevel.DEBUG, this, String.format("Message Payload: %s", object));
+                    log(LogLevel.DEBUG, String.format("Message Payload: %s", object));
                 }
             }
         }
-        componentStatistics.incrementOutboundMessages();
+        getComponentStatistics().incrementOutboundMessages();
         messageTarget.put(inputMessage);
     }
 

@@ -5,12 +5,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.symmetric.is.core.model.Flow;
-import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.AbstractFactory;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 
 public class ComponentFactory extends AbstractFactory<IComponentRuntime> implements IComponentFactory {
 
@@ -52,13 +49,13 @@ public class ComponentFactory extends AbstractFactory<IComponentRuntime> impleme
     }
 
     @Override
-    public IComponentRuntime create(FlowStep flowStep, Flow flow, Map<String, IResource> resources) {
+    public IComponentRuntime create(ComponentContext context) {
         try {
-            String componentType = flowStep.getComponent().getType();
+            String componentType = context.getFlowStep().getComponent().getType();
             Class<? extends IComponentRuntime> clazz = componentTypes.get(componentType);
             if (clazz != null) {
                 IComponentRuntime component = clazz.newInstance();
-                component.init(flowStep, flow, resources);
+                component.init(context);
                 return component;
             } else {
                 throw new IllegalStateException(

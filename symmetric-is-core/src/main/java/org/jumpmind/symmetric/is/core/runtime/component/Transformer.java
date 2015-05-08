@@ -14,7 +14,6 @@ import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
@@ -25,7 +24,7 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         outgoingMessage = MessageType.ENTITY,
         iconImage = "transformer.png",
         inputOutputModelsMatch = true)
-public class Transformer extends AbstractComponent {
+public class Transformer extends AbstractComponentRuntime {
 
     public static final String TYPE = "Transformer";
     
@@ -35,12 +34,12 @@ public class Transformer extends AbstractComponent {
    
     
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start() {
+        
         
         transformsByAttributeId.clear();
         
-        List<ComponentAttributeSetting> settings = flowStep.getComponent().getAttributeSettings();
+        List<ComponentAttributeSetting> settings = getComponent().getAttributeSettings();
         for (ComponentAttributeSetting setting : settings) {
             if (setting.getName().equals(TRANSFORM_EXPRESSION)) {
                 if (isNotBlank(setting.getValue())) {
@@ -52,10 +51,9 @@ public class Transformer extends AbstractComponent {
 
     @Override
     public void handle( Message inputMessage, IMessageTarget messageTarget) {
-        componentStatistics.incrementInboundMessages();
-        
-        Model inputModel = flowStep.getComponent().getInputModel();
-        Message outputMessage = new Message(flowStep.getId());
+        getComponentStatistics().incrementInboundMessages();        
+        Model inputModel = getComponent().getInputModel();
+        Message outputMessage = new Message(getFlowStepId());
         outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
         outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
         List<EntityData> inDatas = inputMessage.getPayload();
@@ -79,10 +77,10 @@ public class Transformer extends AbstractComponent {
                     outData.put(attributeId, value);
                 }
             }            
-            componentStatistics.incrementNumberEntitiesProcessed();
+            getComponentStatistics().incrementNumberEntitiesProcessed();
         }
         
-        componentStatistics.incrementOutboundMessages();
+        getComponentStatistics().incrementOutboundMessages();
         messageTarget.put(outputMessage);
     }    
 

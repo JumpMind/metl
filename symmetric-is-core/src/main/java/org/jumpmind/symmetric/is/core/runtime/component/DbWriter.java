@@ -24,7 +24,6 @@ import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
@@ -37,7 +36,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
         inputMessage = MessageType.ENTITY,
         outgoingMessage = MessageType.NONE,
         resourceCategory = ResourceCategory.DATASOURCE)
-public class DbWriter extends AbstractComponent {
+public class DbWriter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Database Writer";
 
@@ -112,20 +111,20 @@ public class DbWriter extends AbstractComponent {
     Throwable error;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start() {
+        
         error = null;
         
-        if (resource == null) {
+        if (getResourceRuntime() == null) {
             throw new IllegalStateException("A database writer must have a datasource defined");
         }
         
-        Model model = flowStep.getComponent().getInputModel();
+        Model model = getInputModel();
         if (model == null) {
             throw new IllegalStateException("A database writer must have an input model defined");
         }        
         
-        TypedProperties properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
+        TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         replaceRows = properties.is(REPLACE);
         updateFirst = properties.is(UPDATE_FIRST);
         insertFallback = properties.is(INSERT_FALLBACK);
@@ -133,7 +132,7 @@ public class DbWriter extends AbstractComponent {
         stopProcessingOnError = properties.is(STOP_PROCESSING_ON_ERROR, true);
         fitToColumn = properties.is(FIT_TO_COLUMN);
 
-        DataSource dataSource = (DataSource) resource.reference();
+        DataSource dataSource = (DataSource)getResourceReference();
         platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource,
                 new SqlTemplateSettings(), quoteIdentifiers);
         targetTables = new ArrayList<TargetTableDefintion>();
@@ -152,10 +151,10 @@ public class DbWriter extends AbstractComponent {
     public void handle( final Message inputMessage,
             final IMessageTarget messageTarget) {
 
-        componentStatistics.incrementInboundMessages();
+        getComponentStatistics().incrementInboundMessages();
 
         if (error == null || !stopProcessingOnError) {
-            if (resource == null) {
+            if (getResourceRuntime() == null) {
                 throw new RuntimeException(
                         "The data source resource has not been configured.  Please configure it.");
             }
@@ -216,7 +215,7 @@ public class DbWriter extends AbstractComponent {
                         List<Object> data = getValues(true, modelTable, inputRow);
                         int count = execute(transaction, modelTable.getStatement(), new Object(),
                                 data);
-                        componentStatistics.incrementNumberEntitiesProcessed(count);
+                        getComponentStatistics().incrementNumberEntitiesProcessed(count);
                         if (insertFallback && count == 0) {
                             modelTable = targetTableDefinition.getInsertTable();
                             if (modelTable.shouldProcess(inputRow)) {
@@ -224,10 +223,10 @@ public class DbWriter extends AbstractComponent {
                                 data = getValues(false, modelTable, inputRow);
                                 count = execute(transaction, modelTable.getStatement(),
                                         new Object(), data);
-                                componentStatistics.incrementNumberEntitiesProcessed(count);
+                                getComponentStatistics().incrementNumberEntitiesProcessed(count);
                             }
                         } else if (count == 0){
-                            executionTracker.log(LogLevel.DEBUG, this, String.format("Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n", modelTable.getStatement().getSql(), Arrays.toString(data.toArray()),
+                            log(LogLevel.DEBUG, String.format("Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n", modelTable.getStatement().getSql(), Arrays.toString(data.toArray()),
                                     Arrays.toString(modelTable.getStatement().getTypes())));
                         }
                     }
@@ -238,7 +237,7 @@ public class DbWriter extends AbstractComponent {
                             List<Object> data = getValues(false, modelTable, inputRow);
                             int count = execute(transaction, modelTable.getStatement(),
                                     new Object(), data);
-                            componentStatistics.incrementNumberEntitiesProcessed(count);
+                            getComponentStatistics().incrementNumberEntitiesProcessed(count);
                         }
                     } catch (UniqueKeyException e) {
                         if (replaceRows) {
@@ -248,7 +247,7 @@ public class DbWriter extends AbstractComponent {
                                 List<Object> data = getValues(true, modelTable, inputRow);
                                 int count = execute(transaction, modelTable.getStatement(),
                                         new Object(), data);
-                                componentStatistics.incrementNumberEntitiesProcessed(count);
+                                getComponentStatistics().incrementNumberEntitiesProcessed(count);
                             }
                         } else {
                             throw e;
@@ -275,7 +274,7 @@ public class DbWriter extends AbstractComponent {
         try {
             return transaction.addRow(marker, data.toArray(), dmlStatement.getTypes());
         } catch (SqlException ex) {
-            executionTracker.log(LogLevel.WARN, this, String.format("Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n", dmlStatement.getSql(), Arrays.toString(data.toArray()),
+            log(LogLevel.WARN, String.format("Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n", dmlStatement.getSql(), Arrays.toString(data.toArray()),
                     Arrays.toString(dmlStatement.getTypes())));
             throw ex;
         }
@@ -357,7 +356,7 @@ public class DbWriter extends AbstractComponent {
              * Remove columns that are not enabled for this dml type
              */
             for (ModelAttribute attribute : attributes) {
-                ComponentAttributeSetting setting = flowStep.getComponent()
+                ComponentAttributeSetting setting = getComponent()
                         .getSingleAttributeSetting(
                                 attribute.getId(),
                                 dmlType == DmlType.INSERT ? ATTRIBUTE_INSERT_ENABLED
@@ -424,11 +423,11 @@ public class DbWriter extends AbstractComponent {
         TargetColumn(ModelAttribute modelAttribute, Column column) {
             this.modelAttribute = modelAttribute;
             this.column = column;
-            ComponentAttributeSetting insertAttr = flowStep.getComponent()
+            ComponentAttributeSetting insertAttr = getComponent()
                     .getSingleAttributeSetting(modelAttribute.getId(), ATTRIBUTE_INSERT_ENABLED);
             insertEnabled = insertAttr != null ? Boolean.parseBoolean(insertAttr.getValue()) : true;
 
-            ComponentAttributeSetting updateAttr = flowStep.getComponent()
+            ComponentAttributeSetting updateAttr = getComponent()
                     .getSingleAttributeSetting(modelAttribute.getId(), ATTRIBUTE_UPDATE_ENABLED);
             updateEnabled = updateAttr != null ? Boolean.parseBoolean(updateAttr.getValue()) : true;
 

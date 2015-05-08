@@ -1,21 +1,21 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
-import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
+import org.jumpmind.symmetric.is.core.runtime.component.ComponentContext;
 
 public class ExecutionTrackerNoOp implements IExecutionTracker {
 
     String executionId;
     
     @Override
-    public void afterHandle(IComponentRuntime component, Throwable error) {
+    public void afterHandle(ComponentContext context, Throwable error) {
     }
 
     @Override
-    public void beforeHandle(IComponentRuntime component) {
+    public void beforeHandle(ComponentContext context) {
     }
 
     @Override
-    public void flowStepFinished(IComponentRuntime component, Throwable error, boolean cancelled) {
+    public void flowStepFinished(ComponentContext context, Throwable error, boolean cancelled) {
     }
 
     @Override
@@ -28,15 +28,15 @@ public class ExecutionTrackerNoOp implements IExecutionTracker {
     }
 
     @Override
-    public void log(LogLevel level, IComponentRuntime component, String output) {
+    public void log(LogLevel level, ComponentContext context, String output, Object...args) {
     }
 
     @Override
-    public void flowStepStarted(IComponentRuntime component) {
+    public void flowStepStarted(ComponentContext context) {
     }
     
     @Override
-    public void flowStepFailedOnComplete(IComponentRuntime component, Throwable error) {
+    public void flowStepFailedOnComplete(ComponentContext context, Throwable error) {
     }
     
     @Override

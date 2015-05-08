@@ -14,7 +14,6 @@ import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.MessageManipulationStrategy;
@@ -28,9 +27,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.StringUtils;
 
-@ComponentDefinition(typeName = DbReader.TYPE, category = ComponentCategory.READER, iconImage="dbreader.png",
-        inputMessage=MessageType.ANY,
-        outgoingMessage=MessageType.ENTITY,
+@ComponentDefinition(
+        typeName = DbReader.TYPE,
+        category = ComponentCategory.READER,
+        iconImage = "dbreader.png",
+        inputMessage = MessageType.ANY,
+        outgoingMessage = MessageType.ENTITY,
         resourceCategory = ResourceCategory.DATASOURCE)
 public class DbReader extends AbstractDbComponent {
 
@@ -39,47 +41,64 @@ public class DbReader extends AbstractDbComponent {
     @SettingDefinition(order = 0, required = true, type = Type.TEXT, label = "Sql")
     public final static String SQL = "db.reader.sql";
 
-    @SettingDefinition(order = 10, required = true, type = Type.INTEGER, defaultValue = "1",
+    @SettingDefinition(
+            order = 10,
+            required = true,
+            type = Type.INTEGER,
+            defaultValue = "1",
             label = "Rows/Msg")
     public final static String ROWS_PER_MESSAGE = "db.reader.rows.per.message";
 
-    @SettingDefinition(order = 20, required = true, type = Type.BOOLEAN, defaultValue = "false",
+    @SettingDefinition(
+            order = 20,
+            required = true,
+            type = Type.BOOLEAN,
+            defaultValue = "false",
             label = "Trim Columns")
     public final static String TRIM_COLUMNS = "db.reader.trim.columns";
-    
-    @SettingDefinition(order = 20, required = true, type = Type.BOOLEAN, defaultValue = "false",
+
+    @SettingDefinition(
+            order = 20,
+            required = true,
+            type = Type.BOOLEAN,
+            defaultValue = "false",
             label = "Match On Column Name")
     public final static String MATCH_ON_COLUMN_NAME_ONLY = "db.reader.match.on.column.name";
 
-    @SettingDefinition(order = 200, type = Type.CHOICE, choices = { "REPLACE", "ENHANCE" },
-            defaultValue = "REPLACE", label = "Msg Strategy")
+    @SettingDefinition(
+            order = 200,
+            type = Type.CHOICE,
+            choices = { "REPLACE", "ENHANCE" },
+            defaultValue = "REPLACE",
+            label = "Msg Strategy")
     public final static String MESSAGE_MANIPULATION_STRATEGY = "db.reader.message.manipulation.strategy";
 
     String sql;
-    
+
     long rowsPerMessage;
-    
+
     MessageManipulationStrategy messageManipulationStrategy = MessageManipulationStrategy.REPLACE;
-    
+
     boolean trimColumns = false;
-    
+
     boolean matchOnColumnNameOnly = false;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start() {
+
         applySettings();
     }
 
     @Override
-    public void handle( final Message inputMessage, final IMessageTarget messageTarget) {
+    public void handle(final Message inputMessage, final IMessageTarget messageTarget) {
 
-        componentStatistics.incrementInboundMessages();
-        
-        if (resource == null) {
-            throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
+        getComponentStatistics().incrementInboundMessages();
+
+        if (getResourceRuntime() == null) {
+            throw new RuntimeException(
+                    "The data source resource has not been configured.  Please configure it.");
         }
-        
+
         NamedParameterJdbcTemplate template = getJdbcTemplate();
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
@@ -102,79 +121,84 @@ public class DbReader extends AbstractDbComponent {
             } else {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
             }
-            
-            final String sqlToExecute = FormatUtils.replaceTokens(this.sql, inputMessage.getHeader().getParametersAsString(), true);
-            executionTracker.log(LogLevel.DEBUG, this, "About to run: " + sqlToExecute);
+
+            final String sqlToExecute = FormatUtils.replaceTokens(this.sql,
+                    context.getFlowParametersAsString(), true);
+            log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
             template.query(sqlToExecute, paramMap, new ResultSetExtractor<Object>() {
                 @Override
                 public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
-                    
+
                     ResultSetMetaData meta = rs.getMetaData();
-                    ArrayList<String> attributeIds=null;
+                    ArrayList<String> attributeIds = null;
                     Message message = null;
                     int outputRecCount = 0;
-                    
-                    while (rs.next()) {                    	
-                        if (outputRecCount%rowsPerMessage==0 && message != null) {
-                            componentStatistics.incrementOutboundMessages();
-                            message.getHeader().setSequenceNumber(componentStatistics.getNumberOutboundMessages());
+
+                    while (rs.next()) {
+                        if (outputRecCount % rowsPerMessage == 0 && message != null) {
+                            getComponentStatistics().incrementOutboundMessages();
+                            message.getHeader().setSequenceNumber(
+                                    getComponentStatistics().getNumberOutboundMessages());
                             messageTarget.put(message);
                             message = null;
                         }
-                        
-                        componentStatistics.incrementNumberEntitiesProcessed();
-                        
+
+                        getComponentStatistics().incrementNumberEntitiesProcessed();
+
                         if (message == null) {
                             message = createMessage(inputMessage);
                         }
-                        
+
                         if (outputRecCount == 0) {
-                            attributeIds = getAttributeIds(meta, getSqlColumnEntityHints(sqlToExecute));
+                            attributeIds = getAttributeIds(meta,
+                                    getSqlColumnEntityHints(sqlToExecute));
                         }
-                        
+
                         EntityData rowData = new EntityData();
                         for (int i = 1; i <= meta.getColumnCount(); i++) {
                             Object value = JdbcUtils.getResultSetValue(rs, i);
                             if (trimColumns && value instanceof String) {
                                 value = value.toString().trim();
                             }
-                            rowData.put(attributeIds.get(i-1), value);
+                            rowData.put(attributeIds.get(i - 1), value);
                         }
-                        ArrayList<EntityData> payload = message.getPayload();                        
+                        ArrayList<EntityData> payload = message.getPayload();
                         payload.add(rowData);
                         outputRecCount++;
-                    } 
+                    }
                     rs.close();
                     if (message != null) {
-                        componentStatistics.incrementOutboundMessages();
-                        message.getHeader().setSequenceNumber(componentStatistics.getNumberOutboundMessages());
+                        getComponentStatistics().incrementOutboundMessages();
+                        message.getHeader().setSequenceNumber(
+                                getComponentStatistics().getNumberOutboundMessages());
                         message.getHeader().setLastMessage(true);
                         messageTarget.put(message);
                     }
                     return null;
-                } 
+                }
             });
-        } 
+        }
     }
 
     private Message createMessage(Message inputMessage) {
         Message message;
         if (messageManipulationStrategy == MessageManipulationStrategy.ENHANCE) {
-            message = inputMessage.copy(flowStep.getId());
+            message = inputMessage.copy(getFlowStepId());
         } else {
-            message = inputMessage.copy(flowStep.getId(), new ArrayList<EntityData>());
+            message = inputMessage.copy(getFlowStepId(), new ArrayList<EntityData>());
             message.setPayload(new ArrayList<EntityData>());
         }
         return message;
     }
-    
-    private ArrayList<String> getAttributeIds(ResultSetMetaData meta, Map<Integer, String> sqlEntityHints) throws SQLException {
-        
+
+    private ArrayList<String> getAttributeIds(ResultSetMetaData meta,
+            Map<Integer, String> sqlEntityHints) throws SQLException {
+
         ArrayList<String> attributeIds = new ArrayList<String>();
 
-        for (int i=1; i<=meta.getColumnCount();i++) {    
+        for (int i = 1; i <= meta.getColumnCount(); i++) {
             String columnName = meta.getColumnName(i);
-            String tableName = meta.getTableName(i);            
+            String tableName = meta.getTableName(i);
             if (sqlEntityHints.containsKey(i)) {
                 String hint = sqlEntityHints.get(i);
                 if (hint.indexOf(".") != -1) {
@@ -184,7 +208,7 @@ public class DbReader extends AbstractDbComponent {
                     tableName = hint;
                 }
             }
-            
+
             if (matchOnColumnNameOnly) {
                 attributeIds.addAll(getAttributeIds(columnName));
             } else {
@@ -199,16 +223,18 @@ public class DbReader extends AbstractDbComponent {
                 attributeIds.add(attributeId);
             }
         }
-        
+
         return attributeIds;
     }
-    
+
     private List<String> getAttributeIds(String columnName) {
         List<String> attributeIds = new ArrayList<String>();
-        if (this.flowStep.getComponent().getOutputModel() != null) {
-            List<ModelAttribute> attributes = this.flowStep.getComponent().getOutputModel().getAttributesByName(columnName);
+        if (getOutputModel() != null) {
+            List<ModelAttribute> attributes = getOutputModel().getAttributesByName(columnName);
             if (attributes.size() == 0) {
-                throw new SqlException("Column not found in output model and not specified via hint.  Column Name = " + columnName);
+                throw new SqlException(
+                        "Column not found in output model and not specified via hint.  Column Name = "
+                                + columnName);
             } else {
                 for (ModelAttribute modelAttribute : attributes) {
                     attributeIds.add(modelAttribute.getId());
@@ -216,20 +242,24 @@ public class DbReader extends AbstractDbComponent {
             }
             return attributeIds;
         } else {
-            throw new SqlException("No output model was specified for the db reader component.  An output model is required.");
-        }        
+            throw new SqlException(
+                    "No output model was specified for the db reader component.  An output model is required.");
+        }
     }
-    
-    private String getAttributeId(String tableName, String columnName) {        
-        if (this.flowStep.getComponent().getOutputModel() != null) {
-        	ModelAttribute modelAttribute = this.flowStep.getComponent().getOutputModel().getAttributeByName(tableName, columnName);
+
+    private String getAttributeId(String tableName, String columnName) {
+        if (getOutputModel() != null) {
+            ModelAttribute modelAttribute = getOutputModel().getAttributeByName(tableName,
+                    columnName);
             if (modelAttribute == null) {
-                throw new SqlException("Table and Column not found in output model and not specified via hint.  "
-                        + "Table Name = " + tableName + " Column Name = " + columnName);
-            }        
-            return modelAttribute.getId();            
+                throw new SqlException(
+                        "Table and Column not found in output model and not specified via hint.  "
+                                + "Table Name = " + tableName + " Column Name = " + columnName);
+            }
+            return modelAttribute.getId();
         } else {
-            throw new SqlException("No output model was specified for the db reader component.  An output model is required.");
+            throw new SqlException(
+                    "No output model was specified for the db reader component.  An output model is required.");
         }
     }
 
@@ -248,10 +278,8 @@ public class DbReader extends AbstractDbComponent {
     }
 
     protected Map<String, Object> getParamsFromHeader(final Message inputMessage) {
-
         if (inputMessage != null && inputMessage.getHeader() != null) {
-            Map<String, Object> paramMap = new HashMap<String, Object>(inputMessage.getHeader()
-                    .getParameters());
+            Map<String, Object> paramMap = new HashMap<String, Object>(context.getFlowParameters());
             return paramMap;
         } else {
             return null;
@@ -259,7 +287,7 @@ public class DbReader extends AbstractDbComponent {
     }
 
     protected void applySettings() {
-        TypedProperties properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
+        TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         sql = properties.get(SQL);
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         messageManipulationStrategy = MessageManipulationStrategy.valueOf(properties
@@ -270,8 +298,7 @@ public class DbReader extends AbstractDbComponent {
 
     protected Map<Integer, String> getSqlColumnEntityHints(String sql) {
         Map<Integer, String> columnEntityHints = new HashMap<Integer, String>();
-        String columns = sql.substring(sql.toLowerCase().indexOf("select") + 6, 
-                getFromIndex(sql));
+        String columns = sql.substring(sql.toLowerCase().indexOf("select") + 6, getFromIndex(sql));
         int commentIdx = 0;
         while (columns.indexOf("/*", commentIdx) != -1) {
             commentIdx = columns.indexOf("/*", commentIdx) + 2;
@@ -282,27 +309,27 @@ public class DbReader extends AbstractDbComponent {
         }
         return columnEntityHints;
     }
-    
+
     protected int countColumnSeparatingCommas(String value) {
         int count = 0;
-        
+
         int p = 0;
         for (char c : value.toCharArray()) {
-            if (c=='(') {
+            if (c == '(') {
                 p++;
-            } else if (c==')') {
+            } else if (c == ')') {
                 p--;
-            } else if (c==',' && p==0) {
+            } else if (c == ',' && p == 0) {
                 count++;
             }
         }
         return count;
     }
-    
+
     protected int getFromIndex(String sql) {
         sql = sql.toLowerCase();
         int idx = -1;
-        
+
         idx = sql.toLowerCase().indexOf("from ");
         if (idx == -1) {
             idx = sql.toLowerCase().indexOf("from\n");
@@ -311,7 +338,7 @@ public class DbReader extends AbstractDbComponent {
             idx = sql.toLowerCase().indexOf("from\r\n");
         }
         if (idx == -1) {
-            idx=sql.length()-1;
+            idx = sql.length() - 1;
         }
         return idx;
     }

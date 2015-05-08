@@ -55,6 +55,7 @@ public class TestUtils {
         step.setId(name);
         step.setLastUpdateBy("Test");
         step.setLastUpdateTime(new Date());
+        step.setComponent(component);
         return step;
     }
 

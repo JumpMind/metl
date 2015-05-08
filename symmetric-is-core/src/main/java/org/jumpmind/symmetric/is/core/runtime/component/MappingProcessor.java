@@ -16,7 +16,6 @@ import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
@@ -26,7 +25,7 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         typeName = MappingProcessor.TYPE,
         inputMessage = MessageType.ENTITY,
         outgoingMessage = MessageType.ENTITY)
-public class MappingProcessor extends AbstractComponent {
+public class MappingProcessor extends AbstractComponentRuntime {
 
     public static final String TYPE = "Mapping";
 
@@ -45,16 +44,16 @@ public class MappingProcessor extends AbstractComponent {
     boolean setUnmappedAttributesToNull;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start() {
+        
 
         validate();
 
-        setUnmappedAttributesToNull = flowStep.getComponent().getBoolean(
+        setUnmappedAttributesToNull = getComponent().getBoolean(
                 SET_UNMAPPED_ATTRIBUTES_TO_NULL, false);
 
         attrToAttrMap = new HashMap<String, Set<String>>();
-        List<ComponentAttributeSetting> attributeSettings = flowStep.getComponent()
+        List<ComponentAttributeSetting> attributeSettings = getComponent()
                 .getAttributeSettings();
         for (ComponentAttributeSetting attributeSetting : attributeSettings) {
             if (attributeSetting.getName().equalsIgnoreCase(ATTRIBUTE_MAPS_TO)) {
@@ -70,11 +69,11 @@ public class MappingProcessor extends AbstractComponent {
 
     protected void validate() {
         String message = "The ";
-        if (flowStep.getComponent().getInputModel() == null) {
+        if (getComponent().getInputModel() == null) {
             message = message + "input model must be configured ";
         }
 
-        if (flowStep.getComponent().getOutputModel() == null) {
+        if (getComponent().getOutputModel() == null) {
             if (isNotBlank(message)) {
                 message = message + " and the ";
             }
@@ -88,14 +87,14 @@ public class MappingProcessor extends AbstractComponent {
 
     @Override
     public void handle( Message inputMessage, IMessageTarget messageTarget) {
-        componentStatistics.incrementInboundMessages();
+        getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
         if (inputRows == null) {
             return;
         }
 
         ArrayList<EntityData> outputRows = new ArrayList<EntityData>();
-        Message outputMessage = new Message(flowStep.getId());
+        Message outputMessage = new Message(getFlowStepId());
         outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
         outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
 
@@ -112,7 +111,7 @@ public class MappingProcessor extends AbstractComponent {
             }
 
             if (setUnmappedAttributesToNull) {
-                for (ModelEntity entity : flowStep.getComponent().getOutputModel()
+                for (ModelEntity entity : getComponent().getOutputModel()
                         .getModelEntities()) {
                     for (ModelAttribute attr : entity.getModelAttributes()) {
                         if (!outputRow.containsKey(attr.getId())) {
@@ -124,11 +123,11 @@ public class MappingProcessor extends AbstractComponent {
             
             if (outputRow.size() > 0) {
                 outputRows.add(outputRow);
-                componentStatistics.incrementNumberEntitiesProcessed();
+                getComponentStatistics().incrementNumberEntitiesProcessed();
             }
         }
 
-        componentStatistics.incrementOutboundMessages();
+        getComponentStatistics().incrementOutboundMessages();
         outputMessage.setPayload(outputRows);
         messageTarget.put(outputMessage);
     }

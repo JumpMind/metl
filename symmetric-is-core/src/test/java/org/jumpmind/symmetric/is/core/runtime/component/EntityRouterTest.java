@@ -95,8 +95,9 @@ public class EntityRouterTest {
     protected MessageTarget route(EntityData...data) {
         MessageTarget target = new MessageTarget();
         EntityRouter router = new EntityRouter();
-        router.init(step, flow, null);
-        router.start(new ExecutionTrackerNoOp());
+        ComponentContext context = new ComponentContext(step, flow, new ExecutionTrackerNoOp(), null, null);
+        router.init(context);
+        router.start();
         Message inputMessage = new Message("");
         ArrayList<EntityData> datas = new ArrayList<EntityData>();
         for (EntityData entityData : data) {

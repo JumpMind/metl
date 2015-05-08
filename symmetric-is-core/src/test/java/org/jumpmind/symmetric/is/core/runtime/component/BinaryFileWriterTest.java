@@ -7,9 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
@@ -17,9 +15,10 @@ import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
+import org.jumpmind.symmetric.is.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
 import org.jumpmind.symmetric.is.core.utils.TestUtils;
@@ -29,7 +28,7 @@ import org.junit.Test;
 
 public class BinaryFileWriterTest {
 
-    private static Map<String, IResource> resources = new HashMap<String, IResource>();
+    private static IResourceRuntime resourceRuntime;
     private static FlowStep writerFlowStep;
     private static final String FILE_PATH = "build/files/";
     private static final String FILE_NAME = "binary_test_writer.bin";
@@ -39,7 +38,7 @@ public class BinaryFileWriterTest {
     public static void setup() throws Exception {
         writerFlowStep = createWriterFlowStep();
         Resource resource = writerFlowStep.getComponent().getResource();
-        resources.put(resource.getId(), new ResourceFactory().create(resource, null));
+        resourceRuntime = new ResourceFactory().create(resource, null);
     }
 
     @After
@@ -49,8 +48,8 @@ public class BinaryFileWriterTest {
     @Test
     public void testBinaryWriter() throws Exception {
         BinaryFileWriter writer = new BinaryFileWriter();
-        writer.init(writerFlowStep, null, resources);
-        writer.start(null);
+        writer.init(new ComponentContext(writerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null));        
+        writer.start();
         writer.handle(createBinaryMessageToWrite(), null);
         checkBinaryFile();
     }

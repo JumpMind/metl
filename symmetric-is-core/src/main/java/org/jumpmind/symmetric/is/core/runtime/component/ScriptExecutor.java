@@ -10,7 +10,6 @@ import javax.script.ScriptException;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
@@ -23,7 +22,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
         outgoingMessage = MessageType.ANY,
         resourceCategory = ResourceCategory.ANY,
         iconImage = "script.png")
-public class ScriptExecutor extends AbstractComponent {
+public class ScriptExecutor extends AbstractComponentRuntime {
 
     public static final String TYPE = "Script";
 
@@ -58,14 +57,14 @@ public class ScriptExecutor extends AbstractComponent {
     ScriptEngine engine;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start() {
+        
 
-        String importStatements = flowStep.getComponent().get(IMPORTS);
-        String initScript = flowStep.getComponent().get(INIT_SCRIPT);
-        String handleMessageScript = flowStep.getComponent().get(HANDLE_SCRIPT);
-        String onSuccess = flowStep.getComponent().get(ON_FLOW_SUCCESS);
-        String onError = flowStep.getComponent().get(ON_FLOW_ERROR);
+        String importStatements = getComponent().get(IMPORTS);
+        String initScript = getComponent().get(INIT_SCRIPT);
+        String handleMessageScript = getComponent().get(HANDLE_SCRIPT);
+        String onSuccess = getComponent().get(ON_FLOW_SUCCESS);
+        String onError = getComponent().get(ON_FLOW_ERROR);
 
         ScriptEngineManager factory = new ScriptEngineManager();
         ScriptEngine engine = factory.getEngineByName("groovy");
@@ -107,7 +106,7 @@ public class ScriptExecutor extends AbstractComponent {
             }
             script.append("\n};\n");
 
-            executionTracker.log(LogLevel.DEBUG, this, script.toString());
+            log(LogLevel.DEBUG, script.toString());
             script.append("helper.onInit();");
             engine.eval(script.toString());
             this.engine = engine;
@@ -128,7 +127,7 @@ public class ScriptExecutor extends AbstractComponent {
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
-        componentStatistics.incrementInboundMessages();
+        getComponentStatistics().incrementInboundMessages();
         invoke("setInputMessage", inputMessage);
         invoke("setMessageTarget", messageTarget);
         invoke("onHandle");

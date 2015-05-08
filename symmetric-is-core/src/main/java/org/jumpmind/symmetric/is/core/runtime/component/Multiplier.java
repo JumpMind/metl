@@ -9,7 +9,6 @@ import java.util.List;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
@@ -21,7 +20,7 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         outgoingMessage = MessageType.ENTITY,
         inputOutputModelsMatch=true
         )
-public class Multiplier extends AbstractComponent {
+public class Multiplier extends AbstractComponentRuntime {
 
     public static final String TYPE = "Multiplier";
 
@@ -51,22 +50,22 @@ public class Multiplier extends AbstractComponent {
     List<Message> queuedWhileWaitingForMultiplier = new ArrayList<Message>();
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start() {
+        
 
         multipliersInitialized = false;
 
-        sourceStepId = flowStep.getComponent().get(MULTIPLIER_SOURCE_STEP);
-        rowsPerMessage = flowStep.getComponent().getInt(ROWS_PER_MESSAGE, 10);
+        sourceStepId = getComponent().get(MULTIPLIER_SOURCE_STEP);
+        rowsPerMessage = getComponent().getInt(ROWS_PER_MESSAGE, 10);
 
-        if (isBlank(sourceStepId) || flow.findFlowStepWithId(sourceStepId) == null) {
+        if (isBlank(sourceStepId) || getFlow().findFlowStepWithId(sourceStepId) == null) {
             throw new IllegalStateException("The source step must be specified");
         }
     }
 
     @Override
     public void handle( Message inputMessage, IMessageTarget messageTarget) {
-        componentStatistics.incrementInboundMessages();
+        getComponentStatistics().incrementInboundMessages();
 
         if (inputMessage.getHeader().getOriginatingStepId().equals(sourceStepId)) {
             List<EntityData> datas = inputMessage.getPayload();
@@ -95,19 +94,19 @@ public class Multiplier extends AbstractComponent {
 
             List<EntityData> datas = message.getPayload();
             for (int j = 0; j < datas.size(); j++) {
-                componentStatistics.incrementNumberEntitiesProcessed();
+                getComponentStatistics().incrementNumberEntitiesProcessed();
                 EntityData oldData = datas.get(j);
                 EntityData newData = new EntityData();
                 newData.putAll(oldData);
                 newData.putAll(multiplierData);
                 multiplied.add(newData);
                 if (multiplied.size() >= rowsPerMessage) {
-                    Message newMessage = new Message(flowStep.getId());
+                    Message newMessage = new Message(getFlowStepId());
                     newMessage.getHeader().setLastMessage(
                             message.getHeader().isLastMessage() && datas.size() - 1 == j
                                     && multipliers.size() - 1 == i);
                     newMessage.setPayload(multiplied);
-                    componentStatistics.incrementOutboundMessages();
+                    getComponentStatistics().incrementOutboundMessages();
                     messageTarget.put(newMessage);
                     multiplied = new ArrayList<EntityData>();
                 }
@@ -115,10 +114,10 @@ public class Multiplier extends AbstractComponent {
         }
 
         if (multiplied.size() > 0) {
-            Message newMessage = new Message(flowStep.getId());
+            Message newMessage = new Message(getFlowStepId());
             newMessage.setPayload(multiplied);
             newMessage.getHeader().setLastMessage(message.getHeader().isLastMessage());
-            componentStatistics.incrementOutboundMessages();
+            getComponentStatistics().incrementOutboundMessages();
             messageTarget.put(newMessage);
         }
     }

@@ -18,7 +18,6 @@ import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
@@ -29,12 +28,12 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         iconImage = "xmlformatter.png",
         inputMessage = MessageType.ENTITY,
         outgoingMessage = MessageType.TEXT)
-public class XmlFormatter extends AbstractComponent {
+public class XmlFormatter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Format XML";
 
     public final static String XML_FORMATTER_XPATH = "xml.formatter.xpath";
-    
+
     public final static String XML_FORMATTER_TEMPLATE = "xml.formatter.template";
 
     TypedProperties properties;
@@ -42,13 +41,11 @@ public class XmlFormatter extends AbstractComponent {
     Document templateDocument;
 
     List<XmlFormatterSetting> settings;
-    
-    @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
 
-        properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
-        Setting templateSetting = flowStep.getComponent().findSetting(XML_FORMATTER_TEMPLATE);
+    @Override
+    public void start() {
+        properties = getComponent().toTypedProperties(getSettingDefinitions(false));
+        Setting templateSetting = getComponent().findSetting(XML_FORMATTER_TEMPLATE);
 
         if (templateSetting != null && StringUtils.isNotBlank(templateSetting.getValue())) {
             SAXBuilder builder = new SAXBuilder();
@@ -62,9 +59,10 @@ public class XmlFormatter extends AbstractComponent {
         }
 
         settings = new ArrayList<XmlFormatterSetting>();
-        for (ComponentAttributeSetting attrSetting : flowStep.getComponent().getAttributeSettings()) {
+        for (ComponentAttributeSetting attrSetting : getComponent().getAttributeSettings()) {
             if (attrSetting.getName().equals(XML_FORMATTER_XPATH)) {
-                XPathExpression<Object> expression = XPathFactory.instance().compile(attrSetting.getValue());
+                XPathExpression<Object> expression = XPathFactory.instance().compile(
+                        attrSetting.getValue());
                 settings.add(new XmlFormatterSetting(attrSetting, expression));
             }
         }
@@ -72,19 +70,20 @@ public class XmlFormatter extends AbstractComponent {
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
-        componentStatistics.incrementInboundMessages();
+        getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
-        Message outputMessage = new Message(flowStep.getId());
+        Message outputMessage = new Message(getFlowStepId());
         ArrayList<String> outputPayload = new ArrayList<String>();
 
         for (EntityData inputRow : inputRows) {
             outputPayload.add(processInputRow(inputRow));
         }
         outputMessage.setPayload(outputPayload);
-        executionTracker.log(LogLevel.INFO, this, outputPayload.toString());
-        componentStatistics.incrementOutboundMessages();
-        outputMessage.getHeader().setSequenceNumber(componentStatistics.getNumberOutboundMessages());
+        log(LogLevel.INFO, outputPayload.toString());
+        getComponentStatistics().incrementOutboundMessages();
+        outputMessage.getHeader()
+                .setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
         outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
         messageTarget.put(outputMessage);
     }
@@ -95,7 +94,8 @@ public class XmlFormatter extends AbstractComponent {
         for (XmlFormatterSetting setting : settings) {
             String attributeId = setting.getComponentAttributeSetting().getAttributeId();
             if (inputRow.containsKey(attributeId)) {
-                Object inputValue = inputRow.get(setting.getComponentAttributeSetting().getAttributeId());
+                Object inputValue = inputRow.get(setting.getComponentAttributeSetting()
+                        .getAttributeId());
                 String value = (inputValue == null) ? null : inputValue.toString();
                 List<Object> matches = setting.getExpression().evaluate(document);
                 for (Object object : matches) {
@@ -107,19 +107,20 @@ public class XmlFormatter extends AbstractComponent {
                 }
             }
         }
-        
+
         XMLOutputter xmlOutputter = new XMLOutputter();
         xmlOutputter.setFormat(Format.getPrettyFormat());
         return xmlOutputter.outputString(document);
     }
 
     class XmlFormatterSetting {
-        
+
         ComponentAttributeSetting componentAttributeSetting;
-        
+
         XPathExpression<Object> expression;
-        
-        XmlFormatterSetting(ComponentAttributeSetting componentAttributeSetting, XPathExpression<Object> expression) {
+
+        XmlFormatterSetting(ComponentAttributeSetting componentAttributeSetting,
+                XPathExpression<Object> expression) {
             this.componentAttributeSetting = componentAttributeSetting;
             this.expression = expression;
         }
@@ -128,8 +129,7 @@ public class XmlFormatter extends AbstractComponent {
             return componentAttributeSetting;
         }
 
-        public void setComponentAttributeSetting(
-                ComponentAttributeSetting componentAttributeSetting) {
+        public void setComponentAttributeSetting(ComponentAttributeSetting componentAttributeSetting) {
             this.componentAttributeSetting = componentAttributeSetting;
         }
 

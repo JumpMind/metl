@@ -14,11 +14,12 @@ import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
-import org.jumpmind.symmetric.is.core.runtime.component.AbstractComponent;
+import org.jumpmind.symmetric.is.core.runtime.component.AbstractComponentRuntime;
+import org.jumpmind.symmetric.is.core.runtime.component.ComponentContext;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentStatistics;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.util.AppUtils;
 
@@ -28,7 +29,7 @@ public class FlowRuntime {
 
     Map<FlowStep, IComponentRuntime> endpointRuntimes = new HashMap<FlowStep, IComponentRuntime>();
 
-    Map<String, IResource> resourceRuntimes = new HashMap<String, IResource>();
+    Map<String, IResourceRuntime> resourceRuntimes = new HashMap<String, IResourceRuntime>();
 
     IComponentFactory componentFactory;
 
@@ -54,7 +55,7 @@ public class FlowRuntime {
         return deployment;
     }
 
-    public void start(String executionId, Map<String, IResource> resources) throws InterruptedException {
+    public void start(String executionId, Map<String, IResourceRuntime> deployedResources) throws InterruptedException {
         
         this.stepRuntimes = new HashMap<String, StepRuntime>();
         Flow flow = deployment.getFlow();
@@ -64,9 +65,11 @@ public class FlowRuntime {
 
         /* create a step runtime for every component in the flow */
         for (FlowStep flowStep : steps) {
-            boolean enabled = flowStep.getComponent().getBoolean(AbstractComponent.ENABLED, true);
+            boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true);
             if (enabled) {
-                StepRuntime stepRuntime = new StepRuntime(componentFactory.create(flowStep, flow, resources), executionTracker);
+                ComponentContext context = new ComponentContext(flowStep, flow, executionTracker, 
+                        deployedResources.get(flowStep.getComponent().getResourceId()), deployment.parameters());
+                StepRuntime stepRuntime = new StepRuntime(componentFactory.create(context), executionTracker);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
         }
@@ -115,7 +118,6 @@ public class FlowRuntime {
         }
 
         StartupMessage startMessage = new StartupMessage();
-        startMessage.getHeader().setParameters(deployment.parameters());
         /*
          * for each start step (step that has no input msgs), send a start
          * message to that step
@@ -192,7 +194,7 @@ public class FlowRuntime {
             List<StepRuntime> startSteps = findStartSteps();
             for (StepRuntime stepRuntime : startSteps) {
                 try {
-                    stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponent()
+                    stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponentRuntime().getComponentContext()
                             .getFlowStep().getId()));
                 } catch (InterruptedException e) {
                 }
@@ -201,7 +203,7 @@ public class FlowRuntime {
     }
 
     public ComponentStatistics getComponentStatistics(String flowStepId) {
-        return stepRuntimes.get(flowStepId).getComponent().getComponentStatistics();
+        return stepRuntimes.get(flowStepId).getComponentRuntime().getComponentStatistics();
     }
     
     public String getExecutionId() {

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.Flow;
@@ -17,24 +16,20 @@ import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.ExecutionTrackerLogger;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
+import org.jumpmind.symmetric.is.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.utils.TestUtils;
 import org.junit.After;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(PowerMockRunner.class)
 public class DelimitedFormatterTest {
 
-    private static FlowStep delimitedFormatterFlowStep;
+    private FlowStep delimitedFormatterFlowStep;
     
-    @BeforeClass
-    public static void setup() throws Exception {
+    @Before
+    public void setup() throws Exception {
         delimitedFormatterFlowStep = createDelimitedFormatterFlowStep();
     }
 
@@ -44,11 +39,9 @@ public class DelimitedFormatterTest {
     
     @Test
     public void testDelimitedFormatterFromSingleContentMsg() throws Exception {
-
-        IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DelimitedFormatter delimitedFormatter = new DelimitedFormatter();
-        delimitedFormatter.init(delimitedFormatterFlowStep, null, null);
-        delimitedFormatter.start(executionTracker);        
+        delimitedFormatter.init(new ComponentContext(delimitedFormatterFlowStep, null, new ExecutionTrackerNoOp(), null, null));
+        delimitedFormatter.start();
         Message message = createInboundMessage();        
         MessageTarget msgTarget = new MessageTarget();
         delimitedFormatter.handle(message, msgTarget);
@@ -78,7 +71,6 @@ public class DelimitedFormatterTest {
     }
     
     private static FlowStep createDelimitedFormatterFlowStep() {
-
         Folder folder = TestUtils.createFolder("Test Folder");
         Flow flow = TestUtils.createFlow("TestFlow", folder);
         Setting[] settingData = createDelimitedFormatterSettings();
@@ -127,15 +119,15 @@ public class DelimitedFormatterTest {
         tt1.addModelAttribute(new ModelAttribute("tt1col3", tt1.getId(), "COL3"));
 
         ModelEntity tt2 = new ModelEntity("tt2", "TEST_TABLE_2");
-        tt2.addModelAttribute(new ModelAttribute("tt2colx", tt1.getId(), "COLX"));
-        tt2.addModelAttribute(new ModelAttribute("tt2coly", tt1.getId(), "COLY"));
-        tt2.addModelAttribute(new ModelAttribute("tt2colz", tt1.getId(), "COLZ"));
+        tt2.addModelAttribute(new ModelAttribute("tt2col1", tt1.getId(), "COLX"));
+        tt2.addModelAttribute(new ModelAttribute("tt2col2", tt1.getId(), "COLY"));
+        tt2.addModelAttribute(new ModelAttribute("tt2col3", tt1.getId(), "COLZ"));
 
-        Model modelVersion = new Model();
-        modelVersion.getModelEntities().add(tt1);
-        modelVersion.getModelEntities().add(tt2);
+        Model model = new Model();
+        model.getModelEntities().add(tt1);
+        model.getModelEntities().add(tt2);
 
-        return modelVersion;
+        return model;
     }
 
     class MessageTarget implements IMessageTarget {

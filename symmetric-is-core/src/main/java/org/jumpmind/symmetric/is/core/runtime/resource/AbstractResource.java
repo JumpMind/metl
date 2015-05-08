@@ -7,7 +7,7 @@ import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 
-public abstract class AbstractResource extends AbstractRuntimeObject implements IResource {
+public abstract class AbstractResource extends AbstractRuntimeObject implements IResourceRuntime {
 
     protected Resource resource;
     protected TypedProperties agentOverrides;

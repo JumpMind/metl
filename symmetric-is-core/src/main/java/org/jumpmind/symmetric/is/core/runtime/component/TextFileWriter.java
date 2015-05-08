@@ -12,7 +12,6 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
@@ -22,7 +21,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 @ComponentDefinition(typeName = TextFileWriter.TYPE, category = ComponentCategory.WRITER, iconImage="textfilewriter.png",
         inputMessage=MessageType.TEXT,
         resourceCategory = ResourceCategory.STREAMABLE)
-public class TextFileWriter extends AbstractComponent {
+public class TextFileWriter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Text File Writer";
 
@@ -56,16 +55,16 @@ public class TextFileWriter extends AbstractComponent {
     BufferedWriter bufferedWriter = null;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
+    public void start() {
+        
         applySettings();
     }
 
     @Override
     public void handle( Message inputMessage, IMessageTarget messageTarget) {
-        componentStatistics.incrementInboundMessages();
+        getComponentStatistics().incrementInboundMessages();
         
-        if (this.resource == null) {
+        if (getResourceRuntime() == null) {
             throw new IllegalStateException("The target resource has not been configured.  Please choose a resource.");
         }
         
@@ -96,12 +95,12 @@ public class TextFileWriter extends AbstractComponent {
     }
 
     private void initStreamAndWriter() {
-        outStream = getOutputStream((IStreamableResource) this.resource.reference());
+        outStream = getOutputStream((IStreamableResource) getResourceReference());
         bufferedWriter = initializeWriter(outStream);        
     }
     
     private void applySettings() {
-        properties = flowStep.getComponent().toTypedProperties(getSettingDefinitions(false));
+        properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         relativePathAndFile = properties.get(TEXTFILEWRITER_RELATIVE_PATH);
         mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
         append = properties.is(TEXTFILEWRITER_APPEND);
@@ -109,7 +108,7 @@ public class TextFileWriter extends AbstractComponent {
     }
 
     private OutputStream getOutputStream(IStreamableResource conn) {
-        executionTracker.log(LogLevel.INFO, this, String.format("Writing text file to %s", conn.toString()));
+        log(LogLevel.INFO,  String.format("Writing text file to %s", conn.toString()));
         return conn.getOutputStream(relativePathAndFile, mustExist);
     }
 

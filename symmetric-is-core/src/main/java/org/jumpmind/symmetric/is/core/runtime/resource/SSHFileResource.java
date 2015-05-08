@@ -5,7 +5,7 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 
 @ResourceDefinition(typeName=SSHFileResource.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
-public class SSHFileResource extends AbstractResource implements IResource {
+public class SSHFileResource extends AbstractResource implements IResourceRuntime {
 
     public static final String TYPE = "SSH File System";
 

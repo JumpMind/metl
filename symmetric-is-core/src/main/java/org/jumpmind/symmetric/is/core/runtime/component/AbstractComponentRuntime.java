@@ -9,12 +9,12 @@ import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
+import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
@@ -22,9 +22,9 @@ import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 
-abstract public class AbstractComponent extends AbstractRuntimeObject implements IComponentRuntime {
+abstract public class AbstractComponentRuntime extends AbstractRuntimeObject implements IComponentRuntime {
 
     @SettingDefinition(order = 100, required = false, type = Type.INTEGER, defaultValue = "10000", label = "Inbound Queue Capacity")
     public final static String INBOUND_QUEUE_CAPACITY = "inbound.queue.capacity";
@@ -32,21 +32,12 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     @SettingDefinition(order = 0, required = false, type = Type.BOOLEAN, defaultValue = "true", label = "Enabled")
     public final static String ENABLED = "enabled";
 
-    protected Flow flow;
-    protected FlowStep flowStep; 
-    protected Map<String, IResource> resources;
-    protected IResource resource;
-    protected IExecutionTracker executionTracker;
-    protected ComponentStatistics componentStatistics;
-    protected String executionId;
+    protected ComponentContext context;
     protected boolean enabled = true;
     protected boolean shared = false;
 
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        this.componentStatistics = new ComponentStatistics();
-    	this.executionTracker = executionTracker;
-    	this.executionId = executionId;
+    public void start() {        
     }
 
     @Override
@@ -58,43 +49,17 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     }
     
     @Override
-    public String getExecutionId() {
-        return executionId;
+    public ComponentContext getComponentContext() {
+        return context;
     }
     
     @Override
     public ComponentStatistics getComponentStatistics() {
-    	return componentStatistics;
+    	return context.getComponentStatistics();
     }
-    
-    @Override
-    public FlowStep getFlowStep() {
-    	return this.flowStep;
-    }
-    
-    @Override
-    public IResource getResource() {
-        return resource;
-    }
-    
-    @Override
-    public IExecutionTracker getExecutionTracker() {
-        return executionTracker;
-    }
-    
-    @Override
-    public Flow getFlow() {
-        return flow;
-    }
-    
-    public void init(FlowStep flowStep, Flow flow, Map<String, IResource> resources) {
-    	this.flowStep = flowStep;
-    	this.flow = flow;
-    	this.resources = resources;
-    	Resource r = flowStep.getComponent().getResource();
-    	if (r != null) {
-    	    resource = resources.get(r.getId());
-    	}
+        
+    public void init(ComponentContext context) {
+        this.context  = context;
     }
     
     @Override
@@ -105,9 +70,49 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     public void flowCompletedWithErrors(Throwable myError) {
     }
     
-    protected Bindings bindEntityData(ScriptEngine scriptEngine, String executionId, EntityData entityData) {
+    protected String getFlowStepId() {
+        return context.getFlowStep().getId();
+    }
+    
+    protected FlowStep getFlowStep() {
+        return context.getFlowStep();
+    }
+    
+    protected Component getComponent() {
+        return context.getFlowStep().getComponent();
+    }
+    
+    protected IResourceRuntime getResourceRuntime() {
+        return context.getResourceRuntime();
+    }
+    
+    protected <T> T getResourceReference() {
+        return context.getResourceRuntime().reference();
+    }
+    
+    protected Model getOutputModel() {
+        return context.getFlowStep().getComponent().getOutputModel();
+    }
+    
+    protected Model getInputModel() {
+        return context.getFlowStep().getComponent().getInputModel();
+    }
+
+    protected IExecutionTracker getExecutionTracker() {
+        return context.getExecutionTracker();
+    }
+    
+    protected void log(LogLevel level, String msg, Object... args) {
+        getExecutionTracker().log(level, this.getComponentContext(), msg, args);
+    }
+    
+    protected Flow getFlow() {
+        return context.getFlow();
+    }
+    
+    protected Bindings bindEntityData(ScriptEngine scriptEngine, EntityData entityData) {
         Bindings bindings = scriptEngine.createBindings();
-        Model model = flowStep.getComponent().getInputModel();
+        Model model = context.getFlowStep().getComponent().getInputModel();
         List<ModelEntity> entities = model.getModelEntities();
         for (ModelEntity modelEntity : entities) {
             HashMap<String, Object> boundEntity = new HashMap<String, Object>();
@@ -125,7 +130,7 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
                         .getName());
                 boundEntity.put(attribute.getName(), value);
             } else {
-                executionTracker.log(LogLevel.WARN, this, "Could not find attribute in the input model with an id of " + attributeId);
+                log(LogLevel.WARN, "Could not find attribute in the input model with an id of " + attributeId);
             }
         }
         scriptEngine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);

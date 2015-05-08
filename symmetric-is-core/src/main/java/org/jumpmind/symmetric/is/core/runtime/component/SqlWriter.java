@@ -8,10 +8,8 @@ import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.util.FormatUtils;
@@ -46,44 +44,37 @@ public class SqlWriter extends AbstractDbComponent {
 
     String runWhen = PER_MESSAGE;
 
-    StartupMessage startupMessage;
-
     @Override
-    public void start(IExecutionTracker executionTracker) {
-        super.start(executionTracker);
-        startupMessage = null;
+    public void start() {
         applySettings();
-        if (resource == null) {
+        if (getResourceRuntime() == null) {
             throw new IllegalStateException("This component requires a data source");
         }
     }
 
     @Override
     public void handle(final Message inputMessage, final IMessageTarget messageTarget) {
-        componentStatistics.incrementInboundMessages();
-        if (inputMessage instanceof StartupMessage) {
-            startupMessage = (StartupMessage) inputMessage;
-        }
+        getComponentStatistics().incrementInboundMessages();
         for (String sql : this.sqls) {
-            final String sqlToExecute = FormatUtils.replaceTokens(sql, inputMessage.getHeader()
-                    .getParametersAsString(), true);
+            final String sqlToExecute = FormatUtils.replaceTokens(sql,
+                    context.getFlowParametersAsString(), true);
             NamedParameterJdbcTemplate template = getJdbcTemplate();
-            Map<String, Object> params = new HashMap<String, Object>(inputMessage.getHeader()
-                    .getParametersAsString());
+            Map<String, Object> params = new HashMap<String, Object>(
+                    context.getFlowParametersAsString());
             if (runWhen.equals(PER_MESSAGE)) {
                 int count = template.update(sqlToExecute, params);
-                componentStatistics.incrementNumberEntitiesProcessed(count);
+                getComponentStatistics().incrementNumberEntitiesProcessed(count);
             } else if (runWhen.equals(PER_ENTITY)) {
                 List<EntityData> datas = inputMessage.getPayload();
                 for (EntityData entityData : datas) {
-                    params.putAll(flowStep.getComponent().toRow(entityData));
+                    params.putAll(getComponent().toRow(entityData));
                     int count = template.update(sqlToExecute, params);
-                    componentStatistics.incrementNumberEntitiesProcessed(count);
+                    getComponentStatistics().incrementNumberEntitiesProcessed(count);
                 }
             }
         }
-        componentStatistics.incrementOutboundMessages();
-        messageTarget.put(inputMessage.copy(flowStep.getId()));
+        getComponentStatistics().incrementOutboundMessages();
+        messageTarget.put(inputMessage.copy(getFlowStepId()));
     }
 
     @Override
@@ -93,22 +84,19 @@ public class SqlWriter extends AbstractDbComponent {
             for (String sql : this.sqls) {
                 String sqlToExecute = sql;
                 Map<String, Object> params = new HashMap<String, Object>();
-                if (startupMessage != null) {
-                    sqlToExecute = FormatUtils.replaceTokens(sql, startupMessage.getHeader()
-                            .getParametersAsString(), true);
-                    params.putAll(startupMessage.getHeader().getParametersAsString());
-                }
-                executionTracker.log(LogLevel.INFO, this, "Executing the following sql after a successful completion: "
+                sqlToExecute = FormatUtils.replaceTokens(sql, context.getFlowParametersAsString(),
+                        true);
+                params.putAll(context.getFlowParameters());
+                log(LogLevel.INFO, "Executing the following sql after a successful completion: "
                         + sqlToExecute);
                 int count = template.update(sqlToExecute, params);
-                componentStatistics.incrementNumberEntitiesProcessed(count);
+                getComponentStatistics().incrementNumberEntitiesProcessed(count);
             }
         }
     }
 
     protected void applySettings() {
-        TypedProperties properties = flowStep.getComponent().toTypedProperties(
-                getSettingDefinitions(false));
+        TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         sqls = getSqlStatements(properties.get(SQL));
         runWhen = properties.get(RUN_WHEN, PER_MESSAGE);
     }

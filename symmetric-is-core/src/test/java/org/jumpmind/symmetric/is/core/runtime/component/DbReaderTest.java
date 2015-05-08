@@ -2,11 +2,9 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.Serializable;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +15,6 @@ import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.DmlStatement;
 import org.jumpmind.db.sql.DmlStatement.DmlType;
 import org.jumpmind.db.sql.ISqlTemplate;
-import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
@@ -28,13 +25,12 @@ import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.ExecutionTrackerLogger;
-import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
+import org.jumpmind.symmetric.is.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
 import org.jumpmind.symmetric.is.core.utils.DbTestUtils;
 import org.jumpmind.symmetric.is.core.utils.TestUtils;
@@ -47,7 +43,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class DbReaderTest {
 
-    private static Map<String, IResource> resources = new HashMap<String, IResource>();
+    private static IResourceRuntime resourceRuntime;
     private static IDatabasePlatform platform;
     private static FlowStep readerFlowStep;
 
@@ -56,7 +52,7 @@ public class DbReaderTest {
         platform = createPlatformAndTestDatabase();
         readerFlowStep = createReaderFlowStep();
         Resource resource = readerFlowStep.getComponent().getResource();
-        resources.put(resource.getId(), new ResourceFactory().create(resource, null));
+        resourceRuntime = new ResourceFactory().create(resource, null);
 
     }
 
@@ -65,64 +61,10 @@ public class DbReaderTest {
     }
 
     @Test
-    public void testReaderParmsFromHeader() throws Exception {
-
-        DbReader reader = new DbReader();
-        Message inputMessage = new StartupMessage();
-        Map<String, Serializable> msgParamMap = new HashMap<String, Serializable>();
-        msgParamMap.put("param1", "abcde");
-        msgParamMap.put("param2", new Integer(5));
-        inputMessage.getHeader().setParameters(msgParamMap);
-        Map<String, Object> inputParamMap = new HashMap<String, Object>();
-        reader.setParamsFromInboundMsgAndRec(inputParamMap, inputMessage, null);
-
-        assertEquals("abcde", inputParamMap.get("param1"));
-        assertEquals(new Integer(5), inputParamMap.get("param2"));
-    }
-
-    @Test
-    public void testReaderParmsFromMsgBody() throws Exception {
-
-        DbReader reader = new DbReader();
-        Message inputMessage = new StartupMessage();
-        Map<String, Object> inputParamMap = new HashMap<String, Object>();
-        EntityData inputRec = new EntityData();
-        inputRec.put("param1", "fghij");
-        inputRec.put("param2", new Integer(7));
-        reader.setParamsFromInboundMsgAndRec(inputParamMap, inputMessage, inputRec);
-
-        assertEquals("fghij", inputParamMap.get("param1"));
-        assertEquals(new Integer(7), inputParamMap.get("param2"));
-    }
-
-    @Test
-    public void testReaderParmsFromHeaderAndMsgBody() throws Exception {
-
-        DbReader reader = new DbReader();
-        Message inputMessage = new StartupMessage();
-        Map<String, Serializable> msgParamMap = new HashMap<String, Serializable>();
-        msgParamMap.put("param1", "abcde");
-        msgParamMap.put("param2", new Integer(5));
-        inputMessage.getHeader().setParameters(msgParamMap);
-        EntityData inputRec = new EntityData();
-        inputRec.put("param3", "fghij");
-        inputRec.put("param4", new Integer(7));
-        Map<String, Object> inputParamMap = new HashMap<String, Object>();
-        reader.setParamsFromInboundMsgAndRec(inputParamMap, inputMessage, inputRec);
-
-        assertEquals("abcde", inputParamMap.get("param1"));
-        assertEquals(new Integer(5), inputParamMap.get("param2"));
-        assertEquals("fghij", inputParamMap.get("param3"));
-        assertEquals(new Integer(7), inputParamMap.get("param4"));
-    }
-
-    @Test
     public void testReaderFlowFromStartupMsg() throws Exception {
-
-        IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DbReader reader = new DbReader();
-        reader.init(readerFlowStep, null, resources);
-        reader.start(executionTracker);
+        reader.init(new ComponentContext(readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null));
+        reader.start();
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle( msg, msgTarget);
@@ -136,10 +78,9 @@ public class DbReaderTest {
     @Test
     public void testReaderFlowFromSingleContentMsg() throws Exception {
 
-        IExecutionTracker executionTracker = new ExecutionTrackerLogger(new AgentDeployment(new Flow()));
         DbReader reader = new DbReader();
-        reader.init(readerFlowStep, null, resources);
-        reader.start(executionTracker);
+        reader.init(new ComponentContext(readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null));
+        reader.start();
         Message message = new Message("fake step id");
         ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
         inboundPayload.add(new EntityData());

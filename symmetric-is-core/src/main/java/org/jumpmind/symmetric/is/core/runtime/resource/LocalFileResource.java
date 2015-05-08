@@ -6,7 +6,7 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 
 @ResourceDefinition(typeName=LocalFileResource.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
 public class LocalFileResource extends AbstractResource implements
-		IResource {
+		IResourceRuntime {
 
 	public static final String TYPE = "Local File System";
 

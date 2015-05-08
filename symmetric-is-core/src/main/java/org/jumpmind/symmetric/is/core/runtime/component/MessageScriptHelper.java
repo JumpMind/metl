@@ -13,12 +13,12 @@ import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class MessageScriptHelper {
 
-	protected IComponentRuntime component;
+	protected ComponentContext context;
 	
 	protected FlowStep flowStep;
 	
@@ -32,30 +32,30 @@ public class MessageScriptHelper {
     
     protected ComponentStatistics componentStatistics;
     
-    protected IResource resource;
+    protected IResourceRuntime resource;
 
-    public MessageScriptHelper(IComponentRuntime component) {
-        this.component = component;
-        this.flowStep = component.getFlowStep();
-        this.flow = component.getFlow();
-        this.componentStatistics = component.getComponentStatistics();
-        this.resource = component.getResource();
+    public MessageScriptHelper(ComponentContext context, ComponentStatistics componentStatistics) {
+        this.context = context;
+        this.resource = context.getResourceRuntime();
+        this.componentStatistics = componentStatistics;
+        this.flow = context.getFlow();
+        this.flowStep = context.getFlowStep();
     }
 
     protected JdbcTemplate getJdbcTemplate() {
-        if (component.getResource() == null) {
+        if (resource == null) {
             throw new IllegalStateException("In order to create a jdbc template, a datasource resource must be defined");
         }
-        DataSource ds = component.getResource().reference();
+        DataSource ds = resource.reference();
         return new JdbcTemplate(ds);
     }
 
     protected BasicDataSource getBasicDataSource() {
-        return (BasicDataSource) component.getResource().reference();
+        return (BasicDataSource) resource.reference();
     }
 
     protected Row nextRowFromInputMessage() {
-        if (component.getFlowStep().getComponent().getInputModel() != null) {
+        if (flowStep.getComponent().getInputModel() != null) {
             if (entityDataIterator == null) {
                 List<EntityData> list = inputMessage.getPayload();
                 entityDataIterator = list.iterator();
@@ -63,7 +63,7 @@ public class MessageScriptHelper {
 
             if (entityDataIterator.hasNext()) {
                 EntityData data = entityDataIterator.next();
-                return component.getFlowStep().getComponent().toRow(data);
+                return flowStep.getComponent().toRow(data);
             } else {
                 return null;
             }
@@ -74,7 +74,7 @@ public class MessageScriptHelper {
     }
 
     protected void info(String message, Object... args) {
-        component.getExecutionTracker().log(LogLevel.INFO, component, String.format(message, args));
+        context.getExecutionTracker().log(LogLevel.INFO, context, message, args);
     }
 
     protected void setInputMessage(Message inputMessage) {
