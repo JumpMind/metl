@@ -19,6 +19,7 @@ import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.component.XmlFormatter;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
+import org.jumpmind.symmetric.is.ui.views.design.ImportXmlTemplateWindow.ImportXmlListener;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.common.ResizableWindow;
 import org.vaadin.aceeditor.AceEditor;
@@ -41,6 +42,7 @@ import com.vaadin.ui.Field;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
@@ -214,6 +216,24 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
         }
     }
 
+    class ImportTemplateClickListener implements ClickListener, ImportXmlListener {
+        ImportXmlTemplateWindow importWindow;
+        
+        public void buttonClick(ClickEvent event) {
+            importWindow = new ImportXmlTemplateWindow(this);
+            UI.getCurrent().addWindow(importWindow);
+        }
+
+        public void onImport(String xml) {
+            Setting templateSetting = component.findSetting(XmlFormatter.XML_FORMATTER_TEMPLATE);
+            templateSetting.setValue(xml);
+            context.getConfigurationService().save(templateSetting);
+            importWindow.close();
+            EditTemplateWindow editWindow = new EditTemplateWindow();
+            editWindow.show();
+        }
+    }
+
     class EditFieldFactory implements TableFieldFactory {
         public Field<?> createField(final Container dataContainer, final Object itemId,
                 final Object propertyId, com.vaadin.ui.Component uiContext) {
@@ -222,8 +242,10 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
             if (propertyId.equals("xpath")) {
                 final ComboBox combo = new ComboBox();
                 combo.setWidth(100, Unit.PERCENTAGE);
-                combo.addItems(xpathChoices);
-                combo.setPageLength(xpathChoices.size() > 20 ? 20 : xpathChoices.size());
+                if (xpathChoices != null) {
+                    combo.addItems(xpathChoices);
+                    combo.setPageLength(xpathChoices.size() > 20 ? 20 : xpathChoices.size());
+                }
                 combo.setImmediate(true);
                 combo.setNewItemsAllowed(true);
                 combo.setInvalidAllowed(true);
@@ -242,11 +264,6 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
                 field = combo;
             }
             return field;
-        }
-    }
-
-    class ImportTemplateClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
         }
     }
 
