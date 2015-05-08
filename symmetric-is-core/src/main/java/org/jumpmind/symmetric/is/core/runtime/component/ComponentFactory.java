@@ -12,14 +12,14 @@ import org.jumpmind.symmetric.is.core.runtime.AbstractFactory;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 
-public class ComponentFactory extends AbstractFactory<IComponent> implements IComponentFactory {
+public class ComponentFactory extends AbstractFactory<IComponentRuntime> implements IComponentFactory {
 
-    Map<String, Class<? extends IComponent>> componentTypes;
+    Map<String, Class<? extends IComponentRuntime>> componentTypes;
 
     Map<ComponentCategory, List<String>> componentTypesByCategory;
 
     public ComponentFactory() {
-        super(IComponent.class);
+        super(IComponentRuntime.class);
     }
 
     @Override
@@ -28,11 +28,11 @@ public class ComponentFactory extends AbstractFactory<IComponent> implements ICo
     }
 
     @Override
-    public void register(Class<IComponent> clazz) {
+    public void register(Class<IComponentRuntime> clazz) {
         ComponentDefinition definition = clazz.getAnnotation(ComponentDefinition.class);
         if (definition != null) {
             if (componentTypes == null) {
-                componentTypes = new LinkedHashMap<String, Class<? extends IComponent>>();
+                componentTypes = new LinkedHashMap<String, Class<? extends IComponentRuntime>>();
             }
             componentTypes.put(definition.typeName(), clazz);
 
@@ -52,12 +52,12 @@ public class ComponentFactory extends AbstractFactory<IComponent> implements ICo
     }
 
     @Override
-    public IComponent create(FlowStep flowStep, Flow flow, Map<String, IResource> resources) {
+    public IComponentRuntime create(FlowStep flowStep, Flow flow, Map<String, IResource> resources) {
         try {
             String componentType = flowStep.getComponent().getType();
-            Class<? extends IComponent> clazz = componentTypes.get(componentType);
+            Class<? extends IComponentRuntime> clazz = componentTypes.get(componentType);
             if (clazz != null) {
-                IComponent component = clazz.newInstance();
+                IComponentRuntime component = clazz.newInstance();
                 component.init(flowStep, flow, resources);
                 return component;
             } else {
@@ -74,13 +74,13 @@ public class ComponentFactory extends AbstractFactory<IComponent> implements ICo
 
     @Override
     public Map<String, SettingDefinition> getSettingDefinitionsForComponentType(String componentType) {
-        Class<? extends IComponent> clazz = componentTypes.get(componentType);
+        Class<? extends IComponentRuntime> clazz = componentTypes.get(componentType);
         return AbstractRuntimeObject.getSettingDefinitions(clazz, false);
     }
 
     @Override
     public ComponentDefinition getComponentDefinitionForComponentType(String componentType) {
-        Class<? extends IComponent> clazz = componentTypes.get(componentType);
+        Class<? extends IComponentRuntime> clazz = componentTypes.get(componentType);
         if (clazz != null) {
             return clazz.getAnnotation(ComponentDefinition.class);
         } else {

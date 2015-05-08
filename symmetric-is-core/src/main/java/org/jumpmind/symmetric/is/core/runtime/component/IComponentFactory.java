@@ -10,9 +10,9 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 
 public interface IComponentFactory {
 
-    public IComponent create(FlowStep flowStep, Flow flow, Map<String, IResource> resources);
+    public IComponentRuntime create(FlowStep flowStep, Flow flow, Map<String, IResource> resources);
 
-    public void register(Class<IComponent> clazz);
+    public void register(Class<IComponentRuntime> clazz);
 
     public Map<ComponentCategory, List<String>> getComponentTypes();
     

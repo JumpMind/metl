@@ -2,7 +2,7 @@ package org.jumpmind.symmetric.is.core.runtime;
 
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
-import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
+import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     }
 
     @Override
-    public void beforeHandle(String executionId, IComponent component) {
+    public void beforeHandle(String executionId, IComponentRuntime component) {
         FlowStep flowStep = component.getFlowStep();
         String msg = String.format(
                 "started handing step message for execution: %s,  for deployment: %s,  component: %s:%s",
@@ -41,7 +41,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     }
 
     @Override
-    public void afterHandle(String executionId, IComponent component, Throwable error) {
+    public void afterHandle(String executionId, IComponentRuntime component, Throwable error) {
         FlowStep flowStep = component.getFlowStep();
         String msg = String.format(
                 "finished handing step message for execution: %s,  for deployment: %s,  component: %s:%s",
@@ -51,7 +51,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     }
     
     @Override
-    public void flowStepStarted(String executionId, IComponent component) {
+    public void flowStepStarted(String executionId, IComponentRuntime component) {
         FlowStep flowStep = component.getFlowStep();
         String msg = String.format(
                 "step started for execution: %s,  for deployment: %s,  component: %s:%s",
@@ -61,7 +61,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     }
     
     @Override
-    public void flowStepFinished(String executionId, IComponent component, Throwable error, boolean cancelled) {
+    public void flowStepFinished(String executionId, IComponentRuntime component, Throwable error, boolean cancelled) {
         FlowStep flowStep = component.getFlowStep();
         String msg = String.format(
                 "step completed for execution: %s,  for deployment: %s,  component: %s:%s",
@@ -71,11 +71,11 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     }
     
     @Override
-    public void flowStepFailedOnComplete(String executionId, IComponent component, Throwable error) {
+    public void flowStepFailedOnComplete(String executionId, IComponentRuntime component, Throwable error) {
     }
 
     @Override
-    public void log(String executionId, LogLevel level, IComponent component, String output) {
+    public void log(String executionId, LogLevel level, IComponentRuntime component, String output) {
         if (deployment.asLogLevel().log(level)) {
             String msg = String
                     .format("log output from execution: %s, for deployment: %s,  component: %s:%s,  output: %s",

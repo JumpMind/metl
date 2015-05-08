@@ -2,8 +2,6 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.util.List;
-
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -137,12 +135,12 @@ public class ScriptExecutor extends AbstractComponent {
     }
 
     @Override
-    public void flowCompletedWithErrors(Throwable myError, List<Throwable> allErrors) {
-        invoke("onError", myError, allErrors);
+    public void flowCompletedWithErrors(Throwable myError) {
+        invoke("onError", myError);
     }
 
     @Override
-    public void flowCompletedWithoutError() {
+    public void flowCompleted() {
         invoke("onSuccess");
     }
 

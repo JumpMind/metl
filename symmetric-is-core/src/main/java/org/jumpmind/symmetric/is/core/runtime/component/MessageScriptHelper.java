@@ -18,7 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public class MessageScriptHelper {
 
-	protected IComponent component;
+	protected IComponentRuntime component;
 	
 	protected FlowStep flowStep;
 	
@@ -34,7 +34,7 @@ public class MessageScriptHelper {
     
     protected IResource resource;
 
-    public MessageScriptHelper(IComponent component) {
+    public MessageScriptHelper(IComponentRuntime component) {
         this.component = component;
         this.flowStep = component.getFlowStep();
         this.flow = component.getFlow();
@@ -93,7 +93,7 @@ public class MessageScriptHelper {
     protected void onHandle() {
     }
 
-    protected void onError(Throwable myError, List<Throwable> allErrors) {
+    protected void onError(Throwable myError) {
     }
     
     protected void onSuccess() {

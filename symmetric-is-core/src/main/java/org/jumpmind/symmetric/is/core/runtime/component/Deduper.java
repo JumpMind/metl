@@ -63,7 +63,7 @@ public class Deduper extends AbstractComponent {
     }
 
     @Override
-    public void finalize(IMessageTarget messageTarget) {
+    public void lastMessageReceived(IMessageTarget messageTarget) {
 
         if (deduped.size() > 0) {
             int count = 0;

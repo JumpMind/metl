@@ -17,7 +17,7 @@ import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.component.AbstractComponent;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentStatistics;
-import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
+import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
@@ -27,7 +27,7 @@ public class FlowRuntime {
 
     AgentDeployment deployment;
 
-    Map<FlowStep, IComponent> endpointRuntimes = new HashMap<FlowStep, IComponent>();
+    Map<FlowStep, IComponentRuntime> endpointRuntimes = new HashMap<FlowStep, IComponentRuntime>();
 
     Map<String, IResource> resourceRuntimes = new HashMap<String, IResource>();
 

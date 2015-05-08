@@ -24,7 +24,7 @@ import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResource;
 
-abstract public class AbstractComponent extends AbstractRuntimeObject implements IComponent {
+abstract public class AbstractComponent extends AbstractRuntimeObject implements IComponentRuntime {
 
     @SettingDefinition(order = 100, required = false, type = Type.INTEGER, defaultValue = "10000", label = "Inbound Queue Capacity")
     public final static String INBOUND_QUEUE_CAPACITY = "inbound.queue.capacity";
@@ -50,7 +50,7 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     }
 
     @Override
-    public void finalize(IMessageTarget messageTarget) {
+    public void lastMessageReceived(IMessageTarget messageTarget) {
         
     }
     
@@ -98,11 +98,11 @@ abstract public class AbstractComponent extends AbstractRuntimeObject implements
     }
     
     @Override
-    public void flowCompletedWithoutError() {
+    public void flowCompleted() {
     }
     
     @Override
-    public void flowCompletedWithErrors(Throwable myError, List<Throwable> allErrors) {
+    public void flowCompletedWithErrors(Throwable myError) {
     }
     
     protected Bindings bindEntityData(ScriptEngine scriptEngine, String executionId, EntityData entityData) {

@@ -11,7 +11,7 @@ import org.jumpmind.symmetric.is.core.model.ExecutionStatus;
 import org.jumpmind.symmetric.is.core.model.ExecutionStep;
 import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentStatistics;
-import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
+import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
 import org.jumpmind.symmetric.is.core.runtime.flow.AsyncRecorder;
 
 public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
@@ -66,7 +66,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
     
     @Override
-    public void flowStepStarted(String executionId, IComponent component) {
+    public void flowStepStarted(String executionId, IComponentRuntime component) {
         super.flowStepStarted(executionId, component);
         ExecutionStep step = steps.get(component.getFlowStep().getId());
         if (step == null) {
@@ -81,7 +81,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
 
     @Override
-    public void beforeHandle(String executionId, IComponent component) {
+    public void beforeHandle(String executionId, IComponentRuntime component) {
         super.beforeHandle(executionId, component);
         ExecutionStep step = steps.get(component.getFlowStep().getId());
         if (step.getStartTime() == null) {
@@ -95,7 +95,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
  
     @Override
-    public void afterHandle(String executionId, IComponent component, Throwable error) {
+    public void afterHandle(String executionId, IComponentRuntime component, Throwable error) {
         super.afterHandle(executionId, component, error);
         ExecutionStep step = steps.get(component.getFlowStep().getId());
         step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.READY.name());
@@ -109,7 +109,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
     
     @Override
-    public void flowStepFinished(String executionId, IComponent component, Throwable error,
+    public void flowStepFinished(String executionId, IComponentRuntime component, Throwable error,
             boolean cancelled) {
         super.flowStepFinished(executionId, component, error, cancelled);
         ExecutionStep step = steps.get(component.getFlowStep().getId());
@@ -137,7 +137,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
     
     @Override
-    public void flowStepFailedOnComplete(String executionId, IComponent component, Throwable error) {
+    public void flowStepFailedOnComplete(String executionId, IComponentRuntime component, Throwable error) {
         super.flowStepFailedOnComplete(executionId, component, error);
         ExecutionStep step = steps.get(component.getFlowStep().getId());
         if (step != null) {
@@ -147,7 +147,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
 
     @Override
-    public void log(String executionId, LogLevel level, IComponent component, String output) {
+    public void log(String executionId, LogLevel level, IComponentRuntime component, String output) {
         super.log(executionId, level, component, output);
         if (deployment.asLogLevel().log(level)) {
             ExecutionStepLog log = new ExecutionStepLog();

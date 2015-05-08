@@ -64,7 +64,7 @@ public class Joiner extends AbstractComponent {
     }
 
     @Override
-    public void finalize(IMessageTarget messageTarget) {
+    public void lastMessageReceived(IMessageTarget messageTarget) {
         
         ArrayList<EntityData> dataToSend = new ArrayList<EntityData>();
         Iterator<Map.Entry<Object, EntityData>> itr = joinedData.entrySet().iterator();

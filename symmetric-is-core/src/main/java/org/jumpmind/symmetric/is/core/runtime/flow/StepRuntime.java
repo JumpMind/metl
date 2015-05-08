@@ -14,7 +14,7 @@ import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.component.AbstractComponent;
-import org.jumpmind.symmetric.is.core.runtime.component.IComponent;
+import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public class StepRuntime implements Runnable {
 
     Throwable error;
 
-    IComponent component;
+    IComponentRuntime component;
 
     List<StepRuntime> targetStepRuntimes;
 
@@ -41,7 +41,7 @@ public class StepRuntime implements Runnable {
 
     String executionId;
 
-    public StepRuntime(String executionId, IComponent component, IExecutionTracker tracker) {
+    public StepRuntime(String executionId, IComponentRuntime component, IExecutionTracker tracker) {
         this.executionId = executionId;
         this.executionTracker = tracker;
         this.component = component;
@@ -121,6 +121,9 @@ public class StepRuntime implements Runnable {
                         executionTracker.beforeHandle(executionId, component);
                         component.handle(inputMessage, target);
                     } catch (Exception ex) {
+                        /*
+                         * Record the error, but continue processing messages
+                         */
                         recordError(ex);
                     } finally {
                         executionTracker.afterHandle(executionId, component, error);
@@ -151,7 +154,7 @@ public class StepRuntime implements Runnable {
     }
 
     private void shutdown(MessageTarget target) throws InterruptedException {
-        this.component.finalize(target);
+        this.component.lastMessageReceived(target);
         for (StepRuntime targetStepRuntime : targetStepRuntimes) {
             targetStepRuntime.queue(new ShutdownMessage(component.getFlowStep().getId(), cancelled));
         }
@@ -172,7 +175,7 @@ public class StepRuntime implements Runnable {
     public void flowCompletedWithoutError() {
         if (!cancelled) {
             try {
-                component.flowCompletedWithoutError();
+                component.flowCompleted();
             } catch (Exception ex) {
                 recordError(ex);
                 executionTracker.flowStepFailedOnComplete(executionId, component, ex);
@@ -183,7 +186,7 @@ public class StepRuntime implements Runnable {
     public void flowCompletedWithErrors(Throwable myError, List<Throwable> allErrors) {
         if (!cancelled) {
             try {
-                component.flowCompletedWithErrors(myError, allErrors);
+                component.flowCompletedWithErrors(myError);
             } catch (Exception ex) {
                 recordError(ex);
                 executionTracker.flowStepFailedOnComplete(executionId, component, ex);
@@ -191,7 +194,7 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    public IComponent getComponent() {
+    public IComponentRuntime getComponent() {
         return this.component;
     }
 

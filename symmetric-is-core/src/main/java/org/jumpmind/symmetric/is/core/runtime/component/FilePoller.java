@@ -145,14 +145,14 @@ public class FilePoller extends AbstractComponent {
     }
     
     @Override
-    public void flowCompletedWithErrors(Throwable myError, List<Throwable> allErrors) {
+    public void flowCompletedWithErrors(Throwable myError) {
         if (archiveOnError) {
             archive(archiveOnErrorPath);
         }
     }
     
     @Override
-    public void flowCompletedWithoutError() {
+    public void flowCompleted() {
         if (archiveOnSuccess) {
             archive(archiveOnSuccessPath);
         }
