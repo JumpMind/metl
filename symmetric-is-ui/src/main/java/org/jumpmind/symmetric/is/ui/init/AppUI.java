@@ -141,11 +141,17 @@ public class AppUI extends UI implements LoginListener {
         Responsive.makeResponsive(this);
         ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
         if (appCtx.getConfigurationService().isUserLoginEnabled()) {
-            LoginDialog login = new LoginDialog(appCtx, this);   
+            LoginDialog login = new LoginDialog(appCtx, this);
             UI.getCurrent().addWindow(login);
         } else {
-            appCtx.getUser().setLoginId("admin");
-            login(appCtx.getUser());
+            User user = appCtx.getConfigurationService().findUserByLoginId("admin");
+            if (user == null) {
+                user = new User();
+                user.setLoginId("admin");
+                appCtx.getConfigurationService().save(user);
+            }
+            appCtx.setUser(user);
+            login(user);
         }
     }
 
