@@ -18,7 +18,7 @@ import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.runtime.AgentRuntime;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
-import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.Datasource;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.ui.common.AppConstants;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
@@ -160,7 +160,7 @@ public class ExploreView extends VerticalLayout implements View {
                 AgentRuntime runtime = agentManager.getAgentRuntime(agent);
                 Collection<IResourceRuntime> resources = runtime.getDeployedResources();
                 for (IResourceRuntime iResource : resources) {
-                    if (iResource.getResource().getType().equals(DataSourceResource.TYPE)) {
+                    if (iResource.getResource().getType().equals(Datasource.TYPE)) {
                         DbResource db = new DbResource(agent, iResource);
                         dbs.add(db);                        
                     }

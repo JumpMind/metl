@@ -34,9 +34,9 @@ import org.jumpmind.symmetric.is.core.runtime.component.MappingProcessor;
 import org.jumpmind.symmetric.is.core.runtime.component.ScriptExecutor;
 import org.jumpmind.symmetric.is.core.runtime.component.Transformer;
 import org.jumpmind.symmetric.is.core.runtime.component.XmlFormatter;
-import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
-import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
-import org.jumpmind.symmetric.is.core.runtime.resource.SSHFileResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.Datasource;
+import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
+import org.jumpmind.symmetric.is.core.runtime.resource.Scp;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.EnableFocusTextField;
 import org.jumpmind.symmetric.is.ui.common.Icons;
@@ -656,7 +656,7 @@ public class ProjectNavigator extends VerticalLayout {
         for (ResourceName resource : resources) {
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(resource);
-            if (DataSourceResource.TYPE.equals(resource.getType())) {
+            if (Datasource.TYPE.equals(resource.getType())) {
                 this.treeTable.setItemIcon(resource, Icons.DATABASE);
             } else {
                 this.treeTable.setItemIcon(resource, Icons.GENERAL_RESOURCE);
@@ -916,15 +916,15 @@ public class ProjectNavigator extends VerticalLayout {
     }
 
     protected void addNewDatabase() {
-        addNewResource(DataSourceResource.TYPE, "Database", Icons.DATABASE);
+        addNewResource(Datasource.TYPE, "Database", Icons.DATABASE);
     }
 
     protected void addNewLocalFileSystem() {
-        addNewResource(LocalFileResource.TYPE, "Directory", Icons.FILE_SYSTEM);
+        addNewResource(LocalFile.TYPE, "Directory", Icons.FILE_SYSTEM);
     }
     
     protected void addNewSSHFileSystem() {
-        addNewResource(SSHFileResource.TYPE, "Directory", Icons.FILE_SYSTEM);
+        addNewResource(Scp.TYPE, "Directory", Icons.FILE_SYSTEM);
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {

@@ -18,8 +18,8 @@ import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowName;
 import org.jumpmind.symmetric.is.core.model.FlowParameter;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
-import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
-import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.Datasource;
+import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
@@ -389,9 +389,9 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
                 AgentResource agentResource = context.getConfigurationService().findAgentResource(agent.getId(), summary.getId());
                 EditAgentResourcePanel editPanel = new EditAgentResourcePanel(context, agentResource);
                 FontAwesome icon = Icons.GENERAL_RESOURCE;
-                if (agentResource.getType().equals(DataSourceResource.TYPE)) {
+                if (agentResource.getType().equals(Datasource.TYPE)) {
                     icon = Icons.DATABASE;
-                } else if (agentResource.getType().equals(LocalFileResource.TYPE)) {
+                } else if (agentResource.getType().equals(LocalFile.TYPE)) {
                     icon = Icons.FILE_SYSTEM;
                 }
                 tabbedPanel.addCloseableTab(summary.getId(), summary.getName(), icon, editPanel);

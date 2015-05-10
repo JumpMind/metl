@@ -22,7 +22,7 @@ import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.Resource;
-import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.Datasource;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.ui.common.ResizableWindow;
@@ -64,7 +64,7 @@ public class TableColumnSelectWindow extends ResizableWindow {
 		tree.setMultiSelect(true);
         tree.addContainerProperty("name", String.class, "");
 
-        List<Resource> list = context.getConfigurationService().findResourcesByTypes(model.getProjectVersionId(), DataSourceResource.TYPE);
+        List<Resource> list = context.getConfigurationService().findResourcesByTypes(model.getProjectVersionId(), Datasource.TYPE);
 		for (Resource resource : list) {
 		    addItem(resource, null, resource.getName(), Icons.DATABASE, null, true);
         }
@@ -182,7 +182,7 @@ public class TableColumnSelectWindow extends ResizableWindow {
 	}
 	
 	protected void addCatalogsToResource(Resource resource) {
-		DataSourceResource dataSourceResource = (DataSourceResource) context.getResourceFactory().create(resource, null);
+		Datasource dataSourceResource = (Datasource) context.getResourceFactory().create(resource, null);
 		DataSource dataSource = (DataSource) dataSourceResource.reference();
 		IDatabasePlatform platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), true);
 		for (String catalogName : platform.getDdlReader().getCatalogNames()) {

@@ -13,7 +13,7 @@ import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.component.DbReader;
-import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.Datasource;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
@@ -70,7 +70,7 @@ public class EditDbReaderPanel extends VerticalLayout implements IUiPanel {
             resource.put(BasicDataSourcePropertyConstants.DB_POOL_MAX_ACTIVE, "2");
             resource.put(BasicDataSourcePropertyConstants.DB_POOL_MAX_IDLE, "2");
             resource.put(BasicDataSourcePropertyConstants.DB_POOL_MIN_IDLE, "2");
-            DataSourceResource dataSourceResource = (DataSourceResource) context
+            Datasource dataSourceResource = (Datasource) context
                     .getResourceFactory().create(resource, null);
             DataSource dataSource = dataSourceResource.reference();
             platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource,
