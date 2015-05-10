@@ -4,8 +4,8 @@ import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 
-@ResourceDefinition(typeName=SSHFileResource.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
-public class SSHFileResource extends AbstractResource implements IResourceRuntime {
+@ResourceDefinition(typeName=Scp.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
+public class Scp extends AbstractResourceRuntime {
 
     public static final String TYPE = "SSH File System";
 
@@ -32,11 +32,11 @@ public class SSHFileResource extends AbstractResource implements IResourceRuntim
     @SettingDefinition(type = Type.INTEGER, order = 70, required = true, label = "Connection Timeout")
     public static final String SSH_CONNECTION_TIMEOUT = "ssh.connection.timeout";
     
-    IStreamableResource streamableResource;
+    IStreamable streamableResource;
 
     @Override
     protected void start(TypedProperties properties) {
-        streamableResource = new SSHStreamableResource(resource,
+        streamableResource = new ScpStreamable(resource,
                 properties.getProperty(SSH_SERVER), 
                 properties.getInt(SSH_PORT),
                 properties.getProperty(SSH_USER),

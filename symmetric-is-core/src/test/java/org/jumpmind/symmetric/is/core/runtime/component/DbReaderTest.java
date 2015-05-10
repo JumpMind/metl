@@ -29,7 +29,7 @@ import org.jumpmind.symmetric.is.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.DataSourceResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.Datasource;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
 import org.jumpmind.symmetric.is.core.utils.DbTestUtils;
@@ -166,7 +166,7 @@ public class DbReaderTest {
         Folder folder = TestUtils.createFolder("Test Folder Resource");
         resource.setName("Test Resource");
         resource.setFolderId("Test Folder Resource");
-        resource.setType(DataSourceResource.TYPE);
+        resource.setType(Datasource.TYPE);
         resource.setFolder(folder);
         resource.setSettings(settings);
 
@@ -186,10 +186,10 @@ public class DbReaderTest {
 
     private static List<Setting> createResourceSettings() {
         List<Setting> settings = new ArrayList<Setting>(4);
-        settings.add(new Setting(DataSourceResource.DB_POOL_DRIVER, "org.h2.Driver"));
-        settings.add(new Setting(DataSourceResource.DB_POOL_URL, "jdbc:h2:file:build/dbs/testdb"));
-        settings.add(new Setting(DataSourceResource.DB_POOL_USER, "jumpmind"));
-        settings.add(new Setting(DataSourceResource.DB_POOL_PASSWORD, "jumpmind"));
+        settings.add(new Setting(Datasource.DB_POOL_DRIVER, "org.h2.Driver"));
+        settings.add(new Setting(Datasource.DB_POOL_URL, "jdbc:h2:file:build/dbs/testdb"));
+        settings.add(new Setting(Datasource.DB_POOL_USER, "jumpmind"));
+        settings.add(new Setting(Datasource.DB_POOL_PASSWORD, "jumpmind"));
         return settings;
     }
 

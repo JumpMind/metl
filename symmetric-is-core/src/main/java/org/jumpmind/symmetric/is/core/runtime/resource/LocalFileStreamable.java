@@ -11,11 +11,11 @@ import org.apache.commons.io.FileUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.is.core.model.Resource;
 
-public class FileStreamableResource implements IStreamableResource {
+public class LocalFileStreamable implements IStreamable {
 
     String basePath;
 
-    public FileStreamableResource(Resource resource, String basePath, boolean mustExist) {
+    public LocalFileStreamable(Resource resource, String basePath, boolean mustExist) {
         this.basePath = basePath;
     }
 

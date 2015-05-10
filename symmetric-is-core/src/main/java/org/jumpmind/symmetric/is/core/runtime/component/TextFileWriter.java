@@ -15,7 +15,7 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IStreamableResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.IStreamable;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
 @ComponentDefinition(typeName = TextFileWriter.TYPE, category = ComponentCategory.WRITER, iconImage="textfilewriter.png",
@@ -95,7 +95,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
     }
 
     private void initStreamAndWriter() {
-        outStream = getOutputStream((IStreamableResource) getResourceReference());
+        outStream = getOutputStream((IStreamable) getResourceReference());
         bufferedWriter = initializeWriter(outStream);        
     }
     
@@ -107,7 +107,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
         lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
     }
 
-    private OutputStream getOutputStream(IStreamableResource conn) {
+    private OutputStream getOutputStream(IStreamable conn) {
         log(LogLevel.INFO,  String.format("Writing text file to %s", conn.toString()));
         return conn.getOutputStream(relativePathAndFile, mustExist);
     }

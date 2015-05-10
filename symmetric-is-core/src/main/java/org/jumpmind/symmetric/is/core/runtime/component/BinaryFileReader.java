@@ -10,7 +10,7 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IStreamableResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.IStreamable;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
 @ComponentDefinition(typeName = BinaryFileReader.TYPE, category = ComponentCategory.READER, iconImage="binaryfilereader.png",
@@ -91,7 +91,7 @@ public class BinaryFileReader extends AbstractComponentRuntime {
     }
 
     private void open() {
-        IStreamableResource resource = (IStreamableResource) getResourceReference();
+        IStreamable resource = (IStreamable) getResourceReference();
         inStream = resource.getInputStream(relativePathAndFile, mustExist);
     }
 

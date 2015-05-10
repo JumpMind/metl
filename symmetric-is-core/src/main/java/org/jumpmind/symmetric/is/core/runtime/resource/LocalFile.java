@@ -4,9 +4,8 @@ import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 
-@ResourceDefinition(typeName=LocalFileResource.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
-public class LocalFileResource extends AbstractResource implements
-		IResourceRuntime {
+@ResourceDefinition(typeName=LocalFile.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
+public class LocalFile extends AbstractResourceRuntime {
 
 	public static final String TYPE = "Local File System";
 
@@ -16,11 +15,11 @@ public class LocalFileResource extends AbstractResource implements
 	@SettingDefinition(type = Type.BOOLEAN, order = 20, required = true, provided = true, defaultValue = "false", label = "Must Exist")
 	public static final String LOCALFILE_MUST_EXIST = "localfile.must.exist";
 
-	IStreamableResource streamableResource;
+	IStreamable streamableResource;
 
 	@Override
 	protected void start(TypedProperties properties) {
-		streamableResource = new FileStreamableResource(resource,
+		streamableResource = new LocalFileStreamable(resource,
 				properties.getProperty(LOCALFILE_PATH), 
 				properties.is(LOCALFILE_MUST_EXIST));
 	}

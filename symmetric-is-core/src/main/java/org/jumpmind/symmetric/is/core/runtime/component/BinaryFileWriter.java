@@ -9,7 +9,7 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.IStreamableResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.IStreamable;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
 @ComponentDefinition(typeName = BinaryFileWriter.TYPE, category = ComponentCategory.WRITER, iconImage="binaryfilewriter.png",
@@ -70,7 +70,7 @@ public class BinaryFileWriter extends AbstractComponentRuntime {
     }
 
     private void initStream() {
-        outStream = getOutputStream((IStreamableResource) getResourceReference());        
+        outStream = getOutputStream((IStreamable) getResourceReference());        
     }
     
     private void applySettings() {
@@ -81,7 +81,7 @@ public class BinaryFileWriter extends AbstractComponentRuntime {
     }
 
 
-    private OutputStream getOutputStream(IStreamableResource conn) {
+    private OutputStream getOutputStream(IStreamable conn) {
         return conn.getOutputStream(relativePathAndFile, mustExist);
     }
 

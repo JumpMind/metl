@@ -3,7 +3,7 @@ package org.jumpmind.symmetric.is.core.runtime.resource;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public interface IStreamableResource {
+public interface IStreamable {
 
     public void open();
     

@@ -15,7 +15,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 
-public class SSHStreamableResource implements IStreamableResource {
+public class ScpStreamable implements IStreamable {
 
     protected String server;
     protected Integer port;
@@ -29,9 +29,9 @@ public class SSHStreamableResource implements IStreamableResource {
     protected ChannelSftp sftp;
     protected String filePath;
 
-    protected static final Logger log = LoggerFactory.getLogger(SSHStreamableResource.class);
+    protected static final Logger log = LoggerFactory.getLogger(ScpStreamable.class);
 
-    public SSHStreamableResource(Resource resource, 
+    public ScpStreamable(Resource resource, 
             String server,
             Integer port,
             String user,

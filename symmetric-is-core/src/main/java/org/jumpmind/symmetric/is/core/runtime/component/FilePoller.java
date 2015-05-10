@@ -23,7 +23,7 @@ import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 
 @ComponentDefinition(
@@ -90,8 +90,8 @@ public class FilePoller extends AbstractComponentRuntime {
     public void start() {       
         Component component = getComponent();
         Resource resource = component.getResource();
-        if (!resource.getType().equals(LocalFileResource.TYPE)) {
-            throw new IllegalStateException(String.format("The resource must be of type %s",LocalFileResource.TYPE));
+        if (!resource.getType().equals(LocalFile.TYPE)) {
+            throw new IllegalStateException(String.format("The resource must be of type %s",LocalFile.TYPE));
         }
                 
         filePattern = component.get(SETTING_FILE_PATTERN);
@@ -111,7 +111,7 @@ public class FilePoller extends AbstractComponentRuntime {
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
         Resource resource = getComponent().getResource();
-        String path = resource.get(LocalFileResource.LOCALFILE_PATH);
+        String path = resource.get(LocalFile.LOCALFILE_PATH);
         if (useTriggerFile) {
             File triggerFile = new File(path, triggerFilePath);
             if (triggerFile.exists()) {
@@ -158,7 +158,7 @@ public class FilePoller extends AbstractComponentRuntime {
     
     protected void archive(String archivePath) {
         Resource resource = getComponent().getResource();
-        String path = resource.get(LocalFileResource.LOCALFILE_PATH);
+        String path = resource.get(LocalFile.LOCALFILE_PATH);
         File destDir = new File(path, archivePath);
         for (File srcFile : filesSent) {
             try {

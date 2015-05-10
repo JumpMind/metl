@@ -22,7 +22,7 @@ import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.symmetric.is.core.runtime.resource.LocalFileResource;
+import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
 import org.jumpmind.symmetric.is.core.utils.TestUtils;
 import org.junit.After;
@@ -105,7 +105,7 @@ public class BinaryFileReaderTest {
         Folder folder = TestUtils.createFolder("Test Folder Resource");
         resource.setName("Test Resource");
         resource.setFolderId("Test Folder Resource");
-        resource.setType(LocalFileResource.TYPE);
+        resource.setType(LocalFile.TYPE);
         resource.setFolder(folder);
         resource.setSettings(settings);
 
@@ -121,8 +121,8 @@ public class BinaryFileReaderTest {
 
     private static List<Setting> createResourceSettings() {
         List<Setting> settings = new ArrayList<Setting>(2);
-        settings.add(new Setting(LocalFileResource.LOCALFILE_PATH, FILE_PATH));
-        settings.add(new Setting(LocalFileResource.LOCALFILE_MUST_EXIST, "true"));
+        settings.add(new Setting(LocalFile.LOCALFILE_PATH, FILE_PATH));
+        settings.add(new Setting(LocalFile.LOCALFILE_MUST_EXIST, "true"));
         return settings;
     }
 

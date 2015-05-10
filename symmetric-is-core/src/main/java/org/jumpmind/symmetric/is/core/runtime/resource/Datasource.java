@@ -6,8 +6,8 @@ import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 
-@ResourceDefinition(typeName=DataSourceResource.TYPE, resourceCategory=ResourceCategory.DATASOURCE)
-public class DataSourceResource extends AbstractResource implements IResourceRuntime {
+@ResourceDefinition(typeName=Datasource.TYPE, resourceCategory=ResourceCategory.DATASOURCE)
+public class Datasource extends AbstractResourceRuntime implements IResourceRuntime {
 
     public static final String TYPE = "Database";
     
