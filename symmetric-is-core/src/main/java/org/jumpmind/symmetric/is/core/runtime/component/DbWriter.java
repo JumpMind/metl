@@ -28,6 +28,7 @@ import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
+import org.jumpmind.util.FormatUtils;
 
 @ComponentDefinition(
         typeName = DbWriter.TYPE,
@@ -39,9 +40,24 @@ import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 public class DbWriter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Database Writer";
+    
+    @SettingDefinition(
+            order = 5,
+            required = false,
+            type = Type.TEXT,
+            label = "Catalog")
+    public final static String CATALOG = "catalog";
+    
+    @SettingDefinition(
+            order = 6,
+            required = false,
+            type = Type.TEXT,
+            label = "Schema")
+    public final static String SCHEMA = "schema";
+    
 
     @SettingDefinition(
-            order = 1,
+            order = 10,
             required = false,
             type = Type.BOOLEAN,
             label = "Replace rows if they exist",
@@ -49,7 +65,7 @@ public class DbWriter extends AbstractComponentRuntime {
     public final static String REPLACE = "db.writer.replace";
 
     @SettingDefinition(
-            order = 2,
+            order = 20,
             required = false,
             type = Type.BOOLEAN,
             label = "Update rows first instead of insert",
@@ -57,7 +73,7 @@ public class DbWriter extends AbstractComponentRuntime {
     public final static String UPDATE_FIRST = "db.writer.update.first";
 
     @SettingDefinition(
-            order = 3,
+            order = 30,
             required = false,
             type = Type.BOOLEAN,
             label = "Fallback to insert if no rows updated",
@@ -65,7 +81,7 @@ public class DbWriter extends AbstractComponentRuntime {
     public final static String INSERT_FALLBACK = "db.writer.insert.fallback";
 
     @SettingDefinition(
-            order = 4,
+            order = 40,
             required = false,
             type = Type.BOOLEAN,
             label = "Quote table and column names",
@@ -73,7 +89,7 @@ public class DbWriter extends AbstractComponentRuntime {
     public final static String QUOTE_IDENTIFIERS = "db.writer.quote.identifiers";
 
     @SettingDefinition(
-            order = 5,
+            order = 50,
             required = false,
             type = Type.BOOLEAN,
             label = "Trim character data to fit within column",
@@ -81,7 +97,7 @@ public class DbWriter extends AbstractComponentRuntime {
     public final static String FIT_TO_COLUMN = "db.writer.fit.to.column";
 
     @SettingDefinition(
-            order = 6,
+            order = 60,
             required = false,
             type = Type.BOOLEAN,
             label = "Stop Processing Msgs on Error",
@@ -103,6 +119,10 @@ public class DbWriter extends AbstractComponentRuntime {
     boolean fitToColumn = false;
 
     boolean stopProcessingOnError = true;
+    
+    String catalogName;
+    
+    String schemaName;
 
     IDatabasePlatform platform;
 
@@ -131,6 +151,8 @@ public class DbWriter extends AbstractComponentRuntime {
         quoteIdentifiers = properties.is(QUOTE_IDENTIFIERS);
         stopProcessingOnError = properties.is(STOP_PROCESSING_ON_ERROR, true);
         fitToColumn = properties.is(FIT_TO_COLUMN);
+        catalogName = FormatUtils.replaceTokens(properties.get(CATALOG), context.getFlowParametersAsString(), true);
+        schemaName = FormatUtils.replaceTokens(properties.get(SCHEMA), context.getFlowParametersAsString(), true);
 
         DataSource dataSource = (DataSource)getResourceReference();
         platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource,
@@ -138,7 +160,7 @@ public class DbWriter extends AbstractComponentRuntime {
         targetTables = new ArrayList<TargetTableDefintion>();
 
         for (ModelEntity entity : model.getModelEntities()) {
-            Table table = platform.getTableFromCache(entity.getName(), true);
+            Table table = platform.getTableFromCache(catalogName, schemaName, entity.getName(), true);
             if (table != null) {
                 targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE,
                         entity, table.copy()),
