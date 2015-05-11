@@ -246,6 +246,9 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
                     combo.addItems(xpathChoices);
                     combo.setPageLength(xpathChoices.size() > 20 ? 20 : xpathChoices.size());
                 }
+                if (!combo.getItemIds().contains(record.getXpath())) {
+                    combo.addItem(record.getXpath());
+                }
                 combo.setImmediate(true);
                 combo.setNewItemsAllowed(true);
                 combo.setInvalidAllowed(true);

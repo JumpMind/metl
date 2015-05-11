@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -18,6 +19,7 @@ import jlibs.xml.sax.XMLDocument;
 import jlibs.xml.xsd.XSInstance;
 import jlibs.xml.xsd.XSParser;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.xerces.xs.XSConstants;
 import org.apache.xerces.xs.XSModel;
@@ -207,7 +209,9 @@ public class ImportXmlTemplateWindow extends Window implements ValueChangeListen
     }
 
     protected void importFromWsdl(String text) throws Exception {
-        final Wsdl wsdl = Wsdl.parse(text);
+        File wsdlFile = File.createTempFile("import", "wsdl");
+        FileUtils.write(wsdlFile, text);
+        final Wsdl wsdl = Wsdl.parse(wsdlFile.toURI().toURL());
         List<SoapOperation> allOperations = new ArrayList<>();
         List<QName> bindings = wsdl.getBindings();
         for (QName binding : bindings) {

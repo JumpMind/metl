@@ -98,6 +98,9 @@ public class XmlFormatter extends AbstractComponentRuntime {
                         .getAttributeId());
                 String value = (inputValue == null) ? null : inputValue.toString();
                 List<Object> matches = setting.getExpression().evaluate(document);
+                if (matches.size() == 0) {
+                    log(LogLevel.WARN, "XPath expression " + setting.getExpression().getExpression() + " did not find any matches");
+                }
                 for (Object object : matches) {
                     if (object instanceof Element) {
                         ((Element) object).setText(value);
