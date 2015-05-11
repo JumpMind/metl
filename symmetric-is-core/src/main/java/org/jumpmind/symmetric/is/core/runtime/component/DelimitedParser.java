@@ -91,7 +91,9 @@ public class DelimitedParser extends AbstractComponentRuntime {
             // TODO support headers
             for (String inputRow : inputRows) {
                 EntityData data = processInputRow(inputRow);
-                outputPayload.add(data);
+                if (data != null) {
+                    outputPayload.add(data);
+                }
             }
         } catch (IOException e) {
             throw new IoException(e);
