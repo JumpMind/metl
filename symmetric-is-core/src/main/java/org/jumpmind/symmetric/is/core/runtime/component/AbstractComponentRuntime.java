@@ -37,8 +37,12 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     protected boolean shared = false;
 
     @Override
-    public void start() {        
+    final public void start(ComponentContext context) {
+        this.context = context;
+        start();
     }
+    
+    abstract protected void start();
 
     @Override
     public void lastMessageReceived(IMessageTarget messageTarget) {
@@ -56,11 +60,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     protected ComponentStatistics getComponentStatistics() {
     	return context.getComponentStatistics();
     }
-        
-    public void init(ComponentContext context) {
-        this.context  = context;
-    }
-    
+            
     @Override
     public void flowCompleted() {
     }

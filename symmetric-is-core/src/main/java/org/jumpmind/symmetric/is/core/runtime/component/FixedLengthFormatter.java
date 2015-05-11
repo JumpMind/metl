@@ -43,7 +43,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
     List<AttributeFormat> attributesList;
 
     @Override
-    public void start() {
+    protected void start() {
         
         applySettings();
     }

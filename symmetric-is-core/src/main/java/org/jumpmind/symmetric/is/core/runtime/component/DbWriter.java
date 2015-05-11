@@ -131,7 +131,7 @@ public class DbWriter extends AbstractComponentRuntime {
     Throwable error;
 
     @Override
-    public void start() {
+    protected void start() {
         
         error = null;
         

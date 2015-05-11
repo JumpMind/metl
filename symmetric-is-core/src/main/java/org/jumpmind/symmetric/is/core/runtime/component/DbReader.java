@@ -84,7 +84,7 @@ public class DbReader extends AbstractDbComponent {
     boolean matchOnColumnNameOnly = false;
 
     @Override
-    public void start() {
+    protected void start() {
 
         applySettings();
     }

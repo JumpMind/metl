@@ -70,7 +70,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
     List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
 
     @Override
-    public void start() {
+    protected void start() {
         
         applySettings();
     }

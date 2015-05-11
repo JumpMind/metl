@@ -14,6 +14,7 @@ import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.component.AbstractComponentRuntime;
+import org.jumpmind.symmetric.is.core.runtime.component.ComponentContext;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentStatistics;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
@@ -37,13 +38,13 @@ public class StepRuntime implements Runnable {
     List<StepRuntime> targetStepRuntimes;
 
     List<StepRuntime> sourceStepRuntimes;
+    
+    ComponentContext componentContext;
 
-    IExecutionTracker executionTracker;
-
-    public StepRuntime(IComponentRuntime componentRuntime, IExecutionTracker tracker) {
-        this.executionTracker = tracker;
+    public StepRuntime(IComponentRuntime componentRuntime, ComponentContext componentContext) {
+        this.componentContext = componentContext;
         this.componentRuntime = componentRuntime;
-        int capacity = componentRuntime.getComponentContext().getFlowStep().getComponent()
+        int capacity = componentContext.getFlowStep().getComponent()
                 .getInt(AbstractComponentRuntime.INBOUND_QUEUE_CAPACITY, 1000);
         inQueue = new LinkedBlockingQueue<Message>(capacity);
     }
@@ -66,9 +67,9 @@ public class StepRuntime implements Runnable {
 
     public void start(IExecutionTracker tracker, IResourceFactory resourceFactory) {
         try {
-            executionTracker.flowStepStarted(componentRuntime.getComponentContext());
-            componentRuntime.getComponentContext().setComponentStatistics(new ComponentStatistics());
-            componentRuntime.start();
+            componentContext.getExecutionTracker().flowStepStarted(componentContext);
+            componentContext.setComponentStatistics(new ComponentStatistics());
+            componentRuntime.start(componentContext);
         } catch (RuntimeException ex) {
             recordError(ex);
             throw ex;
@@ -81,7 +82,7 @@ public class StepRuntime implements Runnable {
         if (isBlank(msg)) {
             msg = ExceptionUtils.getFullStackTrace(ex);
         }
-        executionTracker.log(LogLevel.ERROR, componentRuntime.getComponentContext(), msg);
+        componentContext.getExecutionTracker().log(LogLevel.ERROR, componentContext, msg);
         log.error("", ex);
     }
 
@@ -112,12 +113,12 @@ public class StepRuntime implements Runnable {
                      */
                     if (cancelled || fromStepId == null || sourceStepRuntimes == null
                             || sourceStepRuntimes.size() == 0
-                            || fromStepId.equals(componentRuntime.getComponentContext().getFlowStep().getId())) {
+                            || fromStepId.equals(componentContext.getFlowStep().getId())) {
                         shutdown(target);
                     }
                 } else {
                     try {
-                        executionTracker.beforeHandle(componentRuntime.getComponentContext());
+                        componentContext.getExecutionTracker().beforeHandle(componentContext);
                         componentRuntime.handle(inputMessage, target);
                     } catch (Exception ex) {
                         /*
@@ -125,7 +126,7 @@ public class StepRuntime implements Runnable {
                          */
                         recordError(ex);
                     } finally {
-                        executionTracker.afterHandle(componentRuntime.getComponentContext(), error);
+                        componentContext.getExecutionTracker().afterHandle(componentContext, error);
                     }
                     if (isStartStep()) {
                         shutdown(target);
@@ -155,7 +156,7 @@ public class StepRuntime implements Runnable {
     private void shutdown(MessageTarget target) throws InterruptedException {
         this.componentRuntime.lastMessageReceived(target);
         for (StepRuntime targetStepRuntime : targetStepRuntimes) {
-            targetStepRuntime.queue(new ShutdownMessage(componentRuntime.getComponentContext().getFlowStep().getId(), cancelled));
+            targetStepRuntime.queue(new ShutdownMessage(componentContext.getFlowStep().getId(), cancelled));
         }
         try {
             this.componentRuntime.stop();
@@ -163,7 +164,7 @@ public class StepRuntime implements Runnable {
             recordError(e);
         }
         running = false;
-        executionTracker.flowStepFinished(componentRuntime.getComponentContext(), error, cancelled);
+        componentContext.getExecutionTracker().flowStepFinished(componentContext, error, cancelled);
     }
 
     public boolean isRunning() {
@@ -172,7 +173,7 @@ public class StepRuntime implements Runnable {
 
     public void stop() throws InterruptedException {
         this.inQueue.clear();
-        this.inQueue.put(new ShutdownMessage(componentRuntime.getComponentContext().getFlowStep().getId()));
+        this.inQueue.put(new ShutdownMessage(componentContext.getFlowStep().getId()));
     }
 
     public void flowCompletedWithoutError() {
@@ -181,7 +182,7 @@ public class StepRuntime implements Runnable {
                 componentRuntime.flowCompleted();
             } catch (Exception ex) {
                 recordError(ex);
-                executionTracker.flowStepFailedOnComplete(componentRuntime.getComponentContext(), ex);
+                componentContext.getExecutionTracker().flowStepFailedOnComplete(componentContext, ex);
             }
         }
     }
@@ -192,7 +193,7 @@ public class StepRuntime implements Runnable {
                 componentRuntime.flowCompletedWithErrors(myError);
             } catch (Exception ex) {
                 recordError(ex);
-                executionTracker.flowStepFailedOnComplete(componentRuntime.getComponentContext(), ex);
+                componentContext.getExecutionTracker().flowStepFailedOnComplete(componentContext, ex);
             }
         }
     }

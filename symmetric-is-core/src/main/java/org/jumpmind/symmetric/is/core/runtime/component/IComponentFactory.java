@@ -7,7 +7,7 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 
 public interface IComponentFactory {
 
-    public IComponentRuntime create(ComponentContext context);
+    public IComponentRuntime create(String type);
 
     public void register(Class<IComponentRuntime> clazz);
 

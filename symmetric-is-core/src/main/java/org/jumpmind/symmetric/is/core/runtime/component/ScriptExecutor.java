@@ -57,7 +57,7 @@ public class ScriptExecutor extends AbstractComponentRuntime {
     ScriptEngine engine;
 
     @Override
-    public void start() {
+    protected void start() {
         
 
         String importStatements = getComponent().get(IMPORTS);

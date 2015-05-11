@@ -41,7 +41,7 @@ public class BinaryFileReader extends AbstractComponentRuntime {
     InputStream inStream = null;
 
     @Override
-    public void start() {
+    protected void start() {
         applySettings();
     }
 

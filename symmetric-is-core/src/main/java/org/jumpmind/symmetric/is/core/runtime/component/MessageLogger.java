@@ -20,6 +20,10 @@ public class MessageLogger extends AbstractComponentRuntime {
     public static final String TYPE = "Message Logger";
 
     @Override
+    protected void start() {
+    }
+    
+    @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
         getComponentStatistics().incrementInboundMessages();
 

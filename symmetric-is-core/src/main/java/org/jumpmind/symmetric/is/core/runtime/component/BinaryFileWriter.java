@@ -43,7 +43,7 @@ public class BinaryFileWriter extends AbstractComponentRuntime {
     OutputStream outStream;
 
     @Override
-    public void start() {
+    protected void start() {
         applySettings();
     }
 

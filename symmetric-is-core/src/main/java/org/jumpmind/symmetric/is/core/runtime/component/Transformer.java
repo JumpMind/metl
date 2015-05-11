@@ -34,7 +34,7 @@ public class Transformer extends AbstractComponentRuntime {
    
     
     @Override
-    public void start() {
+    protected void start() {
         
         
         transformsByAttributeId.clear();

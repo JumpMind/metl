@@ -45,7 +45,7 @@ public class SqlWriter extends AbstractDbComponent {
     String runWhen = PER_MESSAGE;
 
     @Override
-    public void start() {
+    protected void start() {
         applySettings();
         if (getResourceRuntime() == null) {
             throw new IllegalStateException("This component requires a data source");

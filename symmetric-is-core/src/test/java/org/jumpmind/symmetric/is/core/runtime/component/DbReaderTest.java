@@ -63,8 +63,7 @@ public class DbReaderTest {
     @Test
     public void testReaderFlowFromStartupMsg() throws Exception {
         DbReader reader = new DbReader();
-        reader.init(new ComponentContext(readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null));
-        reader.start();
+        reader.start(new ComponentContext(readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null));
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle( msg, msgTarget);
@@ -79,8 +78,7 @@ public class DbReaderTest {
     public void testReaderFlowFromSingleContentMsg() throws Exception {
 
         DbReader reader = new DbReader();
-        reader.init(new ComponentContext(readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null));
-        reader.start();
+        reader.start(new ComponentContext(readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null));
         Message message = new Message("fake step id");
         ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
         inboundPayload.add(new EntityData());

@@ -10,6 +10,10 @@ public class NoOp extends AbstractComponentRuntime {
     public static final String TYPE = "No Op";
 
     @Override
+    protected void start() {
+    }
+    
+    @Override
     public void handle( Message inputMessage, IMessageTarget messageTarget) {
         getComponentStatistics().incrementInboundMessages();
         getComponentStatistics().incrementOutboundMessages();

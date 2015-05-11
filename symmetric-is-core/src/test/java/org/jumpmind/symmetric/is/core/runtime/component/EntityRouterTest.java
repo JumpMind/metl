@@ -96,8 +96,7 @@ public class EntityRouterTest {
         MessageTarget target = new MessageTarget();
         EntityRouter router = new EntityRouter();
         ComponentContext context = new ComponentContext(step, flow, new ExecutionTrackerNoOp(), null, null);
-        router.init(context);
-        router.start();
+        router.start(context);
         Message inputMessage = new Message("");
         ArrayList<EntityData> datas = new ArrayList<EntityData>();
         for (EntityData entityData : data) {

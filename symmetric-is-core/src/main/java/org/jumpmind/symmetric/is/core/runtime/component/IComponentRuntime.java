@@ -5,9 +5,7 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
 public interface IComponentRuntime {
 
-    public void init(ComponentContext context);
-    
-    public void start();
+    public void start(ComponentContext context);
 
     public void handle(Message inputMessage, IMessageTarget messageTarget);
     

@@ -49,13 +49,11 @@ public class ComponentFactory extends AbstractFactory<IComponentRuntime> impleme
     }
 
     @Override
-    public IComponentRuntime create(ComponentContext context) {
+    public IComponentRuntime create(String componentType) {
         try {
-            String componentType = context.getFlowStep().getComponent().getType();
             Class<? extends IComponentRuntime> clazz = componentTypes.get(componentType);
             if (clazz != null) {
                 IComponentRuntime component = clazz.newInstance();
-                component.init(context);
                 return component;
             } else {
                 throw new IllegalStateException(

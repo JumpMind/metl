@@ -34,7 +34,7 @@ public class Deduper extends AbstractComponentRuntime {
     LinkedHashMap<String, EntityData> deduped = new LinkedHashMap<String, EntityData>();
 
     @Override
-    public void start() {
+    protected void start() {
         
         rowsPerMessage = getComponent().getInt(ROWS_PER_MESSAGE, rowsPerMessage);
     }

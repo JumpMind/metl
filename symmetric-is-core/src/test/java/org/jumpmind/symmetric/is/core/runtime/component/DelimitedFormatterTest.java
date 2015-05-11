@@ -40,8 +40,7 @@ public class DelimitedFormatterTest {
     @Test
     public void testDelimitedFormatterFromSingleContentMsg() throws Exception {
         DelimitedFormatter delimitedFormatter = new DelimitedFormatter();
-        delimitedFormatter.init(new ComponentContext(delimitedFormatterFlowStep, null, new ExecutionTrackerNoOp(), null, null));
-        delimitedFormatter.start();
+        delimitedFormatter.start(new ComponentContext(delimitedFormatterFlowStep, null, new ExecutionTrackerNoOp(), null, null));
         Message message = createInboundMessage();        
         MessageTarget msgTarget = new MessageTarget();
         delimitedFormatter.handle(message, msgTarget);

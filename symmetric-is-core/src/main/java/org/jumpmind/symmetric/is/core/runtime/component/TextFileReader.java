@@ -79,7 +79,7 @@ public class TextFileReader extends AbstractComponentRuntime {
     String encoding = "UTF-8";
 
     @Override
-    public void start() {
+    protected void start() {
         
         applySettings();
     }

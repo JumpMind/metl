@@ -48,8 +48,7 @@ public class BinaryFileWriterTest {
     @Test
     public void testBinaryWriter() throws Exception {
         BinaryFileWriter writer = new BinaryFileWriter();
-        writer.init(new ComponentContext(writerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null));        
-        writer.start();
+        writer.start(new ComponentContext(writerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null));        
         writer.handle(createBinaryMessageToWrite(), null);
         checkBinaryFile();
     }

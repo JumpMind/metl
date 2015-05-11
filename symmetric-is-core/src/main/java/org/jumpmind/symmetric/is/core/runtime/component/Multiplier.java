@@ -50,7 +50,7 @@ public class Multiplier extends AbstractComponentRuntime {
     List<Message> queuedWhileWaitingForMultiplier = new ArrayList<Message>();
 
     @Override
-    public void start() {
+    protected void start() {
         
 
         multipliersInitialized = false;

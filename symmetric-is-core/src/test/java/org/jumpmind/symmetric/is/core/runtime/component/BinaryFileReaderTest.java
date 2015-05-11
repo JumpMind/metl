@@ -7,9 +7,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
@@ -57,8 +55,7 @@ public class BinaryFileReaderTest {
     public void testBinarytReaderFlowFromStartupMsg() throws Exception {
 
         BinaryFileReader reader = new BinaryFileReader();        
-        reader.init(new ComponentContext(readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null));
-        reader.start();
+        reader.start(new ComponentContext(readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null));
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle(msg, msgTarget);

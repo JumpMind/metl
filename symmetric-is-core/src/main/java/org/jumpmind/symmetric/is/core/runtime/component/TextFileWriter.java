@@ -55,7 +55,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
     BufferedWriter bufferedWriter = null;
 
     @Override
-    public void start() {
+    protected void start() {
         
         applySettings();
     }

@@ -43,7 +43,7 @@ public class XmlFormatter extends AbstractComponentRuntime {
     List<XmlFormatterSetting> settings;
 
     @Override
-    public void start() {
+    protected void start() {
         properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         Setting templateSetting = getComponent().findSetting(XML_FORMATTER_TEMPLATE);
 

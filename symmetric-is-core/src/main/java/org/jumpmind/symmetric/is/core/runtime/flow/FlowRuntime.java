@@ -69,7 +69,7 @@ public class FlowRuntime {
             if (enabled) {
                 ComponentContext context = new ComponentContext(flowStep, flow, executionTracker, 
                         deployedResources.get(flowStep.getComponent().getResourceId()), deployment.parameters());
-                StepRuntime stepRuntime = new StepRuntime(componentFactory.create(context), executionTracker);
+                StepRuntime stepRuntime = new StepRuntime(componentFactory.create(flowStep.getComponent().getType()), context);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
         }

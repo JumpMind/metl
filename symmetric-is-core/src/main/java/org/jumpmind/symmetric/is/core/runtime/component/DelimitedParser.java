@@ -66,7 +66,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
     List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
 
     @Override
-    public void start() {
+    protected void start() {
         delimiter = getComponent().get(SETTING_DELIMITER, delimiter);
         quoteCharacter = getComponent().get(SETTING_QUOTE_CHARACTER, quoteCharacter);
         encoding = getComponent().get(SETTING_ENCODING, encoding);

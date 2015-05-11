@@ -87,7 +87,7 @@ public class FilePoller extends AbstractComponentRuntime {
     ArrayList<File> filesSent = new ArrayList<File>();
     
     @Override
-    public void start() {       
+    protected void start() {       
         Component component = getComponent();
         Resource resource = component.getResource();
         if (!resource.getType().equals(LocalFile.TYPE)) {

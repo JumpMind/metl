@@ -47,7 +47,7 @@ public class SequenceGenerator extends AbstractDbComponent {
     Long currentSequence;
 
     @Override
-    public void start() {
+    protected void start() {
         Component component = getComponent();
         String sequenceAttributeName = component.get(SEQ_ATTRIBUTE);
 

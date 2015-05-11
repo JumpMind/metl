@@ -47,7 +47,7 @@ public class Joiner extends AbstractComponentRuntime {
     Map<Object, EntityData> joinedData = new LinkedHashMap<Object, EntityData>();
 
     @Override
-    public void start() {
+    protected void start() {
         
         applySettings();
     }

@@ -36,7 +36,7 @@ public class Web extends AbstractComponentRuntime {
     String relativePath;
 
     @Override
-    public void start() {
+    protected void start() {
         IResourceRuntime httpResource = getResourceRuntime();
         if (httpResource == null || !(httpResource instanceof Http)) {
             throw new IllegalStateException(String.format(

@@ -44,7 +44,7 @@ public class MappingProcessor extends AbstractComponentRuntime {
     boolean setUnmappedAttributesToNull;
 
     @Override
-    public void start() {
+    protected void start() {
         
 
         validate();
