@@ -7,6 +7,7 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 @ResourceDefinition(typeName=Scp.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
 public class Scp extends AbstractResourceRuntime {
 
+    // TODO rename to Scp
     public static final String TYPE = "SSH File System";
 
     @SettingDefinition(order=10, required=true, type=Type.STRING, label="Server")
