@@ -3,10 +3,8 @@ package org.jumpmind.symmetric.is.core.runtime.resource;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -147,81 +145,4 @@ public class HttpStreamable implements IStreamable {
     public String toString() {
         return url;
     }
-
-    class HttpOutputStream extends OutputStream {
-
-        HttpURLConnection httpUrlConnection;
-
-        OutputStream os;
-
-        public HttpOutputStream(HttpURLConnection httpUrlConnection) {
-            this.httpUrlConnection = httpUrlConnection;
-            try {
-                this.os = this.httpUrlConnection.getOutputStream();
-            } catch (IOException e) {
-                throw new IoException(e);
-            }
-        }
-
-        @Override
-        public void write(int b) throws IOException {
-            this.os.write(b);
-        }
-
-        @Override
-        public void flush() throws IOException {
-            this.os.flush();
-        }
-
-        @Override
-        public void close() throws IOException {
-            this.os.close();
-            BufferedReader in = null;
-            int responseCode = -1;
-            try {
-                responseCode = httpUrlConnection.getResponseCode();
-                boolean isError = (httpUrlConnection.getResponseCode() >= 400);
-                if (isError) {
-                    in = new BufferedReader(new InputStreamReader(
-                            httpUrlConnection.getErrorStream()));
-                } else {
-                    in = new BufferedReader(new InputStreamReader(
-                            httpUrlConnection.getInputStream()));
-                }
-                if (log.isDebugEnabled() || isError) {
-                    if (isError) {
-                        log.warn("Error Response:");
-                    }
-                    String line = in.readLine();
-                    while (line != null) {
-                        if (isError) {
-                            log.warn(line);
-                        } else {
-                            log.debug(line);
-                        }
-                        line = in.readLine();
-                    }
-                }
-
-            } catch (IOException e) {
-                throw new IoException(e);
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException e) {
-
-                    }
-                }
-            }
-            if (responseCode != 200) {
-                throw new IoException("Received an unexpected response code of " + responseCode);
-            }
-
-            httpUrlConnection.disconnect();
-
-        }
-
-    }
-
 }
