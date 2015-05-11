@@ -35,6 +35,7 @@ import org.jumpmind.symmetric.is.core.runtime.component.ScriptExecutor;
 import org.jumpmind.symmetric.is.core.runtime.component.Transformer;
 import org.jumpmind.symmetric.is.core.runtime.component.XmlFormatter;
 import org.jumpmind.symmetric.is.core.runtime.resource.Datasource;
+import org.jumpmind.symmetric.is.core.runtime.resource.Http;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
 import org.jumpmind.symmetric.is.core.runtime.resource.Scp;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
@@ -136,6 +137,8 @@ public class ProjectNavigator extends VerticalLayout {
     MenuItem newSSHResource;
 
     MenuItem newDataSource;
+    
+    MenuItem newWebResource;
 
     MenuItem blank;
 
@@ -192,6 +195,8 @@ public class ProjectNavigator extends VerticalLayout {
         newFlow.setVisible(false);
         newModel.setVisible(false);
         newDataSource.setVisible(false);
+        newSSHResource.setVisible(false);
+        newWebResource.setVisible(false);
         newFileResource.setVisible(false);
         if (selected instanceof FolderName) {
             FolderName folder = (FolderName) selected;
@@ -202,6 +207,8 @@ public class ProjectNavigator extends VerticalLayout {
             } else if (folder.getName().equals("Resources")) {
                 newDataSource.setVisible(true);
                 newFileResource.setVisible(true);
+                newWebResource.setVisible(true);
+                newSSHResource.setVisible(true);
             } else {
                 blank.setVisible(true);
                 newMenu.setEnabled(false);
@@ -325,11 +332,20 @@ public class ProjectNavigator extends VerticalLayout {
 
         });
         
-        newSSHResource = newMenu.addItem("SSH File System", new Command() {
+        newSSHResource = newMenu.addItem("Scp", new Command() {
             
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 addNewSSHFileSystem();
+            }
+            
+        });
+        
+        newWebResource = newMenu.addItem("Web Resource", new Command() {
+            
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                addNewHttpResource();
             }
             
         });
@@ -925,6 +941,10 @@ public class ProjectNavigator extends VerticalLayout {
     
     protected void addNewSSHFileSystem() {
         addNewResource(Scp.TYPE, "Directory", Icons.FILE_SYSTEM);
+    }
+    
+    protected void addNewHttpResource() {
+        addNewResource(Http.TYPE, "Http", FontAwesome.CLOUD);
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {

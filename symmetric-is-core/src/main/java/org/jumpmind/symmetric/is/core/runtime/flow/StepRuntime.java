@@ -157,7 +157,11 @@ public class StepRuntime implements Runnable {
         for (StepRuntime targetStepRuntime : targetStepRuntimes) {
             targetStepRuntime.queue(new ShutdownMessage(componentRuntime.getComponentContext().getFlowStep().getId(), cancelled));
         }
-        this.componentRuntime.stop();
+        try {
+            this.componentRuntime.stop();
+        } catch (Exception e) {
+            recordError(e);
+        }
         running = false;
         executionTracker.flowStepFinished(componentRuntime.getComponentContext(), error, cancelled);
     }

@@ -26,6 +26,15 @@ public class Http extends AbstractResourceRuntime {
             required = true,
             label = "Http Method")
     public static final String HTTP_METHOD = "http.method";
+    
+    
+    @SettingDefinition(
+            type = Type.TEXT,
+            order = 25,
+            defaultValue = "text/xml; charset=utf-8",
+            required = true,
+            label = "Content Type")
+    public static final String CONTENT_TYPE = "content.type";
 
     @SettingDefinition(
             type = Type.INTEGER,
@@ -54,7 +63,9 @@ public class Http extends AbstractResourceRuntime {
     @Override
     protected void start(TypedProperties properties) {
         streamable = new HttpStreamable(properties.get(URL), properties.get(HTTP_METHOD,
-                HTTP_METHOD_GET), properties.getInt(HTTP_TIMEOUT), properties.get(SECURITY),
+                HTTP_METHOD_GET),
+                properties.get(CONTENT_TYPE),
+                properties.getInt(HTTP_TIMEOUT), properties.get(SECURITY),
                 properties.get(SECURITY_USERNAME), properties.get(SECURITY_PASSWORD));
     }
 

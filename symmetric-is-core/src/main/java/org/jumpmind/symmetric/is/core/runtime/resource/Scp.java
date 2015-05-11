@@ -8,43 +8,43 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 public class Scp extends AbstractResourceRuntime {
 
     // TODO rename to Scp
-    public static final String TYPE = "SSH File System";
+    public static final String TYPE = "Scp";
 
     @SettingDefinition(order=10, required=true, type=Type.STRING, label="Server")
-    public static final String SSH_SERVER = "ssh.server";
+    public static final String SCP_SERVER = "scp.server";
     
     @SettingDefinition(order=20, required=true, type=Type.INTEGER, label="Port", defaultValue="22")
-    public static final String SSH_PORT = "ssh.port";
+    public static final String SCP_PORT = "scp.port";
     
     // User is not required since it can be left blank
     @SettingDefinition(type = Type.STRING, order = 30, required = false, label="User")
-    public static final String SSH_USER = "ssh.user";
+    public static final String SCP_USER = "scp.user";
 
     // Password is not required since it can be blank.
     @SettingDefinition(type = Type.PASSWORD, order = 40, required = false, label="Password")
-    public static final String SSH_PASSWORD = "ssh.password";    
+    public static final String SCP_PASSWORD = "scp.password";    
     
     @SettingDefinition(order = 50, required = true, type = Type.STRING, label = "Base Path")
-    public final static String SSH_BASE_PATH = "ssh.base.path";
+    public final static String SCP_BASE_PATH = "scp.base.path";
 
     @SettingDefinition(type = Type.BOOLEAN, order = 60, required = true, provided = true, defaultValue = "false", label = "Must Exist")
-    public static final String SSH_MUST_EXIST = "ssh.must.exist";
+    public static final String SCP_MUST_EXIST = "scp.must.exist";
     
     @SettingDefinition(type = Type.INTEGER, order = 70, required = true, label = "Connection Timeout")
-    public static final String SSH_CONNECTION_TIMEOUT = "ssh.connection.timeout";
+    public static final String SCP_CONNECTION_TIMEOUT = "scp.connection.timeout";
     
     IStreamable streamableResource;
 
     @Override
     protected void start(TypedProperties properties) {
         streamableResource = new ScpStreamable(resource,
-                properties.getProperty(SSH_SERVER), 
-                properties.getInt(SSH_PORT),
-                properties.getProperty(SSH_USER),
-                properties.getProperty(SSH_PASSWORD),
-                properties.getProperty(SSH_BASE_PATH),                
-                properties.getInt(SSH_CONNECTION_TIMEOUT),
-                properties.is(SSH_MUST_EXIST));
+                properties.getProperty(SCP_SERVER), 
+                properties.getInt(SCP_PORT),
+                properties.getProperty(SCP_USER),
+                properties.getProperty(SCP_PASSWORD),
+                properties.getProperty(SCP_BASE_PATH),                
+                properties.getInt(SCP_CONNECTION_TIMEOUT),
+                properties.is(SCP_MUST_EXIST));
     }
 
     @Override

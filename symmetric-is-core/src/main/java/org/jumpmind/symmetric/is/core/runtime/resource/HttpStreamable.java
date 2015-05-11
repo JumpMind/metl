@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime.resource;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,16 +30,18 @@ public class HttpStreamable implements IStreamable {
 
     String url;
     String httpMethod;
+    String contentType;
     String security;
     String username;
     String password;
     int timeout;
     int contentLength;
 
-    public HttpStreamable(String url, String httpMethod, int timeout, String security,
+    public HttpStreamable(String url, String httpMethod, String contentType, int timeout, String security,
             String username, String password) {
         this.url = url;
         this.httpMethod = httpMethod;
+        this.contentType = contentType;
         this.timeout = timeout;
         this.security = security;
         this.username = username;
@@ -52,7 +55,7 @@ public class HttpStreamable implements IStreamable {
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist) {
         try {
-            HttpURLConnection httpConnection = buildHttpUrlConnection();
+            HttpURLConnection httpConnection = buildHttpUrlConnection(relativePath);
             int responseCode = httpConnection.getResponseCode();
             if (responseCode == 200) {
                 String type = httpConnection.getContentEncoding();
@@ -72,14 +75,21 @@ public class HttpStreamable implements IStreamable {
 
     @Override
     public OutputStream getOutputStream(String relativePath, boolean mustExist) {
-        HttpURLConnection httpUrlConnection = buildHttpUrlConnection();
+        HttpURLConnection httpUrlConnection = buildHttpUrlConnection(relativePath);
         return new HttpOutputStream(httpUrlConnection);
     }
 
-    protected HttpURLConnection buildHttpUrlConnection() {
+    protected HttpURLConnection buildHttpUrlConnection(String relativePath) {
         try {
-            HttpURLConnection httpUrlConnection = (HttpURLConnection) new URL(url).openConnection();
+            String fullUrl = url;
+            if (isNotBlank(relativePath)) {
+                fullUrl += relativePath;
+            }
+            HttpURLConnection httpUrlConnection = (HttpURLConnection) new URL(fullUrl).openConnection();
             setBasicAuthIfNeeded(httpUrlConnection);
+            if (isNotBlank(contentType)) {
+                httpUrlConnection.setRequestProperty("Content-Type", contentType);
+            }
             httpUrlConnection.setConnectTimeout(timeout);
             httpUrlConnection.setReadTimeout(timeout);
             httpUrlConnection.setRequestMethod(httpMethod);
@@ -131,6 +141,11 @@ public class HttpStreamable implements IStreamable {
     @Override
     public boolean supportsDelete() {
         return false;
+    }
+    
+    @Override
+    public String toString() {
+        return url;
     }
 
     class HttpOutputStream extends OutputStream {
