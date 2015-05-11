@@ -20,7 +20,7 @@ public class BinaryFileReader extends AbstractComponentRuntime {
 
     public static final String TYPE = "Binary File Reader";
 
-    @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Path and File")
+    @SettingDefinition(order = 10, required = true, type = Type.TEXT, label = "Path and File")
     public final static String BINARYFILEREADER_RELATIVE_PATH = "binaryfilereader.relative.path";
 
     @SettingDefinition(type = Type.BOOLEAN, order = 20, required = true, provided = true,

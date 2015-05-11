@@ -44,14 +44,14 @@ public class DbWriter extends AbstractComponentRuntime {
     @SettingDefinition(
             order = 5,
             required = false,
-            type = Type.STRING,
+            type = Type.TEXT,
             label = "Catalog")
     public final static String CATALOG = "catalog";
     
     @SettingDefinition(
             order = 6,
             required = false,
-            type = Type.STRING,
+            type = Type.TEXT,
             label = "Schema")
     public final static String SCHEMA = "schema";
     

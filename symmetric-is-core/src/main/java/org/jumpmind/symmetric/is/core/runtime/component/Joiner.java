@@ -29,7 +29,7 @@ public class Joiner extends AbstractComponentRuntime {
     @SettingDefinition(
             order = 10,
             required = true,
-            type = Type.STRING,
+            type = Type.TEXT,
             label = "Join Attribute")
     public final static String JOIN_ATTRIBUTE = "join.attribute";
 

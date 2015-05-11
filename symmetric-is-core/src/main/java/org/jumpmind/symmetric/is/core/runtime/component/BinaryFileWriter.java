@@ -21,7 +21,7 @@ public class BinaryFileWriter extends AbstractComponentRuntime {
 
     public static final String DEFAULT_CHARSET = "UTF-8";
 
-    @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Path and File")
+    @SettingDefinition(order = 10, required = true, type = Type.TEXT, label = "Path and File")
     public final static String BINARYFILEWRITER_RELATIVE_PATH = "binaryfilewriter.relative.path";
 
     @SettingDefinition(type = Type.BOOLEAN, order = 20, required = true, provided = true,

@@ -30,7 +30,7 @@ public class Web extends AbstractComponentRuntime {
 
     public static final String DEFAULT_CHARSET = "UTF-8";
 
-    @SettingDefinition(order = 10, required = false, type = Type.STRING, label = "Append To Url")
+    @SettingDefinition(order = 10, required = false, type = Type.TEXT, label = "Append To Url")
     public final static String RELATIVE_PATH = "relative.path";
 
     String relativePath;

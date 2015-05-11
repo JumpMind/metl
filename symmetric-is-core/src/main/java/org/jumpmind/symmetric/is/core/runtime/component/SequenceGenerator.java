@@ -29,14 +29,14 @@ public class SequenceGenerator extends AbstractDbComponent {
     @SettingDefinition(
             order = 10,
             required = true,
-            type = Type.STRING,
+            type = Type.TEXT,
             label = "Sequence Attribute Name")
     public final static String SEQ_ATTRIBUTE = "sequence.attribute";
 
     @SettingDefinition(
             order = 20,
             required = true,
-            type = Type.TEXT,
+            type = Type.MULTILINE_TEXT,
             label = "Select Starting Sequence Sql")
     public final static String SQL = "sequence.sql";
 

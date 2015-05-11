@@ -10,21 +10,21 @@ public class Scp extends AbstractResourceRuntime {
     // TODO rename to Scp
     public static final String TYPE = "Scp";
 
-    @SettingDefinition(order=10, required=true, type=Type.STRING, label="Server")
+    @SettingDefinition(order=10, required=true, type=Type.TEXT, label="Server")
     public static final String SCP_SERVER = "scp.server";
     
     @SettingDefinition(order=20, required=true, type=Type.INTEGER, label="Port", defaultValue="22")
     public static final String SCP_PORT = "scp.port";
     
     // User is not required since it can be left blank
-    @SettingDefinition(type = Type.STRING, order = 30, required = false, label="User")
+    @SettingDefinition(type = Type.TEXT, order = 30, required = false, label="User")
     public static final String SCP_USER = "scp.user";
 
     // Password is not required since it can be blank.
     @SettingDefinition(type = Type.PASSWORD, order = 40, required = false, label="Password")
     public static final String SCP_PASSWORD = "scp.password";    
     
-    @SettingDefinition(order = 50, required = true, type = Type.STRING, label = "Base Path")
+    @SettingDefinition(order = 50, required = true, type = Type.TEXT, label = "Base Path")
     public final static String SCP_BASE_PATH = "scp.base.path";
 
     @SettingDefinition(type = Type.BOOLEAN, order = 60, required = true, provided = true, defaultValue = "false", label = "Must Exist")

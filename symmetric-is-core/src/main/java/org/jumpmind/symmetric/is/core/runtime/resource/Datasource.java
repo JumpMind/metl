@@ -11,19 +11,19 @@ public class Datasource extends AbstractResourceRuntime implements IResourceRunt
 
     public static final String TYPE = "Database";
     
-    @SettingDefinition(order = 0, required = true, type = Type.STRING, defaultValue = "org.h2.Driver", label = "Driver")
+    @SettingDefinition(order = 0, required = true, type = Type.TEXT, defaultValue = "org.h2.Driver", label = "Driver")
     public final static String DB_POOL_DRIVER = "db.driver";
 
-    @SettingDefinition(order = 10, required = true, type = Type.STRING, defaultValue = "jdbc:h2:mem:db", label = "Url")
+    @SettingDefinition(order = 10, required = true, type = Type.TEXT, defaultValue = "jdbc:h2:mem:db", label = "Url")
     public final static String DB_POOL_URL = "db.url";
 
-    @SettingDefinition(order = 20, type = Type.STRING, label = "User")
+    @SettingDefinition(order = 20, type = Type.TEXT, label = "User")
     public final static String DB_POOL_USER = "db.user";
 
     @SettingDefinition(order = 30, type = Type.PASSWORD, label = "Password")
     public final static String DB_POOL_PASSWORD = "db.password";
 
-    @SettingDefinition(order = 40, type = Type.STRING, label = "Validation Query")
+    @SettingDefinition(order = 40, type = Type.TEXT, label = "Validation Query")
     public final static String DB_POOL_VALIDATION_QUERY = "db.validation.query";
 
     @SettingDefinition(order = 50, type = Type.INTEGER, defaultValue = "5", label = "Initial Size")
@@ -53,10 +53,10 @@ public class Datasource extends AbstractResourceRuntime implements IResourceRunt
     @SettingDefinition(order = 130, type = Type.BOOLEAN, defaultValue = "true", label = "Test while Idle")
     public final static String DB_POOL_TEST_WHILE_IDLE = "db.test.while.idle";
 
-    @SettingDefinition(order = 140, type = Type.STRING, label = "Init Sql")
+    @SettingDefinition(order = 140, type = Type.TEXT, label = "Init Sql")
     public final static String DB_POOL_INIT_SQL = "db.init.sql";
 
-    @SettingDefinition(order = 150, type = Type.STRING, label = "Resource Properties")
+    @SettingDefinition(order = 150, type = Type.TEXT, label = "Resource Properties")
     public final static String DB_POOL_RESOURCE_PROPERTIES = "db.resource.properties";
 
     @SettingDefinition(order = 170, type = Type.INTEGER, defaultValue = "1000", label = "Fetch Size")

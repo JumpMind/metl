@@ -38,7 +38,7 @@ public class DbReader extends AbstractDbComponent {
 
     public static final String TYPE = "Database Reader";
 
-    @SettingDefinition(order = 0, required = true, type = Type.TEXT, label = "Sql")
+    @SettingDefinition(order = 0, required = true, type = Type.MULTILINE_TEXT, label = "Sql")
     public final static String SQL = "db.reader.sql";
 
     @SettingDefinition(

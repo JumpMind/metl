@@ -36,7 +36,7 @@ public class FilePoller extends AbstractComponentRuntime {
 
     public static final String TYPE = "File Poller";
 
-    @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "File Pattern")
+    @SettingDefinition(order = 10, required = true, type = Type.TEXT, label = "File Pattern")
     public final static String SETTING_FILE_PATTERN = "file.pattern";
     
     @SettingDefinition(order = 20, type = Type.BOOLEAN, defaultValue="false", label = "Search Recursively")
@@ -48,20 +48,20 @@ public class FilePoller extends AbstractComponentRuntime {
     @SettingDefinition(order = 35, type = Type.BOOLEAN, defaultValue="false", label = "Archive On Success")
     public final static String SETTING_ARCHIVE_ON_SUCCESS = "archive.on.success";
     
-    @SettingDefinition(order = 40, type = Type.STRING, label = "Archive On Success Path")
+    @SettingDefinition(order = 40, type = Type.TEXT, label = "Archive On Success Path")
     public final static String SETTING_ARCHIVE_ON_SUCCESS_PATH = "archive.on.success.path";
     
     @SettingDefinition(order = 45, type = Type.BOOLEAN, defaultValue="false", label = "Archive On Error")
     public final static String SETTING_ARCHIVE_ON_ERROR = "archive.on.error";
 
-    @SettingDefinition(order = 50, type = Type.STRING, label = "Archive On Error Path")
+    @SettingDefinition(order = 50, type = Type.TEXT, label = "Archive On Error Path")
     public final static String SETTING_ARCHIVE_ON_ERROR_PATH = "archive.on.error.path";
 
 
     @SettingDefinition(order = 60, type = Type.BOOLEAN, defaultValue="false", label = "Use Trigger File")
     public final static String SETTING_USE_TRIGGER_FILE = "use.trigger.file";
 
-    @SettingDefinition(order = 70, type = Type.STRING, label = "Relative Trigger File Path")
+    @SettingDefinition(order = 70, type = Type.TEXT, label = "Relative Trigger File Path")
     public final static String SETTING_TRIGGER_FILE_PATH = "trigger.file.path";
     
     String filePattern;

@@ -380,7 +380,7 @@ public class PropertySheet extends Panel {
                     integerField.setDescription(description);
                     formLayout.addComponent(integerField);
                     break;
-                case STRING:
+                case TEXT:
                     ImmediateUpdateTextField textField = new ImmediateUpdateTextField(
                             definition.label()) {
                         private static final long serialVersionUID = 1L;
@@ -445,7 +445,7 @@ public class PropertySheet extends Panel {
                     });
                     formLayout.addComponent(editor);
                     break;
-                case TEXT:
+                case MULTILINE_TEXT:
                 case XML:
                     ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(definition.label()) {
                         private static final long serialVersionUID = 1L;

@@ -41,14 +41,14 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
     @SettingDefinition(
             order = 10,
             required = true,
-            type = Type.STRING,
+            type = Type.TEXT,
             label = "Delimiter",
             defaultValue = ",")
     public final static String DELIMITED_FORMATTER_DELIMITER = "delimited.formatter.delimiter";
 
     @SettingDefinition(
             order = 20,
-            type = Type.STRING,
+            type = Type.TEXT,
             label = "Quote Character",
             defaultValue = "\"")
     public final static String DELIMITED_FORMATTER_QUOTE_CHARACTER = "delimited.formatter.quote.character";

@@ -36,7 +36,7 @@ public class TextFileReader extends AbstractComponentRuntime {
             label = "Get File Name From Message")
     public final static String SETTING_GET_FILE_FROM_MESSAGE = "get.file.name.from.message";
 
-    @SettingDefinition(order = 10, type = Type.STRING, label = "File Path")
+    @SettingDefinition(order = 10, type = Type.TEXT, label = "File Path")
     public final static String SETTING_RELATIVE_PATH = "textfilereader.relative.path";
 
     @SettingDefinition(
@@ -61,7 +61,7 @@ public class TextFileReader extends AbstractComponentRuntime {
             label = "Delete On Complete")
     public final static String SETTING_DELETE_ON_COMPLETE = "delete.on.complete";
 
-    @SettingDefinition(order = 60, type = Type.STRING, label = "Encoding", defaultValue = "UTF-8")
+    @SettingDefinition(order = 60, type = Type.TEXT, label = "Encoding", defaultValue = "UTF-8")
     public final static String SETTING_ENCODING = "textfilereader.encoding";
 
     String relativePathAndFile;

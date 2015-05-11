@@ -38,19 +38,19 @@ public class DelimitedParser extends AbstractComponentRuntime {
     @SettingDefinition(
             order = 10,
             required = true,
-            type = Type.STRING,
+            type = Type.TEXT,
             label = "Delimiter",
             defaultValue = ",")
     public final static String SETTING_DELIMITER = "delimiter";
 
     @SettingDefinition(
             order = 20,
-            type = Type.STRING,
+            type = Type.TEXT,
             label = "Quote Character",
             defaultValue = "\"")
     public final static String SETTING_QUOTE_CHARACTER = "quote.character";
 
-    @SettingDefinition(order = 30, type = Type.STRING, label = "Encoding", defaultValue = "UTF-8")
+    @SettingDefinition(order = 30, type = Type.TEXT, label = "Encoding", defaultValue = "UTF-8")
     public final static String SETTING_ENCODING = "encoding";
 
     public final static String DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION;

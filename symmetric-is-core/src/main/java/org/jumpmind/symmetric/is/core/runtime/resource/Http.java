@@ -15,7 +15,7 @@ public class Http extends AbstractResourceRuntime {
 
     public static final String TYPE = "Http";
 
-    @SettingDefinition(type = Type.STRING, order = 10, required = true, label = "URL")
+    @SettingDefinition(type = Type.TEXT, order = 10, required = true, label = "URL")
     public static final String URL = "url";
 
     @SettingDefinition(
@@ -29,7 +29,7 @@ public class Http extends AbstractResourceRuntime {
     
     
     @SettingDefinition(
-            type = Type.TEXT,
+            type = Type.MULTILINE_TEXT,
             order = 25,
             defaultValue = "text/xml; charset=utf-8",
             required = true,
@@ -52,7 +52,7 @@ public class Http extends AbstractResourceRuntime {
             label = "Security")
     public static final String SECURITY = "security.type";
 
-    @SettingDefinition(type = Type.STRING, order = 40, required = false, label = "User")
+    @SettingDefinition(type = Type.TEXT, order = 40, required = false, label = "User")
     public static final String SECURITY_USERNAME = "security.usertoken.username";
 
     @SettingDefinition(type = Type.PASSWORD, order = 50, required = false, label = "Password")

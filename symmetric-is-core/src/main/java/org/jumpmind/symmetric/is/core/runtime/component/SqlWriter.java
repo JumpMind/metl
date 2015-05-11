@@ -33,7 +33,7 @@ public class SqlWriter extends AbstractDbComponent {
 
     public static final String TYPE = "Sql Writer";
 
-    @SettingDefinition(order = 10, required = true, type = Type.TEXT, label = "Sql")
+    @SettingDefinition(order = 10, required = true, type = Type.MULTILINE_TEXT, label = "Sql")
     public final static String SQL = "sql";
 
     @SettingDefinition(order = 0, required = false, type = Type.CHOICE, choices = { PER_MESSAGE,

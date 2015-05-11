@@ -27,7 +27,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
 
     public static final String DEFAULT_CHARSET = "UTF-8";
 
-    @SettingDefinition(order = 10, required = true, type = Type.STRING, label = "Path and File")
+    @SettingDefinition(order = 10, required = true, type = Type.TEXT, label = "Path and File")
     public final static String TEXTFILEWRITER_RELATIVE_PATH = "textfilewriter.relative.path";
 
     @SettingDefinition(type = Type.BOOLEAN, order = 30, required = true, 

@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface SettingDefinition {
 
     public enum Type {
-        STRING, INTEGER, BOOLEAN, CHOICE, PASSWORD, XML, TEXT, SCRIPT, SOURCE_STEP
+        TEXT, INTEGER, BOOLEAN, CHOICE, PASSWORD, XML, MULTILINE_TEXT, SCRIPT, SOURCE_STEP
     };
 
     int order() default 0;
