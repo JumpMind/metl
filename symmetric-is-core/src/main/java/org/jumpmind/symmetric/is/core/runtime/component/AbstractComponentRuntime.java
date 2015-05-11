@@ -53,8 +53,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return context;
     }
     
-    @Override
-    public ComponentStatistics getComponentStatistics() {
+    protected ComponentStatistics getComponentStatistics() {
     	return context.getComponentStatistics();
     }
         

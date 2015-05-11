@@ -17,9 +17,7 @@ public interface IComponentRuntime {
     
     public void flowCompletedWithErrors(Throwable myError);
     
-    public void stop();
-    
-    public ComponentStatistics getComponentStatistics();
+    public void stop();   
 
     public ComponentContext getComponentContext(); 
     
