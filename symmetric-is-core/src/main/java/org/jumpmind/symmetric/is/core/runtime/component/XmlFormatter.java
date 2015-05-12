@@ -2,12 +2,17 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.Namespace;
+import org.jdom2.filter.ElementFilter;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
 import org.jdom2.output.Format;
@@ -90,14 +95,28 @@ public class XmlFormatter extends AbstractComponentRuntime {
 
     private String processInputRow(EntityData inputRow) {
         Document document = templateDocument.clone();
-
+        
+        /*
+         * Temporarily remove namespaces
+         */
+        Map<Element, Namespace> namespaces = new HashMap<Element, Namespace>();
+        Namespace rootNameSpace = document.getRootElement().getNamespace();
+        document.getRootElement().setNamespace(null);
+        for (Element el : document.getRootElement().getDescendants(new ElementFilter())) {
+            Namespace nsp = el.getNamespace();
+            if (nsp != null) {
+                el.setNamespace(null);
+                namespaces.put(el, nsp);
+            }
+        }
+        
         for (XmlFormatterSetting setting : settings) {
             String attributeId = setting.getComponentAttributeSetting().getAttributeId();
             if (inputRow.containsKey(attributeId)) {
                 Object inputValue = inputRow.get(setting.getComponentAttributeSetting()
                         .getAttributeId());
                 String value = (inputValue == null) ? null : inputValue.toString();
-                List<Object> matches = setting.getExpression().evaluate(document);
+                List<Object> matches = setting.getExpression().evaluate(document.getRootElement());
                 if (matches.size() == 0) {
                     log(LogLevel.WARN, "XPath expression " + setting.getExpression().getExpression() + " did not find any matches");
                 }
@@ -110,7 +129,16 @@ public class XmlFormatter extends AbstractComponentRuntime {
                 }
             }
         }
-
+        
+        /*
+         * Add temporarily removed namespaces back
+         */
+        Set<Element> elements = namespaces.keySet();
+        for (Element element : elements) {
+            element.setNamespace(namespaces.get(element));
+        }
+        document.getRootElement().setNamespace(rootNameSpace);
+        
         XMLOutputter xmlOutputter = new XMLOutputter();
         xmlOutputter.setFormat(Format.getPrettyFormat());
         return xmlOutputter.outputString(document);
