@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -151,8 +153,16 @@ public class DbWriter extends AbstractComponentRuntime {
         quoteIdentifiers = properties.is(QUOTE_IDENTIFIERS);
         stopProcessingOnError = properties.is(STOP_PROCESSING_ON_ERROR, true);
         fitToColumn = properties.is(FIT_TO_COLUMN);
+        
         catalogName = FormatUtils.replaceTokens(properties.get(CATALOG), context.getFlowParametersAsString(), true);
+        if (isBlank(catalogName)) {
+            catalogName = null;
+        }
+        
         schemaName = FormatUtils.replaceTokens(properties.get(SCHEMA), context.getFlowParametersAsString(), true);
+        if (isBlank(schemaName)) {
+            schemaName = null;
+        }
 
         DataSource dataSource = (DataSource)getResourceReference();
         platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource,
