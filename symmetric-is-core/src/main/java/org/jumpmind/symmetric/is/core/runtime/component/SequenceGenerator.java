@@ -81,6 +81,9 @@ public class SequenceGenerator extends AbstractDbComponent {
             log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
             currentSequence = getJdbcTemplate()
                     .queryForObject(sqlToExecute, context.getFlowParameters(), Long.class);
+            if (currentSequence == null) {
+                currentSequence = 1l;
+            }
         }
 
         if (!(inputMessage instanceof StartupMessage)) {

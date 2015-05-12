@@ -49,8 +49,22 @@ public class DelimitedParser extends AbstractComponentRuntime {
             label = "Quote Character",
             defaultValue = "\"")
     public final static String SETTING_QUOTE_CHARACTER = "quote.character";
+    
+    @SettingDefinition(
+            order = 30,
+            type = Type.INTEGER,
+            label = "Number of Header Lines to Skip",
+            defaultValue = "0")
+    public final static String SETTING_HEADER_LINES_TO_SKIP = "header.lines.to.skip";
+    
+    @SettingDefinition(
+            order = 40,
+            type = Type.INTEGER,
+            label = "Number of Footer Lines to Skip",
+            defaultValue = "0")
+    public final static String SETTING_FOOTER_LINES_TO_SKIP = "footer.lines.to.skip";
 
-    @SettingDefinition(order = 30, type = Type.TEXT, label = "Encoding", defaultValue = "UTF-8")
+    @SettingDefinition(order = 50, type = Type.TEXT, label = "Encoding", defaultValue = "UTF-8")
     public final static String SETTING_ENCODING = "encoding";
 
     public final static String DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION;
@@ -62,6 +76,10 @@ public class DelimitedParser extends AbstractComponentRuntime {
     String quoteCharacter = "\"";
 
     String encoding = "UTF-8";
+    
+    int numberOfFooterLinesToSkip = 0;
+    
+    int numberOfHeaderLinesToSkip = 0;
 
     List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
 
@@ -70,12 +88,13 @@ public class DelimitedParser extends AbstractComponentRuntime {
         delimiter = getComponent().get(SETTING_DELIMITER, delimiter);
         quoteCharacter = getComponent().get(SETTING_QUOTE_CHARACTER, quoteCharacter);
         encoding = getComponent().get(SETTING_ENCODING, encoding);
+        numberOfFooterLinesToSkip = getComponent().getInt(SETTING_FOOTER_LINES_TO_SKIP, 0);
+        numberOfHeaderLinesToSkip = getComponent().getInt(SETTING_HEADER_LINES_TO_SKIP, 0);
         convertAttributeSettingsToAttributeFormat();
         if (getComponent().getOutputModel() == null) {
             throw new IllegalStateException(
                     "This component requires an output model.  Please select one.");
         }
-
     }
 
     @Override
@@ -86,14 +105,21 @@ public class DelimitedParser extends AbstractComponentRuntime {
 
         ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
         Message outputMessage = inputMessage.copy(getFlowStepId(), outputPayload);
-
+        int headerRowsToSkip = numberOfHeaderLinesToSkip;
         try {
-            // TODO support headers
+            int rowCount = 0;
             for (String inputRow : inputRows) {
-                EntityData data = processInputRow(inputRow);
-                if (data != null) {
-                    outputPayload.add(data);
+                if (headerRowsToSkip == 0) {
+                    if (rowCount + numberOfFooterLinesToSkip < inputRows.size()) {
+                        EntityData data = processInputRow(inputRow);
+                        if (data != null) {
+                            outputPayload.add(data);
+                        }
+                    }
+                } else {
+                    headerRowsToSkip--;
                 }
+                rowCount++;
             }
         } catch (IOException e) {
             throw new IoException(e);
