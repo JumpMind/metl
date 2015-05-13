@@ -21,15 +21,13 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     @Override
     public void beforeFlow(String executionId) {
         this.executionId = executionId;
-        String msg = String.format("started execution: %s,  for deployment: %s", executionId,
-                deployment.getId());
+        String msg = String.format("Flow started for deployment: %s", deployment.getName());
         log.info(msg);
     }
 
     @Override
     public void afterFlow() {
-        String msg = String.format("finished execution: %s,  for deployment: %s", executionId,
-                deployment.getId());
+        String msg = String.format("Flow finished for deployment: %s", deployment.getName());
         log.info(msg);
     }
 
@@ -37,9 +35,8 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     public void beforeHandle(ComponentContext context) {
         FlowStep flowStep = context.getFlowStep();
         String msg = String.format(
-                "started handing step message for execution: %s,  for deployment: %s,  component: %s:%s",
-                executionId, deployment.getId(), flowStep.getComponent().getName(), flowStep
-                        .getComponent().getId());
+                "Handling message for deployment: %s for component: %s",
+                deployment.getName(), flowStep.getName());
         log.debug(msg);
     }
 
@@ -47,9 +44,8 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     public void afterHandle(ComponentContext context, Throwable error) {
         FlowStep flowStep = context.getFlowStep();
         String msg = String.format(
-                "finished handing step message for execution: %s,  for deployment: %s,  component: %s:%s",
-                executionId, deployment.getId(), flowStep.getComponent().getName(), flowStep
-                        .getComponent().getId());
+                "Finished handling message for deployment: %s for component: %s",
+                deployment.getName(), flowStep.getName());
         log.debug(msg);
     }
     
@@ -57,9 +53,8 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     public void flowStepStarted(ComponentContext context) {
         FlowStep flowStep = context.getFlowStep();
         String msg = String.format(
-                "step started for execution: %s,  for deployment: %s,  component: %s:%s",
-                executionId, deployment.getId(), flowStep.getComponent().getName(), flowStep
-                        .getComponent().getId());
+                "Started flow step for deployment: %s for component: %s",
+                deployment.getName(), flowStep.getName());
         log.info(msg);
     }
     
@@ -67,9 +62,8 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     public void flowStepFinished(ComponentContext context, Throwable error, boolean cancelled) {
         FlowStep flowStep = context.getFlowStep();
         String msg = String.format(
-                "step completed for execution: %s,  for deployment: %s,  component: %s:%s",
-                executionId, deployment.getId(), flowStep.getComponent().getName(), flowStep
-                        .getComponent().getId());
+                "Finished flow step for deployment: %s for component: %s",
+                deployment.getName(), flowStep.getName());
         log.info(msg);
     }
     
@@ -80,11 +74,8 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     @Override
     public void log(LogLevel level, ComponentContext context, String output, Object...args) {
         if (deployment.asLogLevel().log(level)) {
-            String msg = String
-                    .format("log output from execution: %s, for deployment: %s,  component: %s:%s,  output: %s",
-                            executionId, deployment.getId(), context.getFlowStep().getComponent()
-                                    .getName(), context.getFlowStep().getComponent().getId(),
-                            output);
+            String msg = String.format(
+                    output, args);
             switch (level) {
                 case DEBUG:
                     log.debug(msg);
