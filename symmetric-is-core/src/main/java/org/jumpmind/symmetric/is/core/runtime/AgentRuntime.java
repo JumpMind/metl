@@ -273,8 +273,6 @@ public class AgentRuntime {
             try {
                 log.info("Deploying '{}' to '{}'", deployment.getFlow().toString(), agent.getName());
     
-                configurationService.refresh(deployment.getFlow());
-                
                 deployResources(deployment.getFlow());
     
                 FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory,
@@ -373,8 +371,9 @@ public class AgentRuntime {
         public void run() {
             AgentDeployment deployment = flowRuntime.getDeployment();
             try {
-                log.info("Scheduled '{}' on '{}' is running", deployment.getFlow().toString(),
+                log.info("Scheduled deployment '{}' is runnong on the '{}' agent", deployment.getName(),
                         agent.getName());
+                configurationService.refresh(deployment.getFlow());
                 flowRuntime.start(executionId, deployedResources);
             } catch (Exception e) {
                 log.error("Error while waiting for the flow to complete", e);
