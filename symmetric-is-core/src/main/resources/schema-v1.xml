@@ -298,6 +298,7 @@
         <column name="component_id" type="CHAR" size="36" required="true" description="A unique identifer" />
         <column name="x" type="INTEGER" default="10" required="true" />
         <column name="y" type="INTEGER" default="10" required="true" />
+        <column name="approximate_order" type="INTEGER" default="0" required="true" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -432,6 +433,7 @@
         <column name="execution_id" type="CHAR" size="36" required="true" description="A unique identifer" />
         <column name="flow_step_id" type="CHAR" size="36" required="true" description="A unique identifer" />
         <column name="component_name" type="VARCHAR" required="true" size="255" description="" />
+        <column name="approximate_order" type="INTEGER" default="0" required="true" />
         <column name="status" type="VARCHAR" size="255" description="" />
         <column name="messages_received" type="INTEGER" default="0" required="true" />
         <column name="messages_produced" type="INTEGER" default="0" required="true" />

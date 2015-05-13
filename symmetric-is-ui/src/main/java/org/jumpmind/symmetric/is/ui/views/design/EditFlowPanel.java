@@ -410,7 +410,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                     flowStep.setX(node.getX());
                     flowStep.setY(node.getY());
                 }
-                configurationService.save(flow);
+                flow.calculateApproximateOrder();
+                configurationService.save(flowStep);
             } else if (e instanceof LinkEvent) {
                 LinkEvent event = (LinkEvent) e;
                 if (!event.isRemoved()) {

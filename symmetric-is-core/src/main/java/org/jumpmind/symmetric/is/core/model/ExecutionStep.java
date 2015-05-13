@@ -20,6 +20,8 @@ public class ExecutionStep extends AbstractObject {
     
     private long entitiesProcessed;
     
+    private int approximateOrder;
+    
     private Date startTime;
     
     private Date endTime;
@@ -107,6 +109,14 @@ public class ExecutionStep extends AbstractObject {
 	
 	public long getEntitiesProcessed() {
         return entitiesProcessed;
+    }
+	
+	public void setApproximateOrder(int approximateOrder) {
+        this.approximateOrder = approximateOrder;
+    }
+	
+	public int getApproximateOrder() {
+        return approximateOrder;
     }
 
 }

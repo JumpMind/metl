@@ -1,6 +1,8 @@
 package org.jumpmind.symmetric.is.core.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -22,7 +24,7 @@ public class Flow extends AbstractObject {
     List<FlowStep> flowSteps;
 
     List<FlowStepLink> flowStepLinks;
-    
+
     List<FlowParameter> flowParameters;
 
     boolean deleted = false;
@@ -75,7 +77,7 @@ public class Flow extends AbstractObject {
     public boolean isSettingNameAllowed() {
         return true;
     }
-    
+
     public Set<Resource> findResources() {
         HashSet<Resource> resources = new HashSet<Resource>();
         for (FlowStep flowStep : flowSteps) {
@@ -110,7 +112,7 @@ public class Flow extends AbstractObject {
         }
         return links;
     }
-    
+
     public List<FlowStepLink> findFlowStepLinksWithTarget(String targetNodeId) {
         List<FlowStepLink> links = new ArrayList<FlowStepLink>();
         if (flowStepLinks != null) {
@@ -122,7 +124,6 @@ public class Flow extends AbstractObject {
         }
         return links;
     }
-
 
     public FlowStep findFlowStepWithId(String id) {
         for (FlowStep flowStep : flowSteps) {
@@ -217,12 +218,71 @@ public class Flow extends AbstractObject {
     public boolean isDeleted() {
         return deleted;
     }
-    
+
     public List<FlowParameter> getFlowParameters() {
         return flowParameters;
     }
-    
+
     public void setFlowParameters(List<FlowParameter> flowParameters) {
         this.flowParameters = flowParameters;
+    }
+
+    public void calculateApproximateOrder() {
+        int order = 0;
+        Collections.sort(flowSteps, new YSorter());
+        List<FlowStep> starterSteps = findStartSteps();
+        for (FlowStep starterStep : starterSteps) {
+            order = calculateApproximateOrder(order, starterStep);
+        }
+    }
+    
+    protected int calculateApproximateOrder(int order, FlowStep starterStep) {
+        starterStep.setApproximateOrder(order++);
+        
+        List<FlowStep> children = new ArrayList<FlowStep>();
+        for (FlowStepLink flowStepLink : flowStepLinks) {
+            if (starterStep.getId().equals(flowStepLink.getSourceStepId())) {                
+                FlowStep child = findFlowStepWithId(flowStepLink.getTargetStepId());
+                children.add(child);
+            }
+        }
+        Collections.sort(children, new YSorter());
+        for (FlowStep child : children) {
+            order = calculateApproximateOrder(order, child);    
+        }
+        return order;
+    }
+
+    public List<FlowStep> findStartSteps() {
+        List<FlowStep> starterSteps = new ArrayList<FlowStep>();
+        for (FlowStep flowStep : flowSteps) {
+            boolean isTargetStep = false;
+            for (FlowStepLink flowStepLink : flowStepLinks) {
+                if (flowStep.getId().equals(flowStepLink.getTargetStepId())) {
+                    isTargetStep = true;
+                }
+            }
+
+            if (!isTargetStep) {
+                starterSteps.add(flowStep);
+            }
+        }
+        Collections.sort(starterSteps, new XSorter());
+        Collections.sort(starterSteps, new YSorter());
+        return starterSteps;
+    }
+
+    static public class XSorter implements Comparator<FlowStep> {
+        @Override
+        public int compare(FlowStep o1, FlowStep o2) {
+            return new Integer(o1.getX()).compareTo(new Integer(o2.getX()));
+        }
+    }
+    
+    static public class YSorter implements Comparator<FlowStep> {
+        @Override
+        public int compare(FlowStep o1, FlowStep o2) {
+            return new Integer(o1.getY()).compareTo(new Integer(o2.getY()));
+        }
     }
 }

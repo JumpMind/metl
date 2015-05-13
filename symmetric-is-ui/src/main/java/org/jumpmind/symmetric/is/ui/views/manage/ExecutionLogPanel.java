@@ -182,7 +182,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
     protected ExecutionData getExecutionData() {
         ExecutionData data = new ExecutionData();
         data.execution = executionService.findExecution(executionId);
-        data.steps = executionService.findExecutionStep(executionId);
+        data.steps = executionService.findExecutionSteps(executionId);
         data.logs = executionService.findExecutionStepLog((Set<String>) stepTable.getValue());
         return data;
     }

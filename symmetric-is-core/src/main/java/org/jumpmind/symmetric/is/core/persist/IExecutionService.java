@@ -17,7 +17,7 @@ public interface IExecutionService {
 
     public Execution findExecution(String id);
 
-    public List<ExecutionStep> findExecutionStep(String executionId);
+    public List<ExecutionStep> findExecutionSteps(String executionId);
 
     public List<ExecutionStepLog> findExecutionStepLog(String executionStepId);
     

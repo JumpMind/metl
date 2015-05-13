@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.core.persist;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,10 +38,17 @@ abstract public class AbstractExecutionService extends AbstractService implement
         return e;
     }
 
-    public List<ExecutionStep> findExecutionStep(String executionId) {
+    public List<ExecutionStep> findExecutionSteps(String executionId) {
     	Map<String, Object> args = new HashMap<String, Object>();
     	args.put("executionId", executionId);
-    	return persistenceManager.find(ExecutionStep.class, args, null, null, tableName(ExecutionStep.class));
+    	List<ExecutionStep> steps = persistenceManager.find(ExecutionStep.class, args, null, null, tableName(ExecutionStep.class));
+    	Collections.sort(steps, new Comparator<ExecutionStep>() {
+    	    @Override
+    	    public int compare(ExecutionStep o1, ExecutionStep o2) {
+    	        return new Integer(o1.getApproximateOrder()).compareTo(new Integer(o2.getApproximateOrder()));
+    	    }
+        });
+    	return steps;
     }
 
     public List<ExecutionStepLog> findExecutionStepLog(String executionStepId) {
