@@ -68,9 +68,10 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
             }
         }
         return template.query(String.format(
-                "select id, agent_id, flow_id, agent_name, host_name, flow_name, status, start_time, end_time "
+                "select id, agent_id, flow_id, deployment_id, deployment_name, agent_name, "
+                + "host_name, flow_name, status, start_time, end_time "
                         + "from %1$s_execution " + "where " + whereClause
-                        + "order by create_time limit " + limit, tablePrefix),
+                        + "order by create_time desc limit " + limit, tablePrefix),
                 new ISqlRowMapper<Execution>() {
                     public Execution mapRow(Row row) {
                         Execution e = new Execution();
@@ -80,6 +81,8 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
                         e.setAgentName(row.getString("agent_name"));
                         e.setHostName(row.getString("host_name"));
                         e.setFlowName(row.getString("flow_name"));
+                        e.setDeploymentId(row.getString("deployment_id"));
+                        e.setDeploymentName(row.getString("deployment_name"));
                         e.setStatus(row.getString("status"));
                         e.setStartTime(row.getDateTime("start_time"));
                         e.setEndTime(row.getDateTime("end_time"));

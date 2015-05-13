@@ -10,6 +10,10 @@ public class Execution extends AbstractObject {
     
     String flowId;
     
+    String deploymentId;
+    
+    String deploymentName;
+    
     String agentName;
     
     String hostName;
@@ -107,5 +111,21 @@ public class Execution extends AbstractObject {
 	public void setHostName(String hostName) {
 		this.hostName = hostName;
 	}
+	
+	public void setDeploymentId(String deploymentId) {
+        this.deploymentId = deploymentId;
+    }
+	
+	public String getDeploymentId() {
+        return deploymentId;
+    }
+	
+	public void setDeploymentName(String deploymentName) {
+        this.deploymentName = deploymentName;
+    }
+	
+	public String getDeploymentName() {
+        return deploymentName;
+    }
 
 }

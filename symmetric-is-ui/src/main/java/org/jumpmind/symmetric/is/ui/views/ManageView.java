@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.ui.views;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -176,8 +178,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                 }
             }
         });
-		table.setVisibleColumns(new Object[] { "agentName", "hostName", "flowName", "status", "startTime", "endTime" });
-		table.setColumnHeaders(new String[] { "Agent", "Host", "Flow", "Status", "Start", "End"});
+		table.setVisibleColumns(new Object[] { "agentName", "deploymentName", "hostName", "status", "startTime", "endTime" });
+		table.setColumnHeaders(new String[] { "Agent", "Deployment", "Host", "Status", "Start", "End"});
 		table.setSortContainerPropertyId("startTime");
 		table.setSortAscending(false);
 		table.addValueChangeListener(new ValueChangeListener() {
@@ -253,7 +255,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     		} else if (currentSelection instanceof FlowName) {    		    
     			params.put("flowId", ((FlowName) currentSelection).getId());    			
     		} else if (currentSelection instanceof AgentDeployment) {
-    			params.put("flowId", ((AgentDeployment) currentSelection).getFlowId());
+    			params.put("deploymentId", ((AgentDeployment) currentSelection).getId());
     		}
     		
     		if (currentSelectionParent instanceof Agent) {
@@ -272,16 +274,36 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     }
 
     @SuppressWarnings("unchecked")
-	protected void refreshUI(Object data) {
-    	Object currentSelection = table.getValue();
-    	executionContainer.removeAllItems();
-    	table.setValue(null);
-    	if (data != null) {
-    		executionContainer.addAll((List<Execution>) data);
-    		table.sort();
-    		table.setValue(currentSelection);
-    	}
-    	viewButton.setEnabled(table.getValue() != null);
+    protected void refreshUI(Object obj) {
+        List<Execution> data = (List<Execution>) obj;
+        if (needsUpdated(data)) {
+            Object currentSelection = table.getValue();
+            executionContainer.removeAllItems();
+            table.setValue(null);
+            if (data != null) {
+                executionContainer.addAll((List<Execution>) data);
+                table.sort();
+                table.setValue(currentSelection);
+            }
+            viewButton.setEnabled(table.getValue() != null);
+        }
+    }
+    
+    protected boolean needsUpdated (List<Execution> data) {
+        boolean needsUpdated = false;
+        List<Execution> all = data != null ? new ArrayList<Execution>(data) : new ArrayList<Execution>(0);
+        @SuppressWarnings("unchecked")
+        Collection<Execution> tableValues = (Collection<Execution>)table.getItemIds();
+        for (Execution execution : tableValues) {
+            if (!all.remove(execution)) {
+                needsUpdated = true;
+                break;
+            }
+        }
+        if (all.size() > 0) {
+            needsUpdated = true;
+        }
+        return needsUpdated;
     }
 
     protected void viewLog(Object item) {

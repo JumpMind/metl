@@ -13,6 +13,7 @@ import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentContext;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentStatistics;
 import org.jumpmind.symmetric.is.core.runtime.flow.AsyncRecorder;
+import org.jumpmind.util.AppUtils;
 
 public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
 
@@ -42,7 +43,10 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         execution.setAgentId(deployment.getAgentId());
         execution.setFlowId(deployment.getFlowId());
         execution.setAgentName(agent.getName());
-        execution.setFlowName(deployment.getName());
+        execution.setHostName(AppUtils.getHostName());
+        execution.setFlowName(deployment.getFlow().getName());
+        execution.setDeploymentName(deployment.getName());
+        execution.setDeploymentId(deployment.getId());
         this.recorder.record(execution);
     }
 
