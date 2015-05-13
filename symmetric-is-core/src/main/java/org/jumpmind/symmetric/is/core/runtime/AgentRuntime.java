@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -369,9 +371,12 @@ public class AgentRuntime {
 
         @Override
         public void run() {
+            if (isBlank(executionId)) {
+                executionId = UUID.randomUUID().toString();
+            }
             AgentDeployment deployment = flowRuntime.getDeployment();
             try {
-                log.info("Scheduled deployment '{}' is runnong on the '{}' agent", deployment.getName(),
+                log.info("Scheduled deployment '{}' is running on the '{}' agent", deployment.getName(),
                         agent.getName());
                 configurationService.refresh(deployment.getFlow());
                 flowRuntime.start(executionId, deployedResources);
@@ -383,6 +388,7 @@ public class AgentRuntime {
                 flowRuntime.notifyStepsTheFlowIsComplete();
                 log.info("Scheduled '{}' on '{}' is finished", deployment.getFlow().toString(),
                         agent.getName());
+                executionId = null;
             }
         }
     }
