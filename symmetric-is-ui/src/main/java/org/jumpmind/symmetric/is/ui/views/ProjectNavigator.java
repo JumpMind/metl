@@ -17,6 +17,7 @@ import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowName;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FolderName;
+import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelName;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.ResourceName;
@@ -140,7 +141,7 @@ public class ProjectNavigator extends VerticalLayout {
     
     MenuItem newWebResource;
 
-    MenuItem blank;
+    MenuItem blank;    
 
     MenuItem delete;
 
@@ -255,6 +256,13 @@ public class ProjectNavigator extends VerticalLayout {
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 startEditingItem((AbstractObject) treeTable.getValue());
+            }
+        });
+        
+        editMenu.addItem("Copy", new Command() {
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                copySelected();
             }
         });
         
@@ -850,6 +858,26 @@ public class ProjectNavigator extends VerticalLayout {
 
         treeTable.setValue(obj);
     }
+    
+    protected void copySelected() {
+        Object object = treeTable.getValue();
+        if (object instanceof ModelName) {
+            Model oldModel = context.getConfigurationService().findModel(((ModelName)object).getId());
+            Model newModel = (Model)oldModel.copy();
+            newModel.setName(newModel.getName() + " Copy");
+            context.getConfigurationService().save(newModel);
+            
+            ModelName model = new ModelName();
+            model.setName(newModel.getName());
+            model.setProjectVersionId(newModel.getProjectVersionId());
+            model.setId(newModel.getId());
+
+            treeTable.addItem(model);
+            treeTable.setItemIcon(model, Icons.MODEL);
+            treeTable.setParent(model, treeTable.getParent(object));
+            treeTable.setChildrenAllowed(model, false);
+        }
+    }
 
     protected void handleDelete() {
         Object object = treeTable.getValue();
@@ -984,7 +1012,7 @@ public class ProjectNavigator extends VerticalLayout {
             treeTable.addItem(model);
             treeTable.setItemIcon(model, Icons.MODEL);
             treeTable.setParent(model, folder);
-            this.treeTable.setChildrenAllowed(model, false);
+            treeTable.setChildrenAllowed(model, false);
 
             treeTable.setCollapsed(folder, false);
 
