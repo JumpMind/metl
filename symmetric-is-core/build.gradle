@@ -25,6 +25,7 @@ dependencies {
     compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"  
     compile "com.jcraft:jsch:0.1.52"
     compile "oauth.signpost:oauth-signpost:1.2.1.2"    
+    compile "ant:ant:$antVersion"
     testCompile "org.mockito:mockito-all:$mockitoVersion"
     testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
     testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"

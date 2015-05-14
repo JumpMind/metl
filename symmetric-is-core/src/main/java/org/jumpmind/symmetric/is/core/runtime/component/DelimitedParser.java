@@ -21,7 +21,6 @@ import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
-import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
@@ -125,7 +124,6 @@ public class DelimitedParser extends AbstractComponentRuntime {
             throw new IoException(e);
         }
 
-        log(LogLevel.INFO, outputPayload.toString());
         getComponentStatistics().incrementOutboundMessages();
         outputMessage.getHeader()
                 .setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());

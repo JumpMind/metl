@@ -1,15 +1,18 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.is.core.model.Component;
+import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.Message;
@@ -29,6 +32,10 @@ import org.jumpmind.util.FormatUtils;
 public class TextFileReader extends AbstractComponentRuntime {
 
     public static final String TYPE = "Text File Reader";
+    
+    public static final String ACTION_NONE = "None";
+    public static final String ACTION_DELETE = "Delete";
+    public static final String ACTION_ARCHIVE = "Archive";
 
     @SettingDefinition(
             order = 5,
@@ -52,18 +59,26 @@ public class TextFileReader extends AbstractComponentRuntime {
     @SettingDefinition(type = Type.INTEGER, order = 30, defaultValue = "1000", label = "Rows / Msg")
     public static final String SETTING_ROWS_PER_MESSAGE = "textfilereader.text.rows.per.message";
 
-    @SettingDefinition(type = Type.INTEGER, order = 40, label = "Line Terminator")
-    public static final String SETTING_HEADER_LINES_TO_SKIP = "textfilereader.text.header.lines.to.skip";
+    @SettingDefinition(order = 35, type = Type.CHOICE, defaultValue = "NONE", choices = {
+            ACTION_NONE, ACTION_ARCHIVE, ACTION_DELETE }, label = "Action on Success")
+    public final static String SETTING_ACTION_ON_SUCCESS = "action.on.success";
 
-    @SettingDefinition(
-            order = 50,
-            type = Type.BOOLEAN,
-            defaultValue = "false",
-            label = "Delete On Complete")
-    public final static String SETTING_DELETE_ON_COMPLETE = "delete.on.complete";
+    @SettingDefinition(order = 40, type = Type.TEXT, label = "Archive On Success Path")
+    public final static String SETTING_ARCHIVE_ON_SUCCESS_PATH = "archive.on.success.path";
+
+    @SettingDefinition(order = 45, type = Type.CHOICE, defaultValue = "NONE", choices = {
+            ACTION_NONE, ACTION_ARCHIVE, ACTION_DELETE }, label = "Action on Error")
+    public final static String SETTING_ACTION_ON_ERROR = "action.on.error";
+
+    @SettingDefinition(order = 50, type = Type.TEXT, label = "Archive On Error Path")
+    public final static String SETTING_ARCHIVE_ON_ERROR_PATH = "archive.on.error.path";
 
     @SettingDefinition(order = 60, type = Type.TEXT, label = "Encoding", defaultValue = "UTF-8")
     public final static String SETTING_ENCODING = "textfilereader.encoding";
+    
+    @SettingDefinition(type = Type.INTEGER, order = 70, label = "Header Lines to Skip")
+    public static final String SETTING_HEADER_LINES_TO_SKIP = "textfilereader.text.header.lines.to.skip";
+
 
     String relativePathAndFile;
 
@@ -71,17 +86,25 @@ public class TextFileReader extends AbstractComponentRuntime {
 
     boolean getFileNameFromMessage = false;
 
-    boolean deleteOnComplete = false;
+    String actionOnSuccess = ACTION_NONE;
+
+    String archiveOnSuccessPath;
+
+    String actionOnError = ACTION_NONE;
+
+    String archiveOnErrorPath;
 
     int textRowsPerMessage = 1000;
 
     int textHeaderLinesToSkip;
 
     String encoding = "UTF-8";
+    
+    List<String> filesRead;
 
     @Override
     protected void start() {
-        
+        filesRead = new ArrayList<String>();
         applySettings();
     }
 
@@ -106,6 +129,8 @@ public class TextFileReader extends AbstractComponentRuntime {
         } else {
             files.add(relativePathAndFile);
         }
+        
+        filesRead.addAll(files);
 
         for (String file : files) {
             InputStream inStream = null;
@@ -140,6 +165,44 @@ public class TextFileReader extends AbstractComponentRuntime {
         }
 
     }
+    
+    @Override
+    public void flowCompletedWithErrors(Throwable myError) {
+        if (ACTION_ARCHIVE.equals(actionOnError)) {
+            archive(archiveOnErrorPath);
+        } else if (ACTION_DELETE.equals(actionOnError)) {
+            deleteFiles();
+        }
+    }
+
+    @Override
+    public void flowCompleted() {
+        if (ACTION_ARCHIVE.equals(actionOnSuccess)) {
+            archive(archiveOnSuccessPath);
+        } else if (ACTION_DELETE.equals(actionOnSuccess)) {
+            deleteFiles();
+        }
+    }
+
+    protected void deleteFiles() {
+        IStreamable streamable = getResourceReference();
+        for (String srcFile : filesRead) {
+            streamable.delete(srcFile);
+        }
+    }
+
+    protected void archive(String archivePath) {
+        Resource resource = getComponent().getResource();
+        String path = resource.get(LocalFile.LOCALFILE_PATH);
+        File destDir = new File(path, archivePath);
+        for (String srcFile : filesRead) {
+            try {
+                FileUtils.moveFileToDirectory(new File(path, srcFile), destDir, true);
+            } catch (IOException e) {
+                throw new IoException(e);
+            }
+        }
+    }
 
     private void applySettings() {
         Component component = getComponent();
@@ -151,7 +214,14 @@ public class TextFileReader extends AbstractComponentRuntime {
         textRowsPerMessage = component.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
         getFileNameFromMessage = component.getBoolean(SETTING_GET_FILE_FROM_MESSAGE,
                 getFileNameFromMessage);
-        deleteOnComplete = component.getBoolean(SETTING_DELETE_ON_COMPLETE, deleteOnComplete);
+        actionOnSuccess = component.get(SETTING_ACTION_ON_SUCCESS, actionOnSuccess);
+        actionOnError = component.get(SETTING_ACTION_ON_ERROR, actionOnError);
+        archiveOnErrorPath = FormatUtils.replaceTokens(
+                component.get(SETTING_ARCHIVE_ON_ERROR_PATH), context.getFlowParametersAsString(),
+                true);
+        archiveOnSuccessPath = FormatUtils.replaceTokens(
+                component.get(SETTING_ARCHIVE_ON_SUCCESS_PATH),
+                context.getFlowParametersAsString(), true);
         encoding = component.get(SETTING_ENCODING, encoding);
     }
 

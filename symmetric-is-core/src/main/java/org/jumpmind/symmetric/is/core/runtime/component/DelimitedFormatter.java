@@ -94,7 +94,6 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
             outputPayload.add(outputRec);
         }
         outputMessage.setPayload(outputPayload);
-        log(LogLevel.INFO, outputPayload.toString());
         getComponentStatistics().incrementOutboundMessages();
         outputMessage.getHeader()
                 .setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());

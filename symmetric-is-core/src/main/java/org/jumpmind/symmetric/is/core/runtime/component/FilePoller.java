@@ -1,19 +1,12 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.AndFileFilter;
-import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.commons.io.filefilter.NotFileFilter;
-import org.apache.commons.io.filefilter.OrFileFilter;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
+import org.apache.tools.ant.DirectoryScanner;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Resource;
@@ -25,6 +18,7 @@ import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
+import org.jumpmind.util.FormatUtils;
 
 @ComponentDefinition(
         typeName = FilePoller.TYPE,
@@ -36,76 +30,96 @@ public class FilePoller extends AbstractComponentRuntime {
 
     public static final String TYPE = "File Poller";
 
+    public static final String ACTION_NONE = "None";
+    public static final String ACTION_DELETE = "Delete";
+    public static final String ACTION_ARCHIVE = "Archive";
+
     @SettingDefinition(order = 10, required = true, type = Type.TEXT, label = "File Pattern")
     public final static String SETTING_FILE_PATTERN = "file.pattern";
-    
-    @SettingDefinition(order = 20, type = Type.BOOLEAN, defaultValue="false", label = "Search Recursively")
+
+    @SettingDefinition(
+            order = 20,
+            type = Type.BOOLEAN,
+            defaultValue = "false",
+            label = "Search Recursively")
     public final static String SETTING_RECURSE = "recurse";
-    
-    @SettingDefinition(order = 30, type = Type.BOOLEAN, defaultValue="true", label = "Cancel On No Files")
+
+    @SettingDefinition(
+            order = 30,
+            type = Type.BOOLEAN,
+            defaultValue = "true",
+            label = "Cancel On No Files")
     public final static String SETTING_CANCEL_ON_NO_FILES = "cancel.on.no.files";
-    
-    @SettingDefinition(order = 35, type = Type.BOOLEAN, defaultValue="false", label = "Archive On Success")
-    public final static String SETTING_ARCHIVE_ON_SUCCESS = "archive.on.success";
-    
+
+    @SettingDefinition(order = 35, type = Type.CHOICE, defaultValue = "NONE", choices = {
+            ACTION_NONE, ACTION_ARCHIVE, ACTION_DELETE }, label = "Action on Success")
+    public final static String SETTING_ACTION_ON_SUCCESS = "action.on.success";
+
     @SettingDefinition(order = 40, type = Type.TEXT, label = "Archive On Success Path")
     public final static String SETTING_ARCHIVE_ON_SUCCESS_PATH = "archive.on.success.path";
-    
-    @SettingDefinition(order = 45, type = Type.BOOLEAN, defaultValue="false", label = "Archive On Error")
-    public final static String SETTING_ARCHIVE_ON_ERROR = "archive.on.error";
+
+    @SettingDefinition(order = 45, type = Type.CHOICE, defaultValue = "NONE", choices = {
+            ACTION_NONE, ACTION_ARCHIVE, ACTION_DELETE }, label = "Action on Error")
+    public final static String SETTING_ACTION_ON_ERROR = "action.on.error";
 
     @SettingDefinition(order = 50, type = Type.TEXT, label = "Archive On Error Path")
     public final static String SETTING_ARCHIVE_ON_ERROR_PATH = "archive.on.error.path";
 
-
-    @SettingDefinition(order = 60, type = Type.BOOLEAN, defaultValue="false", label = "Use Trigger File")
+    @SettingDefinition(
+            order = 60,
+            type = Type.BOOLEAN,
+            defaultValue = "false",
+            label = "Use Trigger File")
     public final static String SETTING_USE_TRIGGER_FILE = "use.trigger.file";
 
     @SettingDefinition(order = 70, type = Type.TEXT, label = "Relative Trigger File Path")
     public final static String SETTING_TRIGGER_FILE_PATH = "trigger.file.path";
-    
+
     String filePattern;
-    
+
     String triggerFilePath;
-    
+
     boolean useTriggerFile = false;
-    
+
     boolean recurse = false;
-    
+
     boolean cancelOnNoFiles = true;
-    
-    boolean archiveOnSuccess = false;
-    
+
+    String actionOnSuccess = ACTION_NONE;
+
     String archiveOnSuccessPath;
-    
-    boolean archiveOnError = false;
-    
+
+    String actionOnError = ACTION_NONE;
+
     String archiveOnErrorPath;
-    
-    IOFileFilter fileFilter;
-    
+
     ArrayList<File> filesSent = new ArrayList<File>();
-    
+
     @Override
-    protected void start() {       
+    protected void start() {
         Component component = getComponent();
         Resource resource = component.getResource();
         if (!resource.getType().equals(LocalFile.TYPE)) {
-            throw new IllegalStateException(String.format("The resource must be of type %s",LocalFile.TYPE));
+            throw new IllegalStateException(String.format("The resource must be of type %s",
+                    LocalFile.TYPE));
         }
-                
-        filePattern = component.get(SETTING_FILE_PATTERN);
-        triggerFilePath = component.get(SETTING_TRIGGER_FILE_PATH);
+
+        filePattern = FormatUtils.replaceTokens(component.get(SETTING_FILE_PATTERN),
+                context.getFlowParametersAsString(), true);
+        triggerFilePath = FormatUtils.replaceTokens(component.get(SETTING_TRIGGER_FILE_PATH),
+                context.getFlowParametersAsString(), true);
         useTriggerFile = component.getBoolean(SETTING_USE_TRIGGER_FILE, useTriggerFile);
         recurse = component.getBoolean(SETTING_RECURSE, recurse);
         cancelOnNoFiles = component.getBoolean(SETTING_CANCEL_ON_NO_FILES, cancelOnNoFiles);
-        archiveOnSuccess = component.getBoolean(SETTING_ARCHIVE_ON_SUCCESS, archiveOnSuccess);
-        archiveOnError = component.getBoolean(SETTING_ARCHIVE_ON_ERROR, archiveOnError);
-        archiveOnErrorPath = component.get(SETTING_ARCHIVE_ON_ERROR_PATH);
-        archiveOnSuccessPath = component.get(SETTING_ARCHIVE_ON_SUCCESS_PATH);
-        
-        fileFilter = createIOFileFilter();
-        
+        actionOnSuccess = component.get(SETTING_ACTION_ON_SUCCESS, actionOnSuccess);
+        actionOnError = component.get(SETTING_ACTION_ON_ERROR, actionOnError);
+        archiveOnErrorPath = FormatUtils.replaceTokens(
+                component.get(SETTING_ARCHIVE_ON_ERROR_PATH), context.getFlowParametersAsString(),
+                true);
+        archiveOnSuccessPath = FormatUtils.replaceTokens(
+                component.get(SETTING_ARCHIVE_ON_SUCCESS_PATH),
+                context.getFlowParametersAsString(), true);
+
     }
 
     @Override
@@ -126,41 +140,58 @@ public class FilePoller extends AbstractComponentRuntime {
             pollForFiles(path, inputMessage, messageTarget);
         }
     }
-    
+
     protected void pollForFiles(String path, Message inputMessage, IMessageTarget messageTarget) {
         File pathDir = new File(path);
         ArrayList<String> filePaths = new ArrayList<String>();
-        File[] files = pathDir.listFiles((FilenameFilter)fileFilter);
+        String[] includes = StringUtils.isNotBlank(filePattern) ? filePattern.split(",")
+                : new String[] { "*" };
+        DirectoryScanner scanner = new DirectoryScanner();
+        scanner.setIncludes(includes);
+        scanner.setBasedir(pathDir);
+        scanner.setCaseSensitive(false);
+        scanner.scan();
+        String[] files = scanner.getIncludedFiles();
         if (files.length > 0) {
-            for (File file : files) {
+            for (String filePath : files) {
+                File file = new File(path, filePath);
                 filesSent.add(file);
-                log(LogLevel.INFO,  "File polled: " + file.getAbsolutePath());
+                log(LogLevel.INFO, "File polled: " + file.getAbsolutePath());
                 getComponentStatistics().incrementNumberEntitiesProcessed();
-                String filePath = file.getAbsolutePath(); 
-                filePaths.add(filePath);
+                filePaths.add(file.getAbsolutePath());
             }
             getComponentStatistics().incrementOutboundMessages();
             messageTarget.put(inputMessage.copy(getFlowStepId(), filePaths));
         } else if (cancelOnNoFiles) {
             getComponentStatistics().incrementOutboundMessages();
             messageTarget.put(new ShutdownMessage(getFlowStepId(), true));
-        }        
+        }
     }
-    
+
     @Override
     public void flowCompletedWithErrors(Throwable myError) {
-        if (archiveOnError) {
+        if (ACTION_ARCHIVE.equals(actionOnError)) {
             archive(archiveOnErrorPath);
+        } else if (ACTION_DELETE.equals(actionOnError)) {
+            deleteFiles();
         }
     }
-    
+
     @Override
     public void flowCompleted() {
-        if (archiveOnSuccess) {
+        if (ACTION_ARCHIVE.equals(actionOnSuccess)) {
             archive(archiveOnSuccessPath);
+        } else if (ACTION_DELETE.equals(actionOnSuccess)) {
+            deleteFiles();
         }
     }
-    
+
+    protected void deleteFiles() {
+        for (File srcFile : filesSent) {
+            FileUtils.deleteQuietly(srcFile);
+        }
+    }
+
     protected void archive(String archivePath) {
         Resource resource = getComponent().getResource();
         String path = resource.get(LocalFile.LOCALFILE_PATH);
@@ -170,25 +201,7 @@ public class FilePoller extends AbstractComponentRuntime {
                 FileUtils.moveFileToDirectory(srcFile, destDir, true);
             } catch (IOException e) {
                 throw new IoException(e);
-            }                
+            }
         }
     }
-    
-    protected IOFileFilter createIOFileFilter() {
-        String[] includes = StringUtils.isNotBlank(filePattern) ? filePattern.split(",") : new String[] {"*"};
-        IOFileFilter filter = new WildcardFileFilter(includes);
-        if (!recurse) {
-            List<IOFileFilter> fileFilters = new ArrayList<IOFileFilter>();
-            fileFilters.add(filter);
-            fileFilters.add(new NotFileFilter(FileFilterUtils.directoryFileFilter()));
-            filter = new AndFileFilter(fileFilters);
-        } else {
-            List<IOFileFilter> fileFilters = new ArrayList<IOFileFilter>();
-            fileFilters.add(filter);
-            fileFilters.add(FileFilterUtils.directoryFileFilter());
-            filter = new OrFileFilter(fileFilters);
-        }
-        return filter;
-    }
-
 }
