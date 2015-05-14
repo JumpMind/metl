@@ -152,12 +152,12 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
 
     @Override
     public void log(LogLevel level, ComponentContext context, String output, Object...args) {
-        super.log(level, context, output);
+        super.log(level, context, output, args);
         if (deployment.asLogLevel().log(level)) {
             ExecutionStepLog log = new ExecutionStepLog();
             log.setExecutionStepId(steps.get(context.getFlowStep().getId()).getId());
             log.setLevel(level.name());
-            log.setLogText(output);
+            log.setLogText(String.format(output, args));
             this.recorder.record(log);
         }        
     }

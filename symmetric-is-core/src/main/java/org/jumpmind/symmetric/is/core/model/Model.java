@@ -160,5 +160,11 @@ public class Model extends AbstractObject {
     public boolean isDeleted() {
         return deleted;
     }
+    
+    public void sortAttributes() {
+        for (ModelEntity modelEntity : modelEntities) {
+            AbstractObjectNameBasedSorter.sort(modelEntity.getModelAttributes());
+        }
+    }
 
 }

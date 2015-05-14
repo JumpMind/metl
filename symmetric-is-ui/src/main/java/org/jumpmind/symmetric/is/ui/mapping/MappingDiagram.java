@@ -38,7 +38,16 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
         state.component = component;
         
         state.inputModel = component.getInputModel();
+        if (state.inputModel != null) {
+            context.getConfigurationService().refresh(state.inputModel);
+            state.inputModel.sortAttributes();
+        }
+        
         state.outputModel = component.getOutputModel();
+        if (state.outputModel != null) {
+            context.getConfigurationService().refresh(state.outputModel);
+            state.outputModel.sortAttributes();
+        }
 
         addFunction("onSelect", new OnSelectFunction());       
         addFunction("onConnection", new OnConnectionFunction());
