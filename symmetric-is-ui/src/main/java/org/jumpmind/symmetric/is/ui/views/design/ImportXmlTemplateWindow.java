@@ -36,10 +36,12 @@ import org.vaadin.aceeditor.AceMode;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.server.Page;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -182,6 +184,11 @@ public class ImportXmlTemplateWindow extends Window implements ValueChangeListen
                 importFromWsdl(text);
             } else if (rootName.equals("schema")) {
                 importFromXsd(text);
+            } else {
+                Notification note = new Notification("Unrecognized Content", 
+                        "The XML file has a root element of " + rootName + 
+                        ", but expected \"definitions\" for WSDL or \"schema\" for XSD.");
+                note.show(Page.getCurrent());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -219,21 +226,32 @@ public class ImportXmlTemplateWindow extends Window implements ValueChangeListen
             List<SoapOperation> operations = builder.getOperations();
             allOperations.addAll(operations);
         }
-        
-        ChooseWsdlServiceOperationWindow dialog = new ChooseWsdlServiceOperationWindow(
-                allOperations, new ServiceChosenListener() {
-            public boolean onOk(SoapOperation operation) {
-                try {
-                    SoapBuilder builder = wsdl.getBuilder(operation.getBindingName());
-                    String xml = builder.buildInputMessage(operation);
-                    listener.onImport(xml);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+
+        if (allOperations.size() == 0) {
+            Notification note = new Notification("No operations", "No operations found in the WSDL.");
+            note.show(Page.getCurrent());
+        } else if (allOperations.size() == 1) {
+            importFromWsdl(wsdl, allOperations.get(0));
+        } else {
+            ChooseWsdlServiceOperationWindow dialog = new ChooseWsdlServiceOperationWindow(
+                    allOperations, new ServiceChosenListener() {
+                public boolean onOk(SoapOperation operation) {
+                    importFromWsdl(wsdl, operation);
+                    return true;
                 }
-                return true;
-            }
-        });
-        UI.getCurrent().addWindow(dialog);
+            });
+            UI.getCurrent().addWindow(dialog);
+        }
+    }
+
+    protected void importFromWsdl(Wsdl wsdl, SoapOperation operation) {
+        try {
+            SoapBuilder builder = wsdl.getBuilder(operation.getBindingName());
+            String xml = builder.buildInputMessage(operation);
+            listener.onImport(xml);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }        
     }
 
     public static interface ImportXmlListener extends Serializable {
