@@ -146,15 +146,19 @@ public class StepRuntime implements Runnable {
             Iterator<StepRuntime> it = sourceStepRuntimes.iterator();
             while (it.hasNext()) {
                 StepRuntime sourceRuntime = (StepRuntime) it.next();
-                if (sourceRuntime.getComponentRuntime().getComponentContext().getFlowStep().getId().equals(stepId)) {
+                if (sourceRuntime.getComponentContext().getFlowStep().getId().equals(stepId)) {
                     it.remove();
                 }
             }
         }
     }
 
-    private void shutdown(MessageTarget target) throws InterruptedException {
-        this.componentRuntime.lastMessageReceived(target);
+    private void shutdown(MessageTarget target) throws InterruptedException {        
+        try {
+            this.componentRuntime.lastMessageReceived(target);
+        } catch (Exception e) {
+            recordError(e);
+        }
         for (StepRuntime targetStepRuntime : targetStepRuntimes) {
             targetStepRuntime.queue(new ShutdownMessage(componentContext.getFlowStep().getId(), cancelled));
         }
@@ -204,6 +208,10 @@ public class StepRuntime implements Runnable {
 
     public Throwable getError() {
         return error;
+    }
+    
+    public ComponentContext getComponentContext() {
+        return componentContext;
     }
 
     class MessageTarget implements IMessageTarget {
