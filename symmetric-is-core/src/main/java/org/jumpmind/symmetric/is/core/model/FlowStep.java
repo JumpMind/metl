@@ -13,6 +13,8 @@ public class FlowStep extends AbstractObject {
     
     int y;
     
+    int approximateOrder;
+    
     public FlowStep() {
     }
 
@@ -70,6 +72,14 @@ public class FlowStep extends AbstractObject {
     
     public int getY() {
         return y;
+    }
+    
+    public void setApproximateOrder(int order) {
+        this.approximateOrder = order;
+    }
+    
+    public int getApproximateOrder() {
+        return approximateOrder;
     }
 
     @Override

@@ -15,6 +15,7 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamable;
+import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.util.FormatUtils;
 
@@ -93,13 +94,20 @@ public class TextFileReader extends AbstractComponentRuntime {
         int numberMessages = 0;
         List<String> files = new ArrayList<String>();
         if (getFileNameFromMessage) {
-            files = inputMessage.getPayload();
+            List<String> fullyQualifiedFiles = inputMessage.getPayload();            
+            String path = getResourceRuntime().getResource().get(LocalFile.LOCALFILE_PATH);
+            for (String fullyQualifiedFile : fullyQualifiedFiles) {
+                if (fullyQualifiedFile.startsWith(path)) {
+                    files.add(fullyQualifiedFile.substring(path.length()));
+                } else {
+                    files.add(fullyQualifiedFile);
+                }
+            }
         } else {
             files.add(relativePathAndFile);
         }
 
         for (String file : files) {
-
             InputStream inStream = null;
             BufferedReader reader = null;
             try {

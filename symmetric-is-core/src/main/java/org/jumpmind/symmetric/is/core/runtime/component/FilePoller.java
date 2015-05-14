@@ -110,6 +110,7 @@ public class FilePoller extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
+        getComponentStatistics().incrementInboundMessages();
         Resource resource = getComponent().getResource();
         String path = resource.get(LocalFile.LOCALFILE_PATH);
         if (useTriggerFile) {
@@ -118,6 +119,7 @@ public class FilePoller extends AbstractComponentRuntime {
                 pollForFiles(path, inputMessage, messageTarget);
                 FileUtils.deleteQuietly(triggerFile);
             } else if (cancelOnNoFiles) {
+                getComponentStatistics().incrementOutboundMessages();
                 messageTarget.put(new ShutdownMessage(getFlowStepId(), true));
             }
         } else {
@@ -133,11 +135,14 @@ public class FilePoller extends AbstractComponentRuntime {
             for (File file : files) {
                 filesSent.add(file);
                 log(LogLevel.INFO,  "File polled: " + file.getAbsolutePath());
+                getComponentStatistics().incrementNumberEntitiesProcessed();
                 String filePath = file.getAbsolutePath(); 
-                filePaths.add(filePath.substring(pathDir.getAbsolutePath().length()));
+                filePaths.add(filePath);
             }
+            getComponentStatistics().incrementOutboundMessages();
             messageTarget.put(inputMessage.copy(getFlowStepId(), filePaths));
         } else if (cancelOnNoFiles) {
+            getComponentStatistics().incrementOutboundMessages();
             messageTarget.put(new ShutdownMessage(getFlowStepId(), true));
         }        
     }

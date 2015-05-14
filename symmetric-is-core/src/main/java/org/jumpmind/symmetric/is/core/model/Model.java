@@ -1,7 +1,9 @@
 package org.jumpmind.symmetric.is.core.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class Model extends AbstractObject {
@@ -159,6 +161,34 @@ public class Model extends AbstractObject {
     
     public boolean isDeleted() {
         return deleted;
+    }
+    
+    public void sortAttributes() {
+        for (ModelEntity modelEntity : modelEntities) {
+            AbstractObjectNameBasedSorter.sort(modelEntity.getModelAttributes());
+        }
+    }
+    
+    @Override
+    public AbstractObject copy() {
+        Map<String, String> oldToNewEntityIds = new HashMap<String, String>();
+        Model model = (Model)super.copy();
+        model.setModelEntities(new ArrayList<ModelEntity>());
+        for (ModelEntity modelEntity : modelEntities) {
+            String oldId = modelEntity.getId();
+            modelEntity = (ModelEntity)modelEntity.copy();
+            oldToNewEntityIds.put(oldId, modelEntity.getId());
+            modelEntity.setModelId(model.getId());
+            model.getModelEntities().add(modelEntity);
+        }
+        
+        for (ModelEntity modelEntity : modelEntities) {
+             List<ModelAttribute> attributes = modelEntity.getModelAttributes();
+             for (ModelAttribute modelAttribute : attributes) {
+                modelAttribute.setTypeEntityId(oldToNewEntityIds.get(modelAttribute.getTypeEntityId()));
+            }
+        }
+        return model;
     }
 
 }

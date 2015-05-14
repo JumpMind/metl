@@ -19,9 +19,7 @@ import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Group;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
-import org.jumpmind.symmetric.is.core.model.ModelAttributeRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.model.ModelEntityRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelName;
 import org.jumpmind.symmetric.is.core.model.Project;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
@@ -131,10 +129,6 @@ public interface IConfigurationService {
     
     public void delete(ModelAttribute modelAttribute);
     
-    public void delete(ModelEntityRelationship modelEntityRelationship);
-    
-    public void delete(ModelAttributeRelationship modelAttributeRelationship);
-
     public void delete(User user);
 
     public void refresh(Model model);
@@ -143,15 +137,9 @@ public interface IConfigurationService {
     
     public void refresh(ModelAttribute modelAttribute);
     
-    public void refresh(ModelEntityRelationship modelEntityRelationship);
-    
-    public void refresh(ModelAttributeRelationship modelAttributeRelationship);
-    
     public void save(Model model);
     
     public void save(ModelEntity modelEntity);
-    
-    public void save(ModelEntityRelationship modelEntityRelationship);
     
     public ProjectVersion findProjectVersion(String projectVersionId);
 

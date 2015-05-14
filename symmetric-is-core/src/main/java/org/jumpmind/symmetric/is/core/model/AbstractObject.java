@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
-abstract public class AbstractObject implements Serializable {
+abstract public class AbstractObject implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
     
@@ -86,5 +86,15 @@ abstract public class AbstractObject implements Serializable {
     @Override
     public String toString() {
         return getName();
+    }
+    
+    public AbstractObject copy() {
+        try {
+            AbstractObject clone = (AbstractObject)this.clone();
+            clone.setId(UUID.randomUUID().toString());
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }
