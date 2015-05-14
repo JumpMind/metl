@@ -147,6 +147,32 @@ public class Component extends AbstractObjectWithSettings {
         this.entitySettings = entitySettings;
     }
 
+    public void addEntitySetting(ComponentEntitySetting entitySetting) {
+        if (entitySettings == null) {
+            entitySettings = new ArrayList<ComponentEntitySetting>();
+        }
+        entitySettings.add(entitySetting);
+    }
+
+    public ComponentEntitySetting getSingleEntitySetting(String entityId, String name) {
+        List<ComponentEntitySetting> list = getEntitySetting(entityId, name);
+        if (list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
+    }
+
+    public List<ComponentEntitySetting> getEntitySetting(String entityId, String name) {
+        List<ComponentEntitySetting> list = new ArrayList<ComponentEntitySetting>();
+        for (ComponentEntitySetting setting : entitySettings) {
+            if (setting.getEntityId().equals(entityId)
+                    && setting.getName().equalsIgnoreCase(name)) {
+                list.add(setting);
+            }
+        }
+        return list;
+    }    
+    
     public List<ComponentAttributeSetting> getAttributeSettings() {
         return attributeSettings;
     }

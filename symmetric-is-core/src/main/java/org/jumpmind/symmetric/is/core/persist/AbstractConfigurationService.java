@@ -494,12 +494,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
                 tableName(Group.class));
         if (groups.size() > 0) {
             group = groups.get(0);
-            params = new HashMap<String, Object>();
-            params.put("groupId", group.getId());
-            group.setGroupPrivileges(persistenceManager.find(GroupPrivilege.class, params, null,
-                    null, tableName(GroupPrivilege.class)));
+            refresh(group);
         }
         return group;
+    }
+
+    @Override
+    public List<Group> findGroups() {
+        return persistenceManager.find(Group.class, null, null, null, tableName(Group.class));
     }
 
     @Override
@@ -650,6 +652,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
         user.setGroups(groups);
     }
 
+    @Override
+    public void refresh(Group group) {
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("groupId", group.getId());
+        group.setGroupPrivileges(persistenceManager.find(GroupPrivilege.class, params, null,
+                null, tableName(GroupPrivilege.class)));
+    }
+    
     private void refreshFlowRelations(Flow flow) {
         flow.getFlowSteps().clear();
         flow.getFlowStepLinks().clear();
