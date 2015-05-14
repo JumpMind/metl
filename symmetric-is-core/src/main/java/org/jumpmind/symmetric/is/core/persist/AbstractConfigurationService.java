@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,9 +36,7 @@ import org.jumpmind.symmetric.is.core.model.Group;
 import org.jumpmind.symmetric.is.core.model.GroupPrivilege;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
-import org.jumpmind.symmetric.is.core.model.ModelAttributeRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.model.ModelEntityRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelName;
 import org.jumpmind.symmetric.is.core.model.Project;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
@@ -183,7 +180,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         }
         return list;
     }
-    
+
     @Override
     public ProjectVersion findProjectVersion(String projectVersionId) {
         ProjectVersion projectVersion = new ProjectVersion(projectVersionId);
@@ -589,6 +586,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void deleteFlow(Flow flow) {
         flow.setDeleted(true);
+        List<FlowStep> steps = flow.getFlowSteps();
+        for (FlowStep flowStep : steps) {
+            if (!flowStep.getComponent().isShared()) {
+                flowStep.getComponent().setDeleted(true);
+                save(flowStep.getComponent());
+            }
+        }
         save((AbstractObject) flow);
     }
 
@@ -741,12 +745,6 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void delete(ModelEntity modelEntity) {
-        Iterator<ModelEntityRelationship> itrr = modelEntity.getModelEntityRelationships()
-                .iterator();
-        while (itrr.hasNext()) {
-            delete(itrr.next());
-        }
-
         List<ComponentEntitySetting> settings = persistenceManager.find(
                 ComponentEntitySetting.class, new NameValue("entityId", modelEntity.getId()), null,
                 null, tableName(ComponentEntitySetting.class));
@@ -774,24 +772,6 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
-    public void delete(ModelEntityRelationship modelEntityRelationship) {
-        Iterator<ModelAttributeRelationship> itr = modelEntityRelationship
-                .getAttributeRelationships().iterator();
-        while (itr.hasNext()) {
-            delete(itr.next());
-        }
-        persistenceManager.delete(modelEntityRelationship, null, null,
-                tableName(ModelEntityRelationship.class));
-    }
-
-    @Override
-    public void delete(ModelAttributeRelationship modelAttributeRelationship) {
-
-        persistenceManager.delete(modelAttributeRelationship, null, null,
-                tableName(ModelAttributeRelationship.class));
-    }
-
-    @Override
     public void refresh(Model model) {
         refresh((AbstractObject) model);
 
@@ -814,42 +794,11 @@ abstract class AbstractConfigurationService extends AbstractService implements
             refresh(attribute);
             modelEntity.addModelAttribute(attribute);
         }
-        modelEntity.getModelEntityRelationships().clear();
-        Map<String, Object> entityRelationshipParams = new HashMap<String, Object>();
-        entityRelationshipParams.put("sourceEntityId", modelEntity.getId());
-        List<ModelEntityRelationship> entityRelationships = persistenceManager.find(
-                ModelEntityRelationship.class, entityRelationshipParams, null, null,
-                tableName(ModelEntityRelationship.class));
-        for (ModelEntityRelationship entityRelationshipData : entityRelationships) {
-            refresh(entityRelationshipData);
-            modelEntity.getModelEntityRelationships().add(entityRelationshipData);
-        }
     }
 
     @Override
     public void refresh(ModelAttribute modelAttribute) {
         refresh((AbstractObject) modelAttribute);
-    }
-
-    @Override
-    public void refresh(ModelEntityRelationship modelEntityRelationship) {
-
-        refresh((AbstractObject) modelEntityRelationship);
-        Map<String, Object> entityRelationshipParams = new HashMap<String, Object>();
-        entityRelationshipParams.put("entityRelationshipId", modelEntityRelationship.getId());
-        modelEntityRelationship.getAttributeRelationships().clear();
-        List<ModelAttributeRelationship> attributeRelationships = persistenceManager.find(
-                ModelAttributeRelationship.class, entityRelationshipParams, null, null,
-                tableName(ModelAttribute.class));
-        for (ModelAttributeRelationship attributeRelationship : attributeRelationships) {
-            refresh(attributeRelationship);
-            modelEntityRelationship.getAttributeRelationships().add(attributeRelationship);
-        }
-    }
-
-    @Override
-    public void refresh(ModelAttributeRelationship modelAttributeRelationship) {
-        refresh((AbstractObject) modelAttributeRelationship);
     }
 
     @Override
@@ -865,21 +814,6 @@ abstract class AbstractConfigurationService extends AbstractService implements
         save((AbstractObject) modelEntity);
         for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
             save(modelAttribute);
-        }
-        Iterator<ModelEntityRelationship> itrr = modelEntity.getModelEntityRelationships()
-                .iterator();
-        while (itrr.hasNext()) {
-            save(itrr.next());
-        }
-    }
-
-    @Override
-    public void save(ModelEntityRelationship modelEntityRelationship) {
-
-        save((AbstractObject) modelEntityRelationship);
-        for (ModelAttributeRelationship attributeRelationship : modelEntityRelationship
-                .getAttributeRelationships()) {
-            save(attributeRelationship);
         }
     }
 
