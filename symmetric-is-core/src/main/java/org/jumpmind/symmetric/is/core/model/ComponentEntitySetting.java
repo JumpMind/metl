@@ -7,6 +7,20 @@ public class ComponentEntitySetting extends Setting {
     String componentId;
     String entityId;
 
+    public ComponentEntitySetting() {
+    }
+    
+    public ComponentEntitySetting(String entityId, String componentId, String name, String value) {
+        super(name, value);
+        this.componentId = componentId;
+        this.entityId = entityId;
+    }
+
+    public ComponentEntitySetting(String entityId, String name, String value) {
+        super(name, value);
+        this.entityId = entityId;
+    }
+
     public void setComponentId(String componentId) {
         this.componentId = componentId;
     }

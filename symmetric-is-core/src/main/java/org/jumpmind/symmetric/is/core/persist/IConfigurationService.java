@@ -55,6 +55,8 @@ public interface IConfigurationService {
     
     public Group findGroup(String id);
 
+    public List<Group> findGroups();
+
     public void delete(Folder folder);
 
     public void delete(Agent agent);
@@ -102,6 +104,8 @@ public interface IConfigurationService {
     public void refresh(Component component);
     
     public void refresh(User user);
+    
+    public void refresh(Group group);
 
     public void save(AgentDeployment agentDeployment);
     
