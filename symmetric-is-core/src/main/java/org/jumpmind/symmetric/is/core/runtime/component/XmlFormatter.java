@@ -128,7 +128,6 @@ public class XmlFormatter extends AbstractComponentRuntime {
         ArrayList<String> outputPayload = new ArrayList<String>();
 
         Document document = templateDocument.clone();
-        Namespace rootNamespace = document.getRootElement().getNamespace();
         Map<Element, Namespace> namespaces = removeNamespaces(document);
 
         for (XmlFormatterEntitySetting entitySetting : entitySettings.values()) {
@@ -143,7 +142,6 @@ public class XmlFormatter extends AbstractComponentRuntime {
         }
 
         restoreNamespaces(document, namespaces);
-        document.getRootElement().setNamespace(rootNamespace);
 
         XMLOutputter xmlOutputter = new XMLOutputter();
         xmlOutputter.setFormat(Format.getPrettyFormat());
@@ -218,6 +216,7 @@ public class XmlFormatter extends AbstractComponentRuntime {
     private Map<Element, Namespace> removeNamespaces(Document document) {
         Map<Element, Namespace> namespaces = new HashMap<Element, Namespace>();
         if (ignoreNamespace) {
+            namespaces.put(document.getRootElement(), document.getRootElement().getNamespace());
             document.getRootElement().setNamespace(null);
             for (Element el : document.getRootElement().getDescendants(new ElementFilter())) {
                 Namespace nsp = el.getNamespace();
