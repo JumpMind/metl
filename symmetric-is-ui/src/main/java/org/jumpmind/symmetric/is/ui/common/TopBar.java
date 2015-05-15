@@ -17,7 +17,6 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -51,9 +50,6 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
         addComponent(menuBar);
         setExpandRatio(menuBar, 1.0f);
         
-        Label userLabel = new Label("user");
-        addComponent(userLabel);
-        
         Button settingsButton = new Button(context.getUser().getLoginId(), FontAwesome.GEAR);
         settingsButton.addClickListener(new ClickListener() {            
             @Override
@@ -78,7 +74,13 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
         Map<Category, List<TopBarLink>> menuItemsByCategory = viewManager.getMenuItemsByCategory();
         Set<Category> categories = menuItemsByCategory.keySet();
         for (Category category : categories) {
+            if (!context.getUser().hasPrivilege(category.name())) {
+                continue;
+            }
             List<TopBarLink> links = menuItemsByCategory.get(category);
+            if (viewManager.getDefaultView() == null && links.size() > 0) {
+                viewManager.setDefaultView(links.get(0).id());
+            }
             MenuItem categoryItem = null;
             if (links.size() > 1) {
                 categoryItem = menuBar.addItem(category.name(), null);

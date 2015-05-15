@@ -36,6 +36,7 @@ public class GroupEditPanel extends VerticalLayout implements IUiPanel {
         TextField nameField = new TextField("Group Name", StringUtils.trimToEmpty(group.getName()));
         nameField.addValueChangeListener(new NameChangeListener());
         layout.addComponent(nameField);
+        nameField.focus();
         
         TwinColSelect privSelect = new TwinColSelect();
         for (Privilege priv : Privilege.values()) {

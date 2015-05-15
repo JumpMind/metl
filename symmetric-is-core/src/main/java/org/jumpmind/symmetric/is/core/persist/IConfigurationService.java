@@ -132,6 +132,8 @@ public interface IConfigurationService {
     public void delete(ModelAttribute modelAttribute);
     
     public void delete(User user);
+    
+    public void delete(Group group);
 
     public void refresh(Model model);
     

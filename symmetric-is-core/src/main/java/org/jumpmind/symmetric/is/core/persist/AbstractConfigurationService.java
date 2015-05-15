@@ -603,7 +603,20 @@ abstract class AbstractConfigurationService extends AbstractService implements
         for (Setting setting : user.getSettings()) {
             persistenceManager.delete(setting, null, null, tableName(UserSetting.class));
         }
+        for (Group group : user.getGroups()) {
+            persistenceManager.delete(new UserGroup(user.getId(), group.getId()), null, null, tableName(UserGroup.class));
+        }
+
         persistenceManager.delete(user, null, null, tableName(User.class));
+    }
+
+    @Override
+    public void delete(Group group) {
+        refresh(group);
+        for (GroupPrivilege groupPriv : group.getGroupPrivileges()) {
+            persistenceManager.delete(groupPriv, null, null, tableName(GroupPrivilege.class));
+        }
+        persistenceManager.delete(group, null, null, tableName(Group.class));
     }
 
     @Override

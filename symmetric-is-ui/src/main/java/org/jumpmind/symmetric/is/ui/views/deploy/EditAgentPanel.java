@@ -188,6 +188,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         addComponent(table);
         setExpandRatio(table, 1.0f);
         refresh();
+        setButtonsEnabled();
         backgroundRefresherService.register(this);
     }
 
