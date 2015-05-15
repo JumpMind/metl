@@ -592,7 +592,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                 final FlowParameter parameter = (FlowParameter) itemId;
                 final TextField textField = new ImmediateUpdateTextField(null) {
                     @Override
-                    protected void save() {
+                    protected void save(String text) {
+                        parameter.setDefaultValue(text);
                         context.getConfigurationService().save(parameter);
                     }
                 };
