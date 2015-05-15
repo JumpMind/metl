@@ -9,6 +9,14 @@ public class UserGroup extends AbstractObject {
     
     String groupId;
 
+    public UserGroup() {
+    }
+    
+    public UserGroup(String userId, String groupId) {
+        this.userId = userId;
+        this.groupId = groupId;
+    }
+    
     @Override
     public void setName(String name) {
     }
