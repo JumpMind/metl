@@ -255,4 +255,32 @@ public class Component extends AbstractObjectWithSettings {
         }
         return row;
     }
+    
+    @Override
+    public AbstractObject copy() {
+        Component component = (Component)super.copy();
+        component.setEntitySettings(new ArrayList<ComponentEntitySetting>());
+        component.setAttributeSettings(new ArrayList<ComponentAttributeSetting>());
+        component.setSettings(new ArrayList<Setting>());
+        
+        for (Setting setting : settings) {
+            ComponentSetting cSetting = (ComponentSetting)setting.copy();
+            cSetting.setComponentId(component.getId());
+            component.getSettings().add(cSetting);
+        }
+        
+        for (ComponentAttributeSetting setting : attributeSettings) {
+            setting = (ComponentAttributeSetting)setting.copy();
+            setting.setComponentId(component.getId());
+            component.getAttributeSettings().add(setting);
+        }
+        
+        for (ComponentEntitySetting setting : entitySettings) {
+            setting = (ComponentEntitySetting)setting.copy();
+            setting.setComponentId(component.getId());
+            component.getEntitySettings().add(setting);
+        }
+        
+        return component;
+    }
 }

@@ -114,6 +114,8 @@ public interface IConfigurationService {
     public void save(FlowStep flowStep);    
 
     public void save(AbstractObject obj);
+    
+    public void save(Component component);
 
     public void save(Flow flow);
     

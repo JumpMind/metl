@@ -5,7 +5,6 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -656,10 +655,10 @@ abstract class AbstractConfigurationService extends AbstractService implements
     public void refresh(Group group) {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("groupId", group.getId());
-        group.setGroupPrivileges(persistenceManager.find(GroupPrivilege.class, params, null,
-                null, tableName(GroupPrivilege.class)));
+        group.setGroupPrivileges(persistenceManager.find(GroupPrivilege.class, params, null, null,
+                tableName(GroupPrivilege.class)));
     }
-    
+
     private void refreshFlowRelations(Flow flow) {
         flow.getFlowSteps().clear();
         flow.getFlowStepLinks().clear();
@@ -703,6 +702,26 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
+    public void save(Component component) {
+        save((AbstractObject) component);
+
+        List<ComponentAttributeSetting> aSettings = component.getAttributeSettings();
+        for (ComponentAttributeSetting componentAttributeSetting : aSettings) {
+            save(componentAttributeSetting);
+        }
+
+        List<ComponentEntitySetting> eSettings = component.getEntitySettings();
+        for (ComponentEntitySetting componentEntitySetting : eSettings) {
+            save(componentEntitySetting);
+        }
+
+        List<Setting> settings = component.getSettings();
+        for (Setting setting : settings) {
+            save(setting);
+        }
+    }
+
+    @Override
     public void save(Project project) {
         save((AbstractObject) project);
     }
@@ -741,8 +760,12 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
         List<FlowStepLink> links = flow.getFlowStepLinks();
         for (FlowStepLink link : links) {
-            link.setLastUpdateTime(new Date());
-            persistenceManager.save(link, null, null, tableName(link.getClass()));
+            save(link);
+        }
+
+        List<FlowParameter> parameters = flow.getFlowParameters();
+        for (FlowParameter parm : parameters) {
+            save(parm);
         }
 
     }
