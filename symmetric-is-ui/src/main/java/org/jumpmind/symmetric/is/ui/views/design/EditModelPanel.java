@@ -112,8 +112,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 final AbstractObject obj = (AbstractObject) itemId;
                 if (lastEditItemIds.contains(itemId)) {
                     ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
-                        protected void save() {
-                            obj.setName(getValue());
+                        protected void save(String text) {
+                            obj.setName(text);
                             EditModelPanel.this.context.getConfigurationService().save(obj);
                         };
                     };

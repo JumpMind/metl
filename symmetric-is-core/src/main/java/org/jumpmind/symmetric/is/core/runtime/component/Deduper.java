@@ -25,17 +25,16 @@ public class Deduper extends AbstractComponentRuntime {
             order = 20,
             required = false,
             type = Type.INTEGER,
-            defaultValue = "1000",
+            defaultValue = "10000",
             label = "Rows/Msg")
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
-    int rowsPerMessage = 1000;
+    int rowsPerMessage = 10000;
 
     LinkedHashMap<String, EntityData> deduped = new LinkedHashMap<String, EntityData>();
 
     @Override
-    protected void start() {
-        
+    protected void start() {        
         rowsPerMessage = getComponent().getInt(ROWS_PER_MESSAGE, rowsPerMessage);
     }
 
@@ -56,14 +55,14 @@ public class Deduper extends AbstractComponentRuntime {
 
     @Override
     public void lastMessageReceived(IMessageTarget messageTarget) {
-
         if (deduped.size() > 0) {
             int count = 0;
             ArrayList<EntityData> payload = new ArrayList<EntityData>(rowsPerMessage);
             for (EntityData data : deduped.values()) {
-                if (count > rowsPerMessage) {
+                if (count >= rowsPerMessage) {
                     sendMessage(payload, messageTarget, false);
                     payload = new ArrayList<EntityData>();
+                    count = 0;
                 }
                 payload.add(data);
                 count++;

@@ -188,7 +188,11 @@ public class FilePoller extends AbstractComponentRuntime {
 
     protected void deleteFiles() {
         for (File srcFile : filesSent) {
-            FileUtils.deleteQuietly(srcFile);
+            if(FileUtils.deleteQuietly(srcFile)) {
+                log(LogLevel.INFO, "Deleted %s", srcFile.getAbsolutePath());
+            } else {
+                log(LogLevel.WARN, "Failed to delete %s", srcFile.getAbsolutePath());
+            }            
         }
     }
 
@@ -198,6 +202,7 @@ public class FilePoller extends AbstractComponentRuntime {
         File destDir = new File(path, archivePath);
         for (File srcFile : filesSent) {
             try {
+                log(LogLevel.INFO, "Archiving %s tp %s", srcFile.getAbsolutePath(), destDir.getAbsolutePath());
                 FileUtils.moveFileToDirectory(srcFile, destDir, true);
             } catch (IOException e) {
                 throw new IoException(e);

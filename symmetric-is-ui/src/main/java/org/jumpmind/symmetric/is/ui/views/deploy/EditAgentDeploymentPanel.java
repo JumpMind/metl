@@ -116,8 +116,8 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
 
     protected TextField getNameComponent() {
         ImmediateUpdateTextField textField = new ImmediateUpdateTextField("Name") {
-            protected void save() {
-                agentDeployment.setName(getValue());
+            protected void save(String text) {
+                agentDeployment.setName(text);
                 saveAgentDeployment(agentDeployment);
             }            
         };
@@ -217,8 +217,8 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
 
     protected TextField getCronComponent() {
         startExpressionTextField = new ImmediateUpdateTextField("Start Expression") {
-            protected void save() {
-                agentDeployment.setStartExpression(getValue());
+            protected void save(String text) {
+                agentDeployment.setStartExpression(text);
                 updateScheduleFields();
                 saveAgentDeployment(agentDeployment);
             }
@@ -316,7 +316,8 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
             if (propertyId.equals("value")) {
                 final AgentDeploymentParameter parameter = (AgentDeploymentParameter) itemId;
                 final TextField textField = new ImmediateUpdateTextField(null) {
-                    protected void save() {
+                    protected void save(String text) {
+                        parameter.setValue(text);
                         context.getConfigurationService().save(parameter);
                     }
                 };

@@ -159,8 +159,8 @@ public class EditEntityRouterPanel extends VerticalLayout implements IUiPanel {
             if (propertyId.equals("matchExpression")) {
                 final TextField textField = new ImmediateUpdateTextField(null) {
                     @Override
-                    protected void save() {
-                        route.setMatchExpression(getValue());
+                    protected void save(String text) {
+                        route.setMatchExpression(text);
                         EditEntityRouterPanel.this.save();
                     }
                 };

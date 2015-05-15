@@ -15,6 +15,7 @@ import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
+import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamable;
@@ -56,7 +57,7 @@ public class TextFileReader extends AbstractComponentRuntime {
             label = "Must Exist")
     public static final String SETTING_MUST_EXIST = "textfilereader.must.exist";
 
-    @SettingDefinition(type = Type.INTEGER, order = 30, defaultValue = "1000", label = "Rows / Msg")
+    @SettingDefinition(type = Type.INTEGER, order = 30, defaultValue = "10000", label = "Rows / Msg")
     public static final String SETTING_ROWS_PER_MESSAGE = "textfilereader.text.rows.per.message";
 
     @SettingDefinition(order = 35, type = Type.CHOICE, defaultValue = "NONE", choices = {
@@ -94,7 +95,7 @@ public class TextFileReader extends AbstractComponentRuntime {
 
     String archiveOnErrorPath;
 
-    int textRowsPerMessage = 1000;
+    int textRowsPerMessage = 10000;
 
     int textHeaderLinesToSkip;
 
@@ -113,7 +114,6 @@ public class TextFileReader extends AbstractComponentRuntime {
         getComponentStatistics().incrementInboundMessages();
         String currentLine;
         int linesRead = 0;
-        int linesInMessage = 0;
         int numberMessages = 0;
         List<String> files = new ArrayList<String>();
         if (getFileNameFromMessage) {
@@ -135,6 +135,7 @@ public class TextFileReader extends AbstractComponentRuntime {
         for (String file : files) {
             InputStream inStream = null;
             BufferedReader reader = null;
+            int linesInMessage = 0;
             try {
                 IStreamable resource = (IStreamable)getResourceReference();
                 String filePath = FormatUtils.replaceTokens(file, context.getFlowParametersAsString(), true);
@@ -187,7 +188,11 @@ public class TextFileReader extends AbstractComponentRuntime {
     protected void deleteFiles() {
         IStreamable streamable = getResourceReference();
         for (String srcFile : filesRead) {
-            streamable.delete(srcFile);
+            if(streamable.delete(srcFile)) {
+                log(LogLevel.INFO, "Deleted %s", srcFile);
+            } else {
+                log(LogLevel.WARN, "Failed to delete %s", srcFile);
+            } 
         }
     }
 
@@ -197,6 +202,7 @@ public class TextFileReader extends AbstractComponentRuntime {
         File destDir = new File(path, archivePath);
         for (String srcFile : filesRead) {
             try {
+                log(LogLevel.INFO, "Archiving %s tp %s", srcFile, destDir.getAbsolutePath());
                 FileUtils.moveFileToDirectory(new File(path, srcFile), destDir, true);
             } catch (IOException e) {
                 throw new IoException(e);
