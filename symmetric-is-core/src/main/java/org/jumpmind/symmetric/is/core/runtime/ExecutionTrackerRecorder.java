@@ -157,7 +157,10 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             ExecutionStepLog log = new ExecutionStepLog();
             log.setExecutionStepId(steps.get(context.getFlowStep().getId()).getId());
             log.setLevel(level.name());
-            log.setLogText(String.format(output, args));
+            if (args != null && args.length > 0) {
+                output = String.format(output, args);
+            }
+            log.setLogText(output);
             this.recorder.record(log);
         }        
     }

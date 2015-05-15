@@ -3,9 +3,11 @@ package org.jumpmind.symmetric.is.core.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -146,9 +148,17 @@ public class Flow extends AbstractObject {
     public String getFolderName() {
         return folder.getName();
     }
+    
+    public void setFlowSteps(List<FlowStep> flowSteps) {
+        this.flowSteps = flowSteps;
+    }
 
     public List<FlowStep> getFlowSteps() {
         return flowSteps;
+    }
+    
+    public void setFlowStepLinks(List<FlowStepLink> flowStepLinks) {
+        this.flowStepLinks = flowStepLinks;
     }
 
     public List<FlowStepLink> getFlowStepLinks() {
@@ -270,6 +280,39 @@ public class Flow extends AbstractObject {
         Collections.sort(starterSteps, new XSorter());
         Collections.sort(starterSteps, new YSorter());
         return starterSteps;
+    }
+    
+    @Override
+    public AbstractObject copy() {
+        Flow newFlow = (Flow)super.copy();
+
+        newFlow.setFlowParameters(new ArrayList<FlowParameter>());
+        newFlow.setFlowStepLinks(new ArrayList<FlowStepLink>());
+        newFlow.setFlowSteps(new ArrayList<FlowStep>());
+        
+        Map<String, String> oldToNewFlowStepIds = new HashMap<String, String>();
+        for (FlowStep flowStep : flowSteps) {
+              String oldId = flowStep.getId();
+              flowStep = (FlowStep)flowStep.copy();
+              oldToNewFlowStepIds.put(oldId, flowStep.getId());
+              flowStep.setFlowId(newFlow.getId());
+              newFlow.getFlowSteps().add(flowStep);
+        }
+
+        for (FlowStepLink flowStepLink : flowStepLinks) {
+            flowStepLink = (FlowStepLink)flowStepLink.copy();
+            flowStepLink.setSourceStepId(oldToNewFlowStepIds.get(flowStepLink.getSourceStepId()));
+            flowStepLink.setTargetStepId(oldToNewFlowStepIds.get(flowStepLink.getTargetStepId()));
+            newFlow.getFlowStepLinks().add(flowStepLink);
+        }
+
+        
+        for (FlowParameter flowParameter : flowParameters) {
+            flowParameter = (FlowParameter)flowParameter.copy();
+            flowParameter.setFlowId(newFlow.getId());
+            newFlow.getFlowParameters().add(flowParameter);
+        }
+        return newFlow;
     }
 
     static public class XSorter implements Comparator<FlowStep> {

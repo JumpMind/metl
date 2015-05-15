@@ -682,8 +682,10 @@ public class ProjectNavigator extends VerticalLayout {
             this.treeTable.addItem(resource);
             if (Datasource.TYPE.equals(resource.getType())) {
                 this.treeTable.setItemIcon(resource, Icons.DATABASE);
+            } else if (Http.TYPE.equals(resource.getType())) {
+                this.treeTable.setItemIcon(resource, Icons.WEB);
             } else {
-                this.treeTable.setItemIcon(resource, Icons.GENERAL_RESOURCE);
+                this.treeTable.setItemIcon(resource, Icons.FILE_SYSTEM);
             }
             this.treeTable.setChildrenAllowed(resource, false);
             this.treeTable.setParent(resource, folder);
@@ -876,6 +878,22 @@ public class ProjectNavigator extends VerticalLayout {
             treeTable.setItemIcon(model, Icons.MODEL);
             treeTable.setParent(model, treeTable.getParent(object));
             treeTable.setChildrenAllowed(model, false);
+        } else if (object instanceof FlowName) {
+            Flow oldFlow = context.getConfigurationService().findFlow(((FlowName)object).getId());
+            Flow newFlow = (Flow)oldFlow.copy();
+            newFlow.setName(newFlow.getName() + " Copy");
+            context.getConfigurationService().save(newFlow);
+            
+            FlowName flow = new FlowName();
+            flow.setName(newFlow.getName());
+            flow.setProjectVersionId(newFlow.getProjectVersionId());
+            flow.setId(newFlow.getId());
+
+            treeTable.addItem(flow);
+            treeTable.setItemIcon(flow, Icons.FLOW);
+            treeTable.setParent(flow, treeTable.getParent(object));
+            treeTable.setChildrenAllowed(flow, false);
+            
         }
     }
 
@@ -972,7 +990,7 @@ public class ProjectNavigator extends VerticalLayout {
     }
     
     protected void addNewHttpResource() {
-        addNewResource(Http.TYPE, "Http", FontAwesome.CLOUD);
+        addNewResource(Http.TYPE, "Http", Icons.WEB);
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {
