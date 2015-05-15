@@ -65,10 +65,11 @@ public class Joiner extends AbstractComponentRuntime {
     @Override
     public void lastMessageReceived(IMessageTarget messageTarget) {
         
-        ArrayList<EntityData> dataToSend = new ArrayList<EntityData>();
+        ArrayList<EntityData> dataToSend=null;
         Iterator<Map.Entry<Object, EntityData>> itr = joinedData.entrySet().iterator();
         int nbrRecs=0;
         while (itr.hasNext()) {
+            dataToSend = new ArrayList<EntityData>();  
             nbrRecs++;
             Map.Entry<Object, EntityData> element = (Map.Entry<Object, EntityData>)itr.next();
             dataToSend.add(element.getValue());
@@ -76,7 +77,7 @@ public class Joiner extends AbstractComponentRuntime {
                 sendMessage(dataToSend, messageTarget, nbrRecs==joinedData.size());
             }
         }
-        if (dataToSend.size() > 0) {
+        if (dataToSend != null && dataToSend.size() > 0) {
             sendMessage(dataToSend, messageTarget, true);
         }
     }
@@ -88,8 +89,7 @@ public class Joiner extends AbstractComponentRuntime {
         newMessage.getHeader().setLastMessage(lastMessage);
         newMessage.setPayload(dataToSend);
         getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(newMessage);
-        dataToSend = new ArrayList<EntityData>();        
+        messageTarget.put(newMessage);      
     }
     
     private void applySettings() {
