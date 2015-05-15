@@ -318,9 +318,6 @@
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
-        <foreign-key foreignTable="resource" name="fk_aress_2_res">
-            <reference local="resource_id" foreign="id" />
-        </foreign-key>
     </table>
 
     <table name="agent_setting" description="">
