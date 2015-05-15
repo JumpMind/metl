@@ -27,7 +27,7 @@ public class StepRuntime implements Runnable {
 
     protected BlockingQueue<Message> inQueue;
 
-    boolean running = true;
+    boolean running = false;
 
     boolean cancelled = false;
 
@@ -88,8 +88,7 @@ public class StepRuntime implements Runnable {
 
     @Override
     public void run() {
-        try {
-
+        try {            
             MessageTarget target = new MessageTarget();
             /*
              * if we are a start step (don't have any input links), we'll only
@@ -168,16 +167,19 @@ public class StepRuntime implements Runnable {
             recordError(e);
         }
         running = false;
-        componentContext.getExecutionTracker().flowStepFinished(componentContext, error, cancelled);
+        finished();
+    }
+    
+    public void finished() {
+        componentContext.getExecutionTracker().flowStepFinished(componentContext, error, cancelled);        
+    }
+    
+    public void setRunning(boolean running) {
+        this.running = running;
     }
 
     public boolean isRunning() {
         return running;
-    }
-
-    public void stop() throws InterruptedException {
-        this.inQueue.clear();
-        this.inQueue.put(new ShutdownMessage(componentContext.getFlowStep().getId()));
     }
 
     public void flowCompletedWithoutError() {
@@ -238,6 +240,11 @@ public class StepRuntime implements Runnable {
                 }
             }
         }
+    }
+    
+    @Override
+    public String toString() {
+        return componentContext.getFlowStep().getName();
     }
 
 }

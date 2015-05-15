@@ -22,8 +22,12 @@ import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.util.AppUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FlowRuntime {
+    
+    final Logger log = LoggerFactory.getLogger(getClass());
 
     AgentDeployment deployment;
 
@@ -73,7 +77,7 @@ public class FlowRuntime {
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
         }
-
+        
         List<FlowStepLink> links = flow.getFlowStepLinks();
 
         /* for each step runtime, set their list of target step runtimes */
@@ -101,20 +105,21 @@ public class FlowRuntime {
         }
 
         List<StepRuntime> startSteps = findStartSteps();
-
-        /* each step is started as a thread */
-        for (StepRuntime stepRuntime : stepRuntimes.values()) {
-            threadService.execute(stepRuntime);
-        }
-
+        
         /* start up each step runtime */
         for (StepRuntime stepRuntime : stepRuntimes.values()) {
             try {
-                stepRuntime.start(executionTracker, resourceFactory);
+                stepRuntime.start(executionTracker, resourceFactory);                
             } catch (RuntimeException ex) {
                 stepRuntime.error = ex;
                 throw ex;
             }
+        }
+        
+        /* each step is started as a thread */
+        for (StepRuntime stepRuntime : stepRuntimes.values()) {
+            stepRuntime.setRunning(true);
+            threadService.execute(stepRuntime);
         }
 
         StartupMessage startMessage = new StartupMessage();
@@ -190,14 +195,15 @@ public class FlowRuntime {
     }
 
     public void stop() {
-        if (isRunning()) {
-            List<StepRuntime> startSteps = findStartSteps();
-            for (StepRuntime stepRuntime : startSteps) {
+        for (StepRuntime stepRuntime : stepRuntimes.values()) {
+            if (stepRuntime.isRunning()) {
                 try {
-                    stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponentRuntime().getComponentContext()
-                            .getFlowStep().getId()));
+                    stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponentRuntime()
+                            .getComponentContext().getFlowStep().getId()));
                 } catch (InterruptedException e) {
                 }
+            } else {
+                stepRuntime.finished();
             }
         }
     }
