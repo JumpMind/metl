@@ -114,7 +114,6 @@ public class TextFileReader extends AbstractComponentRuntime {
         getComponentStatistics().incrementInboundMessages();
         String currentLine;
         int linesRead = 0;
-        int linesInMessage = 0;
         int numberMessages = 0;
         List<String> files = new ArrayList<String>();
         if (getFileNameFromMessage) {
@@ -136,6 +135,7 @@ public class TextFileReader extends AbstractComponentRuntime {
         for (String file : files) {
             InputStream inStream = null;
             BufferedReader reader = null;
+            int linesInMessage = 0;
             try {
                 IStreamable resource = (IStreamable)getResourceReference();
                 String filePath = FormatUtils.replaceTokens(file, context.getFlowParametersAsString(), true);

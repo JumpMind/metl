@@ -59,7 +59,7 @@ public class Deduper extends AbstractComponentRuntime {
             int count = 0;
             ArrayList<EntityData> payload = new ArrayList<EntityData>(rowsPerMessage);
             for (EntityData data : deduped.values()) {
-                if (count > rowsPerMessage) {
+                if (count >= rowsPerMessage) {
                     sendMessage(payload, messageTarget, false);
                     payload = new ArrayList<EntityData>();
                     count = 0;
