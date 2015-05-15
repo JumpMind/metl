@@ -8,6 +8,14 @@ public class GroupPrivilege extends AbstractObject {
     
     String groupId;
 
+    public GroupPrivilege() {
+    }
+    
+    public GroupPrivilege(String groupId, String name) {
+        this.groupId = groupId;
+        this.name = name;
+    }
+    
     @Override
     public void setName(String name) {
         this.name = name;
