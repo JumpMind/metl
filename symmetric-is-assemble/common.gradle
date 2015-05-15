@@ -9,6 +9,11 @@ import org.apache.tools.ant.filters.ReplaceTokens
     sourceCompatibility=1.7
     targetCompatibility=1.7   
     
+    configurations.all {
+        // check for updates every build
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+    
     ext {
         antVersion = '1.7.0'
         log4jVersion = '1.2.17'
