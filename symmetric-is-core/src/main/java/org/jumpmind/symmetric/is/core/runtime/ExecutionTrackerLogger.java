@@ -74,21 +74,22 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     @Override
     public void log(LogLevel level, ComponentContext context, String output, Object...args) {
         if (deployment.asLogLevel().log(level)) {
-            String msg = String.format(
-                    output, args);
+            if (args != null && args.length > 0) {
+                output = String.format(output, args);
+            }
             switch (level) {
                 case DEBUG:
-                    log.debug(msg);
+                    log.debug(output);
                     break;
                 case INFO:
-                    log.info(msg);
+                    log.info(output);
                     break;
                 case WARN:
-                    log.warn(msg);
+                    log.warn(output);
                     break;
                 case ERROR:
                 default:
-                    log.error(msg);
+                    log.error(output);
                     break;
             }
         }
