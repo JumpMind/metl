@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.ui.views.admin;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -93,8 +94,11 @@ public class GroupEditPanel extends VerticalLayout implements IUiPanel {
 
             for (String name : lastPrivs) {
                 if (!privs.contains(name)) {
-                    for (GroupPrivilege groupPriv : group.getGroupPrivileges()) {
+                    Iterator<GroupPrivilege> iter = group.getGroupPrivileges().iterator();
+                    while (iter.hasNext()) {
+                        GroupPrivilege groupPriv = iter.next();
                         if (groupPriv.getName().equals(name)) {
+                            iter.remove();
                             context.getConfigurationService().delete(groupPriv);
                         }
                     }
