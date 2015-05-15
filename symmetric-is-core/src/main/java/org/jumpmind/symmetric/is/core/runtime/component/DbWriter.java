@@ -247,7 +247,7 @@ public class DbWriter extends AbstractComponentRuntime {
                     if (modelTable.shouldProcess(inputRow)) {
                         List<Object> data = getValues(true, modelTable, inputRow);
                         int count = execute(transaction, modelTable.getStatement(), new Object(),
-                                data);
+                                data, true);
                         stats.updateCount+=count;
                         getComponentStatistics().incrementNumberEntitiesProcessed(count);
                         if (insertFallback && count == 0) {
@@ -256,7 +256,7 @@ public class DbWriter extends AbstractComponentRuntime {
                                 log.debug("Falling back to insert");
                                 data = getValues(false, modelTable, inputRow);
                                 count = execute(transaction, modelTable.getStatement(),
-                                        new Object(), data);
+                                        new Object(), data, true);
                                 stats.fallbackInsertCount+=count;
                                 getComponentStatistics().incrementNumberEntitiesProcessed(count);
                             }
@@ -275,7 +275,7 @@ public class DbWriter extends AbstractComponentRuntime {
                         if (modelTable.shouldProcess(inputRow)) {
                             List<Object> data = getValues(false, modelTable, inputRow);
                             int count = execute(transaction, modelTable.getStatement(),
-                                    new Object(), data);
+                                    new Object(), data, !replaceRows);
                             stats.insertCount+=count;
                             getComponentStatistics().incrementNumberEntitiesProcessed(count);
                         }
@@ -286,7 +286,7 @@ public class DbWriter extends AbstractComponentRuntime {
                                 log.debug("Falling back to update");
                                 List<Object> data = getValues(true, modelTable, inputRow);
                                 int count = execute(transaction, modelTable.getStatement(),
-                                        new Object(), data);
+                                        new Object(), data, true);
                                 stats.fallbackUpdateCount+=count;
                                 getComponentStatistics().incrementNumberEntitiesProcessed(count);
                             }
@@ -341,7 +341,7 @@ public class DbWriter extends AbstractComponentRuntime {
     }
 
     private int execute(ISqlTransaction transaction, DmlStatement dmlStatement, Object marker,
-            List<Object> data) {
+            List<Object> data, boolean logFailure) {
         if (log.isDebugEnabled()) {
             log.debug("Preparing dml: " + dmlStatement.getSql());
         }
@@ -355,10 +355,13 @@ public class DbWriter extends AbstractComponentRuntime {
         try {
             return transaction.addRow(marker, data.toArray(), dmlStatement.getTypes());
         } catch (SqlException ex) {
-            log(LogLevel.WARN, String.format(
-                    "Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n",
-                    dmlStatement.getSql(), Arrays.toString(data.toArray()),
-                    Arrays.toString(dmlStatement.getTypes())));
+            if (logFailure) {
+                log(LogLevel.WARN,
+                        String.format(
+                                "Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n",
+                                dmlStatement.getSql(), Arrays.toString(data.toArray()),
+                                Arrays.toString(dmlStatement.getTypes())));
+            }
             throw ex;
         }
     }
