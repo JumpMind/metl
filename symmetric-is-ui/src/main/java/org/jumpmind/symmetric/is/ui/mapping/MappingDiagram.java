@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
-import org.jumpmind.symmetric.is.core.runtime.component.MappingProcessor;
+import org.jumpmind.symmetric.is.core.runtime.component.Mapping;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 
 import com.vaadin.annotations.JavaScript;
@@ -73,7 +73,7 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
     }
 
     protected void removeConnection(String sourceId, String targetId) {
-    	List<ComponentAttributeSetting> settings = component.getAttributeSetting(sourceId, MappingProcessor.ATTRIBUTE_MAPS_TO);
+    	List<ComponentAttributeSetting> settings = component.getAttributeSetting(sourceId, Mapping.ATTRIBUTE_MAPS_TO);
     	for (ComponentAttributeSetting setting : settings) {
     		if (setting.getValue().equals(targetId)) {
         		component.getAttributeSettings().remove(setting);
@@ -113,7 +113,7 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
                 	ComponentAttributeSetting setting = new ComponentAttributeSetting();
                 	setting.setAttributeId(sourceId);
                 	setting.setComponentId(component.getId());
-            		setting.setName(MappingProcessor.ATTRIBUTE_MAPS_TO);
+            		setting.setName(Mapping.ATTRIBUTE_MAPS_TO);
             		component.addAttributeSetting(setting);
                 	setting.setValue(targetId);
                 	context.getConfigurationService().save(setting);
