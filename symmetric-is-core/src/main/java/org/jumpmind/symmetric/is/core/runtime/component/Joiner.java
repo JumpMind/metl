@@ -64,14 +64,11 @@ public class Joiner extends AbstractComponentRuntime {
     public void lastMessageReceived(IMessageTarget messageTarget) {        
         ArrayList<EntityData> dataToSend=new ArrayList<EntityData>();
         Iterator<EntityData> itr = joinedData.values().iterator();
-        int nbrRecs=0;
         while (itr.hasNext()) {
-            if (nbrRecs >= rowsPerMessage) {
+            if (dataToSend.size() >= rowsPerMessage) {
                 sendMessage(dataToSend, messageTarget, false);
                 dataToSend = new ArrayList<EntityData>();
-                nbrRecs = 0;
             }
-            nbrRecs++;            
             dataToSend.add(itr.next());
         }
         if (dataToSend != null && dataToSend.size() > 0) {

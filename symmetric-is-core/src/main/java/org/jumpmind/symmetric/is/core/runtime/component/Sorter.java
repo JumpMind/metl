@@ -73,15 +73,11 @@ public class Sorter extends AbstractComponentRuntime {
     public void lastMessageReceived(IMessageTarget messageTarget) {
         ArrayList<EntityData> dataToSend = new ArrayList<EntityData>();
         sort();
-        int nbrRecs = 0;
         for (EntityData record : sortedRecords) {
-            if (nbrRecs >= rowsPerMessage) {
+            if (dataToSend.size() >= rowsPerMessage) {
                 sendMessage(dataToSend, messageTarget, false);
                 dataToSend = new ArrayList<EntityData>();
-                nbrRecs = 0;
             }
-
-            nbrRecs++;
             dataToSend.add(record);
         }
         if (dataToSend != null && dataToSend.size() > 0) {
@@ -114,7 +110,7 @@ public class Sorter extends AbstractComponentRuntime {
                 joinAttributeElements[1]).getId();
         if (sortAttributeId == null) {
             throw new IllegalStateException(
-                    "Join attribute must be a valid 'entity.attribute' in the input model.");
+                    "Sort attribute must be a valid 'entity.attribute' in the input model.");
         }
     }
 
@@ -122,7 +118,6 @@ public class Sorter extends AbstractComponentRuntime {
         Collections.sort(sortedRecords, new Comparator<EntityData>() {
             @Override
             public int compare(EntityData o1, EntityData o2) {
-
                 Object obj1 = o1.get(sortAttributeId);
                 Object obj2 = o2.get(sortAttributeId);
                 if ((obj1 instanceof Comparable || obj1 == null)
