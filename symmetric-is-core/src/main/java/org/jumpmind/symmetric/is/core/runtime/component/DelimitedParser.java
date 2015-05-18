@@ -179,17 +179,21 @@ public class DelimitedParser extends AbstractComponentRuntime {
                 Model inputModel = getComponent().getOutputModel();
                 ModelAttribute attribute = inputModel.getAttributeById(attributeSetting
                         .getAttributeId());
+                ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
                 if (attribute != null) {
-                    ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
                     format = new AttributeFormat(attributeSetting.getAttributeId(), entity,
                             attribute);
-                    formats.put(attributeSetting.getAttributeId(), format);                    
-                    if (attributeSetting.getName().equalsIgnoreCase(DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL)) {
-                        format.setOrdinal(Integer.parseInt(attributeSetting.getValue()));
-                    } else if (attributeSetting.getName().equalsIgnoreCase(
-                            DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION)) {
-                        format.setFormatFunction(attributeSetting.getValue());
-                    }
+                    formats.put(attributeSetting.getAttributeId(), format);
+                }
+            }
+
+            if (format != null) {
+                if (attributeSetting.getName().equalsIgnoreCase(
+                        DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL)) {
+                    format.setOrdinal(Integer.parseInt(attributeSetting.getValue()));
+                } else if (attributeSetting.getName().equalsIgnoreCase(
+                        DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION)) {
+                    format.setFormatFunction(attributeSetting.getValue());
                 }
             }
         }
