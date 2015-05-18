@@ -51,6 +51,8 @@ public interface IConfigurationService {
     
     public User findUserByLoginId(String loginId);
     
+    public List<User> findUsersByGroup(String groupId);
+    
     public List<User> findUsers();
     
     public Group findGroup(String id);

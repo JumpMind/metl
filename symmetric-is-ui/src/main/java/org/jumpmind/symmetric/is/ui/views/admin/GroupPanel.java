@@ -1,9 +1,12 @@
 package org.jumpmind.symmetric.is.ui.views.admin;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.Group;
+import org.jumpmind.symmetric.is.core.model.User;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
@@ -14,7 +17,9 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table;
@@ -129,9 +134,26 @@ public class GroupPanel extends NamedPanel {
 
     class RemoveClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
+            List<User> users = new ArrayList<User>();
             for (Group group : getSelectedItems()) {
-                context.getConfigurationService().delete(group);
-                container.removeItem(group);
+                users.addAll(context.getConfigurationService().findUsersByGroup(group.getId()));
+                if (users.size() > 10) {
+                    break;
+                }
+            }
+            if (users.size() == 0) {
+                for (Group group : getSelectedItems()) {
+                    context.getConfigurationService().delete(group);
+                    container.removeItem(group);
+                }
+            } else {
+                String message = "There are " + users.size() + " users assigned to this group. " +
+                        "Re-assign or delete the users first.  ";
+                if (users.size() < 10) {
+                    message += users.toString();
+                }
+                Notification note = new Notification("Cannot Delete", message);
+                note.show(Page.getCurrent());
             }
             table.setValue(null);
             setButtonsEnabled();

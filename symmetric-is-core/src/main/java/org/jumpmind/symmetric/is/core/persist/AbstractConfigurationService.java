@@ -472,6 +472,19 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
+    public List<User> findUsersByGroup(String groupId) {
+        List<User> users = new ArrayList<User>();
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("groupId", groupId);
+        List<UserGroup> userGroups = persistenceManager.find(UserGroup.class, params, null, null,
+                tableName(UserGroup.class));
+        for (UserGroup userGroup : userGroups) {
+            users.add(findUser(userGroup.getUserId()));
+        }       
+        return users;
+    }
+
+    @Override
     public List<User> findUsers() {
         return persistenceManager.find(User.class, null, null, null, tableName(User.class));
     }
