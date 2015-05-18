@@ -14,6 +14,7 @@ import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.model.Execution;
+import org.jumpmind.symmetric.is.core.model.ExecutionStatus;
 import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 import org.springframework.core.env.Environment;
 
@@ -25,6 +26,22 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
             IPersistenceManager persistenceManager, String tablePrefix, Environment env) {
         super(persistenceManager, tablePrefix, env);
         this.databasePlatform = databasePlatform;
+    }
+    
+    public void markAbandoned(String agentId) {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        int count = template.update(
+                String.format(
+                        "update %1$s_execution_step set status=? where (status=? or status=?) and execution_id in (select execution_id from %1$s_execution where agent_id=?)",
+                        tablePrefix), ExecutionStatus.ABANDONED.name(), ExecutionStatus.RUNNING
+                        .name(), ExecutionStatus.READY.name(), agentId);
+        log.info("Updated {} execution step records that were abandoned", count);
+        count = template.update(
+                String.format(
+                        "update %1$s_execution set status=? where (status=? or status=?) and agent_id=?",
+                        tablePrefix), ExecutionStatus.ABANDONED.name(), ExecutionStatus.RUNNING
+                        .name(), ExecutionStatus.READY.name(), agentId);
+        log.info("Updated {} execution records that were abandoned", count);
     }
 
     public List<ExecutionStepLog> findExecutionStepLog(Set<String> executionStepIds) {
