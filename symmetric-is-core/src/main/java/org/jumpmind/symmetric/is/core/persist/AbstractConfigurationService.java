@@ -732,21 +732,27 @@ abstract class AbstractConfigurationService extends AbstractService implements
         save((AbstractObject) component);
 
         List<ComponentAttributeSetting> aSettings = component.getAttributeSettings();
-        for (ComponentAttributeSetting componentAttributeSetting : aSettings) {
-            save(componentAttributeSetting);
+        if (aSettings != null) {
+            for (ComponentAttributeSetting componentAttributeSetting : aSettings) {
+                save(componentAttributeSetting);
+            }
         }
-
+        
         List<ComponentEntitySetting> eSettings = component.getEntitySettings();
-        for (ComponentEntitySetting componentEntitySetting : eSettings) {
-            save(componentEntitySetting);
+        if (eSettings != null) {
+            for (ComponentEntitySetting componentEntitySetting : eSettings) {
+                save(componentEntitySetting);
+            }
         }
-
+        
         List<Setting> settings = component.getSettings();
-        for (Setting setting : settings) {
-            save(setting);
+        if (settings != null) {
+            for (Setting setting : settings) {
+                save(setting);
+            }
         }
     }
-
+    
     @Override
     public void save(Project project) {
         save((AbstractObject) project);
@@ -875,5 +881,4 @@ abstract class AbstractConfigurationService extends AbstractService implements
             save(modelAttribute);
         }
     }
-
 }
