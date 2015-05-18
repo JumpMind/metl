@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.jumpmind.properties.TypedProperties;
 
-public class Agent extends AbstractObjectWithSettings {
+public class Agent extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,14 +28,15 @@ public class Agent extends AbstractObjectWithSettings {
     
     List<AgentResourceSetting> agentResourceSettings;
     
+    List<AgentParameter> agentParameters;
+    
     boolean deleted;
 
     public Agent() {
         this.agentDeployments = new ArrayList<AgentDeployment>();
     }
 
-    public Agent(Folder folder, Setting... settings) {
-        super(settings);
+    public Agent(Folder folder) {
         setFolder(folder);
         this.agentDeployments = new ArrayList<AgentDeployment>();
     }
@@ -54,11 +55,6 @@ public class Agent extends AbstractObjectWithSettings {
 
     public void setAgentStatus(AgentStatus agentStatus) {
         status = agentStatus.name();
-    }
-
-    @Override
-    protected Setting createSettingData() {
-        return new AgentSetting();
     }
 
     public Folder getFolder() {
@@ -175,6 +171,14 @@ public class Agent extends AbstractObjectWithSettings {
             }
         }
         return properties;
+    }
+
+    public List<AgentParameter> getAgentParameters() {
+        return agentParameters;
+    }
+
+    public void setAgentParameters(List<AgentParameter> agentParameters) {
+        this.agentParameters = agentParameters;
     }
 
 }

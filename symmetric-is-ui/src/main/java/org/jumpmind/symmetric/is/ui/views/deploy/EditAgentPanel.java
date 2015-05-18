@@ -112,6 +112,11 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         editAgentLayout.addComponent(startModeCombo);
         editAgentLayout.setComponentAlignment(startModeCombo, Alignment.BOTTOM_LEFT);
         
+        Button parameterButton = new Button("Parameters");
+        parameterButton.addClickListener(new ParameterClickListener());
+        editAgentLayout.addComponent(parameterButton);
+        editAgentLayout.setComponentAlignment(parameterButton, Alignment.BOTTOM_LEFT);
+        
         HorizontalLayout buttonGroup = new HorizontalLayout();
         
         final TextField hostNameField = new TextField("Hostname");
@@ -486,4 +491,12 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
             return super.compare(o1, o2);
         }        
     }
+    
+    class ParameterClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            EditAgentParametersWindow window = new EditAgentParametersWindow(context, agent);
+            window.showAtSize(0.5);
+        }
+    }
+
 }

@@ -17,7 +17,7 @@ import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentDeploymentParameter;
 import org.jumpmind.symmetric.is.core.model.AgentResource;
 import org.jumpmind.symmetric.is.core.model.AgentResourceSetting;
-import org.jumpmind.symmetric.is.core.model.AgentSetting;
+import org.jumpmind.symmetric.is.core.model.AgentParameter;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.ComponentEntitySetting;
@@ -263,9 +263,9 @@ abstract class AbstractConfigurationService extends AbstractService implements
     protected void refreshAgentSettings(Agent agent) {
         Map<String, Object> settingParams = new HashMap<String, Object>();
         settingParams.put("agentId", agent.getId());
-        List<AgentSetting> settings = persistenceManager.find(AgentSetting.class, settingParams,
-                null, null, tableName(AgentSetting.class));
-        agent.setSettings(settings);
+        List<AgentParameter> parameters = persistenceManager.find(AgentParameter.class, settingParams,
+                null, null, tableName(AgentParameter.class));
+        agent.setAgentParameters(parameters);
     }
 
     protected void refreshAgentResourceSettings(Agent agent) {
