@@ -209,7 +209,7 @@ public class DbWriter extends AbstractComponentRuntime {
         }
     }
 
-    private List<Object> getValues(boolean isUpdate, TargetTable modelTable, EntityData inputRow) {
+    private Object[] getValues(boolean isUpdate, TargetTable modelTable, EntityData inputRow) {
         ArrayList<Object> data = new ArrayList<Object>();
         for (TargetColumn modelColumn : modelTable.getTargetColumns()) {
             if ((isUpdate && modelColumn.isUpdateEnabled())
@@ -222,15 +222,15 @@ public class DbWriter extends AbstractComponentRuntime {
                 data.add(value);
             }
         }
-        if (isUpdate) {
+        
+        ArrayList<Object> keyValues = new ArrayList<Object>();
             for (TargetColumn modelColumn : modelTable.getKeyTargetColumns()) {
                 if ((isUpdate && modelColumn.isUpdateEnabled())
                         || (!isUpdate && modelColumn.isInsertEnabled())) {
-                    data.add(inputRow.get(modelColumn.getModelAttribute().getId()));
+                    keyValues.add(inputRow.get(modelColumn.getModelAttribute().getId()));
                 }
             }
-        }
-        return data;
+            return modelTable.getStatement().getValueArray(data.toArray(new Object[data.size()]), keyValues.toArray(new Object[keyValues.size()]));
     }
 
     private void write(ISqlTransaction transaction, List<EntityData> inputRows) {
@@ -245,7 +245,7 @@ public class DbWriter extends AbstractComponentRuntime {
                 if (updateFirst) {
                     TargetTable modelTable = targetTableDefinition.getUpdateTable();
                     if (modelTable.shouldProcess(inputRow)) {
-                        List<Object> data = getValues(true, modelTable, inputRow);
+                        Object[] data = getValues(true, modelTable, inputRow);
                         int count = execute(transaction, modelTable.getStatement(), new Object(),
                                 data, true);
                         stats.updateCount+=count;
@@ -265,7 +265,7 @@ public class DbWriter extends AbstractComponentRuntime {
                                     String.format(
                                             "Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n",
                                             modelTable.getStatement().getSql(),
-                                            Arrays.toString(data.toArray()),
+                                            Arrays.toString(data),
                                             Arrays.toString(modelTable.getStatement().getTypes())));
                         }
                     }
@@ -273,7 +273,7 @@ public class DbWriter extends AbstractComponentRuntime {
                     try {
                         TargetTable modelTable = targetTableDefinition.getInsertTable();
                         if (modelTable.shouldProcess(inputRow)) {
-                            List<Object> data = getValues(false, modelTable, inputRow);
+                            Object[] data = getValues(false, modelTable, inputRow);
                             int count = execute(transaction, modelTable.getStatement(),
                                     new Object(), data, !replaceRows);
                             stats.insertCount+=count;
@@ -284,7 +284,7 @@ public class DbWriter extends AbstractComponentRuntime {
                             TargetTable modelTable = targetTableDefinition.getUpdateTable();
                             if (modelTable.shouldProcess(inputRow)) {
                                 log.debug("Falling back to update");
-                                List<Object> data = getValues(true, modelTable, inputRow);
+                                Object[] data = getValues(true, modelTable, inputRow);
                                 int count = execute(transaction, modelTable.getStatement(),
                                         new Object(), data, true);
                                 stats.fallbackUpdateCount+=count;
@@ -341,25 +341,25 @@ public class DbWriter extends AbstractComponentRuntime {
     }
 
     private int execute(ISqlTransaction transaction, DmlStatement dmlStatement, Object marker,
-            List<Object> data, boolean logFailure) {
+            Object[] data, boolean logFailure) {
         if (log.isDebugEnabled()) {
             log.debug("Preparing dml: " + dmlStatement.getSql());
         }
         transaction.prepare(dmlStatement.getSql());
 
         if (log.isDebugEnabled()) {
-            log.debug("Submitting data {} with types {}", Arrays.toString(data.toArray()),
+            log.debug("Submitting data {} with types {}", Arrays.toString(data),
                     Arrays.toString(dmlStatement.getTypes()));
         }
 
         try {
-            return transaction.addRow(marker, data.toArray(), dmlStatement.getTypes());
+            return transaction.addRow(marker, data, dmlStatement.getTypes());
         } catch (SqlException ex) {
             if (logFailure) {
                 log(LogLevel.WARN,
                         String.format(
                                 "Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n",
-                                dmlStatement.getSql(), Arrays.toString(data.toArray()),
+                                dmlStatement.getSql(), Arrays.toString(data),
                                 Arrays.toString(dmlStatement.getTypes())));
             }
             throw ex;
