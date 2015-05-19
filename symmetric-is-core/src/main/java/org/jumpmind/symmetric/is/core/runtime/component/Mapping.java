@@ -22,10 +22,10 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 @ComponentDefinition(
         category = ComponentCategory.PROCESSOR,
         iconImage = "mapping.png",
-        typeName = MappingProcessor.TYPE,
+        typeName = Mapping.TYPE,
         inputMessage = MessageType.ENTITY,
         outgoingMessage = MessageType.ENTITY)
-public class MappingProcessor extends AbstractComponentRuntime {
+public class Mapping extends AbstractComponentRuntime {
 
     public static final String TYPE = "Mapping";
 
@@ -46,7 +46,6 @@ public class MappingProcessor extends AbstractComponentRuntime {
     @Override
     protected void start() {
         
-
         validate();
 
         setUnmappedAttributesToNull = getComponent().getBoolean(

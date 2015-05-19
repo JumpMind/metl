@@ -95,6 +95,8 @@ public class AgentRuntime {
         if (!started && !starting) {
             starting = true;
             log.info("Agent '{}' is being started", agent);
+            
+            executionService.markAbandoned(agent.getId());
 
             this.flowStepsExecutionThreads = Executors.newCachedThreadPool(new ThreadFactory() {
                 final AtomicInteger threadNumber = new AtomicInteger(1);

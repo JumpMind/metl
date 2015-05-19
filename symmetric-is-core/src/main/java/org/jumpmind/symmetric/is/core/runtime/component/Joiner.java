@@ -30,7 +30,7 @@ public class Joiner extends AbstractComponentRuntime {
             order = 10,
             required = true,
             type = Type.TEXT,
-            label = "Join Attribute")
+            label = "Join Entity.Attribute")
     public final static String JOIN_ATTRIBUTE = "join.attribute";
 
     @SettingDefinition(
@@ -47,14 +47,12 @@ public class Joiner extends AbstractComponentRuntime {
     Map<Object, EntityData> joinedData = new LinkedHashMap<Object, EntityData>();
 
     @Override
-    protected void start() {
-        
+    protected void start() {        
         applySettings();
     }
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
-
         getComponentStatistics().incrementInboundMessages();
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
@@ -63,19 +61,15 @@ public class Joiner extends AbstractComponentRuntime {
     }
 
     @Override
-    public void lastMessageReceived(IMessageTarget messageTarget) {
-        
-        ArrayList<EntityData> dataToSend=null;
-        Iterator<Map.Entry<Object, EntityData>> itr = joinedData.entrySet().iterator();
-        int nbrRecs=0;
+    public void lastMessageReceived(IMessageTarget messageTarget) {        
+        ArrayList<EntityData> dataToSend=new ArrayList<EntityData>();
+        Iterator<EntityData> itr = joinedData.values().iterator();
         while (itr.hasNext()) {
-            dataToSend = new ArrayList<EntityData>();  
-            nbrRecs++;
-            Map.Entry<Object, EntityData> element = (Map.Entry<Object, EntityData>)itr.next();
-            dataToSend.add(element.getValue());
             if (dataToSend.size() >= rowsPerMessage) {
-                sendMessage(dataToSend, messageTarget, nbrRecs==joinedData.size());
+                sendMessage(dataToSend, messageTarget, false);
+                dataToSend = new ArrayList<EntityData>();
             }
+            dataToSend.add(itr.next());
         }
         if (dataToSend != null && dataToSend.size() > 0) {
             sendMessage(dataToSend, messageTarget, true);
@@ -83,8 +77,7 @@ public class Joiner extends AbstractComponentRuntime {
     }
     
     private void sendMessage(ArrayList<EntityData> dataToSend, IMessageTarget messageTarget,
-            boolean lastMessage) {
-        
+            boolean lastMessage) {        
         Message newMessage = new Message(getFlowStepId());
         newMessage.getHeader().setLastMessage(lastMessage);
         newMessage.setPayload(dataToSend);

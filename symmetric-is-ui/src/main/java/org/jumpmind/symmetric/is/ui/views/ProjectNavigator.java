@@ -31,7 +31,7 @@ import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.DelimitedParser;
 import org.jumpmind.symmetric.is.core.runtime.component.EntityRouter;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
-import org.jumpmind.symmetric.is.core.runtime.component.MappingProcessor;
+import org.jumpmind.symmetric.is.core.runtime.component.Mapping;
 import org.jumpmind.symmetric.is.core.runtime.component.ScriptExecutor;
 import org.jumpmind.symmetric.is.core.runtime.component.Transformer;
 import org.jumpmind.symmetric.is.core.runtime.component.XmlFormatter;
@@ -775,7 +775,7 @@ public class ProjectNavigator extends VerticalLayout {
         } else if (type.equals(EntityRouter.TYPE)) {
             EditEntityRouterPanel panel = new EditEntityRouterPanel(context, flowStep, flow);
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-        } else if (type.equals(MappingProcessor.TYPE)) {
+        } else if (type.equals(Mapping.TYPE)) {
             EditMappingPanel panel = new EditMappingPanel(context, flowStep.getComponent());
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
         } else if (type.equals(ScriptExecutor.TYPE)) {
