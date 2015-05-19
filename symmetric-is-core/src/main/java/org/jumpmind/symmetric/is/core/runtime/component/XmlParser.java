@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
+import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +9,6 @@ import org.jdom2.Attribute;
 import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.filter.Filters;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
 import org.jdom2.xpath.XPathExpression;
@@ -48,7 +48,7 @@ public class XmlParser extends AbstractXML {
         for (ComponentEntitySetting compEntitySetting : component.getEntitySettings()) {
             if (compEntitySetting.getName().equals(XML_FORMATTER_XPATH)) {
                 XPathExpression<?> expression = XPathFactory.instance().compile(
-                        compEntitySetting.getValue(), Filters.element());
+                        compEntitySetting.getValue());
                 XmlFormatterEntitySetting entitySetting = new XmlFormatterEntitySetting(
                         compEntitySetting, expression);
                 entitySettings.add(entitySetting);
@@ -57,7 +57,7 @@ public class XmlParser extends AbstractXML {
                 for (ComponentAttributeSetting componentAttributeSetting : attributeSettings) {
                     if (componentAttributeSetting.getName().equals(XML_FORMATTER_XPATH)) {
                         expression = XPathFactory.instance().compile(
-                                componentAttributeSetting.getValue(), Filters.element());
+                                componentAttributeSetting.getValue());
                         entitySetting.getAttributeSettings().add(
                                 new XmlFormatterAttributeSetting(componentAttributeSetting,
                                         expression));
@@ -86,11 +86,13 @@ public class XmlParser extends AbstractXML {
                     List<Element> entityMatches = (List<Element>) entitySetting.getExpression()
                             .evaluate(document.getRootElement());
                     for (Element element : entityMatches) {
+                        String text = toXML(element);
+                        Document childDocument = builder.build(new ByteArrayInputStream(text.getBytes()));
                         getComponentStatistics().incrementNumberEntitiesProcessed();
                         EntityData data = new EntityData();
                         for (XmlFormatterAttributeSetting attributeSetting : attributeSettings) {
                             List<Object> attributeMatches = (List<Object>) attributeSetting
-                                    .getExpression().evaluate(element);
+                                    .getExpression().evaluate(childDocument);
                             for (Object object : attributeMatches) {
                                 if (object instanceof Attribute) {
                                     data.put(attributeSetting.getSetting().getAttributeId(),

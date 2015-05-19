@@ -37,10 +37,12 @@ public class MessageLogger extends AbstractComponentRuntime {
             List<Object> list = (List<Object>) payload;
             for (Object object : list) {
                 if (object instanceof EntityData && getComponent().getInputModel() != null) {
+                    getComponentStatistics().incrementNumberEntitiesProcessed();
                     log(LogLevel.DEBUG,
                             String.format("Message Payload: %s",
                                     getComponent().toRow((EntityData) object)));
                 } else {
+                    getComponentStatistics().incrementNumberEntitiesProcessed();
                     log(LogLevel.DEBUG, String.format("Message Payload: %s", object));
                 }
             }
