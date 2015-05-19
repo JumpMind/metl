@@ -13,7 +13,6 @@ import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-import org.jdom2.filter.ElementFilter;
 import org.jdom2.filter.Filters;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
@@ -21,14 +20,11 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.jdom2.xpath.XPathExpression;
 import org.jdom2.xpath.XPathFactory;
-import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.ComponentEntitySetting;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.Setting;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
@@ -40,20 +36,10 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         iconImage = "xmlformatter.png",
         inputMessage = MessageType.ENTITY,
         outgoingMessage = MessageType.TEXT)
-public class XmlFormatter extends AbstractComponentRuntime {
-
-    @SettingDefinition(
-            order = 10,
-            required = false,
-            type = Type.BOOLEAN,
-            label = "Ignore namespaces for XPath matching",
-            defaultValue = "true")
-    public final static String IGNORE_NAMESPACE = "xml.formatter.ignore.namespace";
+public class XmlFormatter extends AbstractXML {
 
     public static final String TYPE = "Format XML";
-
-    public final static String XML_FORMATTER_XPATH = "xml.formatter.xpath";
-
+    
     public final static String XML_FORMATTER_TEMPLATE = "xml.formatter.template";
 
     Document templateDocument;
@@ -62,12 +48,9 @@ public class XmlFormatter extends AbstractComponentRuntime {
        
     Map<String, XmlFormatterEntitySetting> entitySettings;
     
-    boolean ignoreNamespace = true;
-
     @Override
     protected void start() {
-        TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
-        ignoreNamespace = properties.is(IGNORE_NAMESPACE);
+        super.start();
         Setting templateSetting = getComponent().findSetting(XML_FORMATTER_TEMPLATE);
 
         if (templateSetting != null && StringUtils.isNotBlank(templateSetting.getValue())) {
@@ -212,32 +195,7 @@ public class XmlFormatter extends AbstractComponentRuntime {
             }
         }        
     }
-
-    private Map<Element, Namespace> removeNamespaces(Document document) {
-        Map<Element, Namespace> namespaces = new HashMap<Element, Namespace>();
-        if (ignoreNamespace) {
-            namespaces.put(document.getRootElement(), document.getRootElement().getNamespace());
-            document.getRootElement().setNamespace(null);
-            for (Element el : document.getRootElement().getDescendants(new ElementFilter())) {
-                Namespace nsp = el.getNamespace();
-                if (nsp != null) {
-                    el.setNamespace(null);
-                    namespaces.put(el, nsp);
-                }
-            }
-        }
-        return namespaces;
-    }
-
-    private void restoreNamespaces(Document document, Map<Element, Namespace> namespaces) {
-        if (ignoreNamespace) {
-            Set<Element> elements = namespaces.keySet();
-            for (Element element : elements) {
-                element.setNamespace(namespaces.get(element));
-            }
-        }
-    }
-
+    
     class XmlFormatterAttributeSetting {
 
         ComponentAttributeSetting setting;

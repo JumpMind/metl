@@ -2,6 +2,8 @@ package org.jumpmind.symmetric.is.ui.views.design;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -98,7 +100,9 @@ public class EditFlowPalette extends VerticalLayout {
         Map<ComponentCategory, List<String>> componentTypesByCategory = componentFactory
                 .getComponentTypes();
         for (ComponentCategory category : componentTypesByCategory.keySet()) {
-            List<String> componentTypes = componentTypesByCategory.get(category);
+            List<String> componentTypes = new ArrayList<String>(componentTypesByCategory.get(category));
+            Collections.sort(componentTypes);
+            
             VerticalLayout componentLayout = new VerticalLayout();
             componentAccordian.addTab(componentLayout, category.name() + "S");
             if (componentTypes != null) {
