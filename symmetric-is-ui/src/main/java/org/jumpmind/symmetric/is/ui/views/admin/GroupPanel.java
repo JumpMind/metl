@@ -18,10 +18,11 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
+import com.vaadin.server.Resource;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
 
 @SuppressWarnings("serial")
@@ -41,8 +42,8 @@ public class GroupPanel extends NamedPanel {
     
     Table table;
 
-    public GroupPanel(ApplicationContext context, TabbedPanel tabbedPanel) {
-        super("Groups");
+    public GroupPanel(ApplicationContext context, TabbedPanel tabbedPanel, String caption, Resource icon) {
+        super(caption, icon);
         this.context = context;
         this.tabbedPanel = tabbedPanel;
 
@@ -119,7 +120,7 @@ public class GroupPanel extends NamedPanel {
         public void buttonClick(ClickEvent event) {
             Group group = new Group();
             GroupEditPanel editPanel = new GroupEditPanel(context, group);
-            tabbedPanel.addCloseableTab(group.getId(), "Edit Group", FontAwesome.USER, editPanel);
+            tabbedPanel.addCloseableTab(group.getId(), "Edit Group", getIcon(), editPanel);
         }
     }
 
@@ -128,7 +129,7 @@ public class GroupPanel extends NamedPanel {
             Group group = getFirstSelectedItem();
             context.getConfigurationService().refresh(group);
             GroupEditPanel editPanel = new GroupEditPanel(context, group);
-            tabbedPanel.addCloseableTab(group.getId(), "Edit Group", FontAwesome.USER, editPanel);
+            tabbedPanel.addCloseableTab(group.getId(), "Edit Group", getIcon(), editPanel);
         }
     }
 

@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.ui.views.admin;
 
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
+import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.Table.ColumnHeaderMode;
 import com.vaadin.ui.TreeTable;
@@ -51,9 +51,9 @@ public class AdminNavigator extends VerticalLayout {
         table.setColumnExpandRatio("name", 1);
         table.addValueChangeListener(new TableValueChangeListener());
         
-        addPanel(new UserPanel(context, tabbedPanel));
-        addPanel(new GroupPanel(context, tabbedPanel));
-        addPanel(new ApiPanel(context, tabbedPanel));
+        addPanel(new UserPanel(context, tabbedPanel, "Users", Icons.USER));
+        addPanel(new GroupPanel(context, tabbedPanel, "Groups", Icons.GROUP));
+        addPanel(new ApiPanel(context, tabbedPanel, "REST", Icons.REST));
 
         table.addStyleName("noselect");
         addComponent(table);
@@ -68,7 +68,7 @@ public class AdminNavigator extends VerticalLayout {
                 if (currentTab != null) {
                     tabbedPanel.removeTab(currentTab);
                 }
-                tabbedPanel.addTab(panel, panel.getName(), FontAwesome.GEAR, 0);
+                tabbedPanel.addTab(panel, panel.getName(), panel.getIcon(), 0);
                 tabbedPanel.setSelectedTab(0);
             }
         }
@@ -76,7 +76,7 @@ public class AdminNavigator extends VerticalLayout {
     
     protected void addPanel(NamedPanel panel) {
         table.addItem(panel);
-        table.setItemIcon(panel, FontAwesome.GEAR);
+        table.setItemIcon(panel, panel.getIcon());
         table.setChildrenAllowed(panel, false);
         table.setCollapsed(panel, true);
     }

@@ -7,6 +7,7 @@ import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Page;
+import com.vaadin.server.Resource;
 import com.vaadin.ui.BrowserFrame;
 
 public class ApiPanel extends NamedPanel {
@@ -15,8 +16,8 @@ public class ApiPanel extends NamedPanel {
 
     private static final long serialVersionUID = 1L;
 
-    public ApiPanel(ApplicationContext context, TabbedPanel tabbedPanel) {   
-        super("API");
+    public ApiPanel(ApplicationContext context, TabbedPanel tabbedPanel, String caption, Resource icon) {   
+        super(caption, icon);
         setSizeFull();
         BrowserFrame e = new BrowserFrame(null, new ExternalResource(Page.getCurrent()
                 .getLocation().getPath().replace("/app", "api.html")));

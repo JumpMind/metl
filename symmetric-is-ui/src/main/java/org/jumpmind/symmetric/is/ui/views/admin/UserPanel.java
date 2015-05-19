@@ -14,6 +14,7 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Resource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -37,8 +38,8 @@ public class UserPanel extends NamedPanel {
     
     Table table;
     
-    public UserPanel(ApplicationContext context, TabbedPanel tabbedPanel) {
-        super("Users");
+    public UserPanel(ApplicationContext context, TabbedPanel tabbedPanel, String caption, Resource icon) {
+        super(caption, icon);
         this.context = context;
         this.tabbedPanel = tabbedPanel;
         
@@ -115,7 +116,7 @@ public class UserPanel extends NamedPanel {
         public void buttonClick(ClickEvent event) {
             User user = new User();
             UserEditPanel editPanel = new UserEditPanel(context, user);
-            tabbedPanel.addCloseableTab(user.getId(), "Edit User", FontAwesome.USER, editPanel);
+            tabbedPanel.addCloseableTab(user.getId(), "Edit User", getIcon(), editPanel);
         }
     }
 
@@ -124,7 +125,7 @@ public class UserPanel extends NamedPanel {
             User user = getFirstSelectedItem();
             context.getConfigurationService().refresh(user);
             UserEditPanel editPanel = new UserEditPanel(context, user);
-            tabbedPanel.addCloseableTab(user.getId(), "Edit User", FontAwesome.USER, editPanel);
+            tabbedPanel.addCloseableTab(user.getId(), "Edit User", getIcon(), editPanel);
         }
     }
 

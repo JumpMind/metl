@@ -203,14 +203,14 @@ public class ManageNavigator extends Panel {
                 : folder);
         for (Agent agent : agents) {
             treeTable.addItem(agent);
-            treeTable.setItemIcon(agent, FontAwesome.GEAR);
+            treeTable.setItemIcon(agent, Icons.AGENT);
             treeTable.setChildrenAllowed(agent, agent.getAgentDeployments().size() > 0);
             treeTable.setParent(agent, folder);
 
             List<AgentDeployment> deployments = agent.getAgentDeployments();
             for (AgentDeployment agentDeployment : deployments) {
                 treeTable.addItem(agentDeployment);
-                treeTable.setItemIcon(agentDeployment, FontAwesome.CUBE);
+                treeTable.setItemIcon(agentDeployment, Icons.DEPLOYMENT);
                 treeTable.setParent(agentDeployment, agent);
                 treeTable.setChildrenAllowed(agentDeployment, false);
             }
