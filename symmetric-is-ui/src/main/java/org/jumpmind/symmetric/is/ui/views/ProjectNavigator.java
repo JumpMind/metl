@@ -35,6 +35,7 @@ import org.jumpmind.symmetric.is.core.runtime.component.Mapping;
 import org.jumpmind.symmetric.is.core.runtime.component.ScriptExecutor;
 import org.jumpmind.symmetric.is.core.runtime.component.Transformer;
 import org.jumpmind.symmetric.is.core.runtime.component.XmlFormatter;
+import org.jumpmind.symmetric.is.core.runtime.component.XmlParser;
 import org.jumpmind.symmetric.is.core.runtime.resource.Datasource;
 import org.jumpmind.symmetric.is.core.runtime.resource.Http;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
@@ -759,7 +760,7 @@ public class ProjectNavigator extends VerticalLayout {
                 type.equals(DelimitedParser.TYPE)) {
             EditFormatPanel panel = new EditFormatPanel(context, flowStep.getComponent());
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-        } else if (type.equals(XmlFormatter.TYPE)) {
+        } else if (type.equals(XmlFormatter.TYPE) || type.equals(XmlParser.TYPE)) {
             EditXmlFormatPanel panel = new EditXmlFormatPanel(context, flowStep.getComponent());
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
         } else if (type.equals(DbReader.TYPE)) {
