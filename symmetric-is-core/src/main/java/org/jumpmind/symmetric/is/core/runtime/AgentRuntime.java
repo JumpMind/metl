@@ -381,7 +381,7 @@ public class AgentRuntime {
                 log.info("Scheduled deployment '{}' is running on the '{}' agent", deployment.getName(),
                         agent.getName());
                 configurationService.refresh(deployment.getFlow());
-                flowRuntime.start(executionId, deployedResources);
+                flowRuntime.start(executionId, deployedResources, agent.getAgentParameters());
             } catch (Exception e) {
                 log.error("Error while waiting for the flow to complete", e);
                 flowRuntime.stop();

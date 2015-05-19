@@ -2,11 +2,8 @@ package org.jumpmind.symmetric.is.core.model;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 
@@ -146,14 +143,6 @@ public class AgentDeployment extends AbstractObject {
     
     public List<AgentDeploymentParameter> getAgentDeploymentParameters() {
         return agentDeploymentParameters;
-    }
-    
-    public Map<String, Serializable> parameters() {
-        Map<String, Serializable> params = new HashMap<String, Serializable>();
-        for (AgentDeploymentParameter agentDeploymentParameter : agentDeploymentParameters) {
-            params.put(agentDeploymentParameter.getName(), agentDeploymentParameter.getValue());
-        }
-        return params;
     }
 
     @Override

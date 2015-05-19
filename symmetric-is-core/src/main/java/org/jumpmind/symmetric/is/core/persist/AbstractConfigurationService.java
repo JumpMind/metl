@@ -661,6 +661,12 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
+    public void refresh(AgentDeployment deployment) {
+        refresh((AbstractObject) deployment);
+        refreshAgentDeploymentRelations(deployment);
+    }
+    
+    @Override
     public void refresh(User user) {
         Map<String, Object> params = new HashMap<String, Object>();
         params = new HashMap<String, Object>();
