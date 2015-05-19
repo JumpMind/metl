@@ -27,7 +27,7 @@ public class Component extends AbstractObjectWithSettings {
     String projectVersionId;
 
     boolean deleted = false;
-    
+
     String folderId;
 
     String rowId = UUID.randomUUID().toString();
@@ -165,16 +165,37 @@ public class Component extends AbstractObjectWithSettings {
     public List<ComponentEntitySetting> getEntitySetting(String entityId, String name) {
         List<ComponentEntitySetting> list = new ArrayList<ComponentEntitySetting>();
         for (ComponentEntitySetting setting : entitySettings) {
-            if (setting.getEntityId().equals(entityId)
-                    && setting.getName().equalsIgnoreCase(name)) {
+            if (setting.getEntityId().equals(entityId) && setting.getName().equalsIgnoreCase(name)) {
                 list.add(setting);
             }
         }
         return list;
-    }    
-    
+    }
+
     public List<ComponentAttributeSetting> getAttributeSettings() {
         return attributeSettings;
+    }
+
+    public List<ComponentAttributeSetting> getAttributeSettingsFor(String entityId) {
+        List<ComponentAttributeSetting> settings = new ArrayList<ComponentAttributeSetting>();
+        for (ComponentAttributeSetting setting : attributeSettings) {
+            String attributeId = setting.getAttributeId();
+            if (inputModel != null) {
+                ModelAttribute attribute = inputModel.getAttributeById(attributeId);
+                if (attribute != null && attribute.getEntityId().equals(entityId)) {
+                    settings.add(setting);
+                }
+            }
+
+            if (outputModel != null) {
+                ModelAttribute attribute = outputModel.getAttributeById(attributeId);
+                if (attribute != null && attribute.getEntityId().equals(entityId)
+                        && !settings.contains(setting)) {
+                    settings.add(setting);
+                }
+            }
+        }
+        return settings;
     }
 
     public void setAttributeSettings(List<ComponentAttributeSetting> attributeSettings) {
@@ -235,15 +256,15 @@ public class Component extends AbstractObjectWithSettings {
     public boolean isDeleted() {
         return deleted;
     }
-    
+
     public void setFolderId(String folderId) {
         this.folderId = folderId;
     }
-    
+
     public String getFolderId() {
         return folderId;
     }
-    
+
     public Row toRow(EntityData data) {
         Row row = new Row(data.size());
         Set<String> attributeIds = data.keySet();
@@ -255,32 +276,32 @@ public class Component extends AbstractObjectWithSettings {
         }
         return row;
     }
-    
+
     @Override
     public AbstractObject copy() {
-        Component component = (Component)super.copy();
+        Component component = (Component) super.copy();
         component.setEntitySettings(new ArrayList<ComponentEntitySetting>());
         component.setAttributeSettings(new ArrayList<ComponentAttributeSetting>());
         component.setSettings(new ArrayList<Setting>());
-        
+
         for (Setting setting : settings) {
-            ComponentSetting cSetting = (ComponentSetting)setting.copy();
+            ComponentSetting cSetting = (ComponentSetting) setting.copy();
             cSetting.setComponentId(component.getId());
             component.getSettings().add(cSetting);
         }
-        
+
         for (ComponentAttributeSetting setting : attributeSettings) {
-            setting = (ComponentAttributeSetting)setting.copy();
+            setting = (ComponentAttributeSetting) setting.copy();
             setting.setComponentId(component.getId());
             component.getAttributeSettings().add(setting);
         }
-        
+
         for (ComponentEntitySetting setting : entitySettings) {
-            setting = (ComponentEntitySetting)setting.copy();
+            setting = (ComponentEntitySetting) setting.copy();
             setting.setComponentId(component.getId());
             component.getEntitySettings().add(setting);
         }
-        
+
         return component;
     }
 }

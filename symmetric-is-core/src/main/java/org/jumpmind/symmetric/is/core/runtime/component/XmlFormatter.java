@@ -13,7 +13,6 @@ import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-import org.jdom2.filter.ElementFilter;
 import org.jdom2.filter.Filters;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
@@ -41,15 +40,7 @@ import org.jumpmind.util.FormatUtils;
         iconImage = "xmlformatter.png",
         inputMessage = MessageType.ENTITY,
         outgoingMessage = MessageType.TEXT)
-public class XmlFormatter extends AbstractComponentRuntime {
-
-    @SettingDefinition(
-            order = 10,
-            required = false,
-            type = Type.BOOLEAN,
-            label = "Ignore namespaces for XPath matching",
-            defaultValue = "true")
-    public final static String IGNORE_NAMESPACE = "xml.formatter.ignore.namespace";
+public class XmlFormatter extends AbstractXML {
 
     @SettingDefinition(
             order = 15,
@@ -60,9 +51,7 @@ public class XmlFormatter extends AbstractComponentRuntime {
     public final static String PARAMETER_REPLACEMENT = "xml.formatter.parameter.replacement";
 
     public static final String TYPE = "Format XML";
-
-    public final static String XML_FORMATTER_XPATH = "xml.formatter.xpath";
-
+    
     public final static String XML_FORMATTER_TEMPLATE = "xml.formatter.template";
 
     Document templateDocument;
@@ -77,6 +66,7 @@ public class XmlFormatter extends AbstractComponentRuntime {
 
     @Override
     protected void start() {
+        super.start();
         TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         ignoreNamespace = properties.is(IGNORE_NAMESPACE);
         useParameterReplacement = properties.is(PARAMETER_REPLACEMENT);
@@ -228,32 +218,7 @@ public class XmlFormatter extends AbstractComponentRuntime {
             }
         }        
     }
-
-    private Map<Element, Namespace> removeNamespaces(Document document) {
-        Map<Element, Namespace> namespaces = new HashMap<Element, Namespace>();
-        if (ignoreNamespace) {
-            namespaces.put(document.getRootElement(), document.getRootElement().getNamespace());
-            document.getRootElement().setNamespace(null);
-            for (Element el : document.getRootElement().getDescendants(new ElementFilter())) {
-                Namespace nsp = el.getNamespace();
-                if (nsp != null) {
-                    el.setNamespace(null);
-                    namespaces.put(el, nsp);
-                }
-            }
-        }
-        return namespaces;
-    }
-
-    private void restoreNamespaces(Document document, Map<Element, Namespace> namespaces) {
-        if (ignoreNamespace) {
-            Set<Element> elements = namespaces.keySet();
-            for (Element element : elements) {
-                element.setNamespace(namespaces.get(element));
-            }
-        }
-    }
-
+    
     class XmlFormatterAttributeSetting {
 
         ComponentAttributeSetting setting;
