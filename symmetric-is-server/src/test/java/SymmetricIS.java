@@ -12,7 +12,7 @@ public class SymmetricIS {
                 AppInitializer.class
         });
         webserver.setWebAppDir("../symmetric-is-ui/src/main/webapp");
-        webserver.setHttpPort(31420);
+        webserver.setHttpPort(42000);
         webserver.setJmxEnabled(false);
         webserver.setJoin(true);
         webserver.start();        
