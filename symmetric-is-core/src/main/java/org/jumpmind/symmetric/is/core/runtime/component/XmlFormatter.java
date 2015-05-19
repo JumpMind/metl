@@ -33,6 +33,7 @@ import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.util.FormatUtils;
 
 @ComponentDefinition(
         typeName = XmlFormatter.TYPE,
@@ -50,6 +51,14 @@ public class XmlFormatter extends AbstractComponentRuntime {
             defaultValue = "true")
     public final static String IGNORE_NAMESPACE = "xml.formatter.ignore.namespace";
 
+    @SettingDefinition(
+            order = 15,
+            required = false,
+            type = Type.BOOLEAN,
+            label = "Parameter replacement",
+            defaultValue = "true")
+    public final static String PARAMETER_REPLACEMENT = "xml.formatter.parameter.replacement";
+
     public static final String TYPE = "Format XML";
 
     public final static String XML_FORMATTER_XPATH = "xml.formatter.xpath";
@@ -63,11 +72,14 @@ public class XmlFormatter extends AbstractComponentRuntime {
     Map<String, XmlFormatterEntitySetting> entitySettings;
     
     boolean ignoreNamespace = true;
+    
+    boolean useParameterReplacement = true;
 
     @Override
     protected void start() {
         TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         ignoreNamespace = properties.is(IGNORE_NAMESPACE);
+        useParameterReplacement = properties.is(PARAMETER_REPLACEMENT);
         Setting templateSetting = getComponent().findSetting(XML_FORMATTER_TEMPLATE);
 
         if (templateSetting != null && StringUtils.isNotBlank(templateSetting.getValue())) {
@@ -75,7 +87,11 @@ public class XmlFormatter extends AbstractComponentRuntime {
             builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
             builder.setFeature("http://xml.org/sax/features/validation", false);
             try {
-                templateDocument = builder.build(new StringReader(templateSetting.getValue()));
+                String xml = templateSetting.getValue();
+                if (useParameterReplacement) {
+                    xml = FormatUtils.replaceTokens(xml, context.getFlowParametersAsString(), true);
+                }
+                templateDocument = builder.build(new StringReader(xml));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
