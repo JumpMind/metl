@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.symmetric.is.core.model.Component;
@@ -40,6 +43,7 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.TableDragMode;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
@@ -56,6 +60,8 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 
     BeanItemContainer<RecordFormat> container = new BeanItemContainer<RecordFormat>(
             RecordFormat.class);
+    
+    Set<RecordFormat> selectedItemIds;
 
     public EditFormatPanel(ApplicationContext context, Component component) {
         this.context = context;
@@ -69,6 +75,18 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 
         Button moveDownButton = buttonBar.addButton("Move Down", FontAwesome.ARROW_DOWN);
         moveDownButton.addClickListener(new MoveDownClickListener());
+
+        Button moveTopButton = buttonBar.addButton("Move Top", FontAwesome.ANGLE_DOUBLE_UP);
+        moveTopButton.addClickListener(new MoveTopClickListener());
+
+        Button moveBottomButton = buttonBar.addButton("Move Bottom", FontAwesome.ANGLE_DOUBLE_DOWN);
+        moveBottomButton.addClickListener(new MoveBottomClickListener());
+
+        Button cutButton = buttonBar.addButton("Cut", FontAwesome.CUT);
+        cutButton.addClickListener(new CutClickListener());
+
+        Button pasteButton = buttonBar.addButton("Paste", FontAwesome.PASTE);
+        pasteButton.addClickListener(new PasteClickListener());
 
         table.setContainerDataSource(container);
 
@@ -87,8 +105,10 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
             table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Transform" });
         }
         table.setTableFieldFactory(new EditFieldFactory());
+        table.setCellStyleGenerator(new TableCellStyleGenerator());
         table.setEditable(true);
-        table.setDragMode(TableDragMode.ROW);
+        table.setMultiSelect(true);
+        table.setDragMode(TableDragMode.MULTIROW);
         table.setDropHandler(new TableDropHandler());
         addComponent(table);
         setExpandRatio(table, 1.0f);
@@ -99,9 +119,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         }
 
         if (model != null) {
-            
             model = context.getConfigurationService().findModel(model.getId());
-
             List<RecordFormat> attributes = new ArrayList<RecordFormat>();
 
             for (ModelEntity entity : model.getModelEntities()) {
@@ -111,17 +129,14 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
             }
 
             Collections.sort(attributes, new Comparator<RecordFormat>() {
-                @Override
                 public int compare(RecordFormat o1, RecordFormat o2) {
-                    return new Integer(o1.getOrdinalSetting()).compareTo(new Integer(o2
-                            .getOrdinalSetting()));
+                    return new Integer(o1.getOrdinalSetting()).compareTo(new Integer(o2.getOrdinalSetting()));
                 }
             });
 
             for (RecordFormat recordFormat : attributes) {
                 table.addItem(recordFormat);
             }
-
         }
         calculatePositions();
         saveOrdinalSettings();
@@ -140,6 +155,19 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 
     @Override
     public void deselected() {
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Set<RecordFormat> getSelectedItems() {
+        return (Set<RecordFormat>) table.getValue();
+    }
+
+    protected RecordFormat getSelectedItem() {
+        Set<RecordFormat> selectedItems = getSelectedItems();
+        if (selectedItems != null && selectedItems.size() == 1) {
+            return selectedItems.iterator().next();
+        }
+        return null;
     }
 
     protected void calculatePositions() {
@@ -162,7 +190,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         }
 
         if (needsRefreshed) {
-            RecordFormat record = (RecordFormat) table.getValue();
+            RecordFormat record = getSelectedItem();
             if (record != null) {
                 record.setFocusFieldId("transformText");
             }
@@ -170,13 +198,21 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         }
     }
 
-    protected void moveItemTo(RecordFormat itemId, int index) {
-        if (index >= 0 && index < container.getItemIds().size() && itemId != null
-                && index != container.indexOfId(itemId)) {
-            container.removeItem(itemId);
-            container.addItemAt(index, itemId);
-            calculatePositions();
-            saveOrdinalSettings();
+    protected void moveItemsTo(Set<RecordFormat> itemIds, int index) {
+        if (index >= 0 && index < container.getItemIds().size() && itemIds.size() > 0) {
+            int firstItemIndex = container.indexOfId(itemIds.iterator().next());
+            if (index != firstItemIndex) {
+                for (RecordFormat itemId : itemIds) {
+                    boolean movingUp = index < container.indexOfId(itemId);
+                    container.removeItem(itemId);
+                    container.addItemAt(index, itemId);
+                    if (movingUp) {
+                        index++;
+                    }
+                }
+                calculatePositions();
+                saveOrdinalSettings();                
+            }
         }
     }
 
@@ -229,27 +265,71 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
 
     class MoveUpClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            RecordFormat itemId = (RecordFormat) table.getValue();
-            moveItemTo(itemId, container.indexOfId(itemId) - 1);
+            Set<RecordFormat> itemIds = getSelectedItems();
+            if (itemIds.size() > 0 && itemIds != null) {
+                RecordFormat firstItem = itemIds.iterator().next();
+                int index = container.indexOfId(firstItem) - 1;
+                moveItemsTo(getSelectedItems(), index);
+            }
         }
     }
 
     class MoveDownClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            RecordFormat itemId = (RecordFormat) table.getValue();
-            moveItemTo(itemId, container.indexOfId(itemId) + 1);
+            Set<RecordFormat> itemIds = getSelectedItems();
+            if (itemIds.size() > 0 && itemIds != null) {
+                RecordFormat lastItem = null;
+                Iterator<RecordFormat> iter = itemIds.iterator();
+                while (iter.hasNext()) {
+                    lastItem = iter.next();
+                }
+                int index = container.indexOfId(lastItem) + 1;
+                moveItemsTo(getSelectedItems(), index);
+            }
+        }
+    }
+
+    class MoveTopClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            moveItemsTo(getSelectedItems(), 0);
+        }
+    }
+
+    class MoveBottomClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            moveItemsTo(getSelectedItems(), container.size() - 1);
+        }
+    }
+
+    class CutClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            Set<RecordFormat> itemIds = getSelectedItems();
+            selectedItemIds = new LinkedHashSet<RecordFormat>(itemIds);
+            for (RecordFormat itemId : itemIds) {
+                table.unselect(itemId);
+            }
+            table.refreshRowCache();
+        }
+    }
+
+    class PasteClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            Set<RecordFormat> itemIds = getSelectedItems();
+            if (itemIds.size() > 0 && selectedItemIds != null) {
+                int index = container.indexOfId(itemIds.iterator().next());
+                moveItemsTo(selectedItemIds, index);
+                selectedItemIds = null;
+            }
         }
     }
 
     class TableDropHandler implements DropHandler {
         public void drop(DragAndDropEvent event) {
-            AbstractSelectTargetDetails targetDetails = (AbstractSelectTargetDetails) event
-                    .getTargetDetails();
-            RecordFormat target = (RecordFormat) targetDetails.getItemIdOver();
+            AbstractSelectTargetDetails targetDetails = (AbstractSelectTargetDetails) event.getTargetDetails();
             Transferable transferable = event.getTransferable();
             if (transferable.getSourceComponent() == table) {
-                RecordFormat source = (RecordFormat) transferable.getData("itemId");
-                moveItemTo(source, container.indexOfId(target));
+                RecordFormat target = (RecordFormat) targetDetails.getItemIdOver();
+                moveItemsTo(getSelectedItems(), container.indexOfId(target));
             }
         }
 
@@ -275,8 +355,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
                 });
                 textField.addFocusListener(new FocusListener() {
                     public void focus(FocusEvent event) {
-                        record.setFocusFieldId(propertyId);
-                        table.select(itemId);
+                        focusOn(record, propertyId);
                     }
                 });
                 record.addField(propertyId, textField);
@@ -302,22 +381,38 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
                 });
                 combo.addFocusListener(new FocusListener() {
                     public void focus(FocusEvent event) {
-                        record.setFocusFieldId(propertyId);
-                        table.select(itemId);
+                        focusOn(record, propertyId);
                     }
                 });
                 record.addField(propertyId, combo);
                 field = combo;
             }
 
-            RecordFormat selected = (RecordFormat) table.getValue();
+            RecordFormat selected = getSelectedItem();
             if (selected == itemId && record.getFocusField() != null) {
                 record.getFocusField().focus();
             }
             return field;
         }
+        
+        protected void focusOn(RecordFormat record, Object propertyId) {
+            record.setFocusFieldId(propertyId);
+            for (Object itemId : getSelectedItems()) {
+                table.unselect(itemId);
+            }
+            table.select(record);
+        }
     }
 
+    class TableCellStyleGenerator implements CellStyleGenerator {
+        public String getStyle(Table source, Object itemId, Object propertyId) {
+            if (propertyId != null && selectedItemIds != null && selectedItemIds.contains(itemId)) {
+                return "highlight";
+            }
+            return null;
+        }
+    }
+    
     public class RecordFormat {
         ModelEntity modelEntity;
 
