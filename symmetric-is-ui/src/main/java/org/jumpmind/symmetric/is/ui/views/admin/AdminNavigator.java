@@ -54,6 +54,7 @@ public class AdminNavigator extends VerticalLayout {
         addPanel(new UserPanel(context, tabbedPanel, "Users", Icons.USER));
         addPanel(new GroupPanel(context, tabbedPanel, "Groups", Icons.GROUP));
         addPanel(new ApiPanel(context, tabbedPanel, "REST", Icons.REST));
+        addPanel(new LoggingPanel(context, tabbedPanel, "Logging", Icons.AGENT));
 
         table.addStyleName("noselect");
         addComponent(table);
