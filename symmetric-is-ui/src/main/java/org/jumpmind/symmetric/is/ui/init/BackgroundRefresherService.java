@@ -32,6 +32,7 @@ public class BackgroundRefresherService {
         this.taskScheduler = new ThreadPoolTaskScheduler();
         this.taskScheduler.setThreadNamePrefix("ui-refresher-");
         this.taskScheduler.setPoolSize(1);
+        this.taskScheduler.setDaemon(true);
         this.taskScheduler.initialize();   
         setPollingInterval(5000);
     }
