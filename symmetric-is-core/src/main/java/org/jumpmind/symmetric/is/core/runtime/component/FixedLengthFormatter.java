@@ -15,6 +15,8 @@ import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
@@ -30,13 +32,19 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Format Fixed";
 
+    @SettingDefinition(
+            order = 10,
+            type = Type.BOOLEAN,
+            label = "Header line",
+            defaultValue = "false")
+    public final static String FIXED_LENGTH_FORMATTER_WRITE_HEADER = "fixed.length.formatter.header";
+
     public final static String FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL = "fixed.length.formatter.attribute.ordinal";
     public final static String FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH = "fixed.length.formatter.attribute.length";
     public final static String FIXED_LENGTH_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = "fixed.length.formatter.attribute.format.function";
 
     /* settings */
-    String delimiter;
-    String quoteCharacter;
+    boolean useHeader;
 
     /* other vars */
     TypedProperties properties;
@@ -44,13 +52,11 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
 
     @Override
     protected void start() {
-        
         applySettings();
     }
 
     @Override
     public void handle( Message inputMessage, IMessageTarget messageTarget) {
-
         if (attributesList == null || attributesList.size() == 0) {
             throw new IllegalStateException(
                     "There are no format attributes configured.  Writing all entity fields to the output.");
@@ -62,16 +68,28 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
         Message outputMessage = new Message(getFlowStepId());
         ArrayList<String> outputPayload = new ArrayList<String>();
 
+        if (useHeader) {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (AttributeFormat attr : attributesList) {
+                if (attr.getAttribute() != null) {
+                    String name = attr.getAttribute().getName();
+                    String paddedValue = StringUtils.pad(name != null ? name.toString() : "", attr.getLength(), " ", true);
+                    stringBuilder.append(paddedValue);
+                }
+            }
+            outputPayload.add(stringBuilder.toString());
+        }
+
         String outputRec;
         for (EntityData inputRow : inputRows) {
             outputRec = processInputRow(inputRow);
             log(LogLevel.DEBUG, String.format("Generated record: %s", outputRec));
             outputPayload.add(outputRec);
         }
+
         outputMessage.setPayload(outputPayload);
         getComponentStatistics().incrementOutboundMessages();
-        outputMessage.getHeader()
-                .setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
+        outputMessage.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
         outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
         messageTarget.put(outputMessage);
     }
@@ -84,8 +102,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
                 value = ModelAttributeScriptHelper.eval(attribute.getAttribute(), value, attribute.getEntity(), 
                         inputRow, attribute.getFormatFunction());
             }
-            String paddedValue = StringUtils.pad(value != null ? value.toString() : "",
-                    attribute.getLength(), " ", true);
+            String paddedValue = StringUtils.pad(value != null ? value.toString() : "", attribute.getLength(), " ", true);
             stringBuilder.append(paddedValue);
         }
         return stringBuilder.toString();
@@ -93,6 +110,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
 
     private void applySettings() {
         properties = getComponent().toTypedProperties(getSettingDefinitions(false));
+        useHeader = properties.is(FIXED_LENGTH_FORMATTER_WRITE_HEADER);
         convertAttributeSettingsToAttributeFormat();
     }
 
@@ -100,8 +118,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
 
         Map<String, AttributeFormat> attributesMap = new HashMap<String, AttributeFormat>();
 
-        List<ComponentAttributeSetting> attributeSettings = getComponent()
-                .getAttributeSettings();
+        List<ComponentAttributeSetting> attributeSettings = getComponent().getAttributeSettings();
         for (ComponentAttributeSetting attributeSetting : attributeSettings) {
             if (!attributesMap.containsKey(attributeSetting.getAttributeId())) {
                 Model inputModel = getComponent().getInputModel();
@@ -110,25 +127,18 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
                 attributesMap.put(attributeSetting.getAttributeId(), new AttributeFormat(attribute, entity));
             }
 
-            if (attributeSetting.getName().equalsIgnoreCase(
-                    FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL)) {
-                attributesMap.get(attributeSetting.getAttributeId()).setOrdinal(
-                        Integer.parseInt(attributeSetting.getValue()));
-            } else if (attributeSetting.getName().equalsIgnoreCase(
-                    FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH)) {
-                attributesMap.get(attributeSetting.getAttributeId()).setLength(
-                        Integer.parseInt(attributeSetting.getValue()));
-            } else if (attributeSetting.getName().equalsIgnoreCase(
-                    FIXED_LENGTH_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION)) {
-                attributesMap.get(attributeSetting.getAttributeId()).setFormatFunction(
-                        attributeSetting.getValue());
+            if (attributeSetting.getName().equalsIgnoreCase(FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL)) {
+                attributesMap.get(attributeSetting.getAttributeId()).setOrdinal(Integer.parseInt(attributeSetting.getValue()));
+            } else if (attributeSetting.getName().equalsIgnoreCase(FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH)) {
+                attributesMap.get(attributeSetting.getAttributeId()).setLength(Integer.parseInt(attributeSetting.getValue()));
+            } else if (attributeSetting.getName().equalsIgnoreCase(FIXED_LENGTH_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION)) {
+                attributesMap.get(attributeSetting.getAttributeId()).setFormatFunction(attributeSetting.getValue());
             }
         }
 
         attributesList = new ArrayList<AttributeFormat>(attributesMap.values());
 
         Collections.sort(attributesList, new Comparator<AttributeFormat>() {
-            @Override
             public int compare(AttributeFormat format1, AttributeFormat format2) {
                 return format1.getOrdinal() - format2.getOrdinal();
             }

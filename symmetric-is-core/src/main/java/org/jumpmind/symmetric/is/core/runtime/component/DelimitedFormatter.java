@@ -53,6 +53,13 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
             defaultValue = "\"")
     public final static String DELIMITED_FORMATTER_QUOTE_CHARACTER = "delimited.formatter.quote.character";
 
+    @SettingDefinition(
+            order = 30,
+            type = Type.BOOLEAN,
+            label = "Header line",
+            defaultValue = "false")
+    public final static String DELIMITED_FORMATTER_WRITE_HEADER = "delimited.formatter.header";
+
     public final static String DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = "delimited.formatter.attribute.format.function";
 
     public final static String DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL = "delimited.formatter.attribute.ordinal";
@@ -62,6 +69,8 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
     String delimiter;
 
     String quoteCharacter;
+
+    boolean useHeader;
 
     /* other vars */
 
@@ -87,6 +96,21 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
 
         Message outputMessage = new Message(getFlowStepId());
         ArrayList<String> outputPayload = new ArrayList<String>();
+        
+        if (useHeader) {
+            Writer writer = new StringWriter();
+            CsvWriter csvWriter = getCsvWriter(writer);
+            try {
+                for (AttributeFormat attr : attributes) {
+                    if (attr.getAttribute() != null) {
+                        csvWriter.write(attr.getAttribute().getName());
+                    }
+                }
+            } catch (IOException e) {
+                throw new IoException("Error writing to stream for formatted output. " + e.getMessage());    
+            }
+            outputPayload.add(writer.toString());
+        }
 
         String outputRec;
         for (EntityData inputRow : inputRows) {
@@ -95,8 +119,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
         }
         outputMessage.setPayload(outputPayload);
         getComponentStatistics().incrementOutboundMessages();
-        outputMessage.getHeader()
-                .setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
+        outputMessage.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
         outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
         messageTarget.put(outputMessage);
     }
@@ -104,12 +127,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
     private String processInputRow(EntityData inputRow) {
 
         Writer writer = new StringWriter();
-        CsvWriter csvWriter = new CsvWriter(writer, delimiter.charAt(0));
-        if (!StringUtils.isEmpty(quoteCharacter)) {
-            csvWriter.setUseTextQualifier(true);
-            csvWriter.setTextQualifier(quoteCharacter.charAt(0));
-            csvWriter.setForceQualifier(true);
-        }
+        CsvWriter csvWriter = getCsvWriter(writer);
         try {
             if (attributes.size() > 0) {
                 for (AttributeFormat attribute : attributes) {
@@ -134,60 +152,64 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
         return writer.toString();
     }
 
+    private CsvWriter getCsvWriter(Writer writer) {
+        CsvWriter csvWriter = new CsvWriter(writer, delimiter.charAt(0));
+        if (!StringUtils.isEmpty(quoteCharacter)) {
+            csvWriter.setUseTextQualifier(true);
+            csvWriter.setTextQualifier(quoteCharacter.charAt(0));
+            csvWriter.setForceQualifier(true);
+        }
+        return csvWriter;
+    }
+
     private void applySettings() {
         properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         delimiter = properties.get(DELIMITED_FORMATTER_DELIMITER);
         quoteCharacter = properties.get(DELIMITED_FORMATTER_QUOTE_CHARACTER);
+        useHeader = properties.is(DELIMITED_FORMATTER_WRITE_HEADER);
         convertAttributeSettingsToAttributeFormat();
     }
 
     private void convertAttributeSettingsToAttributeFormat() {
-        List<ComponentAttributeSetting> attributeSettings = getComponent()
-                .getAttributeSettings();
-        Map<String, AttributeFormat> formats = new HashMap<String, DelimitedFormatter.AttributeFormat>();
+        List<ComponentAttributeSetting> attributeSettings = getComponent().getAttributeSettings();
+        Map<String, AttributeFormat> formats = new HashMap<String, AttributeFormat>();
         for (ComponentAttributeSetting attributeSetting : attributeSettings) {
             AttributeFormat format = formats.get(attributeSetting.getAttributeId());
             if (format == null) {
                 Model inputModel = getComponent().getInputModel();
-                ModelAttribute attribute = inputModel.getAttributeById(attributeSetting
-                        .getAttributeId());
+                ModelAttribute attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
                 ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
                 format = new AttributeFormat(attributeSetting.getAttributeId(), entity, attribute);
                 formats.put(attributeSetting.getAttributeId(), format);
             }
             if (attributeSetting.getName().equalsIgnoreCase(DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL)) {
                 format.setOrdinal(Integer.parseInt(attributeSetting.getValue()));
-            } else if (attributeSetting.getName().equalsIgnoreCase(
-                    DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION)) {
+            } else if (attributeSetting.getName().equalsIgnoreCase(DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION)) {
                 format.setFormatFunction(attributeSetting.getValue());
             }
         }
 
         attributes.addAll(formats.values());
         Collections.sort(attributes, new Comparator<AttributeFormat>() {
-            @Override
             public int compare(AttributeFormat ordinal1, AttributeFormat ordinal2) {
                 return ordinal1.getOrdinal() - ordinal2.getOrdinal();
             }
         });
-
     }
 
     private class AttributeFormat {
 
+        ModelEntity entity;
+        ModelAttribute attribute;
+        String attributeId;
+        int ordinal;
+        String formatFunction;
+
         public AttributeFormat(String attributeId, ModelEntity entity, ModelAttribute attribute) {
             this.attributeId = attributeId;
+            this.entity = entity;
+            this.attribute = attribute;
         }
-
-        ModelEntity entity;
-
-        ModelAttribute attribute;
-
-        String attributeId;
-
-        int ordinal;
-
-        String formatFunction;
 
         public String getAttributeId() {
             return attributeId;
