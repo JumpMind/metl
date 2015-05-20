@@ -42,20 +42,16 @@ public class DelimitedParser extends AbstractComponentRuntime {
             defaultValue = ",")
     public final static String SETTING_DELIMITER = "delimiter";
 
-    @SettingDefinition(
-            order = 20,
-            type = Type.TEXT,
-            label = "Quote Character",
-            defaultValue = "\"")
+    @SettingDefinition(order = 20, type = Type.TEXT, label = "Quote Character", defaultValue = "\"")
     public final static String SETTING_QUOTE_CHARACTER = "quote.character";
-    
+
     @SettingDefinition(
             order = 30,
             type = Type.INTEGER,
             label = "Number of Header Lines to Skip",
             defaultValue = "0")
     public final static String SETTING_HEADER_LINES_TO_SKIP = "header.lines.to.skip";
-    
+
     @SettingDefinition(
             order = 40,
             type = Type.INTEGER,
@@ -75,9 +71,9 @@ public class DelimitedParser extends AbstractComponentRuntime {
     String quoteCharacter = "\"";
 
     String encoding = "UTF-8";
-    
+
     int numberOfFooterLinesToSkip = 0;
-    
+
     int numberOfHeaderLinesToSkip = 0;
 
     List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
@@ -125,8 +121,8 @@ public class DelimitedParser extends AbstractComponentRuntime {
         }
 
         getComponentStatistics().incrementOutboundMessages();
-        outputMessage.getHeader()
-                .setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
+        outputMessage.getHeader().setSequenceNumber(
+                getComponentStatistics().getNumberOutboundMessages());
         outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
         messageTarget.put(outputMessage);
     }
@@ -179,8 +175,8 @@ public class DelimitedParser extends AbstractComponentRuntime {
                 Model inputModel = getComponent().getOutputModel();
                 ModelAttribute attribute = inputModel.getAttributeById(attributeSetting
                         .getAttributeId());
-                ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
                 if (attribute != null) {
+                    ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
                     format = new AttributeFormat(attributeSetting.getAttributeId(), entity,
                             attribute);
                     formats.put(attributeSetting.getAttributeId(), format);
