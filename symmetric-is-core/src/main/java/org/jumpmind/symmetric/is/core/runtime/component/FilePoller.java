@@ -3,6 +3,8 @@ package org.jumpmind.symmetric.is.core.runtime.component;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -16,6 +18,7 @@ import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.util.FormatUtils;
@@ -125,8 +128,8 @@ public class FilePoller extends AbstractComponentRuntime {
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
         getComponentStatistics().incrementInboundMessages();
-        Resource resource = getComponent().getResource();
-        String path = resource.get(LocalFile.LOCALFILE_PATH);
+        IResourceRuntime resourceRuntime = getResourceRuntime();
+        String path = resourceRuntime.getAgentOverrides().get(LocalFile.LOCALFILE_PATH);
         if (useTriggerFile) {
             File triggerFile = new File(path, triggerFilePath);
             if (triggerFile.exists()) {
@@ -144,6 +147,7 @@ public class FilePoller extends AbstractComponentRuntime {
     protected void pollForFiles(String path, Message inputMessage, IMessageTarget messageTarget) {
         File pathDir = new File(path);
         ArrayList<String> filePaths = new ArrayList<String>();
+        ArrayList<File> fileReferences = new ArrayList<File>();
         String[] includes = StringUtils.isNotBlank(filePattern) ? filePattern.split(",")
                 : new String[] { "*" };
         DirectoryScanner scanner = new DirectoryScanner();
@@ -156,6 +160,17 @@ public class FilePoller extends AbstractComponentRuntime {
             for (String filePath : files) {
                 File file = new File(path, filePath);
                 filesSent.add(file);
+                fileReferences.add(file);
+            }
+            
+            Collections.sort(fileReferences, new Comparator<File>() {
+                @Override
+                public int compare(File o1, File o2) {
+                    return new Long(o1.lastModified()).compareTo(new Long(o2.lastModified()));
+                }
+            });
+            
+            for (File file : fileReferences) {
                 log(LogLevel.INFO, "File polled: " + file.getAbsolutePath());
                 getComponentStatistics().incrementNumberEntitiesProcessed();
                 filePaths.add(file.getAbsolutePath());
@@ -197,8 +212,7 @@ public class FilePoller extends AbstractComponentRuntime {
     }
 
     protected void archive(String archivePath) {
-        Resource resource = getComponent().getResource();
-        String path = resource.get(LocalFile.LOCALFILE_PATH);
+        String path = getResourceRuntime().getAgentOverrides().get(LocalFile.LOCALFILE_PATH);
         File destDir = new File(path, archivePath);
         for (File srcFile : filesSent) {
             try {

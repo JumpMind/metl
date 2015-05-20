@@ -106,9 +106,7 @@ public class AgentRuntime {
                 public Thread newThread(Runnable r) {
                     Thread t = new Thread(r);
                     t.setName(namePrefix + "-step-" + threadNumber.getAndIncrement());
-                    if (t.isDaemon()) {
-                        t.setDaemon(false);
-                    }
+                    t.setDaemon(true);
                     if (t.getPriority() != Thread.NORM_PRIORITY) {
                         t.setPriority(Thread.NORM_PRIORITY);
                     }
@@ -117,6 +115,7 @@ public class AgentRuntime {
             });
 
             this.flowExecutionScheduler = new ThreadPoolTaskScheduler();
+            this.flowExecutionScheduler.setDaemon(true);
             this.flowExecutionScheduler.setThreadNamePrefix(agent.getName().toLowerCase()
                     .replace(' ', '-').replace('_', '-')
                     + "-job-");

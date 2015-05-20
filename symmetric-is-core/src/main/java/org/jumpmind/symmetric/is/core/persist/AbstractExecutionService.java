@@ -27,8 +27,8 @@ abstract public class AbstractExecutionService extends AbstractService implement
         this.purgeScheduler.setThreadNamePrefix("execution-purge-job-");
         this.purgeScheduler.setPoolSize(1);
         this.purgeScheduler.initialize();
-        this.purgeScheduler.scheduleWithFixedDelay(new PurgeExecutionHandler(), 60000*5);
-        
+        this.purgeScheduler.setDaemon(true);
+        this.purgeScheduler.scheduleWithFixedDelay(new PurgeExecutionHandler(), 60000*5);        
     }
 
     public Execution findExecution(String id) {

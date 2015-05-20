@@ -211,15 +211,16 @@ public class FlowRuntime {
     }
 
     public void stop() {
-        for (StepRuntime stepRuntime : stepRuntimes.values()) {
-            if (stepRuntime.isRunning()) {
-                try {
-                    stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponentRuntime()
-                            .getComponentContext().getFlowStep().getId()));
-                } catch (InterruptedException e) {
+        if (stepRuntimes != null) {
+            for (StepRuntime stepRuntime : stepRuntimes.values()) {
+                if (stepRuntime.isRunning()) {
+                    try {
+                        stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponentContext().getFlowStep().getId()));
+                    } catch (InterruptedException e) {
+                    }
+                } else {
+                    stepRuntime.finished();
                 }
-            } else {
-                stepRuntime.finished();
             }
         }
     }
