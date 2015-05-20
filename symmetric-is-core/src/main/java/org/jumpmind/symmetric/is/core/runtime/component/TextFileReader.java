@@ -12,7 +12,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.is.core.model.Component;
-import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
@@ -118,7 +117,7 @@ public class TextFileReader extends AbstractComponentRuntime {
         List<String> files = new ArrayList<String>();
         if (getFileNameFromMessage) {
             List<String> fullyQualifiedFiles = inputMessage.getPayload();            
-            String path = getResourceRuntime().getResource().get(LocalFile.LOCALFILE_PATH);
+            String path = getResourceRuntime().getAgentOverrides().get(LocalFile.LOCALFILE_PATH);
             for (String fullyQualifiedFile : fullyQualifiedFiles) {
                 if (fullyQualifiedFile.startsWith(path)) {
                     files.add(fullyQualifiedFile.substring(path.length()));
@@ -197,8 +196,7 @@ public class TextFileReader extends AbstractComponentRuntime {
     }
 
     protected void archive(String archivePath) {
-        Resource resource = getComponent().getResource();
-        String path = resource.get(LocalFile.LOCALFILE_PATH);
+        String path = getResourceRuntime().getAgentOverrides().get(LocalFile.LOCALFILE_PATH);
         File destDir = new File(path, archivePath);
         for (String srcFile : filesRead) {
             try {
