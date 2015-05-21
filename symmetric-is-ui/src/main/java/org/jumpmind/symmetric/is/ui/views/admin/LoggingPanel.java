@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.input.ReversedLinesFileReader;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.symmetric.is.core.util.EnvConstants;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
@@ -139,7 +141,7 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
 
         logPanel = new Panel("Log Output");
         logPanel.setSizeFull();
-        logView = new Label("", ContentMode.PREFORMATTED);
+        logView = new Label("", ContentMode.HTML);
         logView.setSizeUndefined();
         logPanel.setContent(logView);
         addComponent(logPanel);
@@ -190,32 +192,41 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
             try {
                 builder = new StringBuilder();
                 Pattern pattern = Pattern.compile("^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d,\\d\\d\\d .*");
-                ReversedLinesFileReader reader = new ReversedLinesFileReader(logFile);
                 String filterValue = filter.getValue();
+                boolean isFiltering = !StringUtils.isBlank(filterValue);
+                Pattern filter = Pattern.compile("(.*)(" + filterValue + ")(.*)");
+                ReversedLinesFileReader reader = new ReversedLinesFileReader(logFile);
                 try {
                     int lines = Integer.parseInt(bufferSize.getValue());
                     int counter = 0;
                     String line = null;
                     do {
-                        if (StringUtils.isBlank(filterValue)) {
-                            line = reader.readLine();
+                        if (!isFiltering) {
+                            line = StringEscapeUtils.escapeHtml(reader.readLine());
                         } else {
                             StringBuilder multiLine = new StringBuilder();
-                            while ((line = reader.readLine()) != null) {
+                            while ((line = StringEscapeUtils.escapeHtml(reader.readLine())) != null) {
                                 if (pattern.matcher(line).matches()) {
                                     multiLine.insert(0, line);
                                     line = multiLine.toString();
                                     break;
                                 } else {
-                                    multiLine.insert(0, line + "\n");
+                                    multiLine.insert(0, line + "<br/>");
                                     counter++;
                                 }
                             }
                         }
                         
                         if (line != null) {
-                            if (StringUtils.isBlank(filterValue) || line.contains(filterValue)) {
-                                builder.insert(0, line + "\n");
+                            boolean showLine = !isFiltering;
+                            if (isFiltering) {
+                                Matcher matcher = filter.matcher(line);
+                                if (showLine = matcher.matches()) {
+                                    line = matcher.replaceAll("$1<font color='red'>$2</font>$3");
+                                }
+                            }
+                            if (showLine) {
+                                builder.insert(0, line + "<br/>");
                                 counter++;
                             }
                         }
@@ -236,7 +247,7 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
     public void onBackgroundUIRefresh(Object backgroundData) {
         if (backgroundData != null) {
             StringBuilder builder = (StringBuilder) backgroundData;
-            logView.setValue(builder.toString());
+            logView.setValue("<pre>" + builder.toString() + "</pre>");
             logPanel.setScrollTop(1000000);
             logPanel.markAsDirty();
         }

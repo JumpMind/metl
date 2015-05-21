@@ -114,7 +114,7 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
                 .readTableFromDatabase(null, null, tableName(Execution.class));
         if (table != null) {
             Date purgeBefore = DateUtils.addMilliseconds(new Date(), -retentionTimeInMs);
-            log.info("Purging executions with the status of {} before {}", status, purgeBefore);
+            log.debug("Purging executions with the status of {} before {}", status, purgeBefore);
             ISqlTemplate template = databasePlatform.getSqlTemplate();
             long count = template
                     .update(String
@@ -130,8 +130,10 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
             count += template.update(String.format(
                     "delete from %1$s_execution where status=? and last_update_time <= ?",
                     tablePrefix), status, purgeBefore);
-            log.info("Purged {} execution records with the status of {}", new Object[] { count,
-                    status });
+            log.debug("Purged {} execution records with the status of {}", new Object[] { count, status });                
+            if (!log.isDebugEnabled() && count > 0) {
+                log.info("Purged {} execution records", new Object[] { count });                
+            }
         } else {
             log.info("Could not run execution purge because table had not been created yet");
         }
