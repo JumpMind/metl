@@ -117,7 +117,7 @@ public class TextFileReader extends AbstractComponentRuntime {
         List<String> files = new ArrayList<String>();
         if (getFileNameFromMessage) {
             List<String> fullyQualifiedFiles = inputMessage.getPayload();            
-            String path = getResourceRuntime().getAgentOverrides().get(LocalFile.LOCALFILE_PATH);
+            String path = getResourceRuntime().getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
             for (String fullyQualifiedFile : fullyQualifiedFiles) {
                 if (fullyQualifiedFile.startsWith(path)) {
                     files.add(fullyQualifiedFile.substring(path.length()));
@@ -145,7 +145,7 @@ public class TextFileReader extends AbstractComponentRuntime {
                     linesRead++;
                     if (linesRead > textHeaderLinesToSkip) {                        
                         if (linesInMessage >= textRowsPerMessage) {
-                            initAndSendMessage(payload, inputMessage, messageTarget, numberMessages, false);
+                            initAndSendMessage(payload, inputMessage, messageTarget, numberMessages++, false);
                             linesInMessage = 0;
                             payload = new ArrayList<String>();
                         }
@@ -154,7 +154,7 @@ public class TextFileReader extends AbstractComponentRuntime {
                         linesInMessage++;
                     }
                 }
-                initAndSendMessage(payload, inputMessage, messageTarget, numberMessages, true);
+                initAndSendMessage(payload, inputMessage, messageTarget, numberMessages++, true);
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
             } finally {
@@ -196,7 +196,7 @@ public class TextFileReader extends AbstractComponentRuntime {
     }
 
     protected void archive(String archivePath) {
-        String path = getResourceRuntime().getAgentOverrides().get(LocalFile.LOCALFILE_PATH);
+        String path = getResourceRuntime().getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
         File destDir = new File(path, archivePath);
         for (String srcFile : filesRead) {
             try {
@@ -231,7 +231,6 @@ public class TextFileReader extends AbstractComponentRuntime {
 
     private void initAndSendMessage(ArrayList<String> payload, Message inputMessage, IMessageTarget messageTarget,
             int numberMessages, boolean lastMessage) {
-        numberMessages++;        
         Message message = new Message(getFlowStepId()); 
         message.getHeader().setSequenceNumber(numberMessages);
         message.getHeader().setLastMessage(lastMessage);

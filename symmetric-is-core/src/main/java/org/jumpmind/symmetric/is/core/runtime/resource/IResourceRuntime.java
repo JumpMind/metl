@@ -13,6 +13,6 @@ public interface IResourceRuntime {
     
     public Resource getResource();
     
-    public TypedProperties getAgentOverrides();
+    public TypedProperties getResourceRuntimeSettings();
     
 }

@@ -105,9 +105,11 @@ public class DelimitedParser extends AbstractComponentRuntime {
             int rowCount = 0;
             for (String inputRow : inputRows) {
                 if (headerRowsToSkip == 0) {
-                    if (rowCount + numberOfFooterLinesToSkip < inputRows.size()) {
+                    if (!inputMessage.getHeader().isLastMessage() || 
+                            (rowCount + numberOfFooterLinesToSkip < inputRows.size())) {
                         EntityData data = processInputRow(inputRow);
                         if (data != null) {
+                            getComponentStatistics().incrementNumberEntitiesProcessed();
                             outputPayload.add(data);
                         }
                     }

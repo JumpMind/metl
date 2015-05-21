@@ -129,7 +129,7 @@ public class FilePoller extends AbstractComponentRuntime {
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
         getComponentStatistics().incrementInboundMessages();
         IResourceRuntime resourceRuntime = getResourceRuntime();
-        String path = resourceRuntime.getAgentOverrides().get(LocalFile.LOCALFILE_PATH);
+        String path = resourceRuntime.getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
         if (useTriggerFile) {
             File triggerFile = new File(path, triggerFilePath);
             if (triggerFile.exists()) {
@@ -212,7 +212,7 @@ public class FilePoller extends AbstractComponentRuntime {
     }
 
     protected void archive(String archivePath) {
-        String path = getResourceRuntime().getAgentOverrides().get(LocalFile.LOCALFILE_PATH);
+        String path = getResourceRuntime().getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
         File destDir = new File(path, archivePath);
         for (File srcFile : filesSent) {
             try {

@@ -239,7 +239,9 @@ public class AgentRuntime {
             if (alreadyDeployed != null) {
                 deploy = false;
                 Resource deployedResource = alreadyDeployed.getResource();
-                TypedProperties alreadyDeployedOverrides = alreadyDeployed.getAgentOverrides();
+                TypedProperties alreadyDeployedOverrides = alreadyDeployed.getResourceRuntimeSettings();
+                
+                // TODO the runtime is already combined.  change this
                 TypedProperties alreadyDeployedDefaultSettings = deployedResource
                         .toTypedProperties(settings);
                 TypedProperties alreadyDeployedCombined = new TypedProperties(
