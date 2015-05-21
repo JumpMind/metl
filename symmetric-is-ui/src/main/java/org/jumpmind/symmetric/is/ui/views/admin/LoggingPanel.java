@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang3.StringUtils;
@@ -164,36 +165,7 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
     }
 
     protected void refresh() {
-        if (logFile != null && logFile.exists()) {
-            try {
-                StringBuilder builder = new StringBuilder();
-                ReversedLinesFileReader reader = new ReversedLinesFileReader(logFile);
-                String filterValue = filter.getValue();
-                try {
-                    int lines = Integer.parseInt(bufferSize.getValue());
-                    int counter = 0;
-                    String line = null;
-                    do {
-                        line = reader.readLine();
-                        if (line != null) {
-                            if (StringUtils.isBlank(filterValue) || line.contains(filterValue)) {
-                                builder.insert(0, line + "\n");
-                                counter++;
-                            }
-                        }
-                    } while (line != null && counter < lines);
-                } finally {
-                    if (reader != null) {
-                        reader.close();
-                    }
-                }
-                logView.setValue(builder.toString());
-                logPanel.setScrollTop(1000000);
-                logPanel.markAsDirty();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
+        onBackgroundUIRefresh(onBackgroundDataRefresh());
     }
 
     @Override
@@ -217,6 +189,7 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
         if (logFile != null && logFile.exists() && autoRefreshOn.getValue()) {
             try {
                 builder = new StringBuilder();
+                Pattern pattern = Pattern.compile("^\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d,\\d\\d\\d .*");
                 ReversedLinesFileReader reader = new ReversedLinesFileReader(logFile);
                 String filterValue = filter.getValue();
                 try {
@@ -224,7 +197,22 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
                     int counter = 0;
                     String line = null;
                     do {
-                        line = reader.readLine();
+                        if (StringUtils.isBlank(filterValue)) {
+                            line = reader.readLine();
+                        } else {
+                            StringBuilder multiLine = new StringBuilder();
+                            while ((line = reader.readLine()) != null) {
+                                if (pattern.matcher(line).matches()) {
+                                    multiLine.insert(0, line);
+                                    line = multiLine.toString();
+                                    break;
+                                } else {
+                                    multiLine.insert(0, line + "\n");
+                                    counter++;
+                                }
+                            }
+                        }
+                        
                         if (line != null) {
                             if (StringUtils.isBlank(filterValue) || line.contains(filterValue)) {
                                 builder.insert(0, line + "\n");
