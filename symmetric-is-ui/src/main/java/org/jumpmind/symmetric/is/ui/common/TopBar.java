@@ -33,13 +33,9 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
 
     List<MenuItem> categoryItems = new ArrayList<MenuBar.MenuItem>();
 
-    DesignAgentSelect designAgentSelect;
-
     @SuppressWarnings("serial")
-    public TopBar(ViewManager vm, DesignAgentSelect das, ApplicationContext context) {
+    public TopBar(ViewManager vm, ApplicationContext context) {
         setWidth(100, Unit.PERCENTAGE);
-
-        this.designAgentSelect = das;
         this.viewManager = vm;
         this.viewManager.addViewChangeListener(this);
 
@@ -137,7 +133,6 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
             uncheckAll();
             menuItem.setChecked(true);
         }
-        designAgentSelect.refresh();
     }
 
 }

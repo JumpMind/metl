@@ -14,7 +14,6 @@ import org.jumpmind.symmetric.is.core.model.User;
 import org.jumpmind.symmetric.is.core.model.UserGroup;
 import org.jumpmind.symmetric.is.core.model.UserSetting;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
-import org.jumpmind.symmetric.is.ui.common.DesignAgentSelect;
 import org.jumpmind.symmetric.is.ui.common.TopBar;
 import org.jumpmind.symmetric.is.ui.common.ViewManager;
 import org.jumpmind.symmetric.is.ui.init.LoginDialog.LoginListener;
@@ -238,11 +237,9 @@ public class AppUI extends UI implements LoginListener {
         }
 
         viewManager = ctx.getBean(ViewManager.class);
-        viewManager.init(this, contentArea);
-                
-        DesignAgentSelect designAgentSelect = ctx.getBean(DesignAgentSelect.class);
+        viewManager.init(this, contentArea);                
 
-        TopBar menu = new TopBar(viewManager, designAgentSelect, appCtx);
+        TopBar menu = new TopBar(viewManager, appCtx);
 
         root.addComponents(menu, contentArea);
         root.setExpandRatio(contentArea, 1);
