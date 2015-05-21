@@ -8,6 +8,7 @@ import java.io.InputStream;
 
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang3.StringUtils;
+import org.jumpmind.symmetric.is.core.util.EnvConstants;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
@@ -40,24 +41,30 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
     ApplicationContext context;
 
     TabbedPanel tabbedPanel;
-    
+
     TextField bufferSize;
-    
+
     TextField filter;
-    
+
     CheckBox autoRefreshOn;
 
     Label logView;
-    
+
     Panel logPanel;
-    
+
     File logFile;
-    
-    public LoggingPanel(ApplicationContext context, TabbedPanel tabbedPanel, String caption, Resource icon) {
+
+    public LoggingPanel(ApplicationContext context, TabbedPanel tabbedPanel, String caption,
+            Resource icon) {
         super(caption, icon);
         this.context = context;
         this.tabbedPanel = tabbedPanel;
-        logFile = new File("logs/application.log");
+        boolean fileEnabled = Boolean.parseBoolean(context.getEnvironment().getProperty(
+                EnvConstants.LOG_TO_FILE_ENABLED, "true"));
+        if (fileEnabled) {
+            logFile = new File(context.getEnvironment().getProperty(EnvConstants.LOG_FILE,
+                    "logs/application.log"));
+        }
         setSizeFull();
         setSpacing(true);
         setMargin(true);
@@ -65,7 +72,7 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
         HorizontalLayout topPanelLayout = new HorizontalLayout();
         topPanelLayout.setWidth(100, Unit.PERCENTAGE);
         topPanelLayout.setSpacing(true);
-        
+
         Button refreshButton = new Button("Refresh");
         refreshButton.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {
@@ -112,14 +119,16 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
         topPanelLayout.addComponent(spacer);
         topPanelLayout.setExpandRatio(spacer, 1);
 
-        Button downloadButton = new Button("Download log file");
-        downloadButton.addStyleName(ValoTheme.BUTTON_LINK);
-        downloadButton.addStyleName(ValoTheme.BUTTON_SMALL);
-        
-        FileDownloader fileDownloader = new FileDownloader(getLogFileResource());
-        fileDownloader.extend(downloadButton);
-        topPanelLayout.addComponent(downloadButton);
-        topPanelLayout.setComponentAlignment(downloadButton, Alignment.BOTTOM_RIGHT);
+        if (logFile != null && logFile.exists()) {
+            Button downloadButton = new Button("Download log file");
+            downloadButton.addStyleName(ValoTheme.BUTTON_LINK);
+            downloadButton.addStyleName(ValoTheme.BUTTON_SMALL);
+
+            FileDownloader fileDownloader = new FileDownloader(getLogFileResource());
+            fileDownloader.extend(downloadButton);
+            topPanelLayout.addComponent(downloadButton);
+            topPanelLayout.setComponentAlignment(downloadButton, Alignment.BOTTOM_RIGHT);
+        }
 
         addComponent(topPanelLayout);
 
@@ -139,7 +148,8 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
                 try {
                     return new BufferedInputStream(new FileInputStream(logFile));
                 } catch (FileNotFoundException e) {
-                    Notification note = new Notification("File Not Found", "Could not find " + logFile.getName() + " to download");
+                    Notification note = new Notification("File Not Found", "Could not find "
+                            + logFile.getName() + " to download");
                     note.show(Page.getCurrent());
                     return null;
                 }
@@ -149,33 +159,35 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
     }
 
     protected void refresh() {
-        try {
-            StringBuilder builder = new StringBuilder();
-            ReversedLinesFileReader reader = new ReversedLinesFileReader(logFile);
-            String filterValue = filter.getValue();
+        if (logFile != null && logFile.exists()) {
             try {
-                int lines = Integer.parseInt(bufferSize.getValue());
-                int counter = 0;
-                String line = null;
-                do {
-                    line = reader.readLine();
-                    if (line != null) {
-                        if (StringUtils.isBlank(filterValue) || line.contains(filterValue)) {
-                            builder.insert(0, line + "\n");
-                            counter++;
+                StringBuilder builder = new StringBuilder();
+                ReversedLinesFileReader reader = new ReversedLinesFileReader(logFile);
+                String filterValue = filter.getValue();
+                try {
+                    int lines = Integer.parseInt(bufferSize.getValue());
+                    int counter = 0;
+                    String line = null;
+                    do {
+                        line = reader.readLine();
+                        if (line != null) {
+                            if (StringUtils.isBlank(filterValue) || line.contains(filterValue)) {
+                                builder.insert(0, line + "\n");
+                                counter++;
+                            }
                         }
+                    } while (line != null && counter < lines);
+                } finally {
+                    if (reader != null) {
+                        reader.close();
                     }
-                } while (line != null && counter < lines);
-            } finally {
-                if (reader != null) {
-                    reader.close();
                 }
+                logView.setValue(builder.toString());
+                logPanel.setScrollTop(1000000);
+                logPanel.markAsDirty();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-            logView.setValue(builder.toString());
-            logPanel.setScrollTop(1000000);
-            logPanel.markAsDirty();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -187,7 +199,7 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
 
     @Override
     public void onBackgroundUIRefresh(Object backgroundData) {
-        
+
     }
 
 }
