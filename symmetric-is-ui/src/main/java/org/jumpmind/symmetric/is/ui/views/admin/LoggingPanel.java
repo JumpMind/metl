@@ -12,6 +12,7 @@ import org.jumpmind.symmetric.is.core.util.EnvConstants;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
+import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -40,6 +41,8 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
 
     ApplicationContext context;
 
+    BackgroundRefresherService backgroundRefresherService;
+
     TabbedPanel tabbedPanel;
 
     TextField bufferSize;
@@ -59,6 +62,7 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
         super(caption, icon);
         this.context = context;
         this.tabbedPanel = tabbedPanel;
+        this.backgroundRefresherService = context.getBackgroundRefresherService();
         boolean fileEnabled = Boolean.parseBoolean(context.getEnvironment().getProperty(
                 EnvConstants.LOG_TO_FILE_ENABLED, "true"));
         if (fileEnabled) {
@@ -140,6 +144,7 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
         addComponent(logPanel);
         setExpandRatio(logPanel, 1);
         refresh();
+        backgroundRefresherService.register(this);
     }
 
     private StreamResource getLogFileResource() {
@@ -192,14 +197,61 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
     }
 
     @Override
+    public boolean closing() {
+        backgroundRefresherService.unregister(this);
+        return true;
+    }
+
+    @Override
+    public void deselected() {
+    }
+
+    @Override
+    public void selected() {
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public Object onBackgroundDataRefresh() {
-        return null;
+        StringBuilder builder = null;
+        if (logFile != null && logFile.exists() && autoRefreshOn.getValue()) {
+            try {
+                builder = new StringBuilder();
+                ReversedLinesFileReader reader = new ReversedLinesFileReader(logFile);
+                String filterValue = filter.getValue();
+                try {
+                    int lines = Integer.parseInt(bufferSize.getValue());
+                    int counter = 0;
+                    String line = null;
+                    do {
+                        line = reader.readLine();
+                        if (line != null) {
+                            if (StringUtils.isBlank(filterValue) || line.contains(filterValue)) {
+                                builder.insert(0, line + "\n");
+                                counter++;
+                            }
+                        }
+                    } while (line != null && counter < lines);
+                } finally {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return builder;
     }
 
     @Override
     public void onBackgroundUIRefresh(Object backgroundData) {
-
+        if (backgroundData != null) {
+            StringBuilder builder = (StringBuilder) backgroundData;
+            logView.setValue(builder.toString());
+            logPanel.setScrollTop(1000000);
+            logPanel.markAsDirty();
+        }
     }
 
 }
