@@ -58,6 +58,7 @@ public class TextReplace extends AbstractComponentRuntime {
             }            
         }
         
+        getComponentStatistics().incrementOutboundMessages();
         Message message = new Message(getFlowStepId());
         message.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
         message.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
