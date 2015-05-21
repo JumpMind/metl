@@ -10,6 +10,7 @@ import org.jumpmind.symmetric.is.core.model.User;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
+import org.jumpmind.symmetric.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -24,9 +25,10 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class GroupPanel extends NamedPanel {
+public class GroupPanel extends VerticalLayout implements IUiPanel {
 
     ApplicationContext context;
 
@@ -43,7 +45,6 @@ public class GroupPanel extends NamedPanel {
     Table table;
 
     public GroupPanel(ApplicationContext context, TabbedPanel tabbedPanel, String caption, Resource icon) {
-        super(caption, icon);
         this.context = context;
         this.tabbedPanel = tabbedPanel;
 
@@ -85,6 +86,15 @@ public class GroupPanel extends NamedPanel {
     @Override
     public void selected() {
         refresh();
+    }
+
+    @Override
+    public boolean closing() {
+        return true;
+    }
+
+    @Override
+    public void deselected() {
     }
 
     public void refresh() {

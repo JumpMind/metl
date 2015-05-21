@@ -36,6 +36,7 @@ import org.jumpmind.symmetric.is.core.runtime.component.ScriptExecutor;
 import org.jumpmind.symmetric.is.core.runtime.component.Transformer;
 import org.jumpmind.symmetric.is.core.runtime.component.XmlFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.XmlParser;
+import org.jumpmind.symmetric.is.core.runtime.component.XsltProcessor;
 import org.jumpmind.symmetric.is.core.runtime.resource.Datasource;
 import org.jumpmind.symmetric.is.core.runtime.resource.Http;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
@@ -54,6 +55,7 @@ import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditScriptPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditTransformerPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditXmlFormatPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditXsltPanel;
 import org.jumpmind.symmetric.is.ui.views.design.ManageProjectsPanel;
 import org.jumpmind.symmetric.is.ui.views.design.PropertySheet;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
@@ -782,6 +784,9 @@ public class ProjectNavigator extends VerticalLayout {
         } else if (type.equals(ScriptExecutor.TYPE)) {
             EditScriptPanel panel = new EditScriptPanel(context, flowStep.getComponent(),
                     propertySheet);
+            tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+        } else if (type.equals(XsltProcessor.TYPE)) {
+            EditXsltPanel panel = new EditXsltPanel(context, flowStep.getComponent());
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
         }
     }

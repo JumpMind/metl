@@ -16,6 +16,7 @@ import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
+import org.jumpmind.symmetric.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -37,10 +38,11 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
+public class LoggingPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable {
 
     ApplicationContext context;
 
@@ -62,7 +64,6 @@ public class LoggingPanel extends NamedPanel implements IBackgroundRefreshable {
 
     public LoggingPanel(ApplicationContext context, TabbedPanel tabbedPanel, String caption,
             Resource icon) {
-        super(caption, icon);
         this.context = context;
         this.tabbedPanel = tabbedPanel;
         this.backgroundRefresherService = context.getBackgroundRefresherService();
