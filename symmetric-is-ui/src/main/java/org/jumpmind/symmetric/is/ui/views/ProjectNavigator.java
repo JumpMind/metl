@@ -849,18 +849,6 @@ public class ProjectNavigator extends VerticalLayout {
             refresh();
         }
     }
-
-    public void select(Object obj) {
-        Object parent = obj;
-        do {
-            parent = treeTable.getParent(parent);
-            if (parent != null) {
-                treeTable.setCollapsed(parent, false);
-            }
-        } while (parent != null);
-
-        treeTable.setValue(obj);
-    }
     
     protected void copySelected() {
         Object object = treeTable.getValue();
