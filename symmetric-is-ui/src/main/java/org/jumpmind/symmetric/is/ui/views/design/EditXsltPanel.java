@@ -1,6 +1,19 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.RandomUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jumpmind.symmetric.is.core.model.Component;
+import org.jumpmind.symmetric.is.core.model.DataType;
+import org.jumpmind.symmetric.is.core.model.Model;
+import org.jumpmind.symmetric.is.core.model.ModelAttribute;
+import org.jumpmind.symmetric.is.core.model.ModelEntity;
+import org.jumpmind.symmetric.is.core.runtime.EntityData;
+import org.jumpmind.symmetric.is.core.runtime.component.XsltProcessor;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
@@ -63,11 +76,12 @@ public class EditXsltPanel extends VerticalLayout implements IUiPanel, TextChang
         splitPanel.setFirstComponent(leftLayout);
         
         VerticalLayout rightLayout = new VerticalLayout();
+        rightLayout.setSizeFull();
         rightLayout.addComponent(new Label("Sample Input XML"));
         textArea = new TextArea();
         textArea.setEnabled(false);
         textArea.setSizeFull();
-        textArea.setValue("<batch>\n<entity>\n<attribute>hi</attribute>\n</entity>\n</batch>");
+        textArea.setValue(getSampleXml());
         rightLayout.addComponent(textArea);
         rightLayout.setExpandRatio(textArea, 1.0f);
         splitPanel.setSecondComponent(rightLayout);
@@ -94,10 +108,64 @@ public class EditXsltPanel extends VerticalLayout implements IUiPanel, TextChang
     @Override
     public void textChange(TextChangeEvent event) {
         filterField.setValue(event.getText());
+        textArea.setValue(getSampleXml());
         updateTable(event.getText());
     }
 
     protected void updateTable(String filter) {
+    }
+
+    protected String getSampleXml() {
+        Model model = component.getInputModel();
+        String batchXml = "";
+        if (model != null) {
+            ArrayList<EntityData> inputRows = new ArrayList<EntityData>();
+            for (ModelEntity entity : getMatchingEntities(filterField.getValue())) {
+                for (ModelAttribute attr : entity.getModelAttributes()) {
+                    EntityData data = new EntityData();
+                    DataType type = attr.getDataType();
+                    String value = null;
+                    if (type.isString()) {
+                        value = RandomStringUtils.randomAlphanumeric(10);
+                    } else if (type.isNumeric()) {
+                        value = String.valueOf(RandomUtils.nextInt());
+                    } else if (type.isTimestamp()) {
+                        value = new Date(RandomUtils.nextLong()).toString();
+                    } else if (type.isBoolean()) {
+                        value = Boolean.toString(RandomUtils.nextBoolean());
+                    }
+                    data.put(attr.getId(), value);
+                    inputRows.add(data);
+                }
+            }
+            batchXml = XsltProcessor.getBatchXml(model, inputRows, false);
+        }
+        return batchXml;
+    }
+
+    protected List<ModelEntity> getMatchingEntities(String filter) {
+        List<ModelEntity> entities = new ArrayList<ModelEntity>();
+        if (component.getInputModel() != null) {
+            if (StringUtils.isEmpty(filter)) {
+                entities.addAll(component.getInputModel().getModelEntities());
+            } else {
+                String filterText = filter.toUpperCase();
+                for (ModelEntity entity : component.getInputModel().getModelEntities()) {
+                    if (entity.getName().toUpperCase().indexOf(filterText) != -1) {
+                        entities.add(entity);
+                        continue;
+                    }
+                    for (ModelAttribute attr : entity.getModelAttributes()) {
+                        if (attr.getName().toUpperCase().indexOf(filterText) != -1) {
+                            entities.add(entity);
+                            break;
+                        }
+                    }
+                }
+                
+            }
+        }
+        return entities;
     }
 
     class TestClickListener implements ClickListener {
