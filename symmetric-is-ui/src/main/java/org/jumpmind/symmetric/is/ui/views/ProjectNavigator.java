@@ -31,6 +31,7 @@ import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.DelimitedParser;
 import org.jumpmind.symmetric.is.core.runtime.component.EntityRouter;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
+import org.jumpmind.symmetric.is.core.runtime.component.Joiner;
 import org.jumpmind.symmetric.is.core.runtime.component.Mapping;
 import org.jumpmind.symmetric.is.core.runtime.component.ScriptExecutor;
 import org.jumpmind.symmetric.is.core.runtime.component.Transformer;
@@ -51,6 +52,7 @@ import org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditEntityRouterPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditJoinerPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditScriptPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditTransformerPanel;
@@ -787,6 +789,9 @@ public class ProjectNavigator extends VerticalLayout {
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
         } else if (type.equals(XsltProcessor.TYPE)) {
             EditXsltPanel panel = new EditXsltPanel(context, flowStep.getComponent());
+            tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+        } else if (type.equals(Joiner.TYPE)) {
+            EditJoinerPanel panel = new EditJoinerPanel(context, flowStep.getComponent());
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
         }
     }

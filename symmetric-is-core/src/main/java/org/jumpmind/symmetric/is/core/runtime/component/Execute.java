@@ -21,7 +21,7 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         category = ComponentCategory.PROCESSOR,
         typeName = Execute.TYPE,
         inputMessage = MessageType.ANY,
-        outgoingMessage = MessageType.ANY,
+        outgoingMessage = MessageType.TEXT,
         iconImage = "execute.png")
 public class Execute extends AbstractComponentRuntime {
 
