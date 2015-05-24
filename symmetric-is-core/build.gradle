@@ -1,5 +1,14 @@
 apply from: '../symmetric-is-assemble/common.gradle'
 
+configurations {
+    jaxb
+}
+ 
+dependencies {
+    jaxb 'org.glassfish.jaxb:jaxb-core:2.2.11'
+    jaxb 'org.glassfish.jaxb:jaxb-jxc:2.2.11'
+    jaxb 'org.glassfish.jaxb:jaxb-xjc:2.2.11'
+}
 
 dependencies {
     compile "org.springframework:spring-context:$springVersion"
@@ -38,3 +47,19 @@ task (schemaspy, dependsOn: 'classes', type: JavaExec) {
     main = 'org.jumpmind.symmetric.is.core.persist.SchemaSpy'
     classpath = sourceSets.test.runtimeClasspath
 }
+
+task xsdgen () {
+  doLast {
+    ant.taskdef(name: 'schemagen', classname: 'com.sun.tools.jxc.SchemaGenTask', classpath: configurations.jaxb.asPath)
+    ant.schemagen(
+      srcdir: 'src/main/java/org/jumpmind/symmetric/is/core/runtime/plugin/component',
+      destdir: 'src/main/resources',
+      includeAntRuntime: 'false'
+    ) {
+      schema(file: "components.xsd", namespace: "")
+    }
+  }
+}
+
+xsdgen.dependsOn compileJava
+processResources.dependsOn xsdgen

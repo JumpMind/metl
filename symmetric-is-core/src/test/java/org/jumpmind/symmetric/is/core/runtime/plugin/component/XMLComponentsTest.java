@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.core.runtime.plugin;
+package org.jumpmind.symmetric.is.core.runtime.plugin.component;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -9,7 +9,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 
-import org.jumpmind.symmetric.is.core.runtime.plugin.componet.XMLComponents;
+import org.jumpmind.symmetric.is.core.runtime.plugin.component.XMLComponents;
 import org.junit.Test;
 
 public class XMLComponentsTest {
