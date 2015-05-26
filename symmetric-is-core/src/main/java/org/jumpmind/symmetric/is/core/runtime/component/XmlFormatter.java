@@ -42,6 +42,12 @@ import org.jumpmind.util.FormatUtils;
         outgoingMessage = MessageType.TEXT)
 public class XmlFormatter extends AbstractXML {
 
+    public static final String PRETTY_FORMAT = "Pretty";
+    
+    public static final String COMPACT_FORMAT = "Compact";
+    
+    public static final String RAW_FORMAT = "Raw";
+
     @SettingDefinition(
             order = 15,
             required = false,
@@ -49,6 +55,10 @@ public class XmlFormatter extends AbstractXML {
             label = "Parameter replacement",
             defaultValue = "true")
     public final static String PARAMETER_REPLACEMENT = "xml.formatter.parameter.replacement";
+
+    @SettingDefinition(order = 20, type = Type.CHOICE, label = "XML Format", defaultValue = PRETTY_FORMAT, choices = {
+            PRETTY_FORMAT, COMPACT_FORMAT, RAW_FORMAT })
+    public final static String XML_FORMAT = "xml.formatter.xml.format";
 
     public static final String TYPE = "Format XML";
     
@@ -64,12 +74,15 @@ public class XmlFormatter extends AbstractXML {
     
     boolean useParameterReplacement = true;
 
+    String xmlFormat;
+
     @Override
     protected void start() {
         super.start();
         TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         ignoreNamespace = properties.is(IGNORE_NAMESPACE);
         useParameterReplacement = properties.is(PARAMETER_REPLACEMENT);
+        xmlFormat = properties.get(XML_FORMAT);
         Setting templateSetting = getComponent().findSetting(XML_FORMATTER_TEMPLATE);
 
         if (templateSetting != null && StringUtils.isNotBlank(templateSetting.getValue())) {
@@ -150,7 +163,15 @@ public class XmlFormatter extends AbstractXML {
         restoreNamespaces(document, namespaces);
 
         XMLOutputter xmlOutputter = new XMLOutputter();
-        xmlOutputter.setFormat(Format.getPrettyFormat());
+        Format format = null;
+        if (xmlFormat.equals(COMPACT_FORMAT)) {
+            format = Format.getCompactFormat();
+        } else if (xmlFormat.equals(RAW_FORMAT)) {
+            format = Format.getRawFormat();
+        } else {
+            format = Format.getPrettyFormat();
+        }
+        xmlOutputter.setFormat(format);
         outputPayload.add(xmlOutputter.outputString(document));
         outputMessage.setPayload(outputPayload);
         log(LogLevel.INFO, outputPayload.toString());
