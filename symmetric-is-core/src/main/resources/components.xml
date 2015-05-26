@@ -1,0 +1,68 @@
+<components xmlns="http://www.jumpmind.com/schema/components" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+            xsi:schemaLocation="http://www.jumpmind.com/schema/components components.xsd">
+    <component key="Database Writer" category="WRITER" 
+               inputMessage="ENTITY" outputMessage="NONE" 
+               resourceCategory="DATASOURCE"
+               shareable="true">
+       <name>Database Writer</name>
+       <className>org.jumpmind.symmetric.is.core.runtime.component.DbWriter</className>
+       <description></description>
+       <settings>
+         <setting key="catalog" type="TEXT">
+            <name>Catalog</name>
+            <description></description>
+         </setting>
+         <setting key="schema" type="TEXT">
+            <name>Scehma</name>
+            <description></description>
+         </setting>
+         <setting key="db.writer.replace" type="BOOLEAN">
+            <name>Replace rows if they exist</name>
+            <defaultValue>false</defaultValue>
+            <description></description>
+         </setting>
+         <setting key="db.writer.update.first" type="BOOLEAN">
+            <name>Update rows first instead of insert</name>
+            <defaultValue>false</defaultValue>
+            <description></description>
+         </setting>         
+         <setting key="db.writer.insert.fallback" type="BOOLEAN">
+            <name>Fallback to insert if no rows updated</name>
+            <defaultValue>false</defaultValue>
+            <description></description>
+         </setting>
+         <setting key="db.writer.quote.identifiers" type="BOOLEAN">
+            <name>Quote table and column names</name>
+            <defaultValue>false</defaultValue>
+            <description></description>
+         </setting>
+         <setting key="db.writer.fit.to.column" type="BOOLEAN">
+            <name>Trim character data to fit within column</name>
+            <defaultValue>false</defaultValue>
+            <description></description>
+         </setting>         
+         <setting key="stop.processing.on.error" type="BOOLEAN">
+            <name>Stop Processing Msgs on Error</name>
+            <defaultValue>true</defaultValue>
+            <description></description>
+         </setting>         
+       </settings>
+    </component>
+    <component key="" category="" 
+               inputMessage="" outputMessage="" 
+               resourceCategory=""
+               shareable="true">
+       <name></name>
+       <icon></icon>
+       <className>org.jumpmind.symmetric.is.core.runtime.component.XxxxXxx</className>
+       <description></description>      
+       <settings>
+         <setting key="" type="" required="">
+            <name></name>
+            <defaultValue></defaultValue>
+            <description></description>
+         </setting>
+       </settings>    
+    </component>
+</components>
