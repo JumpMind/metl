@@ -23,7 +23,6 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
-import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -62,8 +61,7 @@ public class LoggingPanel extends VerticalLayout implements IUiPanel, IBackgroun
 
     File logFile;
 
-    public LoggingPanel(ApplicationContext context, TabbedPanel tabbedPanel, String caption,
-            Resource icon) {
+    public LoggingPanel(ApplicationContext context, TabbedPanel tabbedPanel) {
         this.context = context;
         this.tabbedPanel = tabbedPanel;
         this.backgroundRefresherService = context.getBackgroundRefresherService();
