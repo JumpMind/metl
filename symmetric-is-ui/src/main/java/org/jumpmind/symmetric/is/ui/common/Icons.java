@@ -47,6 +47,10 @@ final public class Icons {
     
     public static final FontAwesome GROUP = FontAwesome.USERS;
     
+    public static final FontAwesome EMAIL = FontAwesome.ENVELOPE_O;
+    
     public static final FontAwesome REST = FontAwesome.WRENCH;
+    
+    public static final FontAwesome LOGGING = FontAwesome.REORDER;
     
 }

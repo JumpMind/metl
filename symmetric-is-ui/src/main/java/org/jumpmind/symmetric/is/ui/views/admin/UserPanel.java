@@ -15,12 +15,11 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Resource;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
 public class UserPanel extends VerticalLayout implements IUiPanel {
@@ -39,7 +38,7 @@ public class UserPanel extends VerticalLayout implements IUiPanel {
     
     Table table;
     
-    public UserPanel(ApplicationContext context, TabbedPanel tabbedPanel, String caption, Resource icon) {
+    public UserPanel(ApplicationContext context, TabbedPanel tabbedPanel) {
         this.context = context;
         this.tabbedPanel = tabbedPanel;
         

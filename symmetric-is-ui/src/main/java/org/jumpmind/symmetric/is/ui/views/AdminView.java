@@ -10,6 +10,7 @@ import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.is.ui.common.TopBarLink;
 import org.jumpmind.symmetric.is.ui.views.admin.ApiPanel;
+import org.jumpmind.symmetric.is.ui.views.admin.EmailServerPanel;
 import org.jumpmind.symmetric.is.ui.views.admin.GroupPanel;
 import org.jumpmind.symmetric.is.ui.views.admin.LoggingPanel;
 import org.jumpmind.symmetric.is.ui.views.admin.UserPanel;
@@ -82,7 +83,8 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, IBack
         addItem("Users", Icons.USER);
         addItem("Groups", Icons.GROUP);
         addItem("REST", Icons.REST);
-        addItem("Logging", Icons.AGENT);
+        addItem("Email", Icons.EMAIL);
+        addItem("Logging", Icons.LOGGING);
         
         VerticalLayout navigator = new VerticalLayout(table);
         navigator.setSizeFull();
@@ -110,13 +112,15 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, IBack
                     String id = value.toString();
                     Component panel = null;
                     if (id.equals("Users")) {
-                        panel = new UserPanel(context, tabbedPanel, id, table.getItemIcon(id));
+                        panel = new UserPanel(context, tabbedPanel);
                     } else if (id.equals("Groups")) {
-                        panel = new GroupPanel(context, tabbedPanel, id, table.getItemIcon(id));
+                        panel = new GroupPanel(context, tabbedPanel);
                     } else if (id.equals("REST")) {
-                        panel = new ApiPanel(context, tabbedPanel, id, table.getItemIcon(id));
+                        panel = new ApiPanel(context, tabbedPanel);
+                    } else if (id.equals("Email")) {
+                        panel = new EmailServerPanel(context, tabbedPanel);
                     } else if (id.equals("Logging")) {
-                        panel = new LoggingPanel(context, tabbedPanel, id, table.getItemIcon(id));
+                        panel = new LoggingPanel(context, tabbedPanel);
                     }
                     tabbedPanel.addCloseableTab(id, id, table.getItemIcon(id), panel);
                 }

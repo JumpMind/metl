@@ -8,7 +8,6 @@ import org.jumpmind.symmetric.ui.common.IUiPanel;
 
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Page;
-import com.vaadin.server.Resource;
 import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.VerticalLayout;
 
@@ -18,7 +17,7 @@ public class ApiPanel extends VerticalLayout implements IUiPanel {
 
     private static final long serialVersionUID = 1L;
 
-    public ApiPanel(ApplicationContext context, TabbedPanel tabbedPanel, String caption, Resource icon) {   
+    public ApiPanel(ApplicationContext context, TabbedPanel tabbedPanel) {   
         setSizeFull();
         BrowserFrame e = new BrowserFrame(null, new ExternalResource(Page.getCurrent()
                 .getLocation().getPath().replace("/app", "api.html")));
