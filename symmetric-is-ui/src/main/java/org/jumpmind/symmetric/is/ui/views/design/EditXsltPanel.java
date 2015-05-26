@@ -188,14 +188,14 @@ public class EditXsltPanel extends VerticalLayout implements IUiPanel, TextChang
     class TestWindow extends ResizableWindow {
         public TestWindow() {
             super("Test Transformation");
-            setWidth(600f, Unit.PIXELS);
-            setHeight(300f, Unit.PIXELS);
+            setWidth(800f, Unit.PIXELS);
+            setHeight(600f, Unit.PIXELS);
             content.setMargin(true);
             
             TextArea textField = new TextArea();
             textField.setSizeFull();
             textField.setWordwrap(false);
-            textField.setValue("Message goes here");
+            textField.setValue(XsltProcessor.getTransformedXml(textArea.getValue(), editor.getValue(), XsltProcessor.PRETTY_FORMAT));
             addComponent(textField);
             content.setExpandRatio(textField, 1.0f);
             

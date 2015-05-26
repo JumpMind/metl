@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,19 +9,27 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.input.sax.XMLReaders;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
+import org.jdom2.transform.XSLTransformer;
+import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.DataType;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.Setting;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition;
+import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.util.FormatUtils;
 
 @ComponentDefinition(
         typeName = XsltProcessor.TYPE,
@@ -29,6 +38,22 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
         inputMessage = MessageType.ENTITY,
         outgoingMessage = MessageType.TEXT)
 public class XsltProcessor extends AbstractComponentRuntime {
+
+    public static final String PRETTY_FORMAT = "Pretty";
+    
+    public static final String COMPACT_FORMAT = "Compact";
+    
+    public static final String RAW_FORMAT = "Raw";
+
+    @SettingDefinition(order = 10, required = false, type = Type.BOOLEAN, label = "Output all attributes", defaultValue = "false")
+    public final static String OUTPUT_ALL_ATTRIBUTES = "xslt.processor.output.all.attributes";
+
+    @SettingDefinition(order = 15, required = false, type = Type.BOOLEAN, label = "Parameter replacement", defaultValue = "true")
+    public final static String PARAMETER_REPLACEMENT = "xslt.processor.parameter.replacement";
+
+    @SettingDefinition(order = 20, type = Type.CHOICE, label = "XML Format", defaultValue = PRETTY_FORMAT, choices = {
+            PRETTY_FORMAT, COMPACT_FORMAT, RAW_FORMAT })
+    public final static String XML_FORMAT = "xslt.processor.xml.format";
 
     public static final String TYPE = "XSLT Processor";
 
@@ -40,9 +65,20 @@ public class XsltProcessor extends AbstractComponentRuntime {
     
     boolean outputAllAttributes;
     
+    boolean useParameterReplacement = true;
+    
+    String xmlFormat;
+    
     @Override
     protected void start() {
+        TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
+        outputAllAttributes = properties.is(OUTPUT_ALL_ATTRIBUTES);
+        useParameterReplacement = properties.is(PARAMETER_REPLACEMENT);
+        xmlFormat = properties.get(XML_FORMAT);
         stylesheet = getComponent().findSetting(XSLT_PROCESSOR_STYLESHEET);
+        if (StringUtils.isBlank(stylesheet.getValue())) {
+            throw new RuntimeException("The XSLT stylesheet is blank.  Edit the component and set a stylesheet.");
+        }
     }
 
     @Override
@@ -54,7 +90,12 @@ public class XsltProcessor extends AbstractComponentRuntime {
         ArrayList<String> outputPayload = new ArrayList<String>();
         
         String batchXml = getBatchXml(getComponent().getInputModel(), inputRows, outputAllAttributes);
-        System.out.println(batchXml);
+        String stylesheetXml = stylesheet.getValue();
+        if (useParameterReplacement) {
+            stylesheetXml = FormatUtils.replaceTokens(stylesheetXml, context.getFlowParametersAsString(), true);
+        }
+        String outputXml = getTransformedXml(batchXml, stylesheetXml, xmlFormat);
+        outputPayload.add(outputXml);
 
         outputMessage.setPayload(outputPayload);
         log(LogLevel.INFO, outputPayload.toString());
@@ -145,5 +186,32 @@ public class XsltProcessor extends AbstractComponentRuntime {
         }
         return attributes;
     }
-    
+
+    public static String getTransformedXml(String inputXml, String stylesheetXml, String xmlFormat) {
+        StringWriter writer = new StringWriter();
+        SAXBuilder builder = new SAXBuilder();
+        builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
+        builder.setFeature("http://xml.org/sax/features/validation", false);
+        try {
+            Document inputDoc = builder.build(new StringReader(inputXml));
+            StringReader reader = new StringReader(stylesheetXml);
+            XSLTransformer transformer = new XSLTransformer(reader);
+            Document outputDoc = transformer.transform(inputDoc);
+            XMLOutputter xmlOutput = new XMLOutputter();
+            Format format = null;
+            if (xmlFormat.equals(COMPACT_FORMAT)) {
+                format = Format.getCompactFormat();
+            } else if (xmlFormat.equals(RAW_FORMAT)) {
+                format = Format.getRawFormat();
+            } else {
+                format = Format.getPrettyFormat();
+            }
+            xmlOutput.setFormat(format);
+            xmlOutput.output(outputDoc, writer);
+            writer.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return writer.toString();
+    }
 }
