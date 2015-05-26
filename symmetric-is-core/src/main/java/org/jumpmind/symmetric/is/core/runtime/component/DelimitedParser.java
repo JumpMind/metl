@@ -137,6 +137,8 @@ public class DelimitedParser extends AbstractComponentRuntime {
         if (isNotBlank(quoteCharacter)) {
             csvReader.setTextQualifier(quoteCharacter.charAt(0));
             csvReader.setUseTextQualifier(true);
+        } else {
+            csvReader.setUseTextQualifier(false);
         }
         if (csvReader.readRecord()) {
             EntityData data = new EntityData();
