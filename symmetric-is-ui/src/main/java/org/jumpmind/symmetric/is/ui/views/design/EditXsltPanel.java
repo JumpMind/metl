@@ -12,6 +12,7 @@ import org.jumpmind.symmetric.is.core.model.DataType;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
+import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.component.XsltProcessor;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
@@ -69,6 +70,8 @@ public class EditXsltPanel extends VerticalLayout implements IUiPanel, TextChang
         editor.setSizeFull();
         editor.setHighlightActiveLine(true);
         editor.setShowPrintMargin(false);
+        editor.addTextChangeListener(new StylesheetChangeListener());
+        editor.setValue(component.findSetting(XsltProcessor.XSLT_PROCESSOR_STYLESHEET).getValue());
         leftLayout.addComponent(new Label("XSLT Stylesheet"));
         leftLayout.addComponent(editor);
         leftLayout.setExpandRatio(editor, 1.0f);
@@ -161,11 +164,18 @@ public class EditXsltPanel extends VerticalLayout implements IUiPanel, TextChang
                             break;
                         }
                     }
-                }
-                
+                }                
             }
         }
         return entities;
+    }
+
+    class StylesheetChangeListener implements TextChangeListener {
+        public void textChange(TextChangeEvent event) {
+            Setting stylesheet = component.findSetting(XsltProcessor.XSLT_PROCESSOR_STYLESHEET);
+            stylesheet.setValue(editor.getValue());
+            context.getConfigurationService().save(component);
+        }
     }
 
     class TestClickListener implements ClickListener {
