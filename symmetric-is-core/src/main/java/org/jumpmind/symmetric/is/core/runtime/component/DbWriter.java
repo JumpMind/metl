@@ -234,110 +234,114 @@ public class DbWriter extends AbstractComponentRuntime {
     }
 
     private void write(ISqlTransaction transaction, List<EntityData> inputRows) {
-        Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<TargetTableDefintion, WriteStats>();
-        for (EntityData inputRow : inputRows) {
-            for (TargetTableDefintion targetTableDefinition : targetTables) {
-                WriteStats stats = statsMap.get(targetTableDefinition);
-                if (stats == null) {
-                    stats = new WriteStats();
-                    statsMap.put(targetTableDefinition, stats);
-                }
-                if (updateFirst) {
-                    TargetTable modelTable = targetTableDefinition.getUpdateTable();
-                    if (modelTable.shouldProcess(inputRow)) {
-                        Object[] data = getValues(true, modelTable, inputRow);
-                        int count = execute(transaction, modelTable.getStatement(), new Object(),
-                                data, true);
-                        stats.updateCount+=count;
-                        getComponentStatistics().incrementNumberEntitiesProcessed(count);
-                        if (insertFallback && count == 0) {
+        TargetTable modelTable = null;
+        Object[] data = null;
+        try {
+            Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<TargetTableDefintion, WriteStats>();
+            for (EntityData inputRow : inputRows) {
+                for (TargetTableDefintion targetTableDefinition : targetTables) {
+                    WriteStats stats = statsMap.get(targetTableDefinition);
+                    if (stats == null) {
+                        stats = new WriteStats();
+                        statsMap.put(targetTableDefinition, stats);
+                    }
+                    if (updateFirst) {
+                        modelTable = targetTableDefinition.getUpdateTable();
+                        if (modelTable.shouldProcess(inputRow)) {
+                            data = getValues(true, modelTable, inputRow);
+                            int count = execute(transaction, modelTable.getStatement(), new Object(), data, true);
+                            stats.updateCount += count;
+                            getComponentStatistics().incrementNumberEntitiesProcessed(count);
+                            if (insertFallback && count == 0) {
+                                modelTable = targetTableDefinition.getInsertTable();
+                                if (modelTable.shouldProcess(inputRow)) {
+                                    log.debug("Falling back to insert");
+                                    data = getValues(false, modelTable, inputRow);
+                                    count = execute(transaction, modelTable.getStatement(), new Object(), data, true);
+                                    stats.fallbackInsertCount += count;
+                                    getComponentStatistics().incrementNumberEntitiesProcessed(count);
+                                }
+                            } else if (count == 0) {
+                                log(LogLevel.DEBUG, String.format("Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n",
+                                        modelTable.getStatement().getSql(), Arrays.toString(data),
+                                        Arrays.toString(modelTable.getStatement().getTypes())));
+                            }
+                        }
+                    } else {
+                        try {
                             modelTable = targetTableDefinition.getInsertTable();
                             if (modelTable.shouldProcess(inputRow)) {
-                                log.debug("Falling back to insert");
                                 data = getValues(false, modelTable, inputRow);
-                                count = execute(transaction, modelTable.getStatement(),
-                                        new Object(), data, true);
-                                stats.fallbackInsertCount+=count;
+                                int count = execute(transaction, modelTable.getStatement(), new Object(), data, !replaceRows);
+                                stats.insertCount += count;
                                 getComponentStatistics().incrementNumberEntitiesProcessed(count);
                             }
-                        } else if (count == 0) {
-                            log(LogLevel.DEBUG,
-                                    String.format(
-                                            "Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n",
-                                            modelTable.getStatement().getSql(),
-                                            Arrays.toString(data),
-                                            Arrays.toString(modelTable.getStatement().getTypes())));
-                        }
-                    }
-                } else {
-                    try {
-                        TargetTable modelTable = targetTableDefinition.getInsertTable();
-                        if (modelTable.shouldProcess(inputRow)) {
-                            Object[] data = getValues(false, modelTable, inputRow);
-                            int count = execute(transaction, modelTable.getStatement(),
-                                    new Object(), data, !replaceRows);
-                            stats.insertCount+=count;
-                            getComponentStatistics().incrementNumberEntitiesProcessed(count);
-                        }
-                    } catch (UniqueKeyException e) {
-                        if (replaceRows) {
-                            TargetTable modelTable = targetTableDefinition.getUpdateTable();
-                            if (modelTable.shouldProcess(inputRow)) {
-                                log.debug("Falling back to update");
-                                Object[] data = getValues(true, modelTable, inputRow);
-                                int count = execute(transaction, modelTable.getStatement(),
-                                        new Object(), data, true);
-                                stats.fallbackUpdateCount+=count;
-                                getComponentStatistics().incrementNumberEntitiesProcessed(count);
+                        } catch (UniqueKeyException e) {
+                            if (replaceRows) {
+                                modelTable = targetTableDefinition.getUpdateTable();
+                                if (modelTable.shouldProcess(inputRow)) {
+                                    log.debug("Falling back to update");
+                                    data = getValues(true, modelTable, inputRow);
+                                    int count = execute(transaction, modelTable.getStatement(), new Object(), data, true);
+                                    stats.fallbackUpdateCount += count;
+                                    getComponentStatistics().incrementNumberEntitiesProcessed(count);
+                                }
+                            } else {
+                                throw e;
                             }
-                        } else {
-                            throw e;
                         }
                     }
                 }
             }
-        }
-        
-        for (TargetTableDefintion table : targetTables) {
-            WriteStats stats = statsMap.get(table);
-            if (stats != null) {
-                StringBuilder msg = new StringBuilder();
-                if (stats.insertCount > 0) {
-                    msg.append("Inserted: ");
-                    msg.append(stats.insertCount);
-                }
 
-                if (stats.fallbackUpdateCount > 0) {
-                    if (msg.length() > 0) {
-                        msg.append(", ");
+            for (TargetTableDefintion table : targetTables) {
+                WriteStats stats = statsMap.get(table);
+                if (stats != null) {
+                    StringBuilder msg = new StringBuilder();
+                    if (stats.insertCount > 0) {
+                        msg.append("Inserted: ");
+                        msg.append(stats.insertCount);
                     }
-                    msg.append("Fallback Updates: ");
-                    msg.append(stats.fallbackUpdateCount);
-                }
 
-                if (stats.updateCount > 0) {
-                    if (msg.length() > 0) {
-                        msg.append(", ");
+                    if (stats.fallbackUpdateCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append("Fallback Updates: ");
+                        msg.append(stats.fallbackUpdateCount);
                     }
-                    msg.append(" Updated: ");
-                    msg.append(stats.updateCount);
-                }
 
-                if (stats.fallbackInsertCount > 0) {
-                    if (msg.length() > 0) {
-                        msg.append(", ");
+                    if (stats.updateCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append(" Updated: ");
+                        msg.append(stats.updateCount);
                     }
-                    msg.append(" Fallback Inserts: ");
-                    msg.append(stats.fallbackInsertCount);
-                }
-                
-                if (msg.length() > 0) {
-                    log(LogLevel.INFO, "%s: %s", table.getInsertTable().getTable().getFullyQualifiedTableName(), msg.toString());
-                }
 
+                    if (stats.fallbackInsertCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append(" Fallback Inserts: ");
+                        msg.append(stats.fallbackInsertCount);
+                    }
+
+                    if (msg.length() > 0) {
+                        log(LogLevel.INFO, "%s: %s", table.getInsertTable().getTable().getFullyQualifiedTableName(), msg.toString());
+                    }
+
+                }
             }
+
+        } catch (RuntimeException ex) {
+            if (modelTable != null && data != null) {
+                log(LogLevel.ERROR, String.format("Failed to execute: \n%s\nWith values: \n%s\nWith types: \n%s\n", modelTable.getStatement()
+                        .getSql(), Arrays.toString(data), Arrays.toString(modelTable.getStatement().getTypes())));
+            }
+            throw ex;
         }
-        
+
     }
 
     private int execute(ISqlTransaction transaction, DmlStatement dmlStatement, Object marker,
