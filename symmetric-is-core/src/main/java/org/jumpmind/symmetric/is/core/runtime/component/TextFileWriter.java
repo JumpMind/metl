@@ -17,6 +17,7 @@ import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamable;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
+import org.jumpmind.util.FormatUtils;
 
 @ComponentDefinition(typeName = TextFileWriter.TYPE, category = ComponentCategory.WRITER, iconImage="textfilewriter.png",
         inputMessage=MessageType.TEXT,
@@ -101,7 +102,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
     
     private void applySettings() {
         properties = getComponent().toTypedProperties(getSettingDefinitions(false));
-        relativePathAndFile = properties.get(TEXTFILEWRITER_RELATIVE_PATH);
+        relativePathAndFile = FormatUtils.replaceTokens(properties.get(TEXTFILEWRITER_RELATIVE_PATH), context.getFlowParametersAsString(), true);
         mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
         append = properties.is(TEXTFILEWRITER_APPEND);
         lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
