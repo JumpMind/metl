@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.core.runtime.plugin.component;
+package org.jumpmind.symmetric.is.core.runtime.extension;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

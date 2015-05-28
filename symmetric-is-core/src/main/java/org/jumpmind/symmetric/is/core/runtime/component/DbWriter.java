@@ -118,6 +118,8 @@ public class DbWriter extends AbstractComponentRuntime {
     String catalogName;
 
     String schemaName;
+    
+    int inboundEntityDataCount = 0;
 
     IDatabasePlatform platform;
 
@@ -127,7 +129,7 @@ public class DbWriter extends AbstractComponentRuntime {
 
     @Override
     protected void start() {
-
+        inboundEntityDataCount = 0;
         error = null;
 
         if (getResourceRuntime() == null) {
@@ -239,6 +241,7 @@ public class DbWriter extends AbstractComponentRuntime {
         try {
             Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<TargetTableDefintion, WriteStats>();
             for (EntityData inputRow : inputRows) {
+                inboundEntityDataCount++;
                 for (TargetTableDefintion targetTableDefinition : targetTables) {
                     WriteStats stats = statsMap.get(targetTableDefinition);
                     if (stats == null) {
@@ -336,7 +339,7 @@ public class DbWriter extends AbstractComponentRuntime {
 
         } catch (RuntimeException ex) {
             if (modelTable != null && data != null) {
-                log(LogLevel.ERROR, String.format("Failed to execute: \n%s\nWith values: \n%s\nWith types: \n%s\n", modelTable.getStatement()
+                log(LogLevel.ERROR, String.format("Failed to run dml for the %s statement processed: \n%s\nWith values: \n%s\nWith types: \n%s\n", inboundEntityDataCount, modelTable.getStatement()
                         .getSql(), Arrays.toString(data), Arrays.toString(modelTable.getStatement().getTypes())));
             }
             throw ex;

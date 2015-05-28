@@ -19,6 +19,9 @@ import org.jumpmind.symmetric.is.core.runtime.component.NoOp;
 
 public class TestUtils {
 
+    public static void main(String[] args) {
+        System.out.println(Integer.MAX_VALUE);
+    }
     public static Folder createFolder(String name) {
 
         Folder data = new Folder();
