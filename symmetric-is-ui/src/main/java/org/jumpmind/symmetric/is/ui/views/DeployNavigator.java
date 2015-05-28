@@ -76,10 +76,6 @@ public class DeployNavigator extends VerticalLayout {
 
     AbstractObject itemBeingEdited;
 
-    ShortcutListener treeTableEnterKeyShortcutListener;
-
-    ShortcutListener treeTableDeleteKeyShortcutListener;
-
     TabbedPanel tabbedPanel;
 
     MenuItem search;
@@ -257,29 +253,6 @@ public class DeployNavigator extends VerticalLayout {
         });
         table.setVisibleColumns(new Object[] { "name" });
         table.setColumnExpandRatio("name", 1);
-        treeTableDeleteKeyShortcutListener = new ShortcutListener("Delete", KeyCode.DELETE, null) {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void handleAction(Object sender, Object target) {
-                if (delete.isEnabled()) {
-                    handleDelete();
-                }
-            }
-        };
-        table.addShortcutListener(treeTableDeleteKeyShortcutListener);
-
-        treeTableEnterKeyShortcutListener = new ShortcutListener("Enter", KeyCode.ENTER, null) {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void handleAction(Object sender, Object target) {
-                openItem(getSelectedValue());
-            }
-        };
-        table.addShortcutListener(treeTableEnterKeyShortcutListener);
         table.addValueChangeListener(new ValueChangeListener() {
             private static final long serialVersionUID = 1L;
 
@@ -346,8 +319,6 @@ public class DeployNavigator extends VerticalLayout {
 
     protected boolean startEditingItem(AbstractObject obj) {
         if (obj.isSettingNameAllowed()) {
-            treeTable.removeShortcutListener(treeTableDeleteKeyShortcutListener);
-            treeTable.removeShortcutListener(treeTableEnterKeyShortcutListener);
             itemBeingEdited = obj;
             treeTable.refreshRowCache();
             return true;
@@ -360,8 +331,6 @@ public class DeployNavigator extends VerticalLayout {
     protected void finishEditingItem() {
         if (itemBeingEdited != null) {
             IConfigurationService configurationService = context.getConfigurationService();
-            treeTable.addShortcutListener(treeTableDeleteKeyShortcutListener);
-            treeTable.addShortcutListener(treeTableEnterKeyShortcutListener);
             Object selected = itemBeingEdited;
             Method method = null;
             try {
