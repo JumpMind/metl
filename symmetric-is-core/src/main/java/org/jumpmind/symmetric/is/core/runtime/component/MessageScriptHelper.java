@@ -34,10 +34,10 @@ public class MessageScriptHelper {
     
     protected IResourceRuntime resource;
 
-    public MessageScriptHelper(ComponentContext context, ComponentStatistics componentStatistics) {
-        this.context = context;
+    public MessageScriptHelper(IComponentRuntime component) {
+        this.context = component.getComponentContext();
         this.resource = context.getResourceRuntime();
-        this.componentStatistics = componentStatistics;
+        this.componentStatistics = context.getComponentStatistics();
         this.flow = context.getFlow();
         this.flowStep = context.getFlowStep();
     }
