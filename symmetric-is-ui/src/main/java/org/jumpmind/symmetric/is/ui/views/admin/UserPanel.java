@@ -7,6 +7,7 @@ import org.jumpmind.symmetric.is.core.model.User;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
+import org.jumpmind.symmetric.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -18,10 +19,10 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table;
-
+import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class UserPanel extends NamedPanel {
+public class UserPanel extends VerticalLayout implements IUiPanel {
 
     ApplicationContext context;
     
@@ -38,7 +39,6 @@ public class UserPanel extends NamedPanel {
     Table table;
     
     public UserPanel(ApplicationContext context, TabbedPanel tabbedPanel) {
-        super("Users");
         this.context = context;
         this.tabbedPanel = tabbedPanel;
         
@@ -82,6 +82,15 @@ public class UserPanel extends NamedPanel {
         refresh();
     }
 
+    @Override
+    public boolean closing() {
+        return true;
+    }
+
+    @Override
+    public void deselected() {        
+    }
+
     public void refresh() {
         container.removeAllItems();
         container.addAll(context.getConfigurationService().findUsers());
@@ -115,7 +124,7 @@ public class UserPanel extends NamedPanel {
         public void buttonClick(ClickEvent event) {
             User user = new User();
             UserEditPanel editPanel = new UserEditPanel(context, user);
-            tabbedPanel.addCloseableTab(user.getId(), "Edit User", FontAwesome.USER, editPanel);
+            tabbedPanel.addCloseableTab(user.getId(), "Edit User", getIcon(), editPanel);
         }
     }
 
@@ -124,7 +133,7 @@ public class UserPanel extends NamedPanel {
             User user = getFirstSelectedItem();
             context.getConfigurationService().refresh(user);
             UserEditPanel editPanel = new UserEditPanel(context, user);
-            tabbedPanel.addCloseableTab(user.getId(), "Edit User", FontAwesome.USER, editPanel);
+            tabbedPanel.addCloseableTab(user.getId(), "Edit User", getIcon(), editPanel);
         }
     }
 
@@ -158,4 +167,5 @@ public class UserPanel extends NamedPanel {
             setButtonsEnabled();
         }
     }
+
 }

@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime.flow;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -7,6 +8,7 @@ import java.util.concurrent.Executors;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.AgentParameter;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.Folder;
@@ -55,7 +57,7 @@ public class FlowRuntimeTest {
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);	
     	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
     			new ExecutionTrackerLogger(deployment), threadService);
-    	flowRuntime.start("", new HashMap<String, IResourceRuntime>());
+    	flowRuntime.start("", new HashMap<String, IResourceRuntime>(), new ArrayList<AgentParameter>());
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step").getNumberInboundMessages());
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Step").getNumberInboundMessages());
@@ -67,7 +69,7 @@ public class FlowRuntimeTest {
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
     	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
     			new ExecutionTrackerLogger(deployment), threadService);
-    	flowRuntime.start("", new HashMap<String, IResourceRuntime>());
+    	flowRuntime.start("", new HashMap<String, IResourceRuntime>(), new ArrayList<AgentParameter>());
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step").getNumberInboundMessages());
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Step 1").getNumberInboundMessages());
@@ -80,7 +82,7 @@ public class FlowRuntimeTest {
         AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
         FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
                 new ExecutionTrackerLogger(deployment), threadService);
-        flowRuntime.start("", new HashMap<String, IResourceRuntime>());
+        flowRuntime.start("", new HashMap<String, IResourceRuntime>(), new ArrayList<AgentParameter>());
         flowRuntime.waitForFlowCompletion();
         Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step 1").getNumberInboundMessages());
         Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step 2").getNumberInboundMessages());

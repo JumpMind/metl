@@ -4,7 +4,7 @@ import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.runtime.component.MappingProcessor;
+import org.jumpmind.symmetric.is.core.runtime.component.Mapping;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
@@ -123,7 +123,7 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 	protected void autoMap(ModelAttribute attr, ModelAttribute attr2, boolean fuzzy) {
 		boolean isMapped = false;
 		for (ComponentAttributeSetting setting : component.getAttributeSettings()) {
-			if (setting.getName().equals(MappingProcessor.ATTRIBUTE_MAPS_TO) && 
+			if (setting.getName().equals(Mapping.ATTRIBUTE_MAPS_TO) && 
 					setting.getValue().equals(attr2.getId())) {
 				isMapped = true;
 				break;
@@ -135,7 +135,7 @@ public class EditMappingPanel extends VerticalLayout implements IUiPanel {
 			ComponentAttributeSetting setting = new ComponentAttributeSetting();
 			setting.setAttributeId(attr.getId());
 			setting.setComponentId(component.getId());
-			setting.setName(MappingProcessor.ATTRIBUTE_MAPS_TO);
+			setting.setName(Mapping.ATTRIBUTE_MAPS_TO);
 			setting.setValue(attr2.getId());
 			component.addAttributeSetting(setting);
 			context.getConfigurationService().save(setting);

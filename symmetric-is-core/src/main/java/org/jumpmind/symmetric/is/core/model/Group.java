@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Group extends AbstractObject {
@@ -9,6 +10,14 @@ public class Group extends AbstractObject {
     String name;
     
     List<GroupPrivilege> groupPrivileges;
+
+    public Group() {
+        groupPrivileges = new ArrayList<GroupPrivilege>();
+    }
+    
+    public Group(String name) {
+        this.name = name;
+    }
 
     @Override
     public void setName(String name) {

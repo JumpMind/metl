@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.ui.init;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +15,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Scope(value="ui")
-public class BackgroundRefresherService {
+public class BackgroundRefresherService implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     final protected Logger log = LoggerFactory.getLogger(getClass());
 
@@ -32,6 +35,7 @@ public class BackgroundRefresherService {
         this.taskScheduler = new ThreadPoolTaskScheduler();
         this.taskScheduler.setThreadNamePrefix("ui-refresher-");
         this.taskScheduler.setPoolSize(1);
+        this.taskScheduler.setDaemon(true);
         this.taskScheduler.initialize();   
         setPollingInterval(5000);
     }

@@ -27,6 +27,8 @@ import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -112,8 +114,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 final AbstractObject obj = (AbstractObject) itemId;
                 if (lastEditItemIds.contains(itemId)) {
                     ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
-                        protected void save() {
-                            obj.setName(getValue());
+                        protected void save(String text) {
+                            obj.setName(text);
                             EditModelPanel.this.context.getConfigurationService().save(obj);
                         };
                     };
@@ -180,7 +182,15 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
         treeTable.addItemClickListener(new TreeTableItemClickListener());
         treeTable.addValueChangeListener(new TreeTableValueChangeListener());
-
+        ShortcutListener enterKeyListener = new ShortcutListener("Enter", KeyCode.ENTER, null) {
+            public void handleAction(Object sender, Object target) {
+                lastEditItemIds = Collections.emptySet();
+                treeTable.refreshRowCache();
+                setButtonsEnabled(filterField.getValue());
+            }
+        };
+        treeTable.addShortcutListener(enterKeyListener);
+        
         addComponent(treeTable);
         setExpandRatio(treeTable, 1.0f);
         addAll("", model.getModelEntities());

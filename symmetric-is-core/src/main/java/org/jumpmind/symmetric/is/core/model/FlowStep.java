@@ -13,6 +13,8 @@ public class FlowStep extends AbstractObject {
     
     int y;
     
+    int approximateOrder;
+    
     public FlowStep() {
     }
 
@@ -71,9 +73,28 @@ public class FlowStep extends AbstractObject {
     public int getY() {
         return y;
     }
+    
+    public void setApproximateOrder(int order) {
+        this.approximateOrder = order;
+    }
+    
+    public int getApproximateOrder() {
+        return approximateOrder;
+    }
 
     @Override
     public boolean isSettingNameAllowed() {
         return true;
+    }
+    
+    @Override
+    public AbstractObject copy() {
+        FlowStep flowStep = (FlowStep)super.copy();
+        Component component = flowStep.getComponent();
+        if (!component.isShared()) {
+            component = (Component)component.copy();
+            flowStep.setComponent(component);
+        }        
+        return flowStep;
     }
 }

@@ -5,20 +5,19 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
+import org.jumpmind.symmetric.is.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentDeploymentParameter;
 import org.jumpmind.symmetric.is.core.model.AgentResource;
 import org.jumpmind.symmetric.is.core.model.AgentResourceSetting;
-import org.jumpmind.symmetric.is.core.model.AgentSetting;
+import org.jumpmind.symmetric.is.core.model.AgentParameter;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.ComponentEntitySetting;
@@ -36,9 +35,7 @@ import org.jumpmind.symmetric.is.core.model.Group;
 import org.jumpmind.symmetric.is.core.model.GroupPrivilege;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
-import org.jumpmind.symmetric.is.core.model.ModelAttributeRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.model.ModelEntityRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelName;
 import org.jumpmind.symmetric.is.core.model.Project;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
@@ -182,7 +179,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         }
         return list;
     }
-    
+
     @Override
     public ProjectVersion findProjectVersion(String projectVersionId) {
         ProjectVersion projectVersion = new ProjectVersion(projectVersionId);
@@ -266,9 +263,9 @@ abstract class AbstractConfigurationService extends AbstractService implements
     protected void refreshAgentSettings(Agent agent) {
         Map<String, Object> settingParams = new HashMap<String, Object>();
         settingParams.put("agentId", agent.getId());
-        List<AgentSetting> settings = persistenceManager.find(AgentSetting.class, settingParams,
-                null, null, tableName(AgentSetting.class));
-        agent.setSettings(settings);
+        List<AgentParameter> parameters = persistenceManager.find(AgentParameter.class, settingParams,
+                null, null, tableName(AgentParameter.class));
+        agent.setAgentParameters(parameters);
     }
 
     protected void refreshAgentResourceSettings(Agent agent) {
@@ -422,12 +419,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         versionParams.put("modelId", model.getId());
         List<ModelEntity> entities = persistenceManager.find(ModelEntity.class, versionParams,
                 null, null, tableName(ModelEntity.class));
-        Collections.sort(entities, new Comparator<ModelEntity>() {
-            @Override
-            public int compare(ModelEntity o1, ModelEntity o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
+        AbstractObjectNameBasedSorter.sort(entities);
         for (ModelEntity entity : entities) {
             refresh(entity);
             model.getModelEntities().add(entity);
@@ -480,6 +472,19 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
+    public List<User> findUsersByGroup(String groupId) {
+        List<User> users = new ArrayList<User>();
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("groupId", groupId);
+        List<UserGroup> userGroups = persistenceManager.find(UserGroup.class, params, null, null,
+                tableName(UserGroup.class));
+        for (UserGroup userGroup : userGroups) {
+            users.add(findUser(userGroup.getUserId()));
+        }       
+        return users;
+    }
+
+    @Override
     public List<User> findUsers() {
         return persistenceManager.find(User.class, null, null, null, tableName(User.class));
     }
@@ -494,12 +499,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
                 tableName(Group.class));
         if (groups.size() > 0) {
             group = groups.get(0);
-            params = new HashMap<String, Object>();
-            params.put("groupId", group.getId());
-            group.setGroupPrivileges(persistenceManager.find(GroupPrivilege.class, params, null,
-                    null, tableName(GroupPrivilege.class)));
+            refresh(group);
         }
         return group;
+    }
+
+    @Override
+    public List<Group> findGroups() {
+        return persistenceManager.find(Group.class, null, null, null, tableName(Group.class));
     }
 
     @Override
@@ -593,6 +600,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public void deleteFlow(Flow flow) {
         flow.setDeleted(true);
+        List<FlowStep> steps = flow.getFlowSteps();
+        for (FlowStep flowStep : steps) {
+            if (!flowStep.getComponent().isShared()) {
+                flowStep.getComponent().setDeleted(true);
+                save(flowStep.getComponent());
+            }
+        }
         save((AbstractObject) flow);
     }
 
@@ -602,7 +616,20 @@ abstract class AbstractConfigurationService extends AbstractService implements
         for (Setting setting : user.getSettings()) {
             persistenceManager.delete(setting, null, null, tableName(UserSetting.class));
         }
+        for (Group group : user.getGroups()) {
+            persistenceManager.delete(new UserGroup(user.getId(), group.getId()), null, null, tableName(UserGroup.class));
+        }
+
         persistenceManager.delete(user, null, null, tableName(User.class));
+    }
+
+    @Override
+    public void delete(Group group) {
+        refresh(group);
+        for (GroupPrivilege groupPriv : group.getGroupPrivileges()) {
+            persistenceManager.delete(groupPriv, null, null, tableName(GroupPrivilege.class));
+        }
+        persistenceManager.delete(group, null, null, tableName(Group.class));
     }
 
     @Override
@@ -634,6 +661,12 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
+    public void refresh(AgentDeployment deployment) {
+        refresh((AbstractObject) deployment);
+        refreshAgentDeploymentRelations(deployment);
+    }
+    
+    @Override
     public void refresh(User user) {
         Map<String, Object> params = new HashMap<String, Object>();
         params = new HashMap<String, Object>();
@@ -648,6 +681,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
             groups.add(findGroup(userGroup.getGroupId()));
         }
         user.setGroups(groups);
+    }
+
+    @Override
+    public void refresh(Group group) {
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("groupId", group.getId());
+        group.setGroupPrivileges(persistenceManager.find(GroupPrivilege.class, params, null, null,
+                tableName(GroupPrivilege.class)));
     }
 
     private void refreshFlowRelations(Flow flow) {
@@ -693,6 +734,32 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
+    public void save(Component component) {
+        save((AbstractObject) component);
+
+        List<ComponentAttributeSetting> aSettings = component.getAttributeSettings();
+        if (aSettings != null) {
+            for (ComponentAttributeSetting componentAttributeSetting : aSettings) {
+                save(componentAttributeSetting);
+            }
+        }
+        
+        List<ComponentEntitySetting> eSettings = component.getEntitySettings();
+        if (eSettings != null) {
+            for (ComponentEntitySetting componentEntitySetting : eSettings) {
+                save(componentEntitySetting);
+            }
+        }
+        
+        List<Setting> settings = component.getSettings();
+        if (settings != null) {
+            for (Setting setting : settings) {
+                save(setting);
+            }
+        }
+    }
+    
+    @Override
     public void save(Project project) {
         save((AbstractObject) project);
     }
@@ -731,8 +798,12 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
         List<FlowStepLink> links = flow.getFlowStepLinks();
         for (FlowStepLink link : links) {
-            link.setLastUpdateTime(new Date());
-            persistenceManager.save(link, null, null, tableName(link.getClass()));
+            save(link);
+        }
+
+        List<FlowParameter> parameters = flow.getFlowParameters();
+        for (FlowParameter parm : parameters) {
+            save(parm);
         }
 
     }
@@ -745,12 +816,6 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void delete(ModelEntity modelEntity) {
-        Iterator<ModelEntityRelationship> itrr = modelEntity.getModelEntityRelationships()
-                .iterator();
-        while (itrr.hasNext()) {
-            delete(itrr.next());
-        }
-
         List<ComponentEntitySetting> settings = persistenceManager.find(
                 ComponentEntitySetting.class, new NameValue("entityId", modelEntity.getId()), null,
                 null, tableName(ComponentEntitySetting.class));
@@ -778,24 +843,6 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
-    public void delete(ModelEntityRelationship modelEntityRelationship) {
-        Iterator<ModelAttributeRelationship> itr = modelEntityRelationship
-                .getAttributeRelationships().iterator();
-        while (itr.hasNext()) {
-            delete(itr.next());
-        }
-        persistenceManager.delete(modelEntityRelationship, null, null,
-                tableName(ModelEntityRelationship.class));
-    }
-
-    @Override
-    public void delete(ModelAttributeRelationship modelAttributeRelationship) {
-
-        persistenceManager.delete(modelAttributeRelationship, null, null,
-                tableName(ModelAttributeRelationship.class));
-    }
-
-    @Override
     public void refresh(Model model) {
         refresh((AbstractObject) model);
 
@@ -814,52 +861,15 @@ abstract class AbstractConfigurationService extends AbstractService implements
         modelEntity.getModelAttributes().clear();
         List<ModelAttribute> attributes = persistenceManager.find(ModelAttribute.class,
                 entityParams, null, null, tableName(ModelAttribute.class));
-        Collections.sort(attributes, new Comparator<ModelAttribute>() {
-            @Override
-            public int compare(ModelAttribute o1, ModelAttribute o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
         for (ModelAttribute attribute : attributes) {
             refresh(attribute);
             modelEntity.addModelAttribute(attribute);
-        }
-        modelEntity.getModelEntityRelationships().clear();
-        Map<String, Object> entityRelationshipParams = new HashMap<String, Object>();
-        entityRelationshipParams.put("sourceEntityId", modelEntity.getId());
-        List<ModelEntityRelationship> entityRelationships = persistenceManager.find(
-                ModelEntityRelationship.class, entityRelationshipParams, null, null,
-                tableName(ModelEntityRelationship.class));
-        for (ModelEntityRelationship entityRelationshipData : entityRelationships) {
-            refresh(entityRelationshipData);
-            modelEntity.getModelEntityRelationships().add(entityRelationshipData);
         }
     }
 
     @Override
     public void refresh(ModelAttribute modelAttribute) {
         refresh((AbstractObject) modelAttribute);
-    }
-
-    @Override
-    public void refresh(ModelEntityRelationship modelEntityRelationship) {
-
-        refresh((AbstractObject) modelEntityRelationship);
-        Map<String, Object> entityRelationshipParams = new HashMap<String, Object>();
-        entityRelationshipParams.put("entityRelationshipId", modelEntityRelationship.getId());
-        modelEntityRelationship.getAttributeRelationships().clear();
-        List<ModelAttributeRelationship> attributeRelationships = persistenceManager.find(
-                ModelAttributeRelationship.class, entityRelationshipParams, null, null,
-                tableName(ModelAttribute.class));
-        for (ModelAttributeRelationship attributeRelationship : attributeRelationships) {
-            refresh(attributeRelationship);
-            modelEntityRelationship.getAttributeRelationships().add(attributeRelationship);
-        }
-    }
-
-    @Override
-    public void refresh(ModelAttributeRelationship modelAttributeRelationship) {
-        refresh((AbstractObject) modelAttributeRelationship);
     }
 
     @Override
@@ -876,21 +886,5 @@ abstract class AbstractConfigurationService extends AbstractService implements
         for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
             save(modelAttribute);
         }
-        Iterator<ModelEntityRelationship> itrr = modelEntity.getModelEntityRelationships()
-                .iterator();
-        while (itrr.hasNext()) {
-            save(itrr.next());
-        }
     }
-
-    @Override
-    public void save(ModelEntityRelationship modelEntityRelationship) {
-
-        save((AbstractObject) modelEntityRelationship);
-        for (ModelAttributeRelationship attributeRelationship : modelEntityRelationship
-                .getAttributeRelationships()) {
-            save(attributeRelationship);
-        }
-    }
-
 }

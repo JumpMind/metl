@@ -9,7 +9,13 @@ import org.apache.tools.ant.filters.ReplaceTokens
     sourceCompatibility=1.7
     targetCompatibility=1.7   
     
+    configurations.all {
+        // check for updates every build
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+    
     ext {
+        antVersion = '1.7.0'
         log4jVersion = '1.2.17'
         slf4jVersion = '1.7.7'
         springVersion = '4.1.6.RELEASE'
@@ -31,6 +37,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
         h2Version = '1.3.175'
         mysqlVersion = '5.1.29'
         jtdsVersion = '1.3.1'
+        postgresqlVersion = '9.2-1002-jdbc4'
         mockitoVersion = '1.9.5'
         powerMockVersion = '1.5.3'
         springfoxSwaggerVersion = '2.0.0'

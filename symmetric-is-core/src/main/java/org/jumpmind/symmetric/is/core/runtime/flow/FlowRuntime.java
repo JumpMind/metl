@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime.flow;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,6 +9,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.AgentDeploymentParameter;
+import org.jumpmind.symmetric.is.core.model.AgentParameter;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
@@ -22,8 +25,12 @@ import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.util.AppUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FlowRuntime {
+    
+    final Logger log = LoggerFactory.getLogger(getClass());
 
     AgentDeployment deployment;
 
@@ -55,7 +62,8 @@ public class FlowRuntime {
         return deployment;
     }
 
-    public void start(String executionId, Map<String, IResourceRuntime> deployedResources) throws InterruptedException {
+    public void start(String executionId, Map<String, IResourceRuntime> deployedResources, List<AgentParameter> agentParameters) 
+            throws InterruptedException {
         
         this.stepRuntimes = new HashMap<String, StepRuntime>();
         Flow flow = deployment.getFlow();
@@ -67,13 +75,14 @@ public class FlowRuntime {
         for (FlowStep flowStep : steps) {
             boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true);
             if (enabled) {
+                Map<String, Serializable> parameters = getFlowParameters(deployment.getAgentDeploymentParameters(), agentParameters);
                 ComponentContext context = new ComponentContext(flowStep, flow, executionTracker, 
-                        deployedResources.get(flowStep.getComponent().getResourceId()), deployment.parameters());
+                        deployedResources.get(flowStep.getComponent().getResourceId()), parameters);
                 StepRuntime stepRuntime = new StepRuntime(componentFactory.create(flowStep.getComponent().getType()), context);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
         }
-
+        
         List<FlowStepLink> links = flow.getFlowStepLinks();
 
         /* for each step runtime, set their list of target step runtimes */
@@ -101,20 +110,21 @@ public class FlowRuntime {
         }
 
         List<StepRuntime> startSteps = findStartSteps();
-
-        /* each step is started as a thread */
-        for (StepRuntime stepRuntime : stepRuntimes.values()) {
-            threadService.execute(stepRuntime);
-        }
-
+        
         /* start up each step runtime */
         for (StepRuntime stepRuntime : stepRuntimes.values()) {
             try {
-                stepRuntime.start(executionTracker, resourceFactory);
+                stepRuntime.start(executionTracker, resourceFactory);                
             } catch (RuntimeException ex) {
                 stepRuntime.error = ex;
                 throw ex;
             }
+        }
+        
+        /* each step is started as a thread */
+        for (StepRuntime stepRuntime : stepRuntimes.values()) {
+            stepRuntime.setRunning(true);
+            threadService.execute(stepRuntime);
         }
 
         StartupMessage startMessage = new StartupMessage();
@@ -125,6 +135,17 @@ public class FlowRuntime {
         for (StepRuntime stepRuntime : startSteps) {
             stepRuntime.queue(startMessage);
         }
+    }
+
+    protected Map<String, Serializable> getFlowParameters(List<AgentDeploymentParameter> deployParameters, List<AgentParameter> agentParameters) {
+        Map<String, Serializable> params = new HashMap<String, Serializable>();
+        for (AgentParameter agentParameter : agentParameters) {
+            params.put(agentParameter.getName(), agentParameter.getValue());
+        }
+        for (AgentDeploymentParameter deployParameter : deployParameters) {
+            params.put(deployParameter.getName(), deployParameter.getValue());
+        }
+        return params;
     }
 
     /*
@@ -190,13 +211,15 @@ public class FlowRuntime {
     }
 
     public void stop() {
-        if (isRunning()) {
-            List<StepRuntime> startSteps = findStartSteps();
-            for (StepRuntime stepRuntime : startSteps) {
-                try {
-                    stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponentRuntime().getComponentContext()
-                            .getFlowStep().getId()));
-                } catch (InterruptedException e) {
+        if (stepRuntimes != null) {
+            for (StepRuntime stepRuntime : stepRuntimes.values()) {
+                if (stepRuntime.isRunning()) {
+                    try {
+                        stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponentContext().getFlowStep().getId()));
+                    } catch (InterruptedException e) {
+                    }
+                } else {
+                    stepRuntime.finished();
                 }
             }
         }

@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -93,6 +95,8 @@ public class AgentRuntime {
         if (!started && !starting) {
             starting = true;
             log.info("Agent '{}' is being started", agent);
+            
+            executionService.markAbandoned(agent.getId());
 
             this.flowStepsExecutionThreads = Executors.newCachedThreadPool(new ThreadFactory() {
                 final AtomicInteger threadNumber = new AtomicInteger(1);
@@ -102,9 +106,7 @@ public class AgentRuntime {
                 public Thread newThread(Runnable r) {
                     Thread t = new Thread(r);
                     t.setName(namePrefix + "-step-" + threadNumber.getAndIncrement());
-                    if (t.isDaemon()) {
-                        t.setDaemon(false);
-                    }
+                    t.setDaemon(true);
                     if (t.getPriority() != Thread.NORM_PRIORITY) {
                         t.setPriority(Thread.NORM_PRIORITY);
                     }
@@ -113,6 +115,7 @@ public class AgentRuntime {
             });
 
             this.flowExecutionScheduler = new ThreadPoolTaskScheduler();
+            this.flowExecutionScheduler.setDaemon(true);
             this.flowExecutionScheduler.setThreadNamePrefix(agent.getName().toLowerCase()
                     .replace(' ', '-').replace('_', '-')
                     + "-job-");
@@ -236,7 +239,9 @@ public class AgentRuntime {
             if (alreadyDeployed != null) {
                 deploy = false;
                 Resource deployedResource = alreadyDeployed.getResource();
-                TypedProperties alreadyDeployedOverrides = alreadyDeployed.getAgentOverrides();
+                TypedProperties alreadyDeployedOverrides = alreadyDeployed.getResourceRuntimeSettings();
+                
+                // TODO the runtime is already combined.  change this
                 TypedProperties alreadyDeployedDefaultSettings = deployedResource
                         .toTypedProperties(settings);
                 TypedProperties alreadyDeployedCombined = new TypedProperties(
@@ -369,12 +374,15 @@ public class AgentRuntime {
 
         @Override
         public void run() {
+            if (isBlank(executionId)) {
+                executionId = UUID.randomUUID().toString();
+            }
             AgentDeployment deployment = flowRuntime.getDeployment();
             try {
-                log.info("Scheduled deployment '{}' is runnong on the '{}' agent", deployment.getName(),
+                log.info("Scheduled deployment '{}' is running on the '{}' agent", deployment.getName(),
                         agent.getName());
                 configurationService.refresh(deployment.getFlow());
-                flowRuntime.start(executionId, deployedResources);
+                flowRuntime.start(executionId, deployedResources, agent.getAgentParameters());
             } catch (Exception e) {
                 log.error("Error while waiting for the flow to complete", e);
                 flowRuntime.stop();
@@ -383,6 +391,7 @@ public class AgentRuntime {
                 flowRuntime.notifyStepsTheFlowIsComplete();
                 log.info("Scheduled '{}' on '{}' is finished", deployment.getFlow().toString(),
                         agent.getName());
+                executionId = null;
             }
         }
     }

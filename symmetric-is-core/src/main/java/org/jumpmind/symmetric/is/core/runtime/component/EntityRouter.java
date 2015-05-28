@@ -40,7 +40,7 @@ public class EntityRouter extends AbstractComponentRuntime {
             order = 10,
             required = true,
             type = Type.INTEGER,
-            defaultValue = "1",
+            defaultValue = "10000",
             label = "Rows/Msg")
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
@@ -48,7 +48,7 @@ public class EntityRouter extends AbstractComponentRuntime {
 
     ScriptEngine scriptEngine;
 
-    long rowsPerMessage;
+    long rowsPerMessage = 10000;
 
     protected void applySettings() {
         TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
@@ -90,13 +90,12 @@ public class EntityRouter extends AbstractComponentRuntime {
                                 outboundMessages.put(route.getTargetStepId(), message);
                             }
                             ArrayList<EntityData> outputRows = message.getPayload();
-                            outputRows.add(entityData.copy());
-
                             if (outputRows.size() >= rowsPerMessage) {
                                 outboundMessages.remove(route.getTargetStepId());
                                 getComponentStatistics().incrementOutboundMessages();
                                 messageTarget.put(message);
                             }
+                            outputRows.add(entityData.copy());
                         }
                     } catch (ScriptException e) {
                         throw new RuntimeException(e);

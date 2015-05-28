@@ -14,6 +14,7 @@ import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.is.core.model.Execution;
+import org.jumpmind.symmetric.is.core.model.ExecutionStatus;
 import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 import org.springframework.core.env.Environment;
 
@@ -25,6 +26,22 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
             IPersistenceManager persistenceManager, String tablePrefix, Environment env) {
         super(persistenceManager, tablePrefix, env);
         this.databasePlatform = databasePlatform;
+    }
+    
+    public void markAbandoned(String agentId) {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        int count = template.update(
+                String.format(
+                        "update %1$s_execution_step set status=? where (status=? or status=?) and execution_id in (select execution_id from %1$s_execution where agent_id=?)",
+                        tablePrefix), ExecutionStatus.ABANDONED.name(), ExecutionStatus.RUNNING
+                        .name(), ExecutionStatus.READY.name(), agentId);
+        log.info("Updated {} execution step records that were abandoned", count);
+        count = template.update(
+                String.format(
+                        "update %1$s_execution set status=? where (status=? or status=?) and agent_id=?",
+                        tablePrefix), ExecutionStatus.ABANDONED.name(), ExecutionStatus.RUNNING
+                        .name(), ExecutionStatus.READY.name(), agentId);
+        log.info("Updated {} execution records that were abandoned", count);
     }
 
     public List<ExecutionStepLog> findExecutionStepLog(Set<String> executionStepIds) {
@@ -68,9 +85,10 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
             }
         }
         return template.query(String.format(
-                "select id, agent_id, flow_id, agent_name, host_name, flow_name, status, start_time, end_time "
+                "select id, agent_id, flow_id, deployment_id, deployment_name, agent_name, "
+                + "host_name, flow_name, status, start_time, end_time "
                         + "from %1$s_execution " + "where " + whereClause
-                        + "order by create_time limit " + limit, tablePrefix),
+                        + "order by create_time desc limit " + limit, tablePrefix),
                 new ISqlRowMapper<Execution>() {
                     public Execution mapRow(Row row) {
                         Execution e = new Execution();
@@ -80,6 +98,8 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
                         e.setAgentName(row.getString("agent_name"));
                         e.setHostName(row.getString("host_name"));
                         e.setFlowName(row.getString("flow_name"));
+                        e.setDeploymentId(row.getString("deployment_id"));
+                        e.setDeploymentName(row.getString("deployment_name"));
                         e.setStatus(row.getString("status"));
                         e.setStartTime(row.getDateTime("start_time"));
                         e.setEndTime(row.getDateTime("end_time"));
@@ -94,7 +114,7 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
                 .readTableFromDatabase(null, null, tableName(Execution.class));
         if (table != null) {
             Date purgeBefore = DateUtils.addMilliseconds(new Date(), -retentionTimeInMs);
-            log.info("Purging executions with the status of {} before {}", status, purgeBefore);
+            log.debug("Purging executions with the status of {} before {}", status, purgeBefore);
             ISqlTemplate template = databasePlatform.getSqlTemplate();
             long count = template
                     .update(String
@@ -110,8 +130,10 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
             count += template.update(String.format(
                     "delete from %1$s_execution where status=? and last_update_time <= ?",
                     tablePrefix), status, purgeBefore);
-            log.info("Purged {} execution records with the status of {}", new Object[] { count,
-                    status });
+            log.debug("Purged {} execution records with the status of {}", new Object[] { count, status });                
+            if (!log.isDebugEnabled() && count > 0) {
+                log.info("Purged {} execution records", new Object[] { count });                
+            }
         } else {
             log.info("Could not run execution purge because table had not been created yet");
         }

@@ -19,9 +19,7 @@ import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.Group;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
-import org.jumpmind.symmetric.is.core.model.ModelAttributeRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.model.ModelEntityRelationship;
 import org.jumpmind.symmetric.is.core.model.ModelName;
 import org.jumpmind.symmetric.is.core.model.Project;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
@@ -53,9 +51,13 @@ public interface IConfigurationService {
     
     public User findUserByLoginId(String loginId);
     
+    public List<User> findUsersByGroup(String groupId);
+    
     public List<User> findUsers();
     
     public Group findGroup(String id);
+
+    public List<Group> findGroups();
 
     public void delete(Folder folder);
 
@@ -95,6 +97,8 @@ public interface IConfigurationService {
 
     public void refresh(Flow flow);
     
+    public void refresh(AgentDeployment deployment);
+    
     public void refresh(ProjectVersion projectVersion);
     
     public void refresh(Agent agent);
@@ -104,6 +108,8 @@ public interface IConfigurationService {
     public void refresh(Component component);
     
     public void refresh(User user);
+    
+    public void refresh(Group group);
 
     public void save(AgentDeployment agentDeployment);
     
@@ -112,6 +118,8 @@ public interface IConfigurationService {
     public void save(FlowStep flowStep);    
 
     public void save(AbstractObject obj);
+    
+    public void save(Component component);
 
     public void save(Flow flow);
     
@@ -127,11 +135,9 @@ public interface IConfigurationService {
     
     public void delete(ModelAttribute modelAttribute);
     
-    public void delete(ModelEntityRelationship modelEntityRelationship);
-    
-    public void delete(ModelAttributeRelationship modelAttributeRelationship);
-
     public void delete(User user);
+    
+    public void delete(Group group);
 
     public void refresh(Model model);
     
@@ -139,15 +145,9 @@ public interface IConfigurationService {
     
     public void refresh(ModelAttribute modelAttribute);
     
-    public void refresh(ModelEntityRelationship modelEntityRelationship);
-    
-    public void refresh(ModelAttributeRelationship modelAttributeRelationship);
-    
     public void save(Model model);
     
     public void save(ModelEntity modelEntity);
-    
-    public void save(ModelEntityRelationship modelEntityRelationship);
     
     public ProjectVersion findProjectVersion(String projectVersionId);
 

@@ -1,7 +1,5 @@
 package org.jumpmind.symmetric.is.ui.common;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,9 +41,6 @@ public class ViewManager implements Serializable {
             for (View view : views) {
                 TopBarLink menu = (TopBarLink) view.getClass().getAnnotation(TopBarLink.class);
                 if (menu != null && menu.uiClass().equals(AppUI.class)) {
-                    if (isBlank(defaultView) && menu.useAsDefault()) {
-                        defaultView = menu.id();
-                    }
                     navigator.addView(menu.id(), view);
                 }
             }
@@ -83,15 +78,23 @@ public class ViewManager implements Serializable {
     }
 
     public void navigateTo(String viewName) {
-        navigator.navigateTo(viewName);
+        if (viewName != null) {
+            navigator.navigateTo(viewName);
+        }
     }
     
     public void navigateToDefault() {
-        navigateTo(defaultView);
+        if (defaultView != null) {
+            navigateTo(defaultView);
+        }
     }
     
     public String getDefaultView() {
         return defaultView;
+    }
+    
+    public void setDefaultView(String menuId) {
+        defaultView = menuId;
     }
 
 }

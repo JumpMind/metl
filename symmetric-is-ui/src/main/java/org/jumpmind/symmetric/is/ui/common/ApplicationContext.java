@@ -16,6 +16,7 @@ import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
 import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.env.Environment;
 
 @UiComponent
 @Scope(value = "ui")
@@ -43,6 +44,9 @@ public class ApplicationContext implements Serializable {
     
     @Autowired
     IDatabasePlatform configDatabasePlatform;
+    
+    @Autowired
+    Environment environment;
 
     User user = new User();
     
@@ -86,5 +90,9 @@ public class ApplicationContext implements Serializable {
 
     public IDatabasePlatform getConfigDatabasePlatform() {
         return configDatabasePlatform;
+    }
+    
+    public Environment getEnvironment() {
+        return environment;
     }
 }

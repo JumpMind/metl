@@ -17,6 +17,9 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
@@ -58,6 +61,11 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         form.addComponent(getNameComponent());
         form.addComponent(getLogLevelComponent());
         form.addComponent(getStartTypeComponent());
+        
+        Button notificationButton = new Button("Notifications");
+        notificationButton.addClickListener(new NotificationClickListener());
+        form.addComponent(notificationButton);        
+
         vlay.addComponent(form);
         cronLayout = new HorizontalLayout();
         cronLayout.setSpacing(true);
@@ -89,7 +97,7 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
 
         container.addAll(agentDeployment.getAgentDeploymentParameters());
 
-        setSplitPosition(55f);
+        setSplitPosition(60f);
         setFirstComponent(vlay);
         setSecondComponent(table);
         updateScheduleEnable();
@@ -116,8 +124,8 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
 
     protected TextField getNameComponent() {
         ImmediateUpdateTextField textField = new ImmediateUpdateTextField("Name") {
-            protected void save() {
-                agentDeployment.setName(getValue());
+            protected void save(String text) {
+                agentDeployment.setName(text);
                 saveAgentDeployment(agentDeployment);
             }            
         };
@@ -217,8 +225,8 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
 
     protected TextField getCronComponent() {
         startExpressionTextField = new ImmediateUpdateTextField("Start Expression") {
-            protected void save() {
-                agentDeployment.setStartExpression(getValue());
+            protected void save(String text) {
+                agentDeployment.setStartExpression(text);
                 updateScheduleFields();
                 saveAgentDeployment(agentDeployment);
             }
@@ -316,7 +324,8 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
             if (propertyId.equals("value")) {
                 final AgentDeploymentParameter parameter = (AgentDeploymentParameter) itemId;
                 final TextField textField = new ImmediateUpdateTextField(null) {
-                    protected void save() {
+                    protected void save(String text) {
+                        parameter.setValue(text);
                         context.getConfigurationService().save(parameter);
                     }
                 };
@@ -324,6 +333,13 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
                 return textField;
             }
             return null;
+        }
+    }
+
+    class NotificationClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            EditEmailNotificationWindow window = new EditEmailNotificationWindow(context);
+            window.showAtSize(0.5);
         }
     }
 

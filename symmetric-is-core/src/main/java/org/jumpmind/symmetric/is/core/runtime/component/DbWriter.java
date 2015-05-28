@@ -4,7 +4,9 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -42,21 +44,12 @@ import org.jumpmind.util.FormatUtils;
 public class DbWriter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Database Writer";
-    
-    @SettingDefinition(
-            order = 5,
-            required = false,
-            type = Type.TEXT,
-            label = "Catalog")
+
+    @SettingDefinition(order = 5, required = false, type = Type.TEXT, label = "Catalog")
     public final static String CATALOG = "catalog";
-    
-    @SettingDefinition(
-            order = 6,
-            required = false,
-            type = Type.TEXT,
-            label = "Schema")
+
+    @SettingDefinition(order = 6, required = false, type = Type.TEXT, label = "Schema")
     public final static String SCHEMA = "schema";
-    
 
     @SettingDefinition(
             order = 10,
@@ -121,9 +114,9 @@ public class DbWriter extends AbstractComponentRuntime {
     boolean fitToColumn = false;
 
     boolean stopProcessingOnError = true;
-    
+
     String catalogName;
-    
+
     String schemaName;
 
     IDatabasePlatform platform;
@@ -134,18 +127,18 @@ public class DbWriter extends AbstractComponentRuntime {
 
     @Override
     protected void start() {
-        
+
         error = null;
-        
+
         if (getResourceRuntime() == null) {
             throw new IllegalStateException("A database writer must have a datasource defined");
         }
-        
+
         Model model = getInputModel();
         if (model == null) {
             throw new IllegalStateException("A database writer must have an input model defined");
-        }        
-        
+        }
+
         TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         replaceRows = properties.is(REPLACE);
         updateFirst = properties.is(UPDATE_FIRST);
@@ -153,24 +146,27 @@ public class DbWriter extends AbstractComponentRuntime {
         quoteIdentifiers = properties.is(QUOTE_IDENTIFIERS);
         stopProcessingOnError = properties.is(STOP_PROCESSING_ON_ERROR, true);
         fitToColumn = properties.is(FIT_TO_COLUMN);
-        
-        catalogName = FormatUtils.replaceTokens(properties.get(CATALOG), context.getFlowParametersAsString(), true);
+
+        catalogName = FormatUtils.replaceTokens(properties.get(CATALOG),
+                context.getFlowParametersAsString(), true);
         if (isBlank(catalogName)) {
             catalogName = null;
         }
-        
-        schemaName = FormatUtils.replaceTokens(properties.get(SCHEMA), context.getFlowParametersAsString(), true);
+
+        schemaName = FormatUtils.replaceTokens(properties.get(SCHEMA),
+                context.getFlowParametersAsString(), true);
         if (isBlank(schemaName)) {
             schemaName = null;
         }
 
-        DataSource dataSource = (DataSource)getResourceReference();
+        DataSource dataSource = (DataSource) getResourceReference();
         platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource,
                 new SqlTemplateSettings(), quoteIdentifiers);
         targetTables = new ArrayList<TargetTableDefintion>();
 
         for (ModelEntity entity : model.getModelEntities()) {
-            Table table = platform.getTableFromCache(catalogName, schemaName, entity.getName(), true);
+            Table table = platform.getTableFromCache(catalogName, schemaName, entity.getName(),
+                    true);
             if (table != null) {
                 targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE,
                         entity, table.copy()),
@@ -180,8 +176,7 @@ public class DbWriter extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( final Message inputMessage,
-            final IMessageTarget messageTarget) {
+    public void handle(final Message inputMessage, final IMessageTarget messageTarget) {
 
         getComponentStatistics().incrementInboundMessages();
 
@@ -214,7 +209,7 @@ public class DbWriter extends AbstractComponentRuntime {
         }
     }
 
-    private List<Object> getValues(boolean isUpdate, TargetTable modelTable, EntityData inputRow) {
+    private Object[] getValues(boolean isUpdate, TargetTable modelTable, EntityData inputRow) {
         ArrayList<Object> data = new ArrayList<Object>();
         for (TargetColumn modelColumn : modelTable.getTargetColumns()) {
             if ((isUpdate && modelColumn.isUpdateEnabled())
@@ -227,87 +222,150 @@ public class DbWriter extends AbstractComponentRuntime {
                 data.add(value);
             }
         }
-        if (isUpdate) {
+        
+        ArrayList<Object> keyValues = new ArrayList<Object>();
             for (TargetColumn modelColumn : modelTable.getKeyTargetColumns()) {
                 if ((isUpdate && modelColumn.isUpdateEnabled())
                         || (!isUpdate && modelColumn.isInsertEnabled())) {
-                    data.add(inputRow.get(modelColumn.getModelAttribute().getId()));
+                    keyValues.add(inputRow.get(modelColumn.getModelAttribute().getId()));
                 }
             }
-        }
-        return data;
+            return modelTable.getStatement().getValueArray(data.toArray(new Object[data.size()]), keyValues.toArray(new Object[keyValues.size()]));
     }
 
     private void write(ISqlTransaction transaction, List<EntityData> inputRows) {
-        for (EntityData inputRow : inputRows) {
-            for (TargetTableDefintion targetTableDefinition : targetTables) {
-                if (updateFirst) {
-                    TargetTable modelTable = targetTableDefinition.getUpdateTable();
-                    if (modelTable.shouldProcess(inputRow)) {
-                        List<Object> data = getValues(true, modelTable, inputRow);
-                        int count = execute(transaction, modelTable.getStatement(), new Object(),
-                                data);
-                        getComponentStatistics().incrementNumberEntitiesProcessed(count);
-                        if (insertFallback && count == 0) {
+        TargetTable modelTable = null;
+        Object[] data = null;
+        try {
+            Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<TargetTableDefintion, WriteStats>();
+            for (EntityData inputRow : inputRows) {
+                for (TargetTableDefintion targetTableDefinition : targetTables) {
+                    WriteStats stats = statsMap.get(targetTableDefinition);
+                    if (stats == null) {
+                        stats = new WriteStats();
+                        statsMap.put(targetTableDefinition, stats);
+                    }
+                    if (updateFirst) {
+                        modelTable = targetTableDefinition.getUpdateTable();
+                        if (modelTable.shouldProcess(inputRow)) {
+                            data = getValues(true, modelTable, inputRow);
+                            int count = execute(transaction, modelTable.getStatement(), new Object(), data, true);
+                            stats.updateCount += count;
+                            getComponentStatistics().incrementNumberEntitiesProcessed(count);
+                            if (insertFallback && count == 0) {
+                                modelTable = targetTableDefinition.getInsertTable();
+                                if (modelTable.shouldProcess(inputRow)) {
+                                    log.debug("Falling back to insert");
+                                    data = getValues(false, modelTable, inputRow);
+                                    count = execute(transaction, modelTable.getStatement(), new Object(), data, true);
+                                    stats.fallbackInsertCount += count;
+                                    getComponentStatistics().incrementNumberEntitiesProcessed(count);
+                                }
+                            } else if (count == 0) {
+                                log(LogLevel.DEBUG, String.format("Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n",
+                                        modelTable.getStatement().getSql(), Arrays.toString(data),
+                                        Arrays.toString(modelTable.getStatement().getTypes())));
+                            }
+                        }
+                    } else {
+                        try {
                             modelTable = targetTableDefinition.getInsertTable();
                             if (modelTable.shouldProcess(inputRow)) {
-                                log.debug("Falling back to insert");
                                 data = getValues(false, modelTable, inputRow);
-                                count = execute(transaction, modelTable.getStatement(),
-                                        new Object(), data);
+                                int count = execute(transaction, modelTable.getStatement(), new Object(), data, !replaceRows);
+                                stats.insertCount += count;
                                 getComponentStatistics().incrementNumberEntitiesProcessed(count);
                             }
-                        } else if (count == 0){
-                            log(LogLevel.DEBUG, String.format("Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n", modelTable.getStatement().getSql(), Arrays.toString(data.toArray()),
-                                    Arrays.toString(modelTable.getStatement().getTypes())));
-                        }
-                    }
-                } else {
-                    try {
-                        TargetTable modelTable = targetTableDefinition.getInsertTable();
-                        if (modelTable.shouldProcess(inputRow)) {
-                            List<Object> data = getValues(false, modelTable, inputRow);
-                            int count = execute(transaction, modelTable.getStatement(),
-                                    new Object(), data);
-                            getComponentStatistics().incrementNumberEntitiesProcessed(count);
-                        }
-                    } catch (UniqueKeyException e) {
-                        if (replaceRows) {
-                            TargetTable modelTable = targetTableDefinition.getUpdateTable();
-                            if (modelTable.shouldProcess(inputRow)) {
-                                log.debug("Falling back to update");
-                                List<Object> data = getValues(true, modelTable, inputRow);
-                                int count = execute(transaction, modelTable.getStatement(),
-                                        new Object(), data);
-                                getComponentStatistics().incrementNumberEntitiesProcessed(count);
+                        } catch (UniqueKeyException e) {
+                            if (replaceRows) {
+                                modelTable = targetTableDefinition.getUpdateTable();
+                                if (modelTable.shouldProcess(inputRow)) {
+                                    log.debug("Falling back to update");
+                                    data = getValues(true, modelTable, inputRow);
+                                    int count = execute(transaction, modelTable.getStatement(), new Object(), data, true);
+                                    stats.fallbackUpdateCount += count;
+                                    getComponentStatistics().incrementNumberEntitiesProcessed(count);
+                                }
+                            } else {
+                                throw e;
                             }
-                        } else {
-                            throw e;
                         }
                     }
                 }
             }
 
+            for (TargetTableDefintion table : targetTables) {
+                WriteStats stats = statsMap.get(table);
+                if (stats != null) {
+                    StringBuilder msg = new StringBuilder();
+                    if (stats.insertCount > 0) {
+                        msg.append("Inserted: ");
+                        msg.append(stats.insertCount);
+                    }
+
+                    if (stats.fallbackUpdateCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append("Fallback Updates: ");
+                        msg.append(stats.fallbackUpdateCount);
+                    }
+
+                    if (stats.updateCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append(" Updated: ");
+                        msg.append(stats.updateCount);
+                    }
+
+                    if (stats.fallbackInsertCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append(" Fallback Inserts: ");
+                        msg.append(stats.fallbackInsertCount);
+                    }
+
+                    if (msg.length() > 0) {
+                        log(LogLevel.INFO, "%s: %s", table.getInsertTable().getTable().getFullyQualifiedTableName(), msg.toString());
+                    }
+
+                }
+            }
+
+        } catch (RuntimeException ex) {
+            if (modelTable != null && data != null) {
+                log(LogLevel.ERROR, String.format("Failed to execute: \n%s\nWith values: \n%s\nWith types: \n%s\n", modelTable.getStatement()
+                        .getSql(), Arrays.toString(data), Arrays.toString(modelTable.getStatement().getTypes())));
+            }
+            throw ex;
         }
+
     }
 
     private int execute(ISqlTransaction transaction, DmlStatement dmlStatement, Object marker,
-            List<Object> data) {
+            Object[] data, boolean logFailure) {
         if (log.isDebugEnabled()) {
             log.debug("Preparing dml: " + dmlStatement.getSql());
         }
         transaction.prepare(dmlStatement.getSql());
 
         if (log.isDebugEnabled()) {
-            log.debug("Submitting data {} with types {}", Arrays.toString(data.toArray()),
+            log.debug("Submitting data {} with types {}", Arrays.toString(data),
                     Arrays.toString(dmlStatement.getTypes()));
         }
-        
+
         try {
-            return transaction.addRow(marker, data.toArray(), dmlStatement.getTypes());
+            return transaction.addRow(marker, data, dmlStatement.getTypes());
         } catch (SqlException ex) {
-            log(LogLevel.WARN, String.format("Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n", dmlStatement.getSql(), Arrays.toString(data.toArray()),
-                    Arrays.toString(dmlStatement.getTypes())));
+            if (logFailure) {
+                log(LogLevel.WARN,
+                        String.format(
+                                "Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n",
+                                dmlStatement.getSql(), Arrays.toString(data),
+                                Arrays.toString(dmlStatement.getTypes())));
+            }
             throw ex;
         }
     }
@@ -388,11 +446,10 @@ public class DbWriter extends AbstractComponentRuntime {
              * Remove columns that are not enabled for this dml type
              */
             for (ModelAttribute attribute : attributes) {
-                ComponentAttributeSetting setting = getComponent()
-                        .getSingleAttributeSetting(
-                                attribute.getId(),
-                                dmlType == DmlType.INSERT ? ATTRIBUTE_INSERT_ENABLED
-                                        : ATTRIBUTE_UPDATE_ENABLED);
+                ComponentAttributeSetting setting = getComponent().getSingleAttributeSetting(
+                        attribute.getId(),
+                        dmlType == DmlType.INSERT ? ATTRIBUTE_INSERT_ENABLED
+                                : ATTRIBUTE_UPDATE_ENABLED);
                 if (setting != null && !Boolean.parseBoolean(setting.getValue())) {
                     table.removeColumn(table.findColumn(attribute.getName()));
                 }
@@ -455,12 +512,12 @@ public class DbWriter extends AbstractComponentRuntime {
         TargetColumn(ModelAttribute modelAttribute, Column column) {
             this.modelAttribute = modelAttribute;
             this.column = column;
-            ComponentAttributeSetting insertAttr = getComponent()
-                    .getSingleAttributeSetting(modelAttribute.getId(), ATTRIBUTE_INSERT_ENABLED);
+            ComponentAttributeSetting insertAttr = getComponent().getSingleAttributeSetting(
+                    modelAttribute.getId(), ATTRIBUTE_INSERT_ENABLED);
             insertEnabled = insertAttr != null ? Boolean.parseBoolean(insertAttr.getValue()) : true;
 
-            ComponentAttributeSetting updateAttr = getComponent()
-                    .getSingleAttributeSetting(modelAttribute.getId(), ATTRIBUTE_UPDATE_ENABLED);
+            ComponentAttributeSetting updateAttr = getComponent().getSingleAttributeSetting(
+                    modelAttribute.getId(), ATTRIBUTE_UPDATE_ENABLED);
             updateEnabled = updateAttr != null ? Boolean.parseBoolean(updateAttr.getValue()) : true;
 
         }
@@ -480,5 +537,12 @@ public class DbWriter extends AbstractComponentRuntime {
         public boolean isUpdateEnabled() {
             return updateEnabled;
         }
+    }
+    
+    class WriteStats {
+        int insertCount;
+        int updateCount;
+        int fallbackInsertCount;
+        int fallbackUpdateCount;        
     }
 }

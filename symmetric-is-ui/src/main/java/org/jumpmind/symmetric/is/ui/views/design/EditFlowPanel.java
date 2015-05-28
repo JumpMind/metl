@@ -282,17 +282,18 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
 
         context.getConfigurationService().save(flowStep);
 
+        selected = flowStep;
+        
         redrawFlow();
-
-        propertySheet.setSource(component);
+        
+        propertySheet.setSource(flowStep);
 
         projectNavigator.refresh();
-        projectNavigator.select(flowStep);
+        
 
     }
 
-    protected void redrawFlow() {
-        delButton.setEnabled(false);
+    protected void redrawFlow() {       
         if (diagram != null) {
             diagramLayout.removeComponent(diagram);
         }
@@ -300,6 +301,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         diagram = new Diagram();
         if (selected != null && selected instanceof FlowStep) {
             diagram.setSelectedNodeId(((FlowStep) selected).getId());
+            delButton.setEnabled(true);
+        } else {
+            delButton.setEnabled(false);
         }
         diagram.setSizeFull();
         diagram.addListener(new DiagramChangedListener());
@@ -410,7 +414,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                     flowStep.setX(node.getX());
                     flowStep.setY(node.getY());
                 }
-                configurationService.save(flow);
+                flow.calculateApproximateOrder();
+                configurationService.save(flowStep);
             } else if (e instanceof LinkEvent) {
                 LinkEvent event = (LinkEvent) e;
                 if (!event.isRemoved()) {
@@ -591,7 +596,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                 final FlowParameter parameter = (FlowParameter) itemId;
                 final TextField textField = new ImmediateUpdateTextField(null) {
                     @Override
-                    protected void save() {
+                    protected void save(String text) {
+                        parameter.setDefaultValue(text);
                         context.getConfigurationService().save(parameter);
                     }
                 };

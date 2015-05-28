@@ -94,7 +94,7 @@ public class ExecutionApi {
             ExecutionResults result = new ExecutionResults(execution.getId(), execution.getStatus(),
                     execution.getStartTime(), execution.getEndTime());
             if (execution.getExecutionStatus() == ExecutionStatus.ERROR) {
-                List<ExecutionStep> steps = executionService.findExecutionStep(execution.getId());
+                List<ExecutionStep> steps = executionService.findExecutionSteps(execution.getId());
                 for (ExecutionStep executionStep : steps) {
                     if (executionStep.getExecutionStatus() == ExecutionStatus.ERROR) {
                         List<ExecutionStepLog> logs = executionService.findExecutionStepLog(executionStep.getId());

@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +20,10 @@ public class User extends AbstractObjectWithSettings {
     
     List<Group> groups;
     
+    public User() {
+        groups = new ArrayList<Group>();
+    }
+
     public static String hashValue(String password) {
         if (password != null) {
             return DigestUtils.sha256Hex(password.getBytes());
@@ -72,4 +77,16 @@ public class User extends AbstractObjectWithSettings {
     public void setGroups(List<Group> groups) {
         this.groups = groups;
     }
+    
+    public boolean hasPrivilege(String privilegeName) {
+        for (Group group : groups) {
+            for (GroupPrivilege priv : group.getGroupPrivileges()) {
+                if (privilegeName.equals(priv.getName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

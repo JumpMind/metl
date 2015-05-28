@@ -106,42 +106,6 @@
         </foreign-key>
     </table>
 
-    <table name="model_entity_relationship">
-        <column name="id" primaryKey="true" required="true" type="CHAR" size="36" />
-        <column name="name" required="true" type="VARCHAR" size="255" />
-        <column name="source_entity_id" type="CHAR" size="36" />
-        <column name="target_entity_id" type="CHAR" size="36" />
-        <column name="create_by" type="VARCHAR" size="50" />
-        <column name="create_time" type="TIMESTAMP" />
-        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
-        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
-        <foreign-key foreignTable="model_entity" name="fk_mer_2_me_1">
-            <reference local="source_entity_id" foreign="id" />
-        </foreign-key>
-        <foreign-key foreignTable="model_entity" name="fk_mer_2_me_2">
-            <reference local="target_entity_id" foreign="id" />
-        </foreign-key>
-    </table>
-
-    <table name="model_attribute_relationship">
-        <column name="entity_relationship_id" required="true" type="CHAR" size="36" primaryKey="true" />
-        <column name="source_attribute_id" type="CHAR" size="36" required="true" primaryKey="true" />
-        <column name="target_attribute_id" type="CHAR" size="36" required="true" primaryKey="true" />
-        <column name="create_by" type="VARCHAR" size="50" />
-        <column name="create_time" type="TIMESTAMP" />
-        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
-        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
-        <foreign-key foreignTable="model_entity_relationship" name="fk_mar_2_mer">
-            <reference local="entity_relationship_id" foreign="id" />
-        </foreign-key>
-        <foreign-key foreignTable="model_attribute" name="fk_mar_2_ma_1">
-            <reference local="source_attribute_id" foreign="id" />
-        </foreign-key>
-        <foreign-key foreignTable="model_attribute" name="fk_mar_2_ma_2">
-            <reference local="target_attribute_id" foreign="id" />
-        </foreign-key>
-    </table>
-
     <table name="resource" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
         <column name="row_id" type="CHAR" size="36" required="true" description="A unique identifier for this row across different versions" />
@@ -298,6 +262,7 @@
         <column name="component_id" type="CHAR" size="36" required="true" description="A unique identifer" />
         <column name="x" type="INTEGER" default="10" required="true" />
         <column name="y" type="INTEGER" default="10" required="true" />
+        <column name="approximate_order" type="INTEGER" default="0" required="true" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -335,6 +300,7 @@
         <column name="status" type="VARCHAR" size="255" description="" />
         <column name="last_start_time" type="TIMESTAMP" description="" />
         <column name="heartbeat_time" type="TIMESTAMP" description="" />
+        <column name="email_list" type="VARCHAR" size="255" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -353,20 +319,18 @@
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
-        <foreign-key foreignTable="resource" name="fk_aress_2_res">
-            <reference local="resource_id" foreign="id" />
-        </foreign-key>
     </table>
 
-    <table name="agent_setting" description="">
-        <column name="agent_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="name" type="VARCHAR" size="255" primaryKey="true" required="true" description="" />
+    <table name="agent_parameter" description="">
+    	<column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="agent_id" type="CHAR" size="36" required="true"  description="A unique identifer" />
+        <column name="name" type="VARCHAR" size="255" required="true" description="" />
         <column name="value" type="VARCHAR" size="255" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
-        <foreign-key foreignTable="agent" name="fk_agnts_2_agnt">
+        <foreign-key foreignTable="agent" name="fk_agntp_2_agnt">
             <reference local="agent_id" foreign="id" />
         </foreign-key>
     </table>
@@ -409,9 +373,11 @@
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
         <column name="agent_id" type="CHAR" size="36" required="true" description="A unique identifer" />
         <column name="flow_id" type="CHAR" size="36" required="true" description="A unique identifer" />
+        <column name="deployment_id" type="CHAR" size="36" required="true" description="A unique identifer" />
 		<column name="agent_name" type="VARCHAR" size="255" description="" />
 		<column name="host_name" type="VARCHAR" size="255" description="" />
 		<column name="flow_name" type="VARCHAR" size="255" description="" />
+        <column name="deployment_name" type="VARCHAR" size="255" description="" />
         <column name="status" type="VARCHAR" required="true" default="REQUESTED" size="255" description="" />
         <column name="start_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="end_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
@@ -430,6 +396,7 @@
         <column name="execution_id" type="CHAR" size="36" required="true" description="A unique identifer" />
         <column name="flow_step_id" type="CHAR" size="36" required="true" description="A unique identifer" />
         <column name="component_name" type="VARCHAR" required="true" size="255" description="" />
+        <column name="approximate_order" type="INTEGER" default="0" required="true" />
         <column name="status" type="VARCHAR" size="255" description="" />
         <column name="messages_received" type="INTEGER" default="0" required="true" />
         <column name="messages_produced" type="INTEGER" default="0" required="true" />

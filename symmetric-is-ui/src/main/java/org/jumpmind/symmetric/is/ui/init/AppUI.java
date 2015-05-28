@@ -6,11 +6,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import org.jumpmind.symmetric.is.core.model.Group;
+import org.jumpmind.symmetric.is.core.model.GroupPrivilege;
+import org.jumpmind.symmetric.is.core.model.Privilege;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.User;
+import org.jumpmind.symmetric.is.core.model.UserGroup;
 import org.jumpmind.symmetric.is.core.model.UserSetting;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
-import org.jumpmind.symmetric.is.ui.common.DesignAgentSelect;
 import org.jumpmind.symmetric.is.ui.common.TopBar;
 import org.jumpmind.symmetric.is.ui.common.ViewManager;
 import org.jumpmind.symmetric.is.ui.init.LoginDialog.LoginListener;
@@ -149,6 +152,14 @@ public class AppUI extends UI implements LoginListener {
                 user = new User();
                 user.setLoginId("admin");
                 appCtx.getConfigurationService().save(user);
+                Group group = new Group("admin");
+                appCtx.getConfigurationService().save(group);
+                for (Privilege priv : Privilege.values()) {
+                    GroupPrivilege groupPriv = new GroupPrivilege(group.getId(), priv.name());
+                    appCtx.getConfigurationService().save(groupPriv);
+                }
+                UserGroup userGroup = new UserGroup(user.getId(), group.getId());
+                appCtx.getConfigurationService().save(userGroup);
             }
             appCtx.setUser(user);
             login(user);
@@ -213,6 +224,7 @@ public class AppUI extends UI implements LoginListener {
 
         ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
         appCtx.setUser(user);
+        
         List<ProjectVersion> openProjects = appCtx.getOpenProjects();
         openProjects.clear();
         
@@ -225,11 +237,9 @@ public class AppUI extends UI implements LoginListener {
         }
 
         viewManager = ctx.getBean(ViewManager.class);
-        viewManager.init(this, contentArea);
-                
-        DesignAgentSelect designAgentSelect = ctx.getBean(DesignAgentSelect.class);
+        viewManager.init(this, contentArea);                
 
-        TopBar menu = new TopBar(viewManager, designAgentSelect, appCtx);
+        TopBar menu = new TopBar(viewManager, appCtx);
 
         root.addComponents(menu, contentArea);
         root.setExpandRatio(contentArea, 1);

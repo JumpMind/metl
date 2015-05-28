@@ -13,6 +13,7 @@ import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentContext;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentStatistics;
 import org.jumpmind.symmetric.is.core.runtime.flow.AsyncRecorder;
+import org.jumpmind.util.AppUtils;
 
 public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
 
@@ -42,7 +43,10 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         execution.setAgentId(deployment.getAgentId());
         execution.setFlowId(deployment.getFlowId());
         execution.setAgentName(agent.getName());
-        execution.setFlowName(deployment.getName());
+        execution.setHostName(AppUtils.getHostName());
+        execution.setFlowName(deployment.getFlow().getName());
+        execution.setDeploymentName(deployment.getName());
+        execution.setDeploymentId(deployment.getId());
         this.recorder.record(execution);
     }
 
@@ -66,24 +70,25 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
     
     @Override
-    public void flowStepStarted(ComponentContext component) {
-        super.flowStepStarted(component);
-        ExecutionStep step = steps.get(component.getFlowStep().getId());
+    public void flowStepStarted(ComponentContext context) {
+        super.flowStepStarted(context);
+        ExecutionStep step = steps.get(context.getFlowStep().getId());
         if (step == null) {
             step = new ExecutionStep();
-            this.steps.put(component.getFlowStep().getId(), step);
+            this.steps.put(context.getFlowStep().getId(), step);
         }
         step.setExecutionId(executionId);
-        step.setComponentName(component.getFlowStep().getComponent().getName());
-        step.setFlowStepId(component.getFlowStep().getId());
+        step.setApproximateOrder(context.getFlowStep().getApproximateOrder());
+        step.setComponentName(context.getFlowStep().getComponent().getName());
+        step.setFlowStepId(context.getFlowStep().getId());
         step.setStatus(ExecutionStatus.READY.name());
         this.recorder.record(step);
     }
 
     @Override
-    public void beforeHandle(ComponentContext component) {
-        super.beforeHandle(component);
-        ExecutionStep step = steps.get(component.getFlowStep().getId());
+    public void beforeHandle(ComponentContext context) {
+        super.beforeHandle(context);
+        ExecutionStep step = steps.get(context.getFlowStep().getId());
         if (step.getStartTime() == null) {
             step.setStartTime(new Date());
         }
@@ -95,11 +100,11 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
  
     @Override
-    public void afterHandle(ComponentContext component, Throwable error) {
-        super.afterHandle(component, error);
-        ExecutionStep step = steps.get(component.getFlowStep().getId());
+    public void afterHandle(ComponentContext context, Throwable error) {
+        super.afterHandle(context, error);
+        ExecutionStep step = steps.get(context.getFlowStep().getId());
         step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.READY.name());
-        ComponentStatistics stats = component.getComponentStatistics();
+        ComponentStatistics stats = context.getComponentStatistics();
         if (stats != null) {
             step.setEntitiesProcessed(stats.getNumberEntitiesProcessed());
             step.setMessagesReceived(stats.getNumberInboundMessages());
@@ -109,9 +114,9 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
     
     @Override
-    public void flowStepFinished(ComponentContext component, Throwable error, boolean cancelled) {
-        super.flowStepFinished(component, error, cancelled);
-        ExecutionStep step = steps.get(component.getFlowStep().getId());
+    public void flowStepFinished(ComponentContext context, Throwable error, boolean cancelled) {
+        super.flowStepFinished(context, error, cancelled);
+        ExecutionStep step = steps.get(context.getFlowStep().getId());
         if (step != null) {
             if (step.getStartTime() == null) {
                 step.setStartTime(new Date());
@@ -125,10 +130,10 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                 status = ExecutionStatus.ERROR;
             }
             step.setStatus(status.name());
-            if (component.getComponentStatistics() != null) {
-                step.setMessagesReceived(component.getComponentStatistics()
+            if (context.getComponentStatistics() != null) {
+                step.setMessagesReceived(context.getComponentStatistics()
                         .getNumberInboundMessages());
-                step.setMessagesProduced(component.getComponentStatistics()
+                step.setMessagesProduced(context.getComponentStatistics()
                         .getNumberOutboundMessages());
             }
             this.recorder.record(step);
@@ -136,9 +141,9 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
     
     @Override
-    public void flowStepFailedOnComplete(ComponentContext component, Throwable error) {
-        super.flowStepFailedOnComplete(component, error);
-        ExecutionStep step = steps.get(component.getFlowStep().getId());
+    public void flowStepFailedOnComplete(ComponentContext context, Throwable error) {
+        super.flowStepFailedOnComplete(context, error);
+        ExecutionStep step = steps.get(context.getFlowStep().getId());
         if (step != null) {
             step.setStatus(ExecutionStatus.ERROR.name());
             this.recorder.record(step);
@@ -146,12 +151,15 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
 
     @Override
-    public void log(LogLevel level, ComponentContext component, String output, Object...args) {
-        super.log(level, component, output);
+    public void log(LogLevel level, ComponentContext context, String output, Object...args) {
+        super.log(level, context, output, args);
         if (deployment.asLogLevel().log(level)) {
             ExecutionStepLog log = new ExecutionStepLog();
-            log.setExecutionStepId(steps.get(component.getFlowStep().getId()).getId());
+            log.setExecutionStepId(steps.get(context.getFlowStep().getId()).getId());
             log.setLevel(level.name());
+            if (args != null && args.length > 0) {
+                output = String.format(output, args);
+            }
             log.setLogText(output);
             this.recorder.record(log);
         }        

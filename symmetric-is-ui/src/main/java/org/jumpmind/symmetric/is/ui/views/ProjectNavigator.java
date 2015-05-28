@@ -17,6 +17,7 @@ import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowName;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FolderName;
+import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelName;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.ResourceName;
@@ -30,10 +31,13 @@ import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.DelimitedParser;
 import org.jumpmind.symmetric.is.core.runtime.component.EntityRouter;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
-import org.jumpmind.symmetric.is.core.runtime.component.MappingProcessor;
+import org.jumpmind.symmetric.is.core.runtime.component.Joiner;
+import org.jumpmind.symmetric.is.core.runtime.component.Mapping;
 import org.jumpmind.symmetric.is.core.runtime.component.ScriptExecutor;
 import org.jumpmind.symmetric.is.core.runtime.component.Transformer;
 import org.jumpmind.symmetric.is.core.runtime.component.XmlFormatter;
+import org.jumpmind.symmetric.is.core.runtime.component.XmlParser;
+import org.jumpmind.symmetric.is.core.runtime.component.XsltProcessor;
 import org.jumpmind.symmetric.is.core.runtime.resource.Datasource;
 import org.jumpmind.symmetric.is.core.runtime.resource.Http;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
@@ -48,10 +52,12 @@ import org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditEntityRouterPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditJoinerPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditScriptPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditTransformerPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditXmlFormatPanel;
+import org.jumpmind.symmetric.is.ui.views.design.EditXsltPanel;
 import org.jumpmind.symmetric.is.ui.views.design.ManageProjectsPanel;
 import org.jumpmind.symmetric.is.ui.views.design.PropertySheet;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
@@ -140,7 +146,7 @@ public class ProjectNavigator extends VerticalLayout {
     
     MenuItem newWebResource;
 
-    MenuItem blank;
+    MenuItem blank;    
 
     MenuItem delete;
 
@@ -255,6 +261,13 @@ public class ProjectNavigator extends VerticalLayout {
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 startEditingItem((AbstractObject) treeTable.getValue());
+            }
+        });
+        
+        editMenu.addItem("Copy", new Command() {
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                copySelected();
             }
         });
         
@@ -674,8 +687,10 @@ public class ProjectNavigator extends VerticalLayout {
             this.treeTable.addItem(resource);
             if (Datasource.TYPE.equals(resource.getType())) {
                 this.treeTable.setItemIcon(resource, Icons.DATABASE);
+            } else if (Http.TYPE.equals(resource.getType())) {
+                this.treeTable.setItemIcon(resource, Icons.WEB);
             } else {
-                this.treeTable.setItemIcon(resource, Icons.GENERAL_RESOURCE);
+                this.treeTable.setItemIcon(resource, Icons.FILE_SYSTEM);
             }
             this.treeTable.setChildrenAllowed(resource, false);
             this.treeTable.setParent(resource, folder);
@@ -749,7 +764,7 @@ public class ProjectNavigator extends VerticalLayout {
                 type.equals(DelimitedParser.TYPE)) {
             EditFormatPanel panel = new EditFormatPanel(context, flowStep.getComponent());
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-        } else if (type.equals(XmlFormatter.TYPE)) {
+        } else if (type.equals(XmlFormatter.TYPE) || type.equals(XmlParser.TYPE)) {
             EditXmlFormatPanel panel = new EditXmlFormatPanel(context, flowStep.getComponent());
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
         } else if (type.equals(DbReader.TYPE)) {
@@ -765,12 +780,18 @@ public class ProjectNavigator extends VerticalLayout {
         } else if (type.equals(EntityRouter.TYPE)) {
             EditEntityRouterPanel panel = new EditEntityRouterPanel(context, flowStep, flow);
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-        } else if (type.equals(MappingProcessor.TYPE)) {
+        } else if (type.equals(Mapping.TYPE)) {
             EditMappingPanel panel = new EditMappingPanel(context, flowStep.getComponent());
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
         } else if (type.equals(ScriptExecutor.TYPE)) {
             EditScriptPanel panel = new EditScriptPanel(context, flowStep.getComponent(),
                     propertySheet);
+            tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+        } else if (type.equals(XsltProcessor.TYPE)) {
+            EditXsltPanel panel = new EditXsltPanel(context, flowStep.getComponent());
+            tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+        } else if (type.equals(Joiner.TYPE)) {
+            EditJoinerPanel panel = new EditJoinerPanel(context, flowStep.getComponent());
             tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
         }
     }
@@ -838,17 +859,41 @@ public class ProjectNavigator extends VerticalLayout {
             refresh();
         }
     }
+    
+    protected void copySelected() {
+        Object object = treeTable.getValue();
+        if (object instanceof ModelName) {
+            Model oldModel = context.getConfigurationService().findModel(((ModelName)object).getId());
+            Model newModel = (Model)oldModel.copy();
+            newModel.setName(newModel.getName() + " Copy");
+            context.getConfigurationService().save(newModel);
+            
+            ModelName model = new ModelName();
+            model.setName(newModel.getName());
+            model.setProjectVersionId(newModel.getProjectVersionId());
+            model.setId(newModel.getId());
 
-    public void select(Object obj) {
-        Object parent = obj;
-        do {
-            parent = treeTable.getParent(parent);
-            if (parent != null) {
-                treeTable.setCollapsed(parent, false);
-            }
-        } while (parent != null);
+            treeTable.addItem(model);
+            treeTable.setItemIcon(model, Icons.MODEL);
+            treeTable.setParent(model, treeTable.getParent(object));
+            treeTable.setChildrenAllowed(model, false);
+        } else if (object instanceof FlowName) {
+            Flow oldFlow = context.getConfigurationService().findFlow(((FlowName)object).getId());
+            Flow newFlow = (Flow)oldFlow.copy();
+            newFlow.setName(newFlow.getName() + " Copy");
+            context.getConfigurationService().save(newFlow);
+            
+            FlowName flow = new FlowName();
+            flow.setName(newFlow.getName());
+            flow.setProjectVersionId(newFlow.getProjectVersionId());
+            flow.setId(newFlow.getId());
 
-        treeTable.setValue(obj);
+            treeTable.addItem(flow);
+            treeTable.setItemIcon(flow, Icons.FLOW);
+            treeTable.setParent(flow, treeTable.getParent(object));
+            treeTable.setChildrenAllowed(flow, false);
+            
+        }
     }
 
     protected void handleDelete() {
@@ -944,7 +989,7 @@ public class ProjectNavigator extends VerticalLayout {
     }
     
     protected void addNewHttpResource() {
-        addNewResource(Http.TYPE, "Http", FontAwesome.CLOUD);
+        addNewResource(Http.TYPE, "Http", Icons.WEB);
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {
@@ -984,7 +1029,7 @@ public class ProjectNavigator extends VerticalLayout {
             treeTable.addItem(model);
             treeTable.setItemIcon(model, Icons.MODEL);
             treeTable.setParent(model, folder);
-            this.treeTable.setChildrenAllowed(model, false);
+            treeTable.setChildrenAllowed(model, false);
 
             treeTable.setCollapsed(folder, false);
 

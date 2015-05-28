@@ -42,7 +42,6 @@ import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.themes.ValoTheme;
@@ -169,8 +168,8 @@ public class PropertySheet extends Panel {
         ImmediateUpdateTextField textField = new ImmediateUpdateTextField("Component Name") {
             private static final long serialVersionUID = 1L;
 
-            protected void save() {
-                component.setName(this.getValue());
+            protected void save(String text) {
+                component.setName(text);
                 configurationService.save(component);
                 if (listener != null) {
                     listener.componentNameChanged(component);
@@ -325,7 +324,7 @@ public class PropertySheet extends Panel {
 
                         @Override
                         public void valueChange(ValueChangeEvent event) {
-                            saveSetting(key, checkBox, obj);
+                            saveSetting(key, checkBox.getValue().toString(), obj);
                         }
                     });
                     formLayout.addComponent(checkBox);
@@ -346,7 +345,7 @@ public class PropertySheet extends Panel {
 
                         @Override
                         public void valueChange(ValueChangeEvent event) {
-                            saveSetting(key, choice, obj);
+                            saveSetting(key, (String)choice.getValue(), obj);
                         }
                     });
                     formLayout.addComponent(choice);
@@ -356,8 +355,8 @@ public class PropertySheet extends Panel {
                             definition.label()) {
                         private static final long serialVersionUID = 1L;
 
-                        protected void save() {
-                            saveSetting(key, this, obj);
+                        protected void save(String text) {
+                            saveSetting(key, text, obj);
                         };
                     };
                     passwordField.setValue(obj.get(key, definition.defaultValue()));
@@ -370,8 +369,8 @@ public class PropertySheet extends Panel {
                             definition.label()) {
                         private static final long serialVersionUID = 1L;
 
-                        protected void save() {
-                            saveSetting(key, this, obj);
+                        protected void save(String text) {
+                            saveSetting(key, text, obj);
                         };
                     };
                     integerField.setConverter(Integer.class);
@@ -385,8 +384,8 @@ public class PropertySheet extends Panel {
                             definition.label()) {
                         private static final long serialVersionUID = 1L;
 
-                        protected void save() {
-                            saveSetting(key, this, obj);
+                        protected void save(String text) {
+                            saveSetting(key, text, obj);
                         };
                     };
                     textField.setValue(obj.get(key, definition.defaultValue()));
@@ -419,7 +418,7 @@ public class PropertySheet extends Panel {
 
                             @Override
                             public void valueChange(ValueChangeEvent event) {
-                                saveSetting(key, sourceStepsCombo, obj);
+                                saveSetting(key, (String)sourceStepsCombo.getValue(), obj);
                             }
                         });
                         formLayout.addComponent(sourceStepsCombo);
@@ -450,8 +449,8 @@ public class PropertySheet extends Panel {
                     ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(definition.label()) {
                         private static final long serialVersionUID = 1L;
 
-                        protected void save() {
-                            saveSetting(key, this, obj);
+                        protected void save(String text) {
+                            saveSetting(key, text, obj);
                         };
                     };
                     area.setValue(obj.get(key, definition.defaultValue()));
@@ -468,9 +467,9 @@ public class PropertySheet extends Panel {
 
     }
 
-    protected void saveSetting(String key, Field<?> field, AbstractObjectWithSettings obj) {
+    protected void saveSetting(String key, String text, AbstractObjectWithSettings obj) {
         Setting data = obj.findSetting(key);
-        data.setValue(field.getValue() != null ? field.getValue().toString() : null);
+        data.setValue(text);
         configurationService.save(data);
     }
 

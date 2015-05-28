@@ -10,20 +10,21 @@ import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 public abstract class AbstractResourceRuntime extends AbstractRuntimeObject implements IResourceRuntime {
 
     protected Resource resource;
-    protected TypedProperties agentOverrides;
+    protected TypedProperties resourceRuntimeSettings;
 
     @Override
     public void start(IResourceFactory resourceFactory, Resource resource,
-            TypedProperties agentOverrides) {
+            TypedProperties overrides) {
         this.resource = resource;
-        this.agentOverrides = agentOverrides;
+        this.resourceRuntimeSettings = overrides;
         Map<String, SettingDefinition> settings = resourceFactory
                 .getSettingDefinitionsForResourceType(resource.getType());
         TypedProperties defaultSettings = resource.toTypedProperties(settings);
         TypedProperties combined = new TypedProperties(defaultSettings);
-        if (agentOverrides != null) {
-            combined.putAll(agentOverrides);
+        if (overrides != null) {
+            combined.putAll(overrides);
         }
+        resourceRuntimeSettings = combined;
         start(combined);
     }
 
@@ -35,8 +36,8 @@ public abstract class AbstractResourceRuntime extends AbstractRuntimeObject impl
     }
 
     @Override
-    public TypedProperties getAgentOverrides() {
-        return agentOverrides;
+    public TypedProperties getResourceRuntimeSettings() {
+        return resourceRuntimeSettings;
     }
 
 }

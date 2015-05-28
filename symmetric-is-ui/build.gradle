@@ -31,12 +31,12 @@ vaadin.push = true
 
 dependencies {
     compile project(":symmetric-is-core")
-    compile "org.jumpmind.symmetric:symmetric-ui-common:1.0.9-SNAPSHOT"
+    compile group:"org.jumpmind.symmetric", name:"symmetric-ui-common", version:"1.0.9-SNAPSHOT", changing:true
     compile "com.cybercom:spring-ui-scope:0.0.2"
     compile "org.vaadin.addons:aceeditor:0.8.13"
     compile "org.springframework:spring-webmvc:$springVersion"
     compile "org.peimari:maddon:1.20"
-    compile "org.apache.poi:poi:3.11"    
+    compile "org.apache.poi:poi:3.11"
     compile "io.springfox:springfox-swagger2:$springfoxSwaggerVersion"
     compile "io.springfox:springfox-swagger-ui:$springfoxSwaggerVersion"
     compile "org.reficio:soap-builder:$reficioSoapVersion"
