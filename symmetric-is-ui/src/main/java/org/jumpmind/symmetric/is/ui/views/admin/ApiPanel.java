@@ -20,7 +20,7 @@ public class ApiPanel extends VerticalLayout implements IUiPanel {
     public ApiPanel(ApplicationContext context, TabbedPanel tabbedPanel) {   
         setSizeFull();
         BrowserFrame e = new BrowserFrame(null, new ExternalResource(Page.getCurrent()
-                .getLocation().getPath().replace("/app", "api.html")));
+                .getLocation().getPath().replace("/app", "/api.html")));
         e.setSizeFull();
         addComponent(e);
     }

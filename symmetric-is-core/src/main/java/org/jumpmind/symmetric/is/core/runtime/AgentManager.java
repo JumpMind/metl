@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -23,6 +24,8 @@ import org.slf4j.LoggerFactory;
 public class AgentManager implements IAgentManager {
 
     final Logger log = LoggerFactory.getLogger(getClass());
+    
+    public static final Date lastRestartTime = new Date();
 
     IConfigurationService configurationService;
     
