@@ -122,10 +122,6 @@ public class ProjectNavigator extends VerticalLayout {
 
     TreeTable treeTable;
 
-    ShortcutListener treeTableEnterKeyShortcutListener;
-
-    ShortcutListener treeTableDeleteKeyShortcutListener;
-
     AbstractObject itemBeingEdited;
 
     MenuItem newMenu;
@@ -416,28 +412,6 @@ public class ProjectNavigator extends VerticalLayout {
         });
         table.setVisibleColumns(new Object[] { "name" });
         table.setColumnExpandRatio("name", 1);
-        treeTableDeleteKeyShortcutListener = new ShortcutListener("Delete", KeyCode.DELETE, null) {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void handleAction(Object sender, Object target) {
-                if (delete.isEnabled()) {
-                    handleDelete();
-                }
-            }
-        };
-        table.addShortcutListener(treeTableDeleteKeyShortcutListener);
-
-        treeTableEnterKeyShortcutListener = new ShortcutListener("Enter", KeyCode.ENTER, null) {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void handleAction(Object sender, Object target) {
-                open(treeTable.getValue());
-            }
-        };
         table.addValueChangeListener(new ValueChangeListener() {
             private static final long serialVersionUID = 1L;
 
@@ -544,8 +518,6 @@ public class ProjectNavigator extends VerticalLayout {
 
     protected boolean startEditingItem(AbstractObject obj) {
         if (obj.isSettingNameAllowed()) {
-            treeTable.removeShortcutListener(treeTableDeleteKeyShortcutListener);
-            treeTable.removeShortcutListener(treeTableEnterKeyShortcutListener);
             itemBeingEdited = obj;
             treeTable.refreshRowCache();
             treeTable.setValue(null);
@@ -558,7 +530,6 @@ public class ProjectNavigator extends VerticalLayout {
     protected void finishEditingItem() {
         if (itemBeingEdited != null) {
             IConfigurationService configurationService = context.getConfigurationService();
-            treeTable.addShortcutListener(treeTableDeleteKeyShortcutListener);
             Object selected = itemBeingEdited;
             Method method = null;
             try {
@@ -737,10 +708,6 @@ public class ProjectNavigator extends VerticalLayout {
 
     protected void selectionChanged() {
         setMenuItemsEnabled();
-        treeTable.removeShortcutListener(treeTableEnterKeyShortcutListener);
-        if (treeTable.getValue() != null) {
-            treeTable.addShortcutListener(treeTableEnterKeyShortcutListener);
-        }
     }
 
     public void unselectAll() {

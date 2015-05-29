@@ -22,8 +22,8 @@ import org.jumpmind.symmetric.is.core.runtime.component.ComponentContext;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentStatistics;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.util.AppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,10 +109,14 @@ public class FlowRuntime {
             }
         }
 
+        
         List<StepRuntime> startSteps = findStartSteps();
         
         /* start up each step runtime */
-        for (StepRuntime stepRuntime : stepRuntimes.values()) {
+        flow.calculateApproximateOrder();
+        List<FlowStep> flowSteps = flow.getFlowSteps();
+        for (FlowStep flowStep : flowSteps) {
+            StepRuntime stepRuntime = stepRuntimes.get(flowStep.getId());
             try {
                 stepRuntime.start(executionTracker, resourceFactory);                
             } catch (RuntimeException ex) {

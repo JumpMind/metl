@@ -52,7 +52,7 @@ task xsdgen () {
   doLast {
     ant.taskdef(name: 'schemagen', classname: 'com.sun.tools.jxc.SchemaGenTask', classpath: configurations.jaxb.asPath)
     ant.schemagen(
-      srcdir: 'src/main/java/org/jumpmind/symmetric/is/core/runtime/plugin/component',
+      srcdir: 'src/main/java/org/jumpmind/symmetric/is/core/runtime/component/definition',
       destdir: 'src/main/resources',
       includeAntRuntime: 'false'
     ) {
@@ -62,4 +62,3 @@ task xsdgen () {
 }
 
 xsdgen.dependsOn compileJava
-processResources.dependsOn xsdgen

@@ -9,6 +9,7 @@ import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.is.ui.common.TopBarLink;
+import org.jumpmind.symmetric.is.ui.views.admin.AboutPanel;
 import org.jumpmind.symmetric.is.ui.views.admin.ApiPanel;
 import org.jumpmind.symmetric.is.ui.views.admin.GroupPanel;
 import org.jumpmind.symmetric.is.ui.views.admin.LoggingPanel;
@@ -87,6 +88,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, IBack
         addItem("Mail Server", Icons.EMAIL);
         addItem("Notifications", Icons.NOTIFICATION);
         addItem("Logging", Icons.LOGGING);
+        addItem("About", FontAwesome.QUESTION);
         
         VerticalLayout navigator = new VerticalLayout(table);
         navigator.setSizeFull();
@@ -125,6 +127,8 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, IBack
                         panel = new NotificationPanel(context, tabbedPanel);
                     } else if (id.equals("Logging")) {
                         panel = new LoggingPanel(context, tabbedPanel);
+                    } else if (id.equals("About")) {
+                        panel = new AboutPanel(context, tabbedPanel);
                     }
                     tabbedPanel.addCloseableTab(id, id, table.getItemIcon(id), panel);
                 }

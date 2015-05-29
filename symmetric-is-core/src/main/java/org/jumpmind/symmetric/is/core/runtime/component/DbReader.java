@@ -106,7 +106,9 @@ public class DbReader extends AbstractDbComponent {
         ArrayList<EntityData> payload = null;
         if (!(inputMessage instanceof StartupMessage)) {
             payload = inputMessage.getPayload();
-            inboundRecordCount = payload.size();
+            if (payload != null) {
+                inboundRecordCount = payload.size();
+            }
         }
 
         /*

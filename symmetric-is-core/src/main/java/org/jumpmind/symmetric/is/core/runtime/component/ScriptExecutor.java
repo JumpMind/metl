@@ -69,8 +69,7 @@ public class ScriptExecutor extends AbstractComponentRuntime {
         ScriptEngineManager factory = new ScriptEngineManager();
         ScriptEngine engine = factory.getEngineByName("groovy");
 
-        engine.put("component", this);
-
+        engine.put("component", this);        
         StringBuilder script = new StringBuilder();
         try {
             script.append(String.format("import %s;\n", IMessageTarget.class.getName()));

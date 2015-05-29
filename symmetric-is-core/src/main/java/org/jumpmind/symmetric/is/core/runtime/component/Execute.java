@@ -16,6 +16,7 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.util.FormatUtils;
 
 @ComponentDefinition(
         category = ComponentCategory.PROCESSOR,
@@ -44,7 +45,7 @@ public class Execute extends AbstractComponentRuntime {
 
     @Override
     protected void start() {
-        String line = getComponent().get(COMMAND, null);
+        String line = FormatUtils.replaceTokens(getComponent().get(COMMAND, null), context.getFlowParametersAsString(), true);
         continueOnError = getComponent().getBoolean(CONTINUE_ON_ERROR, continueOnError);
         successCode = getComponent().getInt(SUCCESS_CODE, successCode);
 

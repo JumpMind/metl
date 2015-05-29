@@ -1,7 +1,7 @@
 <ui xmlns="http://www.jumpmind.com/schema/ui" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://www.jumpmind.com/schema/ui ui.xsd">
-    <component-ui key="Database Writer">
+    <component-ui id="Database Writer UI" componentId="Database Writer">
         <icon>/org/jumpmind/symmetric/is/core/runtime/component/dbwriter.png</icon>
         <panel>
             <class>org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel</class>
