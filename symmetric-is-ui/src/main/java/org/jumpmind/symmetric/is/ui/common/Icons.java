@@ -53,4 +53,6 @@ final public class Icons {
     
     public static final FontAwesome LOGGING = FontAwesome.REORDER;
     
+    public static final FontAwesome NOTIFICATION = FontAwesome.COMMENT;
+    
 }

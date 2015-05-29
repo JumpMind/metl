@@ -19,11 +19,11 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
 
     AsyncRecorder recorder;
 
-    Execution execution;
-
     Agent agent;
 
     Map<String, ExecutionStep> steps;
+    
+    Date startTime;
 
     public ExecutionTrackerRecorder(Agent agent, AgentDeployment agentDeployment,
             AsyncRecorder recorder) {
@@ -36,9 +36,14 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     public void beforeFlow(String executionId) {
         super.beforeFlow(executionId);
         this.steps = new HashMap<String, ExecutionStep>();
-        execution = new Execution();
+        this.startTime = new Date();
+        this.recorder.record(getExecution());
+    }
+
+    private Execution getExecution() {
+        Execution execution = new Execution();
         execution.setId(executionId);
-        execution.setStartTime(new Date());
+        execution.setStartTime(startTime);
         execution.setStatus(ExecutionStatus.RUNNING.name());
         execution.setAgentId(deployment.getAgentId());
         execution.setFlowId(deployment.getFlowId());
@@ -47,12 +52,14 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         execution.setFlowName(deployment.getFlow().getName());
         execution.setDeploymentName(deployment.getName());
         execution.setDeploymentId(deployment.getId());
-        this.recorder.record(execution);
+        execution.setLastUpdateTime(new Date());
+        return execution;
     }
 
     @Override
     public void afterFlow() {
         super.afterFlow();
+        Execution execution = getExecution();
         execution.setEndTime(new Date());
         ExecutionStatus status = ExecutionStatus.DONE;
         for (ExecutionStep executionStep : steps.values()) {
@@ -65,7 +72,6 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             }
         }        
         execution.setStatus(status.name());
-        execution.setLastUpdateTime(new Date());
         this.recorder.record(execution);
     }
     

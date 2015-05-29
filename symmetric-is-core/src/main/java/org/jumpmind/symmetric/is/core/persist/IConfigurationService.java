@@ -16,11 +16,14 @@ import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderName;
 import org.jumpmind.symmetric.is.core.model.FolderType;
+import org.jumpmind.symmetric.is.core.model.GlobalSetting;
 import org.jumpmind.symmetric.is.core.model.Group;
+import org.jumpmind.symmetric.is.core.model.MailServer;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.ModelName;
+import org.jumpmind.symmetric.is.core.model.Notification;
 import org.jumpmind.symmetric.is.core.model.Project;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
@@ -84,6 +87,8 @@ public interface IConfigurationService {
     public List<Agent> findAgentsInFolder(Folder folder);
     
     public List<Agent> findAgentsForHost(String hostName);
+    
+    public List<AgentDeployment> findAgentDeployments();
     
     public List<AgentDeployment> findAgentDeploymentsFor(Flow flow);
     
@@ -156,4 +161,17 @@ public interface IConfigurationService {
     public String export(ProjectVersion projectVersion);
     
     public boolean isUserLoginEnabled();
+    
+    public List<Notification> findNotifications();
+
+    public List<Notification> findNotificationsForAgent(String agentId);
+
+    public void refresh(Notification notification);
+
+    public List<GlobalSetting> findGlobalSettings();
+    
+    public GlobalSetting findGlobalSetting(String name);
+
+    public MailServer findMailServer();
+    
 }

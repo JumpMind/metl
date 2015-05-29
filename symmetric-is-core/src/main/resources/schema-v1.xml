@@ -4,7 +4,7 @@
 <database name="symmetric-is">
 
     <table name="project" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" description="Name of the folder" />
         <column name="description" type="VARCHAR" size="255" description="Name of the folder" />
         <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>        
@@ -15,10 +15,10 @@
     </table>
     
     <table name="project_version" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="version_label" type="VARCHAR" size="255" description="Label for the version" />
-        <column name="project_id" type="CHAR" size="36" description="A unique identifer" />        
-        <column name="orig_version_id" type="CHAR" size="36" description="A unique identifer" />
+        <column name="project_id" type="CHAR" size="36" description="A unique identifier" />        
+        <column name="orig_version_id" type="CHAR" size="36" description="A unique identifier" />
         <column name="description" type="VARCHAR" size="255" description="Name of the folder" />
         <column name="locked" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this version is editable."/>
         <column name="archived" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this version is archived."/>
@@ -36,10 +36,10 @@
     </table>
 
     <table name="folder" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="row_id" type="CHAR" size="36" required="true" description="A unique identifier for this row across different versions" />
         <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />        
-        <column name="parent_folder_id" type="CHAR" size="36" description="A unique identifer" />
+        <column name="parent_folder_id" type="CHAR" size="36" description="A unique identifier" />
         <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>        
         <column name="name" type="VARCHAR" size="255" description="Name of the folder" />
         <column name="type" type="VARCHAR" size="50" required="true" description="COMPONENT, FLOW, RESOURCE, or AGENT" />
@@ -56,7 +56,7 @@
     </table>
 
     <table name="model" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="row_id" type="CHAR" size="36" required="true" description="A unique identifier for this row across different versions" />
         <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />
         <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>                        
@@ -76,7 +76,7 @@
     </table>
 
     <table name="model_entity" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="model_id" type="CHAR" size="36" required="true" description="A version number" />
         <column name="name" type="VARCHAR" size="255" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
@@ -107,7 +107,7 @@
     </table>
 
     <table name="resource" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="row_id" type="CHAR" size="36" required="true" description="A unique identifier for this row across different versions" />
         <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />
         <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>                                
@@ -140,7 +140,7 @@
     </table>
 
     <table name="component" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="row_id" type="CHAR" size="36" required="true" description="A unique identifier for this row across different versions" />
         <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />
         <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>                        
@@ -173,8 +173,8 @@
     </table>
 
     <table name="component_setting" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="component_id" type="CHAR" size="36" required="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="component_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
         <column name="value" type="LONGVARCHAR" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
@@ -187,8 +187,8 @@
     </table>
 
     <table name="component_entity_setting" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="component_id" type="CHAR" size="36" required="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="component_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="entity_id" type="CHAR" size="36" required="true" description="A version number" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
         <column name="value" type="VARCHAR" size="255" description="" />
@@ -205,9 +205,9 @@
     </table>
 
     <table name="component_attribute_setting" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="component_id" type="CHAR" size="36" required="true" description="A unique identifer" />
-        <column name="attribute_id" type="CHAR" size="36" required="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="component_id" type="CHAR" size="36" required="true" description="A unique identifier" />
+        <column name="attribute_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
         <column name="value" type="VARCHAR" size="255" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
@@ -223,7 +223,7 @@
     </table>
 
     <table name="flow" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="row_id" type="CHAR" size="36" required="true" description="A unique identifier for this row across different versions" />
         <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />
         <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>                        
@@ -242,8 +242,8 @@
     </table>
     
     <table name="flow_parameter" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="flow_id" type="CHAR" size="36" required="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="flow_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
         <column name="default_value" type="VARCHAR" size="255" description="" />
         <column name="position" type="INTEGER" default="1" required="true" />
@@ -257,9 +257,9 @@
     </table>    
 
     <table name="flow_step" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="flow_id" type="CHAR" size="36" required="true" description="A unique identifer" />
-        <column name="component_id" type="CHAR" size="36" required="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="flow_id" type="CHAR" size="36" required="true" description="A unique identifier" />
+        <column name="component_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="x" type="INTEGER" default="10" required="true" />
         <column name="y" type="INTEGER" default="10" required="true" />
         <column name="approximate_order" type="INTEGER" default="0" required="true" />
@@ -276,8 +276,8 @@
     </table>
 
     <table name="flow_step_link" description="">
-        <column name="source_step_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="target_step_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="source_step_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="target_step_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -291,7 +291,7 @@
     </table>
 
     <table name="agent" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" description="" />
         <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>
         <column name="folder_id" type="CHAR" size="36" description="" />
@@ -300,7 +300,6 @@
         <column name="status" type="VARCHAR" size="255" description="" />
         <column name="last_start_time" type="TIMESTAMP" description="" />
         <column name="heartbeat_time" type="TIMESTAMP" description="" />
-        <column name="email_list" type="VARCHAR" size="255" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -311,7 +310,7 @@
     </table>
 
     <table name="agent_resource_setting" description="">
-        <column name="agent_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="agent_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="resource_id" type="CHAR" size="36" required="true" primaryKey="true" description="A version number" />
         <column name="name" type="VARCHAR" size="255" primaryKey="true" required="true" description="" />
         <column name="value" type="VARCHAR" size="255" description="" />
@@ -322,8 +321,8 @@
     </table>
 
     <table name="agent_parameter" description="">
-    	<column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="agent_id" type="CHAR" size="36" required="true"  description="A unique identifer" />
+    	<column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="agent_id" type="CHAR" size="36" required="true"  description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
         <column name="value" type="VARCHAR" size="255" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
@@ -336,10 +335,10 @@
     </table>
 
     <table name="agent_deployment" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
 		<column name="name" type="VARCHAR" size="255" required="true" description="" />
-        <column name="agent_id" type="CHAR" size="36" required="true" description="A unique identifer" />
-        <column name="flow_id" type="CHAR" size="36" required="true" description="A unique identifer" />
+        <column name="agent_id" type="CHAR" size="36" required="true" description="A unique identifier" />
+        <column name="flow_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="start_type" type="VARCHAR" default="MANUAL" required="true" size="128" description="" />
         <column name="log_level" type="VARCHAR" default="INFO" required="true" size="128" description="" />
         <column name="start_expression" type="VARCHAR" size="255" description="" />        
@@ -355,9 +354,9 @@
     </table>
     
     <table name="agent_deployment_parameter" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="flow_parameter_id" type="CHAR" size="36" required="true" description="A unique identifer referencing a flow parameter" />
-        <column name="agent_deployment_id" type="CHAR" size="36" required="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="flow_parameter_id" type="CHAR" size="36" required="true" description="A unique identifier referencing a flow parameter" />
+        <column name="agent_deployment_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
         <column name="value" type="VARCHAR" size="255" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
@@ -370,10 +369,10 @@
     </table>     
     
     <table name="execution" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="agent_id" type="CHAR" size="36" required="true" description="A unique identifer" />
-        <column name="flow_id" type="CHAR" size="36" required="true" description="A unique identifer" />
-        <column name="deployment_id" type="CHAR" size="36" required="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="agent_id" type="CHAR" size="36" required="true" description="A unique identifier" />
+        <column name="flow_id" type="CHAR" size="36" required="true" description="A unique identifier" />
+        <column name="deployment_id" type="CHAR" size="36" required="true" description="A unique identifier" />
 		<column name="agent_name" type="VARCHAR" size="255" description="" />
 		<column name="host_name" type="VARCHAR" size="255" description="" />
 		<column name="flow_name" type="VARCHAR" size="255" description="" />
@@ -392,9 +391,9 @@
     </table>    
 
      <table name="execution_step" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="execution_id" type="CHAR" size="36" required="true" description="A unique identifer" />
-        <column name="flow_step_id" type="CHAR" size="36" required="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="execution_id" type="CHAR" size="36" required="true" description="A unique identifier" />
+        <column name="flow_step_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="component_name" type="VARCHAR" required="true" size="255" description="" />
         <column name="approximate_order" type="INTEGER" default="0" required="true" />
         <column name="status" type="VARCHAR" size="255" description="" />
@@ -406,15 +405,15 @@
     </table>        
 
     <table name="execution_step_log" description="">
-       <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
-       <column name="execution_step_id" type="CHAR" size="36" required="true" description="A unique identifer" />
+       <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+       <column name="execution_step_id" type="CHAR" size="36" required="true" description="A unique identifier" />
        <column name="level" type="VARCHAR" size="255" required="true" description="" />
        <column name="log_text" type="VARCHAR" size="4000" description="" />       
        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
     </table>    
 
     <table name="user" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="login_id" type="VARCHAR" size="50" required="true" description="" />
         <column name="name" type="VARCHAR" size="255" required="false" description="" />
 		<column name="password" type="VARCHAR" size="255" required="false" description="" />
@@ -426,7 +425,7 @@
     </table>
 
     <table name="group" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="false" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
@@ -435,8 +434,8 @@
     </table>
 
     <table name="user_group" description="">
-        <column name="user_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
-        <column name="group_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="user_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="group_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -450,7 +449,7 @@
     </table>
 
     <table name="group_privilege" description="">    
-        <column name="group_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="group_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="50" required="true" primaryKey="true" description="" />window
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
@@ -462,7 +461,7 @@
     </table>    
 
     <table name="user_setting" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifer" />
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="user_id" type="CHAR" size="36" required="true" description="The user id" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
         <column name="value" type="VARCHAR" size="255" description="" />
@@ -473,6 +472,33 @@
         <foreign-key foreignTable="user" name="fk_usrs_2_usr">
             <reference local="user_id" foreign="id" />
         </foreign-key>
+    </table>
+
+    <table name="global_setting" description="">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="name" type="VARCHAR" size="255" required="true" description="" />
+        <column name="value" type="VARCHAR" size="255" description="" />
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
+    </table>
+    
+    <table name="notification" description="">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="level" type="VARCHAR" size="64" required="true" description="" />
+        <column name="link_id" type="CHAR" size="36" required="false" description="A unique identifier" />
+        <column name="name" type="VARCHAR" size="255" required="true" description="" />
+        <column name="notify_type" type="VARCHAR" size="64" required="true" description="" />
+        <column name="event_type" type="VARCHAR" size="64" required="true" description="" />
+        <column name="subject" type="VARCHAR" size="255" description="" />
+        <column name="recipients" type="VARCHAR" size="4000" description="" />
+        <column name="message" type="VARCHAR" size="4000" description="" />
+        <column name="enabled" type="BOOLEANINT" size="1" default="1" description="" />
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
     </table>
 
 </database>

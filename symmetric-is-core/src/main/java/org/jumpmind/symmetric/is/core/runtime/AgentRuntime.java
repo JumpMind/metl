@@ -27,6 +27,8 @@ import org.jumpmind.symmetric.is.core.model.AgentStatus;
 import org.jumpmind.symmetric.is.core.model.DeploymentStatus;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowParameter;
+import org.jumpmind.symmetric.is.core.model.MailServer;
+import org.jumpmind.symmetric.is.core.model.Notification;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.StartType;
@@ -35,8 +37,8 @@ import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.flow.AsyncRecorder;
 import org.jumpmind.symmetric.is.core.runtime.flow.FlowRuntime;
-import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
+import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -126,7 +128,9 @@ public class AgentRuntime {
             this.flowExecutionScheduler.setPoolSize(100);
             this.flowExecutionScheduler.initialize();
 
-            this.recorder = new AsyncRecorder(executionService);
+            MailServer mailServer = this.configurationService.findMailServer();
+            List<Notification> notifications = this.configurationService.findNotificationsForAgent(agent.getId());
+            this.recorder = new AsyncRecorder(executionService, mailServer, notifications);
             this.flowStepsExecutionThreads.execute(this.recorder);
 
             List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(

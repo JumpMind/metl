@@ -15,9 +15,9 @@ import org.jumpmind.symmetric.is.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.AgentDeploymentParameter;
+import org.jumpmind.symmetric.is.core.model.AgentParameter;
 import org.jumpmind.symmetric.is.core.model.AgentResource;
 import org.jumpmind.symmetric.is.core.model.AgentResourceSetting;
-import org.jumpmind.symmetric.is.core.model.AgentParameter;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.ComponentEntitySetting;
@@ -31,12 +31,15 @@ import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderName;
 import org.jumpmind.symmetric.is.core.model.FolderType;
+import org.jumpmind.symmetric.is.core.model.GlobalSetting;
 import org.jumpmind.symmetric.is.core.model.Group;
 import org.jumpmind.symmetric.is.core.model.GroupPrivilege;
+import org.jumpmind.symmetric.is.core.model.MailServer;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.ModelName;
+import org.jumpmind.symmetric.is.core.model.Notification;
 import org.jumpmind.symmetric.is.core.model.Project;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 import org.jumpmind.symmetric.is.core.model.Resource;
@@ -294,6 +297,11 @@ abstract class AbstractConfigurationService extends AbstractService implements
         agentDeployment.setAgentDeploymentParameters(persistenceManager.find(
                 AgentDeploymentParameter.class, params, null, null,
                 tableName(AgentDeploymentParameter.class)));
+    }
+
+    @Override
+    public List<AgentDeployment> findAgentDeployments() {
+        return persistenceManager.find(AgentDeployment.class, null, null, tableName(AgentDeployment.class));
     }
 
     @Override
@@ -887,4 +895,65 @@ abstract class AbstractConfigurationService extends AbstractService implements
             save(modelAttribute);
         }
     }
+    
+    @Override
+    public List<Notification> findNotifications() {
+        return persistenceManager.find(Notification.class, null, null, null, tableName(Notification.class));
+    }
+
+    @Override
+    public List<Notification> findNotificationsForAgent(String agentId) {
+        Map<String, Object> param = new HashMap<String, Object>();
+        param.put("level", Notification.Level.AGENT.toString());
+        param.put("linkId", agentId);
+        param.put("enabled", true);
+        List<Notification> agentNotifications = persistenceManager.find(Notification.class, param, null, null, tableName(Notification.class));
+
+        param = new HashMap<String, Object>();
+        param.put("level", Notification.Level.GLOBAL.toString());
+        List<Notification> notifications = persistenceManager.find(Notification.class, param, null, null, tableName(Notification.class));
+        notifications.addAll(agentNotifications);
+        return notifications;
+    }
+    
+    @Override
+    public void refresh(Notification notification) {
+        refresh((AbstractObject) notification);        
+    }
+
+    @Override
+    public List<GlobalSetting> findGlobalSettings() {
+        return persistenceManager.find(GlobalSetting.class, null, null, tableName(GlobalSetting.class));
+    }
+
+    @Override
+    public GlobalSetting findGlobalSetting(String name) {
+        Map<String, Object> param = new HashMap<String, Object>();
+        param.put("name", name);
+        List<GlobalSetting> settings =  persistenceManager.find(GlobalSetting.class, param, null, null, tableName(GlobalSetting.class));
+        if (settings.size() > 0) {
+            return settings.get(0);
+        }
+        return null;
+    }
+    
+    @Override
+    public MailServer findMailServer() {
+        MailServer mailServer = new MailServer();
+        mailServer.setHostName(getGlobalSettingValue(MailServer.SETTING_HOST_NAME, "localhost"));
+        mailServer.setPortNumber(Integer.parseInt(getGlobalSettingValue(MailServer.SETTING_PORT_NUMBER, "25")));
+        mailServer.setFrom(getGlobalSettingValue(MailServer.SETTING_FROM, "symmetricis@localhost"));
+        mailServer.setUsername(getGlobalSettingValue(MailServer.SETTING_USERNAME, null));
+        mailServer.setPassword(getGlobalSettingValue(MailServer.SETTING_PASSWORD, null));
+        return mailServer;
+    }
+
+    private String getGlobalSettingValue(String name, String defaultValue) {
+        GlobalSetting setting = findGlobalSetting(name);
+        if (setting != null) {
+            return setting.getValue();
+        }
+        return defaultValue;
+    }
+
 }
