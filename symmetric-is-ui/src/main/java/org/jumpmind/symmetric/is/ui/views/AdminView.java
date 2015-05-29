@@ -110,28 +110,26 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, IBack
 
     public void itemClick(ItemClickEvent event) {
         if (event.getButton() == MouseButton.LEFT) {
-            if (event.isDoubleClick()) {
-                Object value = event.getItemId();
-                if (value != null) {
-                    String id = value.toString();
-                    Component panel = null;
-                    if (id.equals("Users")) {
-                        panel = new UserPanel(context, tabbedPanel);
-                    } else if (id.equals("Groups")) {
-                        panel = new GroupPanel(context, tabbedPanel);
-                    } else if (id.equals("REST")) {
-                        panel = new ApiPanel(context, tabbedPanel);
-                    } else if (id.equals("Mail Server")) {
-                        panel = new MailServerPanel(context, tabbedPanel);
-                    } else if (id.equals("Notifications")) {
-                        panel = new NotificationPanel(context, tabbedPanel);
-                    } else if (id.equals("Logging")) {
-                        panel = new LoggingPanel(context, tabbedPanel);
-                    } else if (id.equals("About")) {
-                        panel = new AboutPanel(context, tabbedPanel);
-                    }
-                    tabbedPanel.addCloseableTab(id, id, table.getItemIcon(id), panel);
+            Object value = event.getItemId();
+            if (value != null) {
+                String id = value.toString();
+                Component panel = null;
+                if (id.equals("Users")) {
+                    panel = new UserPanel(context, tabbedPanel);
+                } else if (id.equals("Groups")) {
+                    panel = new GroupPanel(context, tabbedPanel);
+                } else if (id.equals("REST")) {
+                    panel = new ApiPanel(context, tabbedPanel);
+                } else if (id.equals("Mail Server")) {
+                    panel = new MailServerPanel(context, tabbedPanel);
+                } else if (id.equals("Notifications")) {
+                    panel = new NotificationPanel(context, tabbedPanel);
+                } else if (id.equals("Logging")) {
+                    panel = new LoggingPanel(context, tabbedPanel);
+                } else if (id.equals("About")) {
+                    panel = new AboutPanel(context, tabbedPanel);
                 }
+                tabbedPanel.addCloseableTab(id, id, table.getItemIcon(id), panel);
             }
         }
     }
