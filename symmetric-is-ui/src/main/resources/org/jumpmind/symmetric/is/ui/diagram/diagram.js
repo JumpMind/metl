@@ -119,17 +119,21 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         for (i = 0; i < nodeList.length; i++) {
             var node = nodeList[i];
 
-            var nodeDiv = document.createElement('div');
-            nodeDiv.id = node.id;
-            nodeDiv.setAttribute('style', 'width:' + node.width + 'px;height:' + node.height + "px;top:" + node.y
+            var draggableDiv = document.createElement('div');
+            draggableDiv.className='diagram-node-wrapper';
+            draggableDiv.setAttribute('style', "top:" + node.y
                     + "px;left:" + node.x + "px");
+            
+            var nodeDiv = document.createElement('div');
+            draggableDiv.appendChild(nodeDiv);
+                        
+            nodeDiv.id = node.id;
+            nodeDiv.setAttribute('style', 'width:' + node.width + 'px;height:' + node.height + "px");
             nodeDiv.innerHTML = node.text;
             nodeDiv.className = "diagram-node";
 
             nodeDiv.addEventListener("click", function(event) {
                 if (state.selectedNodeId !== event.currentTarget.id) {
-                    unselectAll();
-                    event.currentTarget.className = event.currentTarget.className + " selected ";
                     self.onNodeSelected({
                         'id' : event.currentTarget.id
                     });
@@ -141,10 +145,15 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
                         'id' : event.currentTarget.id
                     });
             }, false);
-
-            parentDiv.appendChild(nodeDiv);
             
-            instance.draggable(nodeDiv, {
+            var labelDiv = document.createElement('div');
+            labelDiv.className = "diagram-node-label";
+            labelDiv.innerHTML = node.name;
+            draggableDiv.appendChild(labelDiv);
+
+            parentDiv.appendChild(draggableDiv);
+            
+            instance.draggable(draggableDiv, {
                 constrain:true,
                 start : function(event) {
                     event.el.dragging = true;
@@ -152,7 +161,7 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
                 stop : function(event) {
                     event.el.dragging = false;
                     self.onNodeMoved({
-                        'id' : event.el.id,
+                        'id' : event.el.firstChild.id,
                         'x' : event.pos[0],
                         'y' : event.pos[1]
                     });
@@ -216,12 +225,15 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
                 'targetNodeId' : connection.targetId,
             });
         });
+        
+        self.onNodeSelected({
+            'id' : state.selectedNodeId
+        });
+        
     };
 
     instance.bind("ready", function() {
-        instance.batch(function() {
-            self.layoutAll();
-        });
+        self.layoutAll();
     });
 
     this.onStateChange = function() {
@@ -230,7 +242,6 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
             if (state.selectedNodeId != null) {
                 var node = document.getElementById(state.selectedNodeId);
                 if (node != null) {
-                    node.innerHTML = findNode(state.selectedNodeId).text;
                     node.className = node.className + " selected ";
                 }
             }
@@ -249,12 +260,9 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
     };
     
     var unselectAll = function() {
-        var diagramDiv = document.getElementById("diagram");
-        var children = diagramDiv.childNodes;
+        var children = document.getElementsByClassName("diagram-node");
         for (var i = 0; i < children.length; i++) {
-            if (children[i].tagName == 'DIV') {
-                children[i].className = children[i].className.replace(/(?:^|\s)selected(?!\S)/g, '');
-            }
+            children[i].className = children[i].className.replace(/(?:^|\s)selected(?!\S)/g, '');
         }
         
         var connections = instance.getAllConnections();
