@@ -8,6 +8,8 @@ public class MailServer {
 
     public static final String SETTING_HOST_NAME = "mail.host";
     
+    public static final String SETTING_TRANSPORT = "mail.transport";
+    
     public static final String SETTING_PORT_NUMBER = "mail.port";
     
     public static final String SETTING_FROM = "mail.from";
@@ -22,6 +24,8 @@ public class MailServer {
     
     private String hostName;
     
+    private String transport;
+
     private int portNumber;
     
     private String from;
@@ -42,8 +46,6 @@ public class MailServer {
         prop.setProperty(MailServer.SETTING_HOST_NAME, StringUtils.trimToEmpty(hostName));
         prop.setProperty(MailServer.SETTING_PORT_NUMBER, String.valueOf(portNumber));
         prop.setProperty(MailServer.SETTING_FROM, StringUtils.trimToEmpty(from));
-        prop.setProperty(MailServer.SETTING_USERNAME, StringUtils.trimToEmpty(username));
-        prop.setProperty(MailServer.SETTING_PASSWORD, StringUtils.trimToEmpty(password));
         prop.setProperty(MailServer.SETTING_USE_TLS, Boolean.toString(useTls));
         prop.setProperty(MailServer.SETTING_USE_AUTH, Boolean.toString(useAuth));
         return prop;
@@ -103,6 +105,14 @@ public class MailServer {
 
     public void setUseAuth(boolean useAuth) {
         this.useAuth = useAuth;
+    }
+
+    public String getTransport() {
+        return transport;
+    }
+
+    public void setTransport(String transport) {
+        this.transport = transport;
     }
 
 }

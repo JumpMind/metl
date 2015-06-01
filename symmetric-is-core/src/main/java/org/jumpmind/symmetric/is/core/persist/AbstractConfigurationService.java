@@ -941,8 +941,11 @@ abstract class AbstractConfigurationService extends AbstractService implements
     public MailServer findMailServer() {
         MailServer mailServer = new MailServer();
         mailServer.setHostName(getGlobalSettingValue(MailServer.SETTING_HOST_NAME, "localhost"));
+        mailServer.setTransport(getGlobalSettingValue(MailServer.SETTING_TRANSPORT, "smtp"));
         mailServer.setPortNumber(Integer.parseInt(getGlobalSettingValue(MailServer.SETTING_PORT_NUMBER, "25")));
         mailServer.setFrom(getGlobalSettingValue(MailServer.SETTING_FROM, "symmetricis@localhost"));
+        mailServer.setUseTls(Boolean.parseBoolean(getGlobalSettingValue(MailServer.SETTING_USE_TLS, "false")));
+        mailServer.setUseAuth(Boolean.parseBoolean(getGlobalSettingValue(MailServer.SETTING_USE_AUTH, "false")));
         mailServer.setUsername(getGlobalSettingValue(MailServer.SETTING_USERNAME, null));
         mailServer.setPassword(getGlobalSettingValue(MailServer.SETTING_PASSWORD, null));
         return mailServer;

@@ -10,6 +10,7 @@ import org.jumpmind.symmetric.is.core.model.AgentDeploymentParameter;
 import org.jumpmind.symmetric.is.core.model.StartType;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
+import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 
@@ -17,9 +18,6 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
@@ -48,11 +46,15 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     TextField startExpressionTextField;
     
     AgentDeploymentChangeListener listener;
+    
+    TabbedPanel tabbedPanel;
         
-    public EditAgentDeploymentPanel(ApplicationContext context, AgentDeployment agentDeployment, AgentDeploymentChangeListener listener) {
+    public EditAgentDeploymentPanel(ApplicationContext context, AgentDeployment agentDeployment, AgentDeploymentChangeListener listener, 
+            TabbedPanel tabbedPanel) {
         this.context = context;
         this.agentDeployment = agentDeployment;
         this.listener = listener;
+        this.tabbedPanel = tabbedPanel;
 
         VerticalLayout vlay = new VerticalLayout();
         FormLayout form = new FormLayout();
@@ -61,10 +63,6 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
         form.addComponent(getNameComponent());
         form.addComponent(getLogLevelComponent());
         form.addComponent(getStartTypeComponent());
-        
-        Button notificationButton = new Button("Notifications");
-        notificationButton.addClickListener(new NotificationClickListener());
-        form.addComponent(notificationButton);        
 
         vlay.addComponent(form);
         cronLayout = new HorizontalLayout();
@@ -333,13 +331,6 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
                 return textField;
             }
             return null;
-        }
-    }
-
-    class NotificationClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            EditEmailNotificationWindow window = new EditEmailNotificationWindow(context);
-            window.showAtSize(0.5);
         }
     }
 
