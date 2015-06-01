@@ -16,6 +16,7 @@ public class Node implements Serializable {
     String outputLabel;
     String inputLabel;
     String text;    
+    String name;
     String id = UUID.randomUUID().toString();
     List<String> targetNodeIds = new ArrayList<String>();
 
@@ -24,6 +25,14 @@ public class Node implements Serializable {
     }
     
     public Node() {
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public String getName() {
+        return name;
     }
     
     public int getX() {

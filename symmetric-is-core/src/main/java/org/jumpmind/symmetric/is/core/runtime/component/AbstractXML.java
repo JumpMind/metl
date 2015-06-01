@@ -11,7 +11,7 @@ import org.jdom2.filter.ElementFilter;
 import org.jdom2.output.XMLOutputter;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 
 abstract public class AbstractXML extends AbstractComponentRuntime {
 

@@ -9,22 +9,22 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "components", propOrder = {
-    "component"
+@XmlType(name = "choices", propOrder = {
+    "choice"
 })
-public class XMLComponents implements Serializable {
+public class XMLSettingChoices implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @XmlElement(required = true)
-    protected List<XMLComponent> component;
-    
-    public void setComponent(List<XMLComponent> components) {
-        this.component = components;
-    }
-    
-    public List<XMLComponent> getComponent() {
-        return component;
-    }
+    @XmlElement(name="choice", required = true)
+    protected List<String> choice;
 
+    public void setChoice(List<String> choice) {
+        this.choice = choice;
+    }
+    
+    public List<String> getChoice() {
+        return choice;
+    }
+    
 }

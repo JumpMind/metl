@@ -2,10 +2,13 @@
 	position: absolute;
 }
 
+.diagram-node-wrapper {
+    position: absolute;
+    z-index: 1;	
+}
+
 .diagram-node {
 	padding: 12px;
-	position: absolute;
-	z-index: 1;
 	text-align: center;
 	border: 2px solid #2e6f9a;
 	box-shadow: 2px 2px 19px #e0e0e0;
@@ -22,6 +25,15 @@
 	-webkit-transition: background-color 0.25s ease-in;
 	-moz-transition: background-color 0.25s ease-in;
 	transition: background-color 0.25s ease-in;
+}
+
+.diagram-node-label {
+    word-wrap: break-word;
+    text-align:center;
+    width: 110px;
+    margin-left: -15px;
+    margin-top: 5px;
+    height: auto;
 }
 
 .diagram-node.selected {

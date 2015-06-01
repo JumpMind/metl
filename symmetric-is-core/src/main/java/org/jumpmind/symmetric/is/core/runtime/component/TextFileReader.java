@@ -13,13 +13,14 @@ import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamable;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
-import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.util.FormatUtils;
 
 @ComponentDefinition(

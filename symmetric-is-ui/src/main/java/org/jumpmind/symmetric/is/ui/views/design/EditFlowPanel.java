@@ -324,8 +324,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             String imageText = String
                     .format("<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>",
                             componentPalette.getBase64RepresentationOfImageForComponentType(type));
-            node.setText(imageText + "<br><div style='width: 100px; margin-left:-25px'><i>" + name
-                    + "</i></div>");
+            
+            node.setText(imageText);
+            node.setName(name);
             node.setId(flowStep.getId());
             node.setX(flowStep.getX());
             node.setY(flowStep.getY());

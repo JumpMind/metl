@@ -13,8 +13,9 @@ import org.apache.tools.ant.taskdefs.PumpStreamHandler;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.csv.CsvReader;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.Message;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.util.FormatUtils;
 
@@ -52,8 +53,15 @@ public class Execute extends AbstractComponentRuntime {
         if (isBlank(line)) {
             throw new IllegalStateException("A command is required by this component");
         }
+        
+        this.commands = parseCommand(line);
+
+    }
+    
+    protected String[] parseCommand(String commandLine) {
         try {
-            CsvReader csvReader = new CsvReader(new ByteArrayInputStream(line.getBytes()), Charset.forName("utf-8"));
+            String[] commands = null;
+            CsvReader csvReader = new CsvReader(new ByteArrayInputStream(commandLine.getBytes()), Charset.forName("utf-8"));
             csvReader.setDelimiter(' ');
             csvReader.setTextQualifier('"');
             csvReader.setUseTextQualifier(true);
@@ -61,10 +69,11 @@ public class Execute extends AbstractComponentRuntime {
             if (csvReader.readRecord()) {
                 commands = csvReader.getValues();
             }
+            return commands;
         } catch (Exception e) {
             throw new IoException(e);
         }
-
+        
     }
 
     @Override
