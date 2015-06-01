@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-  <xs:element name="components" type="xmlComponents"/>
+  <xs:element name="components" type="components"/>
 
   <xs:complexType name="componentXmlFactory">
     <xs:sequence/>
@@ -49,7 +49,7 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="xmlComponents">
+  <xs:complexType name="components">
     <xs:sequence>
       <xs:element name="component" type="component" maxOccurs="unbounded"/>
     </xs:sequence>
@@ -57,11 +57,11 @@
 
   <xs:simpleType name="messageType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="entity"/>
-      <xs:enumeration value="text"/>
+      <xs:enumeration value="none"/>
       <xs:enumeration value="binary"/>
       <xs:enumeration value="any"/>
-      <xs:enumeration value="none"/>
+      <xs:enumeration value="entity"/>
+      <xs:enumeration value="text"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -76,15 +76,15 @@
 
   <xs:simpleType name="type">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="password"/>
       <xs:enumeration value="xml"/>
       <xs:enumeration value="integer"/>
-      <xs:enumeration value="source step"/>
+      <xs:enumeration value="choice"/>
       <xs:enumeration value="boolean"/>
-      <xs:enumeration value="password"/>
+      <xs:enumeration value="source step"/>
+      <xs:enumeration value="multiline_text"/>
       <xs:enumeration value="text"/>
       <xs:enumeration value="script"/>
-      <xs:enumeration value="multiline_text"/>
-      <xs:enumeration value="choice"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

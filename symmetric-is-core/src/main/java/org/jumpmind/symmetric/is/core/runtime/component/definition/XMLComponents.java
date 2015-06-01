@@ -6,10 +6,12 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "components")
+@XmlType(name = "components", propOrder = {
+    "component"
+})
 public class XMLComponents implements Serializable {
 
     private static final long serialVersionUID = 1L;
