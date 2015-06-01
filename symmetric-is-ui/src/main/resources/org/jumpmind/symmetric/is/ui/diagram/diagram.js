@@ -241,8 +241,9 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
             unselectAll();  
             if (state.selectedNodeId != null) {
                 var node = document.getElementById(state.selectedNodeId);
-                if (node != null) {
+                if (node != null) {                    
                     node.className = node.className + " selected ";
+                    node.parentNode.childNodes[1].innerHTML = findNode(state.selectedNodeId).name;
                 }
             }
         });
