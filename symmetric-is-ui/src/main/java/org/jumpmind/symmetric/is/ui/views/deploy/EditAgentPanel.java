@@ -117,11 +117,6 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         editAgentLayout.addComponent(parameterButton);
         editAgentLayout.setComponentAlignment(parameterButton, Alignment.BOTTOM_LEFT);
 
-        Button notificationButton = new Button("Notifications");
-        notificationButton.addClickListener(new NotificationClickListener());
-        editAgentLayout.addComponent(notificationButton);
-        editAgentLayout.setComponentAlignment(notificationButton, Alignment.BOTTOM_LEFT);
-
         HorizontalLayout buttonGroup = new HorizontalLayout();
         
         final TextField hostNameField = new TextField("Hostname");
@@ -394,7 +389,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
             AgentDeploymentSummary summary = (AgentDeploymentSummary) getSelectedItems().iterator().next();
             if (summary.isFlow()) {
                 AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
-                EditAgentDeploymentPanel editPanel = new EditAgentDeploymentPanel(context, deployment, EditAgentPanel.this);
+                EditAgentDeploymentPanel editPanel = new EditAgentDeploymentPanel(context, deployment, EditAgentPanel.this, tabbedPanel);
                 tabbedPanel.addCloseableTab(deployment.getId(), deployment.getName(), Icons.DEPLOYMENT, editPanel);
             } else {
                 AgentResource agentResource = context.getConfigurationService().findAgentResource(agent.getId(), summary.getId());
@@ -500,13 +495,6 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
     class ParameterClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
             EditAgentParametersWindow window = new EditAgentParametersWindow(context, agent);
-            window.showAtSize(0.5);
-        }
-    }
-
-    class NotificationClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            EditEmailNotificationWindow window = new EditEmailNotificationWindow(context);
             window.showAtSize(0.5);
         }
     }

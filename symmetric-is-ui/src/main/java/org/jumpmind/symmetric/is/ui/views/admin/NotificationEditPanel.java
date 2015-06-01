@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.ui.views.admin;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -42,6 +43,14 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
     TextArea messageField;
     
     CheckBox enableField;
+    
+    ValueChangeListener saveListener;
+    
+    LevelFieldListener levelFieldListener;
+    
+    LinkFieldListener linkFieldListener;
+    
+    EventFieldListener eventFieldListener;
     
     Map<String, String> sampleSubjectByEvent;
     
@@ -96,7 +105,7 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
         recipientsField.setColumns(20);
         recipientsField.setRows(10);
         recipientsField.setInputPrompt("address1@example.com\r\naddress2@example.com");
-        recipientsField.setDescription("Email addresses of recipients, separated by commas or whitespace");
+        recipientsField.setDescription("Email addresses of recipients, separated by commas.");
         recipientsField.setImmediate(true);
         form.addComponent(recipientsField);
         
@@ -131,16 +140,11 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
             eventField.setValue(notification.getEventType());
         }
 
-        levelField.addValueChangeListener(new LevelChangeListener());
-        linkField.addValueChangeListener(new LinkChangeListener());
-        eventField.addValueChangeListener(new EventChangeListener());
-
-        ValueChangeListener listener = new FieldChangeListener();
-        nameField.addValueChangeListener(listener);
-        recipientsField.addValueChangeListener(listener);
-        subjectField.addValueChangeListener(listener);
-        messageField.addValueChangeListener(listener);
-        enableField.addValueChangeListener(listener);
+        levelFieldListener = new LevelFieldListener();
+        linkFieldListener = new LinkFieldListener();
+        eventFieldListener = new EventFieldListener();
+        saveListener = new FieldChangeListener();
+        enableAutoSave();
 
         addComponent(form);
         setMargin(true);
@@ -157,6 +161,28 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
 
     @Override
     public void selected() {
+    }
+
+    private void enableAutoSave() {
+        levelField.addValueChangeListener(levelFieldListener);
+        linkField.addValueChangeListener(linkFieldListener);
+        eventField.addValueChangeListener(eventFieldListener);
+        nameField.addValueChangeListener(saveListener);
+        recipientsField.addValueChangeListener(saveListener);
+        subjectField.addValueChangeListener(saveListener);
+        messageField.addValueChangeListener(saveListener);
+        enableField.addValueChangeListener(saveListener);
+    }
+
+    private void disableAutoSave() {
+        levelField.removeValueChangeListener(levelFieldListener);
+        linkField.removeValueChangeListener(linkFieldListener);
+        eventField.removeValueChangeListener(eventFieldListener);
+        nameField.removeValueChangeListener(saveListener);
+        recipientsField.removeValueChangeListener(saveListener);
+        subjectField.removeValueChangeListener(saveListener);
+        messageField.removeValueChangeListener(saveListener);
+        enableField.removeValueChangeListener(saveListener);
     }
 
     private void saveNotification() {
@@ -184,15 +210,23 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
         } else if (level.equals(Notification.Level.AGENT.toString())) {
             linkField.setEnabled(true);
             for (Agent agent : context.getConfigurationService().findAgents()) {
-                linkField.addItem(agent.getId());
-                linkField.setItemCaption(agent.getId(), agent.getName());
+                if (agent.isDeleted()) {
+                    linkField.addItem(agent.getId());
+                    linkField.setItemCaption(agent.getId(), agent.getName());
+                }
             }
         } else if (level.equals(Notification.Level.DEPLOYMENT.toString())) {
             linkField.setEnabled(true);
-            for (AgentDeployment deployment : context.getConfigurationService().findAgentDeployments()) {
-                linkField.addItem(deployment.getId());
-                linkField.setItemCaption(deployment.getId(), deployment.getName());
-            }
+            List<Agent> agents = context.getConfigurationService().findAgents();
+            for (Agent agent : agents) {
+                if (!agent.isDeleted()) {
+                    context.getConfigurationService().refresh(agent);
+                    for (AgentDeployment deployment : agent.getAgentDeployments()) {
+                        linkField.addItem(deployment.getId());
+                        linkField.setItemCaption(deployment.getId(), agent.getName() + "/" + deployment.getName());                        
+                    }
+                }
+            }            
         }
     }
     
@@ -221,24 +255,30 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
         messageField.setValue(sampleMessageByEvent.get(eventField.getValue()));
     }
 
-    class LevelChangeListener implements ValueChangeListener {
+    class LevelFieldListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
-            updateLinks();
+            disableAutoSave();
             updateEventTypes();
+            updateLinks();
+            enableAutoSave();
             saveNotification();
         }
     }
 
-    class LinkChangeListener implements ValueChangeListener {
+    class LinkFieldListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
+            disableAutoSave();
             updateName();
+            enableAutoSave();
             saveNotification();
         }
     }
 
-    class EventChangeListener implements ValueChangeListener {
+    class EventFieldListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
+            disableAutoSave();
             updateName();
+            enableAutoSave();
             saveNotification();
         }
     }
