@@ -3,48 +3,48 @@
             xsi:schemaLocation="http://www.jumpmind.com/schema/components components.xsd">
             
     <component id="Database Writer" category="WRITER" 
-               inputMessageType="ENTITY" outputMessageType="NONE" 
-               resourceCategory="DATASOURCE"
+               inputMessageType="entity" outputMessageType="none" 
+               resourceCategory="datasource"
                inputOutputModelsMatch="false"
                shareable="true">
        <name>Database Writer</name>
        <className>org.jumpmind.symmetric.is.core.runtime.component.DbWriter</className>
        <description></description>
        <settings>
-         <setting id="catalog" type="TEXT">
+         <setting id="catalog" type="text">
             <name>Catalog</name>
             <description></description>
          </setting>
-         <setting id="schema" type="TEXT">
+         <setting id="schema" type="text">
             <name>Scehma</name>
             <description></description>
          </setting>
-         <setting id="db.writer.replace" type="BOOLEAN">
+         <setting id="db.writer.replace" type="boolean">
             <name>Replace rows if they exist</name>
             <defaultValue>false</defaultValue>
             <description></description>
          </setting>
-         <setting id="db.writer.update.first" type="BOOLEAN">
+         <setting id="db.writer.update.first" type="boolean">
             <name>Update rows first instead of insert</name>
             <defaultValue>false</defaultValue>
             <description></description>
          </setting>         
-         <setting id="db.writer.insert.fallback" type="BOOLEAN">
+         <setting id="db.writer.insert.fallback" type="boolean">
             <name>Fallback to insert if no rows updated</name>
             <defaultValue>false</defaultValue>
             <description></description>
          </setting>
-         <setting id="db.writer.quote.identifiers" type="BOOLEAN">
+         <setting id="db.writer.quote.identifiers" type="boolean">
             <name>Quote table and column names</name>
             <defaultValue>false</defaultValue>
             <description></description>
          </setting>
-         <setting id="db.writer.fit.to.column" type="BOOLEAN">
+         <setting id="db.writer.fit.to.column" type="boolean">
             <name>Trim character data to fit within column</name>
             <defaultValue>false</defaultValue>
             <description></description>
          </setting>         
-         <setting id="stop.processing.on.error" type="BOOLEAN">
+         <setting id="stop.processing.on.error" type="boolean">
             <name>Stop Processing Msgs on Error</name>
             <defaultValue>true</defaultValue>
             <description></description>

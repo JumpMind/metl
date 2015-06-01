@@ -5,7 +5,7 @@
 
   <xs:complexType name="component">
     <xs:all>
-      <xs:element name="description" type="xs:string"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
       <xs:element name="name" type="xs:string"/>
       <xs:element name="className" type="xs:string"/>
       <xs:element name="settings" type="settings" minOccurs="0"/>
@@ -14,8 +14,8 @@
     <xs:attribute name="category" type="xs:string" use="required"/>
     <xs:attribute name="shareable" type="xs:boolean" use="required"/>
     <xs:attribute name="inputOutputModelsMatch" type="xs:boolean" use="required"/>
-    <xs:attribute name="inputMessageType" type="xs:string" use="required"/>
-    <xs:attribute name="outputMessageType" type="xs:string" use="required"/>
+    <xs:attribute name="inputMessageType" type="messageType" use="required"/>
+    <xs:attribute name="outputMessageType" type="messageType" use="required"/>
     <xs:attribute name="resourceCategory" type="resourceCategory" use="required"/>
   </xs:complexType>
 
@@ -26,13 +26,15 @@
   </xs:complexType>
 
   <xs:complexType name="setting">
-    <xs:sequence/>
-  </xs:complexType>
-
-  <xs:complexType name="components">
     <xs:sequence>
-      <xs:element name="component" type="component" maxOccurs="unbounded"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="defaultValue" type="xs:string" minOccurs="0"/>
+      <xs:element name="choices" type="choices" minOccurs="0"/>
     </xs:sequence>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="type" type="type" use="required"/>
+    <xs:attribute name="required" type="xs:boolean" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="choices">
@@ -41,12 +43,42 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="components">
+    <xs:sequence>
+      <xs:element name="component" type="component" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="messageType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="any"/>
+      <xs:enumeration value="entity"/>
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="text"/>
+      <xs:enumeration value="binary"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="resourceCategory">
     <xs:restriction base="xs:string">
       <xs:enumeration value="streamable"/>
-      <xs:enumeration value="none"/>
       <xs:enumeration value="any"/>
+      <xs:enumeration value="none"/>
       <xs:enumeration value="datasource"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="choice"/>
+      <xs:enumeration value="password"/>
+      <xs:enumeration value="text"/>
+      <xs:enumeration value="script"/>
+      <xs:enumeration value="multiline_text"/>
+      <xs:enumeration value="xml"/>
+      <xs:enumeration value="integer"/>
+      <xs:enumeration value="source step"/>
+      <xs:enumeration value="boolean"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>
