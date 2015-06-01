@@ -13,8 +13,8 @@ import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.runtime.ExecutionTrackerLogger;
-import org.jumpmind.symmetric.is.core.runtime.component.ComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.ComponentXmlFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
@@ -37,7 +37,7 @@ public class FlowRuntimeTest {
     @Before
     public void setup() throws Exception {
     	
-    	componentFactory = new ComponentFactory();
+    	componentFactory = new ComponentXmlFactory();
     	resourceFactory = new ResourceFactory();
     	threadService = Executors.newFixedThreadPool(5);
     	

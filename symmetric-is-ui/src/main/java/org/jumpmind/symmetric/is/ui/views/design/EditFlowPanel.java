@@ -21,8 +21,8 @@ import org.jumpmind.symmetric.is.core.model.Folder;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
-import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
@@ -331,10 +331,10 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
             node.setX(flowStep.getX());
             node.setY(flowStep.getY());
 
-            ComponentDefinition definition = context.getComponentFactory()
-                    .getComponentDefinitionForComponentType(type);
-            node.setInputLabel(definition.inputMessage().getLetter());
-            node.setOutputLabel(definition.outgoingMessage().getLetter());
+            XMLComponent definition = context.getComponentFactory()
+                    .getComonentDefinition(type);
+            node.setInputLabel(definition.getInputMessageType().getLetter());
+            node.setOutputLabel(definition.getOutputMessageType().getLetter());
 
             for (FlowStepLink link : links) {
                 if (link.getSourceStepId().equals(node.getId())) {
@@ -427,13 +427,13 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                     Component targetComp = flow.findFlowStepWithId(event.getTargetNodeId())
                             .getComponent();
                     IComponentFactory factory = context.getComponentFactory();
-                    ComponentDefinition sourceDefn = factory
-                            .getComponentDefinitionForComponentType(sourceComp.getType());
+                    XMLComponent sourceDefn = factory
+                            .getComonentDefinition(sourceComp.getType());
 
                     if (targetComp.getInputModel() == null) {
                         if (sourceComp.getOutputModel() != null) {
                             targetComp.setInputModel(sourceComp.getOutputModel());
-                        } else if (sourceDefn.inputOutputModelsMatch()
+                        } else if (sourceDefn.isInputOutputModelsMatch()
                                 && sourceComp.getInputModel() != null) {
                             targetComp.setInputModel(sourceComp.getInputModel());
                         }
@@ -445,7 +445,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
                         }
                     }
                     
-                    if (sourceComp.getInputModel() == null && sourceDefn.inputOutputModelsMatch()) {
+                    if (sourceComp.getInputModel() == null && sourceDefn.isInputOutputModelsMatch()) {
                         if (targetComp.getInputModel() != null) {
                             sourceComp.setInputModel(targetComp.getInputModel());
                         }
