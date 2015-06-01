@@ -1,13 +1,13 @@
 apply from: '../symmetric-is-assemble/common.gradle'
 
 configurations {
-    jaxb
+    jaxbConfig
 }
  
 dependencies {
-    jaxb 'org.glassfish.jaxb:jaxb-core:2.2.11'
-    jaxb 'org.glassfish.jaxb:jaxb-jxc:2.2.11'
-    jaxb 'org.glassfish.jaxb:jaxb-xjc:2.2.11'
+    jaxbConfig 'org.glassfish.jaxb:jaxb-core:2.2.11'
+    jaxbConfig 'org.glassfish.jaxb:jaxb-jxc:2.2.11'
+    jaxbConfig 'org.glassfish.jaxb:jaxb-xjc:2.2.11'
 }
 
 dependencies {
@@ -50,7 +50,7 @@ task (schemaspy, dependsOn: 'classes', type: JavaExec) {
 
 task xsdgen () {
   doLast {
-    ant.taskdef(name: 'schemagen', classname: 'com.sun.tools.jxc.SchemaGenTask', classpath: configurations.jaxb.asPath)
+    ant.taskdef(name: 'schemagen', classname: 'com.sun.tools.jxc.SchemaGenTask', classpath: configurations.jaxbConfig.asPath)
     ant.schemagen(
       srcdir: 'src/main/java/org/jumpmind/symmetric/is/core/runtime/component/definition',
       destdir: 'src/main/resources',
