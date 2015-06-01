@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime.component.definition;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -11,7 +12,9 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "choices", propOrder = {
     "choice"
 })
-public class XMLSettingChoices {
+public class XMLSettingChoices implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @XmlElement(name="choice", required = true)
     protected List<String> choice;

@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.core.runtime.component.definition;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -10,7 +12,9 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "component", propOrder = {})
-public class XMLComponent {
+public class XMLComponent implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @XmlType
     @XmlEnum(String.class)
@@ -35,16 +39,14 @@ public class XMLComponent {
     @XmlType
     @XmlEnum
     public enum ResourceCategory {
-
         @XmlEnumValue("datasource") DATASOURCE, 
         @XmlEnumValue("streamable") STREAMABLE, 
         @XmlEnumValue("none") NONE, 
-        @XmlEnumValue("any") ANY
-        
+        @XmlEnumValue("any") ANY        
     }
     
 
-    @XmlElement(required = true)
+    @XmlElement(required = false)
     protected String description;
 
     @XmlElement(required = true)

@@ -5,16 +5,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
+
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SettingDefinition {
 
-    public enum Type {
-        TEXT, INTEGER, BOOLEAN, CHOICE, PASSWORD, XML, MULTILINE_TEXT, SCRIPT, SOURCE_STEP
-    };
-
     int order() default 0;
-
+    
     Type type();
 
     boolean required() default false;

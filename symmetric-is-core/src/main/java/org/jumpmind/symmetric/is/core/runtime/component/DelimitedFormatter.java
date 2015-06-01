@@ -22,11 +22,11 @@ import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
 @ComponentDefinition(

@@ -8,8 +8,8 @@ import static org.jumpmind.symmetric.is.core.runtime.resource.HttpStreamable.SEC
 
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 
 @ResourceDefinition(typeName = Http.TYPE, resourceCategory = ResourceCategory.STREAMABLE)
 public class Http extends AbstractResourceRuntime {
