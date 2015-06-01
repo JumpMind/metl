@@ -48,6 +48,9 @@ public class XMLSetting implements Serializable {
     @XmlAttribute(required = false)
     protected boolean required = false;
     
+    @XmlAttribute(required = false)
+    protected boolean visible = true;
+    
     @XmlElement(required = false)
     protected XMLSettingChoices choices;
 
@@ -107,6 +110,13 @@ public class XMLSetting implements Serializable {
         this.choices = choices;
     }
     
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+    
+    public boolean isVisible() {
+        return visible;
+    }
     
     
     

@@ -61,19 +61,19 @@ public class XMLComponent implements Serializable {
     @XmlAttribute(required = true)
     protected String category;
 
-    @XmlAttribute(required = true)
+    @XmlAttribute(required = false)
     protected boolean shareable;
 
-    @XmlAttribute(required = true)
+    @XmlAttribute(required = false)
     protected boolean inputOutputModelsMatch;
 
-    @XmlAttribute(required = true)
+    @XmlAttribute(required = false)
     protected MessageType inputMessageType;
 
-    @XmlAttribute(required = true)
+    @XmlAttribute(required = false)
     protected MessageType outputMessageType;
 
-    @XmlAttribute(required = true)
+    @XmlAttribute(required = false)
     protected ResourceCategory resourceCategory;
     
     @XmlElement

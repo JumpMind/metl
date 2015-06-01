@@ -14,9 +14,9 @@
     <xs:attribute name="category" type="xs:string" use="required"/>
     <xs:attribute name="shareable" type="xs:boolean" use="required"/>
     <xs:attribute name="inputOutputModelsMatch" type="xs:boolean" use="required"/>
-    <xs:attribute name="inputMessageType" type="messageType" use="required"/>
-    <xs:attribute name="outputMessageType" type="messageType" use="required"/>
-    <xs:attribute name="resourceCategory" type="resourceCategory" use="required"/>
+    <xs:attribute name="inputMessageType" type="messageType"/>
+    <xs:attribute name="outputMessageType" type="messageType"/>
+    <xs:attribute name="resourceCategory" type="resourceCategory"/>
   </xs:complexType>
 
   <xs:complexType name="settings">
@@ -35,6 +35,7 @@
     <xs:attribute name="id" type="xs:string" use="required"/>
     <xs:attribute name="type" type="type" use="required"/>
     <xs:attribute name="required" type="xs:boolean" use="required"/>
+    <xs:attribute name="visible" type="xs:boolean" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="choices">
@@ -52,33 +53,33 @@
   <xs:simpleType name="messageType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="any"/>
-      <xs:enumeration value="entity"/>
-      <xs:enumeration value="none"/>
-      <xs:enumeration value="text"/>
       <xs:enumeration value="binary"/>
+      <xs:enumeration value="text"/>
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="entity"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="resourceCategory">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="streamable"/>
-      <xs:enumeration value="any"/>
-      <xs:enumeration value="none"/>
       <xs:enumeration value="datasource"/>
+      <xs:enumeration value="streamable"/>
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="any"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="type">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="choice"/>
-      <xs:enumeration value="password"/>
-      <xs:enumeration value="text"/>
       <xs:enumeration value="script"/>
+      <xs:enumeration value="boolean"/>
+      <xs:enumeration value="choice"/>
       <xs:enumeration value="multiline_text"/>
       <xs:enumeration value="xml"/>
-      <xs:enumeration value="integer"/>
+      <xs:enumeration value="text"/>
+      <xs:enumeration value="password"/>
       <xs:enumeration value="source step"/>
-      <xs:enumeration value="boolean"/>
+      <xs:enumeration value="integer"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

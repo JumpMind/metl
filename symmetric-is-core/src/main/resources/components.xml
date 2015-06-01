@@ -1,76 +1,628 @@
-<components xmlns="http://www.jumpmind.com/schema/components" 
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-            xsi:schemaLocation="http://www.jumpmind.com/schema/components components.xsd">
-            
-    <component id="Database Writer" category="WRITER" 
-               inputMessageType="entity" outputMessageType="none" 
-               resourceCategory="datasource"
-               inputOutputModelsMatch="false"
-               shareable="true">
-       <name>Database Writer</name>
-       <className>org.jumpmind.symmetric.is.core.runtime.component.DbWriter</className>
-       <description></description>
-       <settings>
-         <setting id="catalog" type="text">
-            <name>Catalog</name>
-            <description></description>
-         </setting>
-         <setting id="schema" type="text">
-            <name>Scehma</name>
-            <description></description>
-         </setting>
-         <setting id="db.writer.replace" type="boolean">
-            <name>Replace rows if they exist</name>
-            <defaultValue>false</defaultValue>
-            <description></description>
-         </setting>
-         <setting id="db.writer.update.first" type="boolean">
-            <name>Update rows first instead of insert</name>
-            <defaultValue>false</defaultValue>
-            <description></description>
-         </setting>         
-         <setting id="db.writer.insert.fallback" type="boolean">
-            <name>Fallback to insert if no rows updated</name>
-            <defaultValue>false</defaultValue>
-            <description></description>
-         </setting>
-         <setting id="db.writer.quote.identifiers" type="boolean">
-            <name>Quote table and column names</name>
-            <defaultValue>false</defaultValue>
-            <description></description>
-         </setting>
-         <setting id="db.writer.fit.to.column" type="boolean">
-            <name>Trim character data to fit within column</name>
-            <defaultValue>false</defaultValue>
-            <description></description>
-         </setting>         
-         <setting id="stop.processing.on.error" type="boolean">
-            <name>Stop Processing Msgs on Error</name>
-            <defaultValue>true</defaultValue>
-            <description></description>
-         </setting>         
-       </settings>
+<components xmlns="http://www.jumpmind.com/schema/components" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.jumpmind.com/schema/components components.xsd">
+
+    <component id='Binary File Reader' category='READER' inputMessageType='none' outputMessageType='binary' resourceCategory='streamable' inputOutputModelsMatch='false'>
+        <name>Binary File Reader</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.BinaryFileReader</classname>
+        <description></description>
+        <settings>
+            <setting id='binaryfilereader.relative.path' type='text' required='true'>
+                <name>Path and File</name>
+                <description></description>
+            </setting>
+            <setting id='binaryfilereader.size.per.message' type='integer' required='false'>
+                <name>Size / Msg (KB)</name>
+                <defaultValue>7</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
     </component>
-    
-    <component id="" category="" 
-               inputMessage="" outputMessage="" 
-               resourceCategory=""
-               shareable="true">
-       <name></name>
-       <icon></icon>
-       <className>org.jumpmind.symmetric.is.core.runtime.component.XxxxXxx</className>
-       <description></description>      
-       <settings>
-         <setting id="" type="" required="">
-            <name></name>
-            <defaultValue></defaultValue>
-            <description></description>
-            <choices>
-              <choice>one</choice>
-              <choice>two</choice>
-              <choice>three</choice>              
-            </choices>
-         </setting>
-       </settings>    
+    <component id='Binary File Writer' category='WRITER' inputMessageType='binary' outputMessageType='none' resourceCategory='streamable' inputOutputModelsMatch='false'>
+        <name>Binary File Writer</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.BinaryFileWriter</classname>
+        <description></description>
+        <settings>
+            <setting id='binaryfilewriter.relative.path' type='text' required='true'>
+                <name>Path and File</name>
+                <description></description>
+            </setting>
+        </settings>
     </component>
+    <component id='Database Reader' category='READER' inputMessageType='any' outputMessageType='entity' resourceCategory='datasource' inputOutputModelsMatch='false'>
+        <name>Database Reader</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.DbReader</classname>
+        <description></description>
+        <settings>
+            <setting id='db.reader.sql' type='multiline_text' required='true'>
+                <name>Sql</name>
+                <description></description>
+            </setting>
+            <setting id='db.reader.rows.per.message' type='integer' required='true'>
+                <name>Rows/Msg</name>
+                <defaultValue>1</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='db.reader.trim.columns' type='boolean' required='true'>
+                <name>Trim Columns</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='db.reader.match.on.column.name' type='boolean' required='true'>
+                <name>Match On Column Name</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='db.reader.message.manipulation.strategy' type='choice' required='false'>
+                <name>Msg Strategy</name>
+                <defaultValue>REPLACE</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>REPLACE</choice>
+                    <choice>ENHANCE</choice>
+                </choices>
+            </setting>
+        </settings>
+    </component>
+    <component id='Database Writer' category='WRITER' inputMessageType='entity' outputMessageType='none' resourceCategory='datasource' inputOutputModelsMatch='false'>
+        <name>Database Writer</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.DbWriter</classname>
+        <description></description>
+        <settings>
+            <setting id='catalog' type='text' required='false'>
+                <name>Catalog</name>
+                <description></description>
+            </setting>
+            <setting id='schema' type='text' required='false'>
+                <name>Schema</name>
+                <description></description>
+            </setting>
+            <setting id='db.writer.replace' type='boolean' required='false'>
+                <name>Replace rows if they exist</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='db.writer.update.first' type='boolean' required='false'>
+                <name>Update rows first instead of insert</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='db.writer.insert.fallback' type='boolean' required='false'>
+                <name>Fallback to insert if no rows updated</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='db.writer.quote.identifiers' type='boolean' required='false'>
+                <name>Quote table and column names</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='db.writer.fit.to.column' type='boolean' required='false'>
+                <name>Trim character data to fit within column</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='stop.processing.on.error' type='boolean' required='false'>
+                <name>Stop Processing Msgs on Error</name>
+                <defaultValue>true</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Deduper' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
+        <name>Deduper</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.Deduper</classname>
+        <description></description>
+        <settings>
+            <setting id='rows.per.message' type='integer' required='false'>
+                <name>Rows/Msg</name>
+                <defaultValue>10000</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Delay' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='false'>
+        <name>Delay</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.Delay</classname>
+        <description></description>
+        <settings>
+            <setting id='delay.in.ms' type='integer' required='true'>
+                <name>Delay (ms)</name>
+                <defaultValue>1000</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Entity Router' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
+        <name>Entity Router</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.EntityRouter</classname>
+        <description></description>
+        <settings>
+            <setting id='rows.per.message' type='integer' required='true'>
+                <name>Rows/Msg</name>
+                <defaultValue>10000</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Execute' category='PROCESSOR' inputMessageType='any' outputMessageType='text' resourceCategory='none' inputOutputModelsMatch='false'>
+        <name>Execute</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.Execute</classname>
+        <description></description>
+        <settings>
+            <setting id='command' type='text' required='true'>
+                <name>Command</name>
+                <description></description>
+            </setting>
+            <setting id='continue.on.error' type='boolean' required='false'>
+                <name>Continue On Error</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='success.code' type='integer' required='false'>
+                <name>Success Code</name>
+                <defaultValue>0</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='File Poller' category='READER' inputMessageType='none' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
+        <name>File Poller</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.FilePoller</classname>
+        <description></description>
+        <settings>
+            <setting id='file.pattern' type='text' required='true'>
+                <name>File Pattern</name>
+                <description></description>
+            </setting>
+            <setting id='recurse' type='boolean' required='false'>
+                <name>Search Recursively</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='cancel.on.no.files' type='boolean' required='false'>
+                <name>Cancel On No Files</name>
+                <defaultValue>true</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='action.on.success' type='choice' required='false'>
+                <name>Action on Success</name>
+                <defaultValue>NONE</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>None</choice>
+                    <choice>Archive</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='archive.on.success.path' type='text' required='false'>
+                <name>Archive On Success Path</name>
+                <description></description>
+            </setting>
+            <setting id='action.on.error' type='choice' required='false'>
+                <name>Action on Error</name>
+                <defaultValue>NONE</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>None</choice>
+                    <choice>Archive</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='archive.on.error.path' type='text' required='false'>
+                <name>Archive On Error Path</name>
+                <description></description>
+            </setting>
+            <setting id='use.trigger.file' type='boolean' required='false'>
+                <name>Use Trigger File</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='trigger.file.path' type='text' required='false'>
+                <name>Relative Trigger File Path</name>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Format Delimited' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none' inputOutputModelsMatch='false'>
+        <name>Format Delimited</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter</classname>
+        <description></description>
+        <settings>
+            <setting id='delimited.formatter.delimiter' type='text' required='true'>
+                <name>Delimiter</name>
+                <defaultValue>,</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='delimited.formatter.quote.character' type='text' required='false'>
+                <name>Quote Character</name>
+                <defaultValue>"</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='delimited.formatter.header' type='boolean' required='false'>
+                <name>Header line</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Format Fixed' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none' inputOutputModelsMatch='false'>
+        <name>Format Fixed</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter</classname>
+        <description></description>
+        <settings>
+            <setting id='fixed.length.formatter.header' type='boolean' required='false'>
+                <name>Header line</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Format XML' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none' inputOutputModelsMatch='false'>
+        <name>Format XML</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.XmlFormatter</classname>
+        <description></description>
+        <settings>
+            <setting id='xml.formatter.ignore.namespace' type='boolean' required='false'>
+                <name>Ignore namespaces for XPath matching</name>
+                <defaultValue>true</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='xml.formatter.parameter.replacement' type='boolean' required='false'>
+                <name>Parameter replacement</name>
+                <defaultValue>true</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='xml.formatter.xml.format' type='choice' required='false'>
+                <name>XML Format</name>
+                <defaultValue>Pretty</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>Pretty</choice>
+                    <choice>Compact</choice>
+                    <choice>Raw</choice>
+                </choices>
+            </setting>
+        </settings>
+    </component>
+    <component id='Joiner' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
+        <name>Joiner</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.Joiner</classname>
+        <description></description>
+        <settings>
+            <setting id='rows.per.message' type='integer' required='false'>
+                <name>Rows/Msg</name>
+                <defaultValue>10</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Mapping' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='false'>
+        <name>Mapping</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.Mapping</classname>
+        <description></description>
+        <settings>
+            <setting id='set.unmapped.attributes.to.null' type='boolean' required='false'>
+                <name>Set Unmapped Attributes To Null</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Message Logger' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='true'>
+        <name>Message Logger</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.MessageLogger</classname>
+        <description></description>
+        <settings>
+        </settings>
+    </component>
+    <component id='Multiplier' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
+        <name>Multiplier</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.Multiplier</classname>
+        <description></description>
+        <settings>
+            <setting id='multiplier.source.step' type='source_step' required='true'>
+                <name>Multiplier Source</name>
+                <description></description>
+            </setting>
+            <setting id='rows.per.message' type='integer' required='false'>
+                <name>Rows/Msg</name>
+                <defaultValue>10</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='No Op' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='false'>
+        <name>No Op</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.NoOp</classname>
+        <description></description>
+        <settings>
+        </settings>
+    </component>
+    <component id='Parse Delimited' category='PROCESSOR' inputMessageType='text' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='false'>
+        <name>Parse Delimited</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.DelimitedParser</classname>
+        <description></description>
+        <settings>
+            <setting id='delimiter' type='text' required='true'>
+                <name>Delimiter</name>
+                <defaultValue>,</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='quote.character' type='text' required='false'>
+                <name>Quote Character</name>
+                <defaultValue>"</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='header.lines.to.skip' type='integer' required='false'>
+                <name>Number of Header Lines to Skip</name>
+                <defaultValue>0</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='footer.lines.to.skip' type='integer' required='false'>
+                <name>Number of Footer Lines to Skip</name>
+                <defaultValue>0</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='encoding' type='text' required='false'>
+                <name>Encoding</name>
+                <defaultValue>UTF-8</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Parse XML' category='PROCESSOR' inputMessageType='text' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='false'>
+        <name>Parse XML</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.XmlParser</classname>
+        <description></description>
+        <settings>
+            <setting id='xml.formatter.ignore.namespace' type='boolean' required='false'>
+                <name>Ignore namespaces for XPath matching</name>
+                <defaultValue>true</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Script' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='any' inputOutputModelsMatch='false'>
+        <name>Script</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.ScriptExecutor</classname>
+        <description></description>
+        <settings>
+            <setting id='imports' type='script' required='true'>
+                <name>Import Statements</name>
+                <description></description>
+            </setting>
+            <setting id='init.script' type='script' required='true'>
+                <name>Init Script</name>
+                <description></description>
+            </setting>
+            <setting id='handle.msg.script' type='script' required='true'>
+                <name>Handle Msg Script</name>
+                <description></description>
+            </setting>
+            <setting id='on.flow.error.script' type='script' required='true'>
+                <name>On Complete Script</name>
+                <description></description>
+            </setting>
+            <setting id='on.flow.error.script' type='script' required='true'>
+                <name>On Complete Script</name>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Sequence' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='datasource' inputOutputModelsMatch='true'>
+        <name>Sequence</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.SequenceGenerator</classname>
+        <description></description>
+        <settings>
+            <setting id='sequence.attribute' type='text' required='true'>
+                <name>Sequence Attribute Name</name>
+                <description></description>
+            </setting>
+            <setting id='sequence.sql' type='multiline_text' required='true'>
+                <name>Select Starting Sequence Sql</name>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Sorter' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
+        <name>Sorter</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.Sorter</classname>
+        <description></description>
+        <settings>
+            <setting id='sort.attribute' type='text' required='true'>
+                <name>Sort Entity.Attribute</name>
+                <description></description>
+            </setting>
+            <setting id='rows.per.message' type='integer' required='false'>
+                <name>Rows/Msg</name>
+                <defaultValue>10</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Sql Writer' category='WRITER' inputMessageType='any' outputMessageType='any' resourceCategory='datasource' inputOutputModelsMatch='true'>
+        <name>Sql Writer</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.SqlWriter</classname>
+        <description></description>
+        <settings>
+            <setting id='run.when' type='choice' required='false'>
+                <name>Run When</name>
+                <defaultValue>PER MESSAGE</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>PER MESSAGE</choice>
+                    <choice>ON SUCCESS</choice>
+                    <choice>PER ENTITY</choice>
+                </choices>
+            </setting>
+            <setting id='sql' type='multiline_text' required='true'>
+                <name>Sql</name>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Text File Reader' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
+        <name>Text File Reader</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.TextFileReader</classname>
+        <description></description>
+        <settings>
+            <setting id='get.file.name.from.message' type='boolean' required='false'>
+                <name>Get File Name From Message</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='textfilereader.relative.path' type='text' required='false'>
+                <name>File Path</name>
+                <description></description>
+            </setting>
+            <setting id='textfilereader.text.rows.per.message' type='integer' required='false'>
+                <name>Rows / Msg</name>
+                <defaultValue>10000</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='action.on.success' type='choice' required='false'>
+                <name>Action on Success</name>
+                <defaultValue>NONE</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>None</choice>
+                    <choice>Archive</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='archive.on.success.path' type='text' required='false'>
+                <name>Archive On Success Path</name>
+                <description></description>
+            </setting>
+            <setting id='action.on.error' type='choice' required='false'>
+                <name>Action on Error</name>
+                <defaultValue>NONE</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>None</choice>
+                    <choice>Archive</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='archive.on.error.path' type='text' required='false'>
+                <name>Archive On Error Path</name>
+                <description></description>
+            </setting>
+            <setting id='textfilereader.encoding' type='text' required='false'>
+                <name>Encoding</name>
+                <defaultValue>UTF-8</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='textfilereader.text.header.lines.to.skip' type='integer' required='false'>
+                <name>Header Lines to Skip</name>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Text File Writer' category='WRITER' inputMessageType='text' outputMessageType='none' resourceCategory='streamable' inputOutputModelsMatch='false'>
+        <name>Text File Writer</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.TextFileWriter</classname>
+        <description></description>
+        <settings>
+            <setting id='textfilewriter.relative.path' type='text' required='true'>
+                <name>Path and File</name>
+                <description></description>
+            </setting>
+            <setting id='textfilewriter.must.exist' type='boolean' required='true'>
+                <name>Must Exist</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='textfilewriter.append' type='boolean' required='true'>
+                <name>Append</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='textfilereader.text.line.terminator' type='integer' required='false'>
+                <name>Line Terminator</name>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Text Replace' category='PROCESSOR' inputMessageType='text' outputMessageType='text' resourceCategory='none' inputOutputModelsMatch='false'>
+        <name>Text Replace</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.TextReplace</classname>
+        <description></description>
+        <settings>
+            <setting id='search.for' type='text' required='true'>
+                <name>Search For (regex)</name>
+                <description></description>
+            </setting>
+            <setting id='replace.with' type='text' required='false'>
+                <name>Replace With</name>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='Transformer' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
+        <name>Transformer</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.Transformer</classname>
+        <description></description>
+        <settings>
+        </settings>
+    </component>
+    <component id='Web' category='PROCESSOR' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
+        <name>Web</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.Web</classname>
+        <description></description>
+        <settings>
+            <setting id='relative.path' type='text' required='false'>
+                <name>Append To Url</name>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='XSLT Processor' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none' inputOutputModelsMatch='false'>
+        <name>XSLT Processor</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.XsltProcessor</classname>
+        <description></description>
+        <settings>
+            <setting id='xslt.processor.output.all.attributes' type='boolean' required='false'>
+                <name>Output all attributes</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='xslt.processor.parameter.replacement' type='boolean' required='false'>
+                <name>Parameter replacement</name>
+                <defaultValue>true</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='xslt.processor.xml.format' type='choice' required='false'>
+                <name>XML Format</name>
+                <defaultValue>Pretty</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>Pretty</choice>
+                    <choice>Compact</choice>
+                    <choice>Raw</choice>
+                </choices>
+            </setting>
+        </settings>
+    </component>
+    <component id='Zip' category='WRITER' inputMessageType='text' outputMessageType='none' resourceCategory='streamable' inputOutputModelsMatch='false'>
+        <name>Zip</name>
+        <classname>org.jumpmind.symmetric.is.core.runtime.component.Zip</classname>
+        <description></description>
+        <settings>
+            <setting id='relative.path' type='text' required='false'>
+                <name>File Path</name>
+                <description></description>
+            </setting>
+            <setting id='delete.on.complete' type='boolean' required='false'>
+                <name>Delete Source Files</name>
+                <defaultValue>true</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='encoding' type='text' required='false'>
+                <name>Encoding</name>
+                <defaultValue>UTF-8</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+
 </components>
