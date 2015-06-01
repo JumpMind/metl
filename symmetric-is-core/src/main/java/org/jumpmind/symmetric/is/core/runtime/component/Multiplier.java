@@ -72,19 +72,18 @@ public class Multiplier extends AbstractComponentRuntime {
             multipliers.addAll(datas);
             multipliersInitialized = inputMessage.getHeader().isLastMessage();
             
-            Iterator<Message> messages = queuedWhileWaitingForMultiplier.iterator();
-            while (messages.hasNext()) {
-                Message message = messages.next();
-                multiply(message, messageTarget);
+            if (multipliersInitialized) {
+                Iterator<Message> messages = queuedWhileWaitingForMultiplier.iterator();
+                while (messages.hasNext()) {
+                    Message message = messages.next();
+                    multiply(message, messageTarget);
+                }
             }
-
         } else if (!multipliersInitialized) {
             queuedWhileWaitingForMultiplier.add(inputMessage);
         } else if (multipliersInitialized) {
             multiply(inputMessage, messageTarget);
         }
-    
-
     }
 
     protected void multiply(Message message, IMessageTarget messageTarget) {
