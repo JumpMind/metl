@@ -5,6 +5,7 @@ import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
 
 @ResourceDefinition(typeName=Datasource.TYPE, resourceCategory=ResourceCategory.DATASOURCE)
 public class Datasource extends AbstractResourceRuntime implements IResourceRuntime {

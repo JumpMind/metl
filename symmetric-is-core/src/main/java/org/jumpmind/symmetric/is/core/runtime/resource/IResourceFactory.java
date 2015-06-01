@@ -6,6 +6,7 @@ import java.util.Map;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
 
 public interface IResourceFactory {
 

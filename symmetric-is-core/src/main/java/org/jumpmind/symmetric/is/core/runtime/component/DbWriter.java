@@ -30,8 +30,9 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
-import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
 import org.jumpmind.util.FormatUtils;
 
 @ComponentDefinition(

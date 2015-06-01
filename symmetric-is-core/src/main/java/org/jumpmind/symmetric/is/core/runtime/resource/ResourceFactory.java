@@ -10,6 +10,7 @@ import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.AbstractFactory;
 import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
 
 public class ResourceFactory extends AbstractFactory<IResourceRuntime> implements IResourceFactory {
 

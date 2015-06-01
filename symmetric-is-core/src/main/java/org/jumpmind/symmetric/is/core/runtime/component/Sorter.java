@@ -13,6 +13,7 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
 @ComponentDefinition(

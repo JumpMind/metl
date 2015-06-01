@@ -3,6 +3,7 @@ package org.jumpmind.symmetric.is.core.runtime.resource;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition.Type;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
 
 @ResourceDefinition(typeName=Scp.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
 public class Scp extends AbstractResourceRuntime {

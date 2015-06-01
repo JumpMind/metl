@@ -8,26 +8,25 @@
       <xs:element name="description" type="xs:string"/>
       <xs:element name="name" type="xs:string"/>
       <xs:element name="className" type="xs:string"/>
+      <xs:element name="settings" type="settings" minOccurs="0"/>
     </xs:all>
     <xs:attribute name="id" type="xs:string" use="required"/>
     <xs:attribute name="category" type="xs:string" use="required"/>
     <xs:attribute name="shareable" type="xs:boolean" use="required"/>
     <xs:attribute name="inputOutputModelsMatch" type="xs:boolean" use="required"/>
-    <xs:attribute name="inputMessageType" use="required">
-      <xs:simpleType>
-        <xs:list itemType="xs:anyType"/>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="outputMessageType" use="required">
-      <xs:simpleType>
-        <xs:list itemType="xs:anyType"/>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="resourceCategory" use="required">
-      <xs:simpleType>
-        <xs:list itemType="xs:anyType"/>
-      </xs:simpleType>
-    </xs:attribute>
+    <xs:attribute name="inputMessageType" type="xs:string" use="required"/>
+    <xs:attribute name="outputMessageType" type="xs:string" use="required"/>
+    <xs:attribute name="resourceCategory" type="resourceCategory" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="settings">
+    <xs:sequence>
+      <xs:element name="setting" type="setting" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="setting">
+    <xs:sequence/>
   </xs:complexType>
 
   <xs:complexType name="components">
@@ -35,5 +34,20 @@
       <xs:element name="component" type="component" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
+
+  <xs:complexType name="choices">
+    <xs:sequence>
+      <xs:element name="choice" type="xs:string" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="resourceCategory">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="streamable"/>
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="any"/>
+      <xs:enumeration value="datasource"/>
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>
 

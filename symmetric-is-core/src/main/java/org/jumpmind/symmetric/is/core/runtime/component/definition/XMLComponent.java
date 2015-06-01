@@ -8,21 +8,41 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
-import org.jumpmind.symmetric.is.core.runtime.component.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.resource.ResourceCategory;
-
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "component", propOrder = {})
 public class XMLComponent {
 
     @XmlType
     @XmlEnum(String.class)
-    public enum name {
-        @XmlEnumValue("create")
-        CREATE, @XmlEnumValue("modify")
-        MODIFY, @XmlEnumValue("delete")
-        DELETE
+    public enum MessageType {
+        @XmlEnumValue("none") NONE(null), 
+        @XmlEnumValue("entity") ENTITY("E"), 
+        @XmlEnumValue("text") TEXT("T"), 
+        @XmlEnumValue("binary") BINARY("B"), 
+        @XmlEnumValue("any") ANY("*");
+        
+        private String letter;
+        
+        private MessageType(String letter) {
+            this.letter = letter;
+        }
+        
+        public String getLetter() {
+            return letter;
+        }
+    }   
+    
+    @XmlType
+    @XmlEnum
+    public enum ResourceCategory {
+
+        @XmlEnumValue("datasource") DATASOURCE, 
+        @XmlEnumValue("streamable") STREAMABLE, 
+        @XmlEnumValue("none") NONE, 
+        @XmlEnumValue("any") ANY
+        
     }
+    
 
     @XmlElement(required = true)
     protected String description;
@@ -45,14 +65,17 @@ public class XMLComponent {
     @XmlAttribute(required = true)
     protected boolean inputOutputModelsMatch;
 
-//    @XmlAttribute(required = true)
-//    protected MessageType inputMessageType;
-//
-//    @XmlAttribute(required = true)
-//    protected MessageType outputMessageType;
-//
-//    @XmlAttribute(required = true)
-//    protected ResourceCategory resourceCategory;
+    @XmlAttribute(required = true)
+    protected MessageType inputMessageType;
+
+    @XmlAttribute(required = true)
+    protected MessageType outputMessageType;
+
+    @XmlAttribute(required = true)
+    protected ResourceCategory resourceCategory;
+    
+    @XmlElement
+    protected XMLSettings settings;
 
     public String getName() {
         return name;
@@ -110,29 +133,36 @@ public class XMLComponent {
         this.inputOutputModelsMatch = inputOutputModelsMatch;
     }
 
-//    public MessageType getInputMessageType() {
-//        return inputMessageType;
-//    }
-//
-//    public void setInputMessageType(MessageType inputMessageType) {
-//        this.inputMessageType = inputMessageType;
-//    }
-//
-//    public MessageType getOutputMessageType() {
-//        return outputMessageType;
-//    }
-//
-//    public void setOutputMessageType(MessageType outputMessageType) {
-//        this.outputMessageType = outputMessageType;
-//    }
-//
-//    public ResourceCategory getResourceCategory() {
-//        return resourceCategory;
-//    }
-//
-//    public void setResourceCategory(ResourceCategory resourceCategory) {
-//        this.resourceCategory = resourceCategory;
-//    }
+    public MessageType getInputMessageType() {
+        return inputMessageType;
+    }
+
+    public void setInputMessageType(MessageType inputMessageType) {
+        this.inputMessageType = inputMessageType;
+    }
+
+    public MessageType getOutputMessageType() {
+        return outputMessageType;
+    }
+
+    public void setOutputMessageType(MessageType outputMessageType) {
+        this.outputMessageType = outputMessageType;
+    }
+
+    public ResourceCategory getResourceCategory() {
+        return resourceCategory;
+    }
+
+    public void setResourceCategory(ResourceCategory resourceCategory) {
+        this.resourceCategory = resourceCategory;
+    }
     
+    public void setSettings(XMLSettings settings) {
+        this.settings = settings;
+    }
     
+    public XMLSettings getSettings() {
+        return settings;
+    }
+
 }
