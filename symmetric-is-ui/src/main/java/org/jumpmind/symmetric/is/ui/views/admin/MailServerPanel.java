@@ -5,6 +5,8 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 
+import org.jumpmind.symmetric.is.core.model.Agent;
+import org.jumpmind.symmetric.is.core.model.AgentStatus;
 import org.jumpmind.symmetric.is.core.model.GlobalSetting;
 import org.jumpmind.symmetric.is.core.model.MailServer;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
@@ -34,6 +36,8 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
     ApplicationContext context;
 
     TabbedPanel tabbedPanel;
+    
+    boolean isChanged;
 
     public MailServerPanel(final ApplicationContext context, TabbedPanel tabbedPanel) {
         this.context = context;
@@ -53,9 +57,8 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
 
         ImmediateUpdateTextField hostField = new ImmediateUpdateTextField("Host name") {
             protected void save(String value) {
-                hostNameSetting.setValue(value);
-                context.getConfigurationService().save(hostNameSetting);
-            }            
+                saveSetting(hostNameSetting, value);
+            }
         };
         hostField.setValue(hostNameSetting.getValue());
         hostField.setWidth(25f, Unit.EM);
@@ -71,17 +74,15 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
         transportField.setWidth(10f, Unit.EM);
         transportField.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
-                transportSetting.setValue((String) event.getProperty().getValue());
-                context.getConfigurationService().save(transportSetting);
+                saveSetting(transportSetting, (String) event.getProperty().getValue());
             }
         });
         form.addComponent(transportField);
 
         ImmediateUpdateTextField portField = new ImmediateUpdateTextField("Port") {
             protected void save(String value) {
-                portSetting.setValue(value);
-                context.getConfigurationService().save(portSetting);
-            }            
+                saveSetting(portSetting, value);
+            }
         };
         portField.setValue(portSetting.getValue());
         portField.setWidth(25f, Unit.EM);
@@ -89,8 +90,7 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
 
         ImmediateUpdateTextField fromField = new ImmediateUpdateTextField("From Address") {
             protected void save(String value) {
-                fromSetting.setValue(value);
-                context.getConfigurationService().save(fromSetting);
+                saveSetting(fromSetting, value);
             }
         };
         fromField.setValue(fromSetting.getValue());
@@ -101,16 +101,14 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
         tlsField.setImmediate(true);
         tlsField.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
-                useTlsSetting.setValue(((Boolean) event.getProperty().getValue()).toString());
-                context.getConfigurationService().save(useTlsSetting);
+                saveSetting(useTlsSetting, ((Boolean) event.getProperty().getValue()).toString());
             }            
         });
         form.addComponent(tlsField);
 
         final ImmediateUpdateTextField userField = new ImmediateUpdateTextField("Username") {
             protected void save(String value) {
-                usernameSetting.setValue(value);
-                context.getConfigurationService().save(usernameSetting);
+                saveSetting(usernameSetting, value);
             }            
         };
         userField.setValue(usernameSetting.getValue());
@@ -118,8 +116,7 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
 
         final ImmediateUpdatePasswordField passwordField = new ImmediateUpdatePasswordField("Password") {
             protected void save(String value) {
-                passwordSetting.setValue(value);
-                context.getConfigurationService().save(passwordSetting);
+                saveSetting(passwordSetting, value);
             }            
         };
         passwordField.setValue(passwordSetting.getValue());
@@ -130,8 +127,7 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
         authField.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
                 Boolean isEnabled = (Boolean) event.getProperty().getValue();
-                useAuthSetting.setValue(isEnabled.toString());
-                context.getConfigurationService().save(useAuthSetting);
+                saveSetting(useAuthSetting, isEnabled.toString());
                 userField.setEnabled(isEnabled);
                 passwordField.setEnabled(isEnabled);
             }            
@@ -150,8 +146,22 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
         setMargin(true);
     }
 
+    private void saveSetting(GlobalSetting setting, String value) {
+        setting.setValue(value);
+        context.getConfigurationService().save(setting);
+        isChanged = true;
+    }
+
     @Override
     public boolean closing() {
+        if (isChanged) {
+            for (Agent agent : context.getConfigurationService().findAgents()) {
+                if (!agent.isDeleted() && agent.getStatus().equals(AgentStatus.RUNNING.name())) {
+                    agent.setStatus(AgentStatus.REQUEST_REFRESH.name());
+                    context.getConfigurationService().save(agent);
+                }
+            }
+        }
         return true;
     }
 

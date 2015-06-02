@@ -41,7 +41,7 @@ public class ScriptExecutor extends AbstractComponentRuntime {
             required = true,
             type = Type.SCRIPT,
                     visible= false,
-            label = "On Complete Script")
+            label = "Ended with Success Script")
     public final static String ON_FLOW_SUCCESS = "on.flow.success.script";
     
     @SettingDefinition(
@@ -49,7 +49,7 @@ public class ScriptExecutor extends AbstractComponentRuntime {
             required = true,
             type = Type.SCRIPT,
             visible= false,
-            label = "On Complete Script")
+            label = "Ended with Error Script")
     public final static String ON_FLOW_ERROR = "on.flow.error.script";
 
 
