@@ -62,8 +62,8 @@ public class FlowRuntime {
         return deployment;
     }
 
-    public void start(String executionId, Map<String, IResourceRuntime> deployedResources, List<AgentParameter> agentParameters) 
-            throws InterruptedException {
+    public void start(String executionId, Map<String, IResourceRuntime> deployedResources, List<AgentParameter> agentParameters,
+            Map<String, String> globalSettings) throws InterruptedException {
         
         this.stepRuntimes = new HashMap<String, StepRuntime>();
         Flow flow = deployment.getFlow();
@@ -77,7 +77,7 @@ public class FlowRuntime {
             if (enabled) {
                 Map<String, Serializable> parameters = getFlowParameters(deployment.getAgentDeploymentParameters(), agentParameters);
                 ComponentContext context = new ComponentContext(flowStep, flow, executionTracker, 
-                        deployedResources.get(flowStep.getComponent().getResourceId()), parameters);
+                        deployedResources.get(flowStep.getComponent().getResourceId()), parameters, globalSettings);
                 StepRuntime stepRuntime = new StepRuntime(componentFactory.create(flowStep.getComponent().getType()), context);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }

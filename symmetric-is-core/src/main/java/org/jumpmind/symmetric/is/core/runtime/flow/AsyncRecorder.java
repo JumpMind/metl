@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
-import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.MimeMessage;
 
@@ -19,9 +18,9 @@ import org.apache.commons.lang.time.DateFormatUtils;
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Execution;
 import org.jumpmind.symmetric.is.core.model.ExecutionStatus;
-import org.jumpmind.symmetric.is.core.model.MailServer;
 import org.jumpmind.symmetric.is.core.model.Notification;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
+import org.jumpmind.symmetric.is.core.util.MailSession;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.util.FormatUtils;
 import org.slf4j.Logger;
@@ -42,19 +41,16 @@ public class AsyncRecorder implements Runnable {
     protected boolean running = false;
     
     protected boolean stopping = false;
-    
-    protected MailServer mailServer;
-    
+   
     protected Map<String, List<Notification>> notificationMap;
     
-    protected Session session;
+    protected MailSession mailSession;
 
-    public AsyncRecorder(IExecutionService executionService, MailServer mailServer, List<Notification> notifications) {
+    public AsyncRecorder(IExecutionService executionService, Map<String, String> globalSettings, List<Notification> notifications) {
         this.inQueue = new LinkedBlockingQueue<AbstractObject>();
         this.executionService = executionService;
-        setMailServer(mailServer);
+        setGlobalSettings(globalSettings);
         setNotifications(notifications);
-        session = Session.getInstance(mailServer.getProperties());
     }
 
     public void record(AbstractObject object) {
@@ -91,13 +87,7 @@ public class AsyncRecorder implements Runnable {
         if (notifications != null) {
             Transport transport = null;
             try {
-                transport = session.getTransport(mailServer.getTransport());
-                if (mailServer.isUseAuth()) {
-                    transport.connect(mailServer.getUsername(), mailServer.getPassword());
-                } else {
-                    transport.connect();
-                }
-    
+                transport = mailSession.getTransport();
                 for (Notification notification : notifications) {
                     String level = notification.getLevel();
                     String linkId = notification.getLinkId();
@@ -106,7 +96,7 @@ public class AsyncRecorder implements Runnable {
                             (level.equals(Notification.Level.AGENT.toString()) && linkId.equals(execution.getAgentId())) ||
                             (level.equals(Notification.Level.DEPLOYMENT.toString()) && linkId.equals(execution.getDeploymentId())))) {
                         log.info("Sending notification " + notification.getName() + " of type " + notification.getNotifyType());
-                        MimeMessage message = new MimeMessage(session);
+                        MimeMessage message = new MimeMessage(mailSession.getSession());
                         Date date = new Date();
                         message.setRecipients(RecipientType.BCC, notification.getRecipients());
                         message.setSentDate(date);
@@ -127,10 +117,7 @@ public class AsyncRecorder implements Runnable {
             } catch (MessagingException e) {
                 log.error("Failure while sending mail notification", e);
             } finally {
-                try {
-                    transport.close();
-                } catch (Exception e) {
-                }
+                mailSession.closeTransport(transport);
             }
         }
     }
@@ -143,8 +130,8 @@ public class AsyncRecorder implements Runnable {
         }
     }
     
-    public synchronized void setMailServer(MailServer mailServer) {
-        this.mailServer = mailServer;
+    public synchronized void setGlobalSettings(Map<String, String> globalSettings) {
+        mailSession = new MailSession(globalSettings);
     }
 
     public synchronized void setNotifications(List<Notification> notifications) {

@@ -27,7 +27,6 @@ import org.jumpmind.symmetric.is.core.model.AgentStatus;
 import org.jumpmind.symmetric.is.core.model.DeploymentStatus;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowParameter;
-import org.jumpmind.symmetric.is.core.model.MailServer;
 import org.jumpmind.symmetric.is.core.model.Notification;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
@@ -63,6 +62,8 @@ public class AgentRuntime {
 
     Map<String, IResourceRuntime> deployedResources = new HashMap<String, IResourceRuntime>();
 
+    Map<String, String> globalSettings;
+    
     IConfigurationService configurationService;
 
     IComponentFactory componentFactory;
@@ -128,9 +129,9 @@ public class AgentRuntime {
             this.flowExecutionScheduler.setPoolSize(100);
             this.flowExecutionScheduler.initialize();
 
-            MailServer mailServer = this.configurationService.findMailServer();
+            this.globalSettings = configurationService.findGlobalSettingsAsMap();
             List<Notification> notifications = this.configurationService.findNotificationsForAgent(agent.getId());
-            this.recorder = new AsyncRecorder(executionService, mailServer, notifications);
+            this.recorder = new AsyncRecorder(executionService, globalSettings, notifications);
             this.flowStepsExecutionThreads.execute(this.recorder);
 
             List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(
@@ -386,7 +387,7 @@ public class AgentRuntime {
                 log.info("Scheduled deployment '{}' is running on the '{}' agent", deployment.getName(),
                         agent.getName());
                 configurationService.refresh(deployment.getFlow());
-                flowRuntime.start(executionId, deployedResources, agent.getAgentParameters());
+                flowRuntime.start(executionId, deployedResources, agent.getAgentParameters(), globalSettings);
             } catch (Exception e) {
                 log.error("Error while waiting for the flow to complete", e);
                 flowRuntime.stop();
@@ -421,7 +422,8 @@ public class AgentRuntime {
                 }
                 if (agent.getStatus().equals(AgentStatus.REQUEST_REFRESH.name())) {
                     log.info("Agent '" + agent.getName() + "' is refreshing settings");
-                    recorder.setMailServer(configurationService.findMailServer());
+                    globalSettings = configurationService.findGlobalSettingsAsMap();
+                    recorder.setGlobalSettings(globalSettings);
                     recorder.setNotifications(configurationService.findNotificationsForAgent(agent.getId()));
                     agent.setStatus(AgentStatus.RUNNING.name());
                     configurationService.save(agent);;

@@ -1,6 +1,7 @@
 package org.jumpmind.symmetric.is.core.persist;
 
 import java.util.List;
+import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.Agent;
@@ -18,7 +19,6 @@ import org.jumpmind.symmetric.is.core.model.FolderName;
 import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.GlobalSetting;
 import org.jumpmind.symmetric.is.core.model.Group;
-import org.jumpmind.symmetric.is.core.model.MailServer;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
@@ -171,9 +171,9 @@ public interface IConfigurationService {
     public void refresh(Notification notification);
 
     public List<GlobalSetting> findGlobalSettings();
+
+    public Map<String, String> findGlobalSettingsAsMap();
     
     public GlobalSetting findGlobalSetting(String name);
-
-    public MailServer findMailServer();
     
 }

@@ -34,7 +34,6 @@ import org.jumpmind.symmetric.is.core.model.FolderType;
 import org.jumpmind.symmetric.is.core.model.GlobalSetting;
 import org.jumpmind.symmetric.is.core.model.Group;
 import org.jumpmind.symmetric.is.core.model.GroupPrivilege;
-import org.jumpmind.symmetric.is.core.model.MailServer;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
@@ -942,27 +941,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
         }
         return null;
     }
-    
-    @Override
-    public MailServer findMailServer() {
-        MailServer mailServer = new MailServer();
-        mailServer.setHostName(getGlobalSettingValue(MailServer.SETTING_HOST_NAME, "localhost"));
-        mailServer.setTransport(getGlobalSettingValue(MailServer.SETTING_TRANSPORT, "smtp"));
-        mailServer.setPortNumber(Integer.parseInt(getGlobalSettingValue(MailServer.SETTING_PORT_NUMBER, "25")));
-        mailServer.setFrom(getGlobalSettingValue(MailServer.SETTING_FROM, "symmetricis@localhost"));
-        mailServer.setUseTls(Boolean.parseBoolean(getGlobalSettingValue(MailServer.SETTING_USE_TLS, "false")));
-        mailServer.setUseAuth(Boolean.parseBoolean(getGlobalSettingValue(MailServer.SETTING_USE_AUTH, "false")));
-        mailServer.setUsername(getGlobalSettingValue(MailServer.SETTING_USERNAME, null));
-        mailServer.setPassword(getGlobalSettingValue(MailServer.SETTING_PASSWORD, null));
-        return mailServer;
-    }
 
-    private String getGlobalSettingValue(String name, String defaultValue) {
-        GlobalSetting setting = findGlobalSetting(name);
-        if (setting != null) {
-            return setting.getValue();
+    @Override
+    public Map<String, String> findGlobalSettingsAsMap() {
+        Map<String, String> globalSettings = new HashMap<String, String>();
+        for (GlobalSetting setting : findGlobalSettings()) {
+            globalSettings.put(setting.getName(), setting.getValue());
         }
-        return defaultValue;
+        return globalSettings;
     }
 
 }

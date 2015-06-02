@@ -21,10 +21,12 @@ public class ComponentContext {
     
     Map<String, Serializable> flowParameters;
     
+    Map<String, String> globalSettings;
+    
     ComponentStatistics componentStatistics = new ComponentStatistics();
 
     public ComponentContext(FlowStep flowStep, Flow flow, IExecutionTracker executionTracker,
-            IResourceRuntime resource, Map<String, Serializable> flowParameters) {
+            IResourceRuntime resource, Map<String, Serializable> flowParameters, Map<String, String> globalSettings) {
         if (flowParameters == null) {
             flowParameters = new HashMap<String, Serializable>();
         }
@@ -33,6 +35,7 @@ public class ComponentContext {
         this.executionTracker = executionTracker;
         this.resourceRuntime = resource;
         this.flowParameters = flowParameters;
+        this.globalSettings = globalSettings;
     }
 
     public FlowStep getFlowStep() {
@@ -74,6 +77,10 @@ public class ComponentContext {
     
     public ComponentStatistics getComponentStatistics() {
         return componentStatistics;
+    }
+
+    public Map<String, String> getGlobalSettings() {
+        return globalSettings;
     }
 
 }
