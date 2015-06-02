@@ -52,12 +52,7 @@ public class DbWriter extends AbstractComponentRuntime {
     @SettingDefinition(order = 6, required = false, type = Type.TEXT, label = "Schema")
     public final static String SCHEMA = "schema";
 
-    @SettingDefinition(
-            order = 10,
-            required = false,
-            type = Type.BOOLEAN,
-            label = "Replace rows if they exist",
-            defaultValue = "false")
+    @SettingDefinition(order = 10, required = false, type = Type.BOOLEAN, label = "Replace rows if they exist", defaultValue = "false")
     public final static String REPLACE = "db.writer.replace";
 
     @SettingDefinition(
@@ -76,12 +71,7 @@ public class DbWriter extends AbstractComponentRuntime {
             defaultValue = "false")
     public final static String INSERT_FALLBACK = "db.writer.insert.fallback";
 
-    @SettingDefinition(
-            order = 40,
-            required = false,
-            type = Type.BOOLEAN,
-            label = "Quote table and column names",
-            defaultValue = "false")
+    @SettingDefinition(order = 40, required = false, type = Type.BOOLEAN, label = "Quote table and column names", defaultValue = "false")
     public final static String QUOTE_IDENTIFIERS = "db.writer.quote.identifiers";
 
     @SettingDefinition(
@@ -92,17 +82,14 @@ public class DbWriter extends AbstractComponentRuntime {
             defaultValue = "false")
     public final static String FIT_TO_COLUMN = "db.writer.fit.to.column";
 
-    @SettingDefinition(
-            order = 60,
-            required = false,
-            type = Type.BOOLEAN,
-            label = "Stop Processing Msgs on Error",
-            defaultValue = "true")
+    @SettingDefinition(order = 60, required = false, type = Type.BOOLEAN, label = "Stop Processing Msgs on Error", defaultValue = "true")
     public final static String STOP_PROCESSING_ON_ERROR = "stop.processing.on.error";
 
     public final static String ATTRIBUTE_INSERT_ENABLED = "insert.enabled";
 
     public final static String ATTRIBUTE_UPDATE_ENABLED = "update.enabled";
+
+    public final static String BATCH_MODE = "batch.mode";
 
     boolean replaceRows = false;
 
@@ -119,14 +106,18 @@ public class DbWriter extends AbstractComponentRuntime {
     String catalogName;
 
     String schemaName;
-    
+
     int inboundEntityDataCount = 0;
+
+    boolean batchMode = false;
 
     IDatabasePlatform platform;
 
     List<TargetTableDefintion> targetTables;
 
     Throwable error;
+
+    String lastPreparedDml;
 
     @Override
     protected void start() {
@@ -143,37 +134,33 @@ public class DbWriter extends AbstractComponentRuntime {
         }
 
         TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
+        batchMode = properties.is(BATCH_MODE, batchMode);
         replaceRows = properties.is(REPLACE);
         updateFirst = properties.is(UPDATE_FIRST);
         insertFallback = properties.is(INSERT_FALLBACK);
         quoteIdentifiers = properties.is(QUOTE_IDENTIFIERS);
-        stopProcessingOnError = properties.is(STOP_PROCESSING_ON_ERROR, true);
+        stopProcessingOnError = properties.is(STOP_PROCESSING_ON_ERROR, stopProcessingOnError);
         fitToColumn = properties.is(FIT_TO_COLUMN);
 
-        catalogName = FormatUtils.replaceTokens(properties.get(CATALOG),
-                context.getFlowParametersAsString(), true);
+        catalogName = FormatUtils.replaceTokens(properties.get(CATALOG), context.getFlowParametersAsString(), true);
         if (isBlank(catalogName)) {
             catalogName = null;
         }
 
-        schemaName = FormatUtils.replaceTokens(properties.get(SCHEMA),
-                context.getFlowParametersAsString(), true);
+        schemaName = FormatUtils.replaceTokens(properties.get(SCHEMA), context.getFlowParametersAsString(), true);
         if (isBlank(schemaName)) {
             schemaName = null;
         }
 
         DataSource dataSource = (DataSource) getResourceReference();
-        platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource,
-                new SqlTemplateSettings(), quoteIdentifiers);
+        platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), quoteIdentifiers);
         targetTables = new ArrayList<TargetTableDefintion>();
 
         for (ModelEntity entity : model.getModelEntities()) {
-            Table table = platform.getTableFromCache(catalogName, schemaName, entity.getName(),
-                    true);
+            Table table = platform.getTableFromCache(catalogName, schemaName, entity.getName(), true);
             if (table != null) {
-                targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE,
-                        entity, table.copy()),
-                        new TargetTable(DmlType.INSERT, entity, table.copy())));
+                targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE, entity, table.copy()), new TargetTable(
+                        DmlType.INSERT, entity, table.copy())));
             }
         }
     }
@@ -185,8 +172,7 @@ public class DbWriter extends AbstractComponentRuntime {
 
         if (error == null || !stopProcessingOnError) {
             if (getResourceRuntime() == null) {
-                throw new RuntimeException(
-                        "The data source resource has not been configured.  Please configure it.");
+                throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
             }
 
             ArrayList<EntityData> inputRows = inputMessage.getPayload();
@@ -195,6 +181,7 @@ public class DbWriter extends AbstractComponentRuntime {
             }
 
             ISqlTransaction transaction = platform.getSqlTemplate().startSqlTransaction();
+            transaction.setInBatchMode(batchMode);
             try {
                 write(transaction, inputRows);
                 transaction.commit();
@@ -215,25 +202,23 @@ public class DbWriter extends AbstractComponentRuntime {
     private Object[] getValues(boolean isUpdate, TargetTable modelTable, EntityData inputRow) {
         ArrayList<Object> data = new ArrayList<Object>();
         for (TargetColumn modelColumn : modelTable.getTargetColumns()) {
-            if ((isUpdate && modelColumn.isUpdateEnabled())
-                    || (!isUpdate && modelColumn.isInsertEnabled())) {
+            if ((isUpdate && modelColumn.isUpdateEnabled()) || (!isUpdate && modelColumn.isInsertEnabled())) {
                 Object value = inputRow.get(modelColumn.getModelAttribute().getId());
                 if (fitToColumn && value != null && value instanceof String) {
-                    value = fitToColumn(modelTable.getTable(), modelColumn.getModelAttribute()
-                            .getName(), (String) value);
+                    value = fitToColumn(modelTable.getTable(), modelColumn.getModelAttribute().getName(), (String) value);
                 }
                 data.add(value);
             }
         }
-        
+
         ArrayList<Object> keyValues = new ArrayList<Object>();
-            for (TargetColumn modelColumn : modelTable.getKeyTargetColumns()) {
-                if ((isUpdate && modelColumn.isUpdateEnabled())
-                        || (!isUpdate && modelColumn.isInsertEnabled())) {
-                    keyValues.add(inputRow.get(modelColumn.getModelAttribute().getId()));
-                }
+        for (TargetColumn modelColumn : modelTable.getKeyTargetColumns()) {
+            if ((isUpdate && modelColumn.isUpdateEnabled()) || (!isUpdate && modelColumn.isInsertEnabled())) {
+                keyValues.add(inputRow.get(modelColumn.getModelAttribute().getId()));
             }
-            return modelTable.getStatement().getValueArray(data.toArray(new Object[data.size()]), keyValues.toArray(new Object[keyValues.size()]));
+        }
+        return modelTable.getStatement()
+                .getValueArray(data.toArray(new Object[data.size()]), keyValues.toArray(new Object[keyValues.size()]));
     }
 
     private void write(ISqlTransaction transaction, List<EntityData> inputRows) {
@@ -243,9 +228,9 @@ public class DbWriter extends AbstractComponentRuntime {
         Object[] data = null;
         try {
             Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<TargetTableDefintion, WriteStats>();
-            for (EntityData inputRow : inputRows) {
-                inboundEntityDataCount++;
-                for (TargetTableDefintion targetTableDefinition : targetTables) {
+            for (TargetTableDefintion targetTableDefinition : targetTables) {
+                for (EntityData inputRow : inputRows) {
+                    inboundEntityDataCount++;
                     WriteStats stats = statsMap.get(targetTableDefinition);
                     if (stats == null) {
                         stats = new WriteStats();
@@ -303,8 +288,8 @@ public class DbWriter extends AbstractComponentRuntime {
                     }
                 }
             }
-            
-            info("Ran a total of %d statements in %s", totalStatementCount, formatDuration(System.currentTimeMillis()-ts));
+
+            info("Ran a total of %d statements in %s", totalStatementCount, formatDuration(System.currentTimeMillis() - ts));
 
             for (TargetTableDefintion table : targetTables) {
                 WriteStats stats = statsMap.get(table);
@@ -348,35 +333,39 @@ public class DbWriter extends AbstractComponentRuntime {
 
         } catch (RuntimeException ex) {
             if (modelTable != null && data != null) {
-                log(LogLevel.ERROR, String.format("Failed to run dml for the %s statement processed: \n%s\nWith values: \n%s\nWith types: \n%s\n", inboundEntityDataCount, modelTable.getStatement()
-                        .getSql(), Arrays.toString(data), Arrays.toString(modelTable.getStatement().getTypes())));
+                log(LogLevel.ERROR, String.format(
+                        "Failed to run dml for the %s statement processed: \n%s\nWith values: \n%s\nWith types: \n%s\n",
+                        inboundEntityDataCount, modelTable.getStatement().getSql(), Arrays.toString(data),
+                        Arrays.toString(modelTable.getStatement().getTypes())));
             }
             throw ex;
         }
 
     }
 
-    private int execute(ISqlTransaction transaction, DmlStatement dmlStatement, Object marker,
-            Object[] data, boolean logFailure) {
-        if (log.isDebugEnabled()) {
-            log.debug("Preparing dml: " + dmlStatement.getSql());
+    private int execute(ISqlTransaction transaction, DmlStatement dmlStatement, Object marker, Object[] data, boolean logFailure) {
+
+        String sql = dmlStatement.getSql();
+
+        if (!sql.equals(lastPreparedDml)) {
+            transaction.flush();
+            if (log.isDebugEnabled()) {
+                log.debug("Preparing dml: {}", sql);
+            }
+            transaction.prepare(sql);
+            lastPreparedDml = sql;
         }
-        transaction.prepare(dmlStatement.getSql());
 
         if (log.isDebugEnabled()) {
-            log.debug("Submitting data {} with types {}", Arrays.toString(data),
-                    Arrays.toString(dmlStatement.getTypes()));
+            log.debug("Submitting data {} with types {}", Arrays.toString(data), Arrays.toString(dmlStatement.getTypes()));
         }
 
         try {
             return transaction.addRow(marker, data, dmlStatement.getTypes());
         } catch (SqlException ex) {
             if (logFailure) {
-                log(LogLevel.WARN,
-                        String.format(
-                                "Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n",
-                                dmlStatement.getSql(), Arrays.toString(data),
-                                Arrays.toString(dmlStatement.getTypes())));
+                log(LogLevel.WARN, String.format("Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n",
+                        dmlStatement.getSql(), Arrays.toString(data), Arrays.toString(dmlStatement.getTypes())));
             }
             throw ex;
         }
@@ -392,7 +381,7 @@ public class DbWriter extends AbstractComponentRuntime {
         }
         return value;
     }
-    
+
     private String formatDuration(long timeInMs) {
         if (timeInMs > 60000) {
             long minutes = timeInMs / 60000;
@@ -414,8 +403,7 @@ public class DbWriter extends AbstractComponentRuntime {
 
         TargetTable insertTable;
 
-        public TargetTableDefintion(ModelEntity modelEntity, TargetTable updateTable,
-                TargetTable insertTable) {
+        public TargetTableDefintion(ModelEntity modelEntity, TargetTable updateTable, TargetTable insertTable) {
             super();
             this.modelEntity = modelEntity;
             this.updateTable = updateTable;
@@ -471,10 +459,8 @@ public class DbWriter extends AbstractComponentRuntime {
              * Remove columns that are not enabled for this dml type
              */
             for (ModelAttribute attribute : attributes) {
-                ComponentAttributeSetting setting = getComponent().getSingleAttributeSetting(
-                        attribute.getId(),
-                        dmlType == DmlType.INSERT ? ATTRIBUTE_INSERT_ENABLED
-                                : ATTRIBUTE_UPDATE_ENABLED);
+                ComponentAttributeSetting setting = getComponent().getSingleAttributeSetting(attribute.getId(),
+                        dmlType == DmlType.INSERT ? ATTRIBUTE_INSERT_ENABLED : ATTRIBUTE_UPDATE_ENABLED);
                 if (setting != null && !Boolean.parseBoolean(setting.getValue())) {
                     table.removeColumn(table.findColumn(attribute.getName()));
                 }
@@ -537,12 +523,10 @@ public class DbWriter extends AbstractComponentRuntime {
         TargetColumn(ModelAttribute modelAttribute, Column column) {
             this.modelAttribute = modelAttribute;
             this.column = column;
-            ComponentAttributeSetting insertAttr = getComponent().getSingleAttributeSetting(
-                    modelAttribute.getId(), ATTRIBUTE_INSERT_ENABLED);
+            ComponentAttributeSetting insertAttr = getComponent().getSingleAttributeSetting(modelAttribute.getId(), ATTRIBUTE_INSERT_ENABLED);
             insertEnabled = insertAttr != null ? Boolean.parseBoolean(insertAttr.getValue()) : true;
 
-            ComponentAttributeSetting updateAttr = getComponent().getSingleAttributeSetting(
-                    modelAttribute.getId(), ATTRIBUTE_UPDATE_ENABLED);
+            ComponentAttributeSetting updateAttr = getComponent().getSingleAttributeSetting(modelAttribute.getId(), ATTRIBUTE_UPDATE_ENABLED);
             updateEnabled = updateAttr != null ? Boolean.parseBoolean(updateAttr.getValue()) : true;
 
         }
@@ -563,11 +547,11 @@ public class DbWriter extends AbstractComponentRuntime {
             return updateEnabled;
         }
     }
-    
+
     class WriteStats {
         int insertCount;
         int updateCount;
         int fallbackInsertCount;
-        int fallbackUpdateCount;        
+        int fallbackUpdateCount;
     }
 }

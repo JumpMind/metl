@@ -1,33 +1,4 @@
 <components>
-    <component id='Binary File Reader' category='READER' iconName='binaryfilereader.png' inputMessageType='none' outputMessageType='binary' resourceCategory='streamable'
-        inputOutputModelsMatch='false'>
-        <name>Binary File Reader</name>
-        <className>org.jumpmind.symmetric.is.core.runtime.component.BinaryFileReader</className>
-        <description></description>
-        <settings>
-            <setting id='binaryfilereader.relative.path' type='text' required='true'>
-                <name>Path and File</name>
-                <description></description>
-            </setting>
-            <setting id='binaryfilereader.size.per.message' type='integer' required='false'>
-                <name>Size / Msg (KB)</name>
-                <defaultValue>7</defaultValue>
-                <description></description>
-            </setting>
-        </settings>
-    </component>
-    <component id='Binary File Writer' category='WRITER' iconName='binaryfilewriter.png' inputMessageType='binary' outputMessageType='none' resourceCategory='streamable'
-        inputOutputModelsMatch='false'>
-        <name>Binary File Writer</name>
-        <className>org.jumpmind.symmetric.is.core.runtime.component.BinaryFileWriter</className>
-        <description></description>
-        <settings>
-            <setting id='binaryfilewriter.relative.path' type='text' required='true'>
-                <name>Path and File</name>
-                <description></description>
-            </setting>
-        </settings>
-    </component>
     <component id='Database Reader' category='READER' iconName='dbreader.png' inputMessageType='any' outputMessageType='entity' resourceCategory='datasource'
         inputOutputModelsMatch='false'>
         <name>Database Reader</name>
@@ -108,6 +79,11 @@
                 <defaultValue>true</defaultValue>
                 <description></description>
             </setting>
+            <setting id='batch.mode' type='boolean' required='false'>
+                <name>Batch Mode</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>            
         </settings>
     </component>
     <component id='Deduper' category='PROCESSOR' iconName='deduper.png' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
