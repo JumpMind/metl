@@ -50,53 +50,46 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
         }       
     });
 
-    var sourceEndpoint = {
-        maxConnections : -1,
-        isSource : true,
-        overlays: [
-                   [ "Label", {
-                       id: "label",
-                       location: [0.5, 0.5],
-                       label: "E",
-                       cssClass: "endpointSourceLabel"
-                   } ]
-               ]
-    },
-    targetEndpoint = {
-        maxConnections : -1,
-        dropOptions : {
-            hoverClass : "hover",
-            activeClass : "active"
-        },
-        isTarget : true,
-        overlays: [
-                   [ "Label", {
-                       id: "label",
-                       location: [0.5, 0.5],
-                       label: "E",
-                       cssClass: "endpointSourceLabel"
-                   } ]
-               ]
-    };
-
     /**
      * Enhance an node with input and output end points
      */
-    this.addEndpoints = function(node) {
+    this.addEndpoints = function(node, nodeDiv) {
         if (node.outputLabel != null) {
-            var s = instance.addEndpoint(node.id, sourceEndpoint, {
+            var s = instance.addEndpoint(nodeDiv, {
                 anchor : "RightMiddle",
-                uuid : "source-" + node.id
+                uuid : "source-" + node.id,
+                maxConnections : -1,
+                isSource : true,
+                overlays: [
+                           [ "Label", {
+                               id: "label",
+                               location: [0.5, 0.5],
+                               label: node.outputLabel,
+                               cssClass: "endpointSourceLabel"
+                           } ]
+                       ]                
             });
-            s.getOverlay("label").label = node.outputLabel;
         }
 
         if (node.inputLabel != null) {
-            var t = instance.addEndpoint(node.id, targetEndpoint, {
+            var t = instance.addEndpoint(nodeDiv, {
                 anchor : "LeftMiddle",
-                uuid : "target-" + node.id
+                uuid : "target-" + node.id,
+                maxConnections : -1,
+                dropOptions : {
+                    hoverClass : "hover",
+                    activeClass : "active"
+                },
+                isTarget : true,
+                overlays: [
+                           [ "Label", {
+                               id: "label",
+                               location: [0.5, 0.5],
+                               label: node.inputLabel,
+                               cssClass: "endpointSourceLabel"
+                           } ]
+                       ]                
             });
-            t.getOverlay("label").label = node.inputLabel;
         }
     };
 
@@ -171,7 +164,7 @@ window.org_jumpmind_symmetric_is_ui_diagram_Diagram = function() {
                 
             });
 
-            self.addEndpoints(node);
+            self.addEndpoints(node, nodeDiv);
 
         }
 
