@@ -101,9 +101,10 @@ public class AsyncRecorder implements Runnable {
                 for (Notification notification : notifications) {
                     String level = notification.getLevel();
                     String linkId = notification.getLinkId();
-                    if (level.equals(Notification.Level.GLOBAL.toString()) ||
+                    if (notification.isEnabled() && 
+                            (level.equals(Notification.Level.GLOBAL.toString()) ||
                             (level.equals(Notification.Level.AGENT.toString()) && linkId.equals(execution.getAgentId())) ||
-                            (level.equals(Notification.Level.DEPLOYMENT.toString()) && linkId.equals(execution.getDeploymentId()))) {
+                            (level.equals(Notification.Level.DEPLOYMENT.toString()) && linkId.equals(execution.getDeploymentId())))) {
                         log.info("Sending notification " + notification.getName() + " of type " + notification.getNotifyType());
                         MimeMessage message = new MimeMessage(session);
                         Date date = new Date();
