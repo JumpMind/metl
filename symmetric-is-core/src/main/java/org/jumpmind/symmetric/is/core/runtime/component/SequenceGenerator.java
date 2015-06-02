@@ -66,7 +66,7 @@ public class SequenceGenerator extends AbstractDbComponent {
 
         shared = getComponent().getBoolean(SHARED, shared);
         if (shared) {
-            sharedName = getComponent().get(SHARED_NAME);
+            sharedName = FormatUtils.replaceTokens(getComponent().get(SHARED_NAME), context.getFlowParametersAsString(), true);
             if (sharedName == null) {
                 throw new IllegalStateException("The 'Shared Name' must be set when this sequence is shared");
             }
