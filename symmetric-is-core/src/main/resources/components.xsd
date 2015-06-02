@@ -3,10 +3,6 @@
 
   <xs:element name="components" type="components"/>
 
-  <xs:complexType name="componentXmlFactory">
-    <xs:sequence/>
-  </xs:complexType>
-
   <xs:complexType name="component">
     <xs:all>
       <xs:element name="description" type="xs:string" minOccurs="0"/>
@@ -57,33 +53,33 @@
 
   <xs:simpleType name="messageType">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="entity"/>
       <xs:enumeration value="none"/>
       <xs:enumeration value="binary"/>
       <xs:enumeration value="any"/>
-      <xs:enumeration value="entity"/>
       <xs:enumeration value="text"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="resourceCategory">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="any"/>
-      <xs:enumeration value="datasource"/>
-      <xs:enumeration value="none"/>
       <xs:enumeration value="streamable"/>
+      <xs:enumeration value="any"/>
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="datasource"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="type">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="password"/>
       <xs:enumeration value="xml"/>
-      <xs:enumeration value="integer"/>
-      <xs:enumeration value="choice"/>
-      <xs:enumeration value="boolean"/>
-      <xs:enumeration value="source step"/>
-      <xs:enumeration value="multiline_text"/>
       <xs:enumeration value="text"/>
+      <xs:enumeration value="source step"/>
+      <xs:enumeration value="choice"/>
+      <xs:enumeration value="integer"/>
+      <xs:enumeration value="boolean"/>
+      <xs:enumeration value="password"/>
+      <xs:enumeration value="multiline_text"/>
       <xs:enumeration value="script"/>
     </xs:restriction>
   </xs:simpleType>

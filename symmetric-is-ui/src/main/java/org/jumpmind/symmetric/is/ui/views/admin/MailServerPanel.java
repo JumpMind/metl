@@ -5,7 +5,6 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.symmetric.is.core.model.GlobalSetting;
 import org.jumpmind.symmetric.is.core.model.MailServer;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;

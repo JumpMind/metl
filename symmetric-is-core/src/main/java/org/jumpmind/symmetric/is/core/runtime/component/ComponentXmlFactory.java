@@ -1,4 +1,4 @@
-package org.jumpmind.symmetric.is.core.runtime.component.definition;
+package org.jumpmind.symmetric.is.core.runtime.component;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,9 +16,10 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.symmetric.is.core.runtime.component.AbstractComponentRuntime;
-import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
-import org.jumpmind.symmetric.is.core.runtime.component.IComponentRuntime;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponents;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSettings;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
