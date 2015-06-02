@@ -5,11 +5,8 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 
-<<<<<<< HEAD
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentStatus;
-=======
->>>>>>> ca832c2a9c2883e36fe64456bc339362c12446ac
 import org.jumpmind.symmetric.is.core.model.GlobalSetting;
 import org.jumpmind.symmetric.is.core.model.MailServer;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
