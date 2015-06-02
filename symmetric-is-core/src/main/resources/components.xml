@@ -435,6 +435,15 @@
                 <name>Select Starting Sequence Sql</name>
                 <description></description>
             </setting>
+            <setting id='shared' type='boolean' required='true'>
+                <defaultValue>false</defaultValue>
+                <name>Is Sequence Shared?</name>
+                <description></description>
+            </setting>            
+            <setting id='shared.name' type='text' required='false'>
+                <name>Shared Name</name>
+                <description></description>
+            </setting>
         </settings>
     </component>
     <component id='Sorter' category='PROCESSOR' iconName='sorter.png' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>

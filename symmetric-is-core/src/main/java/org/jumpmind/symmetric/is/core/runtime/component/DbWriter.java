@@ -237,6 +237,8 @@ public class DbWriter extends AbstractComponentRuntime {
     }
 
     private void write(ISqlTransaction transaction, List<EntityData> inputRows) {
+        long ts = System.currentTimeMillis();
+        int totalStatementCount = 0;
         TargetTable modelTable = null;
         Object[] data = null;
         try {
@@ -254,6 +256,7 @@ public class DbWriter extends AbstractComponentRuntime {
                         if (modelTable.shouldProcess(inputRow)) {
                             data = getValues(true, modelTable, inputRow);
                             int count = execute(transaction, modelTable.getStatement(), new Object(), data, true);
+                            totalStatementCount++;
                             stats.updateCount += count;
                             getComponentStatistics().incrementNumberEntitiesProcessed(count);
                             if (insertFallback && count == 0) {
@@ -262,6 +265,7 @@ public class DbWriter extends AbstractComponentRuntime {
                                     log.debug("Falling back to insert");
                                     data = getValues(false, modelTable, inputRow);
                                     count = execute(transaction, modelTable.getStatement(), new Object(), data, true);
+                                    totalStatementCount++;
                                     stats.fallbackInsertCount += count;
                                     getComponentStatistics().incrementNumberEntitiesProcessed(count);
                                 }
@@ -277,6 +281,7 @@ public class DbWriter extends AbstractComponentRuntime {
                             if (modelTable.shouldProcess(inputRow)) {
                                 data = getValues(false, modelTable, inputRow);
                                 int count = execute(transaction, modelTable.getStatement(), new Object(), data, !replaceRows);
+                                totalStatementCount++;
                                 stats.insertCount += count;
                                 getComponentStatistics().incrementNumberEntitiesProcessed(count);
                             }
@@ -287,6 +292,7 @@ public class DbWriter extends AbstractComponentRuntime {
                                     log.debug("Falling back to update");
                                     data = getValues(true, modelTable, inputRow);
                                     int count = execute(transaction, modelTable.getStatement(), new Object(), data, true);
+                                    totalStatementCount++;
                                     stats.fallbackUpdateCount += count;
                                     getComponentStatistics().incrementNumberEntitiesProcessed(count);
                                 }
@@ -297,6 +303,8 @@ public class DbWriter extends AbstractComponentRuntime {
                     }
                 }
             }
+            
+            info("Ran a total of %d statements in %s", totalStatementCount, formatDuration(System.currentTimeMillis()-ts));
 
             for (TargetTableDefintion table : targetTables) {
                 WriteStats stats = statsMap.get(table);
@@ -383,6 +391,19 @@ public class DbWriter extends AbstractComponentRuntime {
             }
         }
         return value;
+    }
+    
+    private String formatDuration(long timeInMs) {
+        if (timeInMs > 60000) {
+            long minutes = timeInMs / 60000;
+            long seconds = (timeInMs - (minutes * 60000)) / 1000;
+            return minutes + " m " + seconds + " s";
+        } else if (timeInMs > 1000) {
+            long seconds = timeInMs / 1000;
+            return seconds + " s";
+        } else {
+            return timeInMs + " ms";
+        }
     }
 
     class TargetTableDefintion {
