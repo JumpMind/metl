@@ -22,7 +22,7 @@ public class ObjectFactory {
         return new XMLComponent();
     }
 
-    @XmlElementDecl(namespace = "", name = "components")
+    @XmlElementDecl(namespace="", name = "components")
     public JAXBElement<XMLComponents> createConfig(XMLComponents value) {
         return new JAXBElement<XMLComponents>(_Components_QNAME, XMLComponents.class, null, value);
     }

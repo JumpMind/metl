@@ -9,7 +9,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 
-import org.jumpmind.symmetric.is.core.runtime.extension.XMLComponents;
 import org.junit.Test;
 
 public class XMLComponentsTest {

@@ -2,10 +2,10 @@ package org.jumpmind.symmetric.is.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
 import org.jumpmind.symmetric.is.core.model.AbstractObjectWithSettings;
@@ -18,11 +18,13 @@ import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSettingChoices;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
@@ -96,14 +98,14 @@ public class PropertySheet extends Panel {
             }
 
             if (obj instanceof AbstractObjectWithSettings) {
-                Map<String, SettingDefinition> settings = buildSettings(obj);
-                Set<String> keys = settings.keySet();
-                for (String key : keys) {
-                    SettingDefinition definition = settings.get(key);
-                    addSettingField(key, definition, (AbstractObjectWithSettings) obj, formLayout);
+                List<XMLSetting> settings = buildSettings(obj);
+                if (settings != null) {
+                    for (XMLSetting definition : settings) {
+                        addSettingField(definition, (AbstractObjectWithSettings) obj, formLayout);
+                    }
                 }
             }
-            
+
             if (obj instanceof Component) {
                 Component component = (Component) obj;
                 addComponentShared(formLayout, component);
@@ -114,22 +116,19 @@ public class PropertySheet extends Panel {
     }
 
     protected void addComponentProperties(FormLayout formLayout, Component component) {
-        ComponentDefinition componentDefintion = componentFactory
-                .getComponentDefinitionForComponentType(component.getType());
+        XMLComponent componentDefintion = componentFactory.getComonentDefinition(component.getType());
         addComponentName(formLayout, component);
         addResourceCombo(componentDefintion, formLayout, component);
         addInputModelCombo(componentDefintion, formLayout, component);
         addOutputModelCombo(componentDefintion, formLayout, component);
     }
 
-    protected void addOutputModelCombo(ComponentDefinition componentDefintion,
-            FormLayout formLayout, final Component component) {
+    protected void addOutputModelCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
         if (value instanceof FlowStep) {
             FlowStep step = (FlowStep) value;
             String projectVersionId = step.getComponent().getProjectVersionId();
-            if ((componentDefintion.outgoingMessage() == MessageType.ENTITY || componentDefintion
-                    .outgoingMessage() == MessageType.ANY)
-                    && !componentDefintion.inputOutputModelsMatch()) {
+            if ((componentDefintion.getOutputMessageType() == MessageType.ENTITY || componentDefintion.getOutputMessageType() == MessageType.ANY)
+                    && !componentDefintion.isInputOutputModelsMatch()) {
                 final AbstractSelect combo = new ComboBox("Output Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
@@ -137,8 +136,7 @@ public class PropertySheet extends Panel {
                 if (models != null) {
                     for (ModelName model : models) {
                         combo.addItem(model);
-                        if (isNotBlank(component.getOutputModelId())
-                                && component.getOutputModelId().equals(model.getId())) {
+                        if (isNotBlank(component.getOutputModelId()) && component.getOutputModelId().equals(model.getId())) {
                             combo.setValue(model);
                         }
                     }
@@ -212,13 +210,11 @@ public class PropertySheet extends Panel {
 
     }
 
-    protected void addInputModelCombo(ComponentDefinition componentDefintion,
-            FormLayout formLayout, final Component component) {
+    protected void addInputModelCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
         if (value instanceof FlowStep) {
             FlowStep step = (FlowStep) value;
             String projectVersionId = step.getComponent().getProjectVersionId();
-            if (componentDefintion.inputMessage() == MessageType.ENTITY
-                    || componentDefintion.inputMessage() == MessageType.ANY) {
+            if (componentDefintion.getInputMessageType() == MessageType.ENTITY || componentDefintion.getInputMessageType() == MessageType.ANY) {
                 final AbstractSelect combo = new ComboBox("Input Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
@@ -226,8 +222,7 @@ public class PropertySheet extends Panel {
                 if (models != null) {
                     for (ModelName model : models) {
                         combo.addItem(model);
-                        if (isNotBlank(component.getInputModelId())
-                                && component.getInputModelId().equals(model.getId())) {
+                        if (isNotBlank(component.getInputModelId()) && component.getInputModelId().equals(model.getId())) {
                             combo.setValue(model);
                         }
                     }
@@ -252,21 +247,18 @@ public class PropertySheet extends Panel {
         }
     }
 
-    protected void addResourceCombo(ComponentDefinition componentDefintion, FormLayout formLayout,
-            final Component component) {
-        if (componentDefintion.resourceCategory() != null
-                && componentDefintion.resourceCategory() != ResourceCategory.NONE
+    protected void addResourceCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
+        if (componentDefintion.getResourceCategory() != null && componentDefintion.getResourceCategory() != ResourceCategory.NONE
                 && value instanceof FlowStep) {
             FlowStep step = (FlowStep) value;
             final AbstractSelect resourcesCombo = new ComboBox("Resource");
             resourcesCombo.setImmediate(true);
             resourcesCombo.setRequired(true);
-            List<String> types = resourceFactory.getResourceTypes(componentDefintion
-                    .resourceCategory());
+            List<String> types = resourceFactory.getResourceTypes(componentDefintion.getResourceCategory());
             String projectVersionId = step.getComponent().getProjectVersionId();
             if (types != null) {
-                List<Resource> resources = configurationService.findResourcesByTypes(
-                        projectVersionId, types.toArray(new String[types.size()]));
+                List<Resource> resources = configurationService.findResourcesByTypes(projectVersionId,
+                        types.toArray(new String[types.size()]));
                 if (resources != null) {
                     for (Resource resource : resources) {
                         resourcesCombo.addItem(resource);
@@ -289,33 +281,53 @@ public class PropertySheet extends Panel {
         }
     }
 
-    protected Map<String, SettingDefinition> buildSettings(Object obj) {
+    protected List<XMLSetting> buildSettings(Object obj) {
         if (obj instanceof Component) {
             Component component = (Component) obj;
-            return componentFactory.getSettingDefinitionsForComponentType(component.getType());
+            XMLComponent definition = componentFactory.getComonentDefinition(component.getType());
+            return definition.getSettings().getSetting();
         } else if (obj instanceof Resource) {
             Resource resource = (Resource) obj;
-            return resourceFactory.getSettingDefinitionsForResourceType(resource.getType());
+            List<XMLSetting> xmlSettings = new ArrayList<XMLSetting>();
+            Map<String, SettingDefinition> resourceSettings = resourceFactory.getSettingDefinitionsForResourceType(resource.getType());
+            for (String key : resourceSettings.keySet()) {
+                SettingDefinition def = resourceSettings.get(key);
+                XMLSetting setting = new XMLSetting();
+                setting.setId(key);
+                setting.setName(def.label());
+                setting.setDefaultValue(def.defaultValue());
+                setting.setRequired(def.required());
+                setting.setVisible(def.visible());
+                setting.setType(def.type());
+                if (def.type() == Type.CHOICE) {
+                    XMLSettingChoices choices = new XMLSettingChoices();
+                    choices.setChoice(new ArrayList<String>());
+                    for (String choice : def.choices()) {
+                        choices.getChoice().add(choice);
+                    }
+                }
+                xmlSettings.add(setting);
+            }
+            return xmlSettings;
         } else {
-            return new HashMap<String, SettingDefinition>();
+            return Collections.emptyList();
         }
     }
 
-    protected void addSettingField(final String key, final SettingDefinition definition,
-            final AbstractObjectWithSettings obj, FormLayout formLayout) {
-        boolean required = definition.required();
-        if (definition.visible()) {
-            String description = "Represents the " + key + " setting";
-            Type type = definition.type();
+    protected void addSettingField(final XMLSetting definition, final AbstractObjectWithSettings obj, FormLayout formLayout) {
+        boolean required = definition.isRequired();
+        if (definition.isVisible()) {
+            String description = "Represents the " + definition.getId() + " setting";
+            Type type = definition.getType();
             switch (type) {
                 case BOOLEAN:
-                    final CheckBox checkBox = new CheckBox(definition.label());
+                    final CheckBox checkBox = new CheckBox(definition.getName());
                     checkBox.setImmediate(true);
                     boolean defaultValue = false;
-                    if (isNotBlank(definition.defaultValue())) {
-                        defaultValue = Boolean.parseBoolean(definition.defaultValue());
+                    if (isNotBlank(definition.getDefaultValue())) {
+                        defaultValue = Boolean.parseBoolean(definition.getDefaultValue());
                     }
-                    checkBox.setValue(obj.getBoolean(key, defaultValue));
+                    checkBox.setValue(obj.getBoolean(definition.getId(), defaultValue));
                     checkBox.setRequired(required);
                     checkBox.setDescription(description);
                     checkBox.addValueChangeListener(new ValueChangeListener() {
@@ -324,19 +336,19 @@ public class PropertySheet extends Panel {
 
                         @Override
                         public void valueChange(ValueChangeEvent event) {
-                            saveSetting(key, checkBox.getValue().toString(), obj);
+                            saveSetting(definition.getId(), checkBox.getValue().toString(), obj);
                         }
                     });
                     formLayout.addComponent(checkBox);
                     break;
                 case CHOICE:
-                    final AbstractSelect choice = new ComboBox(definition.label());
+                    final AbstractSelect choice = new ComboBox(definition.getName());
                     choice.setImmediate(true);
-                    String[] choices = definition.choices();
+                    List<String> choices = definition.getChoices() != null ? definition.getChoices().getChoice() : new ArrayList<String>(0);
                     for (String c : choices) {
                         choice.addItem(c);
                     }
-                    choice.setValue(obj.get(key, definition.defaultValue()));
+                    choice.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
                     choice.setDescription(description);
                     choice.setNullSelectionAllowed(false);
                     choice.addValueChangeListener(new ValueChangeListener() {
@@ -345,50 +357,47 @@ public class PropertySheet extends Panel {
 
                         @Override
                         public void valueChange(ValueChangeEvent event) {
-                            saveSetting(key, (String)choice.getValue(), obj);
+                            saveSetting(definition.getId(), (String) choice.getValue(), obj);
                         }
                     });
                     formLayout.addComponent(choice);
                     break;
                 case PASSWORD:
-                    ImmediateUpdatePasswordField passwordField = new ImmediateUpdatePasswordField(
-                            definition.label()) {
+                    ImmediateUpdatePasswordField passwordField = new ImmediateUpdatePasswordField(definition.getName()) {
                         private static final long serialVersionUID = 1L;
 
                         protected void save(String text) {
-                            saveSetting(key, text, obj);
+                            saveSetting(definition.getId(), text, obj);
                         };
                     };
-                    passwordField.setValue(obj.get(key, definition.defaultValue()));
+                    passwordField.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
                     passwordField.setRequired(required);
                     passwordField.setDescription(description);
                     formLayout.addComponent(passwordField);
                     break;
                 case INTEGER:
-                    ImmediateUpdateTextField integerField = new ImmediateUpdateTextField(
-                            definition.label()) {
+                    ImmediateUpdateTextField integerField = new ImmediateUpdateTextField(definition.getName()) {
                         private static final long serialVersionUID = 1L;
 
                         protected void save(String text) {
-                            saveSetting(key, text, obj);
+                            saveSetting(definition.getId(), text, obj);
                         };
                     };
                     integerField.setConverter(Integer.class);
-                    integerField.setValue(obj.get(key, definition.defaultValue()));
+                    integerField.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
                     integerField.setRequired(required);
                     integerField.setDescription(description);
                     formLayout.addComponent(integerField);
                     break;
                 case TEXT:
-                    ImmediateUpdateTextField textField = new ImmediateUpdateTextField(
-                            definition.label()) {
+                    ImmediateUpdateTextField textField = new ImmediateUpdateTextField(definition.getName()) {
                         private static final long serialVersionUID = 1L;
 
                         protected void save(String text) {
-                            saveSetting(key, text, obj);
+                            saveSetting(definition.getId(), text, obj);
                         };
                     };
-                    textField.setValue(obj.get(key, definition.defaultValue()));
+                    textField.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
                     textField.setRequired(required);
                     textField.setDescription(description);
                     formLayout.addComponent(textField);
@@ -397,19 +406,16 @@ public class PropertySheet extends Panel {
                     if (value instanceof FlowStep) {
                         FlowStep step = (FlowStep) value;
                         Flow flow = configurationService.findFlow(step.getFlowId());
-                        final AbstractSelect sourceStepsCombo = new ComboBox(definition.label());
+                        final AbstractSelect sourceStepsCombo = new ComboBox(definition.getName());
                         sourceStepsCombo.setImmediate(true);
 
-                        List<FlowStepLink> sourceSteps = flow.findFlowStepLinksWithTarget(step
-                                .getId());
+                        List<FlowStepLink> sourceSteps = flow.findFlowStepLinksWithTarget(step.getId());
                         for (FlowStepLink flowStepLink : sourceSteps) {
-                            FlowStep sourceStep = flow.findFlowStepWithId(flowStepLink
-                                    .getSourceStepId());
+                            FlowStep sourceStep = flow.findFlowStepWithId(flowStepLink.getSourceStepId());
                             sourceStepsCombo.addItem(sourceStep.getId());
-                            sourceStepsCombo.setItemCaption(sourceStep.getId(),
-                                    sourceStep.getName());
+                            sourceStepsCombo.setItemCaption(sourceStep.getId(), sourceStep.getName());
                         }
-                        sourceStepsCombo.setValue(obj.get(key));
+                        sourceStepsCombo.setValue(obj.get(definition.getId()));
                         sourceStepsCombo.setDescription(description);
                         sourceStepsCombo.setNullSelectionAllowed(false);
                         sourceStepsCombo.addValueChangeListener(new ValueChangeListener() {
@@ -418,7 +424,7 @@ public class PropertySheet extends Panel {
 
                             @Override
                             public void valueChange(ValueChangeEvent event) {
-                                saveSetting(key, (String)sourceStepsCombo.getValue(), obj);
+                                saveSetting(definition.getId(), (String) sourceStepsCombo.getValue(), obj);
                             }
                         });
                         formLayout.addComponent(sourceStepsCombo);
@@ -430,14 +436,14 @@ public class PropertySheet extends Panel {
                     editor.setTextChangeTimeout(200);
                     editor.setMode(AceMode.java);
                     editor.setHeight(10, Unit.EM);
-                    editor.setCaption(definition.label());
+                    editor.setCaption(definition.getName());
                     editor.setShowGutter(false);
                     editor.setShowPrintMargin(false);
-                    editor.setValue(obj.get(key, definition.defaultValue()));
+                    editor.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
                     editor.addTextChangeListener(new TextChangeListener() {
                         @Override
                         public void textChange(TextChangeEvent event) {
-                            Setting data = obj.findSetting(key);
+                            Setting data = obj.findSetting(definition.getId());
                             data.setValue(event.getText());
                             configurationService.save(data);
                         }
@@ -446,14 +452,14 @@ public class PropertySheet extends Panel {
                     break;
                 case MULTILINE_TEXT:
                 case XML:
-                    ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(definition.label()) {
+                    ImmediateUpdateTextArea area = new ImmediateUpdateTextArea(definition.getName()) {
                         private static final long serialVersionUID = 1L;
 
                         protected void save(String text) {
-                            saveSetting(key, text, obj);
+                            saveSetting(definition.getId(), text, obj);
                         };
                     };
-                    area.setValue(obj.get(key, definition.defaultValue()));
+                    area.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
                     area.setRows(5);
                     area.setRequired(required);
                     area.setDescription(description);

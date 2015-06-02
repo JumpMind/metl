@@ -19,32 +19,33 @@ public class XMLComponent implements Serializable {
     @XmlType
     @XmlEnum(String.class)
     public enum MessageType {
-        @XmlEnumValue("none") NONE(null), 
-        @XmlEnumValue("entity") ENTITY("E"), 
-        @XmlEnumValue("text") TEXT("T"), 
-        @XmlEnumValue("binary") BINARY("B"), 
-        @XmlEnumValue("any") ANY("*");
-        
+        @XmlEnumValue("none")
+        NONE(null), @XmlEnumValue("entity")
+        ENTITY("E"), @XmlEnumValue("text")
+        TEXT("T"), @XmlEnumValue("binary")
+        BINARY("B"), @XmlEnumValue("any")
+        ANY("*");
+
         private String letter;
-        
+
         private MessageType(String letter) {
             this.letter = letter;
         }
-        
+
         public String getLetter() {
             return letter;
         }
-    }   
-    
+    }
+
     @XmlType
     @XmlEnum
     public enum ResourceCategory {
-        @XmlEnumValue("datasource") DATASOURCE, 
-        @XmlEnumValue("streamable") STREAMABLE, 
-        @XmlEnumValue("none") NONE, 
-        @XmlEnumValue("any") ANY        
+        @XmlEnumValue("datasource")
+        DATASOURCE, @XmlEnumValue("streamable")
+        STREAMABLE, @XmlEnumValue("none")
+        NONE, @XmlEnumValue("any")
+        ANY
     }
-    
 
     @XmlElement(required = false)
     protected String description;
@@ -54,6 +55,9 @@ public class XMLComponent implements Serializable {
 
     @XmlElement(required = true)
     protected String className;
+
+    @XmlAttribute(required = false)
+    protected String iconName;
 
     @XmlAttribute(required = true)
     protected String id;
@@ -75,7 +79,7 @@ public class XMLComponent implements Serializable {
 
     @XmlAttribute(required = false)
     protected ResourceCategory resourceCategory;
-    
+
     @XmlElement
     protected XMLSettings settings;
 
@@ -158,13 +162,21 @@ public class XMLComponent implements Serializable {
     public void setResourceCategory(ResourceCategory resourceCategory) {
         this.resourceCategory = resourceCategory;
     }
-    
+
     public void setSettings(XMLSettings settings) {
         this.settings = settings;
     }
-    
+
     public XMLSettings getSettings() {
         return settings;
+    }
+
+    public void setIconName(String iconName) {
+        this.iconName = iconName;
+    }
+
+    public String getIconName() {
+        return iconName;
     }
 
 }

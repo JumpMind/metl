@@ -10,6 +10,7 @@
       <xs:element name="className" type="xs:string"/>
       <xs:element name="settings" type="settings" minOccurs="0"/>
     </xs:all>
+    <xs:attribute name="iconName" type="xs:string"/>
     <xs:attribute name="id" type="xs:string" use="required"/>
     <xs:attribute name="category" type="xs:string" use="required"/>
     <xs:attribute name="shareable" type="xs:boolean" use="required"/>
@@ -52,34 +53,34 @@
 
   <xs:simpleType name="messageType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="any"/>
-      <xs:enumeration value="binary"/>
-      <xs:enumeration value="text"/>
-      <xs:enumeration value="none"/>
       <xs:enumeration value="entity"/>
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="binary"/>
+      <xs:enumeration value="any"/>
+      <xs:enumeration value="text"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="resourceCategory">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="datasource"/>
       <xs:enumeration value="streamable"/>
-      <xs:enumeration value="none"/>
       <xs:enumeration value="any"/>
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="datasource"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="type">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="script"/>
-      <xs:enumeration value="boolean"/>
-      <xs:enumeration value="choice"/>
-      <xs:enumeration value="multiline_text"/>
       <xs:enumeration value="xml"/>
       <xs:enumeration value="text"/>
-      <xs:enumeration value="password"/>
       <xs:enumeration value="source step"/>
+      <xs:enumeration value="choice"/>
       <xs:enumeration value="integer"/>
+      <xs:enumeration value="boolean"/>
+      <xs:enumeration value="password"/>
+      <xs:enumeration value="multiline_text"/>
+      <xs:enumeration value="script"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

@@ -9,12 +9,12 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.is.core.model.ComponentName;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.runtime.component.ComponentCategory;
-import org.jumpmind.symmetric.is.core.runtime.component.ComponentDefinition;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,9 +81,8 @@ public class EditFlowPalette extends VerticalLayout {
     }
 
     protected String getImageResourceNameForComponentType(String type) {
-        ComponentDefinition defintion = componentFactory
-                .getComponentDefinitionForComponentType(type);
-        return "/org/jumpmind/symmetric/is/core/runtime/component/" + defintion.iconImage();
+       XMLComponent definition = componentFactory.getComonentDefinition(type);
+        return "/org/jumpmind/symmetric/is/core/runtime/component/" + definition.getIconName();
     }
 
     protected ClassResource getImageResourceForComponentType(String type) {
@@ -97,14 +96,14 @@ public class EditFlowPalette extends VerticalLayout {
     }  
     
     protected void populateComponentTypesInComponentPalette(String projectVersionId) {
-        Map<ComponentCategory, List<String>> componentTypesByCategory = componentFactory
+        Map<String, List<String>> componentTypesByCategory = componentFactory
                 .getComponentTypes();
-        for (ComponentCategory category : componentTypesByCategory.keySet()) {
+        for (String category : componentTypesByCategory.keySet()) {
             List<String> componentTypes = new ArrayList<String>(componentTypesByCategory.get(category));
             Collections.sort(componentTypes);
             
             VerticalLayout componentLayout = new VerticalLayout();
-            componentAccordian.addTab(componentLayout, category.name() + "S");
+            componentAccordian.addTab(componentLayout, StringUtils.isAllUpperCase(category) ? category + "S" : category + "s");
             if (componentTypes != null) {
                 for (String componentType : componentTypes) {
                     ClassResource icon = getImageResourceForComponentType(componentType);

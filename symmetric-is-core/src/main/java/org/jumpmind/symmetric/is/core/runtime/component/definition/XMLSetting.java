@@ -54,6 +54,19 @@ public class XMLSetting implements Serializable {
     @XmlElement(required = false)
     protected XMLSettingChoices choices;
 
+    
+    public XMLSetting(String id, String name, String defaultValue, Type type, boolean required) {
+        super();
+        this.id = id;
+        this.name = name;
+        this.defaultValue = defaultValue;
+        this.type = type;
+        this.required = required;
+    }
+
+    public XMLSetting() {
+    }
+    
     public String getDescription() {
         return description;
     }
