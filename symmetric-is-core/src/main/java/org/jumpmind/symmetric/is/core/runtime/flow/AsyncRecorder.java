@@ -52,31 +52,9 @@ public class AsyncRecorder implements Runnable {
     public AsyncRecorder(IExecutionService executionService, MailServer mailServer, List<Notification> notifications) {
         this.inQueue = new LinkedBlockingQueue<AbstractObject>();
         this.executionService = executionService;
-        this.mailServer = mailServer;
-        notificationMap = new HashMap<String, List<Notification>>();
-        for (Notification notification : notifications) {
-            if (notification.getEventType().equals(Notification.EventType.FLOW_START.toString())) {
-                addNotification(ExecutionStatus.RUNNING, notification);
-            } else if (notification.getEventType().equals(Notification.EventType.FLOW_END.toString())) {
-                addNotification(ExecutionStatus.DONE, notification);
-                addNotification(ExecutionStatus.CANCELLED, notification);
-                addNotification(ExecutionStatus.ABANDONED, notification);
-                addNotification(ExecutionStatus.ERROR, notification);
-            } else if (notification.getEventType().equals(Notification.EventType.FLOW_ERROR.toString())) {
-                addNotification(ExecutionStatus.ERROR, notification);
-            }
-        }
+        setMailServer(mailServer);
+        setNotifications(notifications);
         session = Session.getInstance(mailServer.getProperties());
-    }
-    
-    private void addNotification(ExecutionStatus executionStatus, Notification notification) {
-        String status = executionStatus.toString();
-        List<Notification> list = notificationMap.get(status);
-        if (list == null) {
-            list = new ArrayList<Notification>();
-            notificationMap.put(status, list);
-        }
-        list.add(notification);
     }
 
     public void record(AbstractObject object) {
@@ -108,7 +86,7 @@ public class AsyncRecorder implements Runnable {
         running = false;
     }
 
-    private void sendNotifications(Execution execution) {
+    private synchronized void sendNotifications(Execution execution) {
         List<Notification> notifications = notificationMap.get(execution.getStatus());
         if (notifications != null) {
             Transport transport = null;
@@ -162,6 +140,36 @@ public class AsyncRecorder implements Runnable {
         while (this.running) {
             AppUtils.sleep(10);
         }
+    }
+    
+    public synchronized void setMailServer(MailServer mailServer) {
+        this.mailServer = mailServer;
+    }
+
+    public synchronized void setNotifications(List<Notification> notifications) {
+        notificationMap = new HashMap<String, List<Notification>>();
+        for (Notification notification : notifications) {
+            if (notification.getEventType().equals(Notification.EventType.FLOW_START.toString())) {
+                addNotification(ExecutionStatus.RUNNING, notification);
+            } else if (notification.getEventType().equals(Notification.EventType.FLOW_END.toString())) {
+                addNotification(ExecutionStatus.DONE, notification);
+                addNotification(ExecutionStatus.CANCELLED, notification);
+                addNotification(ExecutionStatus.ABANDONED, notification);
+                addNotification(ExecutionStatus.ERROR, notification);
+            } else if (notification.getEventType().equals(Notification.EventType.FLOW_ERROR.toString())) {
+                addNotification(ExecutionStatus.ERROR, notification);
+            }
+        }
+    }
+
+    private void addNotification(ExecutionStatus executionStatus, Notification notification) {
+        String status = executionStatus.toString();
+        List<Notification> list = notificationMap.get(status);
+        if (list == null) {
+            list = new ArrayList<Notification>();
+            notificationMap.put(status, list);
+        }
+        list.add(notification);
     }
 
 }

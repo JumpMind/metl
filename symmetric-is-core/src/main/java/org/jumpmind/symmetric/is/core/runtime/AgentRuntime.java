@@ -419,6 +419,13 @@ public class AgentRuntime {
                         deployResources(deployment.getFlow());
                     }
                 }
+                if (agent.getStatus().equals(AgentStatus.REQUEST_REFRESH.name())) {
+                    log.info("Agent '" + agent.getName() + "' is refreshing settings");
+                    recorder.setMailServer(configurationService.findMailServer());
+                    recorder.setNotifications(configurationService.findNotificationsForAgent(agent.getId()));
+                    agent.setStatus(AgentStatus.RUNNING.name());
+                    configurationService.save(agent);;
+                }
             }
         }
     }

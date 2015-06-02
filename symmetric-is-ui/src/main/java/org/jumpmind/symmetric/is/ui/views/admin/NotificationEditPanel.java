@@ -7,9 +7,12 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.symmetric.is.core.model.Agent;
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
+import org.jumpmind.symmetric.is.core.model.AgentStatus;
 import org.jumpmind.symmetric.is.core.model.Notification;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
+import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextArea;
+import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -17,8 +20,6 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.NativeSelect;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
@@ -34,27 +35,21 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
 
     NativeSelect eventField;
     
-    TextField nameField;
+    ImmediateUpdateTextField nameField;
     
-    TextField subjectField;
+    ImmediateUpdateTextField subjectField;
     
-    TextArea recipientsField;
-    
-    TextArea messageField;
-    
-    CheckBox enableField;
-    
-    ValueChangeListener saveListener;
-    
-    LevelFieldListener levelFieldListener;
-    
-    LinkFieldListener linkFieldListener;
-    
-    EventFieldListener eventFieldListener;
+    ImmediateUpdateTextArea messageField;
     
     Map<String, String> sampleSubjectByEvent;
     
     Map<String, String> sampleMessageByEvent;
+    
+    boolean autoSave;
+    
+    boolean isInit;
+    
+    boolean isChanged;
     
     public NotificationEditPanel(final ApplicationContext context, final Notification notification) {
         this.context = context;
@@ -81,78 +76,127 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
         levelField.setNullSelectionAllowed(false);
         levelField.setImmediate(true);
         levelField.setWidth(15f, Unit.EM);
+        levelField.addValueChangeListener(new LevelFieldListener());
         form.addComponent(levelField);
 
         linkField = new ComboBox("Linked To");
         linkField.setNullSelectionAllowed(false);
         linkField.setImmediate(true);
         linkField.setWidth(15f, Unit.EM);
+        linkField.addValueChangeListener(new LinkFieldListener());
         form.addComponent(linkField);
 
         eventField = new NativeSelect("Event");
         eventField.setNullSelectionAllowed(false);
         eventField.setImmediate(true);
         eventField.setWidth(15f, Unit.EM);
+        eventField.addValueChangeListener(new EventFieldListener());
         form.addComponent(eventField);
 
-        nameField = new TextField("Name", StringUtils.trimToEmpty(notification.getName()));
+        nameField = new ImmediateUpdateTextField("Name") {
+            protected void save(String value) {
+                notification.setName(value);
+                saveNotification();
+            }            
+        };
+        nameField.setValue(StringUtils.trimToEmpty(notification.getName()));
         nameField.setWidth(20f, Unit.EM);
         nameField.setDescription("Display name for the notification");
-        nameField.setImmediate(true);
         form.addComponent(nameField);
 
-        recipientsField = new TextArea("Recipients", StringUtils.trimToEmpty(notification.getRecipients()));
+        ImmediateUpdateTextArea recipientsField = new ImmediateUpdateTextArea("Recipients") {
+            protected void save(String value) {
+                notification.setRecipients(value);
+                saveNotification();
+            }                        
+        };
+        recipientsField.setValue(StringUtils.trimToEmpty(notification.getRecipients()));
         recipientsField.setColumns(20);
         recipientsField.setRows(10);
         recipientsField.setInputPrompt("address1@example.com\r\naddress2@example.com");
         recipientsField.setDescription("Email addresses of recipients, separated by commas.");
-        recipientsField.setImmediate(true);
         form.addComponent(recipientsField);
-        
-        subjectField = new TextField("Subject", StringUtils.trimToEmpty(notification.getSubject()));
+
+        subjectField = new ImmediateUpdateTextField("Subject") {
+            protected void save(String value) {
+                notification.setSubject(value);
+                saveNotification();
+            }            
+        };
+        subjectField.setValue(StringUtils.trimToEmpty(notification.getSubject()));
         subjectField.setWidth(40f, Unit.EM);
         subjectField.setDescription("The subject of the email can contain...");
-        subjectField.setImmediate(true);
         form.addComponent(subjectField);
 
-        messageField = new TextArea("Message", StringUtils.trimToEmpty(notification.getMessage()));
+        messageField = new ImmediateUpdateTextArea("Message") {
+            protected void save(String value) {
+                notification.setMessage(value);
+                saveNotification();
+            }                        
+        };
+        messageField.setValue(StringUtils.trimToEmpty(notification.getMessage()));
         messageField.setColumns(40);
         messageField.setRows(10);
         messageField.setDescription("The body of the email can contain...");
-        messageField.setImmediate(true);
         form.addComponent(messageField);
         
-        enableField = new CheckBox("Enabled", notification.isEnabled());
+        CheckBox enableField = new CheckBox("Enabled", notification.isEnabled());
         enableField.setImmediate(true);
+        enableField.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(ValueChangeEvent event) {
+                notification.setEnabled((Boolean) event.getProperty().getValue());
+                saveNotification();
+            }            
+        });
         form.addComponent(enableField);
         
         if (notification.getLevel() == null) {
+            isInit = true;
             levelField.setValue(Notification.Level.GLOBAL.toString());
+            notification.setLevel(Notification.Level.GLOBAL.toString());
+            notification.setNotifyType(Notification.NotifyType.MAIL.toString());
             updateLinks();
             updateEventTypes();
             updateName();
-            updateNotification();
         } else {
             levelField.setValue(notification.getLevel());
             updateLinks();
             updateEventTypes();
             linkField.setValue(notification.getLinkId());
             eventField.setValue(notification.getEventType());
+            isInit = true;
         }
-
-        levelFieldListener = new LevelFieldListener();
-        linkFieldListener = new LinkFieldListener();
-        eventFieldListener = new EventFieldListener();
-        saveListener = new FieldChangeListener();
-        enableAutoSave();
 
         addComponent(form);
         setMargin(true);
+        autoSave = true;
     }
 
     @Override
     public boolean closing() {
+        if (isChanged) {
+            String level = notification.getLevel();
+            if (level.equals(Notification.Level.GLOBAL.toString())) {
+                for (Agent agent : context.getConfigurationService().findAgents()) {
+                    refreshAgent(agent);
+                }
+            } else if (level.equals(Notification.Level.AGENT.toString()) && notification.getLinkId() != null) {
+                refreshAgent(context.getConfigurationService().findAgent(notification.getLinkId()));
+            } else if (level.equals(Notification.Level.DEPLOYMENT.toString()) && notification.getLinkId() != null) {
+                AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(notification.getLinkId());
+                if (deployment != null) {
+                    refreshAgent(context.getConfigurationService().findAgent(deployment.getAgentId()));
+                }
+            }
+        }
         return true;
+    }
+    
+    private void refreshAgent(Agent agent) {
+        if (agent != null && !agent.isDeleted() && agent.getStatus().equals(AgentStatus.RUNNING.name())) {
+            agent.setStatus(AgentStatus.REQUEST_REFRESH.name());
+            context.getConfigurationService().save(agent);
+        }        
     }
 
     @Override
@@ -163,43 +207,11 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
     public void selected() {
     }
 
-    private void enableAutoSave() {
-        levelField.addValueChangeListener(levelFieldListener);
-        linkField.addValueChangeListener(linkFieldListener);
-        eventField.addValueChangeListener(eventFieldListener);
-        nameField.addValueChangeListener(saveListener);
-        recipientsField.addValueChangeListener(saveListener);
-        subjectField.addValueChangeListener(saveListener);
-        messageField.addValueChangeListener(saveListener);
-        enableField.addValueChangeListener(saveListener);
-    }
-
-    private void disableAutoSave() {
-        levelField.removeValueChangeListener(levelFieldListener);
-        linkField.removeValueChangeListener(linkFieldListener);
-        eventField.removeValueChangeListener(eventFieldListener);
-        nameField.removeValueChangeListener(saveListener);
-        recipientsField.removeValueChangeListener(saveListener);
-        subjectField.removeValueChangeListener(saveListener);
-        messageField.removeValueChangeListener(saveListener);
-        enableField.removeValueChangeListener(saveListener);
-    }
-
     private void saveNotification() {
-        updateNotification();
-        context.getConfigurationService().save(notification);        
-    }
-    
-    private void updateNotification() {
-        notification.setLevel((String) levelField.getValue());
-        notification.setLinkId((String) linkField.getValue());
-        notification.setEventType((String) eventField.getValue());
-        notification.setName((String) nameField.getValue());
-        notification.setRecipients((String) recipientsField.getValue());
-        notification.setSubject((String) subjectField.getValue());
-        notification.setMessage((String) messageField.getValue());
-        notification.setNotifyType(Notification.NotifyType.MAIL.toString());
-        notification.setEnabled(enableField.getValue());
+        if (autoSave) {
+            context.getConfigurationService().save(notification);
+        }
+        isChanged = true;
     }
 
     private void updateLinks() {
@@ -226,7 +238,7 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
                         linkField.setItemCaption(deployment.getId(), agent.getName() + "/" + deployment.getName());                        
                     }
                 }
-            }            
+            }
         }
     }
     
@@ -237,54 +249,62 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
         for (Notification.EventType eventType : eventTypes) {
             eventField.addItem(eventType.toString());
         }
-        eventField.setValue(eventTypes[0].toString());
+        if (isInit) {
+            eventField.setValue(eventTypes[0].toString());
+            notification.setEventType((String) eventField.getValue());
+        }
     }
 
     private void updateName() {
-        String name = "";
-        if (levelField.getValue().equals(Notification.Level.GLOBAL.toString())) {
-            name = "GLOBAL " + eventField.getValue();
-        } else {
-            if (linkField.getValue() != null) {
-                name = linkField.getItemCaption(linkField.getValue()) + " - ";
+        if (isInit) {
+            String name = "";
+            if (levelField.getValue().equals(Notification.Level.GLOBAL.toString())) {
+                name = "GLOBAL " + eventField.getValue();
+            } else {
+                if (linkField.getValue() != null) {
+                    name = linkField.getItemCaption(linkField.getValue()) + " - ";
+                }
+                name += eventField.getValue();
             }
-            name += eventField.getValue();
+            nameField.setValue(name);
+            subjectField.setValue(sampleSubjectByEvent.get(eventField.getValue()));
+            messageField.setValue(sampleMessageByEvent.get(eventField.getValue()));
+            notification.setName(nameField.getValue());
+            notification.setSubject(subjectField.getValue());
+            notification.setMessage(messageField.getValue());
         }
-        nameField.setValue(name);
-        subjectField.setValue(sampleSubjectByEvent.get(eventField.getValue()));
-        messageField.setValue(sampleMessageByEvent.get(eventField.getValue()));
     }
 
     class LevelFieldListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
-            disableAutoSave();
+            boolean oldAutoSave = autoSave;
+            autoSave = false;
+            notification.setLevel((String) levelField.getValue());
             updateEventTypes();
             updateLinks();
-            enableAutoSave();
+            autoSave = oldAutoSave;
             saveNotification();
         }
     }
 
     class LinkFieldListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
-            disableAutoSave();
+            boolean oldAutoSave = autoSave;
+            autoSave = false;
+            notification.setLinkId((String) linkField.getValue());
             updateName();
-            enableAutoSave();
+            autoSave = oldAutoSave;
             saveNotification();
         }
     }
 
     class EventFieldListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
-            disableAutoSave();
+            boolean oldAutoSave = autoSave;
+            autoSave = false;
+            notification.setEventType((String) eventField.getValue());
             updateName();
-            enableAutoSave();
-            saveNotification();
-        }
-    }
-
-    class FieldChangeListener implements ValueChangeListener {
-        public void valueChange(ValueChangeEvent event) {
+            autoSave = oldAutoSave;
             saveNotification();
         }
     }

@@ -84,6 +84,8 @@ public interface IConfigurationService {
         
     public List<Agent> findAgents();
     
+    public Agent findAgent(String agentId);
+    
     public List<Agent> findAgentsInFolder(Folder folder);
     
     public List<Agent> findAgentsForHost(String hostName);

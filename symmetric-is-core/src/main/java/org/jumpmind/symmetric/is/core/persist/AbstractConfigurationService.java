@@ -229,8 +229,14 @@ abstract class AbstractConfigurationService extends AbstractService implements
         return findAgents(params);
     }
 
+    @Override
     public List<Agent> findAgents() {
         return persistenceManager.find(Agent.class, null, null, tableName(Agent.class));
+    }
+
+    @Override
+    public Agent findAgent(String agentId) {
+        return findOne(Agent.class, new NameValue("id", agentId));
     }
 
     protected List<Agent> findAgents(Map<String, Object> params) {
