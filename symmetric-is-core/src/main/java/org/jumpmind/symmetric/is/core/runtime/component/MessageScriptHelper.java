@@ -14,10 +14,14 @@ import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class MessageScriptHelper {
 
+    final Logger log = LoggerFactory.getLogger(getClass());
+    
 	protected ComponentContext context;
 	
 	protected FlowStep flowStep;

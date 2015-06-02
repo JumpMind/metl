@@ -55,7 +55,7 @@ public class BinaryFileReaderTest {
     public void testBinarytReaderFlowFromStartupMsg() throws Exception {
 
         BinaryFileReader reader = new BinaryFileReader();        
-        reader.start(new ComponentContext(readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null));
+        reader.start(new ComponentContext(readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle(msg, msgTarget);
