@@ -1,6 +1,8 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Model;
@@ -40,18 +42,36 @@ public class SequenceGenerator extends AbstractDbComponent {
             type = Type.MULTILINE_TEXT,
             label = "Select Starting Sequence Sql")
     public final static String SQL = "sequence.sql";
+    
+    public final static String SHARED = "shared";
+    
+    public final static String SHARED_NAME = "shared.name";
 
     String sequenceAttributeId;
 
     String sql;
 
-    Long currentSequence;
+    Long nonSharedSequenceNumber;
+    
+    boolean shared = false;
+    
+    String sharedName;
+    
+    static final Map<String, Long> sharedSequence = new HashMap<String, Long>();
 
     @Override
     protected void start() {
         Component component = getComponent();
         String sequenceAttributeName = component.get(SEQ_ATTRIBUTE);
 
+        shared = getComponent().getBoolean(SHARED, shared);
+        if (shared) {
+            sharedName = getComponent().get(SHARED_NAME);
+            if (sharedName == null) {
+                throw new IllegalStateException("The 'Shared Name' must be set when this sequence is shared");
+            }
+        }
+        
         sql = getComponent().get(SQL);
         if (sql == null) {
             throw new IllegalStateException("An sql statement is required by the " + TYPE);
@@ -72,27 +92,41 @@ public class SequenceGenerator extends AbstractDbComponent {
             throw new IllegalStateException(
                     "The sequence attribute must be a valid 'entity.attribute' in the input model.");
         }
+
+        final String sqlToExecute = FormatUtils.replaceTokens(this.sql, context.getFlowParametersAsString(), true);
+        log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
+        nonSharedSequenceNumber = getJdbcTemplate()
+                .queryForObject(sqlToExecute, context.getFlowParameters(), Long.class);
+        if (nonSharedSequenceNumber == null) {
+            nonSharedSequenceNumber = 1l;
+        }
+
+        if (shared) {
+            synchronized (SequenceGenerator.class) {
+                sharedSequence.put(sharedName, nonSharedSequenceNumber);                        
+            } 
+        } 
     }
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
         getComponentStatistics().incrementInboundMessages();
-        if (currentSequence == null) {
-            final String sqlToExecute = FormatUtils.replaceTokens(this.sql, context.getFlowParametersAsString(), true);
-            log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
-            currentSequence = getJdbcTemplate()
-                    .queryForObject(sqlToExecute, context.getFlowParameters(), Long.class);
-            if (currentSequence == null) {
-                currentSequence = 1l;
-            }
-        }
-
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> outgoingPayload = new ArrayList<EntityData>();
             ArrayList<EntityData> payload = inputMessage.getPayload();
             for (EntityData entityData : payload) {
                 entityData = entityData.copy();
-                entityData.put(sequenceAttributeId, ++currentSequence);
+                long sequence;
+                if (shared) {
+                    synchronized (SequenceGenerator.class) {
+                        Long sequenceNumber = sharedSequence.get(sharedName);
+                        sequence = ++sequenceNumber;
+                        sharedSequence.put(sharedName, sequenceNumber);                        
+                    }
+                } else {
+                    sequence = ++nonSharedSequenceNumber;
+                }
+                entityData.put(sequenceAttributeId, sequence);
                 getComponentStatistics().incrementNumberEntitiesProcessed();
                 outgoingPayload.add(entityData);
             }
