@@ -93,19 +93,18 @@ public class SequenceGenerator extends AbstractDbComponent {
                     "The sequence attribute must be a valid 'entity.attribute' in the input model.");
         }
 
-        final String sqlToExecute = FormatUtils.replaceTokens(this.sql, context.getFlowParametersAsString(), true);
-        log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
-        nonSharedSequenceNumber = getJdbcTemplate()
-                .queryForObject(sqlToExecute, context.getFlowParameters(), Long.class);
-        if (nonSharedSequenceNumber == null) {
-            nonSharedSequenceNumber = 1l;
-        }
+        synchronized (SequenceGenerator.class) {
+            final String sqlToExecute = FormatUtils.replaceTokens(this.sql, context.getFlowParametersAsString(), true);
+            log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
+            nonSharedSequenceNumber = getJdbcTemplate().queryForObject(sqlToExecute, context.getFlowParameters(), Long.class);
+            if (nonSharedSequenceNumber == null) {
+                nonSharedSequenceNumber = 1l;
+            }
 
-        if (shared) {
-            synchronized (SequenceGenerator.class) {
-                sharedSequence.put(sharedName, nonSharedSequenceNumber);                        
-            } 
-        } 
+            if (shared) {
+                sharedSequence.put(sharedName, nonSharedSequenceNumber);
+            }
+        }
     }
 
     @Override
