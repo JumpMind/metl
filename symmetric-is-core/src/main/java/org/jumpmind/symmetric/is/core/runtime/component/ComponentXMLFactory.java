@@ -24,7 +24,7 @@ import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Ty
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ComponentXmlFactory implements IComponentFactory {
+public class ComponentXMLFactory implements IComponentFactory {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -32,7 +32,7 @@ public class ComponentXmlFactory implements IComponentFactory {
 
     Map<String, List<String>> componentIdsByCategory = new HashMap<String, List<String>>();
 
-    public ComponentXmlFactory() {
+    public ComponentXMLFactory() {
         refresh();
     }
 

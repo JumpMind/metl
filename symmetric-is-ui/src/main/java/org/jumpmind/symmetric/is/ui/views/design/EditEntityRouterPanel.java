@@ -6,15 +6,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.component.EntityRouter;
 import org.jumpmind.symmetric.is.core.runtime.component.EntityRouter.Route;
-import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -35,16 +32,9 @@ import com.vaadin.ui.Field;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class EditEntityRouterPanel extends VerticalLayout implements IUiPanel {
-
-    ApplicationContext context;
-
-    FlowStep flowStep;
-
-    Flow flow;
+public class EditEntityRouterPanel extends AbstractFlowStepAwareComponentEditPanel {
 
     Table table = new Table();
 
@@ -54,11 +44,7 @@ public class EditEntityRouterPanel extends VerticalLayout implements IUiPanel {
 
     BeanItemContainer<Route> container = new BeanItemContainer<Route>(Route.class);
 
-    public EditEntityRouterPanel(ApplicationContext context, FlowStep flowStep, Flow flow) {
-        this.context = context;
-        this.flowStep = flowStep;
-        this.flow = flow;
-
+    protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
@@ -114,9 +100,8 @@ public class EditEntityRouterPanel extends VerticalLayout implements IUiPanel {
         String json = flowStep.getComponent().get(EntityRouter.SETTING_CONFIG);
         if (isNotBlank(json)) {
             try {
-                List<Route> routes = new ObjectMapper().readValue(json,
-                        new TypeReference<List<Route>>() {
-                        });
+                List<Route> routes = new ObjectMapper().readValue(json, new TypeReference<List<Route>>() {
+                });
                 for (Route route : routes) {
                     table.addItem(route);
                 }
@@ -124,19 +109,6 @@ public class EditEntityRouterPanel extends VerticalLayout implements IUiPanel {
                 throw new RuntimeException(e);
             }
         }
-    }
-
-    @Override
-    public boolean closing() {
-        return true;
-    }
-
-    @Override
-    public void selected() {
-    }
-
-    @Override
-    public void deselected() {
     }
 
     protected void save() {
@@ -152,8 +124,8 @@ public class EditEntityRouterPanel extends VerticalLayout implements IUiPanel {
     }
 
     class EditFieldFactory implements TableFieldFactory {
-        public Field<?> createField(final Container dataContainer, final Object itemId,
-                final Object propertyId, com.vaadin.ui.Component uiContext) {
+        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
+                com.vaadin.ui.Component uiContext) {
             final Route route = (Route) itemId;
             Field<?> field = null;
             if (propertyId.equals("matchExpression")) {
@@ -175,9 +147,8 @@ public class EditEntityRouterPanel extends VerticalLayout implements IUiPanel {
                     FlowStep comboStep = flow.findFlowStepWithId(flowStepLink.getTargetStepId());
                     combo.addItem(comboStep.getId());
                     combo.setItemCaption(comboStep.getId(), comboStep.getName());
-                    
-                    if (flowStepLink.getTargetStepId().equals(route.getTargetStepId())
-                            || combo.getValue() == null) {
+
+                    if (flowStepLink.getTargetStepId().equals(route.getTargetStepId()) || combo.getValue() == null) {
                         combo.setValue(comboStep.getId());
                     }
                 }
@@ -187,7 +158,7 @@ public class EditEntityRouterPanel extends VerticalLayout implements IUiPanel {
                 combo.setNullSelectionAllowed(false);
                 combo.addValueChangeListener(new ValueChangeListener() {
                     public void valueChange(ValueChangeEvent event) {
-                        String stepId = (String)event.getProperty().getValue();
+                        String stepId = (String) event.getProperty().getValue();
                         if (stepId != null) {
                             route.setTargetStepId(stepId);
                             EditEntityRouterPanel.this.save();

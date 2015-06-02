@@ -48,20 +48,22 @@ public class Diagram extends AbstractJavaScriptComponent {
                     Object obj = arguments.get(0);
                     if (obj instanceof JsonObject) {
                         JsonObject json = arguments.getObject(0);
-                        String id = json.getString("id");
-                        DiagramState state = getState();
-                        for (Node node : state.nodes) {
-                            if (node.getId().equals(id)) {
-                                state.selectedNodeId = id;
-                                fireEvent(new NodeSelectedEvent(Diagram.this, node));
-                                break;
+                        if (json.hasKey("id")) {
+                            String id = json.getString("id");
+                            DiagramState state = getState();
+                            for (Node node : state.nodes) {
+                                if (node.getId().equals(id)) {
+                                    state.selectedNodeId = id;
+                                    fireEvent(new NodeSelectedEvent(Diagram.this, node));
+                                    break;
+                                }
                             }
                         }
                     }
                 }
             }
         });
-        
+
         addFunction("onNodeDoubleClick", new JavaScriptFunction() {
 
             private static final long serialVersionUID = 1L;
@@ -84,7 +86,6 @@ public class Diagram extends AbstractJavaScriptComponent {
                 }
             }
         });
-
 
         addFunction("onNodeMoved", new JavaScriptFunction() {
 
@@ -134,8 +135,7 @@ public class Diagram extends AbstractJavaScriptComponent {
                                 } else if (removed) {
                                     node.getTargetNodeIds().remove(targetNodeId);
                                 }
-                                fireEvent(new LinkEvent(Diagram.this, sourceNodeId, targetNodeId,
-                                        removed));
+                                fireEvent(new LinkEvent(Diagram.this, sourceNodeId, targetNodeId, removed));
                                 break;
                             }
                         }
@@ -143,7 +143,7 @@ public class Diagram extends AbstractJavaScriptComponent {
                 }
             }
         });
-        
+
         addFunction("onConnectionMoved", new JavaScriptFunction() {
 
             private static final long serialVersionUID = 1L;
@@ -165,20 +165,18 @@ public class Diagram extends AbstractJavaScriptComponent {
                                 if (!node.getTargetNodeIds().contains(targetNodeId)) {
                                     node.getTargetNodeIds().add(targetNodeId);
                                 }
-                                fireEvent(new LinkEvent(Diagram.this, sourceNodeId, targetNodeId,
-                                        false));
+                                fireEvent(new LinkEvent(Diagram.this, sourceNodeId, targetNodeId, false));
                                 break;
                             }
                         }
-                        
+
                         for (Node node : state.nodes) {
                             if (node.getId().equals(origSourceNodeId)) {
-                                    node.getTargetNodeIds().remove(origTargetNodeId);
-                                fireEvent(new LinkEvent(Diagram.this, origSourceNodeId, origTargetNodeId,
-                                        true));
+                                node.getTargetNodeIds().remove(origTargetNodeId);
+                                fireEvent(new LinkEvent(Diagram.this, origSourceNodeId, origTargetNodeId, true));
                                 break;
                             }
-                        }                       
+                        }
 
                     }
                 }
@@ -186,16 +184,16 @@ public class Diagram extends AbstractJavaScriptComponent {
         });
 
     }
-    
+
     public void setSelectedNodeId(String nodeId) {
         getState().selectedNodeId = nodeId;
         markAsDirty();
     }
-    
+
     public String getSelectedNodeId() {
         return getState().selectedNodeId;
     }
-    
+
     public void setNodes(List<Node> nodes) {
         getState().nodes = nodes;
         markAsDirty();

@@ -10,7 +10,6 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
-import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.ComponentEntitySetting;
 import org.jumpmind.symmetric.is.core.model.Model;
@@ -19,10 +18,8 @@ import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.component.XmlFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.XmlParser;
-import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.views.design.ImportXmlTemplateWindow.ImportXmlListener;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.common.ResizableWindow;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
@@ -45,14 +42,9 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, TextChangeListener {
-
-    ApplicationContext context;
-
-    Component component;
+public class EditXmlFormatPanel extends AbstractComponentEditPanel implements TextChangeListener {
 
     Table table = new Table();
 
@@ -62,10 +54,7 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
 
     Set<String> xpathChoices;
 
-    public EditXmlFormatPanel(ApplicationContext context, Component component) {
-        this.context = context;
-        this.component = component;
-
+    protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
@@ -98,19 +87,6 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
     }
 
     @Override
-    public boolean closing() {
-        return true;
-    }
-
-    @Override
-    public void selected() {
-    }
-
-    @Override
-    public void deselected() {
-    }
-
-    @Override
     public void textChange(TextChangeEvent event) {
         filterField.setValue(event.getText());
         updateTable(event.getText());
@@ -123,8 +99,7 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
             String upperFilterText = StringUtils.trimToEmpty(filterText).toUpperCase();
             for (ModelEntity entity : model.getModelEntities()) {
                 boolean firstAttribute = true;
-                boolean entityMatches = upperFilterText.equals("")
-                        || entity.getName().toUpperCase().indexOf(upperFilterText) >= 0;
+                boolean entityMatches = upperFilterText.equals("") || entity.getName().toUpperCase().indexOf(upperFilterText) >= 0;
                 for (ModelAttribute attr : entity.getModelAttributes()) {
                     if (entityMatches || attr.getName().toUpperCase().indexOf(upperFilterText) >= 0) {
                         if (firstAttribute) {
@@ -144,11 +119,9 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
     protected void saveXPathSettings() {
         for (Record record : container.getItemIds()) {
             if (record.getAttributeId() != null) {
-                saveAttributeSetting(record.getAttributeId(), XmlFormatter.XML_FORMATTER_XPATH,
-                        StringUtils.trimToNull(record.getXpath()));
+                saveAttributeSetting(record.getAttributeId(), XmlFormatter.XML_FORMATTER_XPATH, StringUtils.trimToNull(record.getXpath()));
             } else {
-                saveEntitySetting(record.getEntityId(), XmlFormatter.XML_FORMATTER_XPATH,
-                        StringUtils.trimToNull(record.getXpath()));
+                saveEntitySetting(record.getEntityId(), XmlFormatter.XML_FORMATTER_XPATH, StringUtils.trimToNull(record.getXpath()));
             }
         }
     }
@@ -196,8 +169,7 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
             try {
                 Document document = builder.build(new StringReader(setting.getValue()));
                 xpathChoices = new HashSet<String>();
-                buildXpathChoicesFromElement("/" + document.getRootElement().getName(),
-                        document.getRootElement());
+                buildXpathChoicesFromElement("/" + document.getRootElement().getName(), document.getRootElement());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -274,8 +246,8 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
     }
 
     class EditFieldFactory implements TableFieldFactory {
-        public Field<?> createField(final Container dataContainer, final Object itemId,
-                final Object propertyId, com.vaadin.ui.Component uiContext) {
+        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
+                com.vaadin.ui.Component uiContext) {
             Field<?> field = null;
             Record record = (Record) itemId;
             if (propertyId.equals("xpath")) {
@@ -284,8 +256,7 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
                 if (xpathChoices != null) {
                     combo.addItems(xpathChoices);
                 }
-                if (!StringUtils.trimToEmpty(record.getXpath()).equals("")
-                        && !combo.getItemIds().contains(record.getXpath())) {
+                if (!StringUtils.trimToEmpty(record.getXpath()).equals("") && !combo.getItemIds().contains(record.getXpath())) {
                     combo.addItem(record.getXpath());
                 }
                 combo.setPageLength(20);
@@ -322,14 +293,13 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
             this.modelEntity = modelEntity;
             this.modelAttribute = modelAttribute;
             if (modelAttribute != null) {
-                ComponentAttributeSetting setting = component.getSingleAttributeSetting(
-                        modelAttribute.getId(), XmlFormatter.XML_FORMATTER_XPATH);
+                ComponentAttributeSetting setting = component.getSingleAttributeSetting(modelAttribute.getId(),
+                        XmlFormatter.XML_FORMATTER_XPATH);
                 if (setting != null) {
                     xpath = setting.getValue();
                 }
             } else {
-                ComponentEntitySetting setting = component.getSingleEntitySetting(
-                        modelEntity.getId(), XmlFormatter.XML_FORMATTER_XPATH);
+                ComponentEntitySetting setting = component.getSingleEntitySetting(modelEntity.getId(), XmlFormatter.XML_FORMATTER_XPATH);
                 if (setting != null) {
                     xpath = setting.getValue();
                 }
@@ -337,8 +307,7 @@ public class EditXmlFormatPanel extends VerticalLayout implements IUiPanel, Text
         }
 
         public int hashCode() {
-            return modelEntity.hashCode()
-                    + (modelAttribute == null ? 0 : modelAttribute.hashCode());
+            return modelEntity.hashCode() + (modelAttribute == null ? 0 : modelAttribute.hashCode());
         }
 
         public boolean equals(Object obj) {

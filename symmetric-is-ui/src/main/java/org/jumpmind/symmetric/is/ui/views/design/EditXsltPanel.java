@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.DataType;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
@@ -15,9 +14,7 @@ import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.component.XsltProcessor;
-import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.common.ResizableWindow;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
@@ -35,11 +32,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings({ "serial" })
-public class EditXsltPanel extends VerticalLayout implements IUiPanel, TextChangeListener {
-
-    ApplicationContext context;
-
-    Component component;
+public class EditXsltPanel extends AbstractComponentEditPanel implements TextChangeListener {
 
     TextField filterField;
     
@@ -47,9 +40,10 @@ public class EditXsltPanel extends VerticalLayout implements IUiPanel, TextChang
     
     TextArea textArea;
 
-    public EditXsltPanel(ApplicationContext context, Component component) {
-        this.context = context;
-        this.component = component;
+    public EditXsltPanel() {
+    }
+    
+    protected void buildUI() {
 
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);

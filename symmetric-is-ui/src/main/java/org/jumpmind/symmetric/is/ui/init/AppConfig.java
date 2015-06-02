@@ -40,7 +40,7 @@ import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.core.runtime.AgentManager;
 import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
-import org.jumpmind.symmetric.is.core.runtime.component.ComponentXmlFactory;
+import org.jumpmind.symmetric.is.core.runtime.component.ComponentXMLFactory;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
@@ -211,7 +211,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IComponentFactory componentFactory() {
         if (componentFactory == null) {
-            componentFactory = new ComponentXmlFactory();
+            componentFactory = new ComponentXMLFactory();
         }
         return componentFactory;
     }

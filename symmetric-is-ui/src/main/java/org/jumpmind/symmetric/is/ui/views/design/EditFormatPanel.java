@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
@@ -20,9 +19,7 @@ import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.DelimitedParser;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.ModelAttributeScriptHelper;
-import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -47,14 +44,9 @@ import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.TableDragMode;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class EditFormatPanel extends VerticalLayout implements IUiPanel {
-
-    ApplicationContext context;
-
-    Component component;
+public class EditFormatPanel extends AbstractComponentEditPanel {
 
     Table table = new Table();
 
@@ -63,10 +55,7 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
     
     Set<RecordFormat> selectedItemIds;
 
-    public EditFormatPanel(ApplicationContext context, Component component) {
-        this.context = context;
-        this.component = component;
-
+    protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
@@ -142,19 +131,6 @@ public class EditFormatPanel extends VerticalLayout implements IUiPanel {
         saveOrdinalSettings();
         saveLengthSettings();
         saveTransformSettings();
-    }
-
-    @Override
-    public boolean closing() {
-        return true;
-    }
-
-    @Override
-    public void selected() {
-    }
-
-    @Override
-    public void deselected() {
     }
 
     @SuppressWarnings("unchecked")

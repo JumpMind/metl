@@ -9,36 +9,28 @@ import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourcePropertyConstants;
-import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.runtime.component.DbReader;
 import org.jumpmind.symmetric.is.core.runtime.resource.Datasource;
-import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.sqlexplorer.IButtonBar;
 import org.jumpmind.symmetric.ui.sqlexplorer.IDb;
 import org.jumpmind.symmetric.ui.sqlexplorer.ISettingsProvider;
 import org.jumpmind.symmetric.ui.sqlexplorer.QueryPanel;
 import org.jumpmind.symmetric.ui.sqlexplorer.Settings;
 
-import com.vaadin.event.ShortcutListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutAction.ModifierKey;
+import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class EditDbReaderPanel extends VerticalLayout implements IUiPanel {
-
-    ApplicationContext context;
-
-    Component component;
+public class EditDbReaderPanel extends AbstractComponentEditPanel {
 
     IDatabasePlatform platform;
 
@@ -47,14 +39,8 @@ public class EditDbReaderPanel extends VerticalLayout implements IUiPanel {
     Button executeButton;
 
     ExecuteSqlClickListener executeSqlClickListener;
-    
-    PropertySheet propertySheet;
 
-    public EditDbReaderPanel(ApplicationContext context, Component component, PropertySheet propertySheet) {
-        this.context = context;
-        this.component = component;
-        this.propertySheet = propertySheet;
-
+    protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
@@ -70,11 +56,9 @@ public class EditDbReaderPanel extends VerticalLayout implements IUiPanel {
             resource.put(BasicDataSourcePropertyConstants.DB_POOL_MAX_ACTIVE, "2");
             resource.put(BasicDataSourcePropertyConstants.DB_POOL_MAX_IDLE, "2");
             resource.put(BasicDataSourcePropertyConstants.DB_POOL_MIN_IDLE, "2");
-            Datasource dataSourceResource = (Datasource) context
-                    .getResourceFactory().create(resource, null);
+            Datasource dataSourceResource = (Datasource) context.getResourceFactory().create(resource, null);
             DataSource dataSource = dataSourceResource.reference();
-            platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource,
-                    new SqlTemplateSettings(), false);
+            platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), false);
 
             queryPanel = new QueryPanel(new IDb() {
 
@@ -126,8 +110,7 @@ public class EditDbReaderPanel extends VerticalLayout implements IUiPanel {
 
             queryPanel.appendSql(component.get(DbReader.SQL));
 
-            queryPanel.addShortcutListener(new ShortcutListener("", KeyCode.ENTER,
-                    new int[] { ModifierKey.CTRL }) {
+            queryPanel.addShortcutListener(new ShortcutListener("", KeyCode.ENTER, new int[] { ModifierKey.CTRL }) {
                 @Override
                 public void handleAction(Object sender, Object target) {
                     executeSqlClickListener.buttonClick(new ClickEvent(executeButton));
@@ -174,10 +157,6 @@ public class EditDbReaderPanel extends VerticalLayout implements IUiPanel {
         if (queryPanel != null) {
             queryPanel.selected();
         }
-    }
-    
-    @Override
-    public void deselected() {
     }
 
     class ExecuteSqlClickListener implements ClickListener {

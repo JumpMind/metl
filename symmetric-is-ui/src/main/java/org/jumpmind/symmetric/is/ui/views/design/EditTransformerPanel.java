@@ -7,17 +7,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.component.ModelAttributeScriptHelper;
 import org.jumpmind.symmetric.is.core.runtime.component.Transformer;
-import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.UiUtils;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -31,14 +28,9 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class EditTransformerPanel extends VerticalLayout implements IUiPanel {
-
-    ApplicationContext context;
-
-    Component component;
+public class EditTransformerPanel extends AbstractComponentEditPanel {
 
     Table table = new Table();
 
@@ -49,10 +41,7 @@ public class EditTransformerPanel extends VerticalLayout implements IUiPanel {
     BeanItemContainer<ComponentAttributeSetting> container = new BeanItemContainer<ComponentAttributeSetting>(
             ComponentAttributeSetting.class);
 
-    public EditTransformerPanel(ApplicationContext context, Component c) {
-        this.context = context;
-        this.component = c;
-
+    protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
@@ -181,19 +170,6 @@ public class EditTransformerPanel extends VerticalLayout implements IUiPanel {
                 }
             }
         }
-    }
-
-    @Override
-    public boolean closing() {
-        return true;
-    }
-
-    @Override
-    public void selected() {
-    }
-
-    @Override
-    public void deselected() {
     }
 
     class EditFieldFactory implements TableFieldFactory {

@@ -136,7 +136,7 @@
         </settings>
     </component>
     <component id='Entity Router' category='PROCESSOR' iconName='entityrouter.png' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
-        inputOutputModelsMatch='true'>
+        inputOutputModelsMatch='true' shareable='false'>
         <name>Entity Router</name>
         <classname>org.jumpmind.symmetric.is.core.runtime.component.EntityRouter</classname>
         <description></description>
@@ -325,7 +325,7 @@
         </settings>
     </component>
     <component id='Multiplier' category='PROCESSOR' iconName='multiplier.png' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
-        inputOutputModelsMatch='true'>
+        inputOutputModelsMatch='true' shareable='false'>
         <name>Multiplier</name>
         <classname>org.jumpmind.symmetric.is.core.runtime.component.Multiplier</classname>
         <description></description>

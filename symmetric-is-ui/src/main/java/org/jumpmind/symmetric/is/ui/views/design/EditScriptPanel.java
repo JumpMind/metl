@@ -1,8 +1,6 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
-import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.runtime.component.ScriptExecutor;
-import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.vaadin.aceeditor.AceEditor;
@@ -14,9 +12,8 @@ import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.VerticalLayout;
 
-public class EditScriptPanel extends VerticalLayout {
+public class EditScriptPanel extends AbstractComponentEditPanel {
 
     private static final String SCRIPT_ON_ERROR = "onError(myError, allStepErrors)";
     private static final String SCRIPT_ON_SUCCESS = "onSuccess()";
@@ -26,24 +23,13 @@ public class EditScriptPanel extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
 
-    Component component;
-
-    PropertySheet propertySheet;
-
-    ApplicationContext context;
-
     AceEditor editor;
 
     @SuppressWarnings("serial")
-    public EditScriptPanel(ApplicationContext context, Component component,
-            PropertySheet propertySheet) {
-        this.component = component;
-        this.propertySheet = propertySheet;
-        this.context = context;
-
+    protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
-        
+
         editor = CommonUiUtils.createAceEditor();
         editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
         editor.setTextChangeTimeout(200);
@@ -83,11 +69,10 @@ public class EditScriptPanel extends VerticalLayout {
             public void textChange(TextChangeEvent event) {
                 String key = (String) select.getValue();
                 EditScriptPanel.this.component.put(key, event.getText());
-                EditScriptPanel.this.context.getConfigurationService().save(
-                        EditScriptPanel.this.component.findSetting(key));
+                EditScriptPanel.this.context.getConfigurationService().save(EditScriptPanel.this.component.findSetting(key));
             }
         });
-        
+
         addComponent(editor);
         setExpandRatio(editor, 1);
 
