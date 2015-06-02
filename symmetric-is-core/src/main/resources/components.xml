@@ -411,12 +411,12 @@
                 <name>Handle Msg Script</name>
                 <description></description>
             </setting>
-            <setting id='on.flow.error.script' type='script' required='true'>
-                <name>On Complete Script</name>
+            <setting id='on.flow.success.script' type='script' required='true'>
+                <name>Ended with Success Script</name>
                 <description></description>
             </setting>
             <setting id='on.flow.error.script' type='script' required='true'>
-                <name>On Complete Script</name>
+                <name>Ended with Error Script</name>
                 <description></description>
             </setting>
         </settings>
