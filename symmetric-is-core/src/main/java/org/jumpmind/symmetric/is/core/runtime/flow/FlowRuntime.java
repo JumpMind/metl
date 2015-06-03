@@ -78,7 +78,7 @@ public class FlowRuntime {
                 Map<String, Serializable> parameters = getFlowParameters(deployment.getAgentDeploymentParameters(), agentParameters);
                 ComponentContext context = new ComponentContext(flowStep, flow, executionTracker, 
                         deployedResources.get(flowStep.getComponent().getResourceId()), parameters, globalSettings);
-                StepRuntime stepRuntime = new StepRuntime(componentFactory.create(flowStep.getComponent().getType()), context);
+                StepRuntime stepRuntime = new StepRuntime(componentFactory.create(flowStep.getComponent().getType()), context, this);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
         }
@@ -219,6 +219,7 @@ public class FlowRuntime {
             for (StepRuntime stepRuntime : stepRuntimes.values()) {
                 if (stepRuntime.isRunning()) {
                     try {
+                        stepRuntime.inQueue.clear();
                         stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponentContext().getFlowStep().getId()));
                     } catch (InterruptedException e) {
                     }

@@ -40,8 +40,11 @@ public class StepRuntime implements Runnable {
     List<StepRuntime> sourceStepRuntimes;
     
     ComponentContext componentContext;
+    
+    FlowRuntime flowRuntime;
 
-    public StepRuntime(IComponentRuntime componentRuntime, ComponentContext componentContext) {
+    public StepRuntime(IComponentRuntime componentRuntime, ComponentContext componentContext, FlowRuntime flowRuntime) {
+        this.flowRuntime = flowRuntime;
         this.componentContext = componentContext;
         this.componentRuntime = componentRuntime;
         int capacity = componentContext.getFlowStep().getComponent()
@@ -84,6 +87,7 @@ public class StepRuntime implements Runnable {
         }
         componentContext.getExecutionTracker().log(LogLevel.ERROR, componentContext, msg);
         log.error("", ex);
+        flowRuntime.stop();
     }
 
     @Override
