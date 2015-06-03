@@ -13,7 +13,6 @@ import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
-import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
@@ -189,9 +188,9 @@ public class TextFileReader extends AbstractComponentRuntime {
         IStreamable streamable = getResourceReference();
         for (String srcFile : filesRead) {
             if(streamable.delete(srcFile)) {
-                log(LogLevel.INFO, "Deleted %s", srcFile);
+                warn("Deleted %s", srcFile);
             } else {
-                log(LogLevel.WARN, "Failed to delete %s", srcFile);
+                warn("Failed to delete %s", srcFile);
             } 
         }
     }
@@ -199,10 +198,16 @@ public class TextFileReader extends AbstractComponentRuntime {
     protected void archive(String archivePath) {
         String path = getResourceRuntime().getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
         File destDir = new File(path, archivePath);
-        for (String srcFile : filesRead) {
+        for (String srcFileName : filesRead) {
             try {
-                log(LogLevel.INFO, "Archiving %s tp %s", srcFile, destDir.getAbsolutePath());
-                FileUtils.moveFileToDirectory(new File(path, srcFile), destDir, true);
+                File srcFile = new File(path, srcFileName);
+                File targetFile = new File(destDir, srcFile.getName());
+                if (targetFile.exists()) {
+                    info("The target file already exists.   Deleting it in order to archive a new file.");
+                    FileUtils.deleteQuietly(targetFile);
+                }
+                info("Archiving %s tp %s", srcFile, destDir.getAbsolutePath());
+                FileUtils.moveFileToDirectory(srcFile, destDir, true);
             } catch (IOException e) {
                 throw new IoException(e);
             }
