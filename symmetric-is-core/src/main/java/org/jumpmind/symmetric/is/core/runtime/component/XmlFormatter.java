@@ -63,7 +63,7 @@ public class XmlFormatter extends AbstractXML {
     @Override
     protected void start() {
         super.start();
-        TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
+        TypedProperties properties = getTypedProperties();
         ignoreNamespace = properties.is(IGNORE_NAMESPACE);
         useParameterReplacement = properties.is(PARAMETER_REPLACEMENT);
         xmlFormat = properties.get(XML_FORMAT);

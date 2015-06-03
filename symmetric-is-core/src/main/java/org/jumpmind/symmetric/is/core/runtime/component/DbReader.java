@@ -254,11 +254,11 @@ public class DbReader extends AbstractDbComponent {
     }
 
     protected void applySettings() {
-        TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
+        TypedProperties properties = getTypedProperties();
         sql = properties.get(SQL);
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         messageManipulationStrategy = MessageManipulationStrategy.valueOf(properties
-                .get(MESSAGE_MANIPULATION_STRATEGY));
+                .get(MESSAGE_MANIPULATION_STRATEGY, messageManipulationStrategy.name()));
         trimColumns = properties.is(TRIM_COLUMNS);
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
     }

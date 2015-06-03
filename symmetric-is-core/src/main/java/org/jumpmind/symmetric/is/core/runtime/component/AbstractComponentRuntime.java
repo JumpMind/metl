@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
+import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
@@ -19,6 +21,8 @@ import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 
@@ -31,6 +35,12 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     protected ComponentContext context;
     protected boolean enabled = true;
     protected boolean shared = false;
+    protected XMLComponent definition;
+    
+    @Override
+    public void register(XMLComponent definition) {
+        this.definition = definition;
+    }
 
     @Override
     final public void start(ComponentContext context) {
@@ -39,6 +49,14 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     }
     
     abstract protected void start();
+    
+    protected TypedProperties getTypedProperties() {
+        List<XMLSetting> settings = definition != null ? definition.getSettings().getSetting() : null;
+        if (settings == null) {
+            settings = Collections.emptyList();
+        }
+        return getComponent().toTypedProperties(settings);
+    }
 
     @Override
     public void lastMessageReceived(IMessageTarget messageTarget) {

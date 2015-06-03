@@ -36,7 +36,7 @@ public class EntityRouter extends AbstractComponentRuntime {
     long rowsPerMessage = 10000;
 
     protected void applySettings() {
-        TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
+        TypedProperties properties = getTypedProperties();
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         String json = getComponent().get(SETTING_CONFIG);
         if (isNotBlank(json)) {

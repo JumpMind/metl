@@ -9,7 +9,6 @@ import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.AbstractFactory;
-import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
 
 public class ResourceFactory extends AbstractFactory<IResourceRuntime> implements IResourceFactory {
@@ -89,7 +88,7 @@ public class ResourceFactory extends AbstractFactory<IResourceRuntime> implement
     public Map<String, SettingDefinition> getSettingDefinitionsForResourceType(
             String resourceType) {
         Class<? extends IResourceRuntime> clazz = resourceTypes.get(resourceType);
-        return AbstractRuntimeObject.getSettingDefinitions(clazz, false);
+        return AbstractResourceRuntime.getSettingDefinitions(clazz, false);
     }
 
 }

@@ -1,10 +1,13 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
 import org.jumpmind.symmetric.is.core.runtime.Message;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
 public interface IComponentRuntime {
 
+    public void register(XMLComponent definition);
+    
     public void start(ComponentContext context);
 
     public void handle(Message inputMessage, IMessageTarget messageTarget);

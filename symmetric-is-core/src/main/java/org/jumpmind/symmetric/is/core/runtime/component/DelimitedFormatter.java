@@ -135,7 +135,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
     }
 
     private void applySettings() {
-        properties = getComponent().toTypedProperties(getSettingDefinitions(false));
+        properties = getTypedProperties();
         delimiter = properties.get(DELIMITED_FORMATTER_DELIMITER);
         quoteCharacter = properties.get(DELIMITED_FORMATTER_QUOTE_CHARACTER);
         useHeader = properties.is(DELIMITED_FORMATTER_WRITE_HEADER);

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.properties.TypedProperties;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting;
 
 abstract public class AbstractObjectWithSettings extends AbstractObject {
 
@@ -127,6 +128,18 @@ abstract public class AbstractObjectWithSettings extends AbstractObject {
         TypedProperties properties = new TypedProperties();
         for (String name : definitions.keySet()) {
             properties.put(name, definitions.get(name).defaultValue());
+        }
+
+        for (Setting settingObject : settings) {
+            properties.setProperty(settingObject.getName(), settingObject.getValue());
+        }
+        return properties;
+    }
+    
+    public TypedProperties toTypedProperties(List<XMLSetting> definitions) {
+        TypedProperties properties = new TypedProperties();
+        for (XMLSetting definition : definitions) {
+            properties.put(definition.getId(), definition.getDefaultValue());
         }
 
         for (Setting settingObject : settings) {

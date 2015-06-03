@@ -31,6 +31,7 @@ public class ComponentXMLFactory extends AbstractXMLFactory implements IComponen
             XMLComponent definition = componentsById.get(id);
             if (definition != null) {
                 IComponentRuntime component = (IComponentRuntime) Class.forName(definition.getClassName()).newInstance();
+                component.register(definition);
                 return component;
             } else {
                 throw new IllegalStateException("Could not find a class associated with the component id of " + id);

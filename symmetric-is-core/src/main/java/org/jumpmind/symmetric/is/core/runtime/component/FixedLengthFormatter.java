@@ -96,7 +96,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
     }
 
     private void applySettings() {
-        properties = getComponent().toTypedProperties(getSettingDefinitions(false));
+        properties = getTypedProperties();
         useHeader = properties.is(FIXED_LENGTH_FORMATTER_WRITE_HEADER);
         convertAttributeSettingsToAttributeFormat();
     }

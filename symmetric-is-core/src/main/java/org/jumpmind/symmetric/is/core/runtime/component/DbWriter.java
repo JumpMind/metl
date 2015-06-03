@@ -99,7 +99,7 @@ public class DbWriter extends AbstractComponentRuntime {
             throw new IllegalStateException("A database writer must have an input model defined");
         }
 
-        TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
+        TypedProperties properties = getTypedProperties();
         batchMode = properties.is(BATCH_MODE, batchMode);
         replaceRows = properties.is(REPLACE);
         continueOnError = properties.is(CONTINUE_ON_ERROR, continueOnError);

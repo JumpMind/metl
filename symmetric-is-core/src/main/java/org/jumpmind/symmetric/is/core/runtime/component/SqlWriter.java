@@ -82,7 +82,7 @@ public class SqlWriter extends AbstractDbComponent {
     }
 
     protected void applySettings() {
-        TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
+        TypedProperties properties = getTypedProperties();
         sqls = getSqlStatements(properties.get(SQL));
         runWhen = properties.get(RUN_WHEN, PER_MESSAGE);
     }
