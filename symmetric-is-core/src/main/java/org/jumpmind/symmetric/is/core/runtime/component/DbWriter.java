@@ -167,6 +167,7 @@ public class DbWriter extends AbstractComponentRuntime {
     @Override
     public void handle(final Message inputMessage, final IMessageTarget messageTarget) {
 
+        lastPreparedDml = null;
         getComponentStatistics().incrementInboundMessages();
 
         if (error == null) {
