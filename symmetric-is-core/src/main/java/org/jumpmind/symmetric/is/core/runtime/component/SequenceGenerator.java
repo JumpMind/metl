@@ -69,6 +69,8 @@ public class SequenceGenerator extends AbstractDbComponent {
             sharedName = FormatUtils.replaceTokens(getComponent().get(SHARED_NAME), context.getFlowParametersAsString(), true);
             if (sharedName == null) {
                 throw new IllegalStateException("The 'Shared Name' must be set when this sequence is shared");
+            } else {
+                info("This sequence is shared under the name: %s", sharedName);
             }
         }
         
@@ -102,6 +104,7 @@ public class SequenceGenerator extends AbstractDbComponent {
             }
 
             if (shared) {
+                log.info("'%s' is setting the shared sequence '%s' to %d", getFlowStep().getName(), sharedName, nonSharedSequenceNumber);
                 sharedSequence.put(sharedName, nonSharedSequenceNumber);
             }
         }
