@@ -15,29 +15,15 @@ import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(
-        typeName = FixedLengthFormatter.TYPE,
-        category = ComponentCategory.PROCESSOR,
-        iconImage = "fixedlengthformatter.png",
-        inputMessage = MessageType.ENTITY,
-        outgoingMessage = MessageType.TEXT)
 public class FixedLengthFormatter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Format Fixed";
 
-    @SettingDefinition(
-            order = 10,
-            type = Type.BOOLEAN,
-            label = "Header line",
-            defaultValue = "false")
     public final static String FIXED_LENGTH_FORMATTER_WRITE_HEADER = "fixed.length.formatter.header";
 
     public final static String FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL = "fixed.length.formatter.attribute.ordinal";

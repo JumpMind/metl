@@ -77,7 +77,7 @@ public class TextFileReader extends AbstractComponentRuntime {
     public final static String SETTING_ENCODING = "textfilereader.encoding";
     
     @SettingDefinition(type = Type.INTEGER, order = 70, label = "Header Lines to Skip")
-    public static final String SETTING_HEADER_LINES_TO_SKIP = "textfilereader.text.header.lines.to.skip";
+    public static final String SETTING_HEADER_LINES_TO_SKIP = "textfilereader.text.header.lines.to.skip";    
 
 
     String relativePathAndFile;

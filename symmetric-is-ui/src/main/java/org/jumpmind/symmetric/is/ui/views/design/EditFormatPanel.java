@@ -18,6 +18,7 @@ import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
 import org.jumpmind.symmetric.is.core.runtime.component.DelimitedParser;
 import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
+import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthParser;
 import org.jumpmind.symmetric.is.core.runtime.component.ModelAttributeScriptHelper;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 
@@ -50,9 +51,8 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
 
     Table table = new Table();
 
-    BeanItemContainer<RecordFormat> container = new BeanItemContainer<RecordFormat>(
-            RecordFormat.class);
-    
+    BeanItemContainer<RecordFormat> container = new BeanItemContainer<RecordFormat>(RecordFormat.class);
+
     Set<RecordFormat> selectedItemIds;
 
     protected void buildUI() {
@@ -83,11 +83,9 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
         table.setSortEnabled(false);
         table.setImmediate(true);
         table.setSizeFull();
-        if (component.getType().equals(FixedLengthFormatter.TYPE)) {
-            table.setVisibleColumns(new Object[] { "entityName", "attributeName", "width",
-                    "startPos", "endPos", "transformText" });
-            table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Width",
-                    "Start Position", "End Position", "Transform" });
+        if (component.getType().equals(FixedLengthFormatter.TYPE) || component.getType().equals(FixedLengthParser.TYPE)) {
+            table.setVisibleColumns(new Object[] { "entityName", "attributeName", "width", "startPos", "endPos", "transformText" });
+            table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Width", "Start Position", "End Position", "Transform" });
             table.setColumnWidth("width", 75);
         } else {
             table.setVisibleColumns(new Object[] { "entityName", "attributeName", "transformText" });
@@ -101,9 +99,9 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
         table.setDropHandler(new TableDropHandler());
         addComponent(table);
         setExpandRatio(table, 1.0f);
-        
+
         Model model = component.getInputModel();
-        if (component.getType().equals(DelimitedParser.TYPE)) {
+        if (component.getType().equals(DelimitedParser.TYPE) || component.getType().equals(FixedLengthParser.TYPE)) {
             model = component.getOutputModel();
         }
 
@@ -147,30 +145,29 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
     }
 
     protected void calculatePositions() {
-        if (!component.getType().equals(FixedLengthFormatter.TYPE)) {
-            return;
-        }
-        long pos = 1;
-        boolean needsRefreshed = false;
-        for (RecordFormat record : container.getItemIds()) {
-            if (record.getStartPos() != pos) {
-                record.setStartPos(pos);
-                needsRefreshed = true;
+        if (component.getType().equals(FixedLengthFormatter.TYPE) || component.getType().equals(FixedLengthParser.TYPE)) {
+            long pos = 1;
+            boolean needsRefreshed = false;
+            for (RecordFormat record : container.getItemIds()) {
+                if (record.getStartPos() != pos) {
+                    record.setStartPos(pos);
+                    needsRefreshed = true;
+                }
+                long endPos = pos + record.getWidth() - 1;
+                if (record.getEndPos() != endPos) {
+                    record.setEndPos(endPos);
+                    needsRefreshed = true;
+                }
+                pos = endPos + 1;
             }
-            long endPos = pos + record.getWidth() - 1;
-            if (record.getEndPos() != endPos) {
-                record.setEndPos(endPos);
-                needsRefreshed = true;
-            }
-            pos = endPos + 1;
-        }
 
-        if (needsRefreshed) {
-            RecordFormat record = getSelectedItem();
-            if (record != null) {
-                record.setFocusFieldId("transformText");
+            if (needsRefreshed) {
+                RecordFormat record = getSelectedItem();
+                if (record != null) {
+                    record.setFocusFieldId("transformText");
+                }
+                table.refreshRowCache();
             }
-            table.refreshRowCache();
         }
     }
 
@@ -187,14 +184,16 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
                     }
                 }
                 calculatePositions();
-                saveOrdinalSettings();                
+                saveOrdinalSettings();
             }
         }
     }
 
     protected void saveOrdinalSettings() {
-        String attrName = FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL;
-        if (!component.getType().equals(FixedLengthFormatter.TYPE)) {
+        String attrName;
+        if (component.getType().equals(FixedLengthFormatter.TYPE) || component.getType().equals(FixedLengthParser.TYPE)) {
+            attrName = FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL;
+        } else {
             attrName = DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL;
         }
         int ordinal = 1;
@@ -205,19 +204,19 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
     }
 
     protected void saveLengthSettings() {
-        if (!component.getType().equals(FixedLengthFormatter.TYPE)) {
-            return;
-        }
-        for (RecordFormat record : container.getItemIds()) {
-            saveSetting(record.getAttributeId(),
-                    FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH,
-                    String.valueOf(record.getWidth()));
+        if (component.getType().equals(FixedLengthFormatter.TYPE) || component.getType().equals(FixedLengthParser.TYPE)) {
+            for (RecordFormat record : container.getItemIds()) {
+                saveSetting(record.getAttributeId(), FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH,
+                        String.valueOf(record.getWidth()));
+            }
         }
     }
 
     protected void saveTransformSettings() {
-        String attrName = FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION;
-        if (!component.getType().equals(FixedLengthFormatter.TYPE)) {
+        String attrName;
+        if (component.getType().equals(FixedLengthFormatter.TYPE) || component.getType().equals(FixedLengthParser.TYPE)) {
+            attrName = FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION;
+        } else {
             attrName = DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION;
         }
 
@@ -315,8 +314,8 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
     }
 
     class EditFieldFactory implements TableFieldFactory {
-        public Field<?> createField(final Container dataContainer, final Object itemId,
-                final Object propertyId, com.vaadin.ui.Component uiContext) {
+        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
+                com.vaadin.ui.Component uiContext) {
             final RecordFormat record = (RecordFormat) itemId;
             Field<?> field = null;
             if (propertyId.equals("width")) {
@@ -344,8 +343,7 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
                     combo.addItem(function);
                 }
                 combo.setPageLength(functions.length > 20 ? 20 : functions.length);
-                if (record.getTransformText() != null && 
-                        !combo.getItemIds().contains(record.getTransformText())) {
+                if (record.getTransformText() != null && !combo.getItemIds().contains(record.getTransformText())) {
                     combo.addItem(record.getTransformText());
                 }
                 combo.setImmediate(true);
@@ -370,7 +368,7 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
             }
             return field;
         }
-        
+
         protected void focusOn(RecordFormat record, Object propertyId) {
             record.setFocusFieldId(propertyId);
             for (Object itemId : getSelectedItems()) {
@@ -388,7 +386,7 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
             return null;
         }
     }
-    
+
     public class RecordFormat {
         ModelEntity modelEntity;
 
@@ -412,7 +410,6 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
             this.modelEntity = modelEntity;
             this.modelAttribute = modelAttribute;
 
-
             if (component.getType().equals(DelimitedFormatter.TYPE) || component.getType().equals(DelimitedParser.TYPE)) {
                 ComponentAttributeSetting setting = component.getSingleAttributeSetting(modelAttribute.getId(),
                         DelimitedFormatter.DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL);
@@ -426,14 +423,13 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
                     this.transformText = setting.getValue();
                 }
 
-            } else if (component.getType().equals(FixedLengthFormatter.TYPE)) {
-                ComponentAttributeSetting setting = component.getSingleAttributeSetting(
-                        modelAttribute.getId(),
+            } else {
+                ComponentAttributeSetting setting = component.getSingleAttributeSetting(modelAttribute.getId(),
                         FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH);
                 if (setting != null) {
                     this.width = Long.parseLong(setting.getValue());
                 }
-                
+
                 setting = component.getSingleAttributeSetting(modelAttribute.getId(),
                         FixedLengthFormatter.FIXED_LENGTH_FORMATTER_ATTRIBUTE_ORDINAL);
                 if (setting != null) {

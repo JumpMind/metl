@@ -357,6 +357,23 @@
             </setting>
         </settings>
     </component>
+    <component id='Parse Fixed' category='PROCESSOR' inputMessageType='text' outputMessageType='entity'>
+        <name>Parse Fixed Length</name>
+        <className>org.jumpmind.symmetric.is.core.runtime.component.FixedLengthParser</className>
+        <description></description>
+        <settings>
+            <setting id='header.lines.to.skip' type='integer' required='false'>
+                <name>Number of Header Lines to Skip</name>
+                <defaultValue>0</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='footer.lines.to.skip' type='integer' required='false'>
+                <name>Number of Footer Lines to Skip</name>
+                <defaultValue>0</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>    
     <component id='Parse XML' category='PROCESSOR' inputMessageType='text' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='false'>
         <name>Parse XML</name>
