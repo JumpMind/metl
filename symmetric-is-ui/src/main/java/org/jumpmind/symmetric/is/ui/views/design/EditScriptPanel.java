@@ -1,6 +1,6 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
-import org.jumpmind.symmetric.is.core.runtime.component.ScriptExecutor;
+import org.jumpmind.symmetric.is.core.runtime.component.Script;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.vaadin.aceeditor.AceEditor;
@@ -40,16 +40,16 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
         select.setWidth(40, Unit.EM);
         select.setTextInputAllowed(false);
 
-        select.addItem(ScriptExecutor.HANDLE_SCRIPT);
-        select.setItemCaption(ScriptExecutor.HANDLE_SCRIPT, SCRIPT_ON_HANDLE);
-        select.addItem(ScriptExecutor.INIT_SCRIPT);
-        select.setItemCaption(ScriptExecutor.INIT_SCRIPT, SCRIPT_ON_INIT);
-        select.addItem(ScriptExecutor.ON_FLOW_SUCCESS);
-        select.setItemCaption(ScriptExecutor.ON_FLOW_SUCCESS, SCRIPT_ON_SUCCESS);
-        select.addItem(ScriptExecutor.ON_FLOW_ERROR);
-        select.setItemCaption(ScriptExecutor.ON_FLOW_ERROR, SCRIPT_ON_ERROR);
-        select.addItem(ScriptExecutor.IMPORTS);
-        select.setItemCaption(ScriptExecutor.IMPORTS, SCRIPT_IMPORTS);
+        select.addItem(Script.HANDLE_SCRIPT);
+        select.setItemCaption(Script.HANDLE_SCRIPT, SCRIPT_ON_HANDLE);
+        select.addItem(Script.INIT_SCRIPT);
+        select.setItemCaption(Script.INIT_SCRIPT, SCRIPT_ON_INIT);
+        select.addItem(Script.ON_FLOW_SUCCESS);
+        select.setItemCaption(Script.ON_FLOW_SUCCESS, SCRIPT_ON_SUCCESS);
+        select.addItem(Script.ON_FLOW_ERROR);
+        select.setItemCaption(Script.ON_FLOW_ERROR, SCRIPT_ON_ERROR);
+        select.addItem(Script.IMPORTS);
+        select.setItemCaption(Script.IMPORTS, SCRIPT_IMPORTS);
 
         select.setImmediate(true);
         select.setNullSelectionAllowed(false);
@@ -60,7 +60,7 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
                 editor.setValue(EditScriptPanel.this.component.get((String) select.getValue(), ""));
             }
         });
-        select.setValue(ScriptExecutor.HANDLE_SCRIPT);
+        select.setValue(Script.HANDLE_SCRIPT);
         buttonBar.addLeft(select);
 
         editor.addTextChangeListener(new TextChangeListener() {

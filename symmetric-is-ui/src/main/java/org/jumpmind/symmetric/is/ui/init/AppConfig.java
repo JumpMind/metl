@@ -45,6 +45,8 @@ import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.ResourceFactory;
 import org.jumpmind.symmetric.is.core.util.EnvConstants;
+import org.jumpmind.symmetric.is.ui.views.IUIFactory;
+import org.jumpmind.symmetric.is.ui.views.UIXMLFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,6 +91,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     IPersistenceManager persistenceManager;
 
     IExecutionService executionService;
+    
+    IUIFactory uiFactory;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -214,6 +218,15 @@ public class AppConfig extends WebMvcConfigurerAdapter {
             componentFactory = new ComponentXMLFactory();
         }
         return componentFactory;
+    }
+    
+    @Bean
+    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
+    public IUIFactory uiFactory() {
+        if (uiFactory == null) {
+            uiFactory = new UIXMLFactory();
+        }
+        return uiFactory;
     }
 
     @Bean

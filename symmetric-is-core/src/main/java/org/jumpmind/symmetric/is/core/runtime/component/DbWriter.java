@@ -82,15 +82,16 @@ public class DbWriter extends AbstractComponentRuntime {
             defaultValue = "false")
     public final static String FIT_TO_COLUMN = "db.writer.fit.to.column";
 
-    @SettingDefinition(order = 60, required = false, type = Type.BOOLEAN, label = "Stop Processing Msgs on Error", defaultValue = "true")
-    public final static String STOP_PROCESSING_ON_ERROR = "stop.processing.on.error";
-
     public final static String ATTRIBUTE_INSERT_ENABLED = "insert.enabled";
 
     public final static String ATTRIBUTE_UPDATE_ENABLED = "update.enabled";
 
     public final static String BATCH_MODE = "batch.mode";
+    
+    public final static String CONTINUE_ON_ERROR = "continue.on.error";
 
+    boolean continueOnError = false;
+    
     boolean replaceRows = false;
 
     boolean updateFirst = false;
@@ -100,8 +101,6 @@ public class DbWriter extends AbstractComponentRuntime {
     boolean quoteIdentifiers = false;
 
     boolean fitToColumn = false;
-
-    boolean stopProcessingOnError = true;
 
     String catalogName;
 
@@ -136,10 +135,10 @@ public class DbWriter extends AbstractComponentRuntime {
         TypedProperties properties = getComponent().toTypedProperties(getSettingDefinitions(false));
         batchMode = properties.is(BATCH_MODE, batchMode);
         replaceRows = properties.is(REPLACE);
+        continueOnError = properties.is(CONTINUE_ON_ERROR, continueOnError);
         updateFirst = properties.is(UPDATE_FIRST);
         insertFallback = properties.is(INSERT_FALLBACK);
         quoteIdentifiers = properties.is(QUOTE_IDENTIFIERS);
-        stopProcessingOnError = properties.is(STOP_PROCESSING_ON_ERROR, stopProcessingOnError);
         fitToColumn = properties.is(FIT_TO_COLUMN);
 
         catalogName = FormatUtils.replaceTokens(properties.get(CATALOG), context.getFlowParametersAsString(), true);
@@ -170,7 +169,7 @@ public class DbWriter extends AbstractComponentRuntime {
 
         getComponentStatistics().incrementInboundMessages();
 
-        if (error == null || !stopProcessingOnError) {
+        if (error == null) {
             if (getResourceRuntime() == null) {
                 throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
             }
@@ -254,10 +253,12 @@ public class DbWriter extends AbstractComponentRuntime {
                                     stats.fallbackInsertCount += count;
                                     getComponentStatistics().incrementNumberEntitiesProcessed(count);
                                 }
-                            } else if (count == 0) {
-                                log(LogLevel.DEBUG, String.format("Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n",
+                            } else if (count == 0 && !continueOnError) {                                
+                                throw new SqlException(String.format("Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n",
                                         modelTable.getStatement().getSql(), Arrays.toString(data),
                                         Arrays.toString(modelTable.getStatement().getTypes())));
+                            } else {
+                                stats.ignoredCount++;
                             }
                         }
                     } else {
@@ -265,7 +266,7 @@ public class DbWriter extends AbstractComponentRuntime {
                             modelTable = targetTableDefinition.getInsertTable();
                             if (modelTable.shouldProcess(inputRow)) {
                                 data = getValues(false, modelTable, inputRow);
-                                int count = execute(transaction, modelTable.getStatement(), new Object(), data, !replaceRows);
+                                int count = execute(transaction, modelTable.getStatement(), new Object(), data, !replaceRows && !continueOnError);
                                 totalStatementCount++;
                                 stats.insertCount += count;
                                 getComponentStatistics().incrementNumberEntitiesProcessed(count);
@@ -281,8 +282,10 @@ public class DbWriter extends AbstractComponentRuntime {
                                     stats.fallbackUpdateCount += count;
                                     getComponentStatistics().incrementNumberEntitiesProcessed(count);
                                 }
-                            } else {
+                            } else if (!continueOnError) {
                                 throw e;
+                            } else {
+                                stats.ignoredCount++;
                             }
                         }
                     }
@@ -312,7 +315,7 @@ public class DbWriter extends AbstractComponentRuntime {
                         if (msg.length() > 0) {
                             msg.append(", ");
                         }
-                        msg.append(" Updated: ");
+                        msg.append("Updated: ");
                         msg.append(stats.updateCount);
                     }
 
@@ -320,8 +323,16 @@ public class DbWriter extends AbstractComponentRuntime {
                         if (msg.length() > 0) {
                             msg.append(", ");
                         }
-                        msg.append(" Fallback Inserts: ");
+                        msg.append("Fallback Inserts: ");
                         msg.append(stats.fallbackInsertCount);
+                    }
+                    
+                    if (stats.ignoredCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append("Ignored Count: ");
+                        msg.append(stats.ignoredCount);
                     }
 
                     if (msg.length() > 0) {
@@ -549,6 +560,7 @@ public class DbWriter extends AbstractComponentRuntime {
     }
 
     class WriteStats {
+        int ignoredCount;
         int insertCount;
         int updateCount;
         int fallbackInsertCount;

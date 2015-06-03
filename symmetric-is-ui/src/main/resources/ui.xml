@@ -1,62 +1,54 @@
-<ui xmlns="http://www.jumpmind.com/schema/ui" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.jumpmind.com/schema/ui ui.xsd">
+<ui>
     <component-ui id="Database Writer UI" componentId="Database Writer">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/dbwriter.png</iconImage>
-        <panels>
-            <className>org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel</className>
-        </panels>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel</className>
     </component-ui>
     <component-ui id="Database Reader UI" componentId="Database Reader">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/dbreader.png</iconImage>
-        <panels>
-            <className>org.jumpmind.symmetric.is.ui.views.design.EditDbReaderPanel</className>
-        </panels>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditDbReaderPanel</className>
     </component-ui>
     <component-ui id="Entity Router UI" componentId="Entity Router">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/entityrouter.png</iconImage>
-        <panels>
-            <className>org.jumpmind.symmetric.is.ui.views.design.EditEntityRouterPanel</className>
-        </panels>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditEntityRouterPanel</className>
     </component-ui>
-    <component-ui id="Database Writer UI" componentId="Database Writer">
-        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/dbwriter.png</iconImage>
-        <panels>
-            <className>org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel</className>
-        </panels>
+    <component-ui id="Format Delimited UI" componentId="Format Delimited">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/delimitedformatter.png</iconImage>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel</className>
     </component-ui>
-    <component-ui id="Database Writer UI" componentId="Database Writer">
-        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/dbwriter.png</iconImage>
-        <panels>
-            <className>org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel</className>
-        </panels>
+    <component-ui id="Parse Delimited UI" componentId="Parse Delimited">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/delimitedformatter.png</iconImage>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel</className>
+    </component-ui>  
+    <component-ui id="Mapping UI" componentId="Mapping">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/mapping.png</iconImage>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditMappingPanel</className>
     </component-ui>
-    <component-ui id="Database Writer UI" componentId="Database Writer">
-        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/dbwriter.png</iconImage>
-        <panels>
-            <className>org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel</className>
-        </panels>
+    <component-ui id="Format Fixed UI" componentId="Format Fixed">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/fixedlengthformatter.png</iconImage>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel</className>
     </component-ui>
-    <component-ui id="Database Writer UI" componentId="Database Writer">
-        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/dbwriter.png</iconImage>
-        <panels>
-            <className>org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel</className>
-        </panels>
+    <component-ui id="Joiner UI" componentId="Joiner">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/joiner.png</iconImage>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditJoinerPanel</className>
     </component-ui>
-    <component-ui id="Database Writer UI" componentId="Database Writer">
-        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/dbwriter.png</iconImage>
-        <panels>
-            <className>org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel</className>
-        </panels>
+    <component-ui id="Script UI" componentId="Script">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/script.png</iconImage>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditScriptPanel</className>
     </component-ui>
-    <component-ui id="Database Writer UI" componentId="Database Writer">
-        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/dbwriter.png</iconImage>
-        <panels>
-            <className>org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel</className>
-        </panels>
+    <component-ui id="Transformer UI" componentId="Transformer">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/transformer.png</iconImage>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditTransformerPanel</className>
     </component-ui>
-    <component-ui id="Database Writer UI" componentId="Database Writer">
-        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/dbwriter.png</iconImage>
-        <panels>
-            <className>org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel</className>
-        </panels>
+    <component-ui id="Format XML UI" componentId="Format XML">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/xmlformatter.png</iconImage>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditXmlFormatPanel</className>
+    </component-ui>
+    <component-ui id="Parse XML UI" componentId="Parse XML">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/xmlparser.png</iconImage>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditXmlFormatPanel</className>
+    </component-ui>
+    <component-ui id="XSLT Processor UI" componentId="XSLT Processor">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/xsltprocessor.png</iconImage>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditXsltPanel</className>
     </component-ui>
 </ui>

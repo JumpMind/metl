@@ -24,7 +24,15 @@ public class XMLComponentUI implements Serializable {
     protected String iconImage;
 
     @XmlElement
-    protected XMLPanels panels;
+    protected String className;
+    
+    public void setClassName(String clazz) {
+        this.className = clazz;
+    }
+    
+    public String getClassName() {
+        return className;
+    }
 
     public void setComponentId(String componentId) {
         this.componentId = componentId;
@@ -48,14 +56,6 @@ public class XMLComponentUI implements Serializable {
 
     public String getId() {
         return id;
-    }
-
-    public void setPanels(XMLPanels panels) {
-        this.panels = panels;
-    }
-
-    public XMLPanels getPanels() {
-        return panels;
     }
 
 }

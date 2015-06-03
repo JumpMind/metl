@@ -74,9 +74,9 @@
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
-            <setting id='stop.processing.on.error' type='boolean' required='false'>
-                <name>Stop Processing Msgs on Error</name>
-                <defaultValue>true</defaultValue>
+            <setting id='continue.on.error' type='boolean' required='false'>
+                <name>Continue on Error</name>
+                <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
             <setting id='batch.mode' type='boolean' required='false'>
@@ -372,7 +372,7 @@
     </component>
     <component id='Script' category='PROCESSOR' iconName='script.png' inputMessageType='any' outputMessageType='any' resourceCategory='any' inputOutputModelsMatch='false'>
         <name>Script</name>
-        <className>org.jumpmind.symmetric.is.core.runtime.component.ScriptExecutor</className>
+        <className>org.jumpmind.symmetric.is.core.runtime.component.Script</className>
         <description></description>
         <settings>
             <setting id='imports' type='script' required='true'>

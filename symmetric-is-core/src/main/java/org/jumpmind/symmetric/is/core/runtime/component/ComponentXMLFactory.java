@@ -1,11 +1,8 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,29 +16,17 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponents;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSettings;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSettings;
+import org.jumpmind.symmetric.is.core.util.AbstractXMLFactory;
 
-public class ComponentXMLFactory implements IComponentFactory {
+public class ComponentXMLFactory extends AbstractXMLFactory implements IComponentFactory {
 
-    final Logger log = LoggerFactory.getLogger(getClass());
+    Map<String, XMLComponent> componentsById;
 
-    Map<String, XMLComponent> componentsById = new HashMap<String, XMLComponent>();
+    Map<String, List<String>> componentIdsByCategory;
 
-    Map<String, List<String>> componentIdsByCategory = new HashMap<String, List<String>>();
-
-    public ComponentXMLFactory() {
-        refresh();
-    }
-
-    public void refresh() {
-        loadComponentsForClassloader(getClass().getClassLoader());
-        // TODO in the future load from other resources
-    }
-
-    public IComponentRuntime create(String id) {
+    synchronized public IComponentRuntime create(String id) {
         try {
             XMLComponent definition = componentsById.get(id);
             if (definition != null) {
@@ -57,12 +42,18 @@ public class ComponentXMLFactory implements IComponentFactory {
         }
     }
 
-    public Map<String, List<String>> getComponentTypes() {
+    synchronized public Map<String, List<String>> getComponentTypes() {
         return componentIdsByCategory;
     }
 
-    public XMLComponent getComonentDefinition(String id) {
+    synchronized public XMLComponent getComonentDefinition(String id) {
         return componentsById.get(id);
+    }
+    
+    @Override
+    protected void reset() {
+        componentIdsByCategory = new HashMap<String, List<String>>();
+        componentsById = new HashMap<String, XMLComponent>();
     }
 
     @SuppressWarnings("unchecked")
@@ -119,17 +110,4 @@ public class ComponentXMLFactory implements IComponentFactory {
         }
     }
 
-    protected List<InputStream> loadResources(final String name, final ClassLoader classLoader) {
-        try {
-            final List<InputStream> list = new ArrayList<InputStream>();
-            final Enumeration<URL> systemResources = (classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader)
-                    .getResources(name);
-            while (systemResources.hasMoreElements()) {
-                list.add(systemResources.nextElement().openStream());
-            }
-            return list;
-        } catch (IOException e) {
-            throw new IoException(e);
-        }
-    }
 }

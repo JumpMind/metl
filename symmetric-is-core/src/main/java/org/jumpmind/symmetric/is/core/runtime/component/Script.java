@@ -18,12 +18,12 @@ import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
 @ComponentDefinition(
         category = ComponentCategory.PROCESSOR,
-        typeName = ScriptExecutor.TYPE,
+        typeName = Script.TYPE,
         inputMessage = MessageType.ANY,
         outgoingMessage = MessageType.ANY,
         resourceCategory = ResourceCategory.ANY,
         iconImage = "script.png")
-public class ScriptExecutor extends AbstractComponentRuntime {
+public class Script extends AbstractComponentRuntime {
 
     public static final String TYPE = "Script";
 

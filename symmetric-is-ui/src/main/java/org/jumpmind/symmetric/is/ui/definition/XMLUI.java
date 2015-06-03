@@ -14,7 +14,7 @@ public class XMLUI implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @XmlElement
+    @XmlElement(name="component-ui")
     protected List<XMLComponentUI> componentUis;
     
     public void setComponentUis(List<XMLComponentUI> componentUis) {

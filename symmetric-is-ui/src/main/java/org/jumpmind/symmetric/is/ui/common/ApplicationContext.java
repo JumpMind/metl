@@ -13,6 +13,7 @@ import org.jumpmind.symmetric.is.core.runtime.IAgentManager;
 import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceFactory;
 import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
+import org.jumpmind.symmetric.is.ui.views.IUIFactory;
 import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -32,6 +33,9 @@ public class ApplicationContext implements Serializable {
 
     @Autowired
     IComponentFactory componentFactory;
+    
+    @Autowired
+    IUIFactory uiFactory;
 
     @Autowired
     IResourceFactory resourceFactory;
@@ -94,5 +98,9 @@ public class ApplicationContext implements Serializable {
     
     public Environment getEnvironment() {
         return environment;
+    }
+    
+    public IUIFactory getUiFactory() {
+        return uiFactory;
     }
 }

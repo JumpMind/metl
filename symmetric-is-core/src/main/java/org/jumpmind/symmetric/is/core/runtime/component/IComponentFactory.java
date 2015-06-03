@@ -12,5 +12,7 @@ public interface IComponentFactory {
     public Map<String, List<String>> getComponentTypes();
 
     public XMLComponent getComonentDefinition(String id);
+    
+    public void refresh();
 
 }

@@ -25,19 +25,6 @@ import org.jumpmind.symmetric.is.core.model.Setting;
 import org.jumpmind.symmetric.is.core.model.User;
 import org.jumpmind.symmetric.is.core.model.UserSetting;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.runtime.component.DbReader;
-import org.jumpmind.symmetric.is.core.runtime.component.DbWriter;
-import org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter;
-import org.jumpmind.symmetric.is.core.runtime.component.DelimitedParser;
-import org.jumpmind.symmetric.is.core.runtime.component.EntityRouter;
-import org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter;
-import org.jumpmind.symmetric.is.core.runtime.component.Joiner;
-import org.jumpmind.symmetric.is.core.runtime.component.Mapping;
-import org.jumpmind.symmetric.is.core.runtime.component.ScriptExecutor;
-import org.jumpmind.symmetric.is.core.runtime.component.Transformer;
-import org.jumpmind.symmetric.is.core.runtime.component.XmlFormatter;
-import org.jumpmind.symmetric.is.core.runtime.component.XmlParser;
-import org.jumpmind.symmetric.is.core.runtime.component.XsltProcessor;
 import org.jumpmind.symmetric.is.core.runtime.resource.Datasource;
 import org.jumpmind.symmetric.is.core.runtime.resource.Http;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
@@ -46,18 +33,8 @@ import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.EnableFocusTextField;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
-import org.jumpmind.symmetric.is.ui.mapping.EditMappingPanel;
-import org.jumpmind.symmetric.is.ui.views.design.EditDbReaderPanel;
-import org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel;
-import org.jumpmind.symmetric.is.ui.views.design.EditEntityRouterPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditFlowPanel;
-import org.jumpmind.symmetric.is.ui.views.design.EditFormatPanel;
-import org.jumpmind.symmetric.is.ui.views.design.EditJoinerPanel;
 import org.jumpmind.symmetric.is.ui.views.design.EditModelPanel;
-import org.jumpmind.symmetric.is.ui.views.design.EditScriptPanel;
-import org.jumpmind.symmetric.is.ui.views.design.EditTransformerPanel;
-import org.jumpmind.symmetric.is.ui.views.design.EditXmlFormatPanel;
-import org.jumpmind.symmetric.is.ui.views.design.EditXsltPanel;
 import org.jumpmind.symmetric.is.ui.views.design.IComponentEditPanel;
 import org.jumpmind.symmetric.is.ui.views.design.IFlowStepAware;
 import org.jumpmind.symmetric.is.ui.views.design.ManageProjectsPanel;
@@ -722,38 +699,9 @@ public class ProjectNavigator extends VerticalLayout {
     }
 
     public void open(FlowStep flowStep, Flow flow, PropertySheet propertySheet) {
-        /*
-         * TODO: these ui's need to come from component plugin infrastructure.
-         * Maybe dynamically try to create edit class based on The component
-         * type name. EditXxxxXxxxPanel
-         */
         context.getConfigurationService().refresh(flowStep.getComponent());
         String type = flowStep.getComponent().getType();
-        IComponentEditPanel panel = null;
-        if (type.equals(FixedLengthFormatter.TYPE) || type.equals(DelimitedFormatter.TYPE) || 
-                type.equals(DelimitedParser.TYPE)) {
-            panel = new EditFormatPanel();
-        } else if (type.equals(XmlFormatter.TYPE) || type.equals(XmlParser.TYPE)) {
-            panel = new EditXmlFormatPanel();
-            tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-        } else if (type.equals(DbReader.TYPE)) {
-            panel = new EditDbReaderPanel();
-        } else if (type.equals(Transformer.TYPE)) {
-            panel = new EditTransformerPanel();
-        } else if (type.equals(DbWriter.TYPE)) {
-            panel = new EditDbWriterPanel();
-        } else if (type.equals(EntityRouter.TYPE)) {
-            panel = new EditEntityRouterPanel();
-        } else if (type.equals(Mapping.TYPE)) {
-            panel = new EditMappingPanel();
-        } else if (type.equals(ScriptExecutor.TYPE)) {
-            panel = new EditScriptPanel();
-        } else if (type.equals(XsltProcessor.TYPE)) {
-            panel = new EditXsltPanel();
-        } else if (type.equals(Joiner.TYPE)) {
-            panel = new EditJoinerPanel();
-        }
-
+        IComponentEditPanel panel = context.getUiFactory().create(type);
         if (panel != null) {
             if (panel instanceof IFlowStepAware) {
                 ((IFlowStepAware) panel).makeAwareOf(flowStep, flow);
