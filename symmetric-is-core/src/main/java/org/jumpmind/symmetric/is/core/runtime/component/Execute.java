@@ -12,30 +12,18 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.tools.ant.taskdefs.PumpStreamHandler;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.csv.CsvReader;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.util.FormatUtils;
 
-@ComponentDefinition(
-        category = ComponentCategory.PROCESSOR,
-        typeName = Execute.TYPE,
-        inputMessage = MessageType.ANY,
-        outgoingMessage = MessageType.TEXT,
-        iconImage = "execute.png")
 public class Execute extends AbstractComponentRuntime {
 
     public static final String TYPE = "Execute";
 
-    @SettingDefinition(order = 1, required = true, type = Type.TEXT, defaultValue = "", label = "Command")
     public final static String COMMAND = "command";
 
-    @SettingDefinition(order = 10, type = Type.BOOLEAN, defaultValue = "false", label = "Continue On Error")
     public final static String CONTINUE_ON_ERROR = "continue.on.error";
 
-    @SettingDefinition(order = 20, type = Type.INTEGER, defaultValue = "0", label = "Success Code")
     public final static String SUCCESS_CODE = "success.code";
 
     String[] commands;

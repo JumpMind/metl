@@ -10,50 +10,38 @@ import java.util.ArrayList;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamable;
 import org.jumpmind.util.FormatUtils;
 
-@ComponentDefinition(typeName = TextFileWriter.TYPE, category = ComponentCategory.WRITER, iconImage="textfilewriter.png",
-        inputMessage=MessageType.TEXT,
-        resourceCategory = ResourceCategory.STREAMABLE)
 public class TextFileWriter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Text File Writer";
 
     public static final String DEFAULT_CHARSET = "UTF-8";
 
-    @SettingDefinition(order = 10, required = true, type = Type.TEXT, label = "Path and File")
     public final static String TEXTFILEWRITER_RELATIVE_PATH = "textfilewriter.relative.path";
 
-    @SettingDefinition(type = Type.BOOLEAN, order = 30, required = true, 
-            defaultValue = "false", label = "Must Exist")
     public static final String TEXTFILEWRITER_MUST_EXIST = "textfilewriter.must.exist";
 
-    @SettingDefinition(type = Type.BOOLEAN, order = 40, required = true, 
-            defaultValue = "false", label = "Append")
     public static final String TEXTFILEWRITER_APPEND = "textfilewriter.append";
 
-    @SettingDefinition(type = Type.INTEGER, order = 50, label = "Line Terminator")
     public static final String TEXTFILEWRITER_TEXT_LINE_TERMINATOR = "textfilereader.text.line.terminator";
 
-    /* settings */
-    
     String relativePathAndFile;
+    
     boolean mustExist;
+    
     boolean append;
+    
     String lineTerminator;
 
-    /* other vars */
-    
     TypedProperties properties;
+    
     OutputStream outStream;
+    
     BufferedWriter bufferedWriter = null;
 
     @Override

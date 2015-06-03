@@ -7,31 +7,19 @@ import java.util.ArrayList;
 
 import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.is.core.model.Component;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.Http;
 import org.jumpmind.symmetric.is.core.runtime.resource.HttpOutputStream;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamable;
 
-@ComponentDefinition(
-        typeName = Web.TYPE,
-        category = ComponentCategory.PROCESSOR,
-        iconImage = "web.png",
-        inputMessage = MessageType.TEXT,
-        outgoingMessage = MessageType.TEXT,
-        resourceCategory = ResourceCategory.STREAMABLE)
 public class Web extends AbstractComponentRuntime {
 
     public static final String TYPE = "Web";
 
     public static final String DEFAULT_CHARSET = "UTF-8";
 
-    @SettingDefinition(order = 10, required = false, type = Type.TEXT, label = "Append To Url")
     public final static String RELATIVE_PATH = "relative.path";
 
     String relativePath;

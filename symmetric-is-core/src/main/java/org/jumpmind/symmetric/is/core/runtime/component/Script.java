@@ -8,50 +8,23 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(
-        category = ComponentCategory.PROCESSOR,
-        typeName = Script.TYPE,
-        inputMessage = MessageType.ANY,
-        outgoingMessage = MessageType.ANY,
-        resourceCategory = ResourceCategory.ANY,
-        iconImage = "script.png")
 public class Script extends AbstractComponentRuntime {
 
     public static final String TYPE = "Script";
 
-    @SettingDefinition(order = 5, required = true, type = Type.SCRIPT, visible= false,label = "Import Statements")
     public final static String IMPORTS = "imports";
 
-    @SettingDefinition(order = 10, required = true, type = Type.SCRIPT, visible= false,label = "Init Script")
     public final static String INIT_SCRIPT = "init.script";
 
-    @SettingDefinition(order = 15, required = true, type = Type.SCRIPT, visible= false, label = "Handle Msg Script")
     public final static String HANDLE_SCRIPT = "handle.msg.script";
 
-    @SettingDefinition(
-            order = 20,
-            required = true,
-            type = Type.SCRIPT,
-                    visible= false,
-            label = "Ended with Success Script")
     public final static String ON_FLOW_SUCCESS = "on.flow.success.script";
     
-    @SettingDefinition(
-            order = 20,
-            required = true,
-            type = Type.SCRIPT,
-            visible= false,
-            label = "Ended with Error Script")
     public final static String ON_FLOW_ERROR = "on.flow.error.script";
-
 
     public static String TRANSFORM_EXPRESSION = "transform.expression";
 

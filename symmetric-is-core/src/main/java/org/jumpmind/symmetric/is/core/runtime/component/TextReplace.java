@@ -6,28 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jumpmind.symmetric.is.core.model.Component;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(
-        typeName = TextReplace.TYPE,
-        category = ComponentCategory.PROCESSOR,
-        iconImage = "regex_replace.png",
-        inputMessage = MessageType.TEXT,
-        outgoingMessage = MessageType.TEXT,
-        resourceCategory = ResourceCategory.NONE)
 public class TextReplace extends AbstractComponentRuntime {
 
     public static final String TYPE = "Text Replace";
 
-    @SettingDefinition(order = 10, type = Type.TEXT, required=true, label = "Search For (regex)")
     public final static String SETTING_SEARCH_FOR = "search.for";
     
-    @SettingDefinition(order = 10, type = Type.TEXT, label = "Replace With")
     public final static String SETTING_REPLACE_WITH = "replace.with";
 
     String searchFor;

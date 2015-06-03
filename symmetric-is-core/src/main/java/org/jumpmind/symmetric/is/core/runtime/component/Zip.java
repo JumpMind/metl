@@ -13,46 +13,21 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.is.core.model.Component;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamable;
 
-@ComponentDefinition(
-        typeName = Zip.TYPE,
-        category = ComponentCategory.WRITER,
-        iconImage = "zip.png",
-        inputMessage = MessageType.TEXT,
-        outgoingMessage = MessageType.NONE,
-        resourceCategory = ResourceCategory.STREAMABLE)
 public class Zip extends AbstractComponentRuntime {
 
     public static final String TYPE = "Zip";
 
-    @SettingDefinition(order = 10, type = Type.TEXT, label = "File Path")
     public final static String SETTING_RELATIVE_PATH = "relative.path";
 
-    @SettingDefinition(
-            type = Type.BOOLEAN,
-            order = 20,
-            required = true,
-            provided = true,
-            defaultValue = "true",
-            label = "Must Exist")
     public static final String SETTING_MUST_EXIST = "must.exist";
 
-    @SettingDefinition(
-            order = 50,
-            type = Type.BOOLEAN,
-            defaultValue = "true",
-            label = "Delete Source Files")
     public final static String SETTING_DELETE_ON_COMPLETE = "delete.on.complete";
 
-    @SettingDefinition(order = 60, type = Type.TEXT, label = "Encoding", defaultValue = "UTF-8")
     public final static String SETTING_ENCODING = "encoding";
 
     String relativePathAndFile;

@@ -5,25 +5,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-@ComponentDefinition(
-        typeName = SqlWriter.TYPE,
-        category = ComponentCategory.WRITER,
-        iconImage = "dbwriter.png",
-        inputMessage = MessageType.ANY,
-        outgoingMessage = MessageType.ANY,
-        resourceCategory = ResourceCategory.DATASOURCE,
-        inputOutputModelsMatch = true)
 public class SqlWriter extends AbstractDbComponent {
 
     private static final String ON_SUCCESS = "ON SUCCESS";
@@ -34,11 +22,8 @@ public class SqlWriter extends AbstractDbComponent {
 
     public static final String TYPE = "Sql Writer";
 
-    @SettingDefinition(order = 10, required = true, type = Type.MULTILINE_TEXT, label = "Sql")
     public final static String SQL = "sql";
 
-    @SettingDefinition(order = 0, required = false, type = Type.CHOICE, choices = { PER_MESSAGE,
-            ON_SUCCESS, PER_ENTITY }, defaultValue = PER_MESSAGE, label = "Run When")
     public final static String RUN_WHEN = "run.when";
 
     List<String> sqls;

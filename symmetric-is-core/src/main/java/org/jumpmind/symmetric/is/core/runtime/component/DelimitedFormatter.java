@@ -21,59 +21,30 @@ import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(
-        typeName = DelimitedFormatter.TYPE,
-        category = ComponentCategory.PROCESSOR,
-        iconImage = "delimitedformatter.png",
-        inputMessage = MessageType.ENTITY,
-        outgoingMessage = MessageType.TEXT)
 public class DelimitedFormatter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Format Delimited";
 
-    @SettingDefinition(
-            order = 10,
-            required = true,
-            type = Type.TEXT,
-            label = "Delimiter",
-            defaultValue = ",")
     public final static String DELIMITED_FORMATTER_DELIMITER = "delimited.formatter.delimiter";
 
-    @SettingDefinition(
-            order = 20,
-            type = Type.TEXT,
-            label = "Quote Character",
-            defaultValue = "\"")
     public final static String DELIMITED_FORMATTER_QUOTE_CHARACTER = "delimited.formatter.quote.character";
 
-    @SettingDefinition(
-            order = 30,
-            type = Type.BOOLEAN,
-            label = "Header line",
-            defaultValue = "false")
     public final static String DELIMITED_FORMATTER_WRITE_HEADER = "delimited.formatter.header";
 
     public final static String DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = "delimited.formatter.attribute.format.function";
 
     public final static String DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL = "delimited.formatter.attribute.ordinal";
 
-    /* settings */
-
     String delimiter;
 
     String quoteCharacter;
 
     boolean useHeader;
-
-    /* other vars */
 
     TypedProperties properties;
 

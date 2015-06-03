@@ -6,39 +6,28 @@ import java.nio.ByteBuffer;
 
 import org.jumpmind.exception.IoException;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamable;
 
-@ComponentDefinition(typeName = BinaryFileReader.TYPE, category = ComponentCategory.READER, iconImage="binaryfilereader.png",
-        outgoingMessage=MessageType.BINARY,
-        resourceCategory = ResourceCategory.STREAMABLE)
 public class BinaryFileReader extends AbstractComponentRuntime {
 
     public static final String TYPE = "Binary File Reader";
 
-    @SettingDefinition(order = 10, required = true, type = Type.TEXT, label = "Path and File")
     public final static String BINARYFILEREADER_RELATIVE_PATH = "binaryfilereader.relative.path";
 
-    @SettingDefinition(type = Type.BOOLEAN, order = 20, required = true, provided = true,
-            defaultValue = "true", label = "Must Exist")
     public static final String BINARYFILEREADER_MUST_EXIST = "binaryfilereader.must.exist";
 
-    @SettingDefinition(type = Type.INTEGER, order = 30, defaultValue = "7",
-            label = "Size / Msg (KB)")
     public static final String BINARYFILEREADER_SIZE_PER_MESSAGE = "binaryfilereader.size.per.message";
 
-    /* settings */
     String relativePathAndFile;
+
     boolean mustExist;
+    
     int sizePerMessage;
 
-    /* other vars */
     TypedProperties properties;
+    
     InputStream inStream = null;
 
     @Override

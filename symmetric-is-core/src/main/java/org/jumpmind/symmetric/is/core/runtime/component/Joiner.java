@@ -9,34 +9,17 @@ import java.util.Map;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.Model;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(
-        category = ComponentCategory.PROCESSOR,
-        typeName = Joiner.TYPE,
-        iconImage = "joiner.png",
-        inputMessage = MessageType.ENTITY,
-        outgoingMessage = MessageType.ENTITY,
-        inputOutputModelsMatch=true
-        )
 public class Joiner extends AbstractComponentRuntime {
 
     public static final String TYPE = "Joiner";
 
     public final static String JOIN_ATTRIBUTE = "join.attribute";
 
-    @SettingDefinition(
-            order = 20,
-            required = false,
-            type = Type.INTEGER,
-            defaultValue = "10",
-            label = "Rows/Msg")
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
     int rowsPerMessage;

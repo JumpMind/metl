@@ -8,21 +8,11 @@ import java.util.List;
 import org.apache.commons.lang.ObjectUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.Model;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(
-        category = ComponentCategory.PROCESSOR,
-        typeName = Sorter.TYPE,
-        iconImage = "sorter.png",
-        inputMessage = MessageType.ENTITY,
-        outgoingMessage = MessageType.ENTITY,
-        inputOutputModelsMatch = true)
 public class Sorter extends AbstractComponentRuntime {
 
     // TODO: Instead of making the sort attribute a single component level
@@ -33,19 +23,8 @@ public class Sorter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Sorter";
 
-    @SettingDefinition(
-            order = 10,
-            required = true,
-            type = Type.TEXT,
-            label = "Sort Entity.Attribute")
     public final static String SORT_ATTRIBUTE = "sort.attribute";
 
-    @SettingDefinition(
-            order = 20,
-            required = false,
-            type = Type.INTEGER,
-            defaultValue = "10",
-            label = "Rows/Msg")
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
     int rowsPerMessage;

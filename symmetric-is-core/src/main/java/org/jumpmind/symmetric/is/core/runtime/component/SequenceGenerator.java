@@ -6,41 +6,19 @@ import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Model;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.util.FormatUtils;
 
-@ComponentDefinition(
-        category = ComponentCategory.PROCESSOR,
-        typeName = SequenceGenerator.TYPE,
-        iconImage = "sequence.png",
-        resourceCategory = ResourceCategory.DATASOURCE,
-        inputMessage = MessageType.ENTITY,
-        outgoingMessage = MessageType.ENTITY,
-        inputOutputModelsMatch = true)
 public class SequenceGenerator extends AbstractDbComponent {
 
     public static final String TYPE = "Sequence";
 
-    @SettingDefinition(
-            order = 10,
-            required = true,
-            type = Type.TEXT,
-            label = "Sequence Attribute Name")
     public final static String SEQ_ATTRIBUTE = "sequence.attribute";
 
-    @SettingDefinition(
-            order = 20,
-            required = true,
-            type = Type.MULTILINE_TEXT,
-            label = "Select Starting Sequence Sql")
     public final static String SQL = "sequence.sql";
     
     public final static String SHARED = "shared";

@@ -23,21 +23,12 @@ import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.Setting;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.util.FormatUtils;
 
-@ComponentDefinition(
-        typeName = XsltProcessor.TYPE,
-        category = ComponentCategory.PROCESSOR,
-        iconImage = "xsltprocessor.png",
-        inputMessage = MessageType.ENTITY,
-        outgoingMessage = MessageType.TEXT)
 public class XsltProcessor extends AbstractComponentRuntime {
 
     public static final String PRETTY_FORMAT = "Pretty";
@@ -46,14 +37,10 @@ public class XsltProcessor extends AbstractComponentRuntime {
     
     public static final String RAW_FORMAT = "Raw";
 
-    @SettingDefinition(order = 10, required = false, type = Type.BOOLEAN, label = "Output all attributes", defaultValue = "false")
     public final static String OUTPUT_ALL_ATTRIBUTES = "xslt.processor.output.all.attributes";
 
-    @SettingDefinition(order = 15, required = false, type = Type.BOOLEAN, label = "Parameter replacement", defaultValue = "true")
     public final static String PARAMETER_REPLACEMENT = "xslt.processor.parameter.replacement";
 
-    @SettingDefinition(order = 20, type = Type.CHOICE, label = "XML Format", defaultValue = PRETTY_FORMAT, choices = {
-            PRETTY_FORMAT, COMPACT_FORMAT, RAW_FORMAT })
     public final static String XML_FORMAT = "xslt.processor.xml.format";
 
     public static final String TYPE = "XSLT Processor";

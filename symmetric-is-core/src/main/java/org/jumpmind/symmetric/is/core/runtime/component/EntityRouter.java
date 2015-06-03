@@ -14,35 +14,19 @@ import javax.script.ScriptException;
 
 import org.jumpmind.exception.IoException;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@ComponentDefinition(
-        category = ComponentCategory.PROCESSOR,
-        typeName = EntityRouter.TYPE,
-        iconImage = "entityrouter.png",
-        inputMessage = MessageType.ENTITY,
-        outgoingMessage = MessageType.ENTITY,
-        inputOutputModelsMatch = true)
 public class EntityRouter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Entity Router";
 
     public static final String SETTING_CONFIG = "config";
 
-    @SettingDefinition(
-            order = 10,
-            required = true,
-            type = Type.INTEGER,
-            defaultValue = "10000",
-            label = "Rows/Msg")
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
     List<Route> routes;

@@ -12,23 +12,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.is.core.model.Component;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamable;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
 import org.jumpmind.util.FormatUtils;
 
-@ComponentDefinition(
-        typeName = TextFileReader.TYPE,
-        category = ComponentCategory.READER,
-        iconImage = "textfilereader.png",
-        inputMessage = MessageType.TEXT,
-        outgoingMessage = MessageType.TEXT,
-        resourceCategory = ResourceCategory.STREAMABLE)
 public class TextFileReader extends AbstractComponentRuntime {
 
     public static final String TYPE = "Text File Reader";
@@ -37,48 +26,25 @@ public class TextFileReader extends AbstractComponentRuntime {
     public static final String ACTION_DELETE = "Delete";
     public static final String ACTION_ARCHIVE = "Archive";
 
-    @SettingDefinition(
-            order = 5,
-            type = Type.BOOLEAN,
-            defaultValue = "false",
-            label = "Get File Name From Message")
     public final static String SETTING_GET_FILE_FROM_MESSAGE = "get.file.name.from.message";
 
-    @SettingDefinition(order = 10, type = Type.TEXT, label = "File Path")
     public final static String SETTING_RELATIVE_PATH = "textfilereader.relative.path";
 
-    @SettingDefinition(
-            type = Type.BOOLEAN,
-            order = 20,
-            required = true,
-            provided = true,
-            defaultValue = "true",
-            label = "Must Exist")
     public static final String SETTING_MUST_EXIST = "textfilereader.must.exist";
 
-    @SettingDefinition(type = Type.INTEGER, order = 30, defaultValue = "10000", label = "Rows / Msg")
     public static final String SETTING_ROWS_PER_MESSAGE = "textfilereader.text.rows.per.message";
 
-    @SettingDefinition(order = 35, type = Type.CHOICE, defaultValue = "NONE", choices = {
-            ACTION_NONE, ACTION_ARCHIVE, ACTION_DELETE }, label = "Action on Success")
     public final static String SETTING_ACTION_ON_SUCCESS = "action.on.success";
 
-    @SettingDefinition(order = 40, type = Type.TEXT, label = "Archive On Success Path")
     public final static String SETTING_ARCHIVE_ON_SUCCESS_PATH = "archive.on.success.path";
 
-    @SettingDefinition(order = 45, type = Type.CHOICE, defaultValue = "NONE", choices = {
-            ACTION_NONE, ACTION_ARCHIVE, ACTION_DELETE }, label = "Action on Error")
     public final static String SETTING_ACTION_ON_ERROR = "action.on.error";
 
-    @SettingDefinition(order = 50, type = Type.TEXT, label = "Archive On Error Path")
     public final static String SETTING_ARCHIVE_ON_ERROR_PATH = "archive.on.error.path";
 
-    @SettingDefinition(order = 60, type = Type.TEXT, label = "Encoding", defaultValue = "UTF-8")
     public final static String SETTING_ENCODING = "textfilereader.encoding";
     
-    @SettingDefinition(type = Type.INTEGER, order = 70, label = "Header Lines to Skip")
     public static final String SETTING_HEADER_LINES_TO_SKIP = "textfilereader.text.header.lines.to.skip";    
-
 
     String relativePathAndFile;
 

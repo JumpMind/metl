@@ -15,16 +15,8 @@ import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(
-        category = ComponentCategory.PROCESSOR,
-        typeName = Transformer.TYPE,
-        inputMessage = MessageType.ENTITY,
-        outgoingMessage = MessageType.ENTITY,
-        iconImage = "transformer.png",
-        inputOutputModelsMatch = true)
 public class Transformer extends AbstractComponentRuntime {
 
     public static final String TYPE = "Transformer";

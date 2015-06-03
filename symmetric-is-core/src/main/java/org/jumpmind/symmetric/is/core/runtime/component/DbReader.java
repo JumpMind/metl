@@ -11,15 +11,11 @@ import java.util.Map;
 import org.jumpmind.db.sql.SqlException;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.MessageManipulationStrategy;
 import org.jumpmind.symmetric.is.core.runtime.StartupMessage;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.dao.DataAccessException;
@@ -28,50 +24,18 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.StringUtils;
 
-@ComponentDefinition(
-        typeName = DbReader.TYPE,
-        category = ComponentCategory.READER,
-        iconImage = "dbreader.png",
-        inputMessage = MessageType.ANY,
-        outgoingMessage = MessageType.ENTITY,
-        resourceCategory = ResourceCategory.DATASOURCE)
 public class DbReader extends AbstractDbComponent {
 
     public static final String TYPE = "Database Reader";
 
-    @SettingDefinition(order = 0, required = true, type = Type.MULTILINE_TEXT, label = "Sql")
     public final static String SQL = "db.reader.sql";
 
-    @SettingDefinition(
-            order = 10,
-            required = true,
-            type = Type.INTEGER,
-            defaultValue = "1",
-            label = "Rows/Msg")
     public final static String ROWS_PER_MESSAGE = "db.reader.rows.per.message";
 
-    @SettingDefinition(
-            order = 20,
-            required = true,
-            type = Type.BOOLEAN,
-            defaultValue = "false",
-            label = "Trim Columns")
     public final static String TRIM_COLUMNS = "db.reader.trim.columns";
 
-    @SettingDefinition(
-            order = 20,
-            required = true,
-            type = Type.BOOLEAN,
-            defaultValue = "false",
-            label = "Match On Column Name")
     public final static String MATCH_ON_COLUMN_NAME_ONLY = "db.reader.match.on.column.name";
 
-    @SettingDefinition(
-            order = 200,
-            type = Type.CHOICE,
-            choices = { "REPLACE", "ENHANCE" },
-            defaultValue = "REPLACE",
-            label = "Msg Strategy")
     public final static String MESSAGE_MANIPULATION_STRATEGY = "db.reader.message.manipulation.strategy";
 
     String sql;

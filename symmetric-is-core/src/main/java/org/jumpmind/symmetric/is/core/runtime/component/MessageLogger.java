@@ -6,16 +6,8 @@ import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.MessageHeader;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(
-        category = ComponentCategory.PROCESSOR,
-        typeName = MessageLogger.TYPE,
-        inputMessage = MessageType.ANY,
-        outgoingMessage = MessageType.ANY,
-        inputOutputModelsMatch = true,
-        iconImage = "log.png")
 public class MessageLogger extends AbstractComponentRuntime {
 
     public static final String TYPE = "Message Logger";

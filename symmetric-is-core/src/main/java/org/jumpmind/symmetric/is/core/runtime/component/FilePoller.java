@@ -16,20 +16,12 @@ import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.ShutdownMessage;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
 import org.jumpmind.util.FormatUtils;
 
-@ComponentDefinition(
-        typeName = FilePoller.TYPE,
-        category = ComponentCategory.READER,
-        iconImage = "filepoller.png",
-        outgoingMessage = MessageType.TEXT,
-        resourceCategory = ResourceCategory.STREAMABLE)
 public class FilePoller extends AbstractComponentRuntime {
 
     public static final String TYPE = "File Poller";
@@ -38,42 +30,20 @@ public class FilePoller extends AbstractComponentRuntime {
     public static final String ACTION_DELETE = "Delete";
     public static final String ACTION_ARCHIVE = "Archive";
 
-    @SettingDefinition(order = 10, required = true, type = Type.TEXT, label = "File Pattern")
     public final static String SETTING_FILE_PATTERN = "file.pattern";
 
-    @SettingDefinition(
-            order = 20,
-            type = Type.BOOLEAN,
-            defaultValue = "false",
-            label = "Search Recursively")
     public final static String SETTING_RECURSE = "recurse";
 
-    @SettingDefinition(
-            order = 30,
-            type = Type.BOOLEAN,
-            defaultValue = "true",
-            label = "Cancel On No Files")
     public final static String SETTING_CANCEL_ON_NO_FILES = "cancel.on.no.files";
 
-    @SettingDefinition(order = 35, type = Type.CHOICE, defaultValue = "NONE", choices = {
-            ACTION_NONE, ACTION_ARCHIVE, ACTION_DELETE }, label = "Action on Success")
     public final static String SETTING_ACTION_ON_SUCCESS = "action.on.success";
 
-    @SettingDefinition(order = 40, type = Type.TEXT, label = "Archive On Success Path")
     public final static String SETTING_ARCHIVE_ON_SUCCESS_PATH = "archive.on.success.path";
 
-    @SettingDefinition(order = 45, type = Type.CHOICE, defaultValue = "NONE", choices = {
-            ACTION_NONE, ACTION_ARCHIVE, ACTION_DELETE }, label = "Action on Error")
     public final static String SETTING_ACTION_ON_ERROR = "action.on.error";
 
-    @SettingDefinition(order = 50, type = Type.TEXT, label = "Archive On Error Path")
     public final static String SETTING_ARCHIVE_ON_ERROR_PATH = "archive.on.error.path";
 
-    @SettingDefinition(
-            order = 60,
-            type = Type.BOOLEAN,
-            defaultValue = "false",
-            label = "Use Trigger File")
     public final static String SETTING_USE_TRIGGER_FILE = "use.trigger.file";
 
     @SettingDefinition(order = 70, type = Type.TEXT, label = "Relative Trigger File Path")

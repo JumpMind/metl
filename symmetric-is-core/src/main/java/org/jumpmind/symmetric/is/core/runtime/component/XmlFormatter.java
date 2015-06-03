@@ -26,53 +26,36 @@ import org.jumpmind.symmetric.is.core.model.ComponentEntitySetting;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.Setting;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.util.FormatUtils;
 
-@ComponentDefinition(
-        typeName = XmlFormatter.TYPE,
-        category = ComponentCategory.PROCESSOR,
-        iconImage = "xmlformatter.png",
-        inputMessage = MessageType.ENTITY,
-        outgoingMessage = MessageType.TEXT)
 public class XmlFormatter extends AbstractXML {
 
     public static final String PRETTY_FORMAT = "Pretty";
-    
+
     public static final String COMPACT_FORMAT = "Compact";
-    
+
     public static final String RAW_FORMAT = "Raw";
 
-    @SettingDefinition(
-            order = 15,
-            required = false,
-            type = Type.BOOLEAN,
-            label = "Parameter replacement",
-            defaultValue = "true")
     public final static String PARAMETER_REPLACEMENT = "xml.formatter.parameter.replacement";
 
-    @SettingDefinition(order = 20, type = Type.CHOICE, label = "XML Format", defaultValue = PRETTY_FORMAT, choices = {
-            PRETTY_FORMAT, COMPACT_FORMAT, RAW_FORMAT })
     public final static String XML_FORMAT = "xml.formatter.xml.format";
 
     public static final String TYPE = "Format XML";
-    
+
     public final static String XML_FORMATTER_TEMPLATE = "xml.formatter.template";
 
     Document templateDocument;
-    
+
     List<XmlFormatterAttributeSetting> attributeSettings;
-       
+
     Map<String, XmlFormatterEntitySetting> entitySettings;
-    
+
     boolean ignoreNamespace = true;
-    
+
     boolean useParameterReplacement = true;
 
     String xmlFormat;
@@ -115,12 +98,13 @@ public class XmlFormatter extends AbstractXML {
                         log(LogLevel.WARN, "XPath expression " + compEntitySetting.getValue() + " did not find any matches");
                     } else {
                         Element templateElement = matches.get(0);
-                        entitySettings.put(compEntitySetting.getEntityId(), new XmlFormatterEntitySetting(compEntitySetting, expression, templateElement));
+                        entitySettings.put(compEntitySetting.getEntityId(), new XmlFormatterEntitySetting(compEntitySetting, expression,
+                                templateElement));
                     }
                 }
             }
             restoreNamespaces(templateDocument, namespaces);
-            
+
             for (ComponentAttributeSetting compAttrSetting : getComponent().getAttributeSettings()) {
                 if (compAttrSetting.getName().equals(XML_FORMATTER_XPATH)) {
                     ModelAttribute attr = model.getAttributeById(compAttrSetting.getAttributeId());
@@ -154,7 +138,7 @@ public class XmlFormatter extends AbstractXML {
             List<Element> matches = entitySetting.getExpression().evaluate(document.getRootElement());
             for (Element element : matches) {
                 entitySetting.setParentElement(element.getParentElement());
-            }            
+            }
         }
 
         for (EntityData inputRow : inputRows) {
@@ -187,7 +171,7 @@ public class XmlFormatter extends AbstractXML {
 
         // apply attributes whose entities do not need to repeat
         applyAttributeXpath(document, inputRow, attributeSettings);
-        
+
         // apply attributes whose entities are supposed to repeat
         for (XmlFormatterEntitySetting entitySetting : inputEntitySettings) {
             if (entitySetting.isFirstTimeApply()) {
@@ -238,15 +222,15 @@ public class XmlFormatter extends AbstractXML {
                     }
                 }
             }
-        }        
+        }
     }
-    
+
     class XmlFormatterAttributeSetting {
 
         ComponentAttributeSetting setting;
 
         XPathExpression<Object> expression;
-        
+
         XmlFormatterAttributeSetting(ComponentAttributeSetting setting, XPathExpression<Object> expression) {
             this.setting = setting;
             this.expression = expression;
@@ -270,19 +254,19 @@ public class XmlFormatter extends AbstractXML {
     }
 
     class XmlFormatterEntitySetting {
-        
+
         ComponentEntitySetting setting;
 
         XPathExpression<Element> expression;
-        
+
         Element templateElement;
-        
+
         Element parentElement;
-        
+
         List<XmlFormatterAttributeSetting> attributeSettings;
-        
+
         boolean firstTimeApply;
-        
+
         XmlFormatterEntitySetting(ComponentEntitySetting setting, XPathExpression<Element> expression, Element templateElement) {
             this.setting = setting;
             this.expression = expression;
@@ -319,8 +303,7 @@ public class XmlFormatter extends AbstractXML {
             return attributeSettings;
         }
 
-        public void setAttributeSettings(
-                List<XmlFormatterAttributeSetting> attributeSettings) {
+        public void setAttributeSettings(List<XmlFormatterAttributeSetting> attributeSettings) {
             this.attributeSettings = attributeSettings;
         }
 

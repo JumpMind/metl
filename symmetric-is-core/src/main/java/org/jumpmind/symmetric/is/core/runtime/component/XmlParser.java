@@ -20,15 +20,8 @@ import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(
-        typeName = XmlParser.TYPE,
-        category = ComponentCategory.PROCESSOR,
-        iconImage = "xmlformatter.png",
-        inputMessage = MessageType.TEXT,
-        outgoingMessage = MessageType.ENTITY)
 public class XmlParser extends AbstractXML {
 
     public static final String TYPE = "Parse XML";

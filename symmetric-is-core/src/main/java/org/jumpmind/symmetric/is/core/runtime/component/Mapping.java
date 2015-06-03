@@ -13,31 +13,16 @@ import java.util.Set;
 import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(
-        category = ComponentCategory.PROCESSOR,
-        iconImage = "mapping.png",
-        typeName = Mapping.TYPE,
-        inputMessage = MessageType.ENTITY,
-        outgoingMessage = MessageType.ENTITY)
 public class Mapping extends AbstractComponentRuntime {
 
     public static final String TYPE = "Mapping";
 
     public final static String ATTRIBUTE_MAPS_TO = "mapping.processor.attribute.maps.to";
 
-    @SettingDefinition(
-            order = 10,
-            required = false,
-            type = Type.BOOLEAN,
-            defaultValue = "false",
-            label = "Set Unmapped Attributes To Null")
     public final static String SET_UNMAPPED_ATTRIBUTES_TO_NULL = "set.unmapped.attributes.to.null";
 
     Map<String, Set<String>> attrToAttrMap;

@@ -25,61 +25,28 @@ import org.jumpmind.symmetric.is.core.model.ComponentAttributeSetting;
 import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ModelEntity;
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.ResourceCategory;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.util.FormatUtils;
 
-@ComponentDefinition(
-        typeName = DbWriter.TYPE,
-        category = ComponentCategory.WRITER,
-        iconImage = "dbwriter.png",
-        inputMessage = MessageType.ENTITY,
-        outgoingMessage = MessageType.NONE,
-        resourceCategory = ResourceCategory.DATASOURCE)
 public class DbWriter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Database Writer";
 
-    @SettingDefinition(order = 5, required = false, type = Type.TEXT, label = "Catalog")
     public final static String CATALOG = "catalog";
 
-    @SettingDefinition(order = 6, required = false, type = Type.TEXT, label = "Schema")
     public final static String SCHEMA = "schema";
 
-    @SettingDefinition(order = 10, required = false, type = Type.BOOLEAN, label = "Replace rows if they exist", defaultValue = "false")
     public final static String REPLACE = "db.writer.replace";
 
-    @SettingDefinition(
-            order = 20,
-            required = false,
-            type = Type.BOOLEAN,
-            label = "Update rows first instead of insert",
-            defaultValue = "false")
     public final static String UPDATE_FIRST = "db.writer.update.first";
 
-    @SettingDefinition(
-            order = 30,
-            required = false,
-            type = Type.BOOLEAN,
-            label = "Fallback to insert if no rows updated",
-            defaultValue = "false")
     public final static String INSERT_FALLBACK = "db.writer.insert.fallback";
 
-    @SettingDefinition(order = 40, required = false, type = Type.BOOLEAN, label = "Quote table and column names", defaultValue = "false")
     public final static String QUOTE_IDENTIFIERS = "db.writer.quote.identifiers";
 
-    @SettingDefinition(
-            order = 50,
-            required = false,
-            type = Type.BOOLEAN,
-            label = "Trim character data to fit within column",
-            defaultValue = "false")
     public final static String FIT_TO_COLUMN = "db.writer.fit.to.column";
 
     public final static String ATTRIBUTE_INSERT_ENABLED = "insert.enabled";

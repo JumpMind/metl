@@ -6,38 +6,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.jumpmind.symmetric.is.core.model.SettingDefinition;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.Message;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent.MessageType;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 
-@ComponentDefinition(
-        category = ComponentCategory.PROCESSOR,
-        typeName = Multiplier.TYPE,
-        iconImage = "multiplier.png",
-        inputMessage = MessageType.ENTITY,
-        outgoingMessage = MessageType.ENTITY,
-        inputOutputModelsMatch=true
-        )
 public class Multiplier extends AbstractComponentRuntime {
 
     public static final String TYPE = "Multiplier";
 
-    @SettingDefinition(
-            order = 20,
-            required = false,
-            type = Type.INTEGER,
-            defaultValue = "10",
-            label = "Rows/Msg")
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
-    @SettingDefinition(
-            order = 10,
-            required = true,
-            type = Type.SOURCE_STEP,
-            label = "Multiplier Source")
     public final static String MULTIPLIER_SOURCE_STEP = "multiplier.source.step";
 
     boolean multipliersInitialized = false;
