@@ -24,6 +24,7 @@ eclipse {
 }
 
 war {
+    archiveName="symmetric-is.war"
     filesMatching("**/*.properties") {
        filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [               
          'appVersion': appVersion, 
