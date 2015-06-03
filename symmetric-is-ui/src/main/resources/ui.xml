@@ -44,11 +44,50 @@
         <className>org.jumpmind.symmetric.is.ui.views.design.EditXmlFormatPanel</className>
     </component-ui>
     <component-ui id="Parse XML UI" componentId="Parse XML">
-        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/xmlparser.png</iconImage>
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/xmlformatter.png</iconImage>
         <className>org.jumpmind.symmetric.is.ui.views.design.EditXmlFormatPanel</className>
     </component-ui>
     <component-ui id="XSLT Processor UI" componentId="XSLT Processor">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/xsltprocessor.png</iconImage>
         <className>org.jumpmind.symmetric.is.ui.views.design.EditXsltPanel</className>
     </component-ui>
+    <component-ui id="Deduper UI" componentId="Deduper">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/deduper.png</iconImage>
+    </component-ui>    
+    <component-ui id="Delay UI" componentId="Delay">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/timer.png</iconImage>
+    </component-ui>    
+    <component-ui id="Entity Router UI" componentId="Entity Router">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/entityrouter.png</iconImage>
+    </component-ui>    
+    <component-ui id="Execute UI" componentId="Execute">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/execute.png</iconImage>
+    </component-ui>  
+    <component-ui id="Message Logger UI" componentId="Message Logger">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/log.png</iconImage>
+    </component-ui>
+    <component-ui id="Multiplier UI" componentId="Multiplier">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/multiplier.png</iconImage>
+    </component-ui>   
+    <component-ui id="Sequence UI" componentId="Sequence">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/sequence.png</iconImage>
+    </component-ui>       
+    <component-ui id="Sorter UI" componentId="Sorter">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/sorter.png</iconImage>
+    </component-ui> 
+    <component-ui id="Sql Writer UI" componentId="Sql Writer">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/dbwriter.png</iconImage>
+    </component-ui>   
+    <component-ui id="Text File Reader UI" componentId="Text File Reader">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/textfilereader.png</iconImage>
+    </component-ui> 
+    <component-ui id="Text File Writer UI" componentId="Text File Writer">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/textfilewriter.png</iconImage>
+    </component-ui>    
+    <component-ui id="Text Replace UI" componentId="Text Replace">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/regex_replace.png</iconImage>
+    </component-ui>    
+    <component-ui id="Zip UI" componentId="Zip">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/zip.png</iconImage>
+    </component-ui>                        
 </ui>

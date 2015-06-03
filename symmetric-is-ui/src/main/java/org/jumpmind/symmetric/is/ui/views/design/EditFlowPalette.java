@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -12,10 +14,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.symmetric.is.core.model.ComponentName;
-import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
-import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
-import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
+import org.jumpmind.symmetric.is.ui.definition.XMLComponentUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,20 +36,16 @@ public class EditFlowPalette extends VerticalLayout {
 
     Accordion componentAccordian;
 
-    IComponentFactory componentFactory;
+    ApplicationContext context;
 
-    IConfigurationService configurationService;
-    
     EditFlowPanel designFlowLayout;
 
     float splitPosition = 60;
 
     Unit splitUnit = Unit.PERCENTAGE;
 
-    public EditFlowPalette(EditFlowPanel designFlowLayout, ApplicationContext context,
-            String projectVersionId) {
-        this.componentFactory = context.getComponentFactory();
-        this.configurationService = context.getConfigurationService();
+    public EditFlowPalette(EditFlowPanel designFlowLayout, ApplicationContext context, String projectVersionId) {
+        this.context = context;
         this.designFlowLayout = designFlowLayout;
         setHeight(100, Unit.PERCENTAGE);
         setWidth(150, Unit.PIXELS);
@@ -81,8 +77,12 @@ public class EditFlowPalette extends VerticalLayout {
     }
 
     protected String getImageResourceNameForComponentType(String type) {
-       XMLComponent definition = componentFactory.getComonentDefinition(type);
-        return "/org/jumpmind/symmetric/is/core/runtime/component/" + definition.getIconName();
+        String icon = "/org/jumpmind/symmetric/is/core/runtime/component/puzzle.png";
+        XMLComponentUI def = context.getUiFactory().getDefinition(type);
+        if (def != null && isNotBlank(def.getIconImage())) {
+            icon = def.getIconImage();
+        }
+        return icon;
     }
 
     protected ClassResource getImageResourceForComponentType(String type) {
@@ -93,15 +93,14 @@ public class EditFlowPalette extends VerticalLayout {
         componentAccordian.removeAllComponents();
         populateComponentTypesInComponentPalette(projectVersionId);
         populateSharedComponentsInComponentPalette(projectVersionId);
-    }  
-    
+    }
+
     protected void populateComponentTypesInComponentPalette(String projectVersionId) {
-        Map<String, List<String>> componentTypesByCategory = componentFactory
-                .getComponentTypes();
+        Map<String, List<String>> componentTypesByCategory = context.getComponentFactory().getComponentTypes();
         for (String category : componentTypesByCategory.keySet()) {
             List<String> componentTypes = new ArrayList<String>(componentTypesByCategory.get(category));
             Collections.sort(componentTypes);
-            
+
             VerticalLayout componentLayout = new VerticalLayout();
             componentAccordian.addTab(componentLayout, StringUtils.isAllUpperCase(category) ? category + "S" : category + "s");
             if (componentTypes != null) {
@@ -112,24 +111,22 @@ public class EditFlowPalette extends VerticalLayout {
             }
         }
     }
-    
+
     protected void populateSharedComponentsInComponentPalette(String projectVersionId) {
         VerticalLayout componentLayout = new VerticalLayout();
         componentAccordian.addTab(componentLayout, "SHARED DEFINITIONS");
 
-        List<ComponentName> components = configurationService.findSharedComponentsInProject(
-                projectVersionId);
+        List<ComponentName> components = context.getConfigurationService().findSharedComponentsInProject(projectVersionId);
         for (ComponentName component : components) {
             ClassResource icon = getImageResourceForComponentType(component.getType());
             addItemToFlowPanelSection(component.getName(), componentLayout, icon, component.getId());
-        }        
+        }
     }
-    
-    protected void addItemToFlowPanelSection(String labelName, VerticalLayout componentLayout,
-            ClassResource icon, String componentId) {   
+
+    protected void addItemToFlowPanelSection(String labelName, VerticalLayout componentLayout, ClassResource icon, String componentId) {
 
         FlowPaletteItem paletteItem = new FlowPaletteItem(labelName);
-        if (componentId !=null) {
+        if (componentId != null) {
             paletteItem.setShared(true);
             paletteItem.setComponentId(componentId);
         } else {
@@ -145,7 +142,7 @@ public class EditFlowPalette extends VerticalLayout {
         wrapper.setDragStartMode(DragStartMode.WRAPPER);
         componentLayout.addComponent(wrapper);
         componentLayout.setComponentAlignment(wrapper, Alignment.TOP_CENTER);
-        
+
     }
 
 }

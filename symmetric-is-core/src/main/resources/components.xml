@@ -1,5 +1,5 @@
 <components>
-    <component id='Database Reader' category='READER' iconName='dbreader.png' inputMessageType='any' outputMessageType='entity' resourceCategory='datasource'
+    <component id='Database Reader' category='READER' inputMessageType='any' outputMessageType='entity' resourceCategory='datasource'
         inputOutputModelsMatch='false'>
         <name>Database Reader</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.DbReader</className>
@@ -35,7 +35,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Database Writer' category='WRITER' iconName='dbwriter.png' inputMessageType='entity' outputMessageType='none' resourceCategory='datasource'
+    <component id='Database Writer' category='WRITER' inputMessageType='entity' outputMessageType='none' resourceCategory='datasource'
         inputOutputModelsMatch='false'>
         <name>Database Writer</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.DbWriter</className>
@@ -86,7 +86,7 @@
             </setting>            
         </settings>
     </component>
-    <component id='Deduper' category='PROCESSOR' iconName='deduper.png' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
+    <component id='Deduper' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='true'>
         <name>Deduper</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.Deduper</className>
@@ -99,7 +99,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Delay' category='PROCESSOR' iconName='timer.png' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='false'>
+    <component id='Delay' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='false'>
         <name>Delay</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.Delay</className>
         <description></description>
@@ -111,7 +111,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Entity Router' category='PROCESSOR' iconName='entityrouter.png' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
+    <component id='Entity Router' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='true' shareable='false'>
         <name>Entity Router</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.EntityRouter</className>
@@ -124,7 +124,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Execute' category='PROCESSOR' iconName='execute.png' inputMessageType='any' outputMessageType='text' resourceCategory='none' inputOutputModelsMatch='false'>
+    <component id='Execute' category='PROCESSOR' inputMessageType='any' outputMessageType='text' resourceCategory='none' inputOutputModelsMatch='false'>
         <name>Execute</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.Execute</className>
         <description></description>
@@ -145,7 +145,7 @@
             </setting>
         </settings>
     </component>
-    <component id='File Poller' category='READER' iconName='filepoller.png' inputMessageType='none' outputMessageType='text' resourceCategory='streamable'
+    <component id='File Poller' category='READER' inputMessageType='none' outputMessageType='text' resourceCategory='streamable'
         inputOutputModelsMatch='false'>
         <name>File Poller</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.FilePoller</className>
@@ -204,7 +204,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Format Delimited' category='PROCESSOR' iconName='delimitedformatter.png' inputMessageType='entity' outputMessageType='text' resourceCategory='none'
+    <component id='Format Delimited' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none'
         inputOutputModelsMatch='false'>
         <name>Format Delimited</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.DelimitedFormatter</className>
@@ -227,7 +227,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Format Fixed' category='PROCESSOR' iconName='fixedlengthformatter.png' inputMessageType='entity' outputMessageType='text' resourceCategory='none'
+    <component id='Format Fixed' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none'
         inputOutputModelsMatch='false'>
         <name>Format Fixed</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.FixedLengthFormatter</className>
@@ -240,7 +240,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Format XML' category='PROCESSOR' iconName='xmlformatter.png' inputMessageType='entity' outputMessageType='text' resourceCategory='none'
+    <component id='Format XML' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none'
         inputOutputModelsMatch='false'>
         <name>Format XML</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.XmlFormatter</className>
@@ -268,7 +268,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Joiner' category='PROCESSOR' iconName='joiner.png' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
+    <component id='Joiner' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
         <name>Joiner</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.Joiner</className>
         <description></description>
@@ -280,7 +280,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Mapping' category='PROCESSOR' iconName='mapping.png' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
+    <component id='Mapping' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='false'>
         <name>Mapping</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.Mapping</className>
@@ -293,14 +293,14 @@
             </setting>
         </settings>
     </component>
-    <component id='Message Logger' category='PROCESSOR' iconName='log.png' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='true'>
+    <component id='Message Logger' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='true'>
         <name>Message Logger</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.MessageLogger</className>
         <description></description>
         <settings>
         </settings>
     </component>
-    <component id='Multiplier' category='PROCESSOR' iconName='multiplier.png' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
+    <component id='Multiplier' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='true' shareable='false'>
         <name>Multiplier</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.Multiplier</className>
@@ -317,14 +317,14 @@
             </setting>
         </settings>
     </component>
-    <component id='No Op' category='PROCESSOR' iconName='puzzle.png' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='false'>
+    <component id='No Op' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='false'>
         <name>No Op</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.NoOp</className>
         <description></description>
         <settings>
         </settings>
     </component>
-    <component id='Parse Delimited' category='PROCESSOR' iconName='delimitedformatter.png' inputMessageType='text' outputMessageType='entity' resourceCategory='none'
+    <component id='Parse Delimited' category='PROCESSOR' inputMessageType='text' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='false'>
         <name>Parse Delimited</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.DelimitedParser</className>
@@ -357,7 +357,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Parse XML' category='PROCESSOR' iconName='xmlformatter.png' inputMessageType='text' outputMessageType='entity' resourceCategory='none'
+    <component id='Parse XML' category='PROCESSOR' inputMessageType='text' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='false'>
         <name>Parse XML</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.XmlParser</className>
@@ -370,7 +370,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Script' category='PROCESSOR' iconName='script.png' inputMessageType='any' outputMessageType='any' resourceCategory='any' inputOutputModelsMatch='false'>
+    <component id='Script' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='any' inputOutputModelsMatch='false'>
         <name>Script</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.Script</className>
         <description></description>
@@ -397,7 +397,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Sequence' category='PROCESSOR' iconName='sequence.png' inputMessageType='entity' outputMessageType='entity' resourceCategory='datasource'
+    <component id='Sequence' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='datasource'
         inputOutputModelsMatch='true'>
         <name>Sequence</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.SequenceGenerator</className>
@@ -422,7 +422,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Sorter' category='PROCESSOR' iconName='sorter.png' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
+    <component id='Sorter' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
         <name>Sorter</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.Sorter</className>
         <description></description>
@@ -438,7 +438,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Sql Writer' category='WRITER' iconName='dbwriter.png' inputMessageType='any' outputMessageType='any' resourceCategory='datasource'
+    <component id='Sql Writer' category='WRITER' inputMessageType='any' outputMessageType='any' resourceCategory='datasource'
         inputOutputModelsMatch='true'>
         <name>Sql Writer</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.SqlWriter</className>
@@ -460,7 +460,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Text File Reader' category='READER' iconName='textfilereader.png' inputMessageType='text' outputMessageType='text' resourceCategory='streamable'
+    <component id='Text File Reader' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable'
         inputOutputModelsMatch='false'>
         <name>Text File Reader</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.TextFileReader</className>
@@ -519,7 +519,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Text File Writer' category='WRITER' iconName='textfilewriter.png' inputMessageType='text' outputMessageType='none' resourceCategory='streamable'
+    <component id='Text File Writer' category='WRITER' inputMessageType='text' outputMessageType='none' resourceCategory='streamable'
         inputOutputModelsMatch='false'>
         <name>Text File Writer</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.TextFileWriter</className>
@@ -545,7 +545,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Text Replace' category='PROCESSOR' iconName='regex_replace.png' inputMessageType='text' outputMessageType='text' resourceCategory='none'
+    <component id='Text Replace' category='PROCESSOR' inputMessageType='text' outputMessageType='text' resourceCategory='none'
         inputOutputModelsMatch='false'>
         <name>Text Replace</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.TextReplace</className>
@@ -561,7 +561,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Transformer' category='PROCESSOR' iconName='transformer.png' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
+    <component id='Transformer' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='true'>
         <name>Transformer</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.Transformer</className>
@@ -569,7 +569,7 @@
         <settings>
         </settings>
     </component>
-    <component id='Web' category='PROCESSOR' iconName='web.png' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
+    <component id='Web' category='PROCESSOR' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
         <name>Web</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.Web</className>
         <description></description>
@@ -580,7 +580,7 @@
             </setting>
         </settings>
     </component>
-    <component id='XSLT Processor' category='PROCESSOR' iconName='xsltprocessor.png' inputMessageType='entity' outputMessageType='text' resourceCategory='none'
+    <component id='XSLT Processor' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none'
         inputOutputModelsMatch='false'>
         <name>XSLT Processor</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.XsltProcessor</className>
@@ -608,7 +608,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Zip' category='WRITER' iconName='zip.png' inputMessageType='text' outputMessageType='none' resourceCategory='streamable' inputOutputModelsMatch='false'>
+    <component id='Zip' category='WRITER' inputMessageType='text' outputMessageType='none' resourceCategory='streamable' inputOutputModelsMatch='false'>
         <name>Zip</name>
         <className>org.jumpmind.symmetric.is.core.runtime.component.Zip</className>
         <description></description>

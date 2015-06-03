@@ -56,9 +56,6 @@ public class XMLComponent implements Serializable {
     @XmlElement(required = true)
     protected String className;
 
-    @XmlAttribute(required = false)
-    protected String iconName;
-
     @XmlAttribute(required = true)
     protected String id;
 
@@ -169,14 +166,6 @@ public class XMLComponent implements Serializable {
 
     public XMLSettings getSettings() {
         return settings;
-    }
-
-    public void setIconName(String iconName) {
-        this.iconName = iconName;
-    }
-
-    public String getIconName() {
-        return iconName;
     }
 
 }

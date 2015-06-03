@@ -1,5 +1,7 @@
 package org.jumpmind.symmetric.is.ui.views;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -20,11 +22,15 @@ import org.jumpmind.symmetric.is.ui.views.design.IComponentEditPanel;
 public class UIXMLFactory extends AbstractXMLFactory implements IUIFactory {
 
     protected Map<String, XMLComponentUI> componentUisByComponentId;
+    
+    synchronized public XMLComponentUI getDefinition(String componentId) {
+        return componentUisByComponentId.get(componentId);
+    }
 
-    synchronized public IComponentEditPanel create(String componentId) {
+    public IComponentEditPanel create(String componentId) {
         try {
-            XMLComponentUI ui = componentUisByComponentId.get(componentId);
-            if (ui != null) {
+            XMLComponentUI ui = getDefinition(componentId);
+            if (ui != null && isNotBlank(ui.getClassName())) {
                 return (IComponentEditPanel) Class.forName(ui.getClassName()).newInstance();
             } else {
                 return null;
