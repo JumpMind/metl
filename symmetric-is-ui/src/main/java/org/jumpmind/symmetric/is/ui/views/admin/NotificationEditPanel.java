@@ -56,14 +56,14 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
         this.notification = notification;
 
         sampleSubjectByEvent = new HashMap<String, String>();
-        sampleSubjectByEvent.put(Notification.EventType.FLOW_START.toString(), "Flow $(flow) started");
-        sampleSubjectByEvent.put(Notification.EventType.FLOW_END.toString(), "Flow $(flow) ended");
-        sampleSubjectByEvent.put(Notification.EventType.FLOW_ERROR.toString(), "Flow $(flow) in ERROR");
+        sampleSubjectByEvent.put(Notification.EventType.FLOW_START.toString(), "Flow $(_flowName) started");
+        sampleSubjectByEvent.put(Notification.EventType.FLOW_END.toString(), "Flow $(_flowName) ended");
+        sampleSubjectByEvent.put(Notification.EventType.FLOW_ERROR.toString(), "Flow $(_flowName) - ERROR");
 
         sampleMessageByEvent = new HashMap<String, String>();
-        sampleMessageByEvent.put(Notification.EventType.FLOW_START.toString(), "Started flow $(flow) on agent $(agent) at $(time) on $(date)");
-        sampleMessageByEvent.put(Notification.EventType.FLOW_END.toString(), "Ended flow $(flow) on agent $(agent) at $(time) on $(date)");
-        sampleMessageByEvent.put(Notification.EventType.FLOW_ERROR.toString(), "Error in flow $(flow) on agent $(agent) at $(time) on $(date)");
+        sampleMessageByEvent.put(Notification.EventType.FLOW_START.toString(), "Started flow $(_flowName) on agent $(_agentName) at $(_time) on $(_date)");
+        sampleMessageByEvent.put(Notification.EventType.FLOW_END.toString(), "Ended flow $(_flowName) on agent $(_agent) at $(_time) on $(_date)");
+        sampleMessageByEvent.put(Notification.EventType.FLOW_ERROR.toString(), "Error in flow $(_flowName) on agent $(_agentName) at $(_time) on $(_date)\n\n$(_errorText)");
         
         FormLayout form = new FormLayout();
         form.setSizeFull();

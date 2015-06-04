@@ -170,6 +170,8 @@ public interface IConfigurationService {
 
     public List<Notification> findNotificationsForAgent(String agentId);
 
+    public List<Notification> findNotificationsForDeployment(AgentDeployment deployment);
+    
     public void refresh(Notification notification);
 
     public List<GlobalSetting> findGlobalSettings();

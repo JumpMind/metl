@@ -165,9 +165,11 @@ public class Agent extends AbstractObject {
     
     public TypedProperties toTypedProperties(Resource resource) {
         TypedProperties properties = new TypedProperties();
-        for (AgentResourceSetting setting : agentResourceSettings) {
-            if (setting.getResourceId().equals(resource.getId())) {
-                properties.setProperty(setting.getName(), setting.getValue());
+        if (agentResourceSettings != null) {
+            for (AgentResourceSetting setting : agentResourceSettings) {
+                if (setting.getResourceId().equals(resource.getId())) {
+                    properties.setProperty(setting.getName(), setting.getValue());
+                }
             }
         }
         return properties;

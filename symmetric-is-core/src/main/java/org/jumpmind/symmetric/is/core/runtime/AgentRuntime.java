@@ -143,8 +143,7 @@ public class AgentRuntime {
             this.flowExecutionScheduler.initialize();
 
             this.globalSettings = configurationService.findGlobalSettingsAsMap();
-            List<Notification> notifications = this.configurationService.findNotificationsForAgent(agent.getId());
-            this.recorder = new AsyncRecorder(executionService, globalSettings, notifications);
+            this.recorder = new AsyncRecorder(executionService);
             this.flowStepsExecutionThreads.execute(this.recorder);
 
             List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(
@@ -400,7 +399,8 @@ public class AgentRuntime {
                 log.info("Scheduled deployment '{}' is running on the '{}' agent", deployment.getName(),
                         agent.getName());
                 configurationService.refresh(deployment.getFlow());
-                flowRuntime.start(executionId, deployedResources, agent.getAgentParameters(), globalSettings);
+                List<Notification> notifications = configurationService.findNotificationsForDeployment(deployment);
+                flowRuntime.start(executionId, deployedResources, agent, notifications, globalSettings);
             } catch (Exception e) {
                 log.error("Error while waiting for the flow to complete", e);
                 flowRuntime.stop(false);
@@ -436,8 +436,6 @@ public class AgentRuntime {
                 if (agent.getStatus().equals(AgentStatus.REQUEST_REFRESH.name())) {
                     log.info("Agent '" + agent.getName() + "' is refreshing settings");
                     globalSettings = configurationService.findGlobalSettingsAsMap();
-                    recorder.setGlobalSettings(globalSettings);
-                    recorder.setNotifications(configurationService.findNotificationsForAgent(agent.getId()));
                     agent.setStatus(AgentStatus.RUNNING.name());
                     configurationService.save(agent);;
                 }

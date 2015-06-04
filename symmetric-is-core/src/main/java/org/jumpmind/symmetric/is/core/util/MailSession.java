@@ -27,6 +27,8 @@ public class MailSession {
 
     Session session;
     
+    Transport transport;
+    
     Map<String, String> globalSettings;
     
     public MailSession(Map<String, String> globalSettings) {
@@ -43,20 +45,24 @@ public class MailSession {
     }
 
     public Transport getTransport() throws MessagingException {
-        Transport transport = null;
-        transport = session.getTransport(getGlobalSetting(SETTING_TRANSPORT, "smtp"));
-
-        if (Boolean.parseBoolean(getGlobalSetting(SETTING_USE_AUTH, "false"))) {
-            transport.connect(globalSettings.get(SETTING_USERNAME), globalSettings.get(SETTING_PASSWORD));
-        } else {
-            transport.connect();
+        if (transport == null || !transport.isConnected()) {
+            transport = session.getTransport(getGlobalSetting(SETTING_TRANSPORT, "smtp"));
+    
+            if (Boolean.parseBoolean(getGlobalSetting(SETTING_USE_AUTH, "false"))) {
+                transport.connect(globalSettings.get(SETTING_USERNAME), globalSettings.get(SETTING_PASSWORD));
+            } else {
+                transport.connect();
+            }
         }
         return transport;
     }
     
     public void closeTransport(Transport transport) {
         try {
-            transport.close();
+            if (transport != null) {
+                transport.close();
+                transport = null;
+            }
         } catch (MessagingException e) {
         }
     }

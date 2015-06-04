@@ -931,6 +931,18 @@ abstract class AbstractConfigurationService extends AbstractService implements
         notifications.addAll(agentNotifications);
         return notifications;
     }
+
+    @Override
+    public List<Notification> findNotificationsForDeployment(AgentDeployment deployment) {
+        List<Notification> notifications = findNotificationsForAgent(deployment.getAgentId());
+        Map<String, Object> param = new HashMap<String, Object>();
+        param.put("level", Notification.Level.DEPLOYMENT.toString());
+        param.put("linkId", deployment.getId());
+        param.put("enabled", true);
+        List<Notification> agentNotifications = persistenceManager.find(Notification.class, param, null, null, tableName(Notification.class));
+        notifications.addAll(agentNotifications);
+        return notifications;
+    }
     
     @Override
     public void refresh(Notification notification) {

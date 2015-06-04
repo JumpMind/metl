@@ -20,7 +20,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public class MessageScriptHelper {
 
-    final Logger log = LoggerFactory.getLogger(getClass());
+    protected final Logger log = LoggerFactory.getLogger(getClass());
     
 	protected ComponentContext context;
 	
