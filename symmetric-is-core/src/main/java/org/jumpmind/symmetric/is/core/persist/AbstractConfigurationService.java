@@ -114,6 +114,17 @@ abstract class AbstractConfigurationService extends AbstractService implements
         refresh(flowVersion);
         return flowVersion;
     }
+    
+    @Override
+    public Folder findFirstFolderWithName(String name, FolderType type) {
+        Map<String, Object> byType = new HashMap<String, Object>();
+        byType.put("type", type.name());
+        if (isNotBlank(name)) {
+            byType.put("name", name);
+        }
+        byType.put("deleted", 0);
+        return findOne(Folder.class, byType);
+    }
 
     @Override
     public List<Folder> findFolders(String projectVersionId, FolderType type) {

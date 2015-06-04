@@ -155,7 +155,7 @@ public class ExploreView extends VerticalLayout implements View {
             });
             
             IAgentManager agentManager = context.getAgentManager();
-            Collection<Agent> agents = agentManager.getLocalAgents();
+            Collection<Agent> agents = agentManager.getAvailableAgents();
             for (Agent agent : agents) {
                 AgentRuntime runtime = agentManager.getAgentRuntime(agent);
                 Collection<IResourceRuntime> resources = runtime.getDeployedResources();

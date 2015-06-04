@@ -25,7 +25,6 @@ import org.jumpmind.symmetric.is.core.runtime.component.IComponentFactory;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
-import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
 import org.jumpmind.symmetric.is.ui.common.Icons;
 import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.is.ui.diagram.Diagram;
@@ -40,6 +39,7 @@ import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 import org.jumpmind.symmetric.ui.common.ResizableWindow;
+import org.jumpmind.util.AppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +70,7 @@ import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgroundRefreshable {
+public class EditFlowPanel extends HorizontalLayout implements IUiPanel {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -163,8 +163,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
         }
 
         redrawFlow();
-
-        context.getBackgroundRefresherService().register(this);
     }
 
     protected HorizontalLayout buildButtonBar() {
@@ -209,18 +207,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     }
 
     @Override
-    public void onBackgroundUIRefresh(Object backgroundData) {
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Object onBackgroundDataRefresh() {
-        return null;
-    }
-
-    @Override
     public boolean closing() {
-        context.getBackgroundRefresherService().unregister(this);
         return true;
     }
 
@@ -349,41 +336,47 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IBackgr
     }
 
     protected void runFlow() {
+        final String DESIGN_FOLDER_NAME = "<Design Time>";
+        final String AGENT_NAME = String.format("<%s on %s>", context.getUser().getLoginId(), AppUtils.getHostName());
         IAgentManager agentManager = context.getAgentManager();
-        Set<Agent> agents = agentManager.getLocalAgents();
-        Agent localAgent = null;
+        Set<Agent> agents = agentManager.getAvailableAgents();
+        Agent myDesignAgent = null;
         for (Agent agent : agents) {
-            if (agent.getHost().equals("localhost")) {
-                localAgent = agent;
+            if (agent.getFolder() != null && DESIGN_FOLDER_NAME.equals(agent.getFolder().getName()) &&
+                    agent.getName().equals(AGENT_NAME)) {
+                myDesignAgent = agent;
                 break;
             }
         }
 
-        if (localAgent == null) {
+        if (myDesignAgent == null) {
             IConfigurationService configurationService = context.getConfigurationService();
-            Folder folder = new Folder();
-            folder.setType(FolderType.AGENT.name());
-            folder.setName("<Design Time>");
-            configurationService.save(folder);
+            Folder folder = configurationService.findFirstFolderWithName(DESIGN_FOLDER_NAME, FolderType.AGENT);
+            if (folder == null) {
+                folder = new Folder();
+                folder.setType(FolderType.AGENT.name());
+                folder.setName(DESIGN_FOLDER_NAME);
+                configurationService.save(folder);
+            }
 
-            localAgent = new Agent();
-            localAgent.setHost("localhost");
-            localAgent.setName("Design");
-            localAgent.setFolder(folder);
-            localAgent.setStartMode(AgentStartMode.AUTO.name());
-            configurationService.save(localAgent);
-            agentManager.refresh(localAgent);
+            myDesignAgent = new Agent();
+            myDesignAgent.setHost(AppUtils.getHostName());
+            myDesignAgent.setName(AGENT_NAME);
+            myDesignAgent.setFolder(folder);
+            myDesignAgent.setStartMode(AgentStartMode.AUTO.name());
+            configurationService.save(myDesignAgent);
+            agentManager.refresh(myDesignAgent);
         }
 
-        AgentDeployment deployment = localAgent.getAgentDeploymentFor(flow);
+        AgentDeployment deployment = myDesignAgent.getAgentDeploymentFor(flow);
         if (deployment != null) {
             agentManager.undeploy(deployment);
 
         }
 
-        deployment = agentManager.deploy(localAgent.getId(), flow, new HashMap<String, String>());
+        deployment = agentManager.deploy(myDesignAgent.getId(), flow, new HashMap<String, String>());
 
-        String executionId = agentManager.getAgentRuntime(localAgent).scheduleNow(deployment);
+        String executionId = agentManager.getAgentRuntime(myDesignAgent).scheduleNow(deployment);
         if (executionId != null) {
             ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context);
             tabs.addCloseableTab(executionId, "Run " + flow.getName(), Icons.LOG, logPanel);

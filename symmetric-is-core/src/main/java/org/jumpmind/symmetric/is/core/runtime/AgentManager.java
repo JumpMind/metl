@@ -44,9 +44,14 @@ public class AgentManager implements IAgentManager {
         this.componentFactory = componentFactory;
         this.resourceFactory = resourceFactory;
     }
+    
+    @Override
+    public Set<Agent> getAvailableAgents() {
+        return new HashSet<Agent>(engines.keySet());
+    }
 
     public void start() {
-        Set<Agent> agents = getLocalAgents();
+        Set<Agent> agents = findLocalAgents();
         for (Agent agent : agents) {
             createAndStartRuntime(agent);
         }
@@ -70,7 +75,7 @@ public class AgentManager implements IAgentManager {
         return deployment;
     }
 
-    public Set<Agent> getLocalAgents() {
+    protected Set<Agent> findLocalAgents() {
         Set<Agent> agents = new HashSet<Agent>(configurationService.findAgentsForHost(AppUtils
                 .getHostName()));
         agents.addAll(configurationService.findAgentsForHost(AppUtils.getIpAddress()));

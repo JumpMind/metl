@@ -50,7 +50,6 @@ public class DbReader extends AbstractDbComponent {
 
     @Override
     protected void start() {
-
         applySettings();
     }
 

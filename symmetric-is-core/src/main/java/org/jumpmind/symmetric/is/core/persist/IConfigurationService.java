@@ -46,6 +46,8 @@ public interface IConfigurationService {
 
     public List<Folder> findFolders(String projectVersionId, FolderType type);
     
+    public Folder findFirstFolderWithName(String name, FolderType type);
+    
     public Flow findFlow(String id);
     
     public Model findModel(String id);

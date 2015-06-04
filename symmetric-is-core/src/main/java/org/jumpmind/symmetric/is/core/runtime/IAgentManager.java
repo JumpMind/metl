@@ -25,7 +25,7 @@ public interface IAgentManager {
     
     public void start();
     
-    public Set<Agent> getLocalAgents();
+    public Set<Agent> getAvailableAgents();
     
     
 }

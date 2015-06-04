@@ -62,7 +62,7 @@ public class ExecutionApi {
             HttpServletRequest req) {
         agentName = decode(agentName);
         deploymentName = decode(deploymentName);
-        Set<Agent> agents = agentManager.getLocalAgents();
+        Set<Agent> agents = agentManager.getAvailableAgents();
         Execution execution = null;
         boolean foundAgent = false;
         boolean foundDeployment = false;
