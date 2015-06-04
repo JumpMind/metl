@@ -12,9 +12,13 @@ import org.jumpmind.symmetric.is.core.model.ExecutionStep;
 import org.jumpmind.symmetric.is.core.model.ExecutionStepLog;
 import org.jumpmind.symmetric.is.core.persist.IExecutionService;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
+import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.IBackgroundRefreshable;
+import org.jumpmind.symmetric.is.ui.common.Icons;
+import org.jumpmind.symmetric.is.ui.common.TabbedPanel;
 import org.jumpmind.symmetric.is.ui.common.Table;
-import org.jumpmind.symmetric.is.ui.init.BackgroundRefresherService;
+import org.jumpmind.symmetric.ui.common.ConfirmDialog;
+import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.common.ReadOnlyTextAreaDialog;
 
@@ -29,6 +33,9 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table.ColumnGenerator;
@@ -55,15 +62,40 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
     Label startLabel = new Label();
 
     Label endLabel = new Label();
-
-    BackgroundRefresherService backgroundRefresherService;
+    
+    Button removeButton;
+    
+    Button cancelButton;
 
     String executionId;
+    
+    ApplicationContext context;
+    
+    TabbedPanel parentTabSheet;
 
-    public ExecutionLogPanel(String executionId, ApplicationContext context) {
-        this.backgroundRefresherService = context.getBackgroundRefresherService();
+    public ExecutionLogPanel(String executionId, ApplicationContext context, TabbedPanel parentTabSheet) {
         this.executionService = context.getExecutionService();
         this.executionId = executionId;
+        this.context = context;
+        this.parentTabSheet = parentTabSheet;
+        
+        ButtonBar buttonBar = new ButtonBar();
+        
+        removeButton = buttonBar.addButton("Remove", Icons.DELETE, new ClickListener() {
+            
+            @Override
+            public void buttonClick(ClickEvent event) {
+                remove();
+            }
+        });
+        cancelButton = buttonBar.addButton("Cancel", Icons.CANCEL, new ClickListener() {
+            
+            @Override
+            public void buttonClick(ClickEvent event) {
+                cancel();
+            }
+        });
+        addComponent(buttonBar);
 
         HorizontalLayout header1 = new HorizontalLayout();
         header1.addComponent(new Label("<b>Flow:</b>", ContentMode.HTML));
@@ -150,12 +182,12 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
         setExpandRatio(splitPanel, 1.0f);
 
         refreshUI(getExecutionData());
-        backgroundRefresherService.register(this);
+        context.getBackgroundRefresherService().register(this);
     }
 
     @Override
     public boolean closing() {
-        backgroundRefresherService.unregister(this);
+        context.getBackgroundRefresherService().unregister(this);
         return true;
     }
 
@@ -165,6 +197,36 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
 
     @Override
     public void deselected() {
+    }
+    
+    protected void remove() {
+        ConfirmDialog.show("Delete Execution?",
+                "Are you sure you want to delete this execution?",
+                new IConfirmListener() {
+                    
+                    @Override
+                    public boolean onOk() {
+                        context.getExecutionService().deleteExecution(executionId);
+                        parentTabSheet.closeTab(executionId);
+                        return true;
+                    }
+                });
+
+    }
+    
+    protected void cancel() {
+        ConfirmDialog.show("Cancel Execution?",
+                "Are you sure you want to cancel this execution?",
+                new IConfirmListener() {
+                    
+                    @Override
+                    public boolean onOk() {
+                        context.getAgentManager().cancel(executionId);
+                        cancelButton.setEnabled(false);
+                        return true;
+                    }
+                });
+        
     }
 
     @SuppressWarnings("unchecked")
@@ -186,13 +248,13 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
         data.logs = executionService.findExecutionStepLog((Set<String>) stepTable.getValue());
         return data;
     }
+    
+    protected boolean isDone() {
+        return ExecutionStatus.isDone(statusLabel.getValue());
+    }
 
     protected void refreshUI(ExecutionData data) {
-        String status = statusLabel.getValue();
-        if (status == null
-                || !(status.endsWith(ExecutionStatus.DONE.name())
-                        || status.endsWith(ExecutionStatus.CANCELLED.name()) || status
-                            .endsWith(ExecutionStatus.ERROR.name()))) {
+        if (!isDone()) {
             flowLabel.setValue(data.execution.getFlowName());
             startLabel.setValue(formatDate(data.execution.getStartTime()));
             if (data.execution.getStatus() != null) {
@@ -230,6 +292,9 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
                 logContainer.addAll(data.logs);
             }
         }
+        
+        removeButton.setVisible(isDone());
+        cancelButton.setVisible(!isDone());
     }
 
     protected String formatDate(Date date) {

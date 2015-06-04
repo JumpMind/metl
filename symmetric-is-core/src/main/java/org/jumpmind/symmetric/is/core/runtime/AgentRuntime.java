@@ -89,6 +89,19 @@ public class AgentRuntime {
         this.componentFactory = componentFactory;
         this.resourceFactory = resourceFactory;
     }
+    
+    public boolean cancel(String executionId) {
+        boolean cancelled = false;
+        for (FlowRuntime flowRuntime : new HashSet<FlowRuntime>(deployedFlows.values())) {
+            if (executionId.equals(flowRuntime.getExecutionId())) {
+                if (flowRuntime.isRunning()) {
+                    flowRuntime.stop(true);
+                    cancelled = true;
+                }
+            }
+        }
+        return cancelled;
+    }
 
     public void setAgent(Agent agent) {
         this.agent = agent;
@@ -341,10 +354,10 @@ public class AgentRuntime {
             scheduledDeployments.remove(future);
         }
 
-        FlowRuntime coordinator = deployedFlows.get(deployment);
-        if (coordinator != null) {
+        FlowRuntime flowRuntime = deployedFlows.get(deployment);
+        if (flowRuntime != null) {
             try {
-                coordinator.stop();
+                flowRuntime.stop(true);
                 log.info("Flow '{}' has been undeployed", deployment.getFlow().getName());
             } catch (Exception e) {
                 log.warn("Failed to stop '{}'", deployment.getFlow().getName(), e);
@@ -390,7 +403,7 @@ public class AgentRuntime {
                 flowRuntime.start(executionId, deployedResources, agent.getAgentParameters(), globalSettings);
             } catch (Exception e) {
                 log.error("Error while waiting for the flow to complete", e);
-                flowRuntime.stop();
+                flowRuntime.stop(false);
             } finally {
                 flowRuntime.waitForFlowCompletion();
                 flowRuntime.notifyStepsTheFlowIsComplete();

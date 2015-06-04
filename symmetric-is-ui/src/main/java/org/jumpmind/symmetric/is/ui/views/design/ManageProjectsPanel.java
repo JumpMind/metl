@@ -13,7 +13,7 @@ import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.ButtonBar;
 import org.jumpmind.symmetric.is.ui.common.Icons;
-import org.jumpmind.symmetric.is.ui.views.ProjectNavigator;
+import org.jumpmind.symmetric.is.ui.views.DesignNavigator;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     ApplicationContext context;
 
-    ProjectNavigator projectNavigator;
+    DesignNavigator projectNavigator;
 
     TreeTable treeTable;
 
@@ -67,7 +67,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     AbstractObject currentlyEditing;
 
-    public ManageProjectsPanel(ApplicationContext context, ProjectNavigator projectNavigator) {
+    public ManageProjectsPanel(ApplicationContext context, DesignNavigator projectNavigator) {
         this.setSizeFull();
         this.context = context;
         this.projectNavigator = projectNavigator;

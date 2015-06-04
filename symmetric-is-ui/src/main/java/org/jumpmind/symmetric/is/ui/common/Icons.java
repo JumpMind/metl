@@ -14,11 +14,13 @@ final public class Icons {
     public static final FontAwesome SEARCH = FontAwesome.SEARCH;
     
     public static final FontAwesome DELETE = FontAwesome.TRASH_O;
+
+    public static final FontAwesome CANCEL = FontAwesome.STOP;
     
     public static final FontAwesome PROJECT = FontAwesome.CUBES;
     
     public static final FontAwesome AGENT = FontAwesome.CLOUD;
-
+    
     public static final FontAwesome DEPLOYMENT = FontAwesome.SUITCASE;
     
     public static final FontAwesome GENERAL_RESOURCE = FontAwesome.LINK;

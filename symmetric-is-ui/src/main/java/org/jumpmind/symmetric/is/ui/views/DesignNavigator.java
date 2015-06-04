@@ -91,7 +91,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class ProjectNavigator extends VerticalLayout {
+public class DesignNavigator extends VerticalLayout {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -137,7 +137,7 @@ public class ProjectNavigator extends VerticalLayout {
 
     VerticalLayout openProjectsLayout;
 
-    public ProjectNavigator(ApplicationContext context, TabbedPanel tabs) {
+    public DesignNavigator(ApplicationContext context, TabbedPanel tabs) {
         this.context = context;
         this.tabs = tabs;
 

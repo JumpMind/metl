@@ -87,7 +87,7 @@ public class StepRuntime implements Runnable {
         }
         componentContext.getExecutionTracker().log(LogLevel.ERROR, componentContext, msg);
         log.error("", ex);
-        flowRuntime.stop();
+        flowRuntime.stop(false);
     }
 
     @Override

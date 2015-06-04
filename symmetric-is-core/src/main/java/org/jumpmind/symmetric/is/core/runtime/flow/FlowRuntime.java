@@ -214,13 +214,13 @@ public class FlowRuntime {
         return starterSteps;
     }
 
-    public void stop() {
+    public void stop(boolean cancelled) {
         if (stepRuntimes != null) {
             for (StepRuntime stepRuntime : stepRuntimes.values()) {
                 if (stepRuntime.isRunning()) {
                     try {
                         stepRuntime.inQueue.clear();
-                        stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponentContext().getFlowStep().getId()));
+                        stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponentContext().getFlowStep().getId(), cancelled));
                     } catch (InterruptedException e) {
                     }
                 } else {

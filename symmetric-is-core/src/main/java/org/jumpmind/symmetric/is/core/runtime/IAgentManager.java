@@ -11,6 +11,8 @@ public interface IAgentManager {
 
     public AgentRuntime refresh(Agent agent);
     
+    public boolean cancel(String executionId);
+    
     public void remove(Agent agent);
     
     public AgentRuntime getAgentRuntime(Agent agent);

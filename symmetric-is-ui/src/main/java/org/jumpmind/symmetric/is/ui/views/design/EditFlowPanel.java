@@ -34,7 +34,7 @@ import org.jumpmind.symmetric.is.ui.diagram.Node;
 import org.jumpmind.symmetric.is.ui.diagram.NodeDoubleClickedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeMovedEvent;
 import org.jumpmind.symmetric.is.ui.diagram.NodeSelectedEvent;
-import org.jumpmind.symmetric.is.ui.views.ProjectNavigator;
+import org.jumpmind.symmetric.is.ui.views.DesignNavigator;
 import org.jumpmind.symmetric.is.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
@@ -80,7 +80,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel {
 
     PropertySheet propertySheet;
 
-    ProjectNavigator projectNavigator;
+    DesignNavigator projectNavigator;
 
     EditFlowPalette componentPalette;
 
@@ -103,7 +103,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel {
     IConfigurationService configurationService;
 
     public EditFlowPanel(ApplicationContext context, String flowId,
-            ProjectNavigator designNavigator, TabbedPanel tabs) {
+            DesignNavigator designNavigator, TabbedPanel tabs) {
 
         this.configurationService = context.getConfigurationService();
         this.flow = context.getConfigurationService().findFlow(flowId);
@@ -378,7 +378,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel {
 
         String executionId = agentManager.getAgentRuntime(myDesignAgent).scheduleNow(deployment);
         if (executionId != null) {
-            ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context);
+            ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context, tabs);
             tabs.addCloseableTab(executionId, "Run " + flow.getName(), Icons.LOG, logPanel);
         }
     }

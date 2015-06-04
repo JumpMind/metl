@@ -57,7 +57,7 @@ abstract public class AbstractExecutionService extends AbstractService implement
     	return persistenceManager.find(ExecutionStepLog.class, args, null, null, tableName(ExecutionStepLog.class));
     }
     
-    abstract public void purgeExecutions(String status, int retentionTimeInMs);
+    abstract public void purgeExecutions(String status, int retentionTimeInMs);    
     
     class PurgeExecutionHandler implements Runnable {
         @Override

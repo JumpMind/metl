@@ -57,6 +57,14 @@ public class AgentManager implements IAgentManager {
         }
     }
     
+    public boolean cancel(String executionId) {
+        boolean cancelled = false;
+        for (AgentRuntime agentRuntime : engines.values()) {
+            cancelled |= agentRuntime.cancel(executionId);
+        }
+        return cancelled;
+    }
+    
     @Override
     public void undeploy(AgentDeployment agentDeployment) {
         AgentRuntime engine = getAgentRuntime(agentDeployment.getAgentId());

@@ -24,5 +24,7 @@ public interface IExecutionService {
     public List<ExecutionStepLog> findExecutionStepLog(Set<String> executionStepIds);
     
     public void markAbandoned(String agentId);
+    
+    public void deleteExecution(String executionId);
     	
 }

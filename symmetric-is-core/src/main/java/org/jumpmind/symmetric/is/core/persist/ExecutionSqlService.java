@@ -107,6 +107,19 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
                     }
                 }, params.values().toArray());
     }
+    
+    @Override
+    public void deleteExecution(String executionId) {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        template.update(String.format("delete from %1$s_execution_step_log where execution_step_id in "
+                + "(select id from %1$s_execution_step where execution_id in (select id from %1$s_execution where id=?))", tablePrefix),
+                executionId);
+        template.update(String.format(
+                "delete from %1$s_execution_step where execution_id in (select id from %1$s_execution where id=?)", tablePrefix),
+                executionId);
+        template.update(String.format("delete from %1$s_execution where id=?", tablePrefix), executionId);
+        log.info("Deleted execution with an id of {}", executionId);
+    }
 
     @Override
     public void purgeExecutions(String status, int retentionTimeInMs) {
