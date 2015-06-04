@@ -187,6 +187,11 @@ public class FilePoller extends AbstractComponentRuntime {
         File destDir = new File(path, archivePath);
         for (File srcFile : filesSent) {
             try {
+                File targetFile = new File(destDir, srcFile.getName());
+                if (targetFile.exists()) {
+                    info("The target file already exists.   Deleting it in order to archive a new file.");
+                    FileUtils.deleteQuietly(targetFile);
+                }
                 log(LogLevel.INFO, "Archiving %s tp %s", srcFile.getAbsolutePath(), destDir.getAbsolutePath());
                 FileUtils.moveFileToDirectory(srcFile, destDir, true);
             } catch (IOException e) {
