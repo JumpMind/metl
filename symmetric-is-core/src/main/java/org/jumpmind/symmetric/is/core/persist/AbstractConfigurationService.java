@@ -922,11 +922,12 @@ abstract class AbstractConfigurationService extends AbstractService implements
         Map<String, Object> param = new HashMap<String, Object>();
         param.put("level", Notification.Level.AGENT.toString());
         param.put("linkId", agentId);
-        param.put("enabled", true);
+        param.put("enabled", 1);
         List<Notification> agentNotifications = persistenceManager.find(Notification.class, param, null, null, tableName(Notification.class));
 
         param = new HashMap<String, Object>();
         param.put("level", Notification.Level.GLOBAL.toString());
+        param.put("enabled", 1);
         List<Notification> notifications = persistenceManager.find(Notification.class, param, null, null, tableName(Notification.class));
         notifications.addAll(agentNotifications);
         return notifications;
@@ -938,7 +939,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         Map<String, Object> param = new HashMap<String, Object>();
         param.put("level", Notification.Level.DEPLOYMENT.toString());
         param.put("linkId", deployment.getId());
-        param.put("enabled", true);
+        param.put("enabled", 1);
         List<Notification> agentNotifications = persistenceManager.find(Notification.class, param, null, null, tableName(Notification.class));
         notifications.addAll(agentNotifications);
         return notifications;
