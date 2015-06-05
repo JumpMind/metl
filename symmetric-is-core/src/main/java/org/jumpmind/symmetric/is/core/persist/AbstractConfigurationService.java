@@ -264,10 +264,10 @@ abstract class AbstractConfigurationService extends AbstractService implements
         }
 
         for (Agent agent : list) {
-            agent.setFolder(folderMapById.get(agent.getFolderId()));
             refreshAgentSettings(agent);
             refreshAgentResourceSettings(agent);
             refreshAgentDeployments(agent);
+            agent.setFolder(folderMapById.get(agent.getFolderId()));
         }
 
         Collections.sort(list, new Comparator<Agent>() {
@@ -672,7 +672,8 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void refresh(Agent agent) {
-        refresh((AbstractObject) agent);
+        refresh((AbstractObject) agent);  
+        refresh(agent.getFolder());
         refreshAgentSettings(agent);
         refreshAgentResourceSettings(agent);
         refreshAgentDeployments(agent);
