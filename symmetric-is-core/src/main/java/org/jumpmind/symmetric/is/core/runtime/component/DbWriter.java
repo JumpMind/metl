@@ -29,6 +29,7 @@ import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
+import org.jumpmind.symmetric.is.core.util.LogUtils;
 import org.jumpmind.util.FormatUtils;
 
 public class DbWriter extends AbstractComponentRuntime {
@@ -260,7 +261,7 @@ public class DbWriter extends AbstractComponentRuntime {
                 }
             }
 
-            info("Ran a total of %d statements in %s", totalStatementCount, formatDuration(System.currentTimeMillis() - ts));
+            info("Ran a total of %d statements in %s", totalStatementCount, LogUtils.formatDuration(System.currentTimeMillis() - ts));
 
             for (TargetTableDefintion table : targetTables) {
                 WriteStats stats = statsMap.get(table);
@@ -359,19 +360,6 @@ public class DbWriter extends AbstractComponentRuntime {
             }
         }
         return value;
-    }
-
-    private String formatDuration(long timeInMs) {
-        if (timeInMs > 60000) {
-            long minutes = timeInMs / 60000;
-            long seconds = (timeInMs - (minutes * 60000)) / 1000;
-            return minutes + " m " + seconds + " s";
-        } else if (timeInMs > 1000) {
-            long seconds = timeInMs / 1000;
-            return seconds + " s";
-        } else {
-            return timeInMs + " ms";
-        }
     }
 
     class TargetTableDefintion {

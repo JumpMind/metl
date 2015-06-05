@@ -1,8 +1,12 @@
 package org.jumpmind.symmetric.is.core.runtime;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.runtime.component.ComponentContext;
+import org.jumpmind.symmetric.is.core.util.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +17,8 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     AgentDeployment deployment;
     
     String executionId;
+    
+    Map<String, Long> stepStartTimes = new HashMap<String, Long>();
 
     public ExecutionTrackerLogger(AgentDeployment deployment) {
         this.deployment = deployment;
@@ -21,13 +27,13 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     @Override
     public void beforeFlow(String executionId) {
         this.executionId = executionId;
-        String msg = String.format("Flow started for deployment: %s", deployment.getName());
+        String msg = String.format("[%s] Flow started for deployment: %s", executionId, deployment.getName());
         log.info(msg);
     }
 
     @Override
     public void afterFlow() {
-        String msg = String.format("Flow finished for deployment: %s", deployment.getName());
+        String msg = String.format("[%s] Flow finished for deployment: %s", executionId, deployment.getName());
         log.info(msg);
     }
 
@@ -35,7 +41,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     public void beforeHandle(ComponentContext context) {
         FlowStep flowStep = context.getFlowStep();
         String msg = String.format(
-                "Handling message for deployment: %s for component: %s",
+                "[%s] Handling message for deployment: %s for component: %s", executionId, 
                 deployment.getName(), flowStep.getName());
         log.debug(msg);
     }
@@ -44,7 +50,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     public void afterHandle(ComponentContext context, Throwable error) {
         FlowStep flowStep = context.getFlowStep();
         String msg = String.format(
-                "Finished handling message for deployment: %s for component: %s",
+                "[%s] Finished handling message for deployment: %s for component: %s", executionId, 
                 deployment.getName(), flowStep.getName());
         log.debug(msg);
     }
@@ -52,8 +58,9 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     @Override
     public void flowStepStarted(ComponentContext context) {
         FlowStep flowStep = context.getFlowStep();
+        stepStartTimes.put(flowStep.getId(), System.currentTimeMillis());
         String msg = String.format(
-                "Started flow step for deployment: %s for component: %s",
+                "[%s] Started flow step for deployment: %s for component: %s", executionId, 
                 deployment.getName(), flowStep.getName());
         log.info(msg);
     }
@@ -61,9 +68,10 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     @Override
     public void flowStepFinished(ComponentContext context, Throwable error, boolean cancelled) {
         FlowStep flowStep = context.getFlowStep();
+        long duration = System.currentTimeMillis() - stepStartTimes.get(flowStep.getId());        
         String msg = String.format(
-                "Finished flow step for deployment: %s for component: %s",
-                deployment.getName(), flowStep.getName());
+                "[%s] Finished flow step for deployment: %s for component: %s in %s", executionId, 
+                deployment.getName(), flowStep.getName(), LogUtils.formatDuration(duration));
         log.info(msg);
     }
     
@@ -79,17 +87,17 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
             }
             switch (level) {
                 case DEBUG:
-                    log.debug(output);
+                    log.debug("[{}] {}", executionId, output);
                     break;
                 case INFO:
-                    log.info(output);
+                    log.info("[{}] {}", executionId, output);
                     break;
                 case WARN:
-                    log.warn(output);
+                    log.warn("[{}] {}", executionId, output);
                     break;
                 case ERROR:
                 default:
-                    log.error(output);
+                    log.error("[{}] {}", executionId, output);
                     break;
             }
         }
