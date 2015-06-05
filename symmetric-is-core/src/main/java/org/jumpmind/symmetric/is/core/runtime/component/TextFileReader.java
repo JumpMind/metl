@@ -102,6 +102,7 @@ public class TextFileReader extends AbstractComponentRuntime {
             BufferedReader reader = null;
             int linesInMessage = 0;
             try {
+                info("Reading file: %s", file);
                 IStreamable resource = (IStreamable)getResourceReference();
                 String filePath = FormatUtils.replaceTokens(file, context.getFlowParametersAsString(), true);
                 inStream = resource.getInputStream(filePath, mustExist);
