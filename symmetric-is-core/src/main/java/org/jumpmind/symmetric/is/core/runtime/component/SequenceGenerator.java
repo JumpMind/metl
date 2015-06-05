@@ -84,7 +84,7 @@ public class SequenceGenerator extends AbstractDbComponent {
             if (shared) {
                 Long currentValue = sharedSequence.get(sharedName);
                 if (currentValue == null || currentValue < nonSharedSequenceNumber) {
-                    log.info("'%s' is setting the shared sequence '%s' to %d", getFlowStep().getName(), sharedName, nonSharedSequenceNumber);
+                    info("'%s' is setting the shared sequence '%s' to %d", getFlowStep().getName(), sharedName, nonSharedSequenceNumber);
                     sharedSequence.put(sharedName, nonSharedSequenceNumber);
                 }
             }

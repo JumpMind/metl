@@ -114,10 +114,18 @@ public class AgentRuntime {
             
             executionService.markAbandoned(agent.getId());
 
+            String agentName = agent.getName().toLowerCase();
+            if (agentName.startsWith("<")) {
+                agentName = agentName.substring(1);
+            }
+            if (agentName.endsWith(">")) {
+                agentName = agentName.substring(0, agentName.length()-1);
+            }
+            final String namePrefix = agentName.replaceAll("[^A-Za-z0-9]", "-");
+            
+
             this.flowStepsExecutionThreads = Executors.newCachedThreadPool(new ThreadFactory() {
                 final AtomicInteger threadNumber = new AtomicInteger(1);
-                final String namePrefix = agent.getName().toLowerCase().replace(' ', '-')
-                        .replace('_', '-');
 
                 public Thread newThread(Runnable r) {
                     Thread t = new Thread(r);
@@ -132,8 +140,7 @@ public class AgentRuntime {
 
             this.flowExecutionScheduler = new ThreadPoolTaskScheduler();
             this.flowExecutionScheduler.setDaemon(true);
-            this.flowExecutionScheduler.setThreadNamePrefix(agent.getName().toLowerCase()
-                    .replace(' ', '-').replace('_', '-')
+            this.flowExecutionScheduler.setThreadNamePrefix(namePrefix
                     + "-job-");
             /*
              * Threads are not pre-created. Set this plenty big so we don't run

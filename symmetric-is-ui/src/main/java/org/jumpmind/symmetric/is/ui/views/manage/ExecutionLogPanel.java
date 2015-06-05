@@ -103,7 +103,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
         header1.addComponent(new Label("<b>Start:</b>", ContentMode.HTML));
         header1.addComponent(startLabel);
         header1.setSpacing(true);
-        header1.setMargin(new MarginInfo(true, true, false, true));
+        header1.setMargin(new MarginInfo(false, true, false, true));
         header1.setWidth("100%");
         addComponent(header1);
 
