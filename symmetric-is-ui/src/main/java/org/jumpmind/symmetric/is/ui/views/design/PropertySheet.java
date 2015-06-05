@@ -305,6 +305,7 @@ public class PropertySheet extends Panel {
                     for (String choice : def.choices()) {
                         choices.getChoice().add(choice);
                     }
+                    setting.setChoices(choices);
                 }
                 xmlSettings.add(setting);
             }
