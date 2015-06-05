@@ -175,11 +175,15 @@ public class FlowRuntime {
 
     protected Map<String, Serializable> getFlowParameters(List<AgentDeploymentParameter> deployParameters, List<AgentParameter> agentParameters) {
         Map<String, Serializable> params = new HashMap<String, Serializable>();
-        for (AgentParameter agentParameter : agentParameters) {
-            params.put(agentParameter.getName(), agentParameter.getValue());
+        if (agentParameters != null) {
+            for (AgentParameter agentParameter : agentParameters) {
+                params.put(agentParameter.getName(), agentParameter.getValue());
+            }
         }
-        for (AgentDeploymentParameter deployParameter : deployParameters) {
-            params.put(deployParameter.getName(), deployParameter.getValue());
+        if (deployParameters != null) {
+            for (AgentDeploymentParameter deployParameter : deployParameters) {
+                params.put(deployParameter.getName(), deployParameter.getValue());
+            }
         }
         Date date = new Date();
         params.put("_agentName", agent.getName());
