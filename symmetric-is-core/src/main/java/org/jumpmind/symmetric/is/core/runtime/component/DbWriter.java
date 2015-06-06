@@ -226,7 +226,7 @@ public class DbWriter extends AbstractComponentRuntime {
                                 throw new SqlException(String.format("Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n",
                                         modelTable.getStatement().getSql(), Arrays.toString(data),
                                         Arrays.toString(modelTable.getStatement().getTypes())));
-                            } else {
+                            } else if (count == 0) {
                                 stats.ignoredCount++;
                             }
                         }
