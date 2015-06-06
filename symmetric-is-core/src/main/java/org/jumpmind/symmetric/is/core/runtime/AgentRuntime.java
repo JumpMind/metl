@@ -121,6 +121,9 @@ public class AgentRuntime {
             if (agentName.endsWith(">")) {
                 agentName = agentName.substring(0, agentName.length()-1);
             }
+            if (agentName.indexOf(".") > 0) {
+                agentName = agentName.substring(0, agentName.indexOf("."));
+            }
             final String namePrefix = agentName.replaceAll("[^A-Za-z0-9]", "-");
             
 
