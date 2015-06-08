@@ -21,7 +21,7 @@
     </component-ui>      
     <component-ui id="Mapping UI" componentId="Mapping">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/mapping.png</iconImage>
-        <className>org.jumpmind.symmetric.is.ui.views.design.EditMappingPanel</className>
+        <className>org.jumpmind.symmetric.is.ui.mapping.EditMappingPanel</className>
     </component-ui>
     <component-ui id="Format Fixed UI" componentId="Format Fixed">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/fixedlengthformatter.png</iconImage>
