@@ -114,33 +114,53 @@ public class ModelAttributeScriptHelper {
     
     public Date parsedate(String pattern, String nulldate) {
         String text = value != null ? value.toString() : "";
-        if (isNotBlank(text) && !text.equals(nulldate)) {
-            return FormatUtils.parseDate(text, new String[] { pattern});
-        } else {
-            return null;
-        }
+        return parseDateFromText(pattern, text);
     }
     
     public Date parsedate(String pattern) {
         String text = value != null ? value.toString() : "";
-        if (isNotBlank(text)) {
-            return FormatUtils.parseDate(text, new String[] { pattern});
-        } else {
-            return null;
-        }
+        return parseDateFromText(pattern, text);
     }
     
     public String formatdate(String pattern) {
+        FastDateFormat formatter = FastDateFormat.getInstance(pattern);
         if (value instanceof Date) {
-            FastDateFormat formatter = FastDateFormat.getInstance(pattern);
             return formatter.format((Date) value);
         } else if (value != null) {
-            return "Not a datetime";
+            String text = value != null ? value.toString() : "";
+            Date dateToParse = parseDateFromText(pattern, text);
+            if (dateToParse != null) {
+                return formatter.format((Date) value);
+            } else {
+                return "Not a datetime";
+            }
         } else {
             return "";
         }
     }
 
+    private String formatdate(String pattern, Date value) {
+        FastDateFormat formatter = FastDateFormat.getInstance(pattern);
+        if (value != null) {
+            return formatter.format(value);
+        } else {
+            return "";
+        }
+    }
+    
+    public String parseAndFormatDate(String parsePattern, String formatPattern) {
+        Date dateToFormat = parsedate(parsePattern);
+        return formatdate(formatPattern, dateToFormat);
+    }
+    
+    private Date parseDateFromText(String pattern, String valueToParse) {
+        if (isNotBlank(valueToParse)) {
+            return FormatUtils.parseDate(valueToParse, new String[] { pattern});
+        } else {
+            return null;
+        }        
+    }
+    
     public String stringConstant(String value) {
         return value;
     }
