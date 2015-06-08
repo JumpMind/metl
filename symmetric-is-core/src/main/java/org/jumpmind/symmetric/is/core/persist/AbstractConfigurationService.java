@@ -672,8 +672,10 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public void refresh(Agent agent) {
-        refresh((AbstractObject) agent);  
-        refresh(agent.getFolder());
+        refresh((AbstractObject) agent);
+        if (agent.getFolder() != null) {
+            refresh(agent.getFolder());
+        }
         refreshAgentSettings(agent);
         refreshAgentResourceSettings(agent);
         refreshAgentDeployments(agent);

@@ -121,13 +121,13 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
                 for (ModelAttribute attr : entity.getModelAttributes()) {
                     EntityData data = new EntityData();
                     DataType type = attr.getDataType();
-                    String value = null;
+                    Object value = null;
                     if (type.isString()) {
                         value = RandomStringUtils.randomAlphanumeric(10);
                     } else if (type.isNumeric()) {
                         value = String.valueOf(RandomUtils.nextInt());
                     } else if (type.isTimestamp()) {
-                        value = new Date(RandomUtils.nextLong()).toString();
+                        value = new Date(RandomUtils.nextInt(Integer.MAX_VALUE) * 1000l);
                     } else if (type.isBoolean()) {
                         value = Boolean.toString(RandomUtils.nextBoolean());
                     }
