@@ -60,7 +60,7 @@ public class SqlWriter extends AbstractDbComponent {
             }
         }
         getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(inputMessage.copy(getFlowStepId()));
+        messageTarget.put(inputMessage.clone(getFlowStepId()));
     }
 
     @Override

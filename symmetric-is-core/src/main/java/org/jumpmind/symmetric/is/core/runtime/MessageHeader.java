@@ -2,9 +2,10 @@ package org.jumpmind.symmetric.is.core.runtime;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 
-public class MessageHeader implements Serializable, Cloneable {
+public class MessageHeader extends HashMap<String, Serializable> implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
 
@@ -65,13 +66,14 @@ public class MessageHeader implements Serializable, Cloneable {
         return targetStepIds;
     }
 
-    public MessageHeader copy() {
-        try {
-            MessageHeader header = (MessageHeader) this.clone();
-            return header;
-        } catch (CloneNotSupportedException e) {
-            throw new InternalError();
-        }
+    public MessageHeader clone() {
+        MessageHeader mh = new MessageHeader(originatingStepId);
+        mh.putAll(this);
+        mh.setExecutionId(executionId);
+        mh.setSequenceNumber(sequenceNumber);
+        mh.setLastMessage(lastMessage);
+        mh.setTargetStepIds(new HashSet<String>(targetStepIds));
+        return mh;
     }
-
+    
 }

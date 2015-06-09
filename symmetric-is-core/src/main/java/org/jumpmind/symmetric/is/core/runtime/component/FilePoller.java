@@ -147,7 +147,7 @@ public class FilePoller extends AbstractComponentRuntime {
                 filePaths.add(file.getAbsolutePath());
             }
             getComponentStatistics().incrementOutboundMessages();
-            messageTarget.put(inputMessage.copy(getFlowStepId(), filePaths));
+            messageTarget.put(inputMessage.clone(getFlowStepId(), filePaths));
         } else if (cancelOnNoFiles) {
             getComponentStatistics().incrementOutboundMessages();
             messageTarget.put(new ShutdownMessage(getFlowStepId(), true));

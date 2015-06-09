@@ -73,7 +73,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
         ArrayList<String> inputRows = inputMessage.getPayload();
 
         ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
-        Message outputMessage = inputMessage.copy(getFlowStepId(), outputPayload);
+        Message outputMessage = inputMessage.clone(getFlowStepId(), outputPayload);
         int headerRowsToSkip = inputMessage.getHeader().getSequenceNumber() == 0 ? numberOfHeaderLinesToSkip : 0;
         try {
             int rowCount = 0;

@@ -89,7 +89,7 @@ public class Lookup extends AbstractComponentRuntime {
             playload.add(newData);
         }
 
-            Message newMessage = message.copy(getFlowStepId());
+            Message newMessage = message.clone(getFlowStepId());
             newMessage.setPayload(playload);
             getComponentStatistics().incrementOutboundMessages();
             messageTarget.put(newMessage);

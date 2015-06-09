@@ -22,7 +22,7 @@ public class Delay extends AbstractComponentRuntime {
         getComponentStatistics().incrementInboundMessages();
         AppUtils.sleep(delay);
         getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(inputMessage.copy(getFlowStepId()));
+        messageTarget.put(inputMessage.clone(getFlowStepId()));
     }
 
 }
