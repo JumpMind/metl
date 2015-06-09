@@ -431,6 +431,7 @@
             </setting>
             <setting id='handle.msg.script' type='script' required='true'>
                 <name>Handle Msg Script</name>
+                <defaultValue>messageTarget.put(inputMessage);</defaultValue>
                 <description></description>
             </setting>
             <setting id='on.flow.success.script' type='script' required='true'>
