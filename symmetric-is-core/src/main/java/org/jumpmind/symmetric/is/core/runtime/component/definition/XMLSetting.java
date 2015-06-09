@@ -27,7 +27,8 @@ public class XMLSetting implements Serializable {
         @XmlEnumValue("xml")XML, 
         @XmlEnumValue("multiline_text")MULTILINE_TEXT, 
         @XmlEnumValue("script")SCRIPT, 
-        @XmlEnumValue("source step")SOURCE_STEP
+        @XmlEnumValue("source_step")SOURCE_STEP,
+        @XmlEnumValue("entity_column")ENTITY_COLUMN
     };
     
     @XmlElement(required = false)

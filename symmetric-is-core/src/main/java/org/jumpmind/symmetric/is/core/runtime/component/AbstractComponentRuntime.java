@@ -115,6 +115,10 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return context.getExecutionTracker();
     }
     
+    protected void debug(String msg, Object...args) {
+        log(LogLevel.DEBUG, msg, args);
+    }
+    
     protected void info(String msg, Object...args) {
         log(LogLevel.INFO, msg, args);
     }

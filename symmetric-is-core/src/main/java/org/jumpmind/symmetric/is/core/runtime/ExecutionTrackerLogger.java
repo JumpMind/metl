@@ -68,7 +68,8 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     @Override
     public void flowStepFinished(ComponentContext context, Throwable error, boolean cancelled) {
         FlowStep flowStep = context.getFlowStep();
-        long duration = System.currentTimeMillis() - stepStartTimes.get(flowStep.getId());        
+        Long startTime = stepStartTimes.get(flowStep.getId());        
+        long duration = startTime == null ? 0 : System.currentTimeMillis() - startTime;        
         String msg = String.format(
                 "[%s] Finished flow step for deployment: %s for component: %s in %s", executionId, 
                 deployment.getName(), flowStep.getName(), LogUtils.formatDuration(duration));

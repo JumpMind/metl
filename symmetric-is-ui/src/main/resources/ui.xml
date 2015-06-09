@@ -35,6 +35,9 @@
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/joiner.png</iconImage>
         <className>org.jumpmind.symmetric.is.ui.views.design.EditJoinerPanel</className>
     </component-ui>
+    <component-ui id="Lookup UI" componentId="Lookup">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/lookup.png</iconImage>
+    </component-ui>    
     <component-ui id="Script UI" componentId="Script">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/script.png</iconImage>
         <className>org.jumpmind.symmetric.is.ui.views.design.EditScriptPanel</className>

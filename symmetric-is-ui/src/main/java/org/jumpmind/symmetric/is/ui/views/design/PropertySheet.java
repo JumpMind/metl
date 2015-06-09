@@ -8,11 +8,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.symmetric.is.core.model.AbstractObject;
+import org.jumpmind.symmetric.is.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.symmetric.is.core.model.AbstractObjectWithSettings;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.model.FlowStepLink;
+import org.jumpmind.symmetric.is.core.model.Model;
+import org.jumpmind.symmetric.is.core.model.ModelAttribute;
+import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.model.ModelName;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.Setting;
@@ -153,6 +157,7 @@ public class PropertySheet extends Panel {
                             component.setOutputModel(null);
                         }
                         configurationService.save((AbstractObject) component);
+                        setSource(value);
                     }
                 });
 
@@ -239,6 +244,7 @@ public class PropertySheet extends Panel {
                             component.setInputModel(null);
                         }
                         configurationService.save((AbstractObject) component);
+                        setSource(value);
                     }
                 });
 
@@ -318,7 +324,11 @@ public class PropertySheet extends Panel {
     protected void addSettingField(final XMLSetting definition, final AbstractObjectWithSettings obj, FormLayout formLayout) {
         boolean required = definition.isRequired();
         if (definition.isVisible()) {
-            String description = "Represents the " + definition.getId() + " setting";
+            Component component = null;
+            if (obj instanceof Component) {
+                component = (Component)obj;
+            }
+            String description = definition.getDescription();
             Type type = definition.getType();
             switch (type) {
                 case BOOLEAN:
@@ -429,6 +439,48 @@ public class PropertySheet extends Panel {
                             }
                         });
                         formLayout.addComponent(sourceStepsCombo);
+                    }
+                    break;
+                case ENTITY_COLUMN:
+                    if (component != null) {
+                        List<ModelEntity> entities = new ArrayList<ModelEntity>();
+                        Model model = component.getInputModel();
+                        if (model != null) {
+                            model.sortAttributes();
+                            entities.addAll(model.getModelEntities());
+                        }
+                        model = component.getOutputModel();
+                        if (model != null) {
+                            model.sortAttributes();
+                            entities.addAll(model.getModelEntities());
+                        }
+                        AbstractObjectNameBasedSorter.sort(entities);
+
+                        final AbstractSelect entityColumnCombo = new ComboBox(definition.getName());
+                        entityColumnCombo.setImmediate(true);
+
+                        for (ModelEntity modelEntity : entities) {
+                            for (ModelAttribute attribute : modelEntity.getModelAttributes()) {
+                                entityColumnCombo.addItem(attribute.getId());
+                                entityColumnCombo.setItemCaption(attribute.getId(), modelEntity.getName() + "." + attribute.getName());
+                            }
+                        }
+                        String currentValue  = obj.get(definition.getId());
+                        if (currentValue != null) {
+                            entityColumnCombo.setValue(obj.get(definition.getId()));
+                        }
+                        entityColumnCombo.setDescription(description);
+                        entityColumnCombo.setNullSelectionAllowed(definition.isRequired());
+                        entityColumnCombo.addValueChangeListener(new ValueChangeListener() {
+
+                            private static final long serialVersionUID = 1L;
+
+                            @Override
+                            public void valueChange(ValueChangeEvent event) {
+                                saveSetting(definition.getId(), (String) entityColumnCombo.getValue(), obj);
+                            }
+                        });
+                        formLayout.addComponent(entityColumnCombo);
                     }
                     break;
                 case SCRIPT:

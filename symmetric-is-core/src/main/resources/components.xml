@@ -280,6 +280,35 @@
             </setting>
         </settings>
     </component>
+    <component id='Lookup' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
+        inputOutputModelsMatch='true' shareable='false'>
+        <name>Lookup</name>
+        <className>org.jumpmind.symmetric.is.core.runtime.component.Lookup</className>
+        <description></description>
+        <settings>
+            <setting id='lookup.data.source.step' type='source_step' required='true'>
+                <name>Lookup Data Source</name>
+                <description></description>
+            </setting>
+            <setting id='lookup.key.attribute' type='entity_column' required='true'>
+                <name>Lookup Key Attribute</name>
+                <description></description>
+            </setting>
+            <setting id='lookup.value.attribute' type='entity_column' required='true'>
+                <name>Lookup Value Attribute</name>
+                <description></description>
+            </setting>
+            <setting id='replacement.key.attribute' type='entity_column' required='true'>
+                <name>Replacement Key Attribute</name>
+                <description></description>
+            </setting>
+             <setting id='replacement.value.attribute' type='entity_column' required='true'>
+                <name>Replacement Value Attribute</name>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    
     <component id='Mapping' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='false'>
         <name>Mapping</name>
