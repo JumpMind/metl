@@ -108,6 +108,12 @@ public class ModelAttributeScriptHelper {
         return new Date();
     }
     
+    public String currentdate(String format) {
+        Date currentDate = new Date();
+        return formatdate(format, currentDate);
+                
+    }
+    
     public RemoveAttribute remove() {
         return REMOVE_ATTRIBUTE;
     }
