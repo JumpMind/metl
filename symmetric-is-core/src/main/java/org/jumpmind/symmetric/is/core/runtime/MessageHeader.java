@@ -72,7 +72,9 @@ public class MessageHeader extends HashMap<String, Serializable> implements Seri
         mh.setExecutionId(executionId);
         mh.setSequenceNumber(sequenceNumber);
         mh.setLastMessage(lastMessage);
-        mh.setTargetStepIds(new HashSet<String>(targetStepIds));
+        if (targetStepIds != null) {
+            mh.setTargetStepIds(new HashSet<String>(targetStepIds));
+        }
         return mh;
     }
     
