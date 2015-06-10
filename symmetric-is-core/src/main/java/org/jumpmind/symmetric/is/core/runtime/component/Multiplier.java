@@ -30,8 +30,6 @@ public class Multiplier extends AbstractComponentRuntime {
 
     @Override
     protected void start() {
-        
-
         multipliersInitialized = false;
 
         sourceStepId = getComponent().get(MULTIPLIER_SOURCE_STEP);
@@ -46,7 +44,7 @@ public class Multiplier extends AbstractComponentRuntime {
     public void handle( Message inputMessage, IMessageTarget messageTarget) {
         getComponentStatistics().incrementInboundMessages();
 
-        if (inputMessage.getHeader().getOriginatingStepId().equals(sourceStepId)) {
+        if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
             List<EntityData> datas = inputMessage.getPayload();
             multipliers.addAll(datas);
             multipliersInitialized = inputMessage.getHeader().isLastMessage();
