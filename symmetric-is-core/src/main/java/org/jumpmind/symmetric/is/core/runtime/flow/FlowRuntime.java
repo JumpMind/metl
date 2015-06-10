@@ -149,11 +149,13 @@ public class FlowRuntime {
         List<FlowStep> flowSteps = flow.getFlowSteps();
         for (FlowStep flowStep : flowSteps) {
             StepRuntime stepRuntime = stepRuntimes.get(flowStep.getId());
-            try {
-                stepRuntime.start(executionTracker, resourceFactory);                
-            } catch (RuntimeException ex) {
-                stepRuntime.error = ex;
-                throw ex;
+            if (stepRuntime != null) {
+                try {
+                    stepRuntime.start(executionTracker, resourceFactory);
+                } catch (RuntimeException ex) {
+                    stepRuntime.error = ex;
+                    throw ex;
+                }
             }
         }
         

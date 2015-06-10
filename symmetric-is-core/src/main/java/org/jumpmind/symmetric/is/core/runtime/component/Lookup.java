@@ -52,7 +52,7 @@ public class Lookup extends AbstractComponentRuntime {
     public void handle(Message inputMessage, IMessageTarget messageTarget) {
         getComponentStatistics().incrementInboundMessages();
 
-        if (inputMessage.getHeader().getOriginatingStepId().equals(sourceStepId)) {
+        if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
             List<EntityData> datas = inputMessage.getPayload();
             for (EntityData entityData : datas) {
                 lookup.put(entityData.get(keyAttributeId), entityData.get(valueAttributeId));
