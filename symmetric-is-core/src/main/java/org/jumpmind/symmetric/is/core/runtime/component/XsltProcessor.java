@@ -104,16 +104,18 @@ public class XsltProcessor extends AbstractComponentRuntime {
             root.addContent(entityElement);
 
             for (EntityData entityData : inputRows) {
-                Element recordElement = new Element("record");
-                entityElement.addContent(recordElement);
-
                 List<ModelAttribute> attributes = null;
                 if (outputAllAttributes) {
                     attributes = entity.getModelAttributes();
                 } else {
                     attributes = getModelAttributes(model, entity.getId(), entityData.keySet());
                 }
-                
+
+                Element recordElement = new Element("record");
+                if (attributes.size() > 0) {
+                    entityElement.addContent(recordElement);
+                }
+
                 for (ModelAttribute attribute : attributes) {
                     if (attribute != null && attribute.getEntityId().equals(entity.getId())) {
                         Element attributeElement = new Element("attribute");

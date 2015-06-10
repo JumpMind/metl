@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -21,10 +22,12 @@ import org.jumpmind.symmetric.is.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
+import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.symmetric.is.core.runtime.component.definition.XMLSetting;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
+import org.jumpmind.symmetric.is.core.util.ComponentUtil;
 
 abstract public class AbstractComponentRuntime extends AbstractRuntimeObject implements IComponentRuntime {
 
@@ -164,6 +167,16 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         }
         scriptEngine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
         return bindings;
+    }
+
+    protected Object getAttributeValue(Message inputMessage, String entityName, String attributeName) {
+        ArrayList<EntityData> rows = inputMessage.getPayload();
+        return ComponentUtil.getAttributeValue(getInputModel(), rows, entityName, attributeName);
+    }
+
+    protected List<Object> getAttributeValues(Message inputMessage, String entityName, String attributeName) {
+        ArrayList<EntityData> rows = inputMessage.getPayload();
+        return ComponentUtil.getAttributeValues(getInputModel(), rows, entityName, attributeName);
     }
     
 }

@@ -118,8 +118,9 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
         if (model != null) {
             ArrayList<EntityData> inputRows = new ArrayList<EntityData>();
             for (ModelEntity entity : getMatchingEntities(filterField.getValue())) {
+                EntityData data = new EntityData();
+                inputRows.add(data);
                 for (ModelAttribute attr : entity.getModelAttributes()) {
-                    EntityData data = new EntityData();
                     DataType type = attr.getDataType();
                     Object value = null;
                     if (type.isString()) {
@@ -132,7 +133,6 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
                         value = Boolean.toString(RandomUtils.nextBoolean());
                     }
                     data.put(attr.getId(), value);
-                    inputRows.add(data);
                 }
             }
             batchXml = XsltProcessor.getBatchXml(model, inputRows, false);

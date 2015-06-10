@@ -1,5 +1,6 @@
 package org.jumpmind.symmetric.is.core.runtime.component;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -9,11 +10,13 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
+import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
 import org.jumpmind.symmetric.is.core.runtime.flow.IMessageTarget;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
+import org.jumpmind.symmetric.is.core.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -85,12 +88,23 @@ public class MessageScriptHelper {
         this.inputMessage = inputMessage;
     }
 
+    protected Object getAttributeValue(String entityName, String attributeName) {
+        Model model = flowStep.getComponent().getInputModel();
+        ArrayList<EntityData> rows = inputMessage.getPayload();
+        return ComponentUtil.getAttributeValue(model, rows, entityName, attributeName);
+    }
+
+    protected List<Object> getAttributeValues(String entityName, String attributeName) {
+        Model model = flowStep.getComponent().getInputModel();
+        ArrayList<EntityData> rows = inputMessage.getPayload();
+        return ComponentUtil.getAttributeValues(model, rows, entityName, attributeName);
+    }
+    
     protected void setMessageTarget(IMessageTarget messageTarget) {
         this.messageTarget = messageTarget;
     }
 
     protected void onInit() {
-
     }
 
     protected void onHandle() {
@@ -101,6 +115,5 @@ public class MessageScriptHelper {
     
     protected void onSuccess() {
     }
-
 
 }
