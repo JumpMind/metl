@@ -143,7 +143,7 @@ public class TextFileReader extends AbstractComponentRuntime {
     }
 
     @Override
-    public void flowCompleted() {
+    public void flowCompleted(boolean cancelled) {
         if (ACTION_ARCHIVE.equals(actionOnSuccess)) {
             archive(archiveOnSuccessPath);
         } else if (ACTION_DELETE.equals(actionOnSuccess)) {

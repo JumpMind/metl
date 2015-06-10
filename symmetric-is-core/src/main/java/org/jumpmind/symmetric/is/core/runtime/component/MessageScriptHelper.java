@@ -93,7 +93,7 @@ public class MessageScriptHelper {
 
     }
 
-    protected void onHandle() {
+    protected void onHandle() {        
     }
 
     protected void onError(Throwable myError) {

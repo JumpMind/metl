@@ -112,7 +112,7 @@ public class Script extends AbstractComponentRuntime {
     }
 
     @Override
-    public void flowCompleted() {
+    public void flowCompleted(boolean cancelled) {
         invoke("onSuccess");
     }
 

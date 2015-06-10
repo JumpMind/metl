@@ -189,7 +189,7 @@ public class StepRuntime implements Runnable {
     public void flowCompletedWithoutError() {
         if (!cancelled) {
             try {
-                componentRuntime.flowCompleted();
+                componentRuntime.flowCompleted(cancelled);
             } catch (Exception ex) {
                 recordError(ex);
                 componentContext.getExecutionTracker().flowStepFailedOnComplete(componentContext, ex);
