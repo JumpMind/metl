@@ -14,7 +14,7 @@ public interface IComponentRuntime {
     
     public void lastMessageReceived(IMessageTarget messageTarget);
     
-    public void flowCompleted();
+    public void flowCompleted(boolean cancelled);
     
     public void flowCompletedWithErrors(Throwable myError);
     

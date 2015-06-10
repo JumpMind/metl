@@ -79,7 +79,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     }
             
     @Override
-    public void flowCompleted() {
+    public void flowCompleted(boolean cancelled) {
     }
     
     @Override

@@ -64,8 +64,8 @@ public class SqlWriter extends AbstractDbComponent {
     }
 
     @Override
-    public void flowCompleted() {
-        if (runWhen.equals(ON_SUCCESS)) {
+    public void flowCompleted(boolean cancelled) {
+        if (runWhen.equals(ON_SUCCESS) && !cancelled) {
             NamedParameterJdbcTemplate template = getJdbcTemplate();
             for (String sql : this.sqls) {
                 String sqlToExecute = sql;

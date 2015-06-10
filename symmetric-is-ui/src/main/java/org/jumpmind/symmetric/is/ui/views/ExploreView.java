@@ -101,6 +101,18 @@ public class ExploreView extends VerticalLayout implements View {
             return platform;
         }
         
+        public void close() {
+            if (platform != null) {
+                BasicDataSource ds = (BasicDataSource)platform.getDataSource();
+                if (ds != null) {
+                    try {
+                        ds.close();
+                    } catch (SQLException e) {
+                    }
+                }
+            }
+        }
+        
         public Agent getAgent() {
             return agent;
         }
@@ -133,11 +145,9 @@ public class ExploreView extends VerticalLayout implements View {
         
         public void refresh() {
             for (IDb db : dbs) {
-				try {
-					BasicDataSource ds = db.getPlatform().getDataSource();
-					ds.close();
-				} catch (SQLException e) {
-				}
+                if (db instanceof DbResource) {
+				    ((DbResource)db).close();
+                }
             }
 
             dbs.clear();
