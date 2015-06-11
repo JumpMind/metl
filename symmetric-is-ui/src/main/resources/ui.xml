@@ -3,6 +3,10 @@
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/dbwriter.png</iconImage>
         <className>org.jumpmind.symmetric.is.ui.views.design.EditDbWriterPanel</className>
     </component-ui>
+    <component-ui id="Sql Writer UI" componentId="Sql Writer">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/dbwriter.png</iconImage>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditDbReaderPanel</className>        
+    </component-ui>       
     <component-ui id="Database Reader UI" componentId="Database Reader">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/dbreader.png</iconImage>
         <className>org.jumpmind.symmetric.is.ui.views.design.EditDbReaderPanel</className>
@@ -63,10 +67,7 @@
     </component-ui>    
     <component-ui id="Delay UI" componentId="Delay">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/timer.png</iconImage>
-    </component-ui>    
-    <component-ui id="Entity Router UI" componentId="Entity Router">
-        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/entityrouter.png</iconImage>
-    </component-ui>    
+    </component-ui>   
     <component-ui id="Execute UI" componentId="Execute">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/execute.png</iconImage>
     </component-ui>  
@@ -82,9 +83,6 @@
     <component-ui id="Sorter UI" componentId="Sorter">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/sorter.png</iconImage>
     </component-ui> 
-    <component-ui id="Sql Writer UI" componentId="Sql Writer">
-        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/dbwriter.png</iconImage>
-    </component-ui>   
     <component-ui id="Text File Reader UI" componentId="Text File Reader">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/textfilereader.png</iconImage>
     </component-ui> 
