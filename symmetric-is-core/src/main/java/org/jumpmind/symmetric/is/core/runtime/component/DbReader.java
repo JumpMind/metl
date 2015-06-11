@@ -82,7 +82,7 @@ public class DbReader extends AbstractDbComponent {
          * all records in the input message
          */
         for (int i = 0; i < inboundRecordCount; i++) {
-            if (payload != null && payload.size() > i) {
+            if (payload != null && payload.size() > i && payload.get(i) instanceof EntityData) {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, payload.get(i));
             } else {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
