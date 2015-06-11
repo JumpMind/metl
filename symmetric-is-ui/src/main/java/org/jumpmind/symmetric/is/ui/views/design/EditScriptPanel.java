@@ -40,16 +40,16 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
         select.setWidth(40, Unit.EM);
         select.setTextInputAllowed(false);
 
-        select.addItem(Script.HANDLE_SCRIPT);
-        select.setItemCaption(Script.HANDLE_SCRIPT, SCRIPT_ON_HANDLE);
+        select.addItem(Script.IMPORTS);
+        select.setItemCaption(Script.IMPORTS, SCRIPT_IMPORTS);
         select.addItem(Script.INIT_SCRIPT);
         select.setItemCaption(Script.INIT_SCRIPT, SCRIPT_ON_INIT);
+        select.addItem(Script.HANDLE_SCRIPT);
+        select.setItemCaption(Script.HANDLE_SCRIPT, SCRIPT_ON_HANDLE);
         select.addItem(Script.ON_FLOW_SUCCESS);
         select.setItemCaption(Script.ON_FLOW_SUCCESS, SCRIPT_ON_SUCCESS);
         select.addItem(Script.ON_FLOW_ERROR);
         select.setItemCaption(Script.ON_FLOW_ERROR, SCRIPT_ON_ERROR);
-        select.addItem(Script.IMPORTS);
-        select.setItemCaption(Script.IMPORTS, SCRIPT_IMPORTS);
 
         select.setImmediate(true);
         select.setNullSelectionAllowed(false);
