@@ -5,6 +5,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -125,7 +126,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
                         DataType type = attribute.getDataType();
                         
                         if (object != null) {
-                            if (type.isTimestamp()) {
+                            if (type.isTimestamp() && object instanceof Date) {
                                 value = df.format(object);
                             } else {
                                 value = object.toString();
