@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.model.Component;
 import org.jumpmind.symmetric.is.core.model.Resource;
 import org.jumpmind.symmetric.is.core.model.SettingDefinition;
@@ -45,6 +46,8 @@ public class FilePoller extends AbstractComponentRuntime {
     public final static String SETTING_ARCHIVE_ON_ERROR_PATH = "archive.on.error.path";
 
     public final static String SETTING_USE_TRIGGER_FILE = "use.trigger.file";
+    
+    public final static String SETTING_MAX_FILES_TO_POLL = "max.files.to.poll";
 
     @SettingDefinition(order = 70, type = Type.TEXT, label = "Relative Trigger File Path")
     public final static String SETTING_TRIGGER_FILE_PATH = "trigger.file.path";
@@ -58,6 +61,8 @@ public class FilePoller extends AbstractComponentRuntime {
     boolean recurse = false;
 
     boolean cancelOnNoFiles = true;
+    
+    int maxFilesToPoll;
 
     String actionOnSuccess = ACTION_NONE;
 
@@ -77,22 +82,24 @@ public class FilePoller extends AbstractComponentRuntime {
             throw new IllegalStateException(String.format("The resource must be of type %s",
                     LocalFile.TYPE));
         }
+        TypedProperties properties = getTypedProperties();
 
-        filePattern = FormatUtils.replaceTokens(component.get(SETTING_FILE_PATTERN),
+        filePattern = FormatUtils.replaceTokens(properties.get(SETTING_FILE_PATTERN),
                 context.getFlowParametersAsString(), true);
-        triggerFilePath = FormatUtils.replaceTokens(component.get(SETTING_TRIGGER_FILE_PATH),
+        triggerFilePath = FormatUtils.replaceTokens(properties.get(SETTING_TRIGGER_FILE_PATH),
                 context.getFlowParametersAsString(), true);
-        useTriggerFile = component.getBoolean(SETTING_USE_TRIGGER_FILE, useTriggerFile);
-        recurse = component.getBoolean(SETTING_RECURSE, recurse);
-        cancelOnNoFiles = component.getBoolean(SETTING_CANCEL_ON_NO_FILES, cancelOnNoFiles);
-        actionOnSuccess = component.get(SETTING_ACTION_ON_SUCCESS, actionOnSuccess);
-        actionOnError = component.get(SETTING_ACTION_ON_ERROR, actionOnError);
+        useTriggerFile = properties.is(SETTING_USE_TRIGGER_FILE, useTriggerFile);
+        recurse = properties.is(SETTING_RECURSE, recurse);
+        cancelOnNoFiles = properties.is(SETTING_CANCEL_ON_NO_FILES, cancelOnNoFiles);
+        actionOnSuccess = properties.get(SETTING_ACTION_ON_SUCCESS, actionOnSuccess);
+        actionOnError = properties.get(SETTING_ACTION_ON_ERROR, actionOnError);
         archiveOnErrorPath = FormatUtils.replaceTokens(
-                component.get(SETTING_ARCHIVE_ON_ERROR_PATH), context.getFlowParametersAsString(),
+                properties.get(SETTING_ARCHIVE_ON_ERROR_PATH), context.getFlowParametersAsString(),
                 true);
         archiveOnSuccessPath = FormatUtils.replaceTokens(
-                component.get(SETTING_ARCHIVE_ON_SUCCESS_PATH),
+                properties.get(SETTING_ARCHIVE_ON_SUCCESS_PATH),
                 context.getFlowParametersAsString(), true);
+        maxFilesToPoll = properties.getInt(SETTING_MAX_FILES_TO_POLL);
 
     }
 
@@ -128,8 +135,8 @@ public class FilePoller extends AbstractComponentRuntime {
         scanner.scan();
         String[] files = scanner.getIncludedFiles();
         if (files.length > 0) {
-            for (String filePath : files) {
-                File file = new File(path, filePath);
+            for(int i = 0; i < files.length && i < maxFilesToPoll; i++) {
+                File file = new File(path, files[i]);
                 filesSent.add(file);
                 fileReferences.add(file);
             }

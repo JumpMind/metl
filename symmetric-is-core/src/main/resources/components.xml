@@ -165,15 +165,14 @@
                 <defaultValue>true</defaultValue>
                 <description></description>
             </setting>
-            <setting id='action.on.success' type='choice' required='false'>
-                <name>Action on Success</name>
-                <defaultValue>NONE</defaultValue>
+            <setting id='archive.on.success.path' type='text' required='false'>
+                <name>Archive On Success Path</name>
                 <description></description>
-                <choices>
-                    <choice>None</choice>
-                    <choice>Archive</choice>
-                    <choice>Delete</choice>
-                </choices>
+            </setting>            
+            <setting id='max.files.to.poll' type='integer' required='true'>
+                <name>Max Files To Poll</name>
+                <defaultValue>1000</defaultValue>
+                <description></description>
             </setting>
             <setting id='archive.on.success.path' type='text' required='false'>
                 <name>Archive On Success Path</name>

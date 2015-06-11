@@ -62,7 +62,7 @@ abstract public class AbstractExecutionService extends AbstractService implement
     class PurgeExecutionHandler implements Runnable {
         @Override
         public void run() {
-            ExecutionStatus[] toPurge = new ExecutionStatus[] { ExecutionStatus.CANCELLED, ExecutionStatus.DONE, ExecutionStatus.ERROR, };
+            ExecutionStatus[] toPurge = new ExecutionStatus[] { ExecutionStatus.CANCELLED, ExecutionStatus.DONE, ExecutionStatus.ERROR, ExecutionStatus.ABANDONED };
             for (ExecutionStatus executionStatus : toPurge) {
                 String retentionTimeInMs = environment.getProperty("execution.retention.time.ms", Long.toString(1000*60*60*24*7));
                 retentionTimeInMs = environment.getProperty("execution.retention.time.ms." + executionStatus.name().toLowerCase(), retentionTimeInMs);
