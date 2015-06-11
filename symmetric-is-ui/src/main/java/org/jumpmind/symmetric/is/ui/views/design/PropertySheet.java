@@ -50,6 +50,7 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
@@ -122,6 +123,10 @@ public class PropertySheet extends Panel {
     protected void addComponentProperties(FormLayout formLayout, Component component) {
         XMLComponent componentDefintion = componentFactory.getComonentDefinition(component.getType());
         addComponentName(formLayout, component);
+        TextField textField = new TextField("Component Type");
+        textField.setValue(component.getType());
+        textField.setReadOnly(true);
+        formLayout.addComponent(textField);
         addResourceCombo(componentDefintion, formLayout, component);
         addInputModelCombo(componentDefintion, formLayout, component);
         addOutputModelCombo(componentDefintion, formLayout, component);
