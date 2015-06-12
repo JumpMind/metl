@@ -183,8 +183,8 @@ public class DbReader extends AbstractDbComponent {
             } else {
                 if (StringUtils.isEmpty(tableName)) {
                     throw new SQLException("Table name could not be determined from metadata or hints.  Please check column and hint.  "
-                            + "Note that on some databases metadata is only returned if instructed.  "
-                            + "For example, on SQL Server if you append 'FOR BROWSE' on the end of the query metadata will be returned."
+                            + "(Note to SQL-Server users: metadata may not be returned unless you append 'FOR BROWSE' to the end of your query "
+                            + "or set 'useCursors=true' on the JDBC URL.)"
                             + "Query column = " + i);
                 }
                 String attributeId = getAttributeId(tableName, columnName);
