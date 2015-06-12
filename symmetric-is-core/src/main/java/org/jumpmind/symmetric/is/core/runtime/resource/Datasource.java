@@ -57,8 +57,8 @@ public class Datasource extends AbstractResourceRuntime implements IResourceRunt
     @SettingDefinition(order = 140, type = Type.TEXT, label = "Init Sql")
     public final static String DB_POOL_INIT_SQL = "db.init.sql";
 
-    @SettingDefinition(order = 150, type = Type.TEXT, label = "Resource Properties")
-    public final static String DB_POOL_RESOURCE_PROPERTIES = "db.resource.properties";
+//    @SettingDefinition(order = 150, type = Type.TEXT, label = "Resource Properties")
+//    public final static String DB_POOL_RESOURCE_PROPERTIES = "db.resource.properties";
 
     @SettingDefinition(order = 170, type = Type.INTEGER, defaultValue = "1000", label = "Fetch Size")
     public final static String DB_FETCH_SIZE = "db.fetch.size";
@@ -66,20 +66,20 @@ public class Datasource extends AbstractResourceRuntime implements IResourceRunt
     @SettingDefinition(order = 180, type = Type.INTEGER, defaultValue = "300", label = "Query Timeout (seconds)")
     public final static String DB_QUERY_TIMEOUT = "db.query.timeout";
     
-    @SettingDefinition(order = 170, type = Type.INTEGER, defaultValue = "" + Integer.MAX_VALUE, label = "Max Rows To Select")
-    public final static String DB_MAX_ROWS = "db.max.rows.to.select";
-    
-    @SettingDefinition(order = 200, type = Type.CHOICE, choices = { "TYPE_FORWARD_ONLY",
-            "TYPE_SCROLL_INSENSITIVE", "TYPE_SCROLL_SENSITIVE" }, defaultValue = "TYPE_FORWARD_ONLY", label = "ResultSet Type")
-    public final static String DB_RESULTSET_TYPE = "db.resultset.type";
-
-    @SettingDefinition(order = 210, type = Type.CHOICE, choices = { "CONCUR_READ_ONLY",
-            "CONCUR_UPDATABLE" }, defaultValue = "CONCUR_READ_ONLY", label = "ResultSet Concurrency")
-    public final static String DB_RESULTSET_CONCURRENCY = "db.resultset.concurrency";
-
-    @SettingDefinition(order = 220, type = Type.CHOICE, choices = { "HOLD_CURSORS_OVER_COMMIT",
-            "CLOSE_CURSORS_AT_COMMIT" }, defaultValue = "HOLD_CURSORS_OVER_COMMIT", label = "ResultSet Holdability")
-    public final static String DB_RESULTSET_HOLDABILITY = "db.resultset.holdability";
+//    @SettingDefinition(order = 170, type = Type.INTEGER, defaultValue = "" + Integer.MAX_VALUE, label = "Max Rows To Select")
+//    public final static String DB_MAX_ROWS = "db.max.rows.to.select";
+//    
+//    @SettingDefinition(order = 200, type = Type.CHOICE, choices = { "TYPE_FORWARD_ONLY",
+//            "TYPE_SCROLL_INSENSITIVE", "TYPE_SCROLL_SENSITIVE" }, defaultValue = "TYPE_FORWARD_ONLY", label = "ResultSet Type")
+//    public final static String DB_RESULTSET_TYPE = "db.resultset.type";
+//
+//    @SettingDefinition(order = 210, type = Type.CHOICE, choices = { "CONCUR_READ_ONLY",
+//            "CONCUR_UPDATABLE" }, defaultValue = "CONCUR_READ_ONLY", label = "ResultSet Concurrency")
+//    public final static String DB_RESULTSET_CONCURRENCY = "db.resultset.concurrency";
+//
+//    @SettingDefinition(order = 220, type = Type.CHOICE, choices = { "HOLD_CURSORS_OVER_COMMIT",
+//            "CLOSE_CURSORS_AT_COMMIT" }, defaultValue = "HOLD_CURSORS_OVER_COMMIT", label = "ResultSet Holdability")
+//    public final static String DB_RESULTSET_HOLDABILITY = "db.resultset.holdability";
 
     ResettableBasicDataSource dataSource = new ResettableBasicDataSource();
 

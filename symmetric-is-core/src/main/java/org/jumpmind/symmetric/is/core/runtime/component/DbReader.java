@@ -102,7 +102,7 @@ public class DbReader extends AbstractDbComponent {
                         ArrayList<String> attributeIds = null;
                         Message message = null;
                         int outputRecCount = 0;
-
+                        Map<Integer, String> columnHints = getSqlColumnEntityHints(sqlToExecute);
                         while (rs.next()) {
                             if (outputRecCount % rowsPerMessage == 0 && message != null) {
                                 getComponentStatistics().incrementOutboundMessages();
@@ -118,7 +118,7 @@ public class DbReader extends AbstractDbComponent {
                             }
 
                             if (outputRecCount == 0) {
-                                attributeIds = getAttributeIds(meta, getSqlColumnEntityHints(sqlToExecute));
+                                attributeIds = getAttributeIds(meta, columnHints);
                             }
 
                             EntityData rowData = new EntityData();
