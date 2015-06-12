@@ -5,12 +5,16 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jumpmind.db.sql.SqlException;
 import org.jumpmind.properties.TypedProperties;
+import org.jumpmind.symmetric.is.core.model.Model;
 import org.jumpmind.symmetric.is.core.model.ModelAttribute;
+import org.jumpmind.symmetric.is.core.model.ModelEntity;
 import org.jumpmind.symmetric.is.core.runtime.EntityData;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
 import org.jumpmind.symmetric.is.core.runtime.Message;
@@ -131,6 +135,7 @@ public class DbReader extends AbstractDbComponent {
                         ArrayList<EntityData> payload = message.getPayload();
                         payload.add(rowData);
                         outputRecCount++;
+                        logEntityAttributes(rowData);
                     }
                     rs.close();
                     if (message != null) {
@@ -309,4 +314,47 @@ public class DbReader extends AbstractDbComponent {
         return idx;
     }
 
+    protected void logEntityAttributes(EntityData rowData) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\n");
+        boolean firstEntity = true;
+        for (ModelEntity entity : getModelEntities(rowData)) {
+            if (firstEntity) {
+                firstEntity = false;
+            } else {
+                sb.append(",\n");
+            }
+            sb.append("   \"") .append(entity.getName()).append("\" { ");
+            boolean firstAttribute = true;
+            for (ModelAttribute attribute : entity.getModelAttributes()) {
+                if (rowData.containsKey(attribute.getId())) {
+                    if (firstAttribute) {
+                        firstAttribute = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append("\"").append(attribute.getName()).append("\"");
+                    sb.append(": \"").append(rowData.get(attribute.getId())).append("\"");
+                }
+            }
+            sb.append(" }");
+        }
+        sb.append("\n}");
+        log(LogLevel.DEBUG, sb.toString());
+    }
+    
+    protected Set<ModelEntity> getModelEntities(EntityData rowData) {
+        Set<ModelEntity> entities = new LinkedHashSet<ModelEntity>();
+        Model model = getOutputModel();
+        for (String attributeId : rowData.keySet()) {
+            ModelAttribute attribute = model.getAttributeById(attributeId);
+            if (attribute != null) {
+                ModelEntity entity = model.getEntityById(attribute.getEntityId());
+                if (entity != null) {
+                    entities.add(entity);
+                }
+            }
+        }
+        return entities;
+    }
 }
