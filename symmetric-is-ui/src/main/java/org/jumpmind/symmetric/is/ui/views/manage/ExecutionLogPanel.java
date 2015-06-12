@@ -126,7 +126,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
         stepTable.setVisibleColumns(new Object[] { "componentName", "status", "messagesReceived",
                 "messagesProduced", "entitiesProcessed", "startTime", "endTime" });
         stepTable.setColumnHeaders(new String[] { "Component Name", "Status", "Msgs Recvd",
-                "Msgs Sent", "Entites Prcd", "Start", "End" });
+                "Msgs Sent", "Entities Prcd", "Start", "End" });
         stepTable.setColumnWidth("status", 100);
         stepTable.setColumnWidth("messagesReceived", 100);
         stepTable.setColumnWidth("messagesProduced", 100);
