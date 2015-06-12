@@ -32,7 +32,9 @@ public class SqlWriter extends AbstractDbComponent {
 
     @Override
     protected void start() {
-        applySettings();
+        TypedProperties properties = getTypedProperties();
+        sqls = getSqlStatements(properties.get(SQL));
+        runWhen = properties.get(RUN_WHEN, PER_MESSAGE);
         if (getResourceRuntime() == null) {
             throw new IllegalStateException("This component requires a data source");
         }
@@ -79,12 +81,6 @@ public class SqlWriter extends AbstractDbComponent {
                 getComponentStatistics().incrementNumberEntitiesProcessed(count);
             }
         }
-    }
-
-    protected void applySettings() {
-        TypedProperties properties = getTypedProperties();
-        sqls = getSqlStatements(properties.get(SQL));
-        runWhen = properties.get(RUN_WHEN, PER_MESSAGE);
     }
 
 }
