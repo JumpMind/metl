@@ -42,7 +42,7 @@ public class DbReader extends AbstractDbComponent {
 
     public final static String MESSAGE_MANIPULATION_STRATEGY = "db.reader.message.manipulation.strategy";
 
-    String sql;
+    List<String> sqls;
 
     long rowsPerMessage;
 
@@ -63,8 +63,7 @@ public class DbReader extends AbstractDbComponent {
         getComponentStatistics().incrementInboundMessages();
 
         if (getResourceRuntime() == null) {
-            throw new RuntimeException(
-                    "The data source resource has not been configured.  Please configure it.");
+            throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
         }
 
         NamedParameterJdbcTemplate template = getJdbcTemplate();
@@ -92,62 +91,59 @@ public class DbReader extends AbstractDbComponent {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
             }
 
-            final String sqlToExecute = FormatUtils.replaceTokens(this.sql,
-                    context.getFlowParametersAsString(), true);
-            log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
-            template.query(sqlToExecute, paramMap, new ResultSetExtractor<Object>() {
-                @Override
-                public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
+            for (String sql : sqls) {
+                final String sqlToExecute = FormatUtils.replaceTokens(sql, context.getFlowParametersAsString(), true);
+                log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
+                template.query(sqlToExecute, paramMap, new ResultSetExtractor<Object>() {
+                    @Override
+                    public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
 
-                    ResultSetMetaData meta = rs.getMetaData();
-                    ArrayList<String> attributeIds = null;
-                    Message message = null;
-                    int outputRecCount = 0;
+                        ResultSetMetaData meta = rs.getMetaData();
+                        ArrayList<String> attributeIds = null;
+                        Message message = null;
+                        int outputRecCount = 0;
 
-                    while (rs.next()) {
-                        if (outputRecCount % rowsPerMessage == 0 && message != null) {
-                            getComponentStatistics().incrementOutboundMessages();
-                            message.getHeader().setSequenceNumber(
-                                    getComponentStatistics().getNumberOutboundMessages());
-                            messageTarget.put(message);
-                            message = null;
-                        }
-
-                        getComponentStatistics().incrementNumberEntitiesProcessed();
-
-                        if (message == null) {
-                            message = createMessage(inputMessage);
-                        }
-
-                        if (outputRecCount == 0) {
-                            attributeIds = getAttributeIds(meta,
-                                    getSqlColumnEntityHints(sqlToExecute));
-                        }
-
-                        EntityData rowData = new EntityData();
-                        for (int i = 1; i <= meta.getColumnCount(); i++) {
-                            Object value = JdbcUtils.getResultSetValue(rs, i);
-                            if (trimColumns && value instanceof String) {
-                                value = value.toString().trim();
+                        while (rs.next()) {
+                            if (outputRecCount % rowsPerMessage == 0 && message != null) {
+                                getComponentStatistics().incrementOutboundMessages();
+                                message.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
+                                messageTarget.put(message);
+                                message = null;
                             }
-                            rowData.put(attributeIds.get(i - 1), value);
+
+                            getComponentStatistics().incrementNumberEntitiesProcessed();
+
+                            if (message == null) {
+                                message = createMessage(inputMessage);
+                            }
+
+                            if (outputRecCount == 0) {
+                                attributeIds = getAttributeIds(meta, getSqlColumnEntityHints(sqlToExecute));
+                            }
+
+                            EntityData rowData = new EntityData();
+                            for (int i = 1; i <= meta.getColumnCount(); i++) {
+                                Object value = JdbcUtils.getResultSetValue(rs, i);
+                                if (trimColumns && value instanceof String) {
+                                    value = value.toString().trim();
+                                }
+                                rowData.put(attributeIds.get(i - 1), value);
+                            }
+                            ArrayList<EntityData> payload = message.getPayload();
+                            payload.add(rowData);
+                            outputRecCount++;
                         }
-                        ArrayList<EntityData> payload = message.getPayload();
-                        payload.add(rowData);
-                        outputRecCount++;
-                        logEntityAttributes(rowData);
+                        rs.close();
+                        if (message != null) {
+                            getComponentStatistics().incrementOutboundMessages();
+                            message.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
+                            message.getHeader().setLastMessage(true);
+                            messageTarget.put(message);
+                        }
+                        return null;
                     }
-                    rs.close();
-                    if (message != null) {
-                        getComponentStatistics().incrementOutboundMessages();
-                        message.getHeader().setSequenceNumber(
-                                getComponentStatistics().getNumberOutboundMessages());
-                        message.getHeader().setLastMessage(true);
-                        messageTarget.put(message);
-                    }
-                    return null;
-                }
-            });
+                });
+            }
         }
     }
 
@@ -162,8 +158,7 @@ public class DbReader extends AbstractDbComponent {
         return message;
     }
 
-    private ArrayList<String> getAttributeIds(ResultSetMetaData meta,
-            Map<Integer, String> sqlEntityHints) throws SQLException {
+    private ArrayList<String> getAttributeIds(ResultSetMetaData meta, Map<Integer, String> sqlEntityHints) throws SQLException {
 
         ArrayList<String> attributeIds = new ArrayList<String>();
 
@@ -184,11 +179,10 @@ public class DbReader extends AbstractDbComponent {
                 attributeIds.addAll(getAttributeIds(columnName));
             } else {
                 if (StringUtils.isEmpty(tableName)) {
-                    throw new SQLException(
-                            "Table name could not be determined from metadata or hints.  Please check column and hint.  "
-                                    + "Note that on some databases metadata is only returned if instructed.  "
-                                    + "For example, on SQL Server if you append 'FOR BROWSE' on the end of the query metadata will be returned."
-                                    + "Query column = " + i);
+                    throw new SQLException("Table name could not be determined from metadata or hints.  Please check column and hint.  "
+                            + "Note that on some databases metadata is only returned if instructed.  "
+                            + "For example, on SQL Server if you append 'FOR BROWSE' on the end of the query metadata will be returned."
+                            + "Query column = " + i);
                 }
                 String attributeId = getAttributeId(tableName, columnName);
                 attributeIds.add(attributeId);
@@ -203,9 +197,7 @@ public class DbReader extends AbstractDbComponent {
         if (getOutputModel() != null) {
             List<ModelAttribute> attributes = getOutputModel().getAttributesByName(columnName);
             if (attributes.size() == 0) {
-                throw new SqlException(
-                        "Column not found in output model and not specified via hint.  Column Name = "
-                                + columnName);
+                throw new SqlException("Column not found in output model and not specified via hint.  Column Name = " + columnName);
             } else {
                 for (ModelAttribute modelAttribute : attributes) {
                     attributeIds.add(modelAttribute.getId());
@@ -213,29 +205,24 @@ public class DbReader extends AbstractDbComponent {
             }
             return attributeIds;
         } else {
-            throw new SqlException(
-                    "No output model was specified for the db reader component.  An output model is required.");
+            throw new SqlException("No output model was specified for the db reader component.  An output model is required.");
         }
     }
 
     private String getAttributeId(String tableName, String columnName) {
         if (getOutputModel() != null) {
-            ModelAttribute modelAttribute = getOutputModel().getAttributeByName(tableName,
-                    columnName);
+            ModelAttribute modelAttribute = getOutputModel().getAttributeByName(tableName, columnName);
             if (modelAttribute == null) {
-                throw new SqlException(
-                        "Table and Column not found in output model and not specified via hint.  "
-                                + "Table Name = " + tableName + " Column Name = " + columnName);
+                throw new SqlException("Table and Column not found in output model and not specified via hint.  " + "Table Name = "
+                        + tableName + " Column Name = " + columnName);
             }
             return modelAttribute.getId();
         } else {
-            throw new SqlException(
-                    "No output model was specified for the db reader component.  An output model is required.");
+            throw new SqlException("No output model was specified for the db reader component.  An output model is required.");
         }
     }
 
-    protected void setParamsFromInboundMsgAndRec(Map<String, Object> paramMap,
-            final Message inputMessage, final EntityData entityData) {
+    protected void setParamsFromInboundMsgAndRec(Map<String, Object> paramMap, final Message inputMessage, final EntityData entityData) {
 
         /*
          * input parameters can come from the header and the record. header
@@ -259,10 +246,10 @@ public class DbReader extends AbstractDbComponent {
 
     protected void applySettings() {
         TypedProperties properties = getTypedProperties();
-        sql = properties.get(SQL);
+        sqls = getSqlStatements(properties.get(SQL));
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
-        messageManipulationStrategy = MessageManipulationStrategy.valueOf(properties
-                .get(MESSAGE_MANIPULATION_STRATEGY, messageManipulationStrategy.name()));
+        messageManipulationStrategy = MessageManipulationStrategy.valueOf(properties.get(MESSAGE_MANIPULATION_STRATEGY,
+                messageManipulationStrategy.name()));
         trimColumns = properties.is(TRIM_COLUMNS);
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
     }
@@ -274,8 +261,7 @@ public class DbReader extends AbstractDbComponent {
         while (columns.indexOf("/*", commentIdx) != -1) {
             commentIdx = columns.indexOf("/*", commentIdx) + 2;
             int columnIdx = countColumnSeparatingCommas(columns.substring(0, commentIdx)) + 1;
-            String entity = StringUtils.trimWhitespace(columns.substring(commentIdx,
-                    columns.indexOf("*/", commentIdx)));
+            String entity = StringUtils.trimWhitespace(columns.substring(commentIdx, columns.indexOf("*/", commentIdx)));
             columnEntityHints.put(columnIdx, entity);
         }
         return columnEntityHints;
