@@ -52,7 +52,7 @@ public class TextFileReaderTest {
     public void testTextReaderFlowFromStartupMsgSingleRowPerMessage() throws Exception {
 
         TextFileReader reader = new TextFileReader();
-        reader.start(new ComponentContext(readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
+        reader.start(new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle(msg, msgTarget);
@@ -74,7 +74,7 @@ public class TextFileReaderTest {
     public void testTextReaderFlowFromStartupMsgMultipleRowsPerMessage() throws Exception {
 
         TextFileReader reader = new TextFileReader();
-        reader.start(new ComponentContext(readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
+        reader.start(new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
         reader.handle(msg, msgTarget);
