@@ -132,9 +132,9 @@ public class DbReader extends AbstractDbComponent {
                             ArrayList<EntityData> payload = message.getPayload();
                             payload.add(rowData);
                             outputRecCount++;
-                            if (context.getDeployment().asLogLevel() == LogLevel.DEBUG) {
+                            if (context.getDeployment() != null && context.getDeployment().asLogLevel() == LogLevel.DEBUG) {
                                 logEntityAttributes(rowData);
-                            }   
+                            }
                         }
                         rs.close();
                         if (message != null) {
