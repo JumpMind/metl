@@ -48,7 +48,7 @@ public class TextFileWriterTest {
     @Test
     public void testTextWriterMultipleRowsPerMessage() throws Exception {
         TextFileWriter writer = new TextFileWriter();
-        writer.start(new ComponentContext(writerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
+        writer.start(new ComponentContext(null, writerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         writer.handle(createMultipleRowTextMessageToWrite(), null);
         checkTextFile();
     }
@@ -56,7 +56,7 @@ public class TextFileWriterTest {
     @Test
     public void testTextWriterSingleRowPerMessage() throws Exception {
         TextFileWriter writer = new TextFileWriter();
-        writer.start(new ComponentContext(writerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
+        writer.start(new ComponentContext(null, writerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         writer.handle(createSingleRowTextMessageToWrite(1, false), null);
         writer.handle(createSingleRowTextMessageToWrite(2, false), null);
         writer.handle(createSingleRowTextMessageToWrite(3, false), null);

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jumpmind.symmetric.is.core.model.AgentDeployment;
 import org.jumpmind.symmetric.is.core.model.Flow;
 import org.jumpmind.symmetric.is.core.model.FlowStep;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
@@ -11,6 +12,8 @@ import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 
 public class ComponentContext {
 
+    AgentDeployment deployment;
+    
     FlowStep flowStep;
 
     Flow flow;
@@ -25,8 +28,9 @@ public class ComponentContext {
     
     ComponentStatistics componentStatistics = new ComponentStatistics();
 
-    public ComponentContext(FlowStep flowStep, Flow flow, IExecutionTracker executionTracker,
+    public ComponentContext(AgentDeployment deployment, FlowStep flowStep, Flow flow, IExecutionTracker executionTracker,
             IResourceRuntime resource, Map<String, Serializable> flowParameters, Map<String, String> globalSettings) {
+        this.deployment = deployment;
         if (flowParameters == null) {
             flowParameters = new HashMap<String, Serializable>();
         }
@@ -36,6 +40,10 @@ public class ComponentContext {
         this.resourceRuntime = resource;
         this.flowParameters = flowParameters;
         this.globalSettings = globalSettings;
+    }
+
+    public AgentDeployment getDeployment() {
+        return deployment;
     }
 
     public FlowStep getFlowStep() {

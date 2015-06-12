@@ -108,7 +108,7 @@ public class FlowRuntime {
         for (FlowStep flowStep : steps) {
             boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true);
             if (enabled) {
-                ComponentContext context = new ComponentContext(flowStep, flow, executionTracker, 
+                ComponentContext context = new ComponentContext(deployment, flowStep, flow, executionTracker, 
                         deployedResources.get(flowStep.getComponent().getResourceId()), parameters, globalSettings);
                 StepRuntime stepRuntime = new StepRuntime(componentFactory.create(flowStep.getComponent().getType()), context, this);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
