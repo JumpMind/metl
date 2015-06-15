@@ -91,8 +91,8 @@ public class DbReader extends AbstractDbComponent {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
             }
 
-            Message message = null;
             MessageResultSetExtractor messageResultSetExtractor = new MessageResultSetExtractor(inputMessage, messageTarget);
+            Message message = null;
             for (String sql : sqls) {
                 String sqlToExecute = FormatUtils.replaceTokens(sql, context.getFlowParametersAsString(), true);
                 log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
@@ -101,6 +101,7 @@ public class DbReader extends AbstractDbComponent {
             }
             if (message != null) {
                 message.getHeader().setLastMessage(true);
+                messageTarget.put(message);
             }
         }
     }
@@ -324,13 +325,17 @@ public class DbReader extends AbstractDbComponent {
             Map<Integer, String> columnHints = getSqlColumnEntityHints(sqlToExecute);
             ArrayList<String> attributeIds = getAttributeIds(meta, columnHints);
             while (rs.next()) {
-                if (outputRecCount++ % rowsPerMessage == 0 || message == null) {
+                if (outputRecCount++ % rowsPerMessage == 0 && message != null) {
+                    messageTarget.put(message);
+                    message = null;
+                }
+                getComponentStatistics().incrementNumberEntitiesProcessed();
+
+                if (message == null) {
                     message = createMessage(inputMessage);
                     getComponentStatistics().incrementOutboundMessages();
                     message.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
-                    messageTarget.put(message);
                 }
-                getComponentStatistics().incrementNumberEntitiesProcessed();
 
                 EntityData rowData = new EntityData();
                 for (int i = 1; i <= meta.getColumnCount(); i++) {
