@@ -355,12 +355,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel {
         }
 
         AgentDeployment deployment = myDesignAgent.getAgentDeploymentFor(flow);
-        if (deployment != null) {
-            agentManager.undeploy(deployment);
-
+        if (deployment == null) {
+            deployment = agentManager.deploy(myDesignAgent.getId(), flow, new HashMap<String, String>());
         }
-
-        deployment = agentManager.deploy(myDesignAgent.getId(), flow, new HashMap<String, String>());
 
         String executionId = agentManager.getAgentRuntime(myDesignAgent).scheduleNow(deployment);
         if (executionId != null) {
