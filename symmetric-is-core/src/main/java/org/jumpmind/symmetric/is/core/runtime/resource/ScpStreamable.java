@@ -86,10 +86,6 @@ public class ScpStreamable implements IStreamable {
     }
 
     @Override
-    public void open() {
-    }
-
-    @Override
     public boolean requiresContentLength() {
         return false;
     }

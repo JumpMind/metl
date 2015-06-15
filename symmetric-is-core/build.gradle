@@ -20,6 +20,7 @@ dependencies {
     compile "commons-lang:commons-lang:$commonsLangVersion"
     compile "commons-dbcp:commons-dbcp:$commonsDbcpVersion"
     compile "commons-io:commons-io:$commonsIoVersion"
+    compile "commons-net:commons-net:$commonsNetVersion"    
     compile "jaxen:jaxen:$jaxenVersion"
     compile "javax.mail:mail:$javaMailVersion"
     compile "org.jdom:jdom2:$jdomVersion"
