@@ -91,61 +91,16 @@ public class DbReader extends AbstractDbComponent {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
             }
 
+            Message message = null;
+            MessageResultSetExtractor messageResultSetExtractor = new MessageResultSetExtractor(inputMessage, messageTarget);
             for (String sql : sqls) {
-                final String sqlToExecute = FormatUtils.replaceTokens(sql, context.getFlowParametersAsString(), true);
+                String sqlToExecute = FormatUtils.replaceTokens(sql, context.getFlowParametersAsString(), true);
                 log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
-                template.query(sqlToExecute, paramMap, new ResultSetExtractor<Object>() {
-                    @Override
-                    public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
-
-                        ResultSetMetaData meta = rs.getMetaData();
-                        ArrayList<String> attributeIds = null;
-                        Message message = null;
-                        int outputRecCount = 0;
-                        Map<Integer, String> columnHints = getSqlColumnEntityHints(sqlToExecute);
-                        while (rs.next()) {
-                            if (outputRecCount % rowsPerMessage == 0 && message != null) {
-                                getComponentStatistics().incrementOutboundMessages();
-                                message.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
-                                messageTarget.put(message);
-                                message = null;
-                            }
-
-                            getComponentStatistics().incrementNumberEntitiesProcessed();
-
-                            if (message == null) {
-                                message = createMessage(inputMessage);
-                            }
-
-                            if (outputRecCount == 0) {
-                                attributeIds = getAttributeIds(meta, columnHints);
-                            }
-
-                            EntityData rowData = new EntityData();
-                            for (int i = 1; i <= meta.getColumnCount(); i++) {
-                                Object value = JdbcUtils.getResultSetValue(rs, i);
-                                if (trimColumns && value instanceof String) {
-                                    value = value.toString().trim();
-                                }
-                                rowData.put(attributeIds.get(i - 1), value);
-                            }
-                            ArrayList<EntityData> payload = message.getPayload();
-                            payload.add(rowData);
-                            outputRecCount++;
-                            if (context.getDeployment() != null && context.getDeployment().asLogLevel() == LogLevel.DEBUG) {
-                                logEntityAttributes(rowData);
-                            }
-                        }
-                        rs.close();
-                        if (message != null) {
-                            getComponentStatistics().incrementOutboundMessages();
-                            message.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
-                            message.getHeader().setLastMessage(true);
-                            messageTarget.put(message);
-                        }
-                        return null;
-                    }
-                });
+                messageResultSetExtractor.setSqlToExecute(sqlToExecute);
+                message = template.query(sqlToExecute, paramMap, messageResultSetExtractor);
+            }
+            if (message != null) {
+                message.getHeader().setLastMessage(true);
             }
         }
     }
@@ -346,4 +301,57 @@ public class DbReader extends AbstractDbComponent {
         }
         return entities;
     }
+    
+    class MessageResultSetExtractor implements ResultSetExtractor<Message> {
+        Message inputMessage;
+        
+        IMessageTarget messageTarget;
+
+        Message message;            
+
+        String sqlToExecute;
+        
+        int outputRecCount;
+
+        public MessageResultSetExtractor(Message inputMessage, IMessageTarget messageTarget) {
+            this.inputMessage = inputMessage;
+            this.messageTarget = messageTarget;
+        }
+
+        @Override
+        public Message extractData(ResultSet rs) throws SQLException, DataAccessException {
+            ResultSetMetaData meta = rs.getMetaData();
+            Map<Integer, String> columnHints = getSqlColumnEntityHints(sqlToExecute);
+            ArrayList<String> attributeIds = getAttributeIds(meta, columnHints);
+            while (rs.next()) {
+                if (outputRecCount++ % rowsPerMessage == 0 || message == null) {
+                    message = createMessage(inputMessage);
+                    getComponentStatistics().incrementOutboundMessages();
+                    message.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
+                    messageTarget.put(message);
+                }
+                getComponentStatistics().incrementNumberEntitiesProcessed();
+
+                EntityData rowData = new EntityData();
+                for (int i = 1; i <= meta.getColumnCount(); i++) {
+                    Object value = JdbcUtils.getResultSetValue(rs, i);
+                    if (trimColumns && value instanceof String) {
+                        value = value.toString().trim();
+                    }
+                    rowData.put(attributeIds.get(i - 1), value);
+                }
+                ArrayList<EntityData> payload = message.getPayload();
+                payload.add(rowData);
+                if (context.getDeployment() != null && context.getDeployment().asLogLevel() == LogLevel.DEBUG) {
+                    logEntityAttributes(rowData);
+                }
+            }
+            return message;
+        }
+
+        public void setSqlToExecute(String sqlToExecute) {
+            this.sqlToExecute = sqlToExecute;
+        }
+    }
+
 }

@@ -46,11 +46,13 @@ public class DbReaderTest {
     private static IResourceRuntime resourceRuntime;
     private static IDatabasePlatform platform;
     private static FlowStep readerFlowStep;
+    private static FlowStep readerFlowStepMultiQuery;
 
     @BeforeClass
     public static void setup() throws Exception {
         platform = createPlatformAndTestDatabase();
         readerFlowStep = createReaderFlowStep();
+        readerFlowStepMultiQuery = createReaderFlowStepMultiQuery();
         Resource resource = readerFlowStep.getComponent().getResource();
         resourceRuntime = new ResourceFactory().create(resource, null);
 
@@ -91,11 +93,29 @@ public class DbReaderTest {
         ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
         assertEquals("test row 1", payload.get(0).get("tt1col2"));
         assertEquals("test row x", payload.get(0).get("tt2coly"));
+        assertEquals(false, msgTarget.getMessage(0).getHeader().isLastMessage());
+        assertEquals(true, msgTarget.getMessage(1).getHeader().isLastMessage());
     }
 
     @Test
     public void testReaderFlowFromMultipleContentMsgs() throws Exception {
 
+        DbReader reader = new DbReader();
+        reader.start(new ComponentContext(null, readerFlowStepMultiQuery, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
+        Message message = new Message("fake step id");
+        ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
+        inboundPayload.add(new EntityData());
+        message.setPayload(inboundPayload);
+        
+        MessageTarget msgTarget = new MessageTarget();
+        reader.handle(message, msgTarget);
+
+        assertEquals(2, msgTarget.getTargetMessageCount());
+        ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
+        assertEquals("test row 1", payload.get(0).get("tt1col2"));
+        assertEquals("test row x", payload.get(0).get("tt2coly"));
+        assertEquals(false, msgTarget.getMessage(0).getHeader().isLastMessage());
+        assertEquals(true, msgTarget.getMessage(1).getHeader().isLastMessage());
     }
     
     @Test
@@ -126,6 +146,25 @@ public class DbReaderTest {
         Folder folder = TestUtils.createFolder("Test Folder");
         Flow flow = TestUtils.createFlow("TestFlow", folder);
         Setting[] settingData = createReaderSettings();
+        Component componentVersion = TestUtils.createComponent(DbReader.TYPE, false,
+                createResource(createResourceSettings()), null, createOutputModel(), null,
+                null, settingData);
+        FlowStep readerComponent = new FlowStep();
+        readerComponent.setFlowId(flow.getId());
+        readerComponent.setComponentId(componentVersion.getId());
+        readerComponent.setCreateBy("Test");
+        readerComponent.setCreateTime(new Date());
+        readerComponent.setLastUpdateBy("Test");
+        readerComponent.setLastUpdateTime(new Date());
+        readerComponent.setComponent(componentVersion);
+        return readerComponent;
+    }
+    
+    private static FlowStep createReaderFlowStepMultiQuery() {
+
+        Folder folder = TestUtils.createFolder("Test Folder");
+        Flow flow = TestUtils.createFlow("TestFlow", folder);
+        Setting[] settingData = createReaderSettingsMultiQuery();
         Component componentVersion = TestUtils.createComponent(DbReader.TYPE, false,
                 createResource(createResourceSettings()), null, createOutputModel(), null,
                 null, settingData);
@@ -177,6 +216,18 @@ public class DbReaderTest {
         settingData[0] = new Setting(DbReader.SQL,
                 "select * From test_table_1 tt1 inner join test_table_2 tt2"
                 + " on tt1.col1 = tt2.colx order by tt1.col1");
+        settingData[1] = new Setting(DbReader.ROWS_PER_MESSAGE, "2");
+
+        return settingData;
+    }
+
+    private static Setting[] createReaderSettingsMultiQuery() {
+
+        Setting[] settingData = new Setting[2];
+        settingData[0] = new Setting(DbReader.SQL,
+                "select * From test_table_1 tt1 inner join test_table_2 tt2"
+                + " on tt1.col1 = tt2.colx order by tt1.col1;\n\n"
+                + "select * from test_table_2 where colx = 4;");
         settingData[1] = new Setting(DbReader.ROWS_PER_MESSAGE, "2");
 
         return settingData;
@@ -256,6 +307,8 @@ public class DbReaderTest {
                 statement.getValueArray(new Object[] { 2, "test row y", 8.8 }, new Object[] { 1 }));
         template.update(statement.getSql(),
                 statement.getValueArray(new Object[] { 3, "test row z", 9.9 }, new Object[] { 1 }));
+        template.update(statement.getSql(),
+                statement.getValueArray(new Object[] { 4, "test row zz", 4.9 }, new Object[] { 1 }));
         
     }
 
