@@ -47,10 +47,6 @@ public class HttpStreamable implements IStreamable {
     }
 
     @Override
-    public void open() {
-    }
-
-    @Override
     public InputStream getInputStream(String relativePath, boolean mustExist) {
         try {
             HttpURLConnection httpConnection = buildHttpUrlConnection(relativePath);

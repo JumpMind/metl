@@ -112,7 +112,7 @@ public class TextFileReader extends AbstractComponentRuntime {
                     linesRead++;
                     if (linesRead > textHeaderLinesToSkip) {                        
                         if (linesInMessage >= textRowsPerMessage) {
-                            initAndSendMessage(payload, inputMessage, messageTarget, numberMessages++, false);
+                            initAndSendMessage(payload, inputMessage, messageTarget, ++numberMessages, false);
                             linesInMessage = 0;
                             payload = new ArrayList<String>();
                         }
@@ -121,7 +121,7 @@ public class TextFileReader extends AbstractComponentRuntime {
                         linesInMessage++;
                     }
                 }
-                initAndSendMessage(payload, inputMessage, messageTarget, numberMessages++, true);
+                initAndSendMessage(payload, inputMessage, messageTarget, ++numberMessages, true);
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
             } finally {

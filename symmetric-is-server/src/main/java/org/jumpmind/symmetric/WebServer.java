@@ -260,7 +260,6 @@ public class WebServer {
         webapp = new WebAppContext();
         webapp.setParentLoaderPriority(true);
         webapp.setConfigurationDiscovered(true);
-        webapp.setParentLoaderPriority(true);
         webapp.setContextPath(webHome);
         webapp.setWar(webAppDir);
         webapp.setResourceBase(webAppDir);

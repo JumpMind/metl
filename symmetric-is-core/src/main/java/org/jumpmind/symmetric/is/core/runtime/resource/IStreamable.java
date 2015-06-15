@@ -5,8 +5,6 @@ import java.io.OutputStream;
 
 public interface IStreamable {
 
-    public void open();
-    
     public boolean requiresContentLength();
     
     public void setContentLength(int length);

@@ -26,6 +26,7 @@ import org.jumpmind.symmetric.is.core.model.User;
 import org.jumpmind.symmetric.is.core.model.UserSetting;
 import org.jumpmind.symmetric.is.core.persist.IConfigurationService;
 import org.jumpmind.symmetric.is.core.runtime.resource.Datasource;
+import org.jumpmind.symmetric.is.core.runtime.resource.Ftp;
 import org.jumpmind.symmetric.is.core.runtime.resource.Http;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
 import org.jumpmind.symmetric.is.core.runtime.resource.Scp;
@@ -120,6 +121,8 @@ public class DesignNavigator extends VerticalLayout {
     MenuItem newDataSource;
     
     MenuItem newWebResource;
+    
+    MenuItem newFtpResource;
 
     MenuItem blank;    
 
@@ -178,6 +181,7 @@ public class DesignNavigator extends VerticalLayout {
         newDataSource.setVisible(false);
         newSSHResource.setVisible(false);
         newWebResource.setVisible(false);
+        newFtpResource.setVisible(false);
         newFileResource.setVisible(false);
         if (selected instanceof FolderName) {
             FolderName folder = (FolderName) selected;
@@ -190,6 +194,7 @@ public class DesignNavigator extends VerticalLayout {
                 newFileResource.setVisible(true);
                 newWebResource.setVisible(true);
                 newSSHResource.setVisible(true);
+                newFtpResource.setVisible(true);
             } else {
                 blank.setVisible(true);
                 newMenu.setEnabled(false);
@@ -309,6 +314,15 @@ public class DesignNavigator extends VerticalLayout {
             public void menuSelected(MenuItem selectedItem) {
                 addNewDatabase();
             }
+        });
+        
+        newFtpResource = newMenu.addItem("FTP", new Command() {
+
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                addNewFtpResource();
+            }
+
         });
 
         newFileResource = newMenu.addItem("Local File System", new Command() {
@@ -896,6 +910,10 @@ public class DesignNavigator extends VerticalLayout {
         addNewResource(Datasource.TYPE, "Database", Icons.DATABASE);
     }
 
+    protected void addNewFtpResource() {
+        addNewResource(Ftp.TYPE, "FTP Site", Icons.FILE_SYSTEM);
+    }
+    
     protected void addNewLocalFileSystem() {
         addNewResource(LocalFile.TYPE, "Directory", Icons.FILE_SYSTEM);
     }
