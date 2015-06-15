@@ -358,7 +358,7 @@
         <column name="flow_parameter_id" type="CHAR" size="36" required="true" description="A unique identifier referencing a flow parameter" />
         <column name="agent_deployment_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
-        <column name="value" type="VARCHAR" size="255" description="" />
+        <column name="value" type="LONGVARCHAR" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
