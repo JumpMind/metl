@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.properties.TypedProperties;
@@ -39,8 +40,6 @@ public class TextFileWriter extends AbstractComponentRuntime {
     String lineTerminator;
 
     TypedProperties properties;
-    
-    OutputStream outStream;
     
     BufferedWriter bufferedWriter = null;
 
@@ -84,8 +83,12 @@ public class TextFileWriter extends AbstractComponentRuntime {
     }
 
     private void initStreamAndWriter() {
-        outStream = getOutputStream((IStreamable) getResourceReference());
-        bufferedWriter = initializeWriter(outStream);        
+        IStreamable streamable = (IStreamable) getResourceReference();
+        if (!append && streamable.supportsDelete()) {
+            streamable.delete(relativePathAndFile);
+        }
+        log(LogLevel.INFO,  String.format("Writing text file to %s", streamable.toString()));
+        bufferedWriter = initializeWriter(streamable.getOutputStream(relativePathAndFile, mustExist));        
     }
     
     private void applySettings() {
@@ -96,14 +99,10 @@ public class TextFileWriter extends AbstractComponentRuntime {
         lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
     }
 
-    private OutputStream getOutputStream(IStreamable conn) {
-        log(LogLevel.INFO,  String.format("Writing text file to %s", conn.toString()));
-        return conn.getOutputStream(relativePathAndFile, mustExist);
-    }
 
     private BufferedWriter initializeWriter(OutputStream stream) {
         try {
-            bufferedWriter = new BufferedWriter(new OutputStreamWriter(outStream, DEFAULT_CHARSET));
+            bufferedWriter = new BufferedWriter(new OutputStreamWriter(stream, DEFAULT_CHARSET));
         } catch (UnsupportedEncodingException e) {
             throw new IoException("Error creating buffered writer " + e.getMessage());
         }
@@ -111,24 +110,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
     }
 
     private void close() {
-        try {
-            if (bufferedWriter != null) {
-                bufferedWriter.close();
-            }
-        } catch (IOException e) {
-            throw new IoException("Failure in closing the writer " + e.getMessage());
-        } finally {
-            closeStream();
-        }
+        IOUtils.closeQuietly(bufferedWriter);
     }
 
-    private void closeStream() {
-        try {
-            if (outStream != null) {
-                outStream.close();
-            }
-        } catch (IOException e) {
-            throw new IoException("Failure in closing the writer " + e.getMessage());
-        }
-    }
 }

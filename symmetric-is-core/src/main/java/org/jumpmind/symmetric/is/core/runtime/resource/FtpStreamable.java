@@ -2,6 +2,7 @@ package org.jumpmind.symmetric.is.core.runtime.resource;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,14 +83,16 @@ public class FtpStreamable implements IStreamable {
     }
 
     protected void close(FTPClient ftpClient) {
-        try {
-            ftpClient.logout();
-        } catch (IOException e) {
-        }
+        if (ftpClient != null) {
+            try {
+                ftpClient.logout();
+            } catch (IOException e) {
+            }
 
-        try {
-            ftpClient.disconnect();
-        } catch (IOException e) {
+            try {
+                ftpClient.disconnect();
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -104,12 +107,26 @@ public class FtpStreamable implements IStreamable {
 
     @Override
     public boolean supportsInputStream() {
-        return false;
+        return true;
     }
 
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist) {
-        return null;
+        FTPClient ftpClient = null;
+        try {
+            ftpClient = createClient();
+            InputStream is = ftpClient.retrieveFileStream(relativePath);
+            if (is != null) {
+                return new CloseableInputStreamStream(is, ftpClient);
+            } else {
+                String msg = String.format("Failed to read %s.  The ftp return code was %s", relativePath, ftpClient.getReplyCode());
+                close(ftpClient);
+                throw new IoException(msg);
+            }
+        } catch (Exception e) {
+            close(ftpClient);
+            throw new IoException(e);
+        }
     }
 
     @Override
@@ -119,22 +136,12 @@ public class FtpStreamable implements IStreamable {
 
     @Override
     public OutputStream getOutputStream(final String relativePath, boolean mustExist) {
+        FTPClient ftpClient = null;
         try {
-            final FTPClient ftpClient = createClient();
-            return new BufferedOutputStream(ftpClient.appendFileStream(relativePath)) {
-                @Override
-                public void close() throws IOException {
-                    try {
-                        super.close();
-//                        if (!ftpClient.completePendingCommand()) {
-//                            throw new IoException("Error transfering %s", relativePath);
-//                        }
-                    } finally {
-                        FtpStreamable.this.close(ftpClient);
-                    }
-                }
-            };
+            ftpClient = createClient();
+            return new CloseableOutputStream(ftpClient.appendFileStream(relativePath), ftpClient);
         } catch (Exception e) {
+            close(ftpClient);
             throw new IoException(e);
         }
     }
@@ -146,16 +153,55 @@ public class FtpStreamable implements IStreamable {
 
     @Override
     public boolean delete(String relativePath) {
-        return false;
+        FTPClient ftpClient = null;
+        try {
+            ftpClient = createClient();
+            return ftpClient.deleteFile(relativePath);
+        } catch (Exception e) {
+            throw new IoException(e);
+        } finally {
+            FtpStreamable.this.close(ftpClient);
+
+        }
     }
 
     @Override
     public boolean supportsDelete() {
-        return false;
+        return true;
     }
 
     @Override
     public String toString() {
         return String.format("ftp://%s", hostname);
+    }
+
+    class CloseableOutputStream extends BufferedOutputStream {
+        FTPClient ftpClient;
+
+        public CloseableOutputStream(OutputStream os, FTPClient ftpClient) {
+            super(os);
+            this.ftpClient = ftpClient;
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            FtpStreamable.this.close(ftpClient);
+        }
+    }
+
+    class CloseableInputStreamStream extends BufferedInputStream {
+        FTPClient ftpClient;
+
+        public CloseableInputStreamStream(InputStream is, FTPClient ftpClient) {
+            super(is);
+            this.ftpClient = ftpClient;
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            FtpStreamable.this.close(ftpClient);
+        }
     }
 }
