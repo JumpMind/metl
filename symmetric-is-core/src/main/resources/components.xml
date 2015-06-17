@@ -632,6 +632,24 @@
                 <name>Append To Url</name>
                 <description></description>
             </setting>
+            <setting id='body.from' type='choice' required='true'>
+                <name>Body From</name>
+                <defaultValue>Message</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>Message</choice>
+                    <choice>Provided</choice>
+                </choices>
+            </setting>
+            <setting id='body.text' type='multiline_text' required='false'>
+                <name>Body Text</name>
+                <description></description>
+            </setting>
+            <setting id='parameter.replacement' type='boolean' required='false'>
+                <name>Parameter replacement</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
         </settings>
     </component>
     <component id='XSLT Processor' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none'

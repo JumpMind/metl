@@ -13,6 +13,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.Http;
 import org.jumpmind.symmetric.is.core.runtime.resource.HttpOutputStream;
 import org.jumpmind.symmetric.is.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.is.core.runtime.resource.IStreamable;
+import org.jumpmind.util.FormatUtils;
 
 public class Web extends AbstractComponentRuntime {
 
@@ -20,9 +21,21 @@ public class Web extends AbstractComponentRuntime {
 
     public static final String DEFAULT_CHARSET = "UTF-8";
 
-    public final static String RELATIVE_PATH = "relative.path";
+    public static final String RELATIVE_PATH = "relative.path";
+    
+    public static final String BODY_FROM = "body.from";
+    
+    public static final String BODY_TEXT = "body.text";
+    
+    public static final String PARAMETER_REPLACEMENT = "parameter.replacement";
 
     String relativePath;
+    
+    String bodyFrom;
+    
+    String bodyText;
+    
+    boolean parameterReplacement;
 
     @Override
     protected void start() {
@@ -35,6 +48,9 @@ public class Web extends AbstractComponentRuntime {
 
         Component component = getComponent();
         relativePath = component.get(RELATIVE_PATH);
+        bodyFrom = component.get(BODY_FROM, "Message");
+        bodyText = component.get(BODY_TEXT);
+        parameterReplacement = component.getBoolean(PARAMETER_REPLACEMENT, false);
     }
 
     @Override
@@ -44,10 +60,18 @@ public class Web extends AbstractComponentRuntime {
         IStreamable streamable = getResourceReference();
 
         ArrayList<String> outputPayload = new ArrayList<String>();
-        ArrayList<String> inputPayload = inputMessage.getPayload();
+        ArrayList<String> inputPayload = new ArrayList<String>();
+        if (bodyFrom.equals("Message")) {
+            inputPayload = inputMessage.getPayload();
+        } else {
+            inputPayload.add(bodyText);
+        }
         try {
             for (String requestContent : inputPayload) {
                 getComponentStatistics().incrementNumberEntitiesProcessed();
+                if (parameterReplacement) {
+                    requestContent = FormatUtils.replaceTokens(requestContent, context.getFlowParametersAsString(), true);
+                }
                 HttpOutputStream os = (HttpOutputStream) streamable.getOutputStream(relativePath,
                         false);
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,

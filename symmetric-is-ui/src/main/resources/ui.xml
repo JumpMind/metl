@@ -95,6 +95,10 @@
     <component-ui id="Union UI" componentId="Union">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/union.png</iconImage>
     </component-ui>    
+    <component-ui id="Web UI" componentId="Web">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/web.png</iconImage>
+        <className>org.jumpmind.symmetric.is.ui.views.design.EditWebPanel</className>
+    </component-ui>                        
     <component-ui id="Zip UI" componentId="Zip">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/zip.png</iconImage>
     </component-ui>                        
