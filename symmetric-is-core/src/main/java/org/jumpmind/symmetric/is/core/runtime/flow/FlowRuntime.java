@@ -127,7 +127,8 @@ public class FlowRuntime {
                     if (runtime != null) {
                         targetStepRuntimes.add(runtime);
                     }
-                } else if (stepId.equals(flowStepLink.getTargetStepId())) {
+                }
+                if (stepId.equals(flowStepLink.getTargetStepId())) {
                     StepRuntime runtime = stepRuntimes.get(flowStepLink.getSourceStepId());
                     if (runtime != null) {
                         sourceStepRuntimes.add(runtime);

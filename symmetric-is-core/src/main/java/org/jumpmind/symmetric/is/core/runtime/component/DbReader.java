@@ -100,6 +100,7 @@ public class DbReader extends AbstractDbComponent {
                 message = template.query(sqlToExecute, paramMap, messageResultSetExtractor);
             }
             if (message != null) {
+                //TODO: This isn't correct if you are looping for multiple input records
                 message.getHeader().setLastMessage(true);
                 messageTarget.put(message);
             }
