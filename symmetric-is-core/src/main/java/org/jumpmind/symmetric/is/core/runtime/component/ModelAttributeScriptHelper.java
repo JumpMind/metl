@@ -120,7 +120,11 @@ public class ModelAttributeScriptHelper {
     
     public Date parsedate(String pattern, String nulldate) {
         String text = value != null ? value.toString() : "";
-        return parseDateFromText(pattern, text);
+        if (isNotBlank(text) && !text.equals(nulldate)) {
+            return parseDateFromText(pattern, text);
+        } else {
+            return null;
+        }
     }
     
     public Date parsedate(String pattern) {
