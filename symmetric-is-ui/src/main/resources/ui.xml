@@ -92,6 +92,9 @@
     <component-ui id="Text Replace UI" componentId="Text Replace">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/regex_replace.png</iconImage>
     </component-ui>    
+    <component-ui id="Union UI" componentId="Union">
+        <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/union.png</iconImage>
+    </component-ui>    
     <component-ui id="Zip UI" componentId="Zip">
         <iconImage>/org/jumpmind/symmetric/is/core/runtime/component/zip.png</iconImage>
     </component-ui>                        
