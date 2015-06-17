@@ -131,7 +131,12 @@ public class StepRuntime implements Runnable {
                     } finally {
                         componentContext.getExecutionTracker().afterHandle(componentContext, error);
                     }
-                    if (isStartStep()) {
+                    if (isStartStep() ||
+                       //TODO: this only works if the loop is to yourself.  
+                       //Larger loop detection and processing needed
+                       (sourceStepRuntimes.size() == 1 &&
+                        sourceStepRuntimes.get(0).getComponentContext().equals(this.componentContext) &&
+                        inQueue.size() == 0)){
                         shutdown(target);
                     }
                 }
