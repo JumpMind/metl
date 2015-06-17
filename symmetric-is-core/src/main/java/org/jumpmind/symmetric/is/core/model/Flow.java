@@ -145,6 +145,15 @@ public class Flow extends AbstractObject {
         return null;
     }
 
+    public FlowStep findFlowStepWithName(String name) {
+        for (FlowStep flowStep : flowSteps) {
+            if (flowStep.getName().equals(name)) {
+                return flowStep;
+            }
+        }
+        return null;
+    }
+
     public String getFolderName() {
         return folder.getName();
     }
