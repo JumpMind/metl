@@ -265,13 +265,18 @@ public class Component extends AbstractObjectWithSettings {
         return folderId;
     }
 
-    public Row toRow(EntityData data) {
+    public Row toRow(EntityData data, boolean qualifyWithEntityName) {
         Row row = new Row(data.size());
         Set<String> attributeIds = data.keySet();
         for (String attributeId : attributeIds) {
             ModelAttribute attribute = inputModel.getAttributeById(attributeId);
             if (attribute != null) {
-                row.put(attribute.getName(), data.get(attributeId));
+                ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+                if (qualifyWithEntityName) {
+                    row.put(entity.getName() + "." + attribute.getName(), data.get(attributeId));
+                } else {
+                    row.put(attribute.getName(), data.get(attributeId));
+                }
             }
         }
         return row;

@@ -190,7 +190,7 @@ public class DbReader extends AbstractDbComponent {
         paramMap.clear();
         paramMap.putAll(getParamsFromHeader(inputMessage));
         if (entityData != null) {
-            paramMap.putAll(entityData);
+            paramMap.putAll(this.getComponent().toRow(entityData, true));
         }
     }
 

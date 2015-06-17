@@ -258,7 +258,11 @@ public class Flow extends AbstractObject {
         }
         Collections.sort(children, new YSorter());
         for (FlowStep child : children) {
-            order = calculateApproximateOrder(order, child);    
+            //TODO: this takes care of when you loop back to yourself, but not if there is a larger
+            //loop in the flow.  Work this out based on possibility of a broader cyclic graph
+            if (!starterStep.getId().equals(child.getId())) {
+                order = calculateApproximateOrder(order, child);
+            }
         }
         return order;
     }

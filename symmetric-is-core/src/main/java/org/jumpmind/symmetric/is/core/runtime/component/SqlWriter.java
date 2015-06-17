@@ -55,7 +55,7 @@ public class SqlWriter extends AbstractDbComponent {
             } else if (runWhen.equals(PER_ENTITY)) {
                 List<EntityData> datas = inputMessage.getPayload();
                 for (EntityData entityData : datas) {
-                    params.putAll(getComponent().toRow(entityData));
+                    params.putAll(getComponent().toRow(entityData, false));
                     int count = template.update(sqlToExecute, params);
                     getComponentStatistics().incrementNumberEntitiesProcessed(count);
                 }

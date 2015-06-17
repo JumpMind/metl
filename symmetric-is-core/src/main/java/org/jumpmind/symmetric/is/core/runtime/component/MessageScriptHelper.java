@@ -70,7 +70,7 @@ public class MessageScriptHelper {
 
             if (entityDataIterator.hasNext()) {
                 EntityData data = entityDataIterator.next();
-                return flowStep.getComponent().toRow(data);
+                return flowStep.getComponent().toRow(data, false);
             } else {
                 return null;
             }
