@@ -65,6 +65,11 @@ public class StepRuntime implements Runnable {
     }
 
     protected void queue(Message message) throws InterruptedException {
+        if (inQueue.remainingCapacity() == 0 && 
+                message.getHeader().getOriginatingStepId().equalsIgnoreCase(componentRuntime.getComponentContext().getFlowStep().getId())) {
+            throw new RuntimeException("Inbound queue capacity on " + componentRuntime.getComponentContext().getFlowStep().getName() +
+                    " not sufficient to handle inbound messages from other components in addition to inbound messages from itself.");
+        }
         inQueue.put(message);
     }
 
@@ -136,7 +141,7 @@ public class StepRuntime implements Runnable {
                        //Larger loop detection and processing needed
                        (sourceStepRuntimes.size() == 1 &&
                         sourceStepRuntimes.get(0).getComponentContext().equals(this.componentContext) &&
-                        inQueue.size() == 0)){
+                        inQueue.size() == 0)) {
                         shutdown(target);
                     }
                 }
