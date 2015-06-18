@@ -23,6 +23,7 @@ public class EditWebPanel extends AbstractComponentEditPanel {
         editor.setTextChangeEventMode(TextChangeEventMode.LAZY);
         editor.setTextChangeTimeout(200);
         editor.setMode(AceMode.xml);
+        editor.setValue(component.get(Web.BODY_TEXT));
         editor.addTextChangeListener(new TextChangeListener() {
             public void textChange(TextChangeEvent event) {
                 component.put(Web.BODY_TEXT, event.getText());
