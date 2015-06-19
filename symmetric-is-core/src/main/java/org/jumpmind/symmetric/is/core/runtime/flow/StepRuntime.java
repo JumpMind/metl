@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.symmetric.is.core.runtime.IExecutionTracker;
@@ -38,17 +39,16 @@ public class StepRuntime implements Runnable {
     List<StepRuntime> targetStepRuntimes;
 
     List<StepRuntime> sourceStepRuntimes;
-    
+
     ComponentContext componentContext;
-    
+
     FlowRuntime flowRuntime;
 
     public StepRuntime(IComponentRuntime componentRuntime, ComponentContext componentContext, FlowRuntime flowRuntime) {
         this.flowRuntime = flowRuntime;
         this.componentContext = componentContext;
         this.componentRuntime = componentRuntime;
-        int capacity = componentContext.getFlowStep().getComponent()
-                .getInt(AbstractComponentRuntime.INBOUND_QUEUE_CAPACITY, 1000);
+        int capacity = componentContext.getFlowStep().getComponent().getInt(AbstractComponentRuntime.INBOUND_QUEUE_CAPACITY, 1000);
         inQueue = new LinkedBlockingQueue<Message>(capacity);
     }
 
@@ -65,10 +65,10 @@ public class StepRuntime implements Runnable {
     }
 
     protected void queue(Message message) throws InterruptedException {
-        if (inQueue.remainingCapacity() == 0 && 
-                message.getHeader().getOriginatingStepId().equalsIgnoreCase(componentRuntime.getComponentContext().getFlowStep().getId())) {
-            throw new RuntimeException("Inbound queue capacity on " + componentRuntime.getComponentContext().getFlowStep().getName() +
-                    " not sufficient to handle inbound messages from other components in addition to inbound messages from itself.");
+        if (inQueue.remainingCapacity() == 0
+                && message.getHeader().getOriginatingStepId().equalsIgnoreCase(componentRuntime.getComponentContext().getFlowStep().getId())) {
+            throw new RuntimeException("Inbound queue capacity on " + componentRuntime.getComponentContext().getFlowStep().getName()
+                    + " not sufficient to handle inbound messages from other components in addition to inbound messages from itself.");
         }
         inQueue.put(message);
     }
@@ -97,7 +97,7 @@ public class StepRuntime implements Runnable {
 
     @Override
     public void run() {
-        try {            
+        try {
             MessageTarget target = new MessageTarget();
             /*
              * if we are a start step (don't have any input links), we'll only
@@ -105,44 +105,46 @@ public class StepRuntime implements Runnable {
              * runtime to kick things off. If we have input links, we must loop
              * until we get a shutdown message from one of our sources
              */
-            while (running) {
-                Message inputMessage = inQueue.take();
-                if (inputMessage instanceof ShutdownMessage) {
-                    ShutdownMessage shutdownMessage = (ShutdownMessage) inputMessage;
+            while (flowRuntime.isRunning()) {
+                /*
+                 * continue to poll as long as the flow is running. other
+                 * components could be generating messages which could block if
+                 * we don't continue to poll
+                 */
+                Message inputMessage = inQueue.poll(5, TimeUnit.SECONDS);
+                if (running) {
+                    if (inputMessage instanceof ShutdownMessage) {
+                        ShutdownMessage shutdownMessage = (ShutdownMessage) inputMessage;
 
-                    cancelled = shutdownMessage.isCancelled();
+                        cancelled = shutdownMessage.isCancelled();
 
-                    String fromStepId = inputMessage.getHeader().getOriginatingStepId();
-                    removeSourceStepRuntime(fromStepId);
-                    /*
-                     * When all of the source step runtimes have been removed or
-                     * when the shutdown message comes from myself, then go
-                     * ahead and shutdown
-                     */
-                    if (cancelled || fromStepId == null || sourceStepRuntimes == null
-                            || sourceStepRuntimes.size() == 0
-                            || fromStepId.equals(componentContext.getFlowStep().getId())) {
-                        shutdown(target);
-                    }
-                } else {
-                    try {
-                        componentContext.getExecutionTracker().beforeHandle(componentContext);
-                        componentRuntime.handle(inputMessage, target);
-                    } catch (Exception ex) {
+                        String fromStepId = inputMessage.getHeader().getOriginatingStepId();
+                        removeSourceStepRuntime(fromStepId);
                         /*
-                         * Record the error, but continue processing messages
+                         * When all of the source step runtimes have been
+                         * removed or when the shutdown message comes from
+                         * myself, then go ahead and shutdown
                          */
-                        recordError(ex);
-                    } finally {
-                        componentContext.getExecutionTracker().afterHandle(componentContext, error);
-                    }
-                    if (isStartStep() ||
-                       //TODO: this only works if the loop is to yourself.  
-                       //Larger loop detection and processing needed
-                       (sourceStepRuntimes.size() == 1 &&
-                        sourceStepRuntimes.get(0).getComponentContext().equals(this.componentContext) &&
-                        inQueue.size() == 0)) {
-                        shutdown(target);
+                        if (cancelled || fromStepId == null || sourceStepRuntimes == null || sourceStepRuntimes.size() == 0
+                                || fromStepId.equals(componentContext.getFlowStep().getId())) {
+                            shutdown(target);
+                        }
+                    } else if (inputMessage != null) {
+                        try {
+                            componentContext.getExecutionTracker().beforeHandle(componentContext);
+                            componentRuntime.handle(inputMessage, target);
+                        } catch (Exception ex) {
+                            recordError(ex);
+                        } finally {
+                            componentContext.getExecutionTracker().afterHandle(componentContext, error);
+                        }
+                        if (isStartStep() ||
+                        // TODO: this only works if the loop is to yourself.
+                        // Larger loop detection and processing needed
+                                (sourceStepRuntimes.size() == 1
+                                        && sourceStepRuntimes.get(0).getComponentContext().equals(this.componentContext) && inQueue.size() == 0)) {
+                            shutdown(target);
+                        }
                     }
                 }
             }
@@ -166,7 +168,7 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    private void shutdown(MessageTarget target) throws InterruptedException {        
+    private void shutdown(MessageTarget target) throws InterruptedException {
         try {
             this.componentRuntime.lastMessageReceived(target);
         } catch (Exception e) {
@@ -183,11 +185,11 @@ public class StepRuntime implements Runnable {
         running = false;
         finished();
     }
-    
+
     public void finished() {
-        componentContext.getExecutionTracker().flowStepFinished(componentContext, error, cancelled);        
+        componentContext.getExecutionTracker().flowStepFinished(componentContext, error, cancelled);
     }
-    
+
     public void setRunning(boolean running) {
         this.running = running;
     }
@@ -225,7 +227,7 @@ public class StepRuntime implements Runnable {
     public Throwable getError() {
         return error;
     }
-    
+
     public ComponentContext getComponentContext() {
         return componentContext;
     }
@@ -237,10 +239,8 @@ public class StepRuntime implements Runnable {
             // clear out the target step id as we are done using it
             message.getHeader().setTargetStepIds(null);
             for (StepRuntime targetRuntime : targetStepRuntimes) {
-                boolean forward = targetStepIds == null
-                        || targetStepIds.size() == 0
-                        || targetStepIds.contains(targetRuntime.getComponentRuntime().getComponentContext().getFlowStep()
-                                .getId());
+                boolean forward = targetStepIds == null || targetStepIds.size() == 0
+                        || targetStepIds.contains(targetRuntime.getComponentRuntime().getComponentContext().getFlowStep().getId());
                 if (forward) {
                     try {
                         targetRuntime.queue(message);
@@ -255,7 +255,7 @@ public class StepRuntime implements Runnable {
             }
         }
     }
-    
+
     @Override
     public String toString() {
         return componentContext.getFlowStep().getName();
