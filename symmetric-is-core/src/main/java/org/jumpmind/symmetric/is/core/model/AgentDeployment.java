@@ -21,7 +21,7 @@ public class AgentDeployment extends AbstractObject {
 
     String message;
     
-    String logLevel = LogLevel.DEBUG.name();
+    String logLevel = LogLevel.INFO.name();
 
     String startType = StartType.MANUAL.name();
 
