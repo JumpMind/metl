@@ -17,16 +17,17 @@ import org.jumpmind.util.AppUtils;
 
 public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
 
+    final long TIME_BETWEEN_MESSAGE_UPDATES_IN_MS = 5000;
+
     AsyncRecorder recorder;
 
     Agent agent;
 
     Map<String, ExecutionStep> steps;
-    
+
     Date startTime;
 
-    public ExecutionTrackerRecorder(Agent agent, AgentDeployment agentDeployment,
-            AsyncRecorder recorder) {
+    public ExecutionTrackerRecorder(Agent agent, AgentDeployment agentDeployment, AsyncRecorder recorder) {
         super(agentDeployment);
         this.recorder = recorder;
         this.agent = agent;
@@ -66,15 +67,15 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             if (ExecutionStatus.ERROR.name().equals(executionStep.getStatus())) {
                 status = ExecutionStatus.ERROR;
             }
-            
+
             if (ExecutionStatus.CANCELLED.name().equals(executionStep.getStatus())) {
                 status = ExecutionStatus.CANCELLED;
             }
-        }        
+        }
         execution.setStatus(status.name());
         this.recorder.record(execution);
     }
-    
+
     @Override
     public void flowStepStarted(ComponentContext context) {
         super.flowStepStarted(context);
@@ -95,30 +96,37 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     public void beforeHandle(ComponentContext context) {
         super.beforeHandle(context);
         ExecutionStep step = steps.get(context.getFlowStep().getId());
-        if (step.getStartTime() == null) {
-            step.setStartTime(new Date());
+        Date lastUpdateTime = step.getLastUpdateTime();
+        if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
+            if (step.getStartTime() == null) {
+                step.setStartTime(new Date());
+            }
+            if (!step.getStatus().equals(ExecutionStatus.ERROR.name())) {
+                step.setStatus(ExecutionStatus.RUNNING.name());
+            }
+            step.setLastUpdateTime(new Date());
+            this.recorder.record(step);
         }
-        if (!step.getStatus().equals(ExecutionStatus.ERROR.name())) {
-            step.setStatus(ExecutionStatus.RUNNING.name());
-        }
-        step.setLastUpdateTime(new Date());
-        this.recorder.record(step);
     }
- 
+
     @Override
     public void afterHandle(ComponentContext context, Throwable error) {
         super.afterHandle(context, error);
         ExecutionStep step = steps.get(context.getFlowStep().getId());
-        step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.READY.name());
-        ComponentStatistics stats = context.getComponentStatistics();
-        if (stats != null) {
-            step.setEntitiesProcessed(stats.getNumberEntitiesProcessed());
-            step.setMessagesReceived(stats.getNumberInboundMessages());
-            step.setMessagesProduced(stats.getNumberOutboundMessages());
+        Date lastUpdateTime = step.getLastUpdateTime();
+        if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
+            step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.READY.name());
+            ComponentStatistics stats = context.getComponentStatistics();
+            if (stats != null) {
+                step.setEntitiesProcessed(stats.getNumberEntitiesProcessed());
+                step.setMessagesReceived(stats.getNumberInboundMessages());
+                step.setMessagesProduced(stats.getNumberOutboundMessages());
+            }
+            step.setLastUpdateTime(new Date());
+            this.recorder.record(step);
         }
-        this.recorder.record(step);
     }
-    
+
     @Override
     public void flowStepFinished(ComponentContext context, Throwable error, boolean cancelled) {
         super.flowStepFinished(context, error, cancelled);
@@ -136,16 +144,16 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                 status = ExecutionStatus.ERROR;
             }
             step.setStatus(status.name());
-            if (context.getComponentStatistics() != null) {
-                step.setMessagesReceived(context.getComponentStatistics()
-                        .getNumberInboundMessages());
-                step.setMessagesProduced(context.getComponentStatistics()
-                        .getNumberOutboundMessages());
+            ComponentStatistics stats = context.getComponentStatistics();
+            if (stats != null) {
+                step.setEntitiesProcessed(stats.getNumberEntitiesProcessed());
+                step.setMessagesReceived(stats.getNumberInboundMessages());
+                step.setMessagesProduced(stats.getNumberOutboundMessages());
             }
             this.recorder.record(step);
         }
     }
-    
+
     @Override
     public void flowStepFailedOnComplete(ComponentContext context, Throwable error) {
         super.flowStepFailedOnComplete(context, error);
@@ -157,7 +165,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
 
     @Override
-    public void log(LogLevel level, ComponentContext context, String output, Object...args) {
+    public void log(LogLevel level, ComponentContext context, String output, Object... args) {
         super.log(level, context, output, args);
         if (deployment.asLogLevel().log(level)) {
             ExecutionStepLog log = new ExecutionStepLog();
@@ -168,7 +176,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             }
             log.setLogText(output);
             this.recorder.record(log);
-        }        
+        }
     }
 
 }
