@@ -11,7 +11,7 @@
             </setting>
             <setting id='db.reader.rows.per.message' type='integer' required='true'>
                 <name>Rows/Msg</name>
-                <defaultValue>1</defaultValue>
+                <defaultValue>1000</defaultValue>
                 <description></description>
             </setting>
             <setting id='db.reader.trim.columns' type='boolean' required='true'>
