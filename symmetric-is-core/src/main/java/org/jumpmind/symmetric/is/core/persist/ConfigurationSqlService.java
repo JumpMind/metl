@@ -13,6 +13,7 @@ import org.jumpmind.symmetric.io.data.DbExport;
 import org.jumpmind.symmetric.io.data.DbExport.Format;
 import org.jumpmind.symmetric.is.core.model.AgentDeploymentSummary;
 import org.jumpmind.symmetric.is.core.model.Flow;
+import org.jumpmind.symmetric.is.core.model.ModelAttribute;
 import org.jumpmind.symmetric.is.core.model.ProjectVersion;
 
 public class ConfigurationSqlService extends AbstractConfigurationService {
@@ -71,6 +72,18 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                         return summary;
                     }
                 }, agentId, agentId);
+    }
+    
+    @Override
+    protected List<ModelAttribute> findAllAttributesForModel(String modelId) {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        String sql = String.format("select * from %1$s_model_attribute where entity_id in (select id from %1$s_model_entity where model_id=?)", tablePrefix);
+        return template.query(sql, new ISqlRowMapper<ModelAttribute>() {
+            @Override
+            public ModelAttribute mapRow(Row row) {
+                return persistenceManager.map(row, ModelAttribute.class, null, null, tableName(ModelAttribute.class));
+            }
+        }, new Object[] {modelId});
     }
 
     @Override

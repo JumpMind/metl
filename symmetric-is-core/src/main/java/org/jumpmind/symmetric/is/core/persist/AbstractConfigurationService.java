@@ -50,7 +50,6 @@ import org.jumpmind.symmetric.is.core.model.UserGroup;
 import org.jumpmind.symmetric.is.core.model.UserSetting;
 import org.jumpmind.symmetric.is.core.util.NameValue;
 
-// TODO make methods transactional
 abstract class AbstractConfigurationService extends AbstractService implements
         IConfigurationService {
 
@@ -436,18 +435,27 @@ abstract class AbstractConfigurationService extends AbstractService implements
         refresh(model);
         return model;
     }
+    
+    abstract protected List<ModelAttribute> findAllAttributesForModel(String modelId);
 
     protected Model refreshModelRelations(Model model) {
         model.getModelEntities().clear();
-        Map<String, Object> versionParams = new HashMap<String, Object>();
-        versionParams.put("modelId", model.getId());
-        List<ModelEntity> entities = persistenceManager.find(ModelEntity.class, versionParams,
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("modelId", model.getId());
+        List<ModelEntity> entities = persistenceManager.find(ModelEntity.class, params,
                 null, null, tableName(ModelEntity.class));
-        AbstractObjectNameBasedSorter.sort(entities);
+        List<ModelAttribute> attributes = findAllAttributesForModel(model.getId());
+        Map<String, ModelEntity> byModelEntityId = new HashMap<String, ModelEntity>();
         for (ModelEntity entity : entities) {
-            refresh(entity);
+            byModelEntityId.put(entity.getId(), entity);
             model.getModelEntities().add(entity);
         }
+        
+        for (ModelAttribute modelAttribute : attributes) {
+            byModelEntityId.get(modelAttribute.getEntityId()).getModelAttributes().add(modelAttribute);            
+        }
+
+        AbstractObjectNameBasedSorter.sort(entities);
         return model;
     }
 
@@ -878,25 +886,6 @@ abstract class AbstractConfigurationService extends AbstractService implements
         model.setFolder(findOne(Folder.class, folderParams));
 
         refreshModelRelations(model);
-    }
-
-    @Override
-    public void refresh(ModelEntity modelEntity) {
-        refresh((AbstractObject) modelEntity);
-        Map<String, Object> entityParams = new HashMap<String, Object>();
-        entityParams.put("entityId", modelEntity.getId());
-        modelEntity.getModelAttributes().clear();
-        List<ModelAttribute> attributes = persistenceManager.find(ModelAttribute.class,
-                entityParams, null, null, tableName(ModelAttribute.class));
-        for (ModelAttribute attribute : attributes) {
-            refresh(attribute);
-            modelEntity.addModelAttribute(attribute);
-        }
-    }
-
-    @Override
-    public void refresh(ModelAttribute modelAttribute) {
-        refresh((AbstractObject) modelAttribute);
     }
 
     @Override

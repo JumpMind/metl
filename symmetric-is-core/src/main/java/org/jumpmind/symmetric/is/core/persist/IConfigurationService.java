@@ -150,10 +150,6 @@ public interface IConfigurationService {
 
     public void refresh(Model model);
     
-    public void refresh(ModelEntity modelEntity);
-    
-    public void refresh(ModelAttribute modelAttribute);
-    
     public void save(Model model);
     
     public void save(ModelEntity modelEntity);
