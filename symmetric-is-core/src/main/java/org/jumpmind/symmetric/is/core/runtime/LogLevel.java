@@ -2,7 +2,7 @@ package org.jumpmind.symmetric.is.core.runtime;
 
 public enum LogLevel {
 
-    DEBUG(10), INFO(40), WARN(30), ERROR(40);
+    DEBUG(10), INFO(20), WARN(30), ERROR(40);
     
     int level;
     
