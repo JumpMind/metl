@@ -150,6 +150,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                 step.setMessagesReceived(stats.getNumberInboundMessages());
                 step.setMessagesProduced(stats.getNumberOutboundMessages());
             }
+            step.setLastUpdateTime(new Date());
             this.recorder.record(step);
         }
     }
@@ -160,6 +161,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         ExecutionStep step = steps.get(context.getFlowStep().getId());
         if (step != null) {
             step.setStatus(ExecutionStatus.ERROR.name());
+            step.setLastUpdateTime(new Date());
             this.recorder.record(step);
         }
     }
