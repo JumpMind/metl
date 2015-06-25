@@ -200,9 +200,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     public void setButtonsEnabled(String filter) {
         boolean noFilter = isBlank(filter);
         Set<Object> selected = getSelectedItems();
-        addEntityButton.setEnabled(noFilter);
         importButton.setEnabled(noFilter);
-        addAttributeButton.setEnabled(noFilter && selected.size() > 0);
+        addAttributeButton.setEnabled(selected.size() > 0);
         removeButton.setEnabled(selected.size() > 0);
         editButton.setEnabled(selected.size() > 0);
     }
@@ -232,12 +231,12 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.select(itemId);
     }
 
-    protected void add(String filter, ModelEntity modelEntity) {
-        addModelEntity(filter, modelEntity);
+    protected void add(ModelEntity modelEntity) {
+        addModelEntity(modelEntity);
         for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
             treeTable.setChildrenAllowed(modelEntity, true);
             modelAttribute.setEntityId(modelEntity.getId());
-            addModelAttribute(filter, modelEntity, modelAttribute);
+            addModelAttribute(modelEntity, modelAttribute);
         }
         treeTable.setCollapsed(modelEntity, false);
     }
@@ -251,21 +250,19 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                     add |= modelAttribute.getName().toLowerCase().contains(filter);
                 }
             }
-
             if (add) {
-                add(filter, modelEntity);
+                add(modelEntity);
             }
         }
     }
 
-    protected void addModelEntity(String filter, ModelEntity modelEntity) {
+    protected void addModelEntity(ModelEntity modelEntity) {
         treeTable.addItem(modelEntity);
         treeTable.setItemIcon(modelEntity, FontAwesome.TABLE);
         treeTable.setChildrenAllowed(modelEntity, false);
     }
 
-    protected void addModelAttribute(String filter, ModelEntity entity,
-            ModelAttribute modelAttribute) {
+    protected void addModelAttribute(ModelEntity entity, ModelAttribute modelAttribute) {
         treeTable.addItem(modelAttribute);
         treeTable.setItemIcon(modelAttribute, FontAwesome.COLUMNS);
         treeTable.setChildrenAllowed(entity, true);
@@ -285,7 +282,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             e.setModelId(model.getId());
             model.getModelEntities().add(e);
             context.getConfigurationService().save(e);
-            addModelEntity("", e);
+            addModelEntity(e);
             selectOnly(e);
             editSelectedItem();
         }
@@ -310,7 +307,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                     a.setEntityId(entity.getId());
                     entity.addModelAttribute(a);
                     context.getConfigurationService().save(a);
-                    addModelAttribute("", entity, a);
+                    addModelAttribute(entity, a);
                     treeTable.setCollapsed(entity, false);
                     selectOnly(a);
                     editSelectedItem();
@@ -382,7 +379,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 if (modelEntity == null) {
                     context.getConfigurationService().save(e);
                     existingModelEntities.put(e.getName().toUpperCase(), e);
-                    add("", e);
+                    add(e);
                     model.getModelEntities().add(e);
                 } else {
                     for (ModelAttribute a : e.getModelAttributes()) {
@@ -390,7 +387,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                             a.setEntityId(modelEntity.getId());
                             context.getConfigurationService().save(a);
                             modelEntity.addModelAttribute(a);
-                            addModelAttribute("", modelEntity, a);
+                            addModelAttribute(modelEntity, a);
                         }
                     }
                 }
