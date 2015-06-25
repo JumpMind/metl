@@ -1,7 +1,9 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -258,6 +260,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
     protected void addAll(String filter, Collection<ModelEntity> modelEntityList) {
         filter = filter != null ? filter.toLowerCase() : null;
+        ArrayList<ModelEntity> filteredModelEntityList = new ArrayList<ModelEntity>(); 
         for (ModelEntity modelEntity : modelEntityList) {
             boolean add = UiUtils.filterMatches(filter, modelEntity.getName());
             if (!add) {
@@ -266,8 +269,17 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 }
             }
             if (add) {
-                add(modelEntity);
+                filteredModelEntityList.add(modelEntity);
             }
+        }
+
+        Collections.sort(filteredModelEntityList, new Comparator<ModelEntity>() {
+            public int compare(ModelEntity entity1, ModelEntity entity2) {
+                return entity1.getName().toLowerCase().compareTo(entity2.getName().toLowerCase());
+            }
+        });
+        for (ModelEntity modelEntity : filteredModelEntityList) {
+            add(modelEntity);
         }
     }
 
