@@ -32,12 +32,14 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class EditModelPanel extends VerticalLayout implements IUiPanel {
@@ -180,6 +182,34 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         
         addComponent(treeTable);
         setExpandRatio(treeTable, 1.0f);
+        
+        HorizontalLayout hlayout = new HorizontalLayout();
+        addComponent(hlayout);
+
+        Button selectAllLink = new Button("Collapse All");
+        selectAllLink.addStyleName(ValoTheme.BUTTON_LINK);
+        selectAllLink.addStyleName(ValoTheme.BUTTON_SMALL);
+        hlayout.addComponent(selectAllLink);
+        selectAllLink.addClickListener(new ClickListener() {
+            public void buttonClick(ClickEvent event) {
+                for (Object itemId : treeTable.getItemIds()) {
+                    treeTable.setCollapsed(itemId, true);
+                }
+            }
+        });
+
+        Button selectNoneLink = new Button("Expand All");
+        selectNoneLink.addStyleName(ValoTheme.BUTTON_LINK);
+        selectNoneLink.addStyleName(ValoTheme.BUTTON_SMALL);
+        hlayout.addComponent(selectNoneLink);
+        selectNoneLink.addClickListener(new ClickListener() {
+            public void buttonClick(ClickEvent event) {
+                for (Object itemId : treeTable.getItemIds()) {
+                    treeTable.setCollapsed(itemId, false);
+                }
+            }
+        });
+        
         addAll("", model.getModelEntities());
         setButtonsEnabled();
     }
