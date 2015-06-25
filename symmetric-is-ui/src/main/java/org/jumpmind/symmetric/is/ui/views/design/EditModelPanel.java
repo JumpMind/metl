@@ -1,7 +1,5 @@
 package org.jumpmind.symmetric.is.ui.views.design;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -91,11 +89,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
         filterField = buttonBar.addFilter();
         filterField.addTextChangeListener(new TextChangeListener() {
-
-            @Override
             public void textChange(TextChangeEvent event) {
                 filterField.setValue(event.getText());
-                setButtonsEnabled(event.getText());
                 treeTable.removeAllItems();
                 addAll(event.getText(), EditModelPanel.this.model.getModelEntities());
             }
@@ -108,8 +103,6 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.setSelectable(true);
         treeTable.setMultiSelect(true);
         treeTable.addGeneratedColumn("name", new ColumnGenerator() {
-
-            @Override
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 final AbstractObject obj = (AbstractObject) itemId;
                 if (lastEditItemIds.contains(itemId)) {
@@ -132,7 +125,6 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.setColumnHeader("name", "Name");
 
         treeTable.addGeneratedColumn("type", new ColumnGenerator() {
-            @Override
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 if (itemId instanceof ModelAttribute) {
                     final ModelAttribute obj = (ModelAttribute) itemId;
@@ -144,15 +136,12 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                         }
                         cbox.setValue(obj.getType());
                         cbox.addValueChangeListener(new ValueChangeListener() {
-
-                            @Override
                             public void valueChange(ValueChangeEvent event) {
                                 obj.setType((String) cbox.getValue());
                                 EditModelPanel.this.context.getConfigurationService().save(obj);
                             }
                         });
                         cbox.addBlurListener(new BlurListener() {
-                            @Override
                             public void blur(BlurEvent event) {
                                 Collection<?> items = treeTable.getItemIds();
                                 boolean found = false;
@@ -164,7 +153,6 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                                         editSelectedItem();
                                         break;
                                     }
-
                                 }
                             }
                         });
@@ -186,7 +174,6 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             public void handleAction(Object sender, Object target) {
                 lastEditItemIds = Collections.emptySet();
                 treeTable.refreshRowCache();
-                setButtonsEnabled(filterField.getValue());
             }
         };
         treeTable.addShortcutListener(enterKeyListener);
@@ -194,13 +181,11 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         addComponent(treeTable);
         setExpandRatio(treeTable, 1.0f);
         addAll("", model.getModelEntities());
-        setButtonsEnabled("");
+        setButtonsEnabled();
     }
 
-    public void setButtonsEnabled(String filter) {
-        boolean noFilter = isBlank(filter);
+    public void setButtonsEnabled() {
         Set<Object> selected = getSelectedItems();
-        importButton.setEnabled(noFilter);
         addAttributeButton.setEnabled(selected.size() > 0);
         removeButton.setEnabled(selected.size() > 0);
         editButton.setEnabled(selected.size() > 0);
@@ -244,10 +229,10 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     protected void addAll(String filter, Collection<ModelEntity> modelEntityList) {
         filter = filter != null ? filter.toLowerCase() : null;
         for (ModelEntity modelEntity : modelEntityList) {
-            boolean add = isBlank(filter) || modelEntity.getName().toLowerCase().contains(filter);
+            boolean add = UiUtils.filterMatches(filter, modelEntity.getName());
             if (!add) {
                 for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
-                    add |= modelAttribute.getName().toLowerCase().contains(filter);
+                    add |= UiUtils.filterMatches(filter, modelAttribute.getName());
                 }
             }
             if (add) {
@@ -413,7 +398,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         public void valueChange(ValueChangeEvent event) {
             lastEditItemIds = Collections.emptySet();
             treeTable.refreshRowCache();
-            setButtonsEnabled(filterField.getValue());
+            setButtonsEnabled();
         }
     }
 
