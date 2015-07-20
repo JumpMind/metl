@@ -47,8 +47,7 @@ public class SqlWriter extends AbstractDbComponent {
             final String sqlToExecute = FormatUtils.replaceTokens(sql,
                     context.getFlowParametersAsString(), true);
             NamedParameterJdbcTemplate template = getJdbcTemplate();
-            Map<String, Object> params = new HashMap<String, Object>(
-                    context.getFlowParametersAsString());
+            Map<String, Object> params = getParameters(inputMessage);
             if (runWhen.equals(PER_MESSAGE)) {
                 int count = template.update(sqlToExecute, params);
                 getComponentStatistics().incrementNumberEntitiesProcessed(count);
@@ -65,6 +64,13 @@ public class SqlWriter extends AbstractDbComponent {
         messageTarget.put(inputMessage.clone(getFlowStepId()));
     }
 
+    private HashMap<String, Object> getParameters(Message inputMessage) {
+        HashMap<String, Object> params = new HashMap<String, Object>(
+                context.getFlowParametersAsString());
+        params.putAll(inputMessage.getHeader());
+        return params;
+    }
+    
     @Override
     public void flowCompleted(boolean cancelled) {
         if (runWhen.equals(ON_SUCCESS) && !cancelled) {
