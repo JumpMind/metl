@@ -1,0 +1,12 @@
+
+== Admin
+
+TODO
+
+include::admin/users.ad[]
+include::admin/groups.ad[]
+include::admin/rest.ad[]
+include::admin/mailserver.ad[]
+include::admin/notifications.ad[]
+include::admin/logging.ad[]
+	

@@ -1,6 +1,8 @@
 import org.apache.tools.ant.filters.FixCrLfFilter
 import org.apache.tools.ant.filters.ReplaceTokens
 
+apply from: symAssembleDir + '/asciidoc.gradle'
+
     group = 'org.jumpmind.symmetric'
         
     apply plugin: 'eclipse-wtp'
