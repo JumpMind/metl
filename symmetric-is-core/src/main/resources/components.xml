@@ -585,7 +585,7 @@
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
-            <setting id='textfilereader.text.line.terminator' type='integer' required='false'>
+            <setting id='textfilereader.text.line.terminator' type='text' required='false'>
                 <name>Line Terminator</name>
                 <description></description>
             </setting>

@@ -227,7 +227,9 @@ public class ModelAttributeScriptHelper {
                     expression);
             return engine.eval(importString + code);
         } catch (ScriptException e) {
-            throw new RuntimeException("Unable to evaluate groovy script.  Attribute ==> " + attribute.getName() + ".  Cause ==> " + e.getCause().getMessage(), e);
+            throw new RuntimeException("Unable to evaluate groovy script.  Attribute ==> " + attribute.getName() + 
+                    ".  Value ==> " + value.toString() + "." + 
+                    e.getCause().getMessage(), e);
         }
     }
     

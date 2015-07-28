@@ -65,7 +65,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
             for (String rec : recs) {
                 bufferedWriter.write(rec);
                 if (StringUtils.isNotBlank(lineTerminator)) {
-                    bufferedWriter.write(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
+                    bufferedWriter.write(lineTerminator);
                 } else {
                     bufferedWriter.newLine();
                 }
