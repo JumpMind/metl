@@ -38,7 +38,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
     
     boolean append;
     
-    String lineTerminator;
+    String lineTerminator = null;
 
     TypedProperties properties;
     
@@ -65,7 +65,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
         try {
             for (String rec : recs) {
                 bufferedWriter.write(rec);
-                if (StringUtils.isNotBlank(lineTerminator)) {
+                if (lineTerminator != null) {
                     bufferedWriter.write(lineTerminator);
                 } else {
                     bufferedWriter.newLine();
@@ -97,7 +97,10 @@ public class TextFileWriter extends AbstractComponentRuntime {
         relativePathAndFile = FormatUtils.replaceTokens(properties.get(TEXTFILEWRITER_RELATIVE_PATH), context.getFlowParametersAsString(), true);
         mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
         append = properties.is(TEXTFILEWRITER_APPEND);
-        lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
+        lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
+        if (lineTerminator != null) {
+            lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
+        }
     }
 
 
