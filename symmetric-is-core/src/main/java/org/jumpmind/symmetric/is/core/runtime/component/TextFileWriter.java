@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.symmetric.is.core.runtime.LogLevel;
@@ -21,24 +20,26 @@ import org.jumpmind.util.FormatUtils;
 public class TextFileWriter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Text File Writer";
-
-    public static final String DEFAULT_CHARSET = "UTF-8";
-
+    
+    public final static String TEXTFILEWRITER_ENCODING = "textfilewriter.encoding";
+    
     public final static String TEXTFILEWRITER_RELATIVE_PATH = "textfilewriter.relative.path";
 
     public static final String TEXTFILEWRITER_MUST_EXIST = "textfilewriter.must.exist";
 
     public static final String TEXTFILEWRITER_APPEND = "textfilewriter.append";
 
-    public static final String TEXTFILEWRITER_TEXT_LINE_TERMINATOR = "textfilereader.text.line.terminator";
+    public static final String TEXTFILEWRITER_TEXT_LINE_TERMINATOR = "textfilewriter.text.line.terminator";
 
+    String encoding;
+    
     String relativePathAndFile;
     
     boolean mustExist;
     
     boolean append;
     
-    String lineTerminator = null;
+    String lineTerminator;
 
     TypedProperties properties;
     
@@ -98,6 +99,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
         mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
         append = properties.is(TEXTFILEWRITER_APPEND);
         lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
+        encoding = properties.get(TEXTFILEWRITER_ENCODING);
         if (lineTerminator != null) {
             lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
         }
@@ -106,7 +108,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
 
     private BufferedWriter initializeWriter(OutputStream stream) {
         try {
-            bufferedWriter = new BufferedWriter(new OutputStreamWriter(stream, DEFAULT_CHARSET));
+            bufferedWriter = new BufferedWriter(new OutputStreamWriter(stream, encoding));
         } catch (UnsupportedEncodingException e) {
             throw new IoException("Error creating buffered writer " + e.getMessage());
         }
