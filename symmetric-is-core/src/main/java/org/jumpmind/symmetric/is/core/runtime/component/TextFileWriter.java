@@ -21,6 +21,8 @@ public class TextFileWriter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Text File Writer";
     
+    public final static String DEFAULT_ENCODING = "UTF-8";
+    
     public final static String TEXTFILEWRITER_ENCODING = "textfilewriter.encoding";
     
     public final static String TEXTFILEWRITER_RELATIVE_PATH = "textfilewriter.relative.path";
@@ -99,7 +101,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
         mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
         append = properties.is(TEXTFILEWRITER_APPEND);
         lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
-        encoding = properties.get(TEXTFILEWRITER_ENCODING);
+        encoding = properties.get(TEXTFILEWRITER_ENCODING, DEFAULT_ENCODING);
         if (lineTerminator != null) {
             lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
         }
