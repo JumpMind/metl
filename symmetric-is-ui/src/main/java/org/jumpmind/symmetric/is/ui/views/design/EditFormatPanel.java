@@ -88,8 +88,8 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
             table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Width", "Start Position", "End Position", "Transform" });
             table.setColumnWidth("width", 75);
         } else {
-            table.setVisibleColumns(new Object[] { "entityName", "attributeName", "transformText" });
-            table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Transform" });
+            table.setVisibleColumns(new Object[] { "entityName", "attributeName", "ordinalSetting", "transformText" });
+            table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Ordinal", "Transform" });
         }
         table.setTableFieldFactory(new EditFieldFactory());
         table.setCellStyleGenerator(new TableCellStyleGenerator());
@@ -145,9 +145,9 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
     }
 
     protected void calculatePositions() {
+        boolean needsRefreshed = false;
         if (component.getType().equals(FixedLengthFormatter.TYPE) || component.getType().equals(FixedLengthParser.TYPE)) {
             long pos = 1;
-            boolean needsRefreshed = false;
             for (RecordFormat record : container.getItemIds()) {
                 if (record.getStartPos() != pos) {
                     record.setStartPos(pos);
@@ -161,13 +161,22 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
                 pos = endPos + 1;
             }
 
-            if (needsRefreshed) {
-                RecordFormat record = getSelectedItem();
-                if (record != null) {
-                    record.setFocusFieldId("transformText");
+        } else if (component.getType().equals(DelimitedFormatter.TYPE)) {
+            int ordinal = 1;
+            for (RecordFormat record : container.getItemIds()) {
+                if (record.getOrdinalSetting() != ordinal) {
+                    record.setOrdinalSetting(ordinal);
+                    needsRefreshed = true;
                 }
-                table.refreshRowCache();
+                ordinal++;
+            }            
+        }
+        if (needsRefreshed) {
+            RecordFormat record = getSelectedItem();
+            if (record != null) {
+                record.setFocusFieldId("transformText");
             }
+            table.refreshRowCache();
         }
     }
 

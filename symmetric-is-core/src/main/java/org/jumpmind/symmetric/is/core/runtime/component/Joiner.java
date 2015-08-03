@@ -109,7 +109,9 @@ public class Joiner extends AbstractComponentRuntime {
         while (itr.hasNext()) {
             Map.Entry<String,Object> column = (Map.Entry<String, Object>)itr.next();
             if (column != null) {
-                targetRecord.put(column.getKey(), column.getValue());
+                if (column.getValue() != null) {
+                    targetRecord.put(column.getKey(), column.getValue());
+                }
             }
         }
     }
