@@ -541,6 +541,7 @@ public class DesignNavigator extends VerticalLayout {
                 configurationService.save(itemBeingEdited);
             }
             itemBeingEdited = null;
+            refreshOpenProjects();
             treeTable.refreshRowCache();
             treeTable.focus();
             treeTable.setValue(selected);
@@ -619,7 +620,6 @@ public class DesignNavigator extends VerticalLayout {
             treeTable.setItemIcon(projectVersion, Icons.PROJECT);
             treeTable.setItemCaption(projectVersion, projectVersion.getProject().getName());
             treeTable.setChildrenAllowed(projectVersion, true);            
-
             addFlowsToFolder(addVirtualFolder("Flows", projectVersion), projectVersion);
             addModelsToFolder(addVirtualFolder("Models", projectVersion), projectVersion);
             addResourcesToFolder(addVirtualFolder("Resources", projectVersion), projectVersion);
@@ -678,6 +678,12 @@ public class DesignNavigator extends VerticalLayout {
     protected void addFlowsToFolder(FolderName folder, ProjectVersion projectVersion) {
         IConfigurationService configurationService = context.getConfigurationService();
         List<FlowName> flows = configurationService.findFlowsInProject(projectVersion.getId());
+        Collections.sort(flows, new Comparator<FlowName>() {
+            @Override
+            public int compare(FlowName o1, FlowName o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });        
         for (FlowName flow : flows) {
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(flow);
