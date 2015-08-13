@@ -20,3 +20,7 @@
 /codb13.h2.db
 /codb13.trace.db
 /codb13.lock.db
+/sourcedb.h2.db
+/sourcedb.lock.db
+/sourcedb.trace.db
+/targetdb.h2.db
