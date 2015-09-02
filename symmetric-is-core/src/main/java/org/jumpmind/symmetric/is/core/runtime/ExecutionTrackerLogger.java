@@ -56,6 +56,10 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     }
     
     @Override
+    public void updateStatistics(ComponentContext component) {
+    }
+    
+    @Override
     public void flowStepStarted(ComponentContext context) {
         FlowStep flowStep = context.getFlowStep();
         stepStartTimes.put(flowStep.getId(), System.currentTimeMillis());

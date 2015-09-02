@@ -30,6 +30,10 @@ public class ExecutionTrackerNoOp implements IExecutionTracker {
     @Override
     public void log(LogLevel level, ComponentContext context, String output, Object...args) {
     }
+    
+    @Override
+    public void updateStatistics(ComponentContext context) {
+    }
 
     @Override
     public void flowStepStarted(ComponentContext context) {

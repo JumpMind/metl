@@ -325,6 +325,7 @@ public class DbReader extends AbstractDbComponent {
             ResultSetMetaData meta = rs.getMetaData();
             Map<Integer, String> columnHints = getSqlColumnEntityHints(sqlToExecute);
             ArrayList<String> attributeIds = getAttributeIds(meta, columnHints);
+            long ts = System.currentTimeMillis();
             while (rs.next()) {
                 if (outputRecCount++ % rowsPerMessage == 0 && message != null) {
                     messageTarget.put(message);
@@ -350,6 +351,12 @@ public class DbReader extends AbstractDbComponent {
                 payload.add(rowData);
                 if (context.getDeployment() != null && context.getDeployment().asLogLevel() == LogLevel.DEBUG) {
                     logEntityAttributes(rowData);
+                }
+                
+                long newTs = System.currentTimeMillis();
+                if (newTs - ts > 10000) {
+                    getExecutionTracker().updateStatistics(context);
+                    ts = newTs;
                 }
             }
             return message;

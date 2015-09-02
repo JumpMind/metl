@@ -91,7 +91,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         step.setStatus(ExecutionStatus.READY.name());
         this.recorder.record(step);
     }
-
+    
     @Override
     public void beforeHandle(ComponentContext context) {
         super.beforeHandle(context);
@@ -103,6 +103,23 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             }
             if (!step.getStatus().equals(ExecutionStatus.ERROR.name())) {
                 step.setStatus(ExecutionStatus.RUNNING.name());
+            }
+            step.setLastUpdateTime(new Date());
+            this.recorder.record(step);
+        }
+    }
+    
+    @Override
+    public void updateStatistics(ComponentContext context) {
+        super.updateStatistics(context);
+        ExecutionStep step = steps.get(context.getFlowStep().getId());
+        Date lastUpdateTime = step.getLastUpdateTime();
+        if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
+            ComponentStatistics stats = context.getComponentStatistics();
+            if (stats != null) {
+                step.setEntitiesProcessed(stats.getNumberEntitiesProcessed());
+                step.setMessagesReceived(stats.getNumberInboundMessages());
+                step.setMessagesProduced(stats.getNumberOutboundMessages());
             }
             step.setLastUpdateTime(new Date());
             this.recorder.record(step);
