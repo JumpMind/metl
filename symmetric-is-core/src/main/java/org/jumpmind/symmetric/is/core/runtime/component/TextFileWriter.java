@@ -76,7 +76,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
             }
             bufferedWriter.flush();
         } catch (IOException e) {
-            throw new IoException("Error writing to file " + e.getMessage());
+            throw new IoException(e);
         }
     }    
 

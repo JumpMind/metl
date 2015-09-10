@@ -24,3 +24,5 @@
 /sourcedb.lock.db
 /sourcedb.trace.db
 /targetdb.h2.db
+/targetdb.lock.db
+/targetdb.trace.db

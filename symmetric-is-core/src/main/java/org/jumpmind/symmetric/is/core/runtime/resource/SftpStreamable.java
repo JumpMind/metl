@@ -15,7 +15,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 
-public class ScpStreamable implements IStreamable {
+public class SftpStreamable implements IStreamable {
 
     protected String server;
     protected Integer port;
@@ -27,11 +27,10 @@ public class ScpStreamable implements IStreamable {
     
     protected Session session;
     protected ChannelSftp sftp;
-    protected String filePath;
 
-    protected static final Logger log = LoggerFactory.getLogger(ScpStreamable.class);
+    protected static final Logger log = LoggerFactory.getLogger(SftpStreamable.class);
 
-    public ScpStreamable(Resource resource, 
+    public SftpStreamable(Resource resource, 
             String server,
             Integer port,
             String user,
@@ -44,34 +43,12 @@ public class ScpStreamable implements IStreamable {
         this.port = port;
         this.user = user;
         this.password = password;
-        this.basePath = basePath;     
+        this.basePath = basePath;
         this.connectionTimeout = connectionTimeout;
         this.mustExist = mustExist;
-        
-        JSch jsch=new JSch();
-        try {
-            session = jsch.getSession(user, server, port);
-            session.setPassword(password.getBytes());
-            java.util.Properties config = new java.util.Properties();
-            config.put("StrictHostKeyChecking", "no");
-            session.setConfig(config);
-            session.connect(connectionTimeout);
-            sftp = (ChannelSftp) session.openChannel("sftp");
-            sftp.connect();
-            if (mustExist && !fileExists()) {
-                sftp.disconnect();
-                session.disconnect();
-                throw new IoException("Could not find endpoint %s that was configured as MUST EXIST",filePath);
-            }
-
-        } catch (JSchException e) {
-            throw new IoException("Error obtaining ssh connection to server %s with user id %s on port %d.  Error message = %s",
-                    server, user, port, e.getMessage());
-        }   
-
     }
 
-    private boolean fileExists() {
+    private boolean fileExists(String filePath) {
         try {
                 SftpATTRS attributes = sftp.stat(filePath);
                 if (attributes != null) {
@@ -98,14 +75,37 @@ public class ScpStreamable implements IStreamable {
     public boolean supportsInputStream() {
         return true;
     }
+    
+    protected void connect() {
+        JSch jsch=new JSch();
+        try {
+            session = jsch.getSession(user, server, port);
+            session.setPassword(password.getBytes());
+            java.util.Properties config = new java.util.Properties();
+            config.put("StrictHostKeyChecking", "no");
+            session.setConfig(config);
+            session.connect(connectionTimeout);
+            sftp = (ChannelSftp) session.openChannel("sftp");
+            sftp.connect();
+        } catch (JSchException e) {
+            throw new IoException(e);
+        }   
+    }    
 
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist) {
         try {
+            connect();
+            String filePath = basePath + relativePath;
+            if (mustExist && !fileExists(filePath)) {
+                sftp.disconnect();
+                session.disconnect();
+                throw new IoException("Could not find endpoint %s that was configured as MUST EXIST",filePath);
+            }            
             return sftp.get(filePath);
         } catch (Exception e) {
             throw new IoException("Error getting the input stream for ssh endpoint.  Error %s", e.getMessage());
-        }
+        } 
     }
 
     @Override
@@ -116,26 +116,36 @@ public class ScpStreamable implements IStreamable {
     @Override
     public OutputStream getOutputStream(String relativePath, boolean mustExist) {
         try {
-            return sftp.put(filePath);
-        } catch (Exception e) {
-            throw new IoException("Error getting the output stream for ssh endoint.  Error %s", e.getMessage());
-        }
+            connect();
+            String filePath = basePath + relativePath;
+            return sftp.put(filePath, ChannelSftp.OVERWRITE);
+        } catch (Exception e) {            
+            throw new IoException(e);
+        } 
     }
 
     @Override
     public void close() {
-        sftp.disconnect();
-        session.disconnect();
+        if (sftp != null) {
+            sftp.disconnect();
+            sftp = null;
+         }
+         if (session != null) {
+             session.disconnect();
+             session = null;
+         }
     }
 
     @Override
     public boolean delete(String relativePath) {
         try {
+            connect();
+            String filePath = basePath + relativePath;
             sftp.rm(filePath);
             return true;
         } catch (SftpException e) {
             return false;
-        }
+        } 
     }
 
     @Override

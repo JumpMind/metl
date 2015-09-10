@@ -29,7 +29,7 @@ import org.jumpmind.symmetric.is.core.runtime.resource.Datasource;
 import org.jumpmind.symmetric.is.core.runtime.resource.Ftp;
 import org.jumpmind.symmetric.is.core.runtime.resource.Http;
 import org.jumpmind.symmetric.is.core.runtime.resource.LocalFile;
-import org.jumpmind.symmetric.is.core.runtime.resource.Scp;
+import org.jumpmind.symmetric.is.core.runtime.resource.Sftp;
 import org.jumpmind.symmetric.is.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.is.ui.common.EnableFocusTextField;
 import org.jumpmind.symmetric.is.ui.common.Icons;
@@ -334,7 +334,7 @@ public class DesignNavigator extends VerticalLayout {
 
         });
         
-        newSSHResource = newMenu.addItem("Scp", new Command() {
+        newSSHResource = newMenu.addItem("Sftp", new Command() {
             
             @Override
             public void menuSelected(MenuItem selectedItem) {
@@ -925,7 +925,7 @@ public class DesignNavigator extends VerticalLayout {
     }
     
     protected void addNewSSHFileSystem() {
-        addNewResource(Scp.TYPE, "Directory", Icons.FILE_SYSTEM);
+        addNewResource(Sftp.TYPE, "Directory", Icons.FILE_SYSTEM);
     }
     
     protected void addNewHttpResource() {
