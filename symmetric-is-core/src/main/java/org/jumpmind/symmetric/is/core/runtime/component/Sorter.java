@@ -76,6 +76,7 @@ public class Sorter extends AbstractComponentRuntime {
 
     private void applySettings() {
         TypedProperties properties = getTypedProperties();
+        rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
         String sortAttribute = properties.get(SORT_ATTRIBUTE);
         if (sortAttribute == null) {
             throw new IllegalStateException("The sort attribute must be specified.");
