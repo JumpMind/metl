@@ -7,13 +7,13 @@ which can be deployed to [Apache Tomcat](http://tomcat.apache.org).
 
 To build:
 ~~~~~
-cd symmetric-is-assemble
+cd metl-assemble
 ./gradlew war
 ~~~~~
 
 To deploy:
 ~~~~~
-cp ../symmetric-is-ui/build/libs/symmetric-is.war /opt/apache-tomcat-8.0.14/webapps/.
+cp ../metl-ui/build/libs/metl-is.war /opt/apache-tomcat-8.0.14/webapps/.
 /opt/apache-tomcat-8.0.14/bin/catalina restart
 ~~~~~
 

@@ -1,9 +1,0 @@
-
-=== Flows
-
-TODO
-
-include::flows/processors.ad[]
-include::flows/readers.ad[]
-include::flows/writers.ad[]
-include::flows/shareddefinitions.ad[]

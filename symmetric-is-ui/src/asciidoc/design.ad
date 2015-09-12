@@ -1,7 +1,0 @@
-[id="design",reftext="Design"]
-== Design
-
-include::design/projects.ad[]
-include::design/flows.ad[]
-include::design/models.ad[]
-include::design/resources.ad[]
