@@ -25,7 +25,7 @@ public class SchemaTest {
 
     @Test
     public void createSchema() throws Exception {        
-        ConfigDatabaseUpgrader upgrader = new ConfigDatabaseUpgrader("/schema-v1.xml", platform, true, "SIS_");
+        ConfigDatabaseUpgrader upgrader = new ConfigDatabaseUpgrader("/schema-v1.xml", platform, true, "METL_");
         upgrader.upgrade();
     }
 }

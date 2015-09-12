@@ -171,7 +171,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Bean
     @Scope(value = "singleton")
     public String tablePrefix() {
-        String tablePrefix = env.getProperty(EnvConstants.TABLE_PREFIX, "SIS");
+        String tablePrefix = env.getProperty(EnvConstants.TABLE_PREFIX, "METL");
         return configDatabasePlatform().alterCaseToMatchDatabaseDefaultCase(tablePrefix);
     }
 
