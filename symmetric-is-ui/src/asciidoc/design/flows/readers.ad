@@ -1,4 +1,82 @@
 
 ==== Readers
 
-TODO
+Readers are a set of components that read data and pass that data to other components downstream in the associated flow.  
+
+==== SQL Database Reader
+
+<table>
+   <th>
+      <td>image::dbreader.png[]</td>
+      <td>SQL Database Reader</td>
+   </th>
+   <tr>
+      <td>Description</td>
+      <td>The database file reader is used to read data from a jdbc compliant relational database.</td>
+   </tr>
+   <tr>
+      <td>Inbound Message Type</td>
+      <td>Model Based Message</td>
+   </tr>
+   <tr>
+      <td>Outbound Message Type</td>
+      <td>Model Based Message</td>
+   </tr>
+   <tr>
+      <td>Parameters</td>
+      <td>
+         <table>
+            <th>
+               <td>Name</td>
+               <td>Description</td>
+               <td>Notes</td>
+            </th>
+            <tr>
+               <td>Resource</td>
+               <td>This is the description</td>
+               <td>These are the notes</td>
+            </tr>
+            <tr>
+               <td>Input Model</td>
+               <td>This is the description</td>
+               <td>These are the notes</td>
+            </tr>
+            <tr>
+               <td>Output Model</td>
+               <td>This is the description</td>
+               <td>These are the notes</td>
+            </tr>
+            <tr>
+               <td>Sql</td>
+               <td>This is the description</td>
+               <td>These are the notes</td>
+            </tr>
+         </table>
+      </td>
+   </tr>
+</table>
+
+==== Text Fle Reader
+
+
+==== File Poller
+
+File Poller
+
+Description
+
+Inbound Message Type
+
+Outbound Message Type
+
+Parameters
+
+
+
+[source, cli]           
+----
+bin/symadmin -p my-symmetric-ds.properties create-war /some/path/to/symmetric-ds.war
+----
+
+[IMPORTANT]
+some text here

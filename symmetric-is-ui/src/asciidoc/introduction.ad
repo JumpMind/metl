@@ -1,12 +1,17 @@
 
 == Introduction
 
-TODO 
+METL is a simple, web-based integration platform that allows for several different styles of data integration
+including messaging, file based Extract/Transform/Load (ETL), and remote procedure invocation via Web Services.  
+METL was built to solve fairly simple day to day integration tasks without the need for custom coding, 
+heavy infrastructure or high costs.  It can be deployed in the cloud or in an internal data center, and was built to 
+allow developers to extend it to fit their needs by writing their own components that can be included and leveraged 
+by the existing METL infrastructure.
 
 === System Requirements
 
-SymmetricDS is written in Java and requires a Java Runtime Environment (JRE) Standard Edition (SE) or Java Development Kit (JDK)
-Standard Edition (SE) version 6.0 or above.
+METL is written in Java and requires a Java Runtime Environment (JRE) Standard Edition (SE) or Java Development 
+Kit (JDK) Standard Edition (SE) version 6.0 or above.
 Most major operating systems and databases are supported.  
 The minimum operating system requirements are:
 
@@ -14,8 +19,7 @@ The minimum operating system requirements are:
 * Memory - 64 (MB) available
 * Disk - 256 (MB) available
 
-
-SymmetricIS is accessed from a web console, which requires one of the following supported web browsers:
+METL is accessed from a web console, which requires one of the following supported web browsers:
 
 * Google Chrome 23 or newer
 * Internet Explorer 8 or newer
@@ -24,7 +28,23 @@ SymmetricIS is accessed from a web console, which requires one of the following 
 
 === Overview
 
-TODO 
+METL is a web application 
+It can be deployed as a web application archive (war) file under an existing Servlet container (Tomcat, JBoss, 
+Websphere, etc.) or can be deployed stand-alone as a war file deployed under a bundled Jetty Servlet container.  
+See <<installation>> section for details.
+
+Once installed, the web application (agent) is accessed via a web browser and is used to <<design>>, <<deploy>> and 
+<<manage>> integrations.
+
+Projects
+
+Resources
+
+Models
+
+Flows
+
+Components
 
 === Architecture
 
@@ -34,14 +54,14 @@ TODO
 
 TODO
 
-=== Why SymmetricIS?
+=== Why METL?
 
 TODO
 
 === License
 
-SymmetricIS is free software licensed under the GNU General Public License (GPL) version 3.0.
+METL is free software licensed under the GNU General Public License (GPL) version 3.0.
 See http://www.gnu.org/licenses/gpl.html for the full text of the license.
 This project includes software developed by JumpMind (http://www.jumpmind.com/) and a community of multiple contributors.
-SymmetricIS is licensed to JumpMind as the copyright holder under one or more Contributor License Agreements.
-SymmetricIS and the SymmetricIS logos are trademarks of JumpMind.
+METL is licensed to JumpMind as the copyright holder under one or more Contributor License Agreements.
+METL and the METL logos are trademarks of JumpMind.
