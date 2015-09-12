@@ -1,0 +1,60 @@
+.heading1, .heading2 {
+    position: absolute;
+    z-index: 2;
+    font-size: 11px;
+    font-weight: bold;
+    white-space: nowrap;
+    color: #0072C6;
+}
+
+.heading2 {
+    font-weight: normal;
+    color: #000000;
+}
+
+.entity {
+    padding: 2px 10px 2px 10px;
+    position: absolute;
+    z-index: 1;
+    border: 1px solid #2e6f9a;
+    box-shadow: 2px 2px 19px #e0e0e0;
+    -o-box-shadow: 2px 2px 19px #e0e0e0;
+    -webkit-box-shadow: 2px 2px 19px #e0e0e0;
+    -moz-box-shadow: 2px 2px 19px #e0e0e0;
+    -moz-border-radius: 8px;
+    border-radius: 2px;
+    filter: alpha(opacity=80);
+    cursor: move;
+    background-color: white;
+    font-size: 11px;
+    -webkit-transition: background-color 0.15s ease-in;
+    -moz-transition: background-color 0.15s ease-in;
+    transition: background-color 0.15s ease-in;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.mapping-diagram ._jsPlumb_endpoint_anchor, .mapping-diagram ._jsPlumb_connector {
+    z-index: 2;
+}
+
+.mapping-diagram {
+    position: absolute;
+}
+
+.dragHover {
+    border: 2px solid orange;
+}
+
+.selected {
+	border: 2px solid orange;
+}
+
+path {
+    cursor: pointer;
+}

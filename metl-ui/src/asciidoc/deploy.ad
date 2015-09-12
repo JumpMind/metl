@@ -1,0 +1,5 @@
+[id="deploy",reftext="Deploy"]
+== Deploy
+
+include::deploy/folders.ad[]
+include::deploy/agents.ad[]

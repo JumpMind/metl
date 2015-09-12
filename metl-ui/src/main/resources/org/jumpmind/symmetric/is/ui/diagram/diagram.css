@@ -1,0 +1,70 @@
+.diagram {
+	position: absolute;
+}
+
+.diagram-node-wrapper {
+    position: absolute;
+    z-index: 1;	
+}
+
+.diagram-node {
+	padding: 12px;
+	text-align: center;
+	border: 2px solid #2e6f9a;
+	box-shadow: 2px 2px 19px #e0e0e0;
+	-o-box-shadow: 2px 2px 19px #e0e0e0;
+	-webkit-box-shadow: 2px 2px 19px #e0e0e0;
+	-moz-box-shadow: 2px 2px 19px #e0e0e0;
+	-moz-border-radius: 8px;
+	border-radius: 8px;
+	opacity: 0.8;
+	filter: alpha(opacity = 80);
+	cursor: move;
+	background-color: white;
+	font-size: 11px;
+	-webkit-transition: background-color 0.25s ease-in;
+	-moz-transition: background-color 0.25s ease-in;
+	transition: background-color 0.25s ease-in;
+}
+
+.diagram-node-label {
+    word-wrap: break-word;
+    text-align:center;
+    width: 110px;
+    margin-left: -15px;
+    margin-top: 5px;
+    height: auto;
+}
+
+.diagram-node.selected {
+	border: 2px solid orange;
+}
+
+.diagram ._jsPlumb_endpoint {
+	z-index: 3;
+}
+
+.diagram ._jsPlumb_overlay {
+    z-index: 2;
+}
+
+.endpointSourceLabel {
+	color: white;
+	background-color: #0072C6;
+    padding: 1px 6px 2px;
+    font-size: 12.025px;
+    font-weight: bold;
+    white-space: nowrap;
+    -webkit-border-radius: 9px;
+    -moz-border-radius: 9px;
+    border-radius: 9px;
+}
+
+
+.dragHover {
+	border: 2px solid orange;
+}
+
+path {
+	cursor: pointer;
+}

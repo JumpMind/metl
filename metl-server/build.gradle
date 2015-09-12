@@ -1,0 +1,18 @@
+apply from: '../metl-assemble/common.gradle'
+
+
+dependencies {
+    compile project(":metl-ui")
+    compile project(":metl-core")
+    compile "org.jumpmind.symmetric:symmetric-util:$symmetricVersion"
+    compile "org.jumpmind.symmetric:symmetric-db:$symmetricVersion"
+    compile "org.jumpmind.symmetric:symmetric-jdbc:$symmetricVersion"
+    compile "org.jumpmind.symmetric:symmetric-io:$symmetricVersion"
+    compile "org.jumpmind.symmetric:symmetric-core:$symmetricVersion"
+    //compile 'org.jminix:jminix:1.1.0'    
+    compile "javax.servlet:javax.servlet-api:$servletVersion"
+    compile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
+    compile "org.eclipse.jetty:jetty-jmx:$jettyVersion"
+    compile "org.eclipse.jetty:jetty-annotations:$jettyVersion"
+
+}

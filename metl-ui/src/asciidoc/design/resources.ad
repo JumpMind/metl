@@ -1,0 +1,10 @@
+
+=== Resources
+
+TODO
+
+include::resources/database.ad[]
+include::resources/ftp.ad[]
+include::resources/localfilesystem.ad[]
+include::resources/scp.ad[]
+include::resources/webresources.ad[]

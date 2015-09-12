@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="components" type="components"/>
+
+  <xs:complexType name="component">
+    <xs:all>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="className" type="xs:string"/>
+      <xs:element name="settings" type="settings" minOccurs="0"/>
+    </xs:all>
+    <xs:attribute name="iconName" type="xs:string"/>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="category" type="xs:string" use="required"/>
+    <xs:attribute name="shareable" type="xs:boolean" use="required"/>
+    <xs:attribute name="inputOutputModelsMatch" type="xs:boolean" use="required"/>
+    <xs:attribute name="inputMessageType" type="messageType"/>
+    <xs:attribute name="outputMessageType" type="messageType"/>
+    <xs:attribute name="resourceCategory" type="resourceCategory"/>
+  </xs:complexType>
+
+  <xs:complexType name="settings">
+    <xs:sequence>
+      <xs:element name="setting" type="setting" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="setting">
+    <xs:sequence>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="defaultValue" type="xs:string" minOccurs="0"/>
+      <xs:element name="choices" type="choices" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="type" type="type" use="required"/>
+    <xs:attribute name="required" type="xs:boolean" use="required"/>
+    <xs:attribute name="visible" type="xs:boolean" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="choices">
+    <xs:sequence>
+      <xs:element name="choice" type="xs:string" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="components">
+    <xs:sequence>
+      <xs:element name="component" type="component" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="messageType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="entity"/>
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="binary"/>
+      <xs:enumeration value="any"/>
+      <xs:enumeration value="text"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="resourceCategory">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="streamable"/>
+      <xs:enumeration value="any"/>
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="datasource"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="xml"/>
+      <xs:enumeration value="text"/>
+      <xs:enumeration value="source step"/>
+      <xs:enumeration value="choice"/>
+      <xs:enumeration value="integer"/>
+      <xs:enumeration value="boolean"/>
+      <xs:enumeration value="password"/>
+      <xs:enumeration value="multiline_text"/>
+      <xs:enumeration value="script"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+
