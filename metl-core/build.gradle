@@ -12,11 +12,11 @@ dependencies {
 
 dependencies {
     compile "org.springframework:spring-context:$springVersion"
-    compile "org.jumpmind.symmetric:symmetric-util:$symmetricVersion"
-    compile "org.jumpmind.symmetric:symmetric-db:$symmetricVersion"
-    compile "org.jumpmind.symmetric:symmetric-jdbc:$symmetricVersion"
-    compile "org.jumpmind.symmetric:symmetric-io:$symmetricVersion"
-    compile "org.jumpmind.symmetric:symmetric-core:$symmetricVersion"
+    compile group:"org.jumpmind.symmetric", name:"symmetric-util", version:"$symmetricVersion", changing:true
+    compile group:"org.jumpmind.symmetric", name:"symmetric-db", version:"$symmetricVersion", changing:true
+    compile group:"org.jumpmind.symmetric", name:"symmetric-jdbc", version:"$symmetricVersion", changing:true
+    compile group:"org.jumpmind.symmetric", name:"symmetric-io", version:"$symmetricVersion", changing:true
+    compile group:"org.jumpmind.symmetric", name:"symmetric-core", version:"$symmetricVersion", changing:true
     compile "commons-lang:commons-lang:$commonsLangVersion"
     compile "commons-dbcp:commons-dbcp:$commonsDbcpVersion"
     compile "commons-io:commons-io:$commonsIoVersion"
