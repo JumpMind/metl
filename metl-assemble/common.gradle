@@ -7,6 +7,7 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
         
     apply plugin: 'eclipse-wtp'
     apply plugin: 'java'
+    apply plugin: 'license-report'
 
     sourceCompatibility=1.7
     targetCompatibility=1.7   
