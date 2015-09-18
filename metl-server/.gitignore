@@ -26,3 +26,4 @@
 /targetdb.h2.db
 /targetdb.lock.db
 /targetdb.trace.db
+/metl-dev.h2.db

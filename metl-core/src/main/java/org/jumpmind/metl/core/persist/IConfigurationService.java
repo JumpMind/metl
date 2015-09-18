@@ -32,6 +32,8 @@ import org.jumpmind.metl.core.model.User;
 
 public interface IConfigurationService {
     
+    public boolean isInstalled();
+    
     public List<FolderName> findFoldersInProject(String projectVersionId);
     
     public List<ComponentName> findComponentsInProject(String projectVersionId);

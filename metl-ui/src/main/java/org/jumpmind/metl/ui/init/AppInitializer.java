@@ -4,6 +4,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -12,10 +13,14 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
+import org.jumpmind.db.platform.IDatabasePlatform;
+import org.jumpmind.db.sql.SqlScript;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
+import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.properties.TypedProperties;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.web.WebApplicationInitializer;
@@ -73,8 +78,15 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     }
 
     protected void initDatabase(WebApplicationContext ctx) {
+        IDatabasePlatform platform = ctx.getBean(IDatabasePlatform.class);
+        IConfigurationService configurationService = ctx.getBean(IConfigurationService.class);
+        boolean isInstalled = configurationService.isInstalled();
         ConfigDatabaseUpgrader dbUpgrader = ctx.getBean(ConfigDatabaseUpgrader.class);
         dbUpgrader.upgrade();
+        if (!isInstalled) {
+            LoggerFactory.getLogger(getClass()).info("Installing Metl samples");
+            new SqlScript(new InputStreamReader(getClass().getResourceAsStream("/metl-samples.sql")), platform.getSqlTemplate(), true, ";", null).execute();
+        }
     }
 
     @Override

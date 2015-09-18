@@ -9,6 +9,7 @@ import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
+import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ProjectVersion;
@@ -24,6 +25,11 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
             IPersistenceManager persistenceManager, String tablePrefix) {
         super(persistenceManager, tablePrefix);
         this.databasePlatform = databasePlatform;
+    }
+    
+    @Override
+    public boolean isInstalled() {
+        return databasePlatform.getTableFromCache(tableName(Component.class), false) != null;
     }
 
     @Override

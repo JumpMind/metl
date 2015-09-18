@@ -56,7 +56,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     AbstractConfigurationService(IPersistenceManager persistenceManager, String tablePrefix) {
         super(persistenceManager, tablePrefix);
     }
-
+    
     @Override
     public List<FlowName> findFlowsInProject(String projectVersionId) {
         Map<String, Object> params = new HashMap<String, Object>();
