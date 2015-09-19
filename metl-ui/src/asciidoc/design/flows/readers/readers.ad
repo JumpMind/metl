@@ -1,0 +1,32 @@
+
+==== Readers
+
+Readers are a set of components that read data and pass that data to other components downstream in the associated flow.  
+
+include::sql-reader.ad[]
+
+==== Text Fle Reader
+
+
+
+==== File Poller
+
+File Poller
+
+Description
+
+Inbound Message Type
+
+Outbound Message Type
+
+Parameters
+
+
+
+[source, cli]           
+----
+bin/symadmin -p my-symmetric-ds.properties create-war /some/path/to/symmetric-ds.war
+----
+
+[IMPORTANT]
+some text here

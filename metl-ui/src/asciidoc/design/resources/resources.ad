@@ -3,7 +3,7 @@
 
 TODO
 
-include::resources/database.ad[]
+include::resources/sql-database.ad[]
 include::resources/ftp.ad[]
 include::resources/localfilesystem.ad[]
 include::resources/scp.ad[]
