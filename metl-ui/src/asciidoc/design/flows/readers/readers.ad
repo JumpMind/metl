@@ -5,7 +5,8 @@ Readers are a set of components that read data and pass that data to other compo
 
 include::sql-reader.ad[]
 
-==== Text Fle Reader
+include::text-file-reader.ad[]
+
 
 
 

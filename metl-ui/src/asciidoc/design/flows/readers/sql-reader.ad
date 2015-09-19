@@ -1,18 +1,18 @@
 ==== SQL Reader
 [cols="<25%h,<75%"]
 |===================================
-|Icon|image:dbreader.png[]
+|Icon|image:sqlreader.png[]
 |Description|The SQL Reader is used to read data from a sql compliant relational database by specifying an SQL query.
 
 The SQL Reader can take one or more input messages.  The reader will be executed (i.e. the sql query run) for every input message and
 every entity record within an input message that it receives.  Any entity/attribute within an input message can
 be used as a parameter in the SQL parameter by specifying the input model entity and attribute name in the query prefaced with a colon.
-See example 1 below.  
+See <<sql-database-example-1>> below.  
 
 Be default, the sql results will be mapped directly to the output model based on the table and column name of the 
 selected fields.  When aggregate or other functions are used within the sql statement the table and column name will
 not be available for mapping to the output model, so hints may be used to map the field directly to an output model
-entity and attribute.  See example 2 below.
+entity and attribute.  See <<sql-database-example-2>> below.
 
 |Inbound Message Type|Model Based Message
 |Output Message Type|Model Based Message
@@ -23,7 +23,7 @@ entity and attribute.  See example 2 below.
 [options="header" cols="<25%,<75%"]
 |===================================
 |Name|Description
-|Resource|The SQL Database Resource this SQL Reader uses.  See resource <<sql-database>>
+|Resource|The SQL Database Resource on which the SQL query should be run to read data.  
 include::../common-properties/input-model.ad[]
 include::../common-properties/output-model.ad[]
 include::../common-properties/enabled.ad[]
@@ -37,6 +37,7 @@ include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===================================
 
+[id="sql-database-example-1",reftext="example 1"]
 ====== Example 1.  Using Input Message Entity/Attribute as a parameter
 ----
 select 
@@ -50,6 +51,7 @@ where
 In the example above, the SQL Reader query will be run for each input record within each input message.
 Each time the query is run, field3 will be restricted by the incoming row's INPUT_MODEL_ENTITY_NAME.INPUT_MODEL_ATTRIBUTE field. 
 
+[id="sql-database-example-2",reftext="example 2"]
 ====== Example 2.  Using Hints to Map to the Output Model
 ----
 select 
