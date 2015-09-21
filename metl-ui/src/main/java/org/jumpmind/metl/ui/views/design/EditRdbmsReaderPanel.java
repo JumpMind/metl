@@ -11,7 +11,7 @@ import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourcePropertyConstants;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
-import org.jumpmind.metl.core.runtime.component.DbReader;
+import org.jumpmind.metl.core.runtime.component.RdbmsReader;
 import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.sqlexplorer.IButtonBar;
@@ -30,7 +30,7 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Label;
 
 @SuppressWarnings("serial")
-public class EditDbReaderPanel extends AbstractComponentEditPanel {
+public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
 
     IDatabasePlatform platform;
 
@@ -108,7 +108,7 @@ public class EditDbReaderPanel extends AbstractComponentEditPanel {
                 }
             }, context.getUser().getLoginId());
 
-            queryPanel.appendSql(component.get(DbReader.SQL));
+            queryPanel.appendSql(component.get(RdbmsReader.SQL));
 
             queryPanel.addShortcutListener(new ShortcutListener("", KeyCode.ENTER, new int[] { ModifierKey.CTRL }) {
                 @Override
@@ -131,7 +131,7 @@ public class EditDbReaderPanel extends AbstractComponentEditPanel {
     }
 
     protected void save() {
-        Setting data = component.findSetting(DbReader.SQL);
+        Setting data = component.findSetting(RdbmsReader.SQL);
         data.setValue(queryPanel.getSql());
         context.getConfigurationService().save(data);
     }

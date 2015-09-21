@@ -29,7 +29,7 @@ import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
-import org.jumpmind.metl.core.runtime.component.DbReader;
+import org.jumpmind.metl.core.runtime.component.RdbmsReader;
 import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
 import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -43,7 +43,7 @@ import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class DbReaderTest {
+public class RdbmsReaderTest {
 
     private static IResourceRuntime resourceRuntime;
     private static IDatabasePlatform platform;
@@ -66,7 +66,7 @@ public class DbReaderTest {
 
     @Test
     public void testReaderFlowFromStartupMsg() throws Exception {
-        DbReader reader = new DbReader();
+        RdbmsReader reader = new RdbmsReader();
         reader.start(new ComponentContext(null, readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
@@ -81,7 +81,7 @@ public class DbReaderTest {
     @Test
     public void testReaderFlowFromSingleContentMsg() throws Exception {
 
-        DbReader reader = new DbReader();
+        RdbmsReader reader = new RdbmsReader();
         reader.start(new ComponentContext(null, readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message message = new Message("fake step id");
         ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
@@ -102,7 +102,7 @@ public class DbReaderTest {
     @Test
     public void testReaderFlowFromMultipleContentMsgs() throws Exception {
 
-        DbReader reader = new DbReader();
+        RdbmsReader reader = new RdbmsReader();
         reader.start(new ComponentContext(null, readerFlowStepMultiQuery, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message message = new Message("fake step id");
         ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
@@ -123,7 +123,7 @@ public class DbReaderTest {
     @Test
     public void testCountColumnSeparatingCommas() {
         
-        DbReader reader = new DbReader();
+        RdbmsReader reader = new RdbmsReader();
         
         int count = reader.countColumnSeparatingCommas("ISNULL(a,''), b, *");
         assertEquals(count, 2);        
@@ -134,7 +134,7 @@ public class DbReaderTest {
     @Test
     public void testGetSqlColumnEntityHints() throws Exception {
         
-        DbReader reader = new DbReader();
+        RdbmsReader reader = new RdbmsReader();
         String sql = "select\r\n ISNULL(a,ISNULL(z,'')) /*COLA*/, b/*COLB*/, c/*  COLC */ from test;";
         Map<Integer, String> hints = reader.getSqlColumnEntityHints(sql);
         assertEquals(hints.get(1), "COLA");
@@ -148,7 +148,7 @@ public class DbReaderTest {
         Folder folder = TestUtils.createFolder("Test Folder");
         Flow flow = TestUtils.createFlow("TestFlow", folder);
         Setting[] settingData = createReaderSettings();
-        Component componentVersion = TestUtils.createComponent(DbReader.TYPE, false,
+        Component componentVersion = TestUtils.createComponent(RdbmsReader.TYPE, false,
                 createResource(createResourceSettings()), null, createOutputModel(), null,
                 null, settingData);
         FlowStep readerComponent = new FlowStep();
@@ -167,7 +167,7 @@ public class DbReaderTest {
         Folder folder = TestUtils.createFolder("Test Folder");
         Flow flow = TestUtils.createFlow("TestFlow", folder);
         Setting[] settingData = createReaderSettingsMultiQuery();
-        Component componentVersion = TestUtils.createComponent(DbReader.TYPE, false,
+        Component componentVersion = TestUtils.createComponent(RdbmsReader.TYPE, false,
                 createResource(createResourceSettings()), null, createOutputModel(), null,
                 null, settingData);
         FlowStep readerComponent = new FlowStep();
@@ -215,10 +215,10 @@ public class DbReaderTest {
     private static Setting[] createReaderSettings() {
 
         Setting[] settingData = new Setting[2];
-        settingData[0] = new Setting(DbReader.SQL,
+        settingData[0] = new Setting(RdbmsReader.SQL,
                 "select * From test_table_1 tt1 inner join test_table_2 tt2"
                 + " on tt1.col1 = tt2.colx order by tt1.col1");
-        settingData[1] = new Setting(DbReader.ROWS_PER_MESSAGE, "2");
+        settingData[1] = new Setting(RdbmsReader.ROWS_PER_MESSAGE, "2");
 
         return settingData;
     }
@@ -226,11 +226,11 @@ public class DbReaderTest {
     private static Setting[] createReaderSettingsMultiQuery() {
 
         Setting[] settingData = new Setting[2];
-        settingData[0] = new Setting(DbReader.SQL,
+        settingData[0] = new Setting(RdbmsReader.SQL,
                 "select * From test_table_1 tt1 inner join test_table_2 tt2"
                 + " on tt1.col1 = tt2.colx order by tt1.col1;\n\n"
                 + "select * from test_table_2 where colx = 4;");
-        settingData[1] = new Setting(DbReader.ROWS_PER_MESSAGE, "2");
+        settingData[1] = new Setting(RdbmsReader.ROWS_PER_MESSAGE, "2");
 
         return settingData;
     }

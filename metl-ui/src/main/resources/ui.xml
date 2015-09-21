@@ -5,11 +5,11 @@
     </component-ui>
     <component-ui id="Sql Writer UI" componentId="Sql Writer">
         <iconImage>/org/jumpmind/metl/core/runtime/component/dbwriter.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditDbReaderPanel</className>        
+        <className>org.jumpmind.metl.ui.views.design.EditRdbmsReaderPanel</className>        
     </component-ui>       
-    <component-ui id="Database Reader UI" componentId="Database Reader">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/dbreader.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditDbReaderPanel</className>
+    <component-ui id="Database Reader UI" componentId="RDBMS Reader">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/rdbmsreader.png</iconImage>
+        <className>org.jumpmind.metl.ui.views.design.EditRdbmsReaderPanel</className>
     </component-ui>
     <component-ui id="Entity Router UI" componentId="Entity Router">
         <iconImage>/org/jumpmind/metl/core/runtime/component/entityrouter.png</iconImage>

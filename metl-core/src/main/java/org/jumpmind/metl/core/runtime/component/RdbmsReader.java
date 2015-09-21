@@ -28,19 +28,19 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.StringUtils;
 
-public class DbReader extends AbstractDbComponent {
+public class RdbmsReader extends AbstractDbComponent {
 
-    public static final String TYPE = "Database Reader";
+    public static final String TYPE = "RDBMS Reader";
 
-    public final static String SQL = "db.reader.sql";
+    public final static String SQL = "rdbms.reader.sql";
 
-    public final static String ROWS_PER_MESSAGE = "db.reader.rows.per.message";
+    public final static String ROWS_PER_MESSAGE = "rdbms.reader.rows.per.message";
 
-    public final static String TRIM_COLUMNS = "db.reader.trim.columns";
+    public final static String TRIM_COLUMNS = "rdbms.reader.trim.columns";
 
-    public final static String MATCH_ON_COLUMN_NAME_ONLY = "db.reader.match.on.column.name";
+    public final static String MATCH_ON_COLUMN_NAME_ONLY = "rdbms.reader.match.on.column.name";
 
-    public final static String MESSAGE_MANIPULATION_STRATEGY = "db.reader.message.manipulation.strategy";
+    public final static String MESSAGE_MANIPULATION_STRATEGY = "rdbms.reader.message.manipulation.strategy";
 
     List<String> sqls;
 
