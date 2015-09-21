@@ -32,23 +32,23 @@ import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
-public class DbWriter extends AbstractComponentRuntime {
+public class RdbmsWriter extends AbstractComponentRuntime {
 
-    public static final String TYPE = "Database Writer";
+    public static final String TYPE = "RDBMS Writer";
 
     public final static String CATALOG = "catalog";
 
     public final static String SCHEMA = "schema";
 
-    public final static String REPLACE = "db.writer.replace";
+    public final static String REPLACE = "replace";
 
-    public final static String UPDATE_FIRST = "db.writer.update.first";
+    public final static String UPDATE_FIRST = "update.first";
 
-    public final static String INSERT_FALLBACK = "db.writer.insert.fallback";
+    public final static String INSERT_FALLBACK = "insert.fallback";
 
-    public final static String QUOTE_IDENTIFIERS = "db.writer.quote.identifiers";
+    public final static String QUOTE_IDENTIFIERS = "quote.identifiers";
 
-    public final static String FIT_TO_COLUMN = "db.writer.fit.to.column";
+    public final static String FIT_TO_COLUMN = "fit.to.column";
 
     public final static String ATTRIBUTE_INSERT_ENABLED = "insert.enabled";
 

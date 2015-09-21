@@ -11,7 +11,7 @@ import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.runtime.component.DbWriter;
+import org.jumpmind.metl.core.runtime.component.RdbmsWriter;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
 
@@ -29,7 +29,7 @@ import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
 
 @SuppressWarnings("serial")
-public class EditDbWriterPanel extends AbstractComponentEditPanel {
+public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
 
     Table table = new Table();
 
@@ -97,8 +97,8 @@ public class EditDbWriterPanel extends AbstractComponentEditPanel {
 
             for (ModelEntity entity : component.getInputModel().getModelEntities()) {
                 for (ModelAttribute attr : entity.getModelAttributes()) {
-                    ComponentAttributeSetting insert = component.getSingleAttributeSetting(attr.getId(), DbWriter.ATTRIBUTE_INSERT_ENABLED);
-                    ComponentAttributeSetting update = component.getSingleAttributeSetting(attr.getId(), DbWriter.ATTRIBUTE_UPDATE_ENABLED);
+                    ComponentAttributeSetting insert = component.getSingleAttributeSetting(attr.getId(), RdbmsWriter.ATTRIBUTE_INSERT_ENABLED);
+                    ComponentAttributeSetting update = component.getSingleAttributeSetting(attr.getId(), RdbmsWriter.ATTRIBUTE_UPDATE_ENABLED);
                     boolean insertEnabled = insert != null ? Boolean.parseBoolean(insert.getValue()) : true;
                     boolean updateEnabled = update != null ? Boolean.parseBoolean(update.getValue()) : true;
                     attributeSettings.add(new AttributeSettings(attr.getId(), insertEnabled, updateEnabled));
@@ -147,9 +147,9 @@ public class EditDbWriterPanel extends AbstractComponentEditPanel {
             final AttributeSettings settings = (AttributeSettings) itemId;
 
             if (propertyId.equals("insertEnabled")) {
-                return createCheckBox(settings, DbWriter.ATTRIBUTE_INSERT_ENABLED);
+                return createCheckBox(settings, RdbmsWriter.ATTRIBUTE_INSERT_ENABLED);
             } else if (propertyId.equals("updateEnabled")) {
-                return createCheckBox(settings, DbWriter.ATTRIBUTE_UPDATE_ENABLED);
+                return createCheckBox(settings, RdbmsWriter.ATTRIBUTE_UPDATE_ENABLED);
             } else {
                 return null;
             }

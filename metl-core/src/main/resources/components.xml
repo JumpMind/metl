@@ -35,10 +35,10 @@
             </setting>
         </settings>
     </component>
-    <component id='Database Writer' category='WRITER' inputMessageType='entity' outputMessageType='none' resourceCategory='datasource'
+    <component id='RDBMS Writer' category='WRITER' inputMessageType='entity' outputMessageType='none' resourceCategory='datasource'
         inputOutputModelsMatch='false'>
-        <name>Database Writer</name>
-        <className>org.jumpmind.metl.core.runtime.component.DbWriter</className>
+        <name>RDBMS Writer</name>
+        <className>org.jumpmind.metl.core.runtime.component.RdbmsWriter</className>
         <description></description>
         <settings>
             <setting id='catalog' type='text' required='false'>
@@ -49,27 +49,27 @@
                 <name>Schema</name>
                 <description></description>
             </setting>
-            <setting id='db.writer.replace' type='boolean' required='false'>
+            <setting id='replace' type='boolean' required='false'>
                 <name>Replace rows if they exist</name>
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
-            <setting id='db.writer.update.first' type='boolean' required='false'>
+            <setting id='update.first' type='boolean' required='false'>
                 <name>Update rows first instead of insert</name>
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
-            <setting id='db.writer.insert.fallback' type='boolean' required='false'>
+            <setting id='insert.fallback' type='boolean' required='false'>
                 <name>Fallback to insert if no rows updated</name>
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
-            <setting id='db.writer.quote.identifiers' type='boolean' required='false'>
+            <setting id='quote.identifiers' type='boolean' required='false'>
                 <name>Quote table and column names</name>
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
-            <setting id='db.writer.fit.to.column' type='boolean' required='false'>
+            <setting id='fit.to.column' type='boolean' required='false'>
                 <name>Trim character data to fit within column</name>
                 <defaultValue>false</defaultValue>
                 <description></description>
