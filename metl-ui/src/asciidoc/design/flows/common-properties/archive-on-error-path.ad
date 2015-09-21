@@ -1,0 +1,2 @@
+|Archive on Error Path|If Action on Error is set to Archive, this property sets the archive location where the input file should
+be archived if there is an error when reading. 

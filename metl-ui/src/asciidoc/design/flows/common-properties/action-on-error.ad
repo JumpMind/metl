@@ -1,0 +1,3 @@
+|Action on Error|Either None, Archive or Delete.  If Delete, the input file will be deleted if there is an error when reading.  
+If Archive, the input file will be archived to the Archive on Error Path property location if there is an error when reading.  If None, the 
+input file will be left in its original position if there is an error when reading

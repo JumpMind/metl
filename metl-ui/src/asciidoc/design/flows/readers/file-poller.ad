@@ -1,0 +1,48 @@
+==== File Poller
+[cols="<25%h,<75%"]
+|===================================
+|Icon|image:filepoller.png[]
+|Description|The File Poller is used to look at a file based directory structure and send a message to downstream components 
+if a file or files match a given file pattern exists.  The file poller sends a payload of an array list of strings with the file 
+names of each file found that matches the File Poller's File Pattern parameter.  The File pattern parameter can be a single pattern
+or a list of patterns separated by commas.  Wildcards can be used in any pattern.   
+
+|Inbound Message Type|None
+|Output Message Type|Text Based Message
+|===================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===================================
+|Name|Description
+|Resource|The File based resource on which the File Poller should operate  
+include::../common-properties/enabled.ad[]
+|File Pattern|The File Pattern specifies the pattern(s) of files to look for.  Multiple patterns can be specified in a comma delimited
+list.  Wildcards (*) can be used.  See examples below.
+|Search Recursively|Whether the directory specified by the File Resource and File Pattern path should be searched recursively
+include::../common-properties/cancel-on-no-files.ad[]
+include::../common-properties/action-on-success.ad[]
+include::../common-properties/archive-on-success-path.ad[]
+include::../common-properties/action-on-error.ad[]
+include::../common-properties/archive-on-error-path.ad[]
+|Use Trigger File|Many systems post a single trigger file to designate that other data files are ready to process.  The existence of the trigger
+file indicates the other files are ready to process.  If "Use Trigger File" is true, the File Poller will first check for the existence of a file
+named the same as the Relative Trigger File Path parameter.  If that file exists, the File Poller will then check for files matching the File Pattern
+parameter.  If the trigger file does not exist, the File Poller will send a shutdown message to any downstream linked components.  If the Use Trigger File
+is set to false, no file triggering mechanism will be used
+|Relative Trigger File Path|The relative path and file name of a trigger file that will be used to indicate the files that match the File Pattern 
+parameter are ready for processing.
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===================================
+
+====== Example 1.  Search for all .csv files
+----
+*.csv
+----
+
+====== Example 2.  Search for all.csv and all .txt files
+----
+*.csv,*.txt
+----

@@ -28,16 +28,10 @@ the path and file to be read is based on the File Path property below.
 absolute path specified in the File based resource 
 include::../common-properties/rows-per-message.ad[] .  Records in the text file reader are defined by a line of data up
 to the files row delimiter (i.e. <CR> or <CR><LF>)
-|Action on Success|Either None, Archive or Delete.  If Delete, the input file will be deleted after it is successfully read.
-If Archive the input file will be archived to the Archive on Success Path property location.  If None, the input file will be 
-left it its original location once read
-|Archive On Success Path|If Action on Success is set to Archive, this property sets the archive location where the input file
-should be archived once successfully read
-|Action on Error|Either None, Archive or Delete.  If Delete, the input file will be deleted if there is an error when reading.  
-If Archive, the input file will be archived to the Archive on Error Path property location if there is an error when reading.  If None, the 
-input file will be left in its original position if there is an error when reading
-|Archive on Error Path|If Action on Error is set to Archive, this property sets the archive location where the input file should
-be archived if there is an error when reading. 
+include::../common-properties/action-on-success.ad[]
+include::../common-properties/archive-on-success.ad[]
+include::../common-properties/action-on-error.ad[]
+include::../common-properties/archive-on-error-path.ad[]
 |Encoding|The encoding of the file
 |Header Lines to Skip|The number of header lines in the file that should be skipped and not sent to downstream components
 include::../common-properties/inbound-queue-capacity.ad[]

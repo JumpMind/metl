@@ -7,27 +7,4 @@ include::sql-reader.ad[]
 
 include::text-file-reader.ad[]
 
-
-
-
-==== File Poller
-
-File Poller
-
-Description
-
-Inbound Message Type
-
-Outbound Message Type
-
-Parameters
-
-
-
-[source, cli]           
-----
-bin/symadmin -p my-symmetric-ds.properties create-war /some/path/to/symmetric-ds.war
-----
-
-[IMPORTANT]
-some text here
+include::file-poller.ad[]
