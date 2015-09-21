@@ -5,26 +5,26 @@
         <className>org.jumpmind.metl.core.runtime.component.RdbmsReader</className>
         <description></description>
         <settings>
-            <setting id='rdbms.reader.sql' type='multiline_text' required='true'>
+            <setting id='sql' type='multiline_text' required='true'>
                 <name>Sql</name>
                 <description></description>
             </setting>
-            <setting id='rdbms.reader.rows.per.message' type='integer' required='true'>
+            <setting id='rows.per.message' type='integer' required='true'>
                 <name>Rows/Msg</name>
                 <defaultValue>1000</defaultValue>
                 <description></description>
             </setting>
-            <setting id='rdbms.reader.trim.columns' type='boolean' required='true'>
+            <setting id='trim.columns' type='boolean' required='true'>
                 <name>Trim Columns</name>
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
-            <setting id='rdbms.reader.match.on.column.name' type='boolean' required='true'>
+            <setting id='match.on.column.name' type='boolean' required='true'>
                 <name>Match On Column Name</name>
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
-            <setting id='rdbms.reader.message.manipulation.strategy' type='choice' required='false'>
+            <setting id='message.manipulation.strategy' type='choice' required='false'>
                 <name>Msg Strategy</name>
                 <defaultValue>REPLACE</defaultValue>
                 <description></description>

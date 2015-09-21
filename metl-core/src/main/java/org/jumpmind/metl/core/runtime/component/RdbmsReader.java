@@ -32,15 +32,15 @@ public class RdbmsReader extends AbstractDbComponent {
 
     public static final String TYPE = "RDBMS Reader";
 
-    public final static String SQL = "rdbms.reader.sql";
+    public final static String SQL = "sql";
 
-    public final static String ROWS_PER_MESSAGE = "rdbms.reader.rows.per.message";
+    public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
-    public final static String TRIM_COLUMNS = "rdbms.reader.trim.columns";
+    public final static String TRIM_COLUMNS = "trim.columns";
 
-    public final static String MATCH_ON_COLUMN_NAME_ONLY = "rdbms.reader.match.on.column.name";
+    public final static String MATCH_ON_COLUMN_NAME_ONLY = "match.on.column.name";
 
-    public final static String MESSAGE_MANIPULATION_STRATEGY = "rdbms.reader.message.manipulation.strategy";
+    public final static String MESSAGE_MANIPULATION_STRATEGY = "message.manipulation.strategy";
 
     List<String> sqls;
 
