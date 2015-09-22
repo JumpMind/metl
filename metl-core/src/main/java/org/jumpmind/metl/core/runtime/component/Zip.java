@@ -55,6 +55,7 @@ public class Zip extends AbstractComponentRuntime {
         IStreamable streamable = getResourceReference();
         ZipOutputStream zos = null;
         try {
+        	streamable.delete(relativePathAndFile);
             zos = new ZipOutputStream(streamable.getOutputStream(relativePathAndFile, false), Charset.forName(encoding));
 
             for (String fileName : fileNames) {
