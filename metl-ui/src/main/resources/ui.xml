@@ -1,10 +1,10 @@
 <ui>
     <component-ui id="RDBMS Writer UI" componentId="RDBMS Writer">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/dbwriter.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/rdbmswriter.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditRdbmsWriterPanel</className>
     </component-ui>
-    <component-ui id="Sql Writer UI" componentId="Sql Writer">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/dbwriter.png</iconImage>
+    <component-ui id="Sql Executor UI" componentId="Sql Executor">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/rdbmswriter.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditRdbmsReaderPanel</className>        
     </component-ui>       
     <component-ui id="RDBMS Reader UI" componentId="RDBMS Reader">

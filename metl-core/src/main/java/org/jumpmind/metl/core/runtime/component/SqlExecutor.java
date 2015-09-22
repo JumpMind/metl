@@ -12,7 +12,7 @@ import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-public class SqlWriter extends AbstractDbComponent {
+public class SqlExecutor extends AbstractDbComponent {
 
     private static final String ON_SUCCESS = "ON SUCCESS";
 

@@ -490,10 +490,10 @@
             </setting>
         </settings>
     </component>
-    <component id='Sql Writer' category='WRITER' inputMessageType='any' outputMessageType='any' resourceCategory='datasource'
+    <component id='Sql Executor' category='WRITER' inputMessageType='any' outputMessageType='any' resourceCategory='datasource'
         inputOutputModelsMatch='true'>
-        <name>Sql Writer</name>
-        <className>org.jumpmind.metl.core.runtime.component.SqlWriter</className>
+        <name>Sql Executor</name>
+        <className>org.jumpmind.metl.core.runtime.component.SqlExecutor</className>
         <description></description>
         <settings>
             <setting id='run.when' type='choice' required='false'>
