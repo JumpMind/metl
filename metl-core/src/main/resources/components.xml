@@ -571,7 +571,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Text File Writer' category='WRITER' inputMessageType='text' outputMessageType='none' resourceCategory='streamable'
+    <component id='Text File Writer' category='WRITER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable'
         inputOutputModelsMatch='false'>
         <name>Text File Writer</name>
         <className>org.jumpmind.metl.core.runtime.component.TextFileWriter</className>

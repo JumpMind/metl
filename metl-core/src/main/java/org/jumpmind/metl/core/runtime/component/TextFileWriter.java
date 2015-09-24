@@ -78,6 +78,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
         } catch (IOException e) {
             throw new IoException(e);
         }
+        messageTarget.put(createResultMessage(inputMessage));
     }    
 
     @Override
@@ -86,6 +87,13 @@ public class TextFileWriter extends AbstractComponentRuntime {
         super.stop();
     }
 
+    private Message createResultMessage(Message inputMessage) {
+    	Message resultMessage = new Message(inputMessage.getHeader().getOriginatingStepId());
+    	resultMessage.getHeader().setUnitOfWorkLastMessage(true);
+    	//TODO: Figure out stats we want in the results message and add.
+    	return resultMessage;
+    }
+    
     private void initStreamAndWriter() {
         IStreamable streamable = (IStreamable) getResourceReference();
         if (!append && streamable.supportsDelete()) {
