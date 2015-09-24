@@ -95,8 +95,10 @@ public class RdbmsReaderTest {
         ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
         assertEquals("test row 1", payload.get(0).get("tt1col2"));
         assertEquals("test row x", payload.get(0).get("tt2coly"));
-        assertEquals(false, msgTarget.getMessage(0).getHeader().isUnitOfWorkLastMessage());
-        assertEquals(true, msgTarget.getMessage(1).getHeader().isUnitOfWorkLastMessage());
+        //TODO: can't test these like this anymore.  Need flow and startup message
+        // as this is calculated at the runtime level based on incoming messages
+//        assertEquals(false, msgTarget.getMessage(0).getHeader().isUnitOfWorkLastMessage());
+//        assertEquals(true, msgTarget.getMessage(1).getHeader().isUnitOfWorkLastMessage());
     }
 
     @Test
@@ -116,8 +118,10 @@ public class RdbmsReaderTest {
         ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
         assertEquals("test row 1", payload.get(0).get("tt1col2"));
         assertEquals("test row x", payload.get(0).get("tt2coly"));
-        assertEquals(false, msgTarget.getMessage(0).getHeader().isUnitOfWorkLastMessage());
-        assertEquals(true, msgTarget.getMessage(1).getHeader().isUnitOfWorkLastMessage());
+        //TODO: can't test these like this anymore.  Need flow and startup message
+        // as this is calculated at the runtime level based on incoming messages
+//        assertEquals(false, msgTarget.getMessage(0).getHeader().isUnitOfWorkLastMessage());
+//        assertEquals(true, msgTarget.getMessage(1).getHeader().isUnitOfWorkLastMessage());
     }
     
     @Test
