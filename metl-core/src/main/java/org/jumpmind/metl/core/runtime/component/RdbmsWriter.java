@@ -145,14 +145,14 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
 
             ArrayList<EntityData> inputRows = inputMessage.getPayload();
             if (inputRows == null) {
-            	messageTarget.put(createResultMessage(inputMessage, new ArrayList<Result>()));
+            	messageTarget.put(createResultMessage(inputMessage, new ArrayList<Result>(), unitOfWorkLastMessage));
                 return;
             }
 
             ISqlTransaction transaction = platform.getSqlTemplate().startSqlTransaction();
             transaction.setInBatchMode(batchMode);
             try {
-                write(transaction, inputMessage, messageTarget);
+                write(transaction, inputMessage, messageTarget, unitOfWorkLastMessage);
                 transaction.commit();
             } catch (Throwable ex) {
                 error = ex;
@@ -191,7 +191,8 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
                 .getValueArray(data.toArray(new Object[data.size()]), keyValues.toArray(new Object[keyValues.size()]));
     }
 
-    private void write(ISqlTransaction transaction, Message inputMessage, IMessageTarget messageTarget) {
+    private void write(ISqlTransaction transaction, Message inputMessage, IMessageTarget messageTarget,
+    		boolean unitOfWorkLastMessage) {
         long ts = System.currentTimeMillis();
         int totalStatementCount = 0;
         TargetTable modelTable = null;
@@ -319,7 +320,7 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
                 }
             }
             
-            messageTarget.put(createResultMessage(inputMessage, results));
+            messageTarget.put(createResultMessage(inputMessage, results, unitOfWorkLastMessage));
 
         } catch (RuntimeException ex) {
             if (modelTable != null && data != null) {

@@ -66,7 +66,7 @@ public class SqlExecutor extends AbstractRdbmsComponent {
         }
         getComponentStatistics().incrementOutboundMessages();
 
-        messageTarget.put(createResultMessage(inputMessage, results));
+        messageTarget.put(createResultMessage(inputMessage, results, unitOfWorkLastMessage));
     }
 
     private HashMap<String, Object> getParameters(Message inputMessage) {
