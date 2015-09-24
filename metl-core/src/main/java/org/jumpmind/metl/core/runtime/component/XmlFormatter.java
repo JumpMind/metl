@@ -124,7 +124,7 @@ public class XmlFormatter extends AbstractXML {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
@@ -162,7 +162,7 @@ public class XmlFormatter extends AbstractXML {
         log(LogLevel.INFO, outputPayload.toString());
         getComponentStatistics().incrementOutboundMessages();
         outputMessage.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
-        outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
+        outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
         messageTarget.put(outputMessage);
     }
 

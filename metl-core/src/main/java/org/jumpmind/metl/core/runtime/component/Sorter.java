@@ -37,7 +37,7 @@ public class Sorter extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
@@ -68,7 +68,7 @@ public class Sorter extends AbstractComponentRuntime {
     private void sendMessage(ArrayList<EntityData> dataToSend, IMessageTarget messageTarget,
             boolean lastMessage) {
         Message newMessage = new Message(getFlowStepId());
-        newMessage.getHeader().setLastMessage(lastMessage);
+        newMessage.getHeader().setUnitOfWorkLastMessage(lastMessage);
         newMessage.setPayload(dataToSend);
         getComponentStatistics().incrementOutboundMessages();
         messageTarget.put(newMessage);

@@ -31,6 +31,8 @@ public class StepRuntime implements Runnable {
     boolean running = false;
 
     boolean cancelled = false;
+    
+    boolean unitOfWorkLastMessage = false;
 
     Throwable error;
 
@@ -52,6 +54,10 @@ public class StepRuntime implements Runnable {
         inQueue = new LinkedBlockingQueue<Message>(capacity);
     }
 
+    public boolean isUnitOfWorkLastMessage() {
+    	return unitOfWorkLastMessage;
+    }
+    
     public boolean isStartStep() {
         return sourceStepRuntimes == null || sourceStepRuntimes.size() == 0;
     }
@@ -131,8 +137,9 @@ public class StepRuntime implements Runnable {
                         }
                     } else if (inputMessage != null) {
                         try {
+                        	unitOfWorkLastMessage = calculateUnitOfWorkLastMessage(inputMessage);
                             componentContext.getExecutionTracker().beforeHandle(componentContext);
-                            componentRuntime.handle(inputMessage, target);
+                            componentRuntime.handle(inputMessage, target, unitOfWorkLastMessage);
                         } catch (Exception ex) {
                             recordError(ex);
                         } finally {
@@ -156,6 +163,19 @@ public class StepRuntime implements Runnable {
         }
     }
 
+    private boolean calculateUnitOfWorkLastMessage(Message inputMessage) {
+    	boolean lastMessage = true;
+    	if (inputMessage.getHeader().isUnitOfWorkLastMessage()) {
+    		for (StepRuntime sourceRuntime:sourceStepRuntimes) {
+    			if (!sourceRuntime.isUnitOfWorkLastMessage()) {
+    				lastMessage = false;
+    				break;
+    			}
+    		}
+    	}
+    	return lastMessage;
+    }
+    
     private void removeSourceStepRuntime(String stepId) {
         if (sourceStepRuntimes != null) {
             Iterator<StepRuntime> it = sourceStepRuntimes.iterator();

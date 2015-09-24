@@ -70,7 +70,7 @@ public class RdbmsReaderTest {
         reader.start(new ComponentContext(null, readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
-        reader.handle( msg, msgTarget);
+        reader.handle( msg, msgTarget, true);
 
         assertEquals(2, msgTarget.getTargetMessageCount());
         ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
@@ -89,14 +89,14 @@ public class RdbmsReaderTest {
         message.setPayload(inboundPayload);
         
         MessageTarget msgTarget = new MessageTarget();
-        reader.handle(message, msgTarget);
+        reader.handle(message, msgTarget, true);
 
         assertEquals(2, msgTarget.getTargetMessageCount());
         ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
         assertEquals("test row 1", payload.get(0).get("tt1col2"));
         assertEquals("test row x", payload.get(0).get("tt2coly"));
-        assertEquals(false, msgTarget.getMessage(0).getHeader().isLastMessage());
-        assertEquals(true, msgTarget.getMessage(1).getHeader().isLastMessage());
+        assertEquals(false, msgTarget.getMessage(0).getHeader().isUnitOfWorkLastMessage());
+        assertEquals(true, msgTarget.getMessage(1).getHeader().isUnitOfWorkLastMessage());
     }
 
     @Test
@@ -110,14 +110,14 @@ public class RdbmsReaderTest {
         message.setPayload(inboundPayload);
         
         MessageTarget msgTarget = new MessageTarget();
-        reader.handle(message, msgTarget);
+        reader.handle(message, msgTarget, true);
 
         assertEquals(2, msgTarget.getTargetMessageCount());
         ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
         assertEquals("test row 1", payload.get(0).get("tt1col2"));
         assertEquals("test row x", payload.get(0).get("tt2coly"));
-        assertEquals(false, msgTarget.getMessage(0).getHeader().isLastMessage());
-        assertEquals(true, msgTarget.getMessage(1).getHeader().isLastMessage());
+        assertEquals(false, msgTarget.getMessage(0).getHeader().isUnitOfWorkLastMessage());
+        assertEquals(true, msgTarget.getMessage(1).getHeader().isUnitOfWorkLastMessage());
     }
     
     @Test

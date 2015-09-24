@@ -6,5 +6,6 @@ public class StartupMessage extends Message {
 
 	public StartupMessage() {
 	    super(null);
+	    this.getHeader().setUnitOfWorkLastMessage(true);
     }
 }

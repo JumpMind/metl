@@ -63,7 +63,7 @@ public class XmlParser extends AbstractXML {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         ArrayList<String> inputRows = inputMessage.getPayload();
         ArrayList<EntityData> payload = new ArrayList<EntityData>();
@@ -117,7 +117,7 @@ public class XmlParser extends AbstractXML {
 
         Message msg = new Message(getFlowStepId());
         msg.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
-        msg.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
+        msg.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
         msg.setPayload(payload);
         messageTarget.put(msg);
 

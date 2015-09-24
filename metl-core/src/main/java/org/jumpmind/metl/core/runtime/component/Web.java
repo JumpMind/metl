@@ -54,7 +54,7 @@ public class Web extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
 
         IStreamable streamable = getResourceReference();
@@ -91,7 +91,7 @@ public class Web extends AbstractComponentRuntime {
                 Message outputMessage = new Message(getFlowStepId());
                 outputMessage.setPayload(outputPayload);
                 outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
-                outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
+                outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
                 messageTarget.put(outputMessage);
             }
         } catch (IOException e) {

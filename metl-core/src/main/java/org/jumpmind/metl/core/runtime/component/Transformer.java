@@ -43,12 +43,12 @@ public class Transformer extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget) {
+    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();        
         Model inputModel = getComponent().getInputModel();
         Message outputMessage = new Message(getFlowStepId());
         outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
-        outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
+        outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
         List<EntityData> inDatas = inputMessage.getPayload();
         ArrayList<EntityData> outDatas = new ArrayList<EntityData>(inDatas.size());
         outputMessage.setPayload(outDatas);

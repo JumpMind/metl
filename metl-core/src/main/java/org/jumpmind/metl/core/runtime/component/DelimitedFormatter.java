@@ -57,7 +57,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget) {
+    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
 
         if (attributes.size() == 0) {
             log(LogLevel.INFO, "There are no format attributes configured.  Writing all entity fields to the output");
@@ -92,7 +92,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
         outputMessage.setPayload(outputPayload);
         getComponentStatistics().incrementOutboundMessages();
         outputMessage.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
-        outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
+        outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
         messageTarget.put(outputMessage);
     }
 

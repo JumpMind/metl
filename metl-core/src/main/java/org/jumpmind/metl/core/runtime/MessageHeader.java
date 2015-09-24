@@ -13,7 +13,7 @@ public class MessageHeader extends HashMap<String, Serializable> implements Seri
 
     int sequenceNumber;
 
-    boolean lastMessage;
+    boolean unitOfWorkLastMessage;
 
     String originatingStepId;
 
@@ -47,12 +47,12 @@ public class MessageHeader extends HashMap<String, Serializable> implements Seri
         this.sequenceNumber = sequenceNumber;
     }
 
-    public boolean isLastMessage() {
-        return lastMessage;
+    public boolean isUnitOfWorkLastMessage() {
+        return unitOfWorkLastMessage;
     }
 
-    public void setLastMessage(boolean lastMessage) {
-        this.lastMessage = lastMessage;
+    public void setUnitOfWorkLastMessage(boolean lastMessage) {
+        this.unitOfWorkLastMessage = lastMessage;
     }
 
     public void setTargetStepIds(Collection<String> targetStepIds) {
@@ -71,7 +71,7 @@ public class MessageHeader extends HashMap<String, Serializable> implements Seri
         mh.putAll(this);
         mh.setExecutionId(executionId);
         mh.setSequenceNumber(sequenceNumber);
-        mh.setLastMessage(lastMessage);
+        mh.setUnitOfWorkLastMessage(unitOfWorkLastMessage);
         if (targetStepIds != null) {
             mh.setTargetStepIds(new HashSet<String>(targetStepIds));
         }

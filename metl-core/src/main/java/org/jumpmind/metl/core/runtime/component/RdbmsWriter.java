@@ -32,7 +32,7 @@ import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
-public class RdbmsWriter extends AbstractComponentRuntime {
+public class RdbmsWriter extends AbstractRdbmsComponent {
 
     public static final String TYPE = "RDBMS Writer";
 
@@ -133,7 +133,7 @@ public class RdbmsWriter extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(final Message inputMessage, final IMessageTarget messageTarget) {
+    public void handle(final Message inputMessage, final IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
 
         lastPreparedDml = null;
         getComponentStatistics().incrementInboundMessages();
@@ -145,13 +145,14 @@ public class RdbmsWriter extends AbstractComponentRuntime {
 
             ArrayList<EntityData> inputRows = inputMessage.getPayload();
             if (inputRows == null) {
+            	messageTarget.put(createResultMessage(inputMessage, new ArrayList<Result>()));
                 return;
             }
 
             ISqlTransaction transaction = platform.getSqlTemplate().startSqlTransaction();
             transaction.setInBatchMode(batchMode);
             try {
-                write(transaction, inputRows);
+                write(transaction, inputMessage, messageTarget);
                 transaction.commit();
             } catch (Throwable ex) {
                 error = ex;
@@ -165,6 +166,7 @@ public class RdbmsWriter extends AbstractComponentRuntime {
                 transaction.close();
             }
         }
+        
     }
 
     private Object[] getValues(boolean isUpdate, TargetTable modelTable, EntityData inputRow) {
@@ -189,11 +191,13 @@ public class RdbmsWriter extends AbstractComponentRuntime {
                 .getValueArray(data.toArray(new Object[data.size()]), keyValues.toArray(new Object[keyValues.size()]));
     }
 
-    private void write(ISqlTransaction transaction, List<EntityData> inputRows) {
+    private void write(ISqlTransaction transaction, Message inputMessage, IMessageTarget messageTarget) {
         long ts = System.currentTimeMillis();
         int totalStatementCount = 0;
         TargetTable modelTable = null;
         Object[] data = null;
+    	List<Result> results = new ArrayList<Result>();
+    	List<EntityData> inputRows = inputMessage.getPayload();
         try {
             Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<TargetTableDefintion, WriteStats>();
             for (TargetTableDefintion targetTableDefinition : targetTables) {
@@ -209,6 +213,7 @@ public class RdbmsWriter extends AbstractComponentRuntime {
                         if (modelTable.shouldProcess(inputRow)) {
                             data = getValues(true, modelTable, inputRow);
                             int count = execute(transaction, modelTable.getStatement(), new Object(), data, true);
+                            results.add(new Result(modelTable.getStatement().getSql(), count));
                             totalStatementCount++;
                             stats.updateCount += count;
                             getComponentStatistics().incrementNumberEntitiesProcessed(count);
@@ -218,6 +223,7 @@ public class RdbmsWriter extends AbstractComponentRuntime {
                                     log.debug("Falling back to insert");
                                     data = getValues(false, modelTable, inputRow);
                                     count = execute(transaction, modelTable.getStatement(), new Object(), data, true);
+                                    results.add(new Result(modelTable.getStatement().getSql(), count));
                                     totalStatementCount++;
                                     stats.fallbackInsertCount += count;
                                     getComponentStatistics().incrementNumberEntitiesProcessed(count);
@@ -236,6 +242,7 @@ public class RdbmsWriter extends AbstractComponentRuntime {
                             if (modelTable.shouldProcess(inputRow)) {
                                 data = getValues(false, modelTable, inputRow);
                                 int count = execute(transaction, modelTable.getStatement(), new Object(), data, !replaceRows && !continueOnError);
+                                results.add(new Result(modelTable.getStatement().getSql(), count));                                
                                 totalStatementCount++;
                                 stats.insertCount += count;
                                 getComponentStatistics().incrementNumberEntitiesProcessed(count);
@@ -247,6 +254,7 @@ public class RdbmsWriter extends AbstractComponentRuntime {
                                     log.debug("Falling back to update");
                                     data = getValues(true, modelTable, inputRow);
                                     int count = execute(transaction, modelTable.getStatement(), new Object(), data, true);
+                                    results.add(new Result(modelTable.getStatement().getSql(), count));
                                     totalStatementCount++;
                                     stats.fallbackUpdateCount += count;
                                     getComponentStatistics().incrementNumberEntitiesProcessed(count);
@@ -310,6 +318,8 @@ public class RdbmsWriter extends AbstractComponentRuntime {
 
                 }
             }
+            
+            messageTarget.put(createResultMessage(inputMessage, results));
 
         } catch (RuntimeException ex) {
             if (modelTable != null && data != null) {

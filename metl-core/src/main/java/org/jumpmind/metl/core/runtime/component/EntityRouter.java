@@ -57,7 +57,7 @@ public class EntityRouter extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         Map<String, Message> outboundMessages = new HashMap<String, Message>();
         ArrayList<EntityData> inputDatas = inputMessage.getPayload();

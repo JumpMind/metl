@@ -28,7 +28,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.StringUtils;
 
-public class RdbmsReader extends AbstractDbComponent {
+public class RdbmsReader extends AbstractRdbmsComponent {
 
     public static final String TYPE = "RDBMS Reader";
 
@@ -58,7 +58,7 @@ public class RdbmsReader extends AbstractDbComponent {
     }
 
     @Override
-    public void handle(final Message inputMessage, final IMessageTarget messageTarget) {
+    public void handle(final Message inputMessage, final IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
 
         getComponentStatistics().incrementInboundMessages();
 
@@ -84,6 +84,7 @@ public class RdbmsReader extends AbstractDbComponent {
          * to it. If the reader is started by another component, then loop for
          * all records in the input message
          */
+        Message message = null;
         for (int i = 0; i < inboundRecordCount; i++) {
             if (payload != null && payload.size() > i && payload.get(i) instanceof EntityData) {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, payload.get(i));
@@ -92,18 +93,18 @@ public class RdbmsReader extends AbstractDbComponent {
             }
 
             MessageResultSetExtractor messageResultSetExtractor = new MessageResultSetExtractor(inputMessage, messageTarget);
-            Message message = null;
             for (String sql : sqls) {
                 String sqlToExecute = FormatUtils.replaceTokens(sql, context.getFlowParametersAsString(), true);
                 log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
                 messageResultSetExtractor.setSqlToExecute(sqlToExecute);
                 message = template.query(sqlToExecute, paramMap, messageResultSetExtractor);
             }
-            if (message != null) {
-                //TODO: This isn't correct if you are looping for multiple input records
-                message.getHeader().setLastMessage(true);
-                messageTarget.put(message);
-            }
+        }
+        if (message != null) {
+        	if (inputMessage.getHeader().isUnitOfWorkLastMessage()) {
+        		message.getHeader().setUnitOfWorkLastMessage(true);
+        	}
+            messageTarget.put(message);
         }
     }
 

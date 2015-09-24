@@ -24,7 +24,7 @@ public class Deduper extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
@@ -60,7 +60,7 @@ public class Deduper extends AbstractComponentRuntime {
     private void sendMessage(ArrayList<EntityData> payload, IMessageTarget messageTarget,
             boolean lastMessage) {
         Message newMessage = new Message(getFlowStepId());
-        newMessage.getHeader().setLastMessage(lastMessage);
+        newMessage.getHeader().setUnitOfWorkLastMessage(lastMessage);
         newMessage.setPayload(payload);
         getComponentStatistics().incrementOutboundMessages();
         messageTarget.put(newMessage);

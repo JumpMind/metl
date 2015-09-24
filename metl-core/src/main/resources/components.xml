@@ -35,7 +35,7 @@
             </setting>
         </settings>
     </component>
-    <component id='RDBMS Writer' category='WRITER' inputMessageType='entity' outputMessageType='none' resourceCategory='datasource'
+    <component id='RDBMS Writer' category='WRITER' inputMessageType='entity' outputMessageType='text' resourceCategory='datasource'
         inputOutputModelsMatch='false'>
         <name>RDBMS Writer</name>
         <className>org.jumpmind.metl.core.runtime.component.RdbmsWriter</className>
@@ -490,7 +490,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Sql Executor' category='WRITER' inputMessageType='any' outputMessageType='any' resourceCategory='datasource'
+    <component id='Sql Executor' category='WRITER' inputMessageType='any' outputMessageType='text' resourceCategory='datasource'
         inputOutputModelsMatch='true'>
         <name>Sql Executor</name>
         <className>org.jumpmind.metl.core.runtime.component.SqlExecutor</className>
@@ -712,4 +712,9 @@
             </setting>
         </settings>
     </component>
+    <component id='Last Unit of Work' category='CONTROL' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='false'>
+        <name>Last Unit of Work</name>
+        <className>org.jumpmind.metl.core.runtime.component.LastUnitOfWork</className>
+        <description></description>
+    </component>    
 </components>

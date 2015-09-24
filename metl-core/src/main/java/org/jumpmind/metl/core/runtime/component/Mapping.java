@@ -71,7 +71,7 @@ public class Mapping extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget) {
+    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
         if (inputRows == null) {
@@ -81,7 +81,7 @@ public class Mapping extends AbstractComponentRuntime {
         ArrayList<EntityData> outputRows = new ArrayList<EntityData>();
         Message outputMessage = new Message(getFlowStepId());
         outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
-        outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
+        outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
 
         for (EntityData inputRow : inputRows) {
             EntityData outputRow = new EntityData();            

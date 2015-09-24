@@ -1,26 +1,24 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
-import org.jumpmind.util.AppUtils;
 
-public class Delay extends AbstractComponentRuntime {
+public class LastUnitOfWork extends AbstractComponentRuntime {
 
-    public static final String TYPE = "Delay";
+    public static final String TYPE = "Last Unit of Work";
     
-    public final static String DELAY_TIME = "delay.in.ms";
-    
-    long delay = 1000;
-
     @Override
     protected void start() {        
-        delay = getComponent().getLong(DELAY_TIME, 1000l);
     }
     
     @Override
     public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
-        AppUtils.sleep(delay);
+        getComponentStatistics().incrementInboundMessages();        
+        if (unitOfWorkLastMessage) {
+        	Message msg = new StartupMessage();
+        	messageTarget.put(msg);
+        }
         getComponentStatistics().incrementOutboundMessages();
         messageTarget.put(inputMessage.clone(getFlowStepId()));
     }

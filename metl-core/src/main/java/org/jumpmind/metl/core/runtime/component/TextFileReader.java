@@ -75,7 +75,7 @@ public class TextFileReader extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         String currentLine;
         int linesRead = 0;
@@ -206,7 +206,7 @@ public class TextFileReader extends AbstractComponentRuntime {
             int numberMessages, boolean lastMessage) {
         Message message = new Message(getFlowStepId()); 
         message.getHeader().setSequenceNumber(numberMessages);
-        message.getHeader().setLastMessage(lastMessage);
+        message.getHeader().setUnitOfWorkLastMessage(lastMessage);
         message.setPayload(payload);
         getComponentStatistics().incrementOutboundMessages();
         messageTarget.put(message);

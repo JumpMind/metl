@@ -99,7 +99,7 @@ public class Script extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         invoke("setInputMessage", inputMessage);
         invoke("setMessageTarget", messageTarget);
