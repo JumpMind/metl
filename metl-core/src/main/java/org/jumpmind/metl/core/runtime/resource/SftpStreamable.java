@@ -87,22 +87,24 @@ public class SftpStreamable implements IStreamable {
             session.connect(connectionTimeout);
             sftp = (ChannelSftp) session.openChannel("sftp");
             sftp.connect();
+            sftp.cd(basePath);
         } catch (JSchException e) {
             throw new IoException(e);
-        }   
+        } catch (SftpException se) {
+        	throw new IoException(se);
+		}   
     }    
 
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist) {
         try {
             connect();
-            String filePath = basePath + relativePath;
-            if (mustExist && !fileExists(filePath)) {
+            if (mustExist && !fileExists(relativePath)) {
                 sftp.disconnect();
                 session.disconnect();
-                throw new IoException("Could not find endpoint %s that was configured as MUST EXIST",filePath);
+                throw new IoException("Could not find endpoint %s that was configured as MUST EXIST",relativePath);
             }            
-            return sftp.get(filePath);
+            return sftp.get(relativePath);
         } catch (Exception e) {
             throw new IoException("Error getting the input stream for ssh endpoint.  Error %s", e.getMessage());
         } 
@@ -117,8 +119,7 @@ public class SftpStreamable implements IStreamable {
     public OutputStream getOutputStream(String relativePath, boolean mustExist) {
         try {
             connect();
-            String filePath = basePath + relativePath;
-            return sftp.put(filePath, ChannelSftp.OVERWRITE);
+            return sftp.put(relativePath, ChannelSftp.OVERWRITE);
         } catch (Exception e) {            
             throw new IoException(e);
         } 
@@ -140,8 +141,7 @@ public class SftpStreamable implements IStreamable {
     public boolean delete(String relativePath) {
         try {
             connect();
-            String filePath = basePath + relativePath;
-            sftp.rm(filePath);
+            sftp.rm(relativePath);
             return true;
         } catch (SftpException e) {
             return false;
