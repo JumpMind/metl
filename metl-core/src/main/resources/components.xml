@@ -290,6 +290,15 @@
                     <choice>Raw</choice>
                 </choices>
             </setting>
+            <setting id='unit.of.work' type='choice' required='true'>
+                <name>Unit of Work</name>
+                <defaultValue>Flow</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>Flow</choice>
+                    <choice>Input Message</choice>
+                </choices>            
+            </setting>                                     
         </settings>
     </component>
     <component id='Joiner' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
@@ -331,8 +340,7 @@
                 <description></description>
             </setting>
         </settings>
-    </component>
-    
+    </component>   
     <component id='Mapping' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='false'>
         <name>Mapping</name>
@@ -344,6 +352,15 @@
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
+            <setting id='unit.of.work' type='choice' required='true'>
+                <name>Unit of Work</name>
+                <defaultValue>Flow</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>Flow</choice>
+                    <choice>Input Message</choice>
+                </choices>            
+            </setting>                        
         </settings>
     </component>
     <component id='Message Logger' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='true'>
@@ -708,6 +725,15 @@
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
+            <setting id='unit.of.work' type='choice' required='true'>
+                <name>Unit of Work</name>
+                <defaultValue>Flow</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>Flow</choice>
+                    <choice>Input Message</choice>
+                </choices>            
+            </setting>                                    
         </settings>
     </component>
     <component id='XSLT Processor' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none'

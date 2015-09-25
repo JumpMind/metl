@@ -29,6 +29,8 @@ public class Mapping extends AbstractComponentRuntime {
 
     boolean setUnmappedAttributesToNull;
 
+    String unitOfWork;
+    
     @Override
     protected void start() {
         
@@ -36,7 +38,7 @@ public class Mapping extends AbstractComponentRuntime {
 
         setUnmappedAttributesToNull = getComponent().getBoolean(
                 SET_UNMAPPED_ATTRIBUTES_TO_NULL, false);
-
+        unitOfWork = getComponent().get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
         attrToAttrMap = new HashMap<String, Set<String>>();
         List<ComponentAttributeSetting> attributeSettings = getComponent()
                 .getAttributeSettings();
@@ -81,7 +83,6 @@ public class Mapping extends AbstractComponentRuntime {
         ArrayList<EntityData> outputRows = new ArrayList<EntityData>();
         Message outputMessage = new Message(getFlowStepId());
         outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
-        outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
 
         for (EntityData inputRow : inputRows) {
             EntityData outputRow = new EntityData();            
@@ -114,7 +115,10 @@ public class Mapping extends AbstractComponentRuntime {
 
         getComponentStatistics().incrementOutboundMessages();
         outputMessage.setPayload(outputRows);
+        if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
+        		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
+            outputMessage.getHeader().setUnitOfWorkLastMessage(true);
+        }
         messageTarget.put(outputMessage);
     }
-
 }

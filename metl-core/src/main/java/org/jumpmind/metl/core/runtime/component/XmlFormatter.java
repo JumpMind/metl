@@ -59,6 +59,8 @@ public class XmlFormatter extends AbstractXML {
     boolean useParameterReplacement = true;
 
     String xmlFormat;
+    
+    String unitOfWork;
 
     @Override
     protected void start() {
@@ -67,6 +69,8 @@ public class XmlFormatter extends AbstractXML {
         ignoreNamespace = properties.is(IGNORE_NAMESPACE);
         useParameterReplacement = properties.is(PARAMETER_REPLACEMENT);
         xmlFormat = properties.get(XML_FORMAT);
+        unitOfWork = properties.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
+
         Setting templateSetting = getComponent().findSetting(XML_FORMATTER_TEMPLATE);
 
         if (templateSetting != null && StringUtils.isNotBlank(templateSetting.getValue())) {
@@ -162,7 +166,11 @@ public class XmlFormatter extends AbstractXML {
         log(LogLevel.INFO, outputPayload.toString());
         getComponentStatistics().incrementOutboundMessages();
         outputMessage.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
-        outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
+
+        if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
+        		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
+            outputMessage.getHeader().setUnitOfWorkLastMessage(true);    
+        }  
         messageTarget.put(outputMessage);
     }
 
