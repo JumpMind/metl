@@ -16,6 +16,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 abstract public class AbstractRdbmsComponent extends AbstractComponentRuntime {
 	
+    public static final String UNIT_OF_WORK_SQL_STATEMENT = "SQL Statement";
+    
 	protected List<Result> results = new ArrayList<Result>();
 	
     protected NamedParameterJdbcTemplate getJdbcTemplate() {
@@ -50,15 +52,13 @@ abstract public class AbstractRdbmsComponent extends AbstractComponentRuntime {
     	return payload;
     }
     
-    protected Message createResultMessage(Message inputMessage, List<Result> results, boolean unitOfWorkLastMessage) {
+    protected Message createResultMessage(Message inputMessage, List<Result> results, boolean unitOfWorkLastMessage, String unitOfWork) {
         Message resultMessage = new Message(getFlowStepId());
-        if (inputMessage.getHeader().isUnitOfWorkLastMessage()) {
-        	resultMessage.getHeader().setUnitOfWorkLastMessage(true);
-        }
         resultMessage.setPayload(convertResultsToTextPayload(results));
-        if (unitOfWorkLastMessage) {
-        	resultMessage.getHeader().setUnitOfWorkLastMessage(true);
-        }
+        if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
+        		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
+            resultMessage.getHeader().setUnitOfWorkLastMessage(true);        	
+        }   
         return resultMessage;
     }
     

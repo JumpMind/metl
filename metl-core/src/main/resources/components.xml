@@ -33,6 +33,16 @@
                     <choice>ENHANCE</choice>
                 </choices>
             </setting>
+            <setting id='unit.of.work' type='choice' required='true'>
+                <name>Unit of Work</name>
+                <defaultValue>Flow</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>SQL Statement</choice>
+                    <choice>Input Message</choice>
+                    <choice>Flow</choice>
+                </choices>            
+            </setting>                        
         </settings>
     </component>
     <component id='RDBMS Writer' category='WRITER' inputMessageType='entity' outputMessageType='text' resourceCategory='datasource'
@@ -83,7 +93,16 @@
                 <name>Batch Mode</name>
                 <defaultValue>false</defaultValue>
                 <description></description>
-            </setting>            
+            </setting>   
+            <setting id='unit.of.work' type='choice' required='true'>
+                <name>Unit of Work</name>
+                <defaultValue>Flow</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>Input Message</choice>
+                    <choice>Flow</choice>
+                </choices>            
+            </setting>                        
         </settings>
     </component>
     <component id='Deduper' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
@@ -510,6 +529,16 @@
                 <name>Sql</name>
                 <description></description>
             </setting>
+            <setting id='unit.of.work' type='choice' required='true'>
+                <name>Unit of Work</name>
+                <defaultValue>Flow</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>Input Message</choice>
+                    <choice>Flow</choice>
+                    <choice>SQL Statement</choice>
+                </choices>            
+            </setting>                                    
         </settings>
     </component>
     <component id='Text File Reader' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable'
@@ -569,6 +598,16 @@
                 <name>Header Lines to Skip</name>
                 <description></description>
             </setting>
+            <setting id='unit.of.work' type='choice' required='true'>
+                <name>Unit of Work</name>
+                <defaultValue>Flow</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>File</choice>
+                    <choice>Input Message</choice>
+                    <choice>Flow</choice>
+                </choices>            
+            </setting>            
         </settings>
     </component>
     <component id='Text File Writer' category='WRITER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable'
@@ -600,6 +639,14 @@
                 <defaultValue>UTF-8</defaultValue>
                 <description></description>
             </setting>
+            <setting id='unit.of.work' type='choice' required='true'>
+                <name>Unit of Work</name>
+                <defaultValue>Flow</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>Flow</choice>
+                </choices>            
+            </setting>            
         </settings>
     </component>
     <component id='Text Replace' category='PROCESSOR' inputMessageType='text' outputMessageType='text' resourceCategory='none'

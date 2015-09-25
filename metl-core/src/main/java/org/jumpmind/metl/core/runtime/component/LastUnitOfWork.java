@@ -17,10 +17,10 @@ public class LastUnitOfWork extends AbstractComponentRuntime {
         getComponentStatistics().incrementInboundMessages();        
         if (unitOfWorkLastMessage) {
         	Message msg = new StartupMessage();
+        	msg.getHeader().setOriginatingStepId(getFlowStepId());
         	messageTarget.put(msg);
+            getComponentStatistics().incrementOutboundMessages();
         }
-        getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(inputMessage.clone(getFlowStepId()));
     }
 
 }

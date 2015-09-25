@@ -51,6 +51,8 @@ public class RdbmsReader extends AbstractRdbmsComponent {
     boolean trimColumns = false;
 
     boolean matchOnColumnNameOnly = false;
+    
+    String unitOfWork;
 
     @Override
     protected void start() {
@@ -97,13 +99,15 @@ public class RdbmsReader extends AbstractRdbmsComponent {
                 String sqlToExecute = FormatUtils.replaceTokens(sql, context.getFlowParametersAsString(), true);
                 log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
                 messageResultSetExtractor.setSqlToExecute(sqlToExecute);
-                message = template.query(sqlToExecute, paramMap, messageResultSetExtractor);
+                message = template.query(sqlToExecute, paramMap, messageResultSetExtractor);                
+                //TODO: deal with unitOfWork = SQL Statement                
             }
         }
         if (message != null) {
-        	if (inputMessage.getHeader().isUnitOfWorkLastMessage()) {
-        		message.getHeader().setUnitOfWorkLastMessage(true);
-        	}
+            if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
+            		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
+                message.getHeader().setUnitOfWorkLastMessage(true);        	
+            }        	
             messageTarget.put(message);
         }
     }
@@ -213,6 +217,7 @@ public class RdbmsReader extends AbstractRdbmsComponent {
                 messageManipulationStrategy.name()));
         trimColumns = properties.is(TRIM_COLUMNS);
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
+        unitOfWork = properties.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
     }
 
     public Map<Integer, String> getSqlColumnEntityHints(String sql) {
@@ -367,5 +372,4 @@ public class RdbmsReader extends AbstractRdbmsComponent {
             this.sqlToExecute = sqlToExecute;
         }
     }
-
 }
