@@ -85,6 +85,8 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
     Throwable error;
 
     String lastPreparedDml;
+    
+    String unitOfWork;
 
     @Override
     protected void start() {
@@ -100,24 +102,7 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
             throw new IllegalStateException("A database writer must have an input model defined");
         }
 
-        TypedProperties properties = getTypedProperties();
-        batchMode = properties.is(BATCH_MODE, batchMode);
-        replaceRows = properties.is(REPLACE);
-        continueOnError = properties.is(CONTINUE_ON_ERROR, continueOnError);
-        updateFirst = properties.is(UPDATE_FIRST);
-        insertFallback = properties.is(INSERT_FALLBACK);
-        quoteIdentifiers = properties.is(QUOTE_IDENTIFIERS);
-        fitToColumn = properties.is(FIT_TO_COLUMN);
-
-        catalogName = FormatUtils.replaceTokens(properties.get(CATALOG), context.getFlowParametersAsString(), true);
-        if (isBlank(catalogName)) {
-            catalogName = null;
-        }
-
-        schemaName = FormatUtils.replaceTokens(properties.get(SCHEMA), context.getFlowParametersAsString(), true);
-        if (isBlank(schemaName)) {
-            schemaName = null;
-        }
+        applySettings();
 
         DataSource dataSource = (DataSource) getResourceReference();
         platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), quoteIdentifiers);
@@ -145,7 +130,7 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
 
             ArrayList<EntityData> inputRows = inputMessage.getPayload();
             if (inputRows == null) {
-            	messageTarget.put(createResultMessage(inputMessage, new ArrayList<Result>(), unitOfWorkLastMessage));
+            	messageTarget.put(createResultMessage(inputMessage, new ArrayList<Result>(), unitOfWorkLastMessage, unitOfWork));
                 return;
             }
 
@@ -169,6 +154,27 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
         
     }
 
+    private void applySettings() {
+        TypedProperties properties = getTypedProperties();
+        batchMode = properties.is(BATCH_MODE, batchMode);
+        replaceRows = properties.is(REPLACE);
+        continueOnError = properties.is(CONTINUE_ON_ERROR, continueOnError);
+        updateFirst = properties.is(UPDATE_FIRST);
+        insertFallback = properties.is(INSERT_FALLBACK);
+        quoteIdentifiers = properties.is(QUOTE_IDENTIFIERS);
+        fitToColumn = properties.is(FIT_TO_COLUMN);
+        unitOfWork = properties.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
+        catalogName = FormatUtils.replaceTokens(properties.get(CATALOG), context.getFlowParametersAsString(), true);
+        if (isBlank(catalogName)) {
+            catalogName = null;
+        }
+
+        schemaName = FormatUtils.replaceTokens(properties.get(SCHEMA), context.getFlowParametersAsString(), true);
+        if (isBlank(schemaName)) {
+            schemaName = null;
+        }
+    }
+    
     private Object[] getValues(boolean isUpdate, TargetTable modelTable, EntityData inputRow) {
         ArrayList<Object> data = new ArrayList<Object>();
         for (TargetColumn modelColumn : modelTable.getTargetColumns()) {
@@ -320,7 +326,7 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
                 }
             }
             
-            messageTarget.put(createResultMessage(inputMessage, results, unitOfWorkLastMessage));
+            messageTarget.put(createResultMessage(inputMessage, results, unitOfWorkLastMessage, unitOfWork));
 
         } catch (RuntimeException ex) {
             if (modelTable != null && data != null) {

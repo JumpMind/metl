@@ -40,6 +40,8 @@ public class TextFileWriter extends AbstractComponentRuntime {
     boolean mustExist;
     
     boolean append;
+
+    String unitOfWork;
     
     String lineTerminator;
 
@@ -79,6 +81,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
             throw new IoException(e);
         }
         messageTarget.put(createResultMessage(inputMessage));
+        getComponentStatistics().incrementOutboundMessages();
     }    
 
     @Override
@@ -88,7 +91,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
     }
 
     private Message createResultMessage(Message inputMessage) {
-    	Message resultMessage = new Message(inputMessage.getHeader().getOriginatingStepId());
+    	Message resultMessage = new Message(getFlowStepId());
     	resultMessage.getHeader().setUnitOfWorkLastMessage(true);
     	//TODO: Figure out stats we want in the results message and add.
     	return resultMessage;
@@ -113,6 +116,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
         if (lineTerminator != null) {
             lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
         }
+        unitOfWork = properties.get(UNIT_OF_WORK);
     }
 
 

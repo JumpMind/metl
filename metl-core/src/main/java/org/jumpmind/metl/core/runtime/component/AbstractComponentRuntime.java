@@ -31,7 +31,13 @@ import org.jumpmind.properties.TypedProperties;
 
 abstract public class AbstractComponentRuntime extends AbstractRuntimeObject implements IComponentRuntime {
 
-    public final static String INBOUND_QUEUE_CAPACITY = "inbound.queue.capacity";
+    public final static String INBOUND_QUEUE_CAPACITY = "inbound.queue.capacity"; 
+    
+    public static final String UNIT_OF_WORK = "unit.of.work";
+    
+    public static final String UNIT_OF_WORK_INPUT_MESSAGE = "Input Message";
+    
+    public static final String UNIT_OF_WORK_FLOW = "Flow";
     
     public final static String ENABLED = "enabled";
 
