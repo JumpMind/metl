@@ -80,8 +80,10 @@ public class TextFileWriter extends AbstractComponentRuntime {
         } catch (IOException e) {
             throw new IoException(e);
         }
-        messageTarget.put(createResultMessage(inputMessage));
-        getComponentStatistics().incrementOutboundMessages();
+        if (messageTarget != null) {
+	        messageTarget.put(createResultMessage(inputMessage, unitOfWorkLastMessage));
+	        getComponentStatistics().incrementOutboundMessages();
+        }
     }    
 
     @Override
@@ -90,9 +92,13 @@ public class TextFileWriter extends AbstractComponentRuntime {
         super.stop();
     }
 
-    private Message createResultMessage(Message inputMessage) {
+    private Message createResultMessage(Message inputMessage, boolean unitOfWorkLastMessage) {
     	Message resultMessage = new Message(getFlowStepId());
-    	resultMessage.getHeader().setUnitOfWorkLastMessage(true);
+
+        if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
+        		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
+            resultMessage.getHeader().setUnitOfWorkLastMessage(true);        	
+        }     
     	//TODO: Figure out stats we want in the results message and add.
     	return resultMessage;
     }
@@ -116,7 +122,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
         if (lineTerminator != null) {
             lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
         }
-        unitOfWork = properties.get(UNIT_OF_WORK);
+        unitOfWork = properties.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
     }
 
 

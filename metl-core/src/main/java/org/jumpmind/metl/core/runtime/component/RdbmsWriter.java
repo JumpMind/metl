@@ -129,8 +129,9 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
             }
 
             ArrayList<EntityData> inputRows = inputMessage.getPayload();
-            if (inputRows == null) {
+            if (inputRows == null && messageTarget != null) {
             	messageTarget.put(createResultMessage(inputMessage, new ArrayList<Result>(), unitOfWorkLastMessage, unitOfWork));
+                getComponentStatistics().incrementOutboundMessages();
                 return;
             }
 
