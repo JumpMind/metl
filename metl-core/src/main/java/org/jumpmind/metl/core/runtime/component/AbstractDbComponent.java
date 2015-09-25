@@ -14,7 +14,10 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 abstract public class AbstractDbComponent extends AbstractComponentRuntime {
 
     protected NamedParameterJdbcTemplate getJdbcTemplate() {
-        return new NamedParameterJdbcTemplate((DataSource) this.context.getResourceRuntime().reference());
+    	if (getResourceRuntime() == null) {
+            throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
+        }
+    	return new NamedParameterJdbcTemplate((DataSource) this.context.getResourceRuntime().reference());
     }
     
     protected List<String> getSqlStatements(String script) {
