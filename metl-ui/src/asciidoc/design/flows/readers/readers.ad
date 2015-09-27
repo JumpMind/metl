@@ -3,7 +3,7 @@
 
 Readers are a set of components that read data and pass that data to other components downstream in the associated flow.  
 
-include::sql-reader.ad[]
+include::rdbms-reader.ad[]
 
 include::text-file-reader.ad[]
 
