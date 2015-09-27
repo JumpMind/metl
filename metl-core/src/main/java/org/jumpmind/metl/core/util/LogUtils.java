@@ -25,7 +25,8 @@ public final class LogUtils {
         }
     }
 
-    public static void initLogging(ApplicationContext ctx) {
+    public static void initLogging(String configDir, ApplicationContext ctx) {
+                
         /* Optionally remove existing handlers attached to j.u.l root logger */
         SLF4JBridgeHandler.removeHandlersForRootLogger();
 
@@ -44,13 +45,16 @@ public final class LogUtils {
         boolean fileEnabled = Boolean.parseBoolean(ctx.getEnvironment().getProperty(
                 EnvConstants.LOG_TO_FILE_ENABLED, "true"));
         if (fileEnabled) {
-            String logFile = ctx.getEnvironment().getProperty(EnvConstants.LOG_FILE,
-                    "logs/application.log");
-            File dir = new File(logFile).getParentFile();
-            dir.mkdirs();
+
+            String logFilePath = ctx.getEnvironment().getProperty(EnvConstants.LOG_FILE,(String)null);
+            if (logFilePath == null) {
+                File logDir = new File(configDir, "logs");
+                logDir.mkdirs();
+                logFilePath = logDir.getAbsolutePath() + "metl.log";
+            }
             try {
                 RollingFileAppender logFileAppender = new RollingFileAppender();
-                logFileAppender.setFile(logFile);
+                logFileAppender.setFile(logFilePath);
                 logFileAppender.setMaxBackupIndex(10);
                 logFileAppender.setMaxFileSize("10MB");
                 logFileAppender.setAppend(true);
@@ -58,7 +62,7 @@ public final class LogUtils {
                 org.apache.log4j.Logger.getRootLogger().addAppender(logFileAppender);
                 logFileAppender.activateOptions();
             } catch (Exception ex) {
-                System.err.println("Failed to configure the following log file: " + logFile);
+                System.err.println("Failed to configure the following log file: " + logFilePath);
                 ex.printStackTrace();
             }
         }
