@@ -517,6 +517,23 @@
             </setting>                                   
         </settings>
     </component>
+    <component id='Text Reader' category='READER' inputMessageType='text' outputMessageType='text'
+        inputOutputModelsMatch='false'>
+        <name>Text Reader</name>
+        <className>org.jumpmind.metl.core.runtime.component.TextReader</className>
+        <description></description>      
+        <settings>
+            <setting id='text' type='multiline_text' required='false'>
+                <name>Text</name>
+                <description></description>
+            </setting>
+            <setting id='rows.per.message' type='integer' required='false'>
+                <name>Rows / Msg</name>
+                <defaultValue>10000</defaultValue>
+                <description></description>
+            </setting>            
+        </settings>
+    </component>    
     <component id='Text File Reader' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable'
         inputOutputModelsMatch='false'>
         <name>Text File Reader</name>
