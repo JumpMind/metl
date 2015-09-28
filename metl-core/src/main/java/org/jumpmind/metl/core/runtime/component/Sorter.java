@@ -47,21 +47,20 @@ public class Sorter extends AbstractComponentRuntime {
                 sortedRecords.add(record);
             }
         }
-    }
-
-    @Override
-    public void lastMessageReceived(IMessageTarget messageTarget) {
-        ArrayList<EntityData> dataToSend = new ArrayList<EntityData>();
-        sort();
-        for (EntityData record : sortedRecords) {
-            if (dataToSend.size() >= rowsPerMessage) {
-                sendMessage(dataToSend, messageTarget, false);
-                dataToSend = new ArrayList<EntityData>();
+        
+        if (unitOfWorkLastMessage) {
+            ArrayList<EntityData> dataToSend = new ArrayList<EntityData>();
+            sort();
+            for (EntityData record : sortedRecords) {
+                if (dataToSend.size() >= rowsPerMessage) {
+                    sendMessage(dataToSend, messageTarget, false);
+                    dataToSend = new ArrayList<EntityData>();
+                }
+                dataToSend.add(record);
             }
-            dataToSend.add(record);
-        }
-        if (dataToSend != null && dataToSend.size() > 0) {
-            sendMessage(dataToSend, messageTarget, true);
+            if (dataToSend != null && dataToSend.size() > 0) {
+                sendMessage(dataToSend, messageTarget, true);
+            }            
         }
     }
 

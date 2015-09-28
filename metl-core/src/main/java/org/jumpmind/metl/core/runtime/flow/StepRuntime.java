@@ -207,11 +207,6 @@ public class StepRuntime implements Runnable {
     }
 
     private void shutdown(MessageTarget target) throws InterruptedException {
-        try {
-            this.componentRuntime.lastMessageReceived(target);
-        } catch (Exception e) {
-            recordError(e);
-        }
         for (StepRuntime targetStepRuntime : targetStepRuntimes) {
             targetStepRuntime.queue(new ShutdownMessage(componentContext.getFlowStep().getId(), cancelled));
         }

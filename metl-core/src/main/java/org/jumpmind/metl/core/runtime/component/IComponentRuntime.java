@@ -12,7 +12,7 @@ public interface IComponentRuntime {
 
     public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage);
     
-    public void lastMessageReceived(IMessageTarget messageTarget);
+//    public void lastMessageReceived(IMessageTarget messageTarget);
     
     public void flowCompleted(boolean cancelled);
     

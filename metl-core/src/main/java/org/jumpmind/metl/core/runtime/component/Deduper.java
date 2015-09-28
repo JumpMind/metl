@@ -36,24 +36,23 @@ public class Deduper extends AbstractComponentRuntime {
                 }
             }
         }
-    }
-
-    @Override
-    public void lastMessageReceived(IMessageTarget messageTarget) {
-        if (deduped.size() > 0) {
-            int count = 0;
-            ArrayList<EntityData> payload = new ArrayList<EntityData>(rowsPerMessage);
-            for (EntityData data : deduped.values()) {
-                if (count >= rowsPerMessage) {
-                    sendMessage(payload, messageTarget, false);
-                    payload = new ArrayList<EntityData>();
-                    count = 0;
+        
+        if (unitOfWorkLastMessage) {
+            if (deduped.size() > 0) {
+                int count = 0;
+                ArrayList<EntityData> payload = new ArrayList<EntityData>(rowsPerMessage);
+                for (EntityData data : deduped.values()) {
+                    if (count >= rowsPerMessage) {
+                        sendMessage(payload, messageTarget, false);
+                        payload = new ArrayList<EntityData>();
+                        count = 0;
+                    }
+                    payload.add(data);
+                    count++;
                 }
-                payload.add(data);
-                count++;
-            }
 
-            sendMessage(payload, messageTarget, true);
+                sendMessage(payload, messageTarget, true);
+            }
         }
     }
 

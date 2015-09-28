@@ -24,7 +24,6 @@ import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.util.ComponentUtil;
 import org.jumpmind.properties.TypedProperties;
@@ -65,11 +64,6 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
             settings = Collections.emptyList();
         }
         return getComponent().toTypedProperties(settings);
-    }
-
-    @Override
-    public void lastMessageReceived(IMessageTarget messageTarget) {
-        
     }
     
     public void stop() {
@@ -122,6 +116,10 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
 
     protected IExecutionTracker getExecutionTracker() {
         return context.getExecutionTracker();
+    }
+    
+    protected String getUnitOfWork() {
+        return context.getFlowStep().getComponent().get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
     }
     
     protected void debug(String msg, Object...args) {

@@ -82,8 +82,7 @@ public class TextFileReader extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
-        
+        getComponentStatistics().incrementInboundMessages();        
         List<String> files = getFilesToRead(inputMessage);
         processFiles(files, messageTarget, unitOfWorkLastMessage);
         
