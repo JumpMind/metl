@@ -1,7 +1,9 @@
 package org.jumpmind.metl;
 
+import java.io.FileInputStream;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.annotations.AnnotationConfiguration.ClassInheritanceMap;
 import org.eclipse.jetty.server.Server;
@@ -13,6 +15,11 @@ import org.eclipse.jetty.webapp.WebAppContext;
 public class Develop {
 
     public static void main(String[] args) throws Exception {
+        
+        System.out.println(IOUtils.toString(new FileInputStream("../metl-server/src/main/resources/Metl.asciiart")));
+
+        System.setProperty("org.jumpmind.metl.ui.init.config.dir","build");
+        
         Server server = new Server(42000);
 
         WebAppContext webapp = new WebAppContext();

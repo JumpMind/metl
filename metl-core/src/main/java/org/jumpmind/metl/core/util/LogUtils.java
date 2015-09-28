@@ -50,7 +50,7 @@ public final class LogUtils {
             if (logFilePath == null) {
                 File logDir = new File(configDir, "logs");
                 logDir.mkdirs();
-                logFilePath = logDir.getAbsolutePath() + "metl.log";
+                logFilePath = logDir.getAbsolutePath() + "/metl.log";
             }
             try {
                 RollingFileAppender logFileAppender = new RollingFileAppender();

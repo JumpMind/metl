@@ -89,6 +89,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             new SqlScript(new InputStreamReader(getClass().getResourceAsStream("/metl-samples.sql")), platform.getSqlTemplate(), true, ";",
                     null).execute();
         }
+        LoggerFactory.getLogger(getClass()).info("The configuration database has been initialized");
     }
 
     @Override
