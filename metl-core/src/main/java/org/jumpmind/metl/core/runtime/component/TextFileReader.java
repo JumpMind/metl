@@ -224,6 +224,8 @@ public class TextFileReader extends AbstractComponentRuntime {
         if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
         		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
             initAndSendMessage(payload, messageTarget, ++numberMessages, true);        	
+        } else {
+            initAndSendMessage(payload, messageTarget, ++numberMessages, false);        	        	
         }
     }
     
