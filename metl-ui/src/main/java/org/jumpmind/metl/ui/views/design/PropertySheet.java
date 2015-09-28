@@ -22,12 +22,14 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.IComponentFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSettingChoices;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.MessageType;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.ResourceCategory;
+import org.jumpmind.metl.core.runtime.component.definition.XMLExtraUnitOfWorkOptions;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -130,6 +132,17 @@ public class PropertySheet extends Panel {
         addResourceCombo(componentDefintion, formLayout, component);
         addInputModelCombo(componentDefintion, formLayout, component);
         addOutputModelCombo(componentDefintion, formLayout, component);
+        addUnitOfWorkCombo(componentDefintion, formLayout, component);
+    }
+    
+    protected void addUnitOfWorkCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
+        XMLSetting setting = new XMLSetting(AbstractComponentRuntime.UNIT_OF_WORK, "Unit Of Work", AbstractComponentRuntime.UNIT_OF_WORK_FLOW, Type.CHOICE, true);
+        setting.setChoices(new XMLSettingChoices(AbstractComponentRuntime.UNIT_OF_WORK_FLOW, AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE));
+        XMLExtraUnitOfWorkOptions options = componentDefintion.getExtraUnitOfWorkOptions();
+        if (options != null) {
+            setting.getChoices().getChoice().addAll(options.getExtraUnitOfWorkOption());
+        }
+        addSettingField(setting, component, formLayout);
     }
 
     protected void addOutputModelCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {

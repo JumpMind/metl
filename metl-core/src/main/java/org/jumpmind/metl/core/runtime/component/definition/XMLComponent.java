@@ -46,6 +46,9 @@ public class XMLComponent implements Serializable {
         NONE, @XmlEnumValue("any")
         ANY
     }
+    
+    @XmlElement(required = false)
+    protected XMLExtraUnitOfWorkOptions extraUnitOfWorkOptions;
 
     @XmlElement(required = false)
     protected String description;
@@ -166,6 +169,14 @@ public class XMLComponent implements Serializable {
 
     public XMLSettings getSettings() {
         return settings;
+    }
+    
+    public void setExtraUnitOfWorkOptions(XMLExtraUnitOfWorkOptions extraUnitOfWorkOptions) {
+        this.extraUnitOfWorkOptions = extraUnitOfWorkOptions;
+    }
+    
+    public XMLExtraUnitOfWorkOptions getExtraUnitOfWorkOptions() {
+        return extraUnitOfWorkOptions;
     }
 
 }

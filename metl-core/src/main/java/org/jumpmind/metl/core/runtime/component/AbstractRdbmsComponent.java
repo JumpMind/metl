@@ -16,8 +16,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 abstract public class AbstractRdbmsComponent extends AbstractComponentRuntime {
 	
-    public static final String UNIT_OF_WORK_SQL_STATEMENT = "SQL Statement";
-    
 	protected List<Result> results = new ArrayList<Result>();
 	
     protected NamedParameterJdbcTemplate getJdbcTemplate() {
@@ -39,6 +37,7 @@ abstract public class AbstractRdbmsComponent extends AbstractComponentRuntime {
         }
     }
         
+    @SuppressWarnings("unchecked")
     protected ArrayList<String> convertResultsToTextPayload(List<Result> results) {
     	ArrayList<String> payload = new ArrayList<String>();
     	JSONArray jsonResults = new JSONArray();
