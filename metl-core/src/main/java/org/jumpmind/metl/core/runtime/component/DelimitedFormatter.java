@@ -66,7 +66,6 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
         getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
-        Message outputMessage = new Message(getFlowStepId());
         ArrayList<String> outputPayload = new ArrayList<String>();
         
         if (useHeader) {
@@ -89,11 +88,8 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
             outputRec = processInputRow(inputRow);
             outputPayload.add(outputRec);
         }
-        outputMessage.setPayload(outputPayload);
-        getComponentStatistics().incrementOutboundMessages();
-        outputMessage.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
-        outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
-        messageTarget.put(outputMessage);
+        
+        sendMessage(outputPayload, messageTarget, unitOfWorkLastMessage);
     }
 
     private String processInputRow(EntityData inputRow) {

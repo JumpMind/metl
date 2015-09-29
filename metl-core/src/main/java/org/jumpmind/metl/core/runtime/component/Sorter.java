@@ -28,7 +28,9 @@ public class Sorter extends AbstractComponentRuntime {
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
     int rowsPerMessage;
+    
     String sortAttributeId;
+    
     List<EntityData> sortedRecords = new ArrayList<EntityData>();
 
     @Override
@@ -50,7 +52,9 @@ public class Sorter extends AbstractComponentRuntime {
         
         if (unitOfWorkLastMessage) {
             ArrayList<EntityData> dataToSend = new ArrayList<EntityData>();
+            
             sort();
+            
             for (EntityData record : sortedRecords) {
                 if (dataToSend.size() >= rowsPerMessage) {
                     sendMessage(dataToSend, messageTarget, false);
@@ -58,19 +62,13 @@ public class Sorter extends AbstractComponentRuntime {
                 }
                 dataToSend.add(record);
             }
+            
+            sortedRecords.clear();
+            
             if (dataToSend != null && dataToSend.size() > 0) {
                 sendMessage(dataToSend, messageTarget, true);
-            }            
+            }
         }
-    }
-
-    private void sendMessage(ArrayList<EntityData> dataToSend, IMessageTarget messageTarget,
-            boolean lastMessage) {
-        Message newMessage = new Message(getFlowStepId());
-        newMessage.getHeader().setUnitOfWorkLastMessage(lastMessage);
-        newMessage.setPayload(dataToSend);
-        getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(newMessage);
     }
 
     private void applySettings() {

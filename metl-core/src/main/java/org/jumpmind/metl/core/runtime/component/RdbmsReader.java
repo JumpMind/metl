@@ -94,7 +94,7 @@ public class RdbmsReader extends AbstractRdbmsComponent {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
             }
 
-            MessageResultSetExtractor messageResultSetExtractor = new MessageResultSetExtractor(inputMessage, messageTarget);
+            MessageResultSetExtractor messageResultSetExtractor = new MessageResultSetExtractor(inputMessage, messageTarget, unitOfWorkLastMessage);
             for (String sql : sqls) {
                 String sqlToExecute = FormatUtils.replaceTokens(sql, context.getFlowParametersAsString(), true);
                 log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
@@ -112,12 +112,12 @@ public class RdbmsReader extends AbstractRdbmsComponent {
         }
     }
 
-    private Message createMessage(Message inputMessage) {
+    private Message createMessage(Message inputMessage, boolean unitOfWorkLastMessage) {
         Message message;
         if (messageManipulationStrategy == MessageManipulationStrategy.ENHANCE) {
-            message = inputMessage.clone(getFlowStepId());
+            message = inputMessage.clone(getFlowStepId(), unitOfWorkLastMessage);
         } else {
-            message = inputMessage.clone(getFlowStepId(), new ArrayList<EntityData>());
+            message = inputMessage.clone(getFlowStepId(), new ArrayList<EntityData>(), unitOfWorkLastMessage);
             message.setPayload(new ArrayList<EntityData>());
         }
         return message;
@@ -320,10 +320,13 @@ public class RdbmsReader extends AbstractRdbmsComponent {
         String sqlToExecute;
         
         int outputRecCount;
+        
+        boolean unitOfWorkLastMessage;
 
-        public MessageResultSetExtractor(Message inputMessage, IMessageTarget messageTarget) {
+        public MessageResultSetExtractor(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
             this.inputMessage = inputMessage;
             this.messageTarget = messageTarget;
+            this.unitOfWorkLastMessage = unitOfWorkLastMessage;
         }
 
         @Override
@@ -340,7 +343,7 @@ public class RdbmsReader extends AbstractRdbmsComponent {
                 getComponentStatistics().incrementNumberEntitiesProcessed();
 
                 if (message == null) {
-                    message = createMessage(inputMessage);
+                    message = createMessage(inputMessage, unitOfWorkLastMessage);
                     getComponentStatistics().incrementOutboundMessages();
                     message.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
                 }

@@ -25,7 +25,6 @@ public class TextReader extends AbstractComponentRuntime {
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
-        int numberMessages = 0;
         int linesInMessage = 0;
         int textRowsPerMessage = context.getFlowStep().getComponent().getInt(SETTING_ROWS_PER_MESSAGE, 1000);
         ArrayList<String> payload = new ArrayList<String>();
@@ -36,7 +35,7 @@ public class TextReader extends AbstractComponentRuntime {
             reader = new BufferedReader(new StringReader(context.getFlowStep().getComponent().get(SETTING_TEXT, "")));
             while ((currentLine = reader.readLine()) != null) {
                 if (linesInMessage == textRowsPerMessage) {
-                    initAndSendMessage(payload, messageTarget, ++numberMessages, false);
+                    sendMessage(payload, messageTarget, false);
                     linesInMessage = 0;
                     payload = new ArrayList<String>();
                 }
@@ -49,18 +48,8 @@ public class TextReader extends AbstractComponentRuntime {
         } finally {
             IOUtils.closeQuietly(reader);
         }
-
-        String unitOfWork = getUnitOfWork();
-        initAndSendMessage(payload, messageTarget, ++numberMessages, unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE)
-                || (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage));
+        
+        sendMessage(payload, messageTarget, unitOfWorkLastMessage);
     }
 
-    private void initAndSendMessage(ArrayList<String> payload, IMessageTarget messageTarget, int numberMessages, boolean lastMessage) {
-        Message message = new Message(getFlowStepId());
-        message.getHeader().setSequenceNumber(numberMessages);
-        message.getHeader().setUnitOfWorkLastMessage(lastMessage);
-        message.setPayload(payload);
-        getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(message);
-    }
 }

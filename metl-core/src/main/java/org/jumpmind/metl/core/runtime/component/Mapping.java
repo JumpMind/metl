@@ -80,9 +80,7 @@ public class Mapping extends AbstractComponentRuntime {
             return;
         }
 
-        ArrayList<EntityData> outputRows = new ArrayList<EntityData>();
-        Message outputMessage = new Message(getFlowStepId());
-        outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
+        ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
 
         for (EntityData inputRow : inputRows) {
             EntityData outputRow = new EntityData();            
@@ -108,17 +106,11 @@ public class Mapping extends AbstractComponentRuntime {
             }
             
             if (outputRow.size() > 0) {
-                outputRows.add(outputRow);
+                outputPayload.add(outputRow);
                 getComponentStatistics().incrementNumberEntitiesProcessed();
             }
         }
 
-        getComponentStatistics().incrementOutboundMessages();
-        outputMessage.setPayload(outputRows);
-        if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
-        		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
-            outputMessage.getHeader().setUnitOfWorkLastMessage(true);
-        }
-        messageTarget.put(outputMessage);
+        sendMessage(outputPayload, messageTarget, unitOfWorkLastMessage);
     }
 }

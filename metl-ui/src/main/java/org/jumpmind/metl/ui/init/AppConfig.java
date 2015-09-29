@@ -122,7 +122,6 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Bean
     @Scope(value = "singleton")
     DataSource configDataSource() {
-        log.info("The current working directory is " + System.getProperty("user.dir"));
         TypedProperties properties = new TypedProperties();
         properties.put(DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName()));
         properties.put(DB_POOL_URL, env.getProperty(DB_POOL_URL, "jdbc:h2:mem:config"));

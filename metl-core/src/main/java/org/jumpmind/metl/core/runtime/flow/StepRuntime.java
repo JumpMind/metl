@@ -44,7 +44,7 @@ public class StepRuntime implements Runnable {
 
     List<StepRuntime> sourceStepRuntimes;
     
-    Map<String, Message> sourceStepRuntimeMessages;
+    Map<String, Boolean> sourceStepRuntimeUnitOfWorkReceived;
 
     ComponentContext componentContext;
 
@@ -56,7 +56,7 @@ public class StepRuntime implements Runnable {
         this.componentRuntime = componentRuntime;
         int capacity = componentContext.getFlowStep().getComponent().getInt(AbstractComponentRuntime.INBOUND_QUEUE_CAPACITY, 1000);
         inQueue = new LinkedBlockingQueue<Message>(capacity);
-        sourceStepRuntimeMessages = new HashMap<String, Message>();
+        sourceStepRuntimeUnitOfWorkReceived = new HashMap<String, Boolean>();
     }
 
     public boolean isUnitOfWorkLastMessage() {
@@ -169,29 +169,17 @@ public class StepRuntime implements Runnable {
     }
 
     private boolean calculateUnitOfWorkLastMessage(Message inputMessage) {
-    	
-    	boolean lastMessage = true;
-    	if (inputMessage.getHeader().isUnitOfWorkLastMessage()) {
-    		for (StepRuntime sourceRuntime:sourceStepRuntimes) {
-    			if (sourceStepRuntimeMessages.get(sourceRuntime.getComponentContext().getFlowStep().getId()) == null &&
-    					sourceRuntime.getComponentContext().getFlowStep().getId() != inputMessage.getHeader().getOriginatingStepId()) {
-    				if (sourceStepRuntimeMessages.get(inputMessage.getHeader().getOriginatingStepId()) == null) {
-    					sourceStepRuntimeMessages.put(inputMessage.getHeader().getOriginatingStepId(), inputMessage);
-    				} else {
-    					//TODO: in this case we received more than one unit of work last
-    					//message from one source before we received from the other source
-    					//we should not process this message, but hold it until we pair up
-    					//last unit of work messages from all sources
-    				}
-    				lastMessage=false;
-    				break;
-    			}
-    		}
-    	}
-    	if (lastMessage) {
-    		sourceStepRuntimeMessages.clear();
-    	}
-    	return lastMessage;
+        boolean lastMessage = true;
+        if (inputMessage.getHeader().isUnitOfWorkLastMessage()) {
+            sourceStepRuntimeUnitOfWorkReceived.put(inputMessage.getHeader().getOriginatingStepId(), Boolean.TRUE);
+        }
+        for (StepRuntime sourceRuntime : sourceStepRuntimes) {
+            lastMessage &= sourceStepRuntimeUnitOfWorkReceived.get(sourceRuntime.getComponentContext().getFlowStep().getId()) != null;
+        }
+        if (lastMessage) {
+            //sourceStepRuntimeUnitOfWorkReceived.clear();
+        }
+        return lastMessage;
     }
     
     private void removeSourceStepRuntime(String stepId) {

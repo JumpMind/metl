@@ -63,17 +63,17 @@ public class Lookup extends AbstractComponentRuntime {
                 Iterator<Message> messages = queuedWhileWaitingForLookup.iterator();
                 while (messages.hasNext()) {
                     Message message = messages.next();
-                    enhanceAndSend(message, messageTarget);
+                    enhanceAndSend(message, messageTarget, unitOfWorkLastMessage);
                 }
             }
         } else if (!lookupInitialized) {
             queuedWhileWaitingForLookup.add(inputMessage);
         } else if (lookupInitialized) {
-            enhanceAndSend(inputMessage, messageTarget);
+            enhanceAndSend(inputMessage, messageTarget, unitOfWorkLastMessage);
         }
     }
 
-    protected void enhanceAndSend(Message message, IMessageTarget messageTarget) {
+    protected void enhanceAndSend(Message message, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         
         debug("Using lookup table: {}", lookup);
         
@@ -89,7 +89,7 @@ public class Lookup extends AbstractComponentRuntime {
             playload.add(newData);
         }
 
-            Message newMessage = message.clone(getFlowStepId());
+            Message newMessage = message.clone(getFlowStepId(), unitOfWorkLastMessage);
             newMessage.setPayload(playload);
             getComponentStatistics().incrementOutboundMessages();
             messageTarget.put(newMessage);

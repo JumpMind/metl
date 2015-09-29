@@ -50,7 +50,6 @@ public class FixedLengthParser extends AbstractComponentRuntime {
         ArrayList<String> inputRows = inputMessage.getPayload();
 
         ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
-        Message outputMessage = inputMessage.clone(getFlowStepId(), outputPayload);
         int headerRowsToSkip = inputMessage.getHeader().getSequenceNumber() == 0 ? numberOfHeaderLinesToSkip : 0;
         try {
             int rowCount = 0;
@@ -72,10 +71,7 @@ public class FixedLengthParser extends AbstractComponentRuntime {
             throw new IoException(e);
         }
 
-        getComponentStatistics().incrementOutboundMessages();
-        outputMessage.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
-        outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
-        messageTarget.put(outputMessage);
+        sendMessage(outputPayload, messageTarget, unitOfWorkLastMessage);
     }
 
     private EntityData processInputRow(String inputRow) throws IOException {

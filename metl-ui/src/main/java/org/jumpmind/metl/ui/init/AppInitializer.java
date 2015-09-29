@@ -107,6 +107,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         }
         if (printInstrutions) {
             System.out.println("The current config directory is " + configDir);
+            System.out.println("The current working directory is " + System.getProperty("user.dir"));
         }
         return configDir;
     }

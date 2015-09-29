@@ -132,7 +132,6 @@ public class XmlFormatter extends AbstractXML {
         getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
-        Message outputMessage = new Message(getFlowStepId());
         ArrayList<String> outputPayload = new ArrayList<String>();
 
         Document document = templateDocument.clone();
@@ -162,16 +161,10 @@ public class XmlFormatter extends AbstractXML {
         }
         xmlOutputter.setFormat(format);
         outputPayload.add(xmlOutputter.outputString(document));
-        outputMessage.setPayload(outputPayload);
-        log(LogLevel.INFO, outputPayload.toString());
-        getComponentStatistics().incrementOutboundMessages();
-        outputMessage.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
-
-        if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
-        		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
-            outputMessage.getHeader().setUnitOfWorkLastMessage(true);    
-        }  
-        messageTarget.put(outputMessage);
+        
+        log(LogLevel.DEBUG, outputPayload.toString());
+        
+        sendMessage(outputPayload, messageTarget, unitOfWorkLastMessage);
     }
 
     private void processInputRow(Document document, EntityData inputRow) {

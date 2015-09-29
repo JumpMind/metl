@@ -26,35 +26,31 @@ public class Union extends AbstractComponentRuntime {
             messagesByFlowStep.put(flowStepLink.getSourceStepId(), new ArrayList<Message>());
         }
     }
+    
+    protected void initMessagesByFlowStep() {
+        
+    }
 
     @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
+        
         String fromStepId = inputMessage.getHeader().getOriginatingStepId();
         List<Message> messages = messagesByFlowStep.get(fromStepId);
         if (messages != null) {
             messages.add(inputMessage);
         }
 
-        boolean readyToProcess = true;
-        for (List<Message> unhandledMessages : messagesByFlowStep.values()) {
-            readyToProcess &= unhandledMessages.size() > 0;
-        }
         
-        if (readyToProcess) {
-            Message outputMessage = new Message(getFlowStepId());
-            outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
-            outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
+        if (unitOfWorkLastMessage) {
             ArrayList<EntityData> rowData = new ArrayList<EntityData>();
-            outputMessage.setPayload(rowData);
             for (List<Message> unhandledMessages : messagesByFlowStep.values()) {
                 Message message = unhandledMessages.remove(0);
                 ArrayList<EntityData> inputRowData = message.getPayload();
                 rowData.addAll(inputRowData);
                 getComponentStatistics().incrementNumberEntitiesProcessed(inputRowData.size());
             }
-            getComponentStatistics().incrementOutboundMessages();
-            messageTarget.put(outputMessage);
+            sendMessage(rowData, messageTarget, unitOfWorkLastMessage);
         }
     }
 
