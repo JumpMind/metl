@@ -52,7 +52,7 @@ import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
-public class XmlFormatter extends AbstractXML {
+public class XmlFormatter extends AbstractXMLComponentRuntime {
 
     public static final String PRETTY_FORMAT = "Pretty";
 

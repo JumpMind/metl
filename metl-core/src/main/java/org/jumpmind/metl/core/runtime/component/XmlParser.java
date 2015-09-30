@@ -42,7 +42,7 @@ import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
-public class XmlParser extends AbstractXML {
+public class XmlParser extends AbstractXMLComponentRuntime {
 
     public static final String TYPE = "Parse XML";
 

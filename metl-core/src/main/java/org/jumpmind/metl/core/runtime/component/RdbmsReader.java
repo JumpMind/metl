@@ -104,12 +104,12 @@ public class RdbmsReader extends AbstractRdbmsComponent {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
             }
 
-            MessageResultSetExtractor messageResultSetExtractor = new MessageResultSetExtractor(inputMessage, callback, unitOfWorkBoundaryReached);
+            ResultSetToEntityDataConverter resultSetToEntityDataConverter = new ResultSetToEntityDataConverter(inputMessage, callback, unitOfWorkBoundaryReached);
             for (String sql : getSqls()) {
                 String sqlToExecute = FormatUtils.replaceTokens(sql, getComponentContext().getFlowParametersAsString(), true);
-                log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
-                messageResultSetExtractor.setSqlToExecute(sqlToExecute);
-                outboundPayload = template.query(sqlToExecute, paramMap, messageResultSetExtractor);                        
+                log(LogLevel.INFO, "About to run: " + sqlToExecute);
+                resultSetToEntityDataConverter.setSqlToExecute(sqlToExecute);
+                outboundPayload = template.query(sqlToExecute, paramMap, resultSetToEntityDataConverter);                        
             }
         }
         if (outboundPayload != null && outboundPayload.size() > 0) {
@@ -311,7 +311,7 @@ public class RdbmsReader extends AbstractRdbmsComponent {
 		return matchOnColumnNameOnly;
 	}
 
-	class MessageResultSetExtractor implements ResultSetExtractor<ArrayList<EntityData>> {
+	class ResultSetToEntityDataConverter implements ResultSetExtractor<ArrayList<EntityData>> {
         Message inputMessage;
         
         ISendMessageCallback callback;
@@ -324,7 +324,7 @@ public class RdbmsReader extends AbstractRdbmsComponent {
         
         ArrayList<EntityData> payload;
 
-        public MessageResultSetExtractor(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+        public ResultSetToEntityDataConverter(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
             this.inputMessage = inputMessage;
             this.callback = callback;
             this.unitOfWorkLastMessage = unitOfWorkLastMessage;
