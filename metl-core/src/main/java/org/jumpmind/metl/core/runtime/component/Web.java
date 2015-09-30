@@ -37,8 +37,6 @@ public class Web extends AbstractComponentRuntime {
     
     boolean parameterReplacement;
     
-    String unitOfWork;
-
     @Override
     protected void start() {
         IResourceRuntime httpResource = getResourceRuntime();
@@ -53,7 +51,6 @@ public class Web extends AbstractComponentRuntime {
         bodyFrom = component.get(BODY_FROM, "Message");
         bodyText = component.get(BODY_TEXT);
         parameterReplacement = component.getBoolean(PARAMETER_REPLACEMENT, false);
-        unitOfWork = component.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
     }
 
     @Override
@@ -91,15 +88,7 @@ public class Web extends AbstractComponentRuntime {
             }
             
             if (outputPayload.size() > 0) {
-                Message outputMessage = new Message(getFlowStepId());
-                outputMessage.setPayload(outputPayload);
-                outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
-                
-                if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
-                		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
-                    outputMessage.getHeader().setUnitOfWorkLastMessage(true);    
-                }                    
-                messageTarget.put(outputMessage);
+                sendMessage(outputPayload, messageTarget, unitOfWorkLastMessage);
             }
         } catch (IOException e) {
             throw new IoException(String.format("Error writing to %s ", streamable), e);

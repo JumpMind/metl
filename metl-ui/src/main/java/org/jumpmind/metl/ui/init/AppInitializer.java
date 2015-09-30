@@ -3,7 +3,7 @@ package org.jumpmind.metl.ui.init;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.File;
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
@@ -13,13 +13,17 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.SqlScript;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
+import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.properties.TypedProperties;
+import org.jumpmind.util.FormatUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
@@ -33,8 +37,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 public class AppInitializer implements WebApplicationInitializer, ServletContextListener {
 
-    protected static final String SYS_CONFIG_DIR = AppUI.class.getPackage().getName()
-            + ".config.dir";
+    protected static final String SYS_CONFIG_DIR = AppUI.class.getPackage().getName() + ".config.dir";
 
     public static ThreadLocal<AnnotationConfigWebApplicationContext> applicationContextRef = new ThreadLocal<>();
 
@@ -51,8 +54,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
 
         AnnotationConfigWebApplicationContext dispatchContext = new AnnotationConfigWebApplicationContext();
         dispatchContext.setParent(applicationContext);
-        ServletRegistration.Dynamic dispatcher = servletContext.addServlet("dispatcher",
-                new DispatcherServlet(dispatchContext));
+        ServletRegistration.Dynamic dispatcher = servletContext.addServlet("dispatcher", new DispatcherServlet(dispatchContext));
         dispatcher.setLoadOnStartup(1);
         dispatcher.addMapping("/api/*");
         applicationContextRef.set(dispatchContext);
@@ -65,9 +67,8 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce
-                .getServletContext());
-        LogUtils.initLogging(ctx);
+        WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce.getServletContext());
+        LogUtils.initLogging(getConfigDir(false), ctx);
         initDatabase(ctx);
         initAgentRuntime(ctx);
     }
@@ -85,40 +86,47 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         dbUpgrader.upgrade();
         if (!isInstalled) {
             LoggerFactory.getLogger(getClass()).info("Installing Metl samples");
-            new SqlScript(new InputStreamReader(getClass().getResourceAsStream("/metl-samples.sql")), platform.getSqlTemplate(), true, ";", null).execute();
+            new SqlScript(new InputStreamReader(getClass().getResourceAsStream("/metl-samples.sql")), platform.getSqlTemplate(), true, ";",
+                    null).execute();
         }
+        LoggerFactory.getLogger(getClass()).info("The configuration database has been initialized");
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
     }
 
-    protected Properties loadProperties() {
-        Properties properties = new Properties();
+    protected String getConfigDir(boolean printInstrutions) {
         String configDir = System.getProperty(SYS_CONFIG_DIR);
         if (isBlank(configDir)) {
             configDir = System.getProperty("user.home") + "/.metl";
-            System.out
-                    .println("You can configure the following system property to point to a working directory "
-                            + "where configuration files can be found: -D"
-                            + SYS_CONFIG_DIR
-                            + "=/some/config/dir");
+            if (printInstrutions) {
+                System.out.println("You can configure the following system property to point to a working directory "
+                        + "where configuration files can be found: -D" + SYS_CONFIG_DIR + "=/some/config/dir");
+            }
         }
-        System.out.println("The current config directory is " + configDir);
+        if (printInstrutions) {
+            System.out.println("The current config directory is " + configDir);
+            System.out.println("The current working directory is " + System.getProperty("user.dir"));
+        }
+        return configDir;
+    }
 
+    protected Properties loadProperties() {
+        Properties properties = new Properties();
+        String configDir = getConfigDir(true);
         File configFile = new File(configDir, "metl.properties");
         if (configFile.exists()) {
             properties = new TypedProperties(configFile);
         } else {
-            System.out.println("Could not find the " + configFile.getAbsolutePath()
-                    + " configuration file.  Looking on the classpath for " + configFile.getName());
-
-            InputStream is = getClass().getResourceAsStream("/" + configFile.getName());
-            if (is != null) {
-                properties = new TypedProperties(is);
-            } else {
-                System.err.println("Could not find any " + configFile.getName()
-                        + ".  Using all of the system defaults.");
+            try {
+                System.out.println("Could not find the " + configFile.getAbsolutePath() + " configuration file.  A default version will be written.");
+                String propContent = IOUtils.toString(getClass().getResourceAsStream("/" + configFile.getName()));
+                propContent = FormatUtils.replaceToken(propContent, "configDir", configDir, true);
+                FileUtils.write(configFile, propContent);
+                properties = new TypedProperties(configFile);
+            } catch (IOException e) {
+                throw new IoException(e);
             }
         }
         return properties;

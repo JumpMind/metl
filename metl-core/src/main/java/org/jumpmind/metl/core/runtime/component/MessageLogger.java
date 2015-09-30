@@ -21,7 +21,7 @@ public class MessageLogger extends AbstractComponentRuntime {
         getComponentStatistics().incrementInboundMessages();
 
         MessageHeader header = inputMessage.getHeader();
-        log(LogLevel.DEBUG, String.format("Message(sequenceNumber=%d,last=%s,source='%s')",
+        log(LogLevel.INFO, String.format("Message(sequenceNumber=%d,unitOfWorkLastMessage=%s,source='%s')",
                 header.getSequenceNumber(), header.isUnitOfWorkLastMessage(),
                 getFlow().findFlowStepWithId(header.getOriginatingStepId()).getName()));
         Object payload = inputMessage.getPayload();
@@ -31,17 +31,17 @@ public class MessageLogger extends AbstractComponentRuntime {
             for (Object object : list) {
                 if (object instanceof EntityData && getComponent().getInputModel() != null) {
                     getComponentStatistics().incrementNumberEntitiesProcessed();
-                    log(LogLevel.DEBUG,
+                    log(LogLevel.INFO,
                             String.format("Message Payload: %s",
                                     getComponent().toRow((EntityData) object, false)));
                 } else {
                     getComponentStatistics().incrementNumberEntitiesProcessed();
-                    log(LogLevel.DEBUG, String.format("Message Payload: %s", object));
+                    log(LogLevel.INFO, String.format("Message Payload: %s", object));
                 }
             }
         }
         getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(inputMessage);
+        messageTarget.put(inputMessage.clone(getFlowStepId(), unitOfWorkLastMessage));
     }
 
 }

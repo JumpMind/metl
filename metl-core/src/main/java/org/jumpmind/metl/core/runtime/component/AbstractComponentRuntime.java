@@ -1,5 +1,6 @@
 package org.jumpmind.metl.core.runtime.component;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,9 +43,12 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     public final static String ENABLED = "enabled";
 
     protected ComponentContext context;
+    
     protected boolean enabled = true;
+    
     protected boolean shared = false;
-    protected XMLComponent definition;
+    
+    protected XMLComponent definition;    
     
     @Override
     public void register(XMLComponent definition) {
@@ -65,11 +69,6 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
             settings = Collections.emptyList();
         }
         return getComponent().toTypedProperties(settings);
-    }
-
-    @Override
-    public void lastMessageReceived(IMessageTarget messageTarget) {
-        
     }
     
     public void stop() {
@@ -122,6 +121,10 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
 
     protected IExecutionTracker getExecutionTracker() {
         return context.getExecutionTracker();
+    }
+    
+    protected String getUnitOfWork() {
+        return context.getFlowStep().getComponent().get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
     }
     
     protected void debug(String msg, Object...args) {
@@ -183,6 +186,26 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     protected List<Object> getAttributeValues(Message inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
         return ComponentUtil.getAttributeValues(getInputModel(), rows, entityName, attributeName);
+    }
+    
+    protected Message createMessage(Serializable payload, boolean lastMessage) {
+        String unitOfWork = getUnitOfWork();
+        Message newMessage = new Message(getFlowStepId());
+        if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE)
+                || (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && lastMessage)) {
+            newMessage.getHeader().setUnitOfWorkLastMessage(true);
+        }
+        newMessage.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages()+1);
+        newMessage.setPayload(payload);
+        return newMessage;
+    }
+    
+    protected void sendMessage(Serializable payload, IMessageTarget messageTarget, boolean lastMessage) {
+        Message newMessage = createMessage(payload, lastMessage);                
+        getComponentStatistics().incrementOutboundMessages();
+        if (messageTarget != null) {
+            messageTarget.put(newMessage);
+        }
     }
     
 }

@@ -27,13 +27,13 @@ public class Message implements Serializable, Cloneable {
         this.payload = payload;
     }
     
-    public Message clone(String originatingStepId) {
-        return clone(originatingStepId, getPayload());
+    public Message clone(String originatingStepId, boolean unitOfWorkLastMessage) {
+        return clone(originatingStepId, getPayload(), unitOfWorkLastMessage);
     }
     
-    public Message clone(String originatingStepId, Serializable newPayload) {
+    public Message clone(String originatingStepId, Serializable newPayload, boolean unitOfWorkLastMessage) {
         Message message = new Message(originatingStepId);
-        message.header = header.clone();
+        message.header = header.clone(unitOfWorkLastMessage);
         message.header.setOriginatingStepId(originatingStepId);
         message.setPayload(newPayload);
         return message;

@@ -51,63 +51,62 @@ public class Zip extends AbstractComponentRuntime {
     }
 
     @Override
-    public void lastMessageReceived(IMessageTarget messageTarget) {
-        IStreamable streamable = getResourceReference();
-        ZipOutputStream zos = null;
-        try {
-        	streamable.delete(relativePathAndFile);
-            zos = new ZipOutputStream(streamable.getOutputStream(relativePathAndFile, false), Charset.forName(encoding));
-
-            for (String fileName : fileNames) {
-                File file = new File(fileName);                                
-                log(LogLevel.INFO, "Received file name to add to zip: %s", fileName);
-                if (mustExist && !file.exists()) {
-                    throw new IoException(String.format("Could not find file to zip: %s", fileName));
-                }
-
-                if (file.exists()) {
-                    try {
-                        if (file.isFile()) {
-                            ZipEntry entry = new ZipEntry(file.getName());
-                            entry.setSize(file.length());
-                            entry.setTime(file.lastModified());
-                            zos.putNextEntry(entry);
-                            log(LogLevel.INFO, "Adding %s", file.getName());
-                            FileInputStream fis = new FileInputStream(file);
-                            try {
-                                IOUtils.copy(fis, zos);
-                            } finally {
-                                IOUtils.closeQuietly(fis);
-                            }
-                        }
-                        zos.closeEntry();
-                    } catch (IOException e) {
-                        throw new IoException(e);
-                    }
-                }
-            }
-            
-            log(LogLevel.INFO, "Generated %s", relativePathAndFile);
-
-        } finally {
-            IOUtils.closeQuietly(zos);
-        }
-        
-        if (deleteOnComplete) {
-            for (String fileName : fileNames) {
-                File file = new File(fileName);
-                FileUtils.deleteQuietly(file);
-            }
-        }
-    }
-
-    @Override
     public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         List<String> files = inputMessage.getPayload();
         if (files != null) {
             fileNames.addAll(files);
             getComponentStatistics().incrementNumberEntitiesProcessed(files.size());
+        }
+        
+        if (unitOfWorkLastMessage) {
+            IStreamable streamable = getResourceReference();
+            ZipOutputStream zos = null;
+            try {
+                streamable.delete(relativePathAndFile);
+                zos = new ZipOutputStream(streamable.getOutputStream(relativePathAndFile, false), Charset.forName(encoding));
+
+                for (String fileName : fileNames) {
+                    File file = new File(fileName);                                
+                    log(LogLevel.INFO, "Received file name to add to zip: %s", fileName);
+                    if (mustExist && !file.exists()) {
+                        throw new IoException(String.format("Could not find file to zip: %s", fileName));
+                    }
+
+                    if (file.exists()) {
+                        try {
+                            if (file.isFile()) {
+                                ZipEntry entry = new ZipEntry(file.getName());
+                                entry.setSize(file.length());
+                                entry.setTime(file.lastModified());
+                                zos.putNextEntry(entry);
+                                log(LogLevel.INFO, "Adding %s", file.getName());
+                                FileInputStream fis = new FileInputStream(file);
+                                try {
+                                    IOUtils.copy(fis, zos);
+                                } finally {
+                                    IOUtils.closeQuietly(fis);
+                                }
+                            }
+                            zos.closeEntry();
+                        } catch (IOException e) {
+                            throw new IoException(e);
+                        }
+                    }
+                }
+                
+                log(LogLevel.INFO, "Generated %s", relativePathAndFile);
+
+            } finally {
+                IOUtils.closeQuietly(zos);
+            }
+            
+            if (deleteOnComplete) {
+                for (String fileName : fileNames) {
+                    File file = new File(fileName);
+                    FileUtils.deleteQuietly(file);
+                }
+            }            
         }
     }
 

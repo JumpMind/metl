@@ -16,8 +16,6 @@ import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_TEST
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_URL;
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_USER;
 import static org.jumpmind.db.util.BasicDataSourcePropertyConstants.DB_POOL_VALIDATION_QUERY;
-import static org.jumpmind.metl.core.util.EnvConstants.DEFAULT_PROPERTY_ENV;
-import static org.jumpmind.metl.core.util.EnvConstants.PROPERTY_ENV;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -124,11 +122,6 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Bean
     @Scope(value = "singleton")
     DataSource configDataSource() {
-        log.info("The current working directory is " + System.getProperty("user.dir"));
-        log.info("The current environment is configured as "
-                + env.getProperty(PROPERTY_ENV, DEFAULT_PROPERTY_ENV)
-                + ".  This value can be changed in the application properties file using the "
-                + PROPERTY_ENV + " property");
         TypedProperties properties = new TypedProperties();
         properties.put(DB_POOL_DRIVER, env.getProperty(DB_POOL_DRIVER, Driver.class.getName()));
         properties.put(DB_POOL_URL, env.getProperty(DB_POOL_URL, "jdbc:h2:mem:config"));

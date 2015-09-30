@@ -1,6 +1,8 @@
 package org.jumpmind.metl.core.runtime.component.definition;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -18,6 +20,13 @@ public class XMLSettingChoices implements Serializable {
 
     @XmlElement(name="choice", required = true)
     protected List<String> choice;
+    
+    public XMLSettingChoices() {
+    }
+    
+    public XMLSettingChoices(String... choices) {
+        choice = new ArrayList<>(Arrays.asList(choices));
+    }
 
     public void setChoice(List<String> choice) {
         this.choice = choice;

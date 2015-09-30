@@ -4,6 +4,9 @@
         <name>RDBMS Reader</name>
         <className>org.jumpmind.metl.core.runtime.component.RdbmsReader</className>
         <description></description>
+        <extraUnitOfWorkOptions>
+            <extraUnitOfWorkOption>SQL Statement</extraUnitOfWorkOption>
+        </extraUnitOfWorkOptions>
         <settings>
             <setting id='sql' type='multiline_text' required='true'>
                 <name>Sql</name>
@@ -32,17 +35,7 @@
                     <choice>REPLACE</choice>
                     <choice>ENHANCE</choice>
                 </choices>
-            </setting>
-            <setting id='unit.of.work' type='choice' required='true'>
-                <name>Unit of Work</name>
-                <defaultValue>Flow</defaultValue>
-                <description></description>
-                <choices>
-                    <choice>SQL Statement</choice>
-                    <choice>Input Message</choice>
-                    <choice>Flow</choice>
-                </choices>            
-            </setting>                        
+            </setting>                      
         </settings>
     </component>
     <component id='RDBMS Writer' category='WRITER' inputMessageType='entity' outputMessageType='text' resourceCategory='datasource'
@@ -94,15 +87,6 @@
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>   
-            <setting id='unit.of.work' type='choice' required='true'>
-                <name>Unit of Work</name>
-                <defaultValue>Flow</defaultValue>
-                <description></description>
-                <choices>
-                    <choice>Input Message</choice>
-                    <choice>Flow</choice>
-                </choices>            
-            </setting>                        
         </settings>
     </component>
     <component id='Deduper' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
@@ -290,15 +274,6 @@
                     <choice>Raw</choice>
                 </choices>
             </setting>
-            <setting id='unit.of.work' type='choice' required='true'>
-                <name>Unit of Work</name>
-                <defaultValue>Flow</defaultValue>
-                <description></description>
-                <choices>
-                    <choice>Flow</choice>
-                    <choice>Input Message</choice>
-                </choices>            
-            </setting>                                     
         </settings>
     </component>
     <component id='Joiner' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
@@ -352,15 +327,6 @@
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
-            <setting id='unit.of.work' type='choice' required='true'>
-                <name>Unit of Work</name>
-                <defaultValue>Flow</defaultValue>
-                <description></description>
-                <choices>
-                    <choice>Flow</choice>
-                    <choice>Input Message</choice>
-                </choices>            
-            </setting>                        
         </settings>
     </component>
     <component id='Message Logger' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='true'>
@@ -531,6 +497,9 @@
         <name>Sql Executor</name>
         <className>org.jumpmind.metl.core.runtime.component.SqlExecutor</className>
         <description></description>
+        <extraUnitOfWorkOptions>
+            <extraUnitOfWorkOption>SQL Statement</extraUnitOfWorkOption>
+        </extraUnitOfWorkOptions>        
         <settings>
             <setting id='run.when' type='choice' required='false'>
                 <name>Run When</name>
@@ -545,24 +514,34 @@
             <setting id='sql' type='multiline_text' required='true'>
                 <name>Sql</name>
                 <description></description>
-            </setting>
-            <setting id='unit.of.work' type='choice' required='true'>
-                <name>Unit of Work</name>
-                <defaultValue>Flow</defaultValue>
-                <description></description>
-                <choices>
-                    <choice>Input Message</choice>
-                    <choice>Flow</choice>
-                    <choice>SQL Statement</choice>
-                </choices>            
-            </setting>                                    
+            </setting>                                   
         </settings>
     </component>
+    <component id='Text Reader' category='READER' inputMessageType='text' outputMessageType='text'
+        inputOutputModelsMatch='false'>
+        <name>Text Reader</name>
+        <className>org.jumpmind.metl.core.runtime.component.TextReader</className>
+        <description></description>      
+        <settings>
+            <setting id='text' type='multiline_text' required='false'>
+                <name>Text</name>
+                <description></description>
+            </setting>
+            <setting id='rows.per.message' type='integer' required='false'>
+                <name>Rows / Msg</name>
+                <defaultValue>10000</defaultValue>
+                <description></description>
+            </setting>            
+        </settings>
+    </component>    
     <component id='Text File Reader' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable'
         inputOutputModelsMatch='false'>
         <name>Text File Reader</name>
         <className>org.jumpmind.metl.core.runtime.component.TextFileReader</className>
         <description></description>
+        <extraUnitOfWorkOptions>
+            <extraUnitOfWorkOption>File</extraUnitOfWorkOption>
+        </extraUnitOfWorkOptions>        
         <settings>
             <setting id='get.file.name.from.message' type='boolean' required='false'>
                 <name>Get File Name From Message</name>
@@ -614,17 +593,7 @@
             <setting id='textfilereader.text.header.lines.to.skip' type='integer' required='false'>
                 <name>Header Lines to Skip</name>
                 <description></description>
-            </setting>
-            <setting id='unit.of.work' type='choice' required='true'>
-                <name>Unit of Work</name>
-                <defaultValue>Flow</defaultValue>
-                <description></description>
-                <choices>
-                    <choice>File</choice>
-                    <choice>Input Message</choice>
-                    <choice>Flow</choice>
-                </choices>            
-            </setting>            
+            </setting>          
         </settings>
     </component>
     <component id='Text File Writer' category='WRITER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable'
@@ -655,15 +624,7 @@
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
                 <description></description>
-            </setting>
-            <setting id='unit.of.work' type='choice' required='true'>
-                <name>Unit of Work</name>
-                <defaultValue>Flow</defaultValue>
-                <description></description>
-                <choices>
-                    <choice>Flow</choice>
-                </choices>            
-            </setting>            
+            </setting>          
         </settings>
     </component>
     <component id='Text Replace' category='PROCESSOR' inputMessageType='text' outputMessageType='text' resourceCategory='none'
@@ -686,14 +647,6 @@
         inputOutputModelsMatch='true'>
         <name>Transformer</name>
         <className>org.jumpmind.metl.core.runtime.component.Transformer</className>
-        <description></description>
-        <settings>
-        </settings>
-    </component>
-    <component id='Union' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
-        inputOutputModelsMatch='true'>
-        <name>Union</name>
-        <className>org.jumpmind.metl.core.runtime.component.Union</className>
         <description></description>
         <settings>
         </settings>
@@ -724,16 +677,7 @@
                 <name>Parameter replacement</name>
                 <defaultValue>false</defaultValue>
                 <description></description>
-            </setting>
-            <setting id='unit.of.work' type='choice' required='true'>
-                <name>Unit of Work</name>
-                <defaultValue>Flow</defaultValue>
-                <description></description>
-                <choices>
-                    <choice>Flow</choice>
-                    <choice>Input Message</choice>
-                </choices>            
-            </setting>                                    
+            </setting>                                   
         </settings>
     </component>
     <component id='XSLT Processor' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none'

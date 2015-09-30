@@ -30,15 +30,12 @@ public class SqlExecutor extends AbstractRdbmsComponent {
     List<String> sqls;
 
     String runWhen = PER_MESSAGE;
-    
-    String unitOfWork;
 
     @Override
     protected void start() {
         TypedProperties properties = getTypedProperties();
         sqls = getSqlStatements(properties.get(SQL));
         runWhen = properties.get(RUN_WHEN, PER_MESSAGE);
-        unitOfWork = properties.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
         if (getResourceRuntime() == null) {
             throw new IllegalStateException("This component requires a data source");
         }
@@ -69,7 +66,7 @@ public class SqlExecutor extends AbstractRdbmsComponent {
         }
 
         if (messageTarget != null) {
-        	messageTarget.put(createResultMessage(inputMessage, results, unitOfWorkLastMessage, unitOfWork));
+        	messageTarget.put(createResultMessage(inputMessage, results, unitOfWorkLastMessage));
             getComponentStatistics().incrementOutboundMessages();
         }
     }

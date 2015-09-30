@@ -36,34 +36,26 @@ public class Deduper extends AbstractComponentRuntime {
                 }
             }
         }
-    }
-
-    @Override
-    public void lastMessageReceived(IMessageTarget messageTarget) {
-        if (deduped.size() > 0) {
-            int count = 0;
-            ArrayList<EntityData> payload = new ArrayList<EntityData>(rowsPerMessage);
-            for (EntityData data : deduped.values()) {
-                if (count >= rowsPerMessage) {
-                    sendMessage(payload, messageTarget, false);
-                    payload = new ArrayList<EntityData>();
-                    count = 0;
+        
+        if (unitOfWorkLastMessage) {
+            if (deduped.size() > 0) {
+                int count = 0;
+                ArrayList<EntityData> payload = new ArrayList<EntityData>(rowsPerMessage);
+                for (EntityData data : deduped.values()) {
+                    if (count >= rowsPerMessage) {
+                        sendMessage(payload, messageTarget, false);
+                        payload = new ArrayList<EntityData>();
+                        count = 0;
+                    }
+                    payload.add(data);
+                    count++;
                 }
-                payload.add(data);
-                count++;
+
+                deduped.clear();
+                
+                sendMessage(payload, messageTarget, true);
             }
-
-            sendMessage(payload, messageTarget, true);
         }
-    }
-
-    private void sendMessage(ArrayList<EntityData> payload, IMessageTarget messageTarget,
-            boolean lastMessage) {
-        Message newMessage = new Message(getFlowStepId());
-        newMessage.getHeader().setUnitOfWorkLastMessage(lastMessage);
-        newMessage.setPayload(payload);
-        getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(newMessage);
     }
 
 }

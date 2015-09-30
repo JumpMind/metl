@@ -86,8 +86,6 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
 
     String lastPreparedDml;
     
-    String unitOfWork;
-
     @Override
     protected void start() {
         inboundEntityDataCount = 0;
@@ -130,7 +128,7 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
 
             ArrayList<EntityData> inputRows = inputMessage.getPayload();
             if (inputRows == null && messageTarget != null) {
-            	messageTarget.put(createResultMessage(inputMessage, new ArrayList<Result>(), unitOfWorkLastMessage, unitOfWork));
+            	messageTarget.put(createResultMessage(inputMessage, new ArrayList<Result>(), unitOfWorkLastMessage));
                 getComponentStatistics().incrementOutboundMessages();
                 return;
             }
@@ -164,7 +162,6 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
         insertFallback = properties.is(INSERT_FALLBACK);
         quoteIdentifiers = properties.is(QUOTE_IDENTIFIERS);
         fitToColumn = properties.is(FIT_TO_COLUMN);
-        unitOfWork = properties.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
         catalogName = FormatUtils.replaceTokens(properties.get(CATALOG), context.getFlowParametersAsString(), true);
         if (isBlank(catalogName)) {
             catalogName = null;
@@ -327,7 +324,7 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
                 }
             }
             
-            messageTarget.put(createResultMessage(inputMessage, results, unitOfWorkLastMessage, unitOfWork));
+            messageTarget.put(createResultMessage(inputMessage, results, unitOfWorkLastMessage));
 
         } catch (RuntimeException ex) {
             if (modelTable != null && data != null) {

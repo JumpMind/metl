@@ -1,5 +1,8 @@
 package org.jumpmind.metl.core.runtime.resource;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -25,9 +28,6 @@ public class SftpStreamable implements IStreamable {
     protected Integer connectionTimeout;
     protected boolean mustExist;
     
-    protected Session session;
-    protected ChannelSftp sftp;
-
     protected static final Logger log = LoggerFactory.getLogger(SftpStreamable.class);
 
     public SftpStreamable(Resource resource, 
@@ -48,7 +48,7 @@ public class SftpStreamable implements IStreamable {
         this.mustExist = mustExist;
     }
 
-    private boolean fileExists(String filePath) {
+    private boolean fileExists(ChannelSftp sftp, String filePath) {
         try {
                 SftpATTRS attributes = sftp.stat(filePath);
                 if (attributes != null) {
@@ -62,6 +62,17 @@ public class SftpStreamable implements IStreamable {
         }
     }
 
+    protected void close(Session session, ChannelSftp sftp) {
+    	if (sftp != null) {
+            sftp.disconnect();
+            sftp = null;
+        }
+    	if (session != null) {
+    		session.disconnect();
+    		session = null;
+    	}
+    }
+    
     @Override
     public boolean requiresContentLength() {
         return false;
@@ -76,8 +87,9 @@ public class SftpStreamable implements IStreamable {
         return true;
     }
     
-    protected void connect() {
+    protected Session connect() {
         JSch jsch=new JSch();
+        Session session = null;
         try {
             session = jsch.getSession(user, server, port);
             session.setPassword(password.getBytes());
@@ -85,26 +97,26 @@ public class SftpStreamable implements IStreamable {
             config.put("StrictHostKeyChecking", "no");
             session.setConfig(config);
             session.connect(connectionTimeout);
-            sftp = (ChannelSftp) session.openChannel("sftp");
-            sftp.connect();
-            sftp.cd(basePath);
+            return session;
         } catch (JSchException e) {
             throw new IoException(e);
-        } catch (SftpException se) {
-        	throw new IoException(se);
 		}   
     }    
 
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist) {
+    	Session session = null;
+    	ChannelSftp sftp = null;
         try {
-            connect();
-            if (mustExist && !fileExists(relativePath)) {
-                sftp.disconnect();
-                session.disconnect();
+        	session = connect();
+            sftp = (ChannelSftp) session.openChannel("sftp");
+            sftp.connect();
+            sftp.cd(basePath);
+            if (mustExist && !fileExists(sftp, relativePath)) {
+            	SftpStreamable.this.close(session, sftp);
                 throw new IoException("Could not find endpoint %s that was configured as MUST EXIST",relativePath);
-            }            
-            return sftp.get(relativePath);
+            }
+            return new CloseableInputStreamStream(sftp.get(relativePath), session, sftp);
         } catch (Exception e) {
             throw new IoException("Error getting the input stream for ssh endpoint.  Error %s", e.getMessage());
         } 
@@ -117,9 +129,14 @@ public class SftpStreamable implements IStreamable {
 
     @Override
     public OutputStream getOutputStream(String relativePath, boolean mustExist) {
+    	Session session = null;
+    	ChannelSftp sftp = null;
         try {
-            connect();
-            return sftp.put(relativePath, ChannelSftp.OVERWRITE);
+        	session = connect();
+            sftp = (ChannelSftp) session.openChannel("sftp");
+            sftp.connect();
+            sftp.cd(basePath);
+            return new CloseableOutputStream(sftp.put(relativePath, ChannelSftp.OVERWRITE), session, sftp);
         } catch (Exception e) {            
             throw new IoException(e);
         } 
@@ -127,27 +144,26 @@ public class SftpStreamable implements IStreamable {
 
     @Override
     public void close() {
-        if (sftp != null) {
-            sftp.disconnect();
-            sftp = null;
-         }
-         if (session != null) {
-             session.disconnect();
-             session = null;
-         }
     }
 
     @Override
     public boolean delete(String relativePath) {
+    	Session session = null;
+    	ChannelSftp sftp = null;
         try {
-            connect();
+            session = connect();
+            sftp = (ChannelSftp) session.openChannel("sftp");
+            sftp.connect();
+            sftp.cd(basePath);
             sftp.rm(relativePath);
             return true;
-        } catch (SftpException e) {
+        } catch (Exception e) {
             return false;
-        } 
+        } finally {
+        	SftpStreamable.this.close(session, sftp);
+        }
     }
-
+    
     @Override
     public boolean supportsDelete() {
         return true;
@@ -157,4 +173,38 @@ public class SftpStreamable implements IStreamable {
     public String toString() {
         return basePath;
     }
+
+    class CloseableOutputStream extends BufferedOutputStream {
+        Session session;
+        ChannelSftp sftp;
+
+        public CloseableOutputStream(OutputStream os, Session session, ChannelSftp sftp) {
+            super(os);
+            this.session = session;
+            this.sftp = sftp;
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            SftpStreamable.this.close(session, sftp);
+        }
+    }
+
+    class CloseableInputStreamStream extends BufferedInputStream {
+        Session session;
+        ChannelSftp sftp;
+
+        public CloseableInputStreamStream(InputStream is, Session session, ChannelSftp sftp) {
+            super(is);
+            this.session = session;
+            this.sftp = sftp;
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            SftpStreamable.this.close(session, sftp);
+        }
+    }    
 }

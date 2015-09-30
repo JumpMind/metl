@@ -16,8 +16,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 abstract public class AbstractRdbmsComponent extends AbstractComponentRuntime {
 	
-    public static final String UNIT_OF_WORK_SQL_STATEMENT = "SQL Statement";
-    
 	protected List<Result> results = new ArrayList<Result>();
 	
 	protected NamedParameterJdbcTemplate getJdbcTemplate() {
@@ -42,6 +40,7 @@ abstract public class AbstractRdbmsComponent extends AbstractComponentRuntime {
         }
     }
         
+    @SuppressWarnings("unchecked")
     protected ArrayList<String> convertResultsToTextPayload(List<Result> results) {
     	ArrayList<String> payload = new ArrayList<String>();
     	JSONArray jsonResults = new JSONArray();
@@ -55,14 +54,8 @@ abstract public class AbstractRdbmsComponent extends AbstractComponentRuntime {
     	return payload;
     }
     
-    protected Message createResultMessage(Message inputMessage, List<Result> results, boolean unitOfWorkLastMessage, String unitOfWork) {
-        Message resultMessage = new Message(getFlowStepId());
-        resultMessage.setPayload(convertResultsToTextPayload(results));
-        if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
-        		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
-            resultMessage.getHeader().setUnitOfWorkLastMessage(true);        	
-        }   
-        return resultMessage;
+    protected Message createResultMessage(Message inputMessage, List<Result> results, boolean unitOfWorkLastMessage) {
+        return createMessage(convertResultsToTextPayload(results), unitOfWorkLastMessage);
     }
     
     class Result {

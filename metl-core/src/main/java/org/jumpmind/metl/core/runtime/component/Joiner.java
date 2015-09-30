@@ -39,31 +39,21 @@ public class Joiner extends AbstractComponentRuntime {
             ArrayList<EntityData> payload = inputMessage.getPayload();
             join(payload);
         }
-    }
 
-    @Override
-    public void lastMessageReceived(IMessageTarget messageTarget) {        
-        ArrayList<EntityData> dataToSend=new ArrayList<EntityData>();
-        Iterator<EntityData> itr = joinedData.values().iterator();
-        while (itr.hasNext()) {
-            if (dataToSend.size() >= rowsPerMessage) {
-                sendMessage(dataToSend, messageTarget, false);
-                dataToSend = new ArrayList<EntityData>();
+        if (unitOfWorkLastMessage) {
+            ArrayList<EntityData> dataToSend = new ArrayList<EntityData>();
+            Iterator<EntityData> itr = joinedData.values().iterator();
+            while (itr.hasNext()) {
+                if (dataToSend.size() >= rowsPerMessage) {
+                    sendMessage(dataToSend, messageTarget, false);
+                    dataToSend = new ArrayList<EntityData>();
+                }
+                dataToSend.add(itr.next());
             }
-            dataToSend.add(itr.next());
+            if (dataToSend != null && dataToSend.size() > 0) {
+                sendMessage(dataToSend, messageTarget, true);
+            }
         }
-        if (dataToSend != null && dataToSend.size() > 0) {
-            sendMessage(dataToSend, messageTarget, true);
-        }
-    }
-    
-    private void sendMessage(ArrayList<EntityData> dataToSend, IMessageTarget messageTarget,
-            boolean lastMessage) {        
-        Message newMessage = new Message(getFlowStepId());
-        newMessage.getHeader().setUnitOfWorkLastMessage(lastMessage);
-        newMessage.setPayload(dataToSend);
-        getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(newMessage);      
     }
     
     private void applySettings() {

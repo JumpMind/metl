@@ -53,17 +53,18 @@ public class Multiplier extends AbstractComponentRuntime {
                 Iterator<Message> messages = queuedWhileWaitingForMultiplier.iterator();
                 while (messages.hasNext()) {
                     Message message = messages.next();
-                    multiply(message, messageTarget);
+                    multiply(message, messageTarget, message.getHeader().isUnitOfWorkLastMessage());
                 }
             }
         } else if (!multipliersInitialized) {
+            inputMessage.getHeader().setUnitOfWorkLastMessage(unitOfWorkLastMessage);
             queuedWhileWaitingForMultiplier.add(inputMessage);
         } else if (multipliersInitialized) {
-            multiply(inputMessage, messageTarget);
+            multiply(inputMessage, messageTarget, unitOfWorkLastMessage);
         }
     }
 
-    protected void multiply(Message message, IMessageTarget messageTarget) {
+    protected void multiply(Message message, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         ArrayList<EntityData> multiplied = new ArrayList<EntityData>();
         for (int i = 0; i < multipliers.size(); i++) {
             EntityData multiplierData = multipliers.get(i);
@@ -77,24 +78,14 @@ public class Multiplier extends AbstractComponentRuntime {
                 newData.putAll(multiplierData);
                 multiplied.add(newData);
                 if (multiplied.size() >= rowsPerMessage) {
-                    Message newMessage = new Message(getFlowStepId());
-                    newMessage.getHeader().setUnitOfWorkLastMessage(
-                            message.getHeader().isUnitOfWorkLastMessage() && datas.size() - 1 == j
-                                    && multipliers.size() - 1 == i);
-                    newMessage.setPayload(multiplied);
-                    getComponentStatistics().incrementOutboundMessages();
-                    messageTarget.put(newMessage);
+                    sendMessage(multiplied, messageTarget, false);                    
                     multiplied = new ArrayList<EntityData>();
                 }
             }
         }
 
         if (multiplied.size() > 0) {
-            Message newMessage = new Message(getFlowStepId());
-            newMessage.setPayload(multiplied);
-            newMessage.getHeader().setUnitOfWorkLastMessage(message.getHeader().isUnitOfWorkLastMessage());
-            getComponentStatistics().incrementOutboundMessages();
-            messageTarget.put(newMessage);
+            sendMessage(multiplied, messageTarget, true);               
         }
     }
 

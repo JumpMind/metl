@@ -80,27 +80,14 @@ public class TextFileWriter extends AbstractComponentRuntime {
         } catch (IOException e) {
             throw new IoException(e);
         }
-        if (messageTarget != null) {
-	        messageTarget.put(createResultMessage(inputMessage, unitOfWorkLastMessage));
-	        getComponentStatistics().incrementOutboundMessages();
-        }
+       
+        sendMessage("{\"status\":\"success\"}", messageTarget, unitOfWorkLastMessage);
     }    
 
     @Override
     public void stop() {
         close();
         super.stop();
-    }
-
-    private Message createResultMessage(Message inputMessage, boolean unitOfWorkLastMessage) {
-    	Message resultMessage = new Message(getFlowStepId());
-
-        if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
-        		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
-            resultMessage.getHeader().setUnitOfWorkLastMessage(true);        	
-        }     
-    	//TODO: Figure out stats we want in the results message and add.
-    	return resultMessage;
     }
     
     private void initStreamAndWriter() {

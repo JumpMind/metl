@@ -46,12 +46,8 @@ public class Transformer extends AbstractComponentRuntime {
     public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();        
         Model inputModel = getComponent().getInputModel();
-        Message outputMessage = new Message(getFlowStepId());
-        outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
-        outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
         List<EntityData> inDatas = inputMessage.getPayload();
         ArrayList<EntityData> outDatas = new ArrayList<EntityData>(inDatas.size());
-        outputMessage.setPayload(outDatas);
         
         for (EntityData inData : inDatas) {
             EntityData outData = new EntityData();
@@ -73,8 +69,7 @@ public class Transformer extends AbstractComponentRuntime {
             getComponentStatistics().incrementNumberEntitiesProcessed();
         }
         
-        getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(outputMessage);
+        sendMessage(outDatas, messageTarget, unitOfWorkLastMessage);
     }    
 
 }
