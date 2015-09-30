@@ -28,7 +28,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.StringUtils;
 
-public class RdbmsReader extends AbstractDbComponent {
+public class RdbmsReader extends AbstractRdbmsComponent {
 
     public static final String TYPE = "RDBMS Reader";
 
@@ -51,6 +51,8 @@ public class RdbmsReader extends AbstractDbComponent {
     boolean trimColumns = false;
 
     boolean matchOnColumnNameOnly = false;
+    
+    String unitOfWork;
 
     @Override
     protected void start() {
@@ -58,7 +60,7 @@ public class RdbmsReader extends AbstractDbComponent {
     }
 
     @Override
-    public void handle(final Message inputMessage, final IMessageTarget messageTarget) {
+    public void handle(final Message inputMessage, final IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
 
         getComponentStatistics().incrementInboundMessages();
 
@@ -80,6 +82,7 @@ public class RdbmsReader extends AbstractDbComponent {
          * to it. If the reader is started by another component, then loop for
          * all records in the input message
          */
+        Message message = null;
         for (int i = 0; i < inboundRecordCount; i++) {
             if (payload != null && payload.size() > i && payload.get(i) instanceof EntityData) {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, payload.get(i));
@@ -88,18 +91,20 @@ public class RdbmsReader extends AbstractDbComponent {
             }
 
             MessageResultSetExtractor messageResultSetExtractor = new MessageResultSetExtractor(inputMessage, messageTarget);
-            Message message = null;
             for (String sql : getSqls()) {
                 String sqlToExecute = FormatUtils.replaceTokens(sql, getComponentContext().getFlowParametersAsString(), true);
                 log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
                 messageResultSetExtractor.setSqlToExecute(sqlToExecute);
-                message = template.query(sqlToExecute, paramMap, messageResultSetExtractor);
+                message = template.query(sqlToExecute, paramMap, messageResultSetExtractor);                
+                //TODO: deal with unitOfWork = SQL Statement                
             }
-            if (message != null) {
-                //TODO: This isn't correct if you are looping for multiple input records
-                message.getHeader().setLastMessage(true);
-                messageTarget.put(message);
-            }
+        }
+        if (message != null) {
+            if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
+            		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
+                message.getHeader().setUnitOfWorkLastMessage(true);        	
+            }        	
+            messageTarget.put(message);
         }
     }
 
@@ -208,6 +213,7 @@ public class RdbmsReader extends AbstractDbComponent {
                 messageManipulationStrategy.name()));
         trimColumns = properties.is(TRIM_COLUMNS);
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
+        unitOfWork = properties.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
     }
 
     public Map<Integer, String> getSqlColumnEntityHints(String sql) {
@@ -386,5 +392,4 @@ public class RdbmsReader extends AbstractDbComponent {
             this.sqlToExecute = sqlToExecute;
         }
     }
-
 }

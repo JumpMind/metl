@@ -41,13 +41,13 @@ public class Multiplier extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget) {
+    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
 
         if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
             List<EntityData> datas = inputMessage.getPayload();
             multipliers.addAll(datas);
-            multipliersInitialized = inputMessage.getHeader().isLastMessage();
+            multipliersInitialized = inputMessage.getHeader().isUnitOfWorkLastMessage();
             
             if (multipliersInitialized) {
                 Iterator<Message> messages = queuedWhileWaitingForMultiplier.iterator();
@@ -78,8 +78,8 @@ public class Multiplier extends AbstractComponentRuntime {
                 multiplied.add(newData);
                 if (multiplied.size() >= rowsPerMessage) {
                     Message newMessage = new Message(getFlowStepId());
-                    newMessage.getHeader().setLastMessage(
-                            message.getHeader().isLastMessage() && datas.size() - 1 == j
+                    newMessage.getHeader().setUnitOfWorkLastMessage(
+                            message.getHeader().isUnitOfWorkLastMessage() && datas.size() - 1 == j
                                     && multipliers.size() - 1 == i);
                     newMessage.setPayload(multiplied);
                     getComponentStatistics().incrementOutboundMessages();
@@ -92,7 +92,7 @@ public class Multiplier extends AbstractComponentRuntime {
         if (multiplied.size() > 0) {
             Message newMessage = new Message(getFlowStepId());
             newMessage.setPayload(multiplied);
-            newMessage.getHeader().setLastMessage(message.getHeader().isLastMessage());
+            newMessage.getHeader().setUnitOfWorkLastMessage(message.getHeader().isUnitOfWorkLastMessage());
             getComponentStatistics().incrementOutboundMessages();
             messageTarget.put(newMessage);
         }

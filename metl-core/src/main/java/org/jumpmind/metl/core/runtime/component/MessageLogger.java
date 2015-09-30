@@ -17,12 +17,12 @@ public class MessageLogger extends AbstractComponentRuntime {
     }
     
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
 
         MessageHeader header = inputMessage.getHeader();
         log(LogLevel.DEBUG, String.format("Message(sequenceNumber=%d,last=%s,source='%s')",
-                header.getSequenceNumber(), header.isLastMessage(),
+                header.getSequenceNumber(), header.isUnitOfWorkLastMessage(),
                 getFlow().findFlowStepWithId(header.getOriginatingStepId()).getName()));
         Object payload = inputMessage.getPayload();
         if (payload instanceof List) {

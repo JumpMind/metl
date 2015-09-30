@@ -105,7 +105,7 @@ public class EntityRouterTest {
             datas.add(entityData);
         }
         inputMessage.setPayload(datas);
-        router.handle(inputMessage, target);
+        router.handle(inputMessage, target, true);
         return target;
     }
 

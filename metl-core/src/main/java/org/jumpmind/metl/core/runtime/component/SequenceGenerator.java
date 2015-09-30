@@ -13,7 +13,7 @@ import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
 import org.jumpmind.util.FormatUtils;
 
-public class SequenceGenerator extends AbstractDbComponent {
+public class SequenceGenerator extends AbstractRdbmsComponent {
 
     public static final String TYPE = "Sequence";
 
@@ -92,7 +92,7 @@ public class SequenceGenerator extends AbstractDbComponent {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> outgoingPayload = new ArrayList<EntityData>();
@@ -113,14 +113,14 @@ public class SequenceGenerator extends AbstractDbComponent {
                 getComponentStatistics().incrementNumberEntitiesProcessed();
                 outgoingPayload.add(entityData);
             }
-            sendMessage(outgoingPayload, messageTarget, inputMessage.getHeader().isLastMessage());
+            sendMessage(outgoingPayload, messageTarget, inputMessage.getHeader().isUnitOfWorkLastMessage());
         }
     }
 
     private void sendMessage(ArrayList<EntityData> payload, IMessageTarget messageTarget,
             boolean lastMessage) {
         Message newMessage = new Message(getFlowStepId());
-        newMessage.getHeader().setLastMessage(lastMessage);
+        newMessage.getHeader().setUnitOfWorkLastMessage(lastMessage);
         newMessage.setPayload(payload);
         getComponentStatistics().incrementOutboundMessages();
         messageTarget.put(newMessage);

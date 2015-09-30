@@ -10,7 +10,7 @@ public interface IComponentRuntime {
     
     public void start(ComponentContext context);
 
-    public void handle(Message inputMessage, IMessageTarget messageTarget);
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage);
     
     public void lastMessageReceived(IMessageTarget messageTarget);
     

@@ -49,7 +49,7 @@ public class Lookup extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
 
         if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
@@ -57,7 +57,7 @@ public class Lookup extends AbstractComponentRuntime {
             for (EntityData entityData : datas) {
                 lookup.put(entityData.get(keyAttributeId), entityData.get(valueAttributeId));
             }
-            lookupInitialized = inputMessage.getHeader().isLastMessage();
+            lookupInitialized = inputMessage.getHeader().isUnitOfWorkLastMessage();
 
             if (lookupInitialized) {
                 Iterator<Message> messages = queuedWhileWaitingForLookup.iterator();

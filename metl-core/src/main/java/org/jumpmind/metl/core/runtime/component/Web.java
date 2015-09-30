@@ -36,6 +36,8 @@ public class Web extends AbstractComponentRuntime {
     String bodyText;
     
     boolean parameterReplacement;
+    
+    String unitOfWork;
 
     @Override
     protected void start() {
@@ -51,10 +53,11 @@ public class Web extends AbstractComponentRuntime {
         bodyFrom = component.get(BODY_FROM, "Message");
         bodyText = component.get(BODY_TEXT);
         parameterReplacement = component.getBoolean(PARAMETER_REPLACEMENT, false);
+        unitOfWork = component.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
 
         IStreamable streamable = getResourceReference();
@@ -91,7 +94,11 @@ public class Web extends AbstractComponentRuntime {
                 Message outputMessage = new Message(getFlowStepId());
                 outputMessage.setPayload(outputPayload);
                 outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
-                outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
+                
+                if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
+                		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
+                    outputMessage.getHeader().setUnitOfWorkLastMessage(true);    
+                }                    
                 messageTarget.put(outputMessage);
             }
         } catch (IOException e) {

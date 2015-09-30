@@ -35,7 +35,7 @@ public class TextReplace extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         List<String> in = inputMessage.getPayload();
         ArrayList<String> out = new ArrayList<String>();
@@ -49,7 +49,7 @@ public class TextReplace extends AbstractComponentRuntime {
         getComponentStatistics().incrementOutboundMessages();
         Message message = new Message(getFlowStepId());
         message.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
-        message.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
+        message.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
         message.setPayload(out);
         messageTarget.put(message);
     }

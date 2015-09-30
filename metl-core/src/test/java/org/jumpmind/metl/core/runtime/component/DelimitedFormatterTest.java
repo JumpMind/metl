@@ -45,7 +45,7 @@ public class DelimitedFormatterTest {
         delimitedFormatter.start(new ComponentContext(null, delimitedFormatterFlowStep, null, new ExecutionTrackerNoOp(), null, null, null));
         Message message = createInboundMessage();        
         MessageTarget msgTarget = new MessageTarget();
-        delimitedFormatter.handle(message, msgTarget);
+        delimitedFormatter.handle(message, msgTarget, true);
 
         assertEquals(1, msgTarget.getTargetMessageCount());
         ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();

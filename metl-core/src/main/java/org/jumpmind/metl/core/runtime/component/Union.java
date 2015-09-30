@@ -28,7 +28,7 @@ public class Union extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         String fromStepId = inputMessage.getHeader().getOriginatingStepId();
         List<Message> messages = messagesByFlowStep.get(fromStepId);
@@ -43,7 +43,7 @@ public class Union extends AbstractComponentRuntime {
         
         if (readyToProcess) {
             Message outputMessage = new Message(getFlowStepId());
-            outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
+            outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
             outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
             ArrayList<EntityData> rowData = new ArrayList<EntityData>();
             outputMessage.setPayload(rowData);

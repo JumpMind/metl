@@ -8,39 +8,63 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MessageManipulationStrategy;
+import org.junit.Before;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-public class AbstractDbComponentTest extends AbstractComponentRuntimeTest {
+public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntimeTest {
 
-	public void setupHandle(AbstractDbComponent spy, Message inputMessage, final Message resultMessage, 
-			final ComponentSettings settings) {
+	List<String> sqls;
+	String expectedFlowReplacementSql;
+	Map<String, Object> expectedParamMap;
+	long rowsPerMessage;
+    MessageManipulationStrategy messageManipulationStrategy;
+    boolean trimColumns;
+    boolean matchOnColumnNameOnly;
+
+    
+	@Before
+	public void reset() {
+		super.reset();
+		sqls = new ArrayList<String>();
+		expectedFlowReplacementSql = "";
+		expectedParamMap = new HashMap<String, Object>();
+		rowsPerMessage = 0L;
+	    messageManipulationStrategy = MessageManipulationStrategy.REPLACE;
+	    trimColumns = false;
+	    matchOnColumnNameOnly = false;
+	}
+	
+	public void setupHandle() {
 		
-		super.setupHandle(spy, settings);
+		super.setupHandle();
 		
 		NamedParameterJdbcTemplate mJdbcTemplate = mock(NamedParameterJdbcTemplate.class);
 		
 		// Verify flow parameters as a string map were replaced
-		if (settings.getFlowParametersAsString() != null && settings.getFlowParametersAsString().size() > 0) {
+		if (flowParametersAsString != null && flowParametersAsString.size() > 0) {
 			when(mJdbcTemplate.query(anyString(), anyMap(), Mockito.any(ResultSetExtractor.class))).thenAnswer(new Answer() {
 				public Object answer(InvocationOnMock invocation) {
 					Object[] args = invocation.getArguments();
 					
 					// Verify flow parameters were replaced
-					assertEquals(((RdbmsReaderComponentSettings) settings).getExpectedFlowReplacementSql(), args[0]);
+					assertEquals(expectedFlowReplacementSql, args[0]);
 					
 					return resultMessage;
 				}
 			});
 		}
 		// Verify flow parameters as a serialized map were set
-		else if (settings.getFlowParameters() != null && settings.getFlowParameters().size() > 0) {
+		else if (flowParameters != null && flowParameters.size() > 0) {
 			when(mJdbcTemplate.query(anyString(), anyMap(), Mockito.any(ResultSetExtractor.class))).thenAnswer(new Answer() {
 				public Object answer(InvocationOnMock invocation) {
 					Object[] args = invocation.getArguments();
@@ -50,7 +74,7 @@ public class AbstractDbComponentTest extends AbstractComponentRuntimeTest {
 					if (((Map) args[1]).size() > 0) {
 						Map<String, Object> paramMap = (Map<String, Object>) args[1];
 						for (Map.Entry<String, Object> entry : paramMap.entrySet()) {
-							Map<String, Object> expectedMap = ((RdbmsReaderComponentSettings) settings).getExpectedParamMap();
+							Map<String, Object> expectedMap = expectedParamMap;
 							assertTrue(expectedMap.containsKey(entry.getKey()));
 							
 							Object expectedValue = expectedMap.get(entry.getKey());
@@ -65,7 +89,7 @@ public class AbstractDbComponentTest extends AbstractComponentRuntimeTest {
 		} else {
 			when(mJdbcTemplate.query(anyString(), anyMap(), Mockito.any(ResultSetExtractor.class))).thenReturn(inputMessage);
 		}
-		doReturn(mJdbcTemplate).when(spy).getJdbcTemplate();
+		doReturn(mJdbcTemplate).when((AbstractRdbmsComponent) spy).getJdbcTemplate();
 		
 	}
 }

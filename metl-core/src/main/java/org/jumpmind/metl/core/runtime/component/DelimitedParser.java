@@ -67,7 +67,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget) {
+    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
 
         ArrayList<String> inputRows = inputMessage.getPayload();
@@ -79,7 +79,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
             int rowCount = 0;
             for (String inputRow : inputRows) {
                 if (headerRowsToSkip == 0) {
-                    if (!inputMessage.getHeader().isLastMessage() || 
+                    if (!inputMessage.getHeader().isUnitOfWorkLastMessage() || 
                             (rowCount + numberOfFooterLinesToSkip < inputRows.size())) {
                         EntityData data = processInputRow(inputRow);
                         if (data != null) {
@@ -99,7 +99,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
         getComponentStatistics().incrementOutboundMessages();
         outputMessage.getHeader().setSequenceNumber(
                 getComponentStatistics().getNumberOutboundMessages());
-        outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
+        outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
         messageTarget.put(outputMessage);
     }
 

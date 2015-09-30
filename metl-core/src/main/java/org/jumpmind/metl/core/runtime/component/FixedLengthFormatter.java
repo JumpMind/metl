@@ -43,7 +43,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget) {
+    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         if (attributesList == null || attributesList.size() == 0) {
             throw new IllegalStateException(
                     "There are no format attributes configured.  Writing all entity fields to the output.");
@@ -77,7 +77,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
         outputMessage.setPayload(outputPayload);
         getComponentStatistics().incrementOutboundMessages();
         outputMessage.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
-        outputMessage.getHeader().setLastMessage(inputMessage.getHeader().isLastMessage());
+        outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
         messageTarget.put(outputMessage);
     }
 

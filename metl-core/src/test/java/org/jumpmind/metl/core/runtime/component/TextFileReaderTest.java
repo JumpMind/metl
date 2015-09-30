@@ -57,7 +57,7 @@ public class TextFileReaderTest {
         reader.start(new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
-        reader.handle(msg, msgTarget);
+        reader.handle(msg, msgTarget, true);
 
         assertEquals(4, msgTarget.getTargetMessageCount());
         ArrayList<String> payload;
@@ -79,7 +79,7 @@ public class TextFileReaderTest {
         reader.start(new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message msg = new StartupMessage();
         MessageTarget msgTarget = new MessageTarget();
-        reader.handle(msg, msgTarget);
+        reader.handle(msg, msgTarget, true);
 
         assertEquals(4, msgTarget.getTargetMessageCount());
         ArrayList<String> payload;

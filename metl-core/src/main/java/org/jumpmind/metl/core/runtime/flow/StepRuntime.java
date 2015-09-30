@@ -3,8 +3,10 @@ package org.jumpmind.metl.core.runtime.flow;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +33,8 @@ public class StepRuntime implements Runnable {
     boolean running = false;
 
     boolean cancelled = false;
+    
+    boolean unitOfWorkLastMessage = false;
 
     Throwable error;
 
@@ -39,6 +43,8 @@ public class StepRuntime implements Runnable {
     List<StepRuntime> targetStepRuntimes;
 
     List<StepRuntime> sourceStepRuntimes;
+    
+    Map<String, Message> sourceStepRuntimeMessages;
 
     ComponentContext componentContext;
 
@@ -50,8 +56,13 @@ public class StepRuntime implements Runnable {
         this.componentRuntime = componentRuntime;
         int capacity = componentContext.getFlowStep().getComponent().getInt(AbstractComponentRuntime.INBOUND_QUEUE_CAPACITY, 1000);
         inQueue = new LinkedBlockingQueue<Message>(capacity);
+        sourceStepRuntimeMessages = new HashMap<String, Message>();
     }
 
+    public boolean isUnitOfWorkLastMessage() {
+    	return unitOfWorkLastMessage;
+    }
+    
     public boolean isStartStep() {
         return sourceStepRuntimes == null || sourceStepRuntimes.size() == 0;
     }
@@ -131,8 +142,9 @@ public class StepRuntime implements Runnable {
                         }
                     } else if (inputMessage != null) {
                         try {
+                        	unitOfWorkLastMessage = calculateUnitOfWorkLastMessage(inputMessage);
                             componentContext.getExecutionTracker().beforeHandle(componentContext);
-                            componentRuntime.handle(inputMessage, target);
+                            componentRuntime.handle(inputMessage, target, unitOfWorkLastMessage);
                         } catch (Exception ex) {
                             recordError(ex);
                         } finally {
@@ -156,6 +168,32 @@ public class StepRuntime implements Runnable {
         }
     }
 
+    private boolean calculateUnitOfWorkLastMessage(Message inputMessage) {
+    	
+    	boolean lastMessage = true;
+    	if (inputMessage.getHeader().isUnitOfWorkLastMessage()) {
+    		for (StepRuntime sourceRuntime:sourceStepRuntimes) {
+    			if (sourceStepRuntimeMessages.get(sourceRuntime.getComponentContext().getFlowStep().getId()) == null &&
+    					sourceRuntime.getComponentContext().getFlowStep().getId() != inputMessage.getHeader().getOriginatingStepId()) {
+    				if (sourceStepRuntimeMessages.get(inputMessage.getHeader().getOriginatingStepId()) == null) {
+    					sourceStepRuntimeMessages.put(inputMessage.getHeader().getOriginatingStepId(), inputMessage);
+    				} else {
+    					//TODO: in this case we received more than one unit of work last
+    					//message from one source before we received from the other source
+    					//we should not process this message, but hold it until we pair up
+    					//last unit of work messages from all sources
+    				}
+    				lastMessage=false;
+    				break;
+    			}
+    		}
+    	}
+    	if (lastMessage) {
+    		sourceStepRuntimeMessages.clear();
+    	}
+    	return lastMessage;
+    }
+    
     private void removeSourceStepRuntime(String stepId) {
         if (sourceStepRuntimes != null) {
             Iterator<StepRuntime> it = sourceStepRuntimes.iterator();

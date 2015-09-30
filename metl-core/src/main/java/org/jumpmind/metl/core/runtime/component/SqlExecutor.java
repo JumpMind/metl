@@ -1,5 +1,6 @@
 package org.jumpmind.metl.core.runtime.component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,7 @@ import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-public class SqlExecutor extends AbstractDbComponent {
+public class SqlExecutor extends AbstractRdbmsComponent {
 
     private static final String ON_SUCCESS = "ON SUCCESS";
 
@@ -20,7 +21,7 @@ public class SqlExecutor extends AbstractDbComponent {
 
     private static final String PER_ENTITY = "PER ENTITY";
 
-    public static final String TYPE = "Sql Writer";
+    public static final String TYPE = "Sql Executor";
 
     public final static String SQL = "sql";
 
@@ -29,19 +30,23 @@ public class SqlExecutor extends AbstractDbComponent {
     List<String> sqls;
 
     String runWhen = PER_MESSAGE;
+    
+    String unitOfWork;
 
     @Override
     protected void start() {
         TypedProperties properties = getTypedProperties();
         sqls = getSqlStatements(properties.get(SQL));
         runWhen = properties.get(RUN_WHEN, PER_MESSAGE);
+        unitOfWork = properties.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
         if (getResourceRuntime() == null) {
             throw new IllegalStateException("This component requires a data source");
         }
     }
 
     @Override
-    public void handle(final Message inputMessage, final IMessageTarget messageTarget) {
+    public void handle(final Message inputMessage, final IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    	List<Result> results = new ArrayList<Result>();
         getComponentStatistics().incrementInboundMessages();
         for (String sql : this.sqls) {
             final String sqlToExecute = FormatUtils.replaceTokens(sql,
@@ -50,18 +55,23 @@ public class SqlExecutor extends AbstractDbComponent {
             Map<String, Object> params = getParameters(inputMessage);
             if (runWhen.equals(PER_MESSAGE)) {
                 int count = template.update(sqlToExecute, params);
+                results.add(new Result(sqlToExecute, count));
                 getComponentStatistics().incrementNumberEntitiesProcessed(count);
             } else if (runWhen.equals(PER_ENTITY)) {
                 List<EntityData> datas = inputMessage.getPayload();
                 for (EntityData entityData : datas) {
                     params.putAll(getComponent().toRow(entityData, false));
                     int count = template.update(sqlToExecute, params);
+                    results.add(new Result(sqlToExecute, count));
                     getComponentStatistics().incrementNumberEntitiesProcessed(count);
                 }
             }
         }
-        getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(inputMessage.clone(getFlowStepId()));
+
+        if (messageTarget != null) {
+        	messageTarget.put(createResultMessage(inputMessage, results, unitOfWorkLastMessage, unitOfWork));
+            getComponentStatistics().incrementOutboundMessages();
+        }
     }
 
     private HashMap<String, Object> getParameters(Message inputMessage) {

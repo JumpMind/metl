@@ -51,7 +51,7 @@ public class TextFileWriterTest {
     public void testTextWriterMultipleRowsPerMessage() throws Exception {
         TextFileWriter writer = new TextFileWriter();
         writer.start(new ComponentContext(null, writerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
-        writer.handle(createMultipleRowTextMessageToWrite(), null);
+        writer.handle(createMultipleRowTextMessageToWrite(), null, true);
         checkTextFile();
     }
 
@@ -59,10 +59,10 @@ public class TextFileWriterTest {
     public void testTextWriterSingleRowPerMessage() throws Exception {
         TextFileWriter writer = new TextFileWriter();
         writer.start(new ComponentContext(null, writerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
-        writer.handle(createSingleRowTextMessageToWrite(1, false), null);
-        writer.handle(createSingleRowTextMessageToWrite(2, false), null);
-        writer.handle(createSingleRowTextMessageToWrite(3, false), null);
-        writer.handle(createSingleRowTextMessageToWrite(4, true), null);
+        writer.handle(createSingleRowTextMessageToWrite(1, false), null, true);
+        writer.handle(createSingleRowTextMessageToWrite(2, false), null, true);
+        writer.handle(createSingleRowTextMessageToWrite(3, false), null, true);
+        writer.handle(createSingleRowTextMessageToWrite(4, true), null, true);
         checkTextFile();
     }
 
@@ -79,7 +79,7 @@ public class TextFileWriterTest {
     private static Message createMultipleRowTextMessageToWrite() {
         Message msg = new Message("originating step id");
         msg.getHeader().setSequenceNumber(1);
-        msg.getHeader().setLastMessage(true);
+        msg.getHeader().setUnitOfWorkLastMessage(true);
         ArrayList<String> payload = new ArrayList<String>();
         payload.add("Line 1");
         payload.add("Line 2");
@@ -92,7 +92,7 @@ public class TextFileWriterTest {
     private static Message createSingleRowTextMessageToWrite(int lineNumber, boolean lastMsg) {
         Message msg = new Message("originating step id");
         msg.getHeader().setSequenceNumber(lineNumber);
-        msg.getHeader().setLastMessage(lastMsg);
+        msg.getHeader().setUnitOfWorkLastMessage(lastMsg);
         ArrayList<String> payload = new ArrayList<String>();
         payload.add("Line " + lineNumber);
         msg.setPayload(payload);

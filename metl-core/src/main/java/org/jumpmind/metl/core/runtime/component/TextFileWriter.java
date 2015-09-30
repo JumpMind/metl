@@ -40,6 +40,8 @@ public class TextFileWriter extends AbstractComponentRuntime {
     boolean mustExist;
     
     boolean append;
+
+    String unitOfWork;
     
     String lineTerminator;
 
@@ -53,7 +55,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget) {
+    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         
         if (getResourceRuntime() == null) {
@@ -78,6 +80,10 @@ public class TextFileWriter extends AbstractComponentRuntime {
         } catch (IOException e) {
             throw new IoException(e);
         }
+        if (messageTarget != null) {
+	        messageTarget.put(createResultMessage(inputMessage, unitOfWorkLastMessage));
+	        getComponentStatistics().incrementOutboundMessages();
+        }
     }    
 
     @Override
@@ -86,6 +92,17 @@ public class TextFileWriter extends AbstractComponentRuntime {
         super.stop();
     }
 
+    private Message createResultMessage(Message inputMessage, boolean unitOfWorkLastMessage) {
+    	Message resultMessage = new Message(getFlowStepId());
+
+        if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
+        		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
+            resultMessage.getHeader().setUnitOfWorkLastMessage(true);        	
+        }     
+    	//TODO: Figure out stats we want in the results message and add.
+    	return resultMessage;
+    }
+    
     private void initStreamAndWriter() {
         IStreamable streamable = (IStreamable) getResourceReference();
         if (!append && streamable.supportsDelete()) {
@@ -105,6 +122,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
         if (lineTerminator != null) {
             lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
         }
+        unitOfWork = properties.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
     }
 
 

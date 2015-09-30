@@ -2,7 +2,6 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -12,10 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.MessageManipulationStrategy;
+import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.StartupMessage;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
 import org.jumpmind.properties.TypedProperties;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,8 +22,120 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 
 @RunWith(PowerMockRunner.class)
-public class RdmsReaderUnitTest extends AbstractDbComponentTest {
+public class RdmsReaderUnitTest extends AbstractRdbmsComponentTest {
 
+	
+	@Test
+	@Override
+	public void testHandleStartupMessage() {
+		inputMessage = new StartupMessage();
+		
+		runHandle();
+		assertHandle(0, 1, 1, 0);
+	}
+
+	@Test
+	@Override
+	public void testHandleShutdownMessage() {
+		inputMessage = new ShutdownMessage("test");
+		
+		runHandle();
+		assertHandle(0, 1, 1, 0);
+	}
+	
+	@Test
+	public void testReceivesStartupWithResults() {
+		inputMessage = new StartupMessage();
+		
+		List<String> sqls = new ArrayList<String>();
+		sqls.add("select * from test");
+		this.sqls = sqls;
+		
+		runHandle();
+		assertHandle(1, 1, 0, 0);
+	}
+	
+	@Test
+	@Override
+	public void testHandleEmptyPayload() {
+		setupHandle();
+		runHandle();
+		assertHandle(0, 1, 0, 0);
+	}
+
+	@Test
+	@Override
+	public void testHandleUnitOfWorkInputMessage() {
+		setupHandle();
+		
+		inputMessage.setPayload(new ArrayList<EntityData>());
+		((RdbmsReader) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE;
+		
+		runHandle();
+		assertHandle(1, 1, 1, 0, true);
+	}
+
+	@Test
+	@Override
+	public void testHandleUnitOfWorkFlow() {
+		setupHandle();
+		
+		inputMessage.setPayload(new ArrayList<EntityData>());
+		((RdbmsReader) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
+		unitOfWorkLastMessage = true;
+		
+		runHandle();
+		assertHandle(1, 1, 1, 0, true);
+	}
+
+	@Test
+	@Override
+	public void testHandleNormal() {
+		List<String> sqls = new ArrayList<String>();
+		sqls.add("select * from $(UNIT_TEST)");
+		
+		this.sqls = sqls;
+		
+		runHandle();
+		assertHandle(1, 1, 0, 0);
+	}
+
+	
+	@Test
+	public void testHandleWithFlowParameters() {
+		List<String> sqls = new ArrayList<String>();
+		sqls.add("select * from $(UNIT_TEST)");
+		
+		Map<String, String> flowParameters = new HashMap<String, String>();
+		flowParameters.put("UNIT_TEST", "GOES_BOOM");
+		
+		this.sqls = sqls;
+		this.flowParametersAsString = flowParameters;
+		expectedFlowReplacementSql = "select * from GOES_BOOM";
+		
+		runHandle();
+		assertHandle(1, 1, 0, 0);
+	}
+	
+	@Test
+	public void testHandleSettingParamsFromHeaderNoPayload() {
+		Map<String, Serializable> flowParameters = new HashMap<String, Serializable>();
+		flowParameters.put("key", "value");
+		
+		List<String> sqls = new ArrayList<String>();
+		sqls.add("select * from test");
+		
+		Map<String, Object> expectedParams = new HashMap<String, Object>();
+		expectedParams.putAll(flowParameters);
+		
+		this.sqls = sqls;
+		this.flowParameters = flowParameters;
+		expectedParamMap = expectedParams;
+		
+		runHandle();
+		assertHandle(1, 1, 0, 0);
+	}
+	
 	@Test
 	public void testApplySettings() {
 		// setup
@@ -54,129 +165,26 @@ public class RdmsReaderUnitTest extends AbstractDbComponentTest {
 		assertEquals(eSql, reader.getSqls().get(0));
 		assertEquals(MessageManipulationStrategy.ENHANCE, reader.getMessageManipulationStrategy());
 	}
-	
-	@Test
-	public void testHandleStartupNoResults() {
-		// setup
-		Message resultMessage = new Message("");
-		MessageTarget target = new MessageTarget();
-		RdbmsReaderComponentSettings settings = new RdbmsReaderComponentSettings();
-				
-		// execute
-		RdbmsReader reader = runHandle(new StartupMessage(), resultMessage, target, settings);
-		
-		// verify
-		assertEquals(0, target.getTargetMessageCount());
-		assertEquals(1, reader.getComponentStatistics().getNumberInboundMessages());
-	}
-	
-	@Test
-	public void testHandleStartupWithResults() {
-		// setup
-		Message resultMessage = new Message("");
-		MessageTarget target = new MessageTarget();
-		RdbmsReaderComponentSettings settings = new RdbmsReaderComponentSettings();
-		List<String> sqls = new ArrayList<String>();
-		sqls.add("select * from test");
-		settings.setSqls(sqls);
-		
-		// execute
-		RdbmsReader reader = runHandle(new StartupMessage(), resultMessage, target, settings);
-		
-		// verify
-		assertEquals(1, target.getTargetMessageCount());
-		assertTrue(target.getMessage(0).getHeader().isLastMessage());
-		assertEquals(1, reader.getComponentStatistics().getNumberInboundMessages());
-	}
-	
-	@Test
-	public void testHandleWithFlowParameters() {
-		// setup
-		Message inputMessage = new Message("test");
-		Message resultMessage = new Message("");
-		MessageTarget target = new MessageTarget();
-		RdbmsReaderComponentSettings settings = new RdbmsReaderComponentSettings();
-		
-		List<String> sqls = new ArrayList<String>();
-		sqls.add("select * from $(UNIT_TEST)");
-		
-		Map<String, String> flowParameters = new HashMap<String, String>();
-		flowParameters.put("UNIT_TEST", "GOES_BOOM");
-		
-		settings.setSqls(sqls);
-		settings.setFlowParametersAsString(flowParameters);
-		settings.setExpectedFlowReplacementSql("select * from GOES_BOOM");
-		
-		// execute
-		RdbmsReader reader = runHandle(inputMessage, resultMessage, target, settings);
-		
-		// verify
-		assertEquals(1, target.getTargetMessageCount());
-		assertTrue(target.getMessage(0).getHeader().isLastMessage());
-		assertEquals(1, reader.getComponentStatistics().getNumberInboundMessages());
-	}
-	
-	@Test
-	public void testHandleSettingParamsFromHeaderNoPayload() {
-		Message inputMessage = new Message("test");
-		Message resultMessage = new Message("");
-		MessageTarget target = new MessageTarget();
-		
-		RdbmsReaderComponentSettings settings = new RdbmsReaderComponentSettings();
 
-		Map<String, Serializable> flowParameters = new HashMap<String, Serializable>();
-		flowParameters.put("key", "value");
-		
-		List<String> sqls = new ArrayList<String>();
-		sqls.add("select * from test");
-		
-		Map<String, Object> expectedParams = new HashMap<String, Object>();
-		expectedParams.putAll(flowParameters);
-		
-		settings.setSqls(sqls);
-		settings.setFlowParameters(flowParameters);
-		settings.setExpectedParamMap(expectedParams);
-		// execute
-		RdbmsReader reader = runHandle(inputMessage, resultMessage, target, settings);
-		
-		// verify
-		assertEquals(1, reader.getComponentStatistics().getNumberInboundMessages());
+	@Override
+	public IComponentRuntime getComponentSpy() {
+		RdbmsReader reader = spy(new RdbmsReader());
+		reader.unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
+		return reader;
 		
 	}
+
+	@Override
+	public void setupHandle() {
+		super.setupHandle();
+		
+		doReturn(this.sqls).when((RdbmsReader) spy).getSqls();
+		
+	}
+
 	
-	@Test
-	public void testHandleSettingParamsFromHeaderWithPayload() {
-		// TODO
-	}
-	private RdbmsReader runHandle(Message inputMessage, Message resultMessage, MessageTarget target, 
-			RdbmsReaderComponentSettings settings) {
-		
-		RdbmsReader sReader = spy(new RdbmsReader());
-		doReturn(settings.getSqls()).when(sReader).getSqls();
-		doNothing().when(sReader).start();
-		
-		super.setupHandle(sReader, inputMessage, resultMessage, settings);
-		
-		sReader.handle(inputMessage, target);
-		return sReader;
-	}
 	
-	class MessageTarget implements IMessageTarget {
-
-        List<Message> targetMsgArray = new ArrayList<Message>();
-
-        @Override
-        public void put(Message message) {
-            targetMsgArray.add(message);
-        }
-
-        public Message getMessage(int idx) {
-            return targetMsgArray.get(idx);
-        }
-
-        public int getTargetMessageCount() {
-            return targetMsgArray.size();
-        }
-    }
+	
+	
 	
 }
