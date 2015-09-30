@@ -60,7 +60,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     
     protected boolean shared = false;
     
-    protected XMLComponent definition;    
+    protected XMLComponent definition;   
     
     @Override
     public void register(XMLComponent definition) {

@@ -49,7 +49,18 @@ public class Joiner extends AbstractComponentRuntime {
 
     @Override
     protected void start() {        
-        applySettings();
+        Component component = getComponent();
+        Model inputModel = component.getInputModel();
+        if (inputModel == null) {
+            throw new IllegalStateException("The input model is required and has not yet been set");
+        }
+
+        List<ComponentAttributeSetting> settings = component.getAttributeSettings();
+        for (ComponentAttributeSetting componentAttributeSetting : settings) {
+            if (componentAttributeSetting.getName().equals(JOIN_ATTRIBUTE) && Boolean.parseBoolean(componentAttributeSetting.getValue())) {
+                attributesToJoinOn.add(componentAttributeSetting.getAttributeId());
+            }
+        }
     }
 
     @Override
@@ -73,23 +84,7 @@ public class Joiner extends AbstractComponentRuntime {
                 callback.sendMessage(dataToSend, true);
             }
         }
-    }
-    
-    private void applySettings() {
-        Component component = getComponent();
-        Model inputModel = component.getInputModel();
-        if (inputModel == null) {
-            throw new IllegalStateException("The input model is required and has not yet been set");
-        }
-        
-
-            List<ComponentAttributeSetting> settings = component.getAttributeSettings();
-            for (ComponentAttributeSetting componentAttributeSetting : settings) {
-                if (componentAttributeSetting.getName().equals(JOIN_ATTRIBUTE) && Boolean.parseBoolean(componentAttributeSetting.getValue())) {
-                    attributesToJoinOn.add(componentAttributeSetting.getAttributeId());
-                }
-            }
-    }
+    }   
     
     private void join(ArrayList<EntityData> records) {        
         for (EntityData entityData : records) {

@@ -66,15 +66,15 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
 
     boolean useHeader;
 
-    TypedProperties properties;
-
     List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
 
     @Override
     protected void start() {
-        
-        applySettings();
-    }
+        TypedProperties properties = getTypedProperties();
+        delimiter = properties.get(DELIMITED_FORMATTER_DELIMITER);
+        quoteCharacter = properties.get(DELIMITED_FORMATTER_QUOTE_CHARACTER);
+        useHeader = properties.is(DELIMITED_FORMATTER_WRITE_HEADER);
+        convertAttributeSettingsToAttributeFormat();    }
 
     @Override
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
@@ -147,14 +147,6 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
             csvWriter.setForceQualifier(true);
         }
         return csvWriter;
-    }
-
-    private void applySettings() {
-        properties = getTypedProperties();
-        delimiter = properties.get(DELIMITED_FORMATTER_DELIMITER);
-        quoteCharacter = properties.get(DELIMITED_FORMATTER_QUOTE_CHARACTER);
-        useHeader = properties.is(DELIMITED_FORMATTER_WRITE_HEADER);
-        convertAttributeSettingsToAttributeFormat();
     }
 
     private void convertAttributeSettingsToAttributeFormat() {

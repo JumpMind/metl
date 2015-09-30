@@ -54,12 +54,13 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
     boolean useHeader;
 
     /* other vars */
-    TypedProperties properties;
     List<AttributeFormat> attributesList;
 
     @Override
     protected void start() {
-        applySettings();
+        TypedProperties properties = getTypedProperties();
+        useHeader = properties.is(FIXED_LENGTH_FORMATTER_WRITE_HEADER);
+        convertAttributeSettingsToAttributeFormat();
     }
 
     @Override
@@ -108,13 +109,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
         }
         return stringBuilder.toString();
     }
-
-    private void applySettings() {
-        properties = getTypedProperties();
-        useHeader = properties.is(FIXED_LENGTH_FORMATTER_WRITE_HEADER);
-        convertAttributeSettingsToAttributeFormat();
-    }
-
+    
     private void convertAttributeSettingsToAttributeFormat() {
 
         Map<String, AttributeFormat> attributesMap = new HashMap<String, AttributeFormat>();

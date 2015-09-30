@@ -108,7 +108,7 @@ public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntim
 		} else {
 			when(mJdbcTemplate.query(anyString(), anyMap(), Mockito.any(ResultSetExtractor.class))).thenReturn(inputMessage);
 		}
-		doReturn(mJdbcTemplate).when((AbstractRdbmsComponent) spy).getJdbcTemplate();
+		doReturn(mJdbcTemplate).when((AbstractRdbmsComponentRuntime) spy).getJdbcTemplate();
 		
 	}
 }

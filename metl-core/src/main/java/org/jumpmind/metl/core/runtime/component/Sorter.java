@@ -55,7 +55,24 @@ public class Sorter extends AbstractComponentRuntime {
 
     @Override
     protected void start() {
-        applySettings();
+        TypedProperties properties = getTypedProperties();
+        rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
+        String sortAttribute = properties.get(SORT_ATTRIBUTE);
+        if (sortAttribute == null) {
+            throw new IllegalStateException("The sort attribute must be specified.");
+        }
+        Model inputModel = this.getComponent().getInputModel();
+        String[] joinAttributeElements = sortAttribute.split("[.]");
+        if (joinAttributeElements.length != 2) {
+            throw new IllegalStateException(
+                    "The sort attribute must be specified as 'entity.attribute'");
+        }
+        sortAttributeId = inputModel.getAttributeByName(joinAttributeElements[0],
+                joinAttributeElements[1]).getId();
+        if (sortAttributeId == null) {
+            throw new IllegalStateException(
+                    "Sort attribute must be a valid 'entity.attribute' in the input model.");
+        }
     }
 
     @Override
@@ -87,27 +104,6 @@ public class Sorter extends AbstractComponentRuntime {
             if (dataToSend != null && dataToSend.size() > 0) {
                 callback.sendMessage(dataToSend, true);
             }
-        }
-    }
-
-    private void applySettings() {
-        TypedProperties properties = getTypedProperties();
-        rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
-        String sortAttribute = properties.get(SORT_ATTRIBUTE);
-        if (sortAttribute == null) {
-            throw new IllegalStateException("The sort attribute must be specified.");
-        }
-        Model inputModel = this.getComponent().getInputModel();
-        String[] joinAttributeElements = sortAttribute.split("[.]");
-        if (joinAttributeElements.length != 2) {
-            throw new IllegalStateException(
-                    "The sort attribute must be specified as 'entity.attribute'");
-        }
-        sortAttributeId = inputModel.getAttributeByName(joinAttributeElements[0],
-                joinAttributeElements[1]).getId();
-        if (sortAttributeId == null) {
-            throw new IllegalStateException(
-                    "Sort attribute must be a valid 'entity.attribute' in the input model.");
         }
     }
 

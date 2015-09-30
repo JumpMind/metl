@@ -52,7 +52,7 @@ import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
-public class RdbmsWriter extends AbstractRdbmsComponent {
+public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 
     public static final String TYPE = "RDBMS Writer";
 
@@ -120,7 +120,23 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
             throw new IllegalStateException("A database writer must have an input model defined");
         }
 
-        applySettings();
+        TypedProperties properties = getTypedProperties();
+        batchMode = properties.is(BATCH_MODE, batchMode);
+        replaceRows = properties.is(REPLACE);
+        continueOnError = properties.is(CONTINUE_ON_ERROR, continueOnError);
+        updateFirst = properties.is(UPDATE_FIRST);
+        insertFallback = properties.is(INSERT_FALLBACK);
+        quoteIdentifiers = properties.is(QUOTE_IDENTIFIERS);
+        fitToColumn = properties.is(FIT_TO_COLUMN);
+        catalogName = FormatUtils.replaceTokens(properties.get(CATALOG), context.getFlowParametersAsString(), true);
+        if (isBlank(catalogName)) {
+            catalogName = null;
+        }
+
+        schemaName = FormatUtils.replaceTokens(properties.get(SCHEMA), context.getFlowParametersAsString(), true);
+        if (isBlank(schemaName)) {
+            schemaName = null;
+        }
 
         DataSource dataSource = (DataSource) getResourceReference();
         platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), quoteIdentifiers);
@@ -170,26 +186,6 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
             }
         }
 
-    }
-
-    private void applySettings() {
-        TypedProperties properties = getTypedProperties();
-        batchMode = properties.is(BATCH_MODE, batchMode);
-        replaceRows = properties.is(REPLACE);
-        continueOnError = properties.is(CONTINUE_ON_ERROR, continueOnError);
-        updateFirst = properties.is(UPDATE_FIRST);
-        insertFallback = properties.is(INSERT_FALLBACK);
-        quoteIdentifiers = properties.is(QUOTE_IDENTIFIERS);
-        fitToColumn = properties.is(FIT_TO_COLUMN);
-        catalogName = FormatUtils.replaceTokens(properties.get(CATALOG), context.getFlowParametersAsString(), true);
-        if (isBlank(catalogName)) {
-            catalogName = null;
-        }
-
-        schemaName = FormatUtils.replaceTokens(properties.get(SCHEMA), context.getFlowParametersAsString(), true);
-        if (isBlank(schemaName)) {
-            schemaName = null;
-        }
     }
 
     private Object[] getValues(boolean isUpdate, TargetTable modelTable, EntityData inputRow) {

@@ -69,7 +69,15 @@ public class TextFileWriter extends AbstractComponentRuntime {
 
     @Override
     protected void start() {        
-        applySettings();
+        properties = getTypedProperties();
+        relativePathAndFile = FormatUtils.replaceTokens(properties.get(TEXTFILEWRITER_RELATIVE_PATH), context.getFlowParametersAsString(), true);
+        mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
+        append = properties.is(TEXTFILEWRITER_APPEND);
+        lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
+        encoding = properties.get(TEXTFILEWRITER_ENCODING, DEFAULT_ENCODING);
+        if (lineTerminator != null) {
+            lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
+        }
     }
 
     @Override
@@ -114,19 +122,6 @@ public class TextFileWriter extends AbstractComponentRuntime {
         log(LogLevel.INFO,  String.format("Writing text file to %s", streamable.toString()));
         bufferedWriter = initializeWriter(streamable.getOutputStream(relativePathAndFile, mustExist));        
     }
-    
-    private void applySettings() {
-        properties = getTypedProperties();
-        relativePathAndFile = FormatUtils.replaceTokens(properties.get(TEXTFILEWRITER_RELATIVE_PATH), context.getFlowParametersAsString(), true);
-        mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
-        append = properties.is(TEXTFILEWRITER_APPEND);
-        lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
-        encoding = properties.get(TEXTFILEWRITER_ENCODING, DEFAULT_ENCODING);
-        if (lineTerminator != null) {
-            lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
-        }
-    }
-
 
     private BufferedWriter initializeWriter(OutputStream stream) {
         try {

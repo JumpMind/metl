@@ -33,7 +33,7 @@ import org.jumpmind.db.sql.SqlScriptReader;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 
-abstract public class AbstractRdbmsComponent extends AbstractComponentRuntime {
+abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRuntime {
 	
 	protected List<Result> results = new ArrayList<Result>();
 	

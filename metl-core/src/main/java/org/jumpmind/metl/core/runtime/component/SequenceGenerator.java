@@ -33,7 +33,7 @@ import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.util.FormatUtils;
 
-public class SequenceGenerator extends AbstractRdbmsComponent {
+public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
 
     public static final String TYPE = "Sequence";
 

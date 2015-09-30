@@ -54,7 +54,10 @@ public class EntityRouter extends AbstractComponentRuntime {
 
     long rowsPerMessage = 10000;
 
-    protected void applySettings() {
+    @Override
+    protected void start() {
+        ScriptEngineManager factory = new ScriptEngineManager();
+        scriptEngine = factory.getEngineByName("groovy");
         TypedProperties properties = getTypedProperties();
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         String json = getComponent().get(SETTING_CONFIG);
@@ -66,13 +69,6 @@ public class EntityRouter extends AbstractComponentRuntime {
                 throw new IoException(e);
             }
         }
-    }
-
-    @Override
-    protected void start() {
-        ScriptEngineManager factory = new ScriptEngineManager();
-        scriptEngine = factory.getEngineByName("groovy");
-        applySettings();
     }
 
     @Override
