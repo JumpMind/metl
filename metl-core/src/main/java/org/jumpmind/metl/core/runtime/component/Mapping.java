@@ -15,7 +15,7 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Mapping extends AbstractComponentRuntime {
 
@@ -29,8 +29,6 @@ public class Mapping extends AbstractComponentRuntime {
 
     boolean setUnmappedAttributesToNull;
 
-    String unitOfWork;
-    
     @Override
     protected void start() {
         
@@ -38,7 +36,6 @@ public class Mapping extends AbstractComponentRuntime {
 
         setUnmappedAttributesToNull = getComponent().getBoolean(
                 SET_UNMAPPED_ATTRIBUTES_TO_NULL, false);
-        unitOfWork = getComponent().get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
         attrToAttrMap = new HashMap<String, Set<String>>();
         List<ComponentAttributeSetting> attributeSettings = getComponent()
                 .getAttributeSettings();
@@ -73,7 +70,7 @@ public class Mapping extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
         if (inputRows == null) {
@@ -111,6 +108,6 @@ public class Mapping extends AbstractComponentRuntime {
             }
         }
 
-        sendMessage(outputPayload, messageTarget, unitOfWorkLastMessage);
+        callback.sendMessage(outputPayload, unitOfWorkLastMessage);
     }
 }

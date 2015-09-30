@@ -3,7 +3,6 @@ package org.jumpmind.metl.core.runtime.component;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,7 @@ import javax.script.ScriptException;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -57,9 +56,9 @@ public class EntityRouter extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
-        Map<String, Message> outboundMessages = new HashMap<String, Message>();
+        Map<String, ArrayList<EntityData>> outboundMessages = new HashMap<String, ArrayList<EntityData>>();
         ArrayList<EntityData> inputDatas = inputMessage.getPayload();
         for (EntityData entityData : inputDatas) {
             bindEntityData(scriptEngine, entityData);
@@ -67,33 +66,26 @@ public class EntityRouter extends AbstractComponentRuntime {
                 for (Route route : routes) {
                     try {
                         if (Boolean.TRUE.equals(scriptEngine.eval(route.getMatchExpression()))) {
-                            Message message = outboundMessages.get(route.getTargetStepId());
-                            if (message == null) {
-                                message = new Message(getFlowStepId());
-                                message.setPayload(new ArrayList<EntityData>());
-                                message.getHeader().getTargetStepIds().add(route.getTargetStepId());
-                                outboundMessages.put(route.getTargetStepId(), message);
+                            ArrayList<EntityData> outboundPayload = outboundMessages.get(route.getTargetStepId());
+                            if (outboundPayload == null) {
+                                outboundPayload = new ArrayList<EntityData>();
+                                outboundMessages.put(route.getTargetStepId(), outboundPayload);
                             }
-                            ArrayList<EntityData> outputRows = message.getPayload();
-                            if (outputRows.size() >= rowsPerMessage) {
+                            if (outboundPayload.size() >= rowsPerMessage) {
                                 outboundMessages.remove(route.getTargetStepId());
-                                getComponentStatistics().incrementOutboundMessages();
-                                messageTarget.put(message);
+                                callback.sendMessage(outboundPayload, false, route.getTargetStepId());
                             }
-                            outputRows.add(entityData.copy());
+                            outboundPayload.add(entityData.copy());
                         }
                     } catch (ScriptException e) {
                         throw new RuntimeException(e);
                     }
                 }
             }
-
         }
 
-        Collection<Message> messages = outboundMessages.values();
-        for (Message message : messages) {
-            getComponentStatistics().incrementOutboundMessages();
-            messageTarget.put(message);
+        for (String targetFlowStepId : outboundMessages.keySet()) {
+            callback.sendMessage(outboundMessages.get(targetFlowStepId), true, targetFlowStepId);
         }
 
     }

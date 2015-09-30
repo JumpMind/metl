@@ -26,7 +26,7 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
@@ -71,7 +71,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
       
@@ -87,7 +87,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
 
         log(LogLevel.DEBUG, outputPayload.toString());
         
-        sendMessage(outputPayload, messageTarget, unitOfWorkLastMessage);
+        callback.sendMessage(outputPayload, unitOfWorkLastMessage);
     }
 
     public static String getBatchXml(Model model, ArrayList<EntityData> inputRows, boolean outputAllAttributes) {

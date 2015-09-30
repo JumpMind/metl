@@ -10,7 +10,7 @@ import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.StartupMessage;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.util.FormatUtils;
 
 public class SequenceGenerator extends AbstractRdbmsComponent {
@@ -92,7 +92,7 @@ public class SequenceGenerator extends AbstractRdbmsComponent {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> outgoingPayload = new ArrayList<EntityData>();
@@ -113,7 +113,7 @@ public class SequenceGenerator extends AbstractRdbmsComponent {
                 getComponentStatistics().incrementNumberEntitiesProcessed();
                 outgoingPayload.add(entityData);
             }
-            sendMessage(outgoingPayload, messageTarget, unitOfWorkLastMessage);
+            callback.sendMessage(outgoingPayload, unitOfWorkLastMessage);
         }
     }
 

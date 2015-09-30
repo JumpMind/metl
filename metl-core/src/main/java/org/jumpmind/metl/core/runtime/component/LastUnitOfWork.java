@@ -1,8 +1,7 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.StartupMessage;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class LastUnitOfWork extends AbstractComponentRuntime {
 
@@ -13,13 +12,10 @@ public class LastUnitOfWork extends AbstractComponentRuntime {
     }
     
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();        
         if (unitOfWorkLastMessage) {
-        	Message msg = new StartupMessage();
-        	msg.getHeader().setOriginatingStepId(getFlowStepId());
-        	messageTarget.put(msg);
-            getComponentStatistics().incrementOutboundMessages();
+        	callback.sendStartupMessage();
         }
     }
 

@@ -18,9 +18,6 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.component.ComponentContext;
-import org.jumpmind.metl.core.runtime.component.TextFileWriter;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
@@ -140,23 +137,5 @@ public class TextFileWriterTest {
         settings.add(new Setting(LocalFile.LOCALFILE_PATH, FILE_PATH));
         settings.add(new Setting(LocalFile.LOCALFILE_MUST_EXIST, "true"));
         return settings;
-    }
-
-    class MessageTarget implements IMessageTarget {
-
-        List<Message> targetMsgArray = new ArrayList<Message>();
-
-        @Override
-        public void put(Message message) {
-            targetMsgArray.add(message);
-        }
-
-        public Message getMessage(int idx) {
-            return targetMsgArray.get(idx);
-        }
-
-        public int getTargetMessageCount() {
-            return targetMsgArray.size();
-        }
     }
 }

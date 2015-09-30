@@ -26,16 +26,7 @@
                 <name>Match On Column Name</name>
                 <defaultValue>false</defaultValue>
                 <description></description>
-            </setting>
-            <setting id='message.manipulation.strategy' type='choice' required='false'>
-                <name>Msg Strategy</name>
-                <defaultValue>REPLACE</defaultValue>
-                <description></description>
-                <choices>
-                    <choice>REPLACE</choice>
-                    <choice>ENHANCE</choice>
-                </choices>
-            </setting>                      
+            </setting>                    
         </settings>
     </component>
     <component id='RDBMS Writer' category='WRITER' inputMessageType='entity' outputMessageType='text' resourceCategory='datasource'

@@ -15,9 +15,8 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.properties.TypedProperties;
@@ -104,25 +103,25 @@ public class FilePoller extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         IResourceRuntime resourceRuntime = getResourceRuntime();
         String path = resourceRuntime.getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
         if (useTriggerFile) {
             File triggerFile = new File(path, triggerFilePath);
             if (triggerFile.exists()) {
-                pollForFiles(path, inputMessage, messageTarget, unitOfWorkLastMessage);
+                pollForFiles(path, inputMessage, callback, unitOfWorkLastMessage);
                 FileUtils.deleteQuietly(triggerFile);
             } else if (cancelOnNoFiles) {
                 getComponentStatistics().incrementOutboundMessages();
-                messageTarget.put(new ShutdownMessage(getFlowStepId(), true));
+                callback.sendShutdownMessage(true);
             }
         } else {
-            pollForFiles(path, inputMessage, messageTarget, unitOfWorkLastMessage);
+            pollForFiles(path, inputMessage, callback, unitOfWorkLastMessage);
         }
     }
 
-    protected void pollForFiles(String path, Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    protected void pollForFiles(String path, Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         File pathDir = new File(path);
         ArrayList<String> filePaths = new ArrayList<String>();
         ArrayList<File> fileReferences = new ArrayList<File>();
@@ -153,11 +152,9 @@ public class FilePoller extends AbstractComponentRuntime {
                 getComponentStatistics().incrementNumberEntitiesProcessed();
                 filePaths.add(file.getAbsolutePath());
             }
-            getComponentStatistics().incrementOutboundMessages();
-            messageTarget.put(inputMessage.clone(getFlowStepId(), filePaths, unitOfWorkLastMessage));
+            callback.sendMessage(filePaths, unitOfWorkLastMessage);
         } else if (cancelOnNoFiles) {
-            getComponentStatistics().incrementOutboundMessages();
-            messageTarget.put(new ShutdownMessage(getFlowStepId(), true));
+            callback.sendShutdownMessage(true);
         }
     }
 
@@ -196,7 +193,7 @@ public class FilePoller extends AbstractComponentRuntime {
             try {
                 File targetFile = new File(destDir, srcFile.getName());
                 if (targetFile.exists()) {
-                    info("The target file already exists.   Deleting it in order to archive a new file.");
+                    info("The msgTarget file already exists.   Deleting it in order to archive a new file.");
                     FileUtils.deleteQuietly(targetFile);
                 }
                 log(LogLevel.INFO, "Archiving %s tp %s", srcFile.getAbsolutePath(), destDir.getAbsolutePath());

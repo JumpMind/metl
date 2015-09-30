@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class LookupTest extends AbstractComponentRuntimeTest {
+public class LookupTest extends AbstractComponentRuntimeTest<ArrayList<EntityData>> {
 
 	@Test
 	@Override

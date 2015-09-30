@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.metl.core.model.Component;
@@ -19,10 +18,9 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
 import org.junit.Before;
 
-public abstract class AbstractComponentRuntimeTest {
+public abstract class AbstractComponentRuntimeTest<T> {
 
 	public static String MODEL_ATTR_ID_1 = "attr1";
 	public static String MODEL_ATTR_NAME_1 = "attr1Name";
@@ -51,7 +49,7 @@ public abstract class AbstractComponentRuntimeTest {
 	IComponentRuntime spy;
 	Message inputMessage;
 	Message resultMessage;
-	MessageTarget target;
+	SendMessageCallback<T> msgTarget;
 	boolean unitOfWorkLastMessage;
 	
 	Model inputModel;
@@ -71,7 +69,7 @@ public abstract class AbstractComponentRuntimeTest {
 	public void reset() {
 		inputMessage = new Message("test");
 		resultMessage = new Message("");
-		target = new MessageTarget();
+		msgTarget = new SendMessageCallback<T>();
 		spy = getComponentSpy();
 		unitOfWorkLastMessage = false;
 		setupCalled = false;
@@ -113,7 +111,7 @@ public abstract class AbstractComponentRuntimeTest {
 			setupHandle();
 		}
 		
-		spy.handle(inputMessage, target, unitOfWorkLastMessage);
+		spy.handle(inputMessage, msgTarget, unitOfWorkLastMessage);
 	}
 	
 	public void assertHandle(int targetMessageCount, int numberInboundMessages,
@@ -126,11 +124,12 @@ public abstract class AbstractComponentRuntimeTest {
 		assertHandle(targetMessageCount, numberInboundMessages, numberOutboundMessages, numberEntitiesProcessed, unitOfWorkLastMessage, null, null);
 	}
 	
-	public void assertHandle(int targetMessageCount, int numberInboundMessages,
+	@SuppressWarnings("unchecked")
+    public void assertHandle(int targetMessageCount, int numberInboundMessages,
 			int numberOutboundMessages, int numberEntitiesProcessed, boolean unitOfWorkLastMessage, 
 			Object entityKey, Object entityValue) {
 		
-		assertEquals("Target message counts are not equal", targetMessageCount, target.getTargetMessageCount());
+		assertEquals("Target message counts are not equal", targetMessageCount, msgTarget.getPayloadList().size());
 		assertEquals("Statistics inbound messages are not equal", numberInboundMessages, 
 				((AbstractComponentRuntime) spy).getComponentStatistics().getNumberInboundMessages());
 		assertEquals("Statistics outbound messages are not equal", numberOutboundMessages, 
@@ -140,17 +139,12 @@ public abstract class AbstractComponentRuntimeTest {
 		
 		if (entityKey != null) {
 			assertTrue("Expected entity key " + entityKey + " but there were not any output messages.",
-					target.getTargetMessageCount() > 0);
+					msgTarget.getPayloadList().size() > 0);
 		}
 		
-		for (int i = 0; i < target.getTargetMessageCount(); i++) {
-			assertEquals("Sequence numbers are not equal", inputMessage.getHeader().getSequenceNumber(), 
-					target.getMessage(i).getHeader().getSequenceNumber()); 
-			assertEquals("Unit of work not equal", unitOfWorkLastMessage, 
-					target.getMessage(i).getHeader().isUnitOfWorkLastMessage());
-			
+		for (int i = 0; i < msgTarget.getPayloadList().size(); i++) {			
 			if (i == 0 && entityKey != null) {
-				ArrayList<EntityData> actualPayload = target.getMessage(i).getPayload();
+				ArrayList<EntityData> actualPayload = (ArrayList<EntityData>)msgTarget.getPayloadList().get(i);
 				EntityData actualEntityData = actualPayload.get(i);
 				
 				assertEquals("Entity value not as expected", entityValue, actualEntityData.get(entityKey));
@@ -158,22 +152,5 @@ public abstract class AbstractComponentRuntimeTest {
 			}
 		}
 	}
-	
-	class MessageTarget implements IMessageTarget {
 
-        List<Message> targetMsgArray = new ArrayList<Message>();
-
-        @Override
-        public void put(Message message) {
-            targetMsgArray.add(message);
-        }
-
-        public Message getMessage(int idx) {
-            return targetMsgArray.get(idx);
-        }
-
-        public int getTargetMessageCount() {
-            return targetMsgArray.size();
-        }
-    }
 }

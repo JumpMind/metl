@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.metl.core.runtime.MessageManipulationStrategy;
+import org.jumpmind.metl.core.runtime.EntityData;
 import org.junit.Before;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -21,13 +21,12 @@ import org.mockito.stubbing.Answer;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntimeTest {
+public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntimeTest<ArrayList<EntityData>> {
 
 	List<String> sqls;
 	String expectedFlowReplacementSql;
 	Map<String, Object> expectedParamMap;
 	long rowsPerMessage;
-    MessageManipulationStrategy messageManipulationStrategy;
     boolean trimColumns;
     boolean matchOnColumnNameOnly;
 
@@ -39,12 +38,12 @@ public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntim
 		expectedFlowReplacementSql = "";
 		expectedParamMap = new HashMap<String, Object>();
 		rowsPerMessage = 0L;
-	    messageManipulationStrategy = MessageManipulationStrategy.REPLACE;
 	    trimColumns = false;
 	    matchOnColumnNameOnly = false;
 	}
 	
-	public void setupHandle() {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+    public void setupHandle() {
 		
 		super.setupHandle();
 		

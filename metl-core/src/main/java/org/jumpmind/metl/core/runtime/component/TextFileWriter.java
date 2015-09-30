@@ -12,7 +12,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IStreamable;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
@@ -41,8 +41,6 @@ public class TextFileWriter extends AbstractComponentRuntime {
     
     boolean append;
 
-    String unitOfWork;
-    
     String lineTerminator;
 
     TypedProperties properties;
@@ -55,11 +53,11 @@ public class TextFileWriter extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         
         if (getResourceRuntime() == null) {
-            throw new IllegalStateException("The target resource has not been configured.  Please choose a resource.");
+            throw new IllegalStateException("The msgTarget resource has not been configured.  Please choose a resource.");
         }
         
         if (inputMessage.getHeader().getSequenceNumber() == 1) {
@@ -81,7 +79,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
             throw new IoException(e);
         }
        
-        sendMessage("{\"status\":\"success\"}", messageTarget, unitOfWorkLastMessage);
+        callback.sendMessage("{\"status\":\"success\"}", unitOfWorkLastMessage);
     }    
 
     @Override
@@ -109,7 +107,6 @@ public class TextFileWriter extends AbstractComponentRuntime {
         if (lineTerminator != null) {
             lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
         }
-        unitOfWork = properties.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
     }
 
 

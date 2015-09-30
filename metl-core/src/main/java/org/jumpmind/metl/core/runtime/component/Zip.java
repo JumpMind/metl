@@ -15,7 +15,7 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IStreamable;
 
 public class Zip extends AbstractComponentRuntime {
@@ -51,7 +51,7 @@ public class Zip extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         List<String> files = inputMessage.getPayload();
         if (files != null) {

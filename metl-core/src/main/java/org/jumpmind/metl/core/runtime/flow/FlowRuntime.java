@@ -117,7 +117,7 @@ public class FlowRuntime {
         
         List<FlowStepLink> links = flow.getFlowStepLinks();
 
-        /* for each step runtime, set their list of target step runtimes */
+        /* for each step runtime, set their list of msgTarget step runtimes */
         for (String stepId : stepRuntimes.keySet()) {
             List<StepRuntime> targetStepRuntimes = new ArrayList<StepRuntime>();
             List<StepRuntime> sourceStepRuntimes = new ArrayList<StepRuntime>();

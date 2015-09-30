@@ -8,7 +8,7 @@ import java.util.Map;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -42,7 +42,7 @@ public class SqlExecutor extends AbstractRdbmsComponent {
     }
 
     @Override
-    public void handle(final Message inputMessage, final IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
     	List<Result> results = new ArrayList<Result>();
         getComponentStatistics().incrementInboundMessages();
         for (String sql : this.sqls) {
@@ -65,9 +65,8 @@ public class SqlExecutor extends AbstractRdbmsComponent {
             }
         }
 
-        if (messageTarget != null) {
-        	messageTarget.put(createResultMessage(inputMessage, results, unitOfWorkLastMessage));
-            getComponentStatistics().incrementOutboundMessages();
+        if (callback != null) {
+        	callback.sendMessage(convertResultsToTextPayload(results), unitOfWorkLastMessage);
         }
     }
 

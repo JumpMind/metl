@@ -14,7 +14,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.util.ComponentUtil;
 import org.slf4j.Logger;
@@ -35,7 +35,7 @@ public class MessageScriptHelper {
 
     protected Message inputMessage;
 
-    protected IMessageTarget messageTarget;
+    protected ISendMessageCallback messageTarget;
     
     protected ComponentStatistics componentStatistics;
     
@@ -100,7 +100,7 @@ public class MessageScriptHelper {
         return ComponentUtil.getAttributeValues(model, rows, entityName, attributeName);
     }
     
-    protected void setMessageTarget(IMessageTarget messageTarget) {
+    protected void setMessageTarget(ISendMessageCallback messageTarget) {
         this.messageTarget = messageTarget;
     }
 

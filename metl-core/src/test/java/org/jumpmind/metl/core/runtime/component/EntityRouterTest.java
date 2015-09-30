@@ -19,10 +19,7 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.component.ComponentContext;
-import org.jumpmind.metl.core.runtime.component.EntityRouter;
 import org.jumpmind.metl.core.runtime.component.EntityRouter.Route;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
 import org.jumpmind.metl.core.util.NameValue;
 import org.jumpmind.metl.core.utils.TestUtils;
 import org.junit.Before;
@@ -64,38 +61,35 @@ public class EntityRouterTest {
     
     @Test
     public void testRouteToTarget1() {
-        MessageTarget target = route(new EntityData(new NameValue("tt1col1", "Route to 1")));
-        assertEquals(1, target.getTargetMessageCount());
-        Message message = target.getMessage(0);
-        Collection<String> targetIds = message.getHeader().getTargetStepIds();
+        SendMessageCallback<ArrayList<EntityData>> target = route(new EntityData(new NameValue("tt1col1", "Route to 1")));
+        assertEquals(1, target.getPayloadList().size());
+        Collection<String> targetIds = target.getTargetStepIds().get(0);
         assertEquals(1, targetIds.size());
         assertEquals("Target 1", targetIds.iterator().next());
     }
     
     @Test
     public void testRouteToTarget1And2() {        
-        MessageTarget target = route(new EntityData(new NameValue("tt1col1", "Route to 1")),
+        SendMessageCallback<ArrayList<EntityData>> target = route(new EntityData(new NameValue("tt1col1", "Route to 1")),
                 new EntityData(new NameValue("tt2colx", "Route to 2")));
-        assertEquals(2, target.getTargetMessageCount());
-        Message message = target.getMessage(0);
-        Collection<String> targetIds = message.getHeader().getTargetStepIds();
+        assertEquals(2, target.getPayloadList().size());
+        Collection<String> targetIds = target.getTargetStepIds().get(0);
         assertEquals(1, targetIds.size());
         assertEquals("Target 1", targetIds.iterator().next());
-        List<EntityData> datas = message.getPayload();
+        List<EntityData> datas = target.getPayloadList().get(0);
         assertEquals(1, datas.size());
         assertEquals("Route to 1", datas.get(0).get("tt1col1"));
         
-        message = target.getMessage(1);
-        targetIds = message.getHeader().getTargetStepIds();
+        targetIds = target.getTargetStepIds().get(1);
         assertEquals(1, targetIds.size());
         assertEquals("Target 2", targetIds.iterator().next());
-        datas = message.getPayload();
+        datas = target.getPayloadList().get(1);
         assertEquals(1, datas.size());
         assertEquals("Route to 2", datas.get(0).get("tt2colx"));
     }
     
-    protected MessageTarget route(EntityData...data) {
-        MessageTarget target = new MessageTarget();
+    protected SendMessageCallback<ArrayList<EntityData>> route(EntityData...data) {
+        SendMessageCallback<ArrayList<EntityData>> target = new SendMessageCallback<ArrayList<EntityData>>();
         EntityRouter router = new EntityRouter();
         ComponentContext context = new ComponentContext(null, step, flow, new ExecutionTrackerNoOp(), null, null, null);
         router.start(context);
@@ -137,21 +131,4 @@ public class EntityRouterTest {
         return settingData;
     }
 
-    class MessageTarget implements IMessageTarget {
-
-        List<Message> targetMsgArray = new ArrayList<Message>();
-
-        @Override
-        public void put(Message message) {
-            targetMsgArray.add(message);
-        }
-
-        public Message getMessage(int idx) {
-            return targetMsgArray.get(idx);
-        }
-
-        public int getTargetMessageCount() {
-            return targetMsgArray.size();
-        }
-    }
 }

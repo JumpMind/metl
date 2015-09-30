@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class JoinerTest extends AbstractComponentRuntimeTest {
+public class JoinerTest extends AbstractComponentRuntimeTest<ArrayList<EntityData>> {
 
 	@Test
 	@Override
@@ -49,7 +49,6 @@ public class JoinerTest extends AbstractComponentRuntimeTest {
 	setupHandle();
 		
 		inputMessage.setPayload(new ArrayList<EntityData>());
-		//((Joiner) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE;
 		assertEquals("Unit of work not implemented for joiner", 1,2);
 		
 		runHandle();
@@ -62,8 +61,6 @@ public class JoinerTest extends AbstractComponentRuntimeTest {
 		setupHandle();
 		
 		inputMessage.setPayload(new ArrayList<EntityData>());
-		//((Joiner) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
-		unitOfWorkLastMessage = true;
 		assertEquals("Unit of work not implemented for joiner", 1,2);
 		
 		runHandle();

@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.MessageManipulationStrategy;
 import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.properties.TypedProperties;
@@ -69,7 +68,6 @@ public class RdmsReaderUnitTest extends AbstractRdbmsComponentTest {
 		setupHandle();
 		
 		inputMessage.setPayload(new ArrayList<EntityData>());
-		((RdbmsReader) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE;
 		
 		runHandle();
 		assertHandle(1, 1, 1, 0, true);
@@ -81,7 +79,6 @@ public class RdmsReaderUnitTest extends AbstractRdbmsComponentTest {
 		setupHandle();
 		
 		inputMessage.setPayload(new ArrayList<EntityData>());
-		((RdbmsReader) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
 		unitOfWorkLastMessage = true;
 		
 		runHandle();
@@ -143,33 +140,29 @@ public class RdmsReaderUnitTest extends AbstractRdbmsComponentTest {
 		
 		String eSql = "select * from test";
 		long eRowsPerMessage = 5l;
-		String eMessageManipulationStrategy = MessageManipulationStrategy.ENHANCE.name();
 		String eTrimColumns = "true";
 		String eMatchOnColumnNameOnly = "true";
 		
 		TypedProperties eProperties = new TypedProperties();
 		eProperties.setProperty(RdbmsReader.SQL, eSql);
 		eProperties.setProperty(RdbmsReader.ROWS_PER_MESSAGE, eRowsPerMessage);
-		eProperties.setProperty(RdbmsReader.MESSAGE_MANIPULATION_STRATEGY, eMessageManipulationStrategy);
 		eProperties.setProperty(RdbmsReader.TRIM_COLUMNS, eTrimColumns);
 		eProperties.setProperty(RdbmsReader.MATCH_ON_COLUMN_NAME_ONLY, eMatchOnColumnNameOnly);
 				
 		doReturn(eProperties).when(reader).getTypedProperties();
 		
 		// actual
-		reader.applySettings();
+		reader.start();
 		assertTrue(reader.isMatchOnColumnNameOnly());
 		assertTrue(reader.isTrimColumns());
 		assertEquals(eRowsPerMessage, reader.getRowsPerMessage());
 		assertEquals(1, reader.getSqls().size());
 		assertEquals(eSql, reader.getSqls().get(0));
-		assertEquals(MessageManipulationStrategy.ENHANCE, reader.getMessageManipulationStrategy());
 	}
 
 	@Override
 	public IComponentRuntime getComponentSpy() {
 		RdbmsReader reader = spy(new RdbmsReader());
-		reader.unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
 		return reader;
 		
 	}
@@ -181,10 +174,6 @@ public class RdmsReaderUnitTest extends AbstractRdbmsComponentTest {
 		doReturn(this.sqls).when((RdbmsReader) spy).getSqls();
 		
 	}
-
-	
-	
-	
 	
 	
 }

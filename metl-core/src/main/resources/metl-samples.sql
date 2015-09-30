@@ -58,14 +58,14 @@ insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, 
 drop table if exists female;
 drop table if exists male;
 create table person (id integer auto_increment, first_name varchar(100), last_name varchar(100), gender char(1), primary key (id));
-create table male (id integer auto_increment, first_name varchar(100), last_name varchar(100));
-create table female (id integer auto_increment, first_name varchar(100), last_name varchar(100));
+create table male (id integer auto_increment, first_name varchar(100), last_name varchar(100), primary key(id));
+create table female (id integer auto_increment, first_name varchar(100), last_name varchar(100), primary key(id));
 create table if not exists runs (id integer auto_increment, exec_time timestamp, primary key (id));
 insert into person values(1, ''Garfield'', ''Arbuckle'', ''M'');
 insert into person values(2, ''Odie'', ''Arbuckle'', ''M'');
 insert into person values(3, ''Jon'', ''Arbuckle'', ''M'');
 insert into person values(4, ''Liz'', ''Wilson'', ''F'');
-insert into person values(5, ''Arlene'', ''Cat'', ''F'');',{ts '2015-09-28 14:43:03.841'},null,null,{ts '2015-09-28 15:30:39.295'});
+insert into person values(5, ''Arlene'', ''Cat'', ''F'');',{ts '2015-09-28 14:43:03.841'},null,null,{ts '2015-09-30 14:24:27.580'});
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('71440ead-9b7b-4f97-9637-09ddc07dd7bd','48d92f15-542e-437c-8041-43db46c8923d','sql','insert into runs (exec_time) values(current_timestamp);',{ts '2015-09-28 15:27:02.184'},null,null,{ts '2015-09-28 15:27:15.566'});
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('3c090c3c-2ac9-4c82-bde6-6316deb56cab','cadcab7c-357f-43d4-b13c-8834364220ad','quote.character','',{ts '2015-09-29 08:07:16.050'},null,null,{ts '2015-09-29 10:29:30.746'});
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('ff0be6a5-5a53-4266-931b-8bd4cff0c0b4','b642d9ee-ab20-492b-9fef-e0656edd9f27','delay.in.ms','5000',{ts '2015-09-29 07:55:47.145'},null,null,{ts '2015-09-29 10:32:53.385'});

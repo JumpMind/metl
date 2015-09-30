@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.StartupMessage;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Deduper extends AbstractComponentRuntime {
 
@@ -19,12 +19,12 @@ public class Deduper extends AbstractComponentRuntime {
     LinkedHashMap<String, EntityData> deduped = new LinkedHashMap<String, EntityData>();
 
     @Override
-    protected void start() {        
+    protected void start() {
         rowsPerMessage = getComponent().getInt(ROWS_PER_MESSAGE, rowsPerMessage);
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
@@ -36,14 +36,14 @@ public class Deduper extends AbstractComponentRuntime {
                 }
             }
         }
-        
+
         if (unitOfWorkLastMessage) {
             if (deduped.size() > 0) {
                 int count = 0;
                 ArrayList<EntityData> payload = new ArrayList<EntityData>(rowsPerMessage);
                 for (EntityData data : deduped.values()) {
                     if (count >= rowsPerMessage) {
-                        sendMessage(payload, messageTarget, false);
+                        callback.sendMessage(payload, false);
                         payload = new ArrayList<EntityData>();
                         count = 0;
                     }
@@ -52,8 +52,8 @@ public class Deduper extends AbstractComponentRuntime {
                 }
 
                 deduped.clear();
-                
-                sendMessage(payload, messageTarget, true);
+
+                callback.sendMessage(payload, true);
             }
         }
     }

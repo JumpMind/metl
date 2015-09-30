@@ -15,7 +15,7 @@ import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class DeduperTest extends AbstractComponentRuntimeTest {
+public class DeduperTest extends AbstractComponentRuntimeTest<ArrayList<EntityData>> {
 
 	@Test
 	@Override

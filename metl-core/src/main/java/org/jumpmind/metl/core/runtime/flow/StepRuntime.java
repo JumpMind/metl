@@ -2,7 +2,11 @@ package org.jumpmind.metl.core.runtime.flow;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -12,10 +16,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.jumpmind.metl.core.model.FlowStep;
+import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.ShutdownMessage;
+import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
@@ -27,6 +34,12 @@ import org.slf4j.LoggerFactory;
 public class StepRuntime implements Runnable {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
+    
+    public static final String UNIT_OF_WORK = "unit.of.work";
+    
+    public static final String UNIT_OF_WORK_INPUT_MESSAGE = "Input Message";
+    
+    public static final String UNIT_OF_WORK_FLOW = "Flow";
 
     protected BlockingQueue<Message> inQueue;
 
@@ -109,7 +122,7 @@ public class StepRuntime implements Runnable {
     @Override
     public void run() {
         try {
-            MessageTarget target = new MessageTarget();
+            SendMessageCallback target = new SendMessageCallback();
             /*
              * if we are a start step (don't have any input links), we'll only
              * get a single message which is the start message sent by the flow
@@ -194,7 +207,7 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    private void shutdown(MessageTarget target) throws InterruptedException {
+    private void shutdown(SendMessageCallback target) throws InterruptedException {
         for (StepRuntime targetStepRuntime : targetStepRuntimes) {
             targetStepRuntime.queue(new ShutdownMessage(componentContext.getFlowStep().getId(), cancelled));
         }
@@ -253,12 +266,48 @@ public class StepRuntime implements Runnable {
         return componentContext;
     }
 
-    class MessageTarget implements IMessageTarget {
-        @Override
-        public void put(Message message) {
-            Collection<String> targetStepIds = message.getHeader().getTargetStepIds();
-            // clear out the target step id as we are done using it
-            message.getHeader().setTargetStepIds(null);
+    class SendMessageCallback implements ISendMessageCallback {
+        
+        protected boolean isUnitOfWorkLastMessage(String unitOfWork, boolean lastMessage) {
+            if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) || (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && lastMessage)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        protected Message createMessage(Message newMessage, Serializable payload, boolean lastMessage) {
+            FlowStep flowStep = componentContext.getFlowStep();
+            ComponentStatistics statistics = componentContext.getComponentStatistics();
+            String unitOfWork = flowStep.getComponent().get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
+            newMessage.getHeader().setUnitOfWorkLastMessage(isUnitOfWorkLastMessage(unitOfWork, lastMessage));
+            newMessage.getHeader().setSequenceNumber(statistics.getNumberOutboundMessages()+1);
+            newMessage.setPayload(payload);
+            return newMessage;
+        }
+        
+        protected Serializable copy(Serializable payload) {
+            if (payload instanceof ArrayList) {
+                payload = (Serializable)((ArrayList<?>)payload).clone();
+                ArrayList<?> old = (ArrayList<?>)payload;
+                ArrayList<Object> copied = new ArrayList<>(old.size());
+                for (Object object : old) {
+                    if (object instanceof EntityData) {
+                        object = ((EntityData)object).copy();
+                    }
+                    copied.add(object);
+                }
+                payload = copied;
+            }
+            return payload;
+        }
+        
+        protected void sendMessage(Message message, String... targetFlowStepIds) {
+            ComponentStatistics statistics = componentContext.getComponentStatistics();
+            statistics.incrementOutboundMessages();
+
+            Collection<String> targetStepIds = targetFlowStepIds != null ? Arrays.asList(targetFlowStepIds) : Collections.emptyList();
+            
             for (StepRuntime targetRuntime : targetStepRuntimes) {
                 boolean forward = targetStepIds == null || targetStepIds.size() == 0
                         || targetStepIds.contains(targetRuntime.getComponentRuntime().getComponentContext().getFlowStep().getId());
@@ -274,6 +323,26 @@ public class StepRuntime implements Runnable {
                     }
                 }
             }
+        }
+        
+        @Override
+        public void sendShutdownMessage(boolean cancel) {
+            FlowStep flowStep = componentContext.getFlowStep();
+            sendMessage(new ShutdownMessage(flowStep.getId(), cancel));
+        }
+        
+        @Override
+        public void sendStartupMessage() {
+            FlowStep flowStep = componentContext.getFlowStep();
+            sendMessage(new StartupMessage(flowStep.getId()));
+        }        
+        
+        @Override
+        public void sendMessage(Serializable payload, boolean lastMessage, String... targetFlowStepIds) {
+            payload = copy(payload);            
+            FlowStep flowStep = componentContext.getFlowStep();
+            sendMessage(createMessage(new Message(flowStep.getId()), payload, lastMessage), targetFlowStepIds);                 
+            
         }
     }
 
