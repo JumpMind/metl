@@ -10,7 +10,8 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
     apply plugin: 'eclipse-wtp'
     apply plugin: 'java'
     apply plugin: 'license-report'
-
+	apply plugin: 'jacoco'
+	
     sourceCompatibility=1.8
     targetCompatibility=1.8   
     

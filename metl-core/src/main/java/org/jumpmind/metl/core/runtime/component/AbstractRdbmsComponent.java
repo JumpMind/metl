@@ -18,8 +18,11 @@ abstract public class AbstractRdbmsComponent extends AbstractComponentRuntime {
 	
 	protected List<Result> results = new ArrayList<Result>();
 	
-    protected NamedParameterJdbcTemplate getJdbcTemplate() {
-        return new NamedParameterJdbcTemplate((DataSource) this.context.getResourceRuntime().reference());
+	protected NamedParameterJdbcTemplate getJdbcTemplate() {
+    	if (getResourceRuntime() == null) {
+            throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
+        }
+    	return new NamedParameterJdbcTemplate((DataSource) this.context.getResourceRuntime().reference());
     }
     
     protected List<String> getSqlStatements(String script) {

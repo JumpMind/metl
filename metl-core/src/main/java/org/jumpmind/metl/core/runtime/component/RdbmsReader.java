@@ -64,10 +64,6 @@ public class RdbmsReader extends AbstractRdbmsComponent {
 
         getComponentStatistics().incrementInboundMessages();
 
-        if (getResourceRuntime() == null) {
-            throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
-        }
-
         NamedParameterJdbcTemplate template = getJdbcTemplate();
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
@@ -95,8 +91,8 @@ public class RdbmsReader extends AbstractRdbmsComponent {
             }
 
             MessageResultSetExtractor messageResultSetExtractor = new MessageResultSetExtractor(inputMessage, messageTarget, unitOfWorkLastMessage);
-            for (String sql : sqls) {
-                String sqlToExecute = FormatUtils.replaceTokens(sql, context.getFlowParametersAsString(), true);
+            for (String sql : getSqls()) {
+                String sqlToExecute = FormatUtils.replaceTokens(sql, getComponentContext().getFlowParametersAsString(), true);
                 log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
                 messageResultSetExtractor.setSqlToExecute(sqlToExecute);
                 message = template.query(sqlToExecute, paramMap, messageResultSetExtractor);                
@@ -310,7 +306,31 @@ public class RdbmsReader extends AbstractRdbmsComponent {
         return entities;
     }
     
-    class MessageResultSetExtractor implements ResultSetExtractor<Message> {
+    
+    
+    List<String> getSqls() {
+		return sqls;
+	}
+
+	long getRowsPerMessage() {
+		return rowsPerMessage;
+	}
+
+	MessageManipulationStrategy getMessageManipulationStrategy() {
+		return messageManipulationStrategy;
+	}
+
+	boolean isTrimColumns() {
+		return trimColumns;
+	}
+
+	boolean isMatchOnColumnNameOnly() {
+		return matchOnColumnNameOnly;
+	}
+
+
+
+	class MessageResultSetExtractor implements ResultSetExtractor<Message> {
         Message inputMessage;
         
         IMessageTarget messageTarget;

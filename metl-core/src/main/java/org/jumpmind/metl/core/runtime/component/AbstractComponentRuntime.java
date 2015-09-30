@@ -63,7 +63,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     
     abstract protected void start();
     
-    protected TypedProperties getTypedProperties() {
+    public TypedProperties getTypedProperties() {
         List<XMLSetting> settings = definition != null ? definition.getSettings().getSetting() : null;
         if (settings == null) {
             settings = Collections.emptyList();
