@@ -47,8 +47,6 @@ public class StepRuntime implements Runnable {
 
     boolean cancelled = false;
     
-    boolean unitOfWorkLastMessage = false;
-
     Throwable error;
 
     IComponentRuntime componentRuntime;
@@ -70,10 +68,6 @@ public class StepRuntime implements Runnable {
         int capacity = componentContext.getFlowStep().getComponent().getInt(AbstractComponentRuntime.INBOUND_QUEUE_CAPACITY, 1000);
         inQueue = new LinkedBlockingQueue<Message>(capacity);
         sourceStepRuntimeUnitOfWorkReceived = new HashMap<String, Boolean>();
-    }
-
-    public boolean isUnitOfWorkLastMessage() {
-    	return unitOfWorkLastMessage;
     }
     
     public boolean isStartStep() {
@@ -155,9 +149,8 @@ public class StepRuntime implements Runnable {
                         }
                     } else if (inputMessage != null) {
                         try {
-                        	unitOfWorkLastMessage = calculateUnitOfWorkLastMessage(inputMessage);
                             componentContext.getExecutionTracker().beforeHandle(componentContext);
-                            componentRuntime.handle(inputMessage, target, unitOfWorkLastMessage);
+                            componentRuntime.handle(inputMessage, target, calculateUnitOfWorkLastMessage(inputMessage));
                         } catch (Exception ex) {
                             recordError(ex);
                         } finally {
