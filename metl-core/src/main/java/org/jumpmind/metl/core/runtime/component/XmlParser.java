@@ -63,7 +63,7 @@ public class XmlParser extends AbstractXML {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         ArrayList<String> inputRows = inputMessage.getPayload();
         ArrayList<EntityData> payload = new ArrayList<EntityData>();
         for (String xml : inputRows) {
@@ -114,7 +114,7 @@ public class XmlParser extends AbstractXML {
 
         }
 
-        callback.sendMessage(payload, unitOfWorkLastMessage);
+        callback.sendMessage(payload, unitOfWorkBoundaryReached);
 
     }
 

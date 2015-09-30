@@ -57,7 +57,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
 
         if (attributes.size() == 0) {
             log(LogLevel.INFO, "There are no format attributes configured.  Writing all entity fields to the output");
@@ -88,7 +88,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
             outputPayload.add(outputRec);
         }
         
-        callback.sendMessage(outputPayload, unitOfWorkLastMessage);
+        callback.sendMessage(outputPayload, unitOfWorkBoundaryReached);
     }
 
     private String processInputRow(EntityData inputRow) {

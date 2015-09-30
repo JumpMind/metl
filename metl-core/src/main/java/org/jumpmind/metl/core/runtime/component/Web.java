@@ -54,7 +54,7 @@ public class Web extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         IStreamable streamable = getResourceReference();
 
         ArrayList<String> outputPayload = new ArrayList<String>();
@@ -86,7 +86,7 @@ public class Web extends AbstractComponentRuntime {
             }
             
             if (outputPayload.size() > 0) {
-                callback.sendMessage(outputPayload, unitOfWorkLastMessage);
+                callback.sendMessage(outputPayload, unitOfWorkBoundaryReached);
             }
         } catch (IOException e) {
             throw new IoException(String.format("Error writing to %s ", streamable), e);

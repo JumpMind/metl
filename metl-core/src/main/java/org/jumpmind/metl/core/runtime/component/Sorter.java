@@ -39,7 +39,7 @@ public class Sorter extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
             for (int i = 0; i < payload.size(); i++) {
@@ -49,7 +49,7 @@ public class Sorter extends AbstractComponentRuntime {
             }
         }
         
-        if (unitOfWorkLastMessage) {
+        if (unitOfWorkBoundaryReached) {
             ArrayList<EntityData> dataToSend = new ArrayList<EntityData>();
             
             sort();

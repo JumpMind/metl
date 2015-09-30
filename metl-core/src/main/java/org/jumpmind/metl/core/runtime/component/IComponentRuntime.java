@@ -10,9 +10,7 @@ public interface IComponentRuntime {
     
     public void start(ComponentContext context);
 
-    public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkLastMessage);
-    
-//    public void lastMessageReceived(ISendMessageCallback messageTarget);
+    public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached);
     
     public void flowCompleted(boolean cancelled);
     

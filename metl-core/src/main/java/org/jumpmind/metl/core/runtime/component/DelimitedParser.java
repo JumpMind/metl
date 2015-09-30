@@ -67,7 +67,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
 
         ArrayList<String> inputRows = inputMessage.getPayload();
 
@@ -94,7 +94,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
             throw new IoException(e);
         }
 
-        callback.sendMessage(outputPayload, unitOfWorkLastMessage);
+        callback.sendMessage(outputPayload, unitOfWorkBoundaryReached);
     }
 
     private EntityData processInputRow(String inputRow) throws IOException {

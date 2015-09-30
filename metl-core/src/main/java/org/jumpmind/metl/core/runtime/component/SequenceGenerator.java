@@ -92,7 +92,7 @@ public class SequenceGenerator extends AbstractRdbmsComponent {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> outgoingPayload = new ArrayList<EntityData>();
             ArrayList<EntityData> payload = inputMessage.getPayload();
@@ -112,7 +112,7 @@ public class SequenceGenerator extends AbstractRdbmsComponent {
                 getComponentStatistics().incrementNumberEntitiesProcessed();
                 outgoingPayload.add(entityData);
             }
-            callback.sendMessage(outgoingPayload, unitOfWorkLastMessage);
+            callback.sendMessage(outgoingPayload, unitOfWorkBoundaryReached);
         }
     }
 

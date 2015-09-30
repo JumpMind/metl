@@ -33,13 +33,13 @@ public class Joiner extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
             join(payload);
         }
 
-        if (unitOfWorkLastMessage) {
+        if (unitOfWorkBoundaryReached) {
             ArrayList<EntityData> dataToSend = new ArrayList<EntityData>();
             Iterator<EntityData> itr = joinedData.values().iterator();
             while (itr.hasNext()) {

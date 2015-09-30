@@ -24,7 +24,7 @@ public class Deduper extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
             for (EntityData entityData : payload) {
@@ -36,7 +36,7 @@ public class Deduper extends AbstractComponentRuntime {
             }
         }
 
-        if (unitOfWorkLastMessage) {
+        if (unitOfWorkBoundaryReached) {
             if (deduped.size() > 0) {
                 int count = 0;
                 ArrayList<EntityData> payload = new ArrayList<EntityData>(rowsPerMessage);

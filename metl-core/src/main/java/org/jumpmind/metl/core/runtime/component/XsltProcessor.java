@@ -71,7 +71,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
       
         ArrayList<String> outputPayload = new ArrayList<String>();
@@ -86,7 +86,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
 
         log(LogLevel.DEBUG, outputPayload.toString());
         
-        callback.sendMessage(outputPayload, unitOfWorkLastMessage);
+        callback.sendMessage(outputPayload, unitOfWorkBoundaryReached);
     }
 
     public static String getBatchXml(Model model, ArrayList<EntityData> inputRows, boolean outputAllAttributes) {

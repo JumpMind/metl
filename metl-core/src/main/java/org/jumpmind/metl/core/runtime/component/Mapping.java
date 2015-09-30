@@ -70,7 +70,7 @@ public class Mapping extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
         if (inputRows == null) {
             return;
@@ -107,6 +107,6 @@ public class Mapping extends AbstractComponentRuntime {
             }
         }
 
-        callback.sendMessage(outputPayload, unitOfWorkLastMessage);
+        callback.sendMessage(outputPayload, unitOfWorkBoundaryReached);
     }
 }

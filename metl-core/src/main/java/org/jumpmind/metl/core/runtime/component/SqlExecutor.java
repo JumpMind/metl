@@ -42,7 +42,7 @@ public class SqlExecutor extends AbstractRdbmsComponent {
     }
 
     @Override
-    public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
     	List<Result> results = new ArrayList<Result>();
         for (String sql : this.sqls) {
             final String sqlToExecute = FormatUtils.replaceTokens(sql,
@@ -65,7 +65,7 @@ public class SqlExecutor extends AbstractRdbmsComponent {
         }
 
         if (callback != null) {
-        	callback.sendMessage(convertResultsToTextPayload(results), unitOfWorkLastMessage);
+        	callback.sendMessage(convertResultsToTextPayload(results), unitOfWorkBoundaryReached);
         }
     }
 

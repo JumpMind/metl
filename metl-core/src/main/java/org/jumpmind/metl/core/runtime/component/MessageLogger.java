@@ -18,7 +18,7 @@ public class MessageLogger extends AbstractComponentRuntime {
     }
     
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         MessageHeader header = inputMessage.getHeader();
         log(LogLevel.INFO, String.format("Message(sequenceNumber=%d,unitOfWorkLastMessage=%s,source='%s')",
                 header.getSequenceNumber(), header.isUnitOfWorkLastMessage(),
@@ -40,7 +40,7 @@ public class MessageLogger extends AbstractComponentRuntime {
             }
         }
         
-        callback.sendMessage(payload, unitOfWorkLastMessage);
+        callback.sendMessage(payload, unitOfWorkBoundaryReached);
     }
 
 }

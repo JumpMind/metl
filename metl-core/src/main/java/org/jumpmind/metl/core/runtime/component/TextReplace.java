@@ -35,7 +35,7 @@ public class TextReplace extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         List<String> in = inputMessage.getPayload();
         ArrayList<String> out = new ArrayList<String>();
         if (in != null) {
@@ -45,7 +45,7 @@ public class TextReplace extends AbstractComponentRuntime {
             }            
         }
         
-        callback.sendMessage(out, unitOfWorkLastMessage);
+        callback.sendMessage(out, unitOfWorkBoundaryReached);
     }
 
 }

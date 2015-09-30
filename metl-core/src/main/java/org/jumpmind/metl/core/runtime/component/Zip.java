@@ -51,14 +51,14 @@ public class Zip extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {
         List<String> files = inputMessage.getPayload();
         if (files != null) {
             fileNames.addAll(files);
             getComponentStatistics().incrementNumberEntitiesProcessed(files.size());
         }
         
-        if (unitOfWorkLastMessage) {
+        if (unitOfWorkBoundaryReached) {
             IStreamable streamable = getResourceReference();
             ZipOutputStream zos = null;
             try {

@@ -65,7 +65,7 @@ public class Execute extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             PumpStreamHandler outputHandler = new PumpStreamHandler(os);

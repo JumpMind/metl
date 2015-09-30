@@ -44,7 +44,7 @@ public class FixedLengthParser extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         ArrayList<String> inputRows = inputMessage.getPayload();
 
         ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
@@ -69,7 +69,7 @@ public class FixedLengthParser extends AbstractComponentRuntime {
             throw new IoException(e);
         }
 
-        callback.sendMessage(outputPayload, unitOfWorkLastMessage);
+        callback.sendMessage(outputPayload, unitOfWorkBoundaryReached);
     }
 
     private EntityData processInputRow(String inputRow) throws IOException {

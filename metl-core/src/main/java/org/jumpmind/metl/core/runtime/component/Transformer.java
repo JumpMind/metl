@@ -41,7 +41,7 @@ public class Transformer extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         Model inputModel = getComponent().getInputModel();
         List<EntityData> inDatas = inputMessage.getPayload();
         ArrayList<EntityData> outDatas = new ArrayList<EntityData>(inDatas.size());
@@ -66,7 +66,7 @@ public class Transformer extends AbstractComponentRuntime {
             getComponentStatistics().incrementNumberEntitiesProcessed();
         }
         
-        callback.sendMessage(outDatas, unitOfWorkLastMessage);
+        callback.sendMessage(outDatas, unitOfWorkBoundaryReached);
     }    
 
 }

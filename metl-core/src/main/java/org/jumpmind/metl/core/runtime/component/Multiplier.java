@@ -41,7 +41,7 @@ public class Multiplier extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
             List<EntityData> datas = inputMessage.getPayload();
             multipliers.addAll(datas);
@@ -55,10 +55,10 @@ public class Multiplier extends AbstractComponentRuntime {
                 }
             }
         } else if (!multipliersInitialized) {
-            inputMessage.getHeader().setUnitOfWorkLastMessage(unitOfWorkLastMessage);
+            inputMessage.getHeader().setUnitOfWorkLastMessage(unitOfWorkBoundaryReached);
             queuedWhileWaitingForMultiplier.add(inputMessage);
         } else if (multipliersInitialized) {
-            multiply(inputMessage, callback, unitOfWorkLastMessage);
+            multiply(inputMessage, callback, unitOfWorkBoundaryReached);
         }
     }
 

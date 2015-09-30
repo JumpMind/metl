@@ -116,7 +116,7 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
     }
 
     @Override
-    public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         lastPreparedDml = null;
 
         if (error == null) {
@@ -129,7 +129,7 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
                 ISqlTransaction transaction = platform.getSqlTemplate().startSqlTransaction();
                 transaction.setInBatchMode(batchMode);
                 try {
-                    write(transaction, inputMessage, callback, unitOfWorkLastMessage);
+                    write(transaction, inputMessage, callback, unitOfWorkBoundaryReached);
                     transaction.commit();
                     
                 } catch (Throwable ex) {
@@ -146,7 +146,7 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
             }
 
             if (callback != null) {
-                callback.sendMessage(convertResultsToTextPayload(results), unitOfWorkLastMessage);
+                callback.sendMessage(convertResultsToTextPayload(results), unitOfWorkBoundaryReached);
             }
         }
 

@@ -99,7 +99,7 @@ public class Script extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {
         invoke("setInputMessage", inputMessage);
         invoke("setMessageTarget", messageTarget);
         invoke("onHandle");

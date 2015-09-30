@@ -103,19 +103,19 @@ public class FilePoller extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         IResourceRuntime resourceRuntime = getResourceRuntime();
         String path = resourceRuntime.getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
         if (useTriggerFile) {
             File triggerFile = new File(path, triggerFilePath);
             if (triggerFile.exists()) {
-                pollForFiles(path, inputMessage, callback, unitOfWorkLastMessage);
+                pollForFiles(path, inputMessage, callback, unitOfWorkBoundaryReached);
                 FileUtils.deleteQuietly(triggerFile);
             } else if (cancelOnNoFiles) {
                 callback.sendShutdownMessage(true);
             }
         } else {
-            pollForFiles(path, inputMessage, callback, unitOfWorkLastMessage);
+            pollForFiles(path, inputMessage, callback, unitOfWorkBoundaryReached);
         }
     }
 

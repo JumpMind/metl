@@ -57,7 +57,7 @@ public class RdbmsReader extends AbstractRdbmsComponent {
     }
 
     @Override
-    public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         NamedParameterJdbcTemplate template = getJdbcTemplate();
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
@@ -84,7 +84,7 @@ public class RdbmsReader extends AbstractRdbmsComponent {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
             }
 
-            MessageResultSetExtractor messageResultSetExtractor = new MessageResultSetExtractor(inputMessage, callback, unitOfWorkLastMessage);
+            MessageResultSetExtractor messageResultSetExtractor = new MessageResultSetExtractor(inputMessage, callback, unitOfWorkBoundaryReached);
             for (String sql : getSqls()) {
                 String sqlToExecute = FormatUtils.replaceTokens(sql, getComponentContext().getFlowParametersAsString(), true);
                 log(LogLevel.DEBUG, "About to run: " + sqlToExecute);

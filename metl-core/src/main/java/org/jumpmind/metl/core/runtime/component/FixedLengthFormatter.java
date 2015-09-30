@@ -43,7 +43,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (attributesList == null || attributesList.size() == 0) {
             throw new IllegalStateException(
                     "There are no format attributes configured.  Writing all entity fields to the output.");
@@ -72,7 +72,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
             outputPayload.add(outputRec);
         }
 
-        callback.sendMessage(outputPayload, unitOfWorkLastMessage);
+        callback.sendMessage(outputPayload, unitOfWorkBoundaryReached);
     }
 
     private String processInputRow(EntityData inputRow) {

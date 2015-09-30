@@ -53,7 +53,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (getResourceRuntime() == null) {
             throw new IllegalStateException("The msgTarget resource has not been configured.  Please choose a resource.");
         }
@@ -77,7 +77,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
             throw new IoException(e);
         }
        
-        callback.sendMessage("{\"status\":\"success\"}", unitOfWorkLastMessage);
+        callback.sendMessage("{\"status\":\"success\"}", unitOfWorkBoundaryReached);
     }    
 
     @Override

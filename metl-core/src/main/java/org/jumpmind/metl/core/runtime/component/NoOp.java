@@ -12,8 +12,8 @@ public class NoOp extends AbstractComponentRuntime {
     }
     
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        callback.sendMessage(inputMessage.getPayload(), unitOfWorkLastMessage);
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        callback.sendMessage(inputMessage.getPayload(), unitOfWorkBoundaryReached);
     }
 
 }

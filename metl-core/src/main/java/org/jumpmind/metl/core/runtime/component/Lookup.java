@@ -49,7 +49,7 @@ public class Lookup extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
             List<EntityData> datas = inputMessage.getPayload();
             for (EntityData entityData : datas) {
@@ -61,13 +61,13 @@ public class Lookup extends AbstractComponentRuntime {
                 Iterator<Message> messages = queuedWhileWaitingForLookup.iterator();
                 while (messages.hasNext()) {
                     Message message = messages.next();
-                    enhanceAndSend(message, callback, unitOfWorkLastMessage);
+                    enhanceAndSend(message, callback, unitOfWorkBoundaryReached);
                 }
             }
         } else if (!lookupInitialized) {
             queuedWhileWaitingForLookup.add(inputMessage);
         } else if (lookupInitialized) {
-            enhanceAndSend(inputMessage, callback, unitOfWorkLastMessage);
+            enhanceAndSend(inputMessage, callback, unitOfWorkBoundaryReached);
         }
     }
 

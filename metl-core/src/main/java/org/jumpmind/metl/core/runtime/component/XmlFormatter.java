@@ -125,7 +125,7 @@ public class XmlFormatter extends AbstractXML {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
         ArrayList<String> outputPayload = new ArrayList<String>();
@@ -160,7 +160,7 @@ public class XmlFormatter extends AbstractXML {
         
         log(LogLevel.DEBUG, outputPayload.toString());
         
-        callback.sendMessage(outputPayload, unitOfWorkLastMessage);
+        callback.sendMessage(outputPayload, unitOfWorkBoundaryReached);
     }
 
     private void processInputRow(Document document, EntityData inputRow) {
