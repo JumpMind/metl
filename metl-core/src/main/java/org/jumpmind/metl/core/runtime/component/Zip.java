@@ -52,7 +52,6 @@ public class Zip extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
         List<String> files = inputMessage.getPayload();
         if (files != null) {
             fileNames.addAll(files);

@@ -24,7 +24,6 @@ public class TextReader extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
         int linesInMessage = 0;
         int textRowsPerMessage = context.getFlowStep().getComponent().getInt(SETTING_ROWS_PER_MESSAGE, 1000);
         ArrayList<String> payload = new ArrayList<String>();

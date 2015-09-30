@@ -93,7 +93,6 @@ public class SequenceGenerator extends AbstractRdbmsComponent {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> outgoingPayload = new ArrayList<EntityData>();
             ArrayList<EntityData> payload = inputMessage.getPayload();

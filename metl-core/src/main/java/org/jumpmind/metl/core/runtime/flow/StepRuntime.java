@@ -150,6 +150,7 @@ public class StepRuntime implements Runnable {
                     } else if (inputMessage != null) {
                         try {
                             componentContext.getExecutionTracker().beforeHandle(componentContext);
+                            componentContext.getComponentStatistics().incrementInboundMessages();
                             componentRuntime.handle(inputMessage, target, calculateUnitOfWorkLastMessage(inputMessage));
                         } catch (Exception ex) {
                             recordError(ex);

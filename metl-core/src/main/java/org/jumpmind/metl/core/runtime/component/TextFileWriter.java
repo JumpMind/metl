@@ -54,8 +54,6 @@ public class TextFileWriter extends AbstractComponentRuntime {
 
     @Override
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
-        
         if (getResourceRuntime() == null) {
             throw new IllegalStateException("The msgTarget resource has not been configured.  Please choose a resource.");
         }

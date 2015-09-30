@@ -44,7 +44,6 @@ public class SqlExecutor extends AbstractRdbmsComponent {
     @Override
     public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
     	List<Result> results = new ArrayList<Result>();
-        getComponentStatistics().incrementInboundMessages();
         for (String sql : this.sqls) {
             final String sqlToExecute = FormatUtils.replaceTokens(sql,
                     context.getFlowParametersAsString(), true);

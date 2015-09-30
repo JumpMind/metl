@@ -117,9 +117,7 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
 
     @Override
     public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-
         lastPreparedDml = null;
-        getComponentStatistics().incrementInboundMessages();
 
         if (error == null) {
             if (getResourceRuntime() == null) {

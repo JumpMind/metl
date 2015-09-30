@@ -63,7 +63,6 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
             log(LogLevel.INFO, "There are no format attributes configured.  Writing all entity fields to the output");
         }
 
-        getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
         ArrayList<String> outputPayload = new ArrayList<String>();

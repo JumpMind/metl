@@ -50,8 +50,6 @@ public class Lookup extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
-
         if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
             List<EntityData> datas = inputMessage.getPayload();
             for (EntityData entityData : datas) {

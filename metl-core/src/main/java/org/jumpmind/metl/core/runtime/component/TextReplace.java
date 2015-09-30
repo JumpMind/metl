@@ -36,7 +36,6 @@ public class TextReplace extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
         List<String> in = inputMessage.getPayload();
         ArrayList<String> out = new ArrayList<String>();
         if (in != null) {

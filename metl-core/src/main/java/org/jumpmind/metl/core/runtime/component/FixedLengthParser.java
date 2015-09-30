@@ -45,8 +45,6 @@ public class FixedLengthParser extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
-
         ArrayList<String> inputRows = inputMessage.getPayload();
 
         ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();

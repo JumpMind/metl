@@ -71,7 +71,6 @@ public class Mapping extends AbstractComponentRuntime {
 
     @Override
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
         if (inputRows == null) {
             return;

@@ -104,7 +104,6 @@ public class FilePoller extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
         IResourceRuntime resourceRuntime = getResourceRuntime();
         String path = resourceRuntime.getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
         if (useTriggerFile) {

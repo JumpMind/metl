@@ -13,7 +13,6 @@ public class NoOp extends AbstractComponentRuntime {
     
     @Override
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
         callback.sendMessage(inputMessage.getPayload(), unitOfWorkLastMessage);
     }
 

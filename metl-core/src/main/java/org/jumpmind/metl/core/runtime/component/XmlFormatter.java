@@ -126,7 +126,6 @@ public class XmlFormatter extends AbstractXML {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
         ArrayList<String> outputPayload = new ArrayList<String>();

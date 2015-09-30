@@ -58,9 +58,6 @@ public class RdbmsReader extends AbstractRdbmsComponent {
 
     @Override
     public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-
-        getComponentStatistics().incrementInboundMessages();
-
         NamedParameterJdbcTemplate template = getJdbcTemplate();
         Map<String, Object> paramMap = new HashMap<String, Object>();
 

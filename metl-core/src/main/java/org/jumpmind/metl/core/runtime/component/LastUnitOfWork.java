@@ -12,8 +12,7 @@ public class LastUnitOfWork extends AbstractComponentRuntime {
     }
     
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();        
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {    
         if (unitOfWorkLastMessage) {
         	callback.sendStartupMessage();
         }

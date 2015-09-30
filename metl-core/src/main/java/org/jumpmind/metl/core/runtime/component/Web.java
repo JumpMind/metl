@@ -55,8 +55,6 @@ public class Web extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
-
         IStreamable streamable = getResourceReference();
 
         ArrayList<String> outputPayload = new ArrayList<String>();

@@ -28,8 +28,6 @@ public class Transformer extends AbstractComponentRuntime {
     
     @Override
     protected void start() {
-        
-        
         transformsByAttributeId.clear();
         
         List<ComponentAttributeSetting> settings = getComponent().getAttributeSettings();
@@ -44,7 +42,6 @@ public class Transformer extends AbstractComponentRuntime {
 
     @Override
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();        
         Model inputModel = getComponent().getInputModel();
         List<EntityData> inDatas = inputMessage.getPayload();
         ArrayList<EntityData> outDatas = new ArrayList<EntityData>(inDatas.size());

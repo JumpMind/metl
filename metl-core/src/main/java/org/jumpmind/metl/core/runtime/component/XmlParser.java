@@ -64,7 +64,6 @@ public class XmlParser extends AbstractXML {
     @SuppressWarnings("unchecked")
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
         ArrayList<String> inputRows = inputMessage.getPayload();
         ArrayList<EntityData> payload = new ArrayList<EntityData>();
         for (String xml : inputRows) {
