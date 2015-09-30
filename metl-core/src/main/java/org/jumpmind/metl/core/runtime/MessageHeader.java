@@ -66,7 +66,7 @@ public class MessageHeader extends HashMap<String, Serializable> implements Seri
         return targetStepIds;
     }
 
-    public MessageHeader clone() {
+    public MessageHeader clone (boolean unitOfWorkLastMessage) {
         MessageHeader mh = new MessageHeader(originatingStepId);
         mh.putAll(this);
         mh.setExecutionId(executionId);

@@ -56,15 +56,6 @@ public class Joiner extends AbstractComponentRuntime {
         }
     }
     
-    private void sendMessage(ArrayList<EntityData> dataToSend, IMessageTarget messageTarget,
-            boolean lastMessage) {        
-        Message newMessage = new Message(getFlowStepId());
-        newMessage.getHeader().setUnitOfWorkLastMessage(lastMessage);
-        newMessage.setPayload(dataToSend);
-        getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(newMessage);      
-    }
-    
     private void applySettings() {
         Component component = getComponent();
         Model inputModel = component.getInputModel();

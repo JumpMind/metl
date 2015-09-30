@@ -111,18 +111,18 @@ public class FilePoller extends AbstractComponentRuntime {
         if (useTriggerFile) {
             File triggerFile = new File(path, triggerFilePath);
             if (triggerFile.exists()) {
-                pollForFiles(path, inputMessage, messageTarget);
+                pollForFiles(path, inputMessage, messageTarget, unitOfWorkLastMessage);
                 FileUtils.deleteQuietly(triggerFile);
             } else if (cancelOnNoFiles) {
                 getComponentStatistics().incrementOutboundMessages();
                 messageTarget.put(new ShutdownMessage(getFlowStepId(), true));
             }
         } else {
-            pollForFiles(path, inputMessage, messageTarget);
+            pollForFiles(path, inputMessage, messageTarget, unitOfWorkLastMessage);
         }
     }
 
-    protected void pollForFiles(String path, Message inputMessage, IMessageTarget messageTarget) {
+    protected void pollForFiles(String path, Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         File pathDir = new File(path);
         ArrayList<String> filePaths = new ArrayList<String>();
         ArrayList<File> fileReferences = new ArrayList<File>();
@@ -154,7 +154,7 @@ public class FilePoller extends AbstractComponentRuntime {
                 filePaths.add(file.getAbsolutePath());
             }
             getComponentStatistics().incrementOutboundMessages();
-            messageTarget.put(inputMessage.clone(getFlowStepId(), filePaths));
+            messageTarget.put(inputMessage.clone(getFlowStepId(), filePaths, unitOfWorkLastMessage));
         } else if (cancelOnNoFiles) {
             getComponentStatistics().incrementOutboundMessages();
             messageTarget.put(new ShutdownMessage(getFlowStepId(), true));

@@ -85,7 +85,7 @@ public class Execute extends AbstractComponentRuntime {
                 info("The output of the command was: %s", output);
 
                 getComponentStatistics().incrementOutboundMessages();
-                Message msg = inputMessage.clone(getFlowStepId());
+                Message msg = inputMessage.clone(getFlowStepId(), unitOfWorkLastMessage);
                 ArrayList<String> payload = new ArrayList<String>();
                 payload.add(output);
                 msg.setPayload(payload);

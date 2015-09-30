@@ -113,17 +113,8 @@ public class SequenceGenerator extends AbstractRdbmsComponent {
                 getComponentStatistics().incrementNumberEntitiesProcessed();
                 outgoingPayload.add(entityData);
             }
-            sendMessage(outgoingPayload, messageTarget, inputMessage.getHeader().isUnitOfWorkLastMessage());
+            sendMessage(outgoingPayload, messageTarget, unitOfWorkLastMessage);
         }
-    }
-
-    private void sendMessage(ArrayList<EntityData> payload, IMessageTarget messageTarget,
-            boolean lastMessage) {
-        Message newMessage = new Message(getFlowStepId());
-        newMessage.getHeader().setUnitOfWorkLastMessage(lastMessage);
-        newMessage.setPayload(payload);
-        getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(newMessage);
     }
 
 }

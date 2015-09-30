@@ -74,8 +74,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
     public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
-
-        Message outputMessage = new Message(getFlowStepId());
+      
         ArrayList<String> outputPayload = new ArrayList<String>();
         
         String batchXml = getBatchXml(getComponent().getInputModel(), inputRows, outputAllAttributes);
@@ -86,12 +85,9 @@ public class XsltProcessor extends AbstractComponentRuntime {
         String outputXml = getTransformedXml(batchXml, stylesheetXml, xmlFormat);
         outputPayload.add(outputXml);
 
-        outputMessage.setPayload(outputPayload);
-        log(LogLevel.INFO, outputPayload.toString());
-        getComponentStatistics().incrementOutboundMessages();
-        outputMessage.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
-        outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
-        messageTarget.put(outputMessage);
+        log(LogLevel.DEBUG, outputPayload.toString());
+        
+        sendMessage(outputPayload, messageTarget, unitOfWorkLastMessage);
     }
 
     public static String getBatchXml(Model model, ArrayList<EntityData> inputRows, boolean outputAllAttributes) {

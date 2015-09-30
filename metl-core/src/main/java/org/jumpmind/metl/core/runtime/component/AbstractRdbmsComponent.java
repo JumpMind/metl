@@ -51,14 +51,8 @@ abstract public class AbstractRdbmsComponent extends AbstractComponentRuntime {
     	return payload;
     }
     
-    protected Message createResultMessage(Message inputMessage, List<Result> results, boolean unitOfWorkLastMessage, String unitOfWork) {
-        Message resultMessage = new Message(getFlowStepId());
-        resultMessage.setPayload(convertResultsToTextPayload(results));
-        if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
-        		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
-            resultMessage.getHeader().setUnitOfWorkLastMessage(true);        	
-        }   
-        return resultMessage;
+    protected Message createResultMessage(Message inputMessage, List<Result> results, boolean unitOfWorkLastMessage) {
+        return createMessage(convertResultsToTextPayload(results), unitOfWorkLastMessage);
     }
     
     class Result {

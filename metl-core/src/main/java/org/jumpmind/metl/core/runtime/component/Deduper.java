@@ -51,18 +51,11 @@ public class Deduper extends AbstractComponentRuntime {
                     count++;
                 }
 
+                deduped.clear();
+                
                 sendMessage(payload, messageTarget, true);
             }
         }
-    }
-
-    private void sendMessage(ArrayList<EntityData> payload, IMessageTarget messageTarget,
-            boolean lastMessage) {
-        Message newMessage = new Message(getFlowStepId());
-        newMessage.getHeader().setUnitOfWorkLastMessage(lastMessage);
-        newMessage.setPayload(payload);
-        getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(newMessage);
     }
 
 }

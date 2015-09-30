@@ -1,5 +1,6 @@
 package org.jumpmind.metl.core.runtime.component;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
+import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.util.ComponentUtil;
 import org.jumpmind.properties.TypedProperties;
@@ -41,9 +43,12 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     public final static String ENABLED = "enabled";
 
     protected ComponentContext context;
+    
     protected boolean enabled = true;
+    
     protected boolean shared = false;
-    protected XMLComponent definition;
+    
+    protected XMLComponent definition;    
     
     @Override
     public void register(XMLComponent definition) {
@@ -181,6 +186,26 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     protected List<Object> getAttributeValues(Message inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
         return ComponentUtil.getAttributeValues(getInputModel(), rows, entityName, attributeName);
+    }
+    
+    protected Message createMessage(Serializable payload, boolean lastMessage) {
+        String unitOfWork = getUnitOfWork();
+        Message newMessage = new Message(getFlowStepId());
+        if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE)
+                || (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && lastMessage)) {
+            newMessage.getHeader().setUnitOfWorkLastMessage(true);
+        }
+        newMessage.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages()+1);
+        newMessage.setPayload(payload);
+        return newMessage;
+    }
+    
+    protected void sendMessage(Serializable payload, IMessageTarget messageTarget, boolean lastMessage) {
+        Message newMessage = createMessage(payload, lastMessage);                
+        getComponentStatistics().incrementOutboundMessages();
+        if (messageTarget != null) {
+            messageTarget.put(newMessage);
+        }
     }
     
 }
