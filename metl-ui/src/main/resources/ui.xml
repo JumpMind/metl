@@ -92,9 +92,6 @@
     <component-ui id="Text Replace UI" componentId="Text Replace">
         <iconImage>/org/jumpmind/metl/core/runtime/component/regex_replace.png</iconImage>
     </component-ui>    
-    <component-ui id="Union UI" componentId="Union">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/union.png</iconImage>
-    </component-ui>    
     <component-ui id="Web UI" componentId="Web">
         <iconImage>/org/jumpmind/metl/core/runtime/component/web.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditWebPanel</className>

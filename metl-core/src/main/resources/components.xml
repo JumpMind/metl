@@ -651,14 +651,6 @@
         <settings>
         </settings>
     </component>
-    <component id='Union' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
-        inputOutputModelsMatch='true'>
-        <name>Union</name>
-        <className>org.jumpmind.metl.core.runtime.component.Union</className>
-        <description></description>
-        <settings>
-        </settings>
-    </component>
     <component id='Web' category='PROCESSOR' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
         <name>Web</name>
         <className>org.jumpmind.metl.core.runtime.component.Web</className>
