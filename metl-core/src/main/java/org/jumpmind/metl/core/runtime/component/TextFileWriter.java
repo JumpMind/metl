@@ -62,14 +62,12 @@ public class TextFileWriter extends AbstractComponentRuntime {
     boolean append;
 
     String lineTerminator;
-
-    TypedProperties properties;
     
     BufferedWriter bufferedWriter = null;
 
     @Override
     protected void start() {        
-        properties = getTypedProperties();
+        TypedProperties properties = getTypedProperties();
         relativePathAndFile = FormatUtils.replaceTokens(properties.get(TEXTFILEWRITER_RELATIVE_PATH), context.getFlowParametersAsString(), true);
         mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
         append = properties.is(TEXTFILEWRITER_APPEND);
