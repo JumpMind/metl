@@ -22,15 +22,7 @@ public class JoinerTest extends AbstractComponentRuntimeTest {
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		inputMessage = new StartupMessage();
-		runHandle();
-		assertHandle(0, 1, 0, 0);
-	}
-
-	@Test
-	@Override
-	public void testHandleShutdownMessage() {
-		inputMessage = new ShutdownMessage("test");
+		setInputMessage(new StartupMessage());
 		runHandle();
 		assertHandle(0, 1, 0, 0);
 	}
@@ -46,9 +38,9 @@ public class JoinerTest extends AbstractComponentRuntimeTest {
 	@Test
 	@Override
 	public void testHandleUnitOfWorkInputMessage() {
-	setupHandle();
+		setupHandle();
 		
-		inputMessage.setPayload(new ArrayList<EntityData>());
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		//((Joiner) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE;
 		assertEquals("Unit of work not implemented for joiner", 1,2);
 		
@@ -61,9 +53,9 @@ public class JoinerTest extends AbstractComponentRuntimeTest {
 	public void testHandleUnitOfWorkFlow() {
 		setupHandle();
 		
-		inputMessage.setPayload(new ArrayList<EntityData>());
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		//((Joiner) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
-		unitOfWorkLastMessage = true;
+		setUnitOfWorkLastMessage(true);
 		assertEquals("Unit of work not implemented for joiner", 1,2);
 		
 		runHandle();
@@ -75,7 +67,7 @@ public class JoinerTest extends AbstractComponentRuntimeTest {
 	public void testHandleNormal() {
 		setupHandle();
 		
-		inputMessage.setPayload(PayloadTestHelper.createPayloadWithMultipleEntityData());
+		getInputMessage().setPayload(PayloadTestHelper.createPayloadWithMultipleEntityData());
 		
 		List<String> attributesToJoinOn = new ArrayList<String>();
 		attributesToJoinOn.add(MODEL_ATTR_ID_1);

@@ -20,15 +20,7 @@ public class DeduperTest extends AbstractComponentRuntimeTest {
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		inputMessage = new StartupMessage();
-		runHandle();
-		assertHandle(0, 1, 0, 0);
-	}
-
-	@Test
-	@Override
-	public void testHandleShutdownMessage() {
-		inputMessage = new ShutdownMessage("test");
+		setInputMessage(new StartupMessage());
 		runHandle();
 		assertHandle(0, 1, 0, 0);
 	}
@@ -46,7 +38,7 @@ public class DeduperTest extends AbstractComponentRuntimeTest {
 	public void testHandleUnitOfWorkInputMessage() {
 		setupHandle();
 		
-		inputMessage.setPayload(new ArrayList<EntityData>());
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		//((Deduper) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE;
 		assertEquals("Unit of work not implemented for deduper", 1,2);
 		
@@ -59,9 +51,9 @@ public class DeduperTest extends AbstractComponentRuntimeTest {
 	public void testHandleUnitOfWorkFlow() {
 		setupHandle();
 		
-		inputMessage.setPayload(new ArrayList<EntityData>());
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		//((Deduper) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
-		unitOfWorkLastMessage = true;
+		setUnitOfWorkLastMessage(true);
 		assertEquals("Unit of work not implemented for deduper", 1,2);
 		
 		runHandle();
@@ -73,8 +65,8 @@ public class DeduperTest extends AbstractComponentRuntimeTest {
 	public void testHandleNormal() {
 		setupHandle();
 		
-		inputMessage.setPayload(PayloadTestHelper.createPayloadWithEntityData(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1));
-		ArrayList<EntityData> payload = inputMessage.getPayload();
+		getInputMessage().setPayload(PayloadTestHelper.createPayloadWithEntityData(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1));
+		ArrayList<EntityData> payload = getInputMessage().getPayload();
 		PayloadTestHelper.addEntityDataToPayload(payload, MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1);
 		
 		((Deduper) spy).deduped = new LinkedHashMap<String, EntityData>();

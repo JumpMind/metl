@@ -32,20 +32,11 @@ public class TransformerTest extends AbstractComponentRuntimeTest {
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		inputMessage = new StartupMessage();
+		setInputMessage(new StartupMessage());
 		runHandle();
 		assertHandle(1, 1, 1, 0);
 	}
 
-	@Test
-	@Override
-	public void testHandleShutdownMessage() {
-		inputMessage = new ShutdownMessage("test");
-		runHandle();
-		assertHandle(1, 1, 1, 0);
-		
-	}
-	
 	@Test
 	@Override
 	public void testHandleEmptyPayload() {
@@ -59,7 +50,7 @@ public class TransformerTest extends AbstractComponentRuntimeTest {
 	public void testHandleUnitOfWorkInputMessage() {
 		setupHandle();
 		
-		inputMessage.setPayload(new ArrayList<EntityData>());
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		//((Transformer) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE;
 		assertEquals("Unit of work not implemented for transformer", 1,2);
 		
@@ -72,9 +63,9 @@ public class TransformerTest extends AbstractComponentRuntimeTest {
 	public void testHandleUnitOfWorkFlow() {
 		setupHandle();
 		
-		inputMessage.setPayload(new ArrayList<EntityData>());
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		//((Transformer) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
-		unitOfWorkLastMessage = true;
+		setUnitOfWorkLastMessage(true);
 		assertEquals("Unit of work not implemented for transformer", 1,2);
 		
 		runHandle();
@@ -86,7 +77,7 @@ public class TransformerTest extends AbstractComponentRuntimeTest {
 	public void testHandleNormal() {
 		setupHandle();
 		
-		inputMessage.setPayload(PayloadTestHelper.createPayloadWithEntityData(MODEL_ATTR_ID_1, TRANSFORM_SOURCE));
+		getInputMessage().setPayload(PayloadTestHelper.createPayloadWithEntityData(MODEL_ATTR_ID_1, TRANSFORM_SOURCE));
 		
 		Map<String, String> transformMap = new HashMap<String, String>();
 		transformMap.put(MODEL_ATTR_ID_1, TRANSFORM_EXP);
@@ -123,7 +114,7 @@ public class TransformerTest extends AbstractComponentRuntimeTest {
 		super.setupHandle();
 		
 		ArrayList<EntityData> payload = new ArrayList<EntityData>(); 
-		inputMessage.setPayload(payload);
+		getInputMessage().setPayload(payload);
 		ModelTestHelper.createMockModel(inputModel, MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1, 
 				MODEL_ATTR_ID_1, MODEL_ENTITY_NAME_1);
 	}

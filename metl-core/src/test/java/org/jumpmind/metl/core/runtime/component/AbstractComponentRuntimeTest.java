@@ -2,6 +2,8 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -19,6 +21,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.component.HandleParams.MessageTarget;
 import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
 import org.junit.Before;
 
@@ -40,7 +43,6 @@ public abstract class AbstractComponentRuntimeTest {
 	
 	// Standard tests that should be implemented for all components
 	public abstract void testHandleStartupMessage();
-	public abstract void testHandleShutdownMessage();
 	public abstract void testHandleEmptyPayload();
 	public abstract void testHandleUnitOfWorkInputMessage();
 	public abstract void testHandleUnitOfWorkFlow();
@@ -49,11 +51,9 @@ public abstract class AbstractComponentRuntimeTest {
 	public abstract IComponentRuntime getComponentSpy();
 	
 	IComponentRuntime spy;
-	Message inputMessage;
-	Message resultMessage;
-	MessageTarget target;
-	boolean unitOfWorkLastMessage;
 	
+	List<HandleParams> messages = new ArrayList<HandleParams>();
+		
 	Model inputModel;
 	Model outputModel;
 	Component component;
@@ -69,11 +69,10 @@ public abstract class AbstractComponentRuntimeTest {
 	
 	@Before
 	public void reset() {
-		inputMessage = new Message("test");
-		resultMessage = new Message("");
-		target = new MessageTarget();
 		spy = getComponentSpy();
-		unitOfWorkLastMessage = false;
+		
+		initHandleParams();
+		
 		setupCalled = false;
 		context = mock(ComponentContext.class);
 		inputModel = mock(Model.class);
@@ -103,6 +102,7 @@ public abstract class AbstractComponentRuntimeTest {
 		when(flowStep.getComponent()).thenReturn(component);
 		
 		doReturn(eExecutionTracker).when((AbstractComponentRuntime) spy).getExecutionTracker();
+		doNothing().when((AbstractComponentRuntime) spy).sendMessage(any(Serializable.class), any(IMessageTarget.class), anyBoolean());
 		
 		spy.start(context);
 		setupCalled = true;
@@ -113,7 +113,10 @@ public abstract class AbstractComponentRuntimeTest {
 			setupHandle();
 		}
 		
-		spy.handle(inputMessage, target, unitOfWorkLastMessage);
+		for(int i = 0; i < messages.size(); i++) {
+			HandleParams p = messages.get(i);
+			spy.handle(p.getInputMessage(), p.getTarget(), p.getUnitOfWorkLastMessage());
+		}
 	}
 	
 	public void assertHandle(int targetMessageCount, int numberInboundMessages,
@@ -129,6 +132,9 @@ public abstract class AbstractComponentRuntimeTest {
 	public void assertHandle(int targetMessageCount, int numberInboundMessages,
 			int numberOutboundMessages, int numberEntitiesProcessed, boolean unitOfWorkLastMessage, 
 			Object entityKey, Object entityValue) {
+		
+		MessageTarget target = messages.get(0).getTarget();
+		Message inputMessage = messages.get(0).getInputMessage();
 		
 		assertEquals("Target message counts are not equal", targetMessageCount, target.getTargetMessageCount());
 		assertEquals("Statistics inbound messages are not equal", numberInboundMessages, 
@@ -159,21 +165,23 @@ public abstract class AbstractComponentRuntimeTest {
 		}
 	}
 	
-	class MessageTarget implements IMessageTarget {
-
-        List<Message> targetMsgArray = new ArrayList<Message>();
-
-        @Override
-        public void put(Message message) {
-            targetMsgArray.add(message);
-        }
-
-        public Message getMessage(int idx) {
-            return targetMsgArray.get(idx);
-        }
-
-        public int getTargetMessageCount() {
-            return targetMsgArray.size();
-        }
-    }
+	
+	public void setInputMessage(Message inputMessage) {
+		messages.get(0).setInputMessage(inputMessage);
+	}
+	public void setUnitOfWorkLastMessage(Boolean uof) {
+		messages.get(0).setUnitOfWorkLastMessage(uof);
+	}
+	
+	public Message getInputMessage() {
+		return messages.get(0).getInputMessage();
+	}
+	
+	public void initHandleParams() {
+		messages = new ArrayList<HandleParams>();
+		HandleParams params = new HandleParams(new Message("inputMessage"));
+		messages.add(params);
+	}
+	
+	
 }

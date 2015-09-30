@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MessageManipulationStrategy;
 import org.junit.Before;
 import org.mockito.Mockito;
@@ -30,7 +31,7 @@ public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntim
     MessageManipulationStrategy messageManipulationStrategy;
     boolean trimColumns;
     boolean matchOnColumnNameOnly;
-
+    Message resultMessage = new Message("result");
     
 	@Before
 	public void reset() {
@@ -87,7 +88,7 @@ public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntim
 				}
 			});
 		} else {
-			when(mJdbcTemplate.query(anyString(), anyMap(), Mockito.any(ResultSetExtractor.class))).thenReturn(inputMessage);
+			when(mJdbcTemplate.query(anyString(), anyMap(), Mockito.any(ResultSetExtractor.class))).thenReturn(messages.get(0).getInputMessage());
 		}
 		doReturn(mJdbcTemplate).when((AbstractRdbmsComponent) spy).getJdbcTemplate();
 		

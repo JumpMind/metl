@@ -13,7 +13,6 @@ import java.util.Map;
 
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.MessageManipulationStrategy;
-import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.properties.TypedProperties;
 import org.junit.Test;
@@ -28,24 +27,14 @@ public class RdmsReaderUnitTest extends AbstractRdbmsComponentTest {
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		inputMessage = new StartupMessage();
-		
+		setInputMessage(new StartupMessage());
 		runHandle();
 		assertHandle(0, 1, 1, 0);
 	}
 
 	@Test
-	@Override
-	public void testHandleShutdownMessage() {
-		inputMessage = new ShutdownMessage("test");
-		
-		runHandle();
-		assertHandle(0, 1, 1, 0);
-	}
-	
-	@Test
 	public void testReceivesStartupWithResults() {
-		inputMessage = new StartupMessage();
+		setInputMessage(new StartupMessage());
 		
 		List<String> sqls = new ArrayList<String>();
 		sqls.add("select * from test");
@@ -68,7 +57,7 @@ public class RdmsReaderUnitTest extends AbstractRdbmsComponentTest {
 	public void testHandleUnitOfWorkInputMessage() {
 		setupHandle();
 		
-		inputMessage.setPayload(new ArrayList<EntityData>());
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		((RdbmsReader) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE;
 		
 		runHandle();
@@ -80,9 +69,9 @@ public class RdmsReaderUnitTest extends AbstractRdbmsComponentTest {
 	public void testHandleUnitOfWorkFlow() {
 		setupHandle();
 		
-		inputMessage.setPayload(new ArrayList<EntityData>());
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		((RdbmsReader) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
-		unitOfWorkLastMessage = true;
+		setUnitOfWorkLastMessage(true);
 		
 		runHandle();
 		assertHandle(1, 1, 1, 0, true);

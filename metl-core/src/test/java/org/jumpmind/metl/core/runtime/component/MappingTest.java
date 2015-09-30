@@ -24,15 +24,7 @@ public class MappingTest extends AbstractComponentRuntimeTest {
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		inputMessage = new StartupMessage();
-		runHandle();
-		assertHandle(0, 1, 0, 0);
-	}
-
-	@Test
-	@Override
-	public void testHandleShutdownMessage() {
-		inputMessage = new ShutdownMessage("test");
+		setInputMessage(new StartupMessage());
 		runHandle();
 		assertHandle(0, 1, 0, 0);
 	}
@@ -50,7 +42,7 @@ public class MappingTest extends AbstractComponentRuntimeTest {
 	public void testHandleUnitOfWorkInputMessage() {
 		setupHandle();
 		
-		inputMessage.setPayload(new ArrayList<EntityData>());
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		((Mapping) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE;
 		
 		runHandle();
@@ -62,9 +54,9 @@ public class MappingTest extends AbstractComponentRuntimeTest {
 	public void testHandleUnitOfWorkFlow() {
 		setupHandle();
 		
-		inputMessage.setPayload(new ArrayList<EntityData>());
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		((Mapping) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
-		unitOfWorkLastMessage = true;
+		setUnitOfWorkLastMessage(true);
 		
 		runHandle();
 		assertHandle(1, 1, 1, 0, true);
@@ -75,7 +67,7 @@ public class MappingTest extends AbstractComponentRuntimeTest {
 	public void testHandleNormal() {
 		setupHandle();
 		
-		inputMessage.setPayload(PayloadTestHelper.createPayloadWithEntityData(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1));
+		getInputMessage().setPayload(PayloadTestHelper.createPayloadWithEntityData(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1));
 		HashMap<String, Set<String>> attrToAttrMap = new HashMap<String, Set<String>>();
 		Set<String> mappings = new HashSet<String>();
 		mappings.add(MAPPING_TARGET_1);
@@ -93,7 +85,7 @@ public class MappingTest extends AbstractComponentRuntimeTest {
 	public void testHandleUnMappedToNull() {
 		setupHandle();
 		
-		inputMessage.setPayload(PayloadTestHelper.createPayloadWithEntityData(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1));
+		getInputMessage().setPayload(PayloadTestHelper.createPayloadWithEntityData(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1));
 		
 		HashMap<String, Set<String>> attrToAttrMap = new HashMap<String, Set<String>>();
 		Set<String> mappings = new HashSet<String>();
@@ -114,7 +106,7 @@ public class MappingTest extends AbstractComponentRuntimeTest {
 	public void testHandleNoMappingsFound() {
 		setupHandle();
 		
-		inputMessage.setPayload(PayloadTestHelper.createPayloadWithEntityData(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1));
+		getInputMessage().setPayload(PayloadTestHelper.createPayloadWithEntityData(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1));
 		HashMap<String, Set<String>> attrToAttrMap = new HashMap<String, Set<String>>();
 		Set<String> mappings = new HashSet<String>();
 		mappings.add(MAPPING_TARGET_1);
