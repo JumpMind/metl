@@ -113,7 +113,6 @@ public class FilePoller extends AbstractComponentRuntime {
                 pollForFiles(path, inputMessage, callback, unitOfWorkLastMessage);
                 FileUtils.deleteQuietly(triggerFile);
             } else if (cancelOnNoFiles) {
-                getComponentStatistics().incrementOutboundMessages();
                 callback.sendShutdownMessage(true);
             }
         } else {
