@@ -148,11 +148,11 @@ public class RdmsReaderUnitTest extends AbstractRdbmsComponentTest {
 		String eMatchOnColumnNameOnly = "true";
 		
 		TypedProperties eProperties = new TypedProperties();
-		eProperties.setProperty(reader.SQL, eSql);
-		eProperties.setProperty(reader.ROWS_PER_MESSAGE, eRowsPerMessage);
-		eProperties.setProperty(reader.MESSAGE_MANIPULATION_STRATEGY, eMessageManipulationStrategy);
-		eProperties.setProperty(reader.TRIM_COLUMNS, eTrimColumns);
-		eProperties.setProperty(reader.MATCH_ON_COLUMN_NAME_ONLY, eMatchOnColumnNameOnly);
+		eProperties.setProperty(RdbmsReader.SQL, eSql);
+		eProperties.setProperty(RdbmsReader.ROWS_PER_MESSAGE, eRowsPerMessage);
+		eProperties.setProperty(RdbmsReader.MESSAGE_MANIPULATION_STRATEGY, eMessageManipulationStrategy);
+		eProperties.setProperty(RdbmsReader.TRIM_COLUMNS, eTrimColumns);
+		eProperties.setProperty(RdbmsReader.MATCH_ON_COLUMN_NAME_ONLY, eMatchOnColumnNameOnly);
 				
 		doReturn(eProperties).when(reader).getTypedProperties();
 		
