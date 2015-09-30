@@ -66,7 +66,7 @@
         <iconImage>/org/jumpmind/metl/core/runtime/component/deduper.png</iconImage>
     </component-ui>    
     <component-ui id="Delay UI" componentId="Delay">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/timer.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/delay.png</iconImage>
     </component-ui>   
     <component-ui id="Execute UI" componentId="Execute">
         <iconImage>/org/jumpmind/metl/core/runtime/component/execute.png</iconImage>
