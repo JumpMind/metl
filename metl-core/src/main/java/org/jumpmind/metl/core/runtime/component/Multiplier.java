@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Multiplier extends AbstractComponentRuntime {
 
@@ -41,7 +41,7 @@ public class Multiplier extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
 
         if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
@@ -53,18 +53,18 @@ public class Multiplier extends AbstractComponentRuntime {
                 Iterator<Message> messages = queuedWhileWaitingForMultiplier.iterator();
                 while (messages.hasNext()) {
                     Message message = messages.next();
-                    multiply(message, messageTarget, message.getHeader().isUnitOfWorkLastMessage());
+                    multiply(message, callback, message.getHeader().isUnitOfWorkLastMessage());
                 }
             }
         } else if (!multipliersInitialized) {
             inputMessage.getHeader().setUnitOfWorkLastMessage(unitOfWorkLastMessage);
             queuedWhileWaitingForMultiplier.add(inputMessage);
         } else if (multipliersInitialized) {
-            multiply(inputMessage, messageTarget, unitOfWorkLastMessage);
+            multiply(inputMessage, callback, unitOfWorkLastMessage);
         }
     }
 
-    protected void multiply(Message message, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    protected void multiply(Message message, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         ArrayList<EntityData> multiplied = new ArrayList<EntityData>();
         for (int i = 0; i < multipliers.size(); i++) {
             EntityData multiplierData = multipliers.get(i);
@@ -78,14 +78,14 @@ public class Multiplier extends AbstractComponentRuntime {
                 newData.putAll(multiplierData);
                 multiplied.add(newData);
                 if (multiplied.size() >= rowsPerMessage) {
-                    sendMessage(multiplied, messageTarget, false);                    
+                    callback.sendMessage(multiplied, false);                    
                     multiplied = new ArrayList<EntityData>();
                 }
             }
         }
 
         if (multiplied.size() > 0) {
-            sendMessage(multiplied, messageTarget, true);               
+            callback.sendMessage(multiplied, true);               
         }
     }
 

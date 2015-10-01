@@ -1,7 +1,7 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class NoOp extends AbstractComponentRuntime {
 
@@ -12,10 +12,9 @@ public class NoOp extends AbstractComponentRuntime {
     }
     
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
-        getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(inputMessage);
+        callback.sendMessage(inputMessage.getPayload(), unitOfWorkLastMessage);
     }
 
 }

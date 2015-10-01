@@ -13,7 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IStreamable;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.util.FormatUtils;
@@ -21,12 +21,10 @@ import org.jumpmind.util.FormatUtils;
 public class TextFileReader extends AbstractComponentRuntime {
 
     public static final String TYPE = "Text File Reader";
-    
+
     public static final String ACTION_NONE = "None";
     public static final String ACTION_DELETE = "Delete";
     public static final String ACTION_ARCHIVE = "Archive";
-    
-    public static final String UNIT_OF_WORK_FILE = "File";
 
     public final static String SETTING_GET_FILE_FROM_MESSAGE = "get.file.name.from.message";
 
@@ -45,15 +43,15 @@ public class TextFileReader extends AbstractComponentRuntime {
     public final static String SETTING_ARCHIVE_ON_ERROR_PATH = "archive.on.error.path";
 
     public final static String SETTING_ENCODING = "textfilereader.encoding";
-    
-    public static final String SETTING_HEADER_LINES_TO_SKIP = "textfilereader.text.header.lines.to.skip";    
+
+    public static final String SETTING_HEADER_LINES_TO_SKIP = "textfilereader.text.header.lines.to.skip";
 
     String relativePathAndFile;
 
     boolean mustExist;
 
     boolean getFileNameFromMessage = false;
-    
+
     boolean unitOfWorkLastMessage = false;
 
     String actionOnSuccess = ACTION_NONE;
@@ -69,25 +67,36 @@ public class TextFileReader extends AbstractComponentRuntime {
     int textHeaderLinesToSkip;
 
     String encoding = "UTF-8";
-    
-    String unitOfWork = UNIT_OF_WORK_FILE;
-    
+
     List<String> filesRead;
 
     @Override
     protected void start() {
         filesRead = new ArrayList<String>();
-        applySettings();
+        Component component = getComponent();
+        relativePathAndFile = component.get(SETTING_RELATIVE_PATH, relativePathAndFile);
+        mustExist = component.getBoolean(SETTING_MUST_EXIST, mustExist);
+        textRowsPerMessage = component.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
+        textHeaderLinesToSkip = component.getInt(SETTING_HEADER_LINES_TO_SKIP, textHeaderLinesToSkip);
+        textRowsPerMessage = component.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
+        getFileNameFromMessage = component.getBoolean(SETTING_GET_FILE_FROM_MESSAGE, getFileNameFromMessage);
+        actionOnSuccess = component.get(SETTING_ACTION_ON_SUCCESS, actionOnSuccess);
+        actionOnError = component.get(SETTING_ACTION_ON_ERROR, actionOnError);
+        archiveOnErrorPath = FormatUtils.replaceTokens(component.get(SETTING_ARCHIVE_ON_ERROR_PATH), context.getFlowParametersAsString(),
+                true);
+        archiveOnSuccessPath = FormatUtils.replaceTokens(component.get(SETTING_ARCHIVE_ON_SUCCESS_PATH), context.getFlowParametersAsString(),
+                true);
+        encoding = component.get(SETTING_ENCODING, encoding);
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();        
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+        getComponentStatistics().incrementInboundMessages();
         List<String> files = getFilesToRead(inputMessage);
-        processFiles(files, messageTarget, unitOfWorkLastMessage);
-        
+        processFiles(files, callback, unitOfWorkLastMessage);
+
     }
-    
+
     @Override
     public void flowCompletedWithErrors(Throwable myError) {
         if (ACTION_ARCHIVE.equals(actionOnError)) {
@@ -109,11 +118,11 @@ public class TextFileReader extends AbstractComponentRuntime {
     protected void deleteFiles() {
         IStreamable streamable = getResourceReference();
         for (String srcFile : filesRead) {
-            if(streamable.delete(srcFile)) {
+            if (streamable.delete(srcFile)) {
                 warn("Deleted %s", srcFile);
             } else {
                 warn("Failed to delete %s", srcFile);
-            } 
+            }
         }
     }
 
@@ -125,7 +134,7 @@ public class TextFileReader extends AbstractComponentRuntime {
                 File srcFile = new File(path, srcFileName);
                 File targetFile = new File(destDir, srcFile.getName());
                 if (targetFile.exists()) {
-                    info("The target file already exists.   Deleting it in order to archive a new file.");
+                    info("The msgTarget file already exists.   Deleting it in order to archive a new file.");
                     FileUtils.deleteQuietly(targetFile);
                 }
                 info("Archiving %s tp %s", srcFile, destDir.getAbsolutePath());
@@ -136,32 +145,10 @@ public class TextFileReader extends AbstractComponentRuntime {
         }
     }
 
-    private void applySettings() {
-        Component component = getComponent();
-        relativePathAndFile = component.get(SETTING_RELATIVE_PATH, relativePathAndFile);
-        mustExist = component.getBoolean(SETTING_MUST_EXIST, mustExist);
-        textRowsPerMessage = component.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
-        textHeaderLinesToSkip = component.getInt(SETTING_HEADER_LINES_TO_SKIP,
-                textHeaderLinesToSkip);
-        textRowsPerMessage = component.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
-        getFileNameFromMessage = component.getBoolean(SETTING_GET_FILE_FROM_MESSAGE,
-                getFileNameFromMessage);
-        actionOnSuccess = component.get(SETTING_ACTION_ON_SUCCESS, actionOnSuccess);
-        actionOnError = component.get(SETTING_ACTION_ON_ERROR, actionOnError);
-        archiveOnErrorPath = FormatUtils.replaceTokens(
-                component.get(SETTING_ARCHIVE_ON_ERROR_PATH), context.getFlowParametersAsString(),
-                true);
-        archiveOnSuccessPath = FormatUtils.replaceTokens(
-                component.get(SETTING_ARCHIVE_ON_SUCCESS_PATH),
-                context.getFlowParametersAsString(), true);
-        encoding = component.get(SETTING_ENCODING, encoding);
-        unitOfWork = component.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
-    }
-
     private List<String> getFilesToRead(Message inputMessage) {
-    	ArrayList<String> files = new ArrayList<String>();
+        ArrayList<String> files = new ArrayList<String>();
         if (getFileNameFromMessage) {
-            List<String> fullyQualifiedFiles = inputMessage.getPayload();            
+            List<String> fullyQualifiedFiles = inputMessage.getPayload();
             String path = getResourceRuntime().getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
             for (String fullyQualifiedFile : fullyQualifiedFiles) {
                 if (fullyQualifiedFile.startsWith(path)) {
@@ -176,13 +163,12 @@ public class TextFileReader extends AbstractComponentRuntime {
         return files;
     }
 
-    private void processFiles(List<String> files, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
-        int numberMessages = 0;
+    private void processFiles(List<String> files, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         int linesInMessage = 0;
         ArrayList<String> payload = new ArrayList<String>();
-        
+
         filesRead.addAll(files);
-        
+
         for (String file : files) {
             InputStream inStream = null;
             BufferedReader reader = null;
@@ -190,29 +176,26 @@ public class TextFileReader extends AbstractComponentRuntime {
             String currentLine;
             try {
                 info("Reading file: %s", file);
-                IStreamable resource = (IStreamable)getResourceReference();
+                IStreamable resource = (IStreamable) getResourceReference();
                 String filePath = FormatUtils.replaceTokens(file, context.getFlowParametersAsString(), true);
                 inStream = resource.getInputStream(filePath, mustExist);
                 reader = new BufferedReader(new InputStreamReader(inStream, encoding));
-                
+
                 while ((currentLine = reader.readLine()) != null) {
-                	currentFileLinesRead++;
-                	if (linesInMessage == textRowsPerMessage) {
-                		initAndSendMessage(payload, messageTarget, ++numberMessages, false);
-                		linesInMessage = 0;                		
-                		payload = new ArrayList<String>();
-                	}                	
-                	if (currentFileLinesRead > textHeaderLinesToSkip) {
-                		getComponentStatistics().incrementNumberEntitiesProcessed();
-                		payload.add(currentLine);
-                		linesInMessage++;
-                	}
+                    currentFileLinesRead++;
+                    if (linesInMessage == textRowsPerMessage) {
+                        initAndSendMessage(payload, callback, false);
+                        linesInMessage = 0;
+                        payload = new ArrayList<String>();
+                    }
+                    if (currentFileLinesRead > textHeaderLinesToSkip) {
+                        getComponentStatistics().incrementNumberEntitiesProcessed();
+                        payload.add(currentLine);
+                        linesInMessage++;
+                    }
                 }
-                if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FILE)) {
-                	initAndSendMessage(payload, messageTarget, ++numberMessages, true);
-                	numberMessages = 0;
-                	linesInMessage = 0;
-                } 
+                initAndSendMessage(payload, callback, unitOfWorkLastMessage);
+                linesInMessage = 0;
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
             } finally {
@@ -220,22 +203,10 @@ public class TextFileReader extends AbstractComponentRuntime {
                 IOUtils.closeQuietly(inStream);
             }
         }
-        
-        if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
-        		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
-            initAndSendMessage(payload, messageTarget, ++numberMessages, true);        	
-        } else {
-            initAndSendMessage(payload, messageTarget, ++numberMessages, false);        	        	
-        }
+
     }
-    
-    private void initAndSendMessage(ArrayList<String> payload, IMessageTarget messageTarget,
-            int numberMessages, boolean lastMessage) {
-        Message message = new Message(getFlowStepId()); 
-        message.getHeader().setSequenceNumber(numberMessages);
-        message.getHeader().setUnitOfWorkLastMessage(lastMessage);
-        message.setPayload(payload);
-        getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(message);
+
+    private void initAndSendMessage(ArrayList<String> payload, ISendMessageCallback callback, boolean lastMessage) {
+        callback.sendMessage(payload, lastMessage);
     }
 }

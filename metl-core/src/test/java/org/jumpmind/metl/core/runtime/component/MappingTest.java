@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class MappingTest extends AbstractComponentRuntimeTest {
+public class MappingTest extends AbstractComponentRuntimeTest<ArrayList<EntityData>> {
 
 	public static String MAPPING_TARGET_1 = "mapping1";
 	
@@ -43,8 +43,7 @@ public class MappingTest extends AbstractComponentRuntimeTest {
 		setupHandle();
 		
 		getInputMessage().setPayload(new ArrayList<EntityData>());
-		((Mapping) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE;
-		
+
 		runHandle();
 		assertHandle(1, 1, 1, 0, true);
 	}
@@ -55,8 +54,7 @@ public class MappingTest extends AbstractComponentRuntimeTest {
 		setupHandle();
 		
 		getInputMessage().setPayload(new ArrayList<EntityData>());
-		((Mapping) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
-		setUnitOfWorkLastMessage(true);
+setUnitOfWorkLastMessage(true);
 		
 		runHandle();
 		assertHandle(1, 1, 1, 0, true);
@@ -75,8 +73,7 @@ public class MappingTest extends AbstractComponentRuntimeTest {
 		attrToAttrMap.put(MODEL_ATTR_ID_1, mappings);
 		
 		((Mapping) spy).attrToAttrMap = attrToAttrMap;
-		((Mapping) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
-		
+
 		runHandle();
 		assertHandle(1, 1, 1, 1, false, MAPPING_TARGET_1, MODEL_ATTR_NAME_1);
 	}
@@ -95,7 +92,6 @@ public class MappingTest extends AbstractComponentRuntimeTest {
 		ModelTestHelper.createMockModel(outputModel, MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1, MODEL_ENTITY_ID_1, MODEL_ENTITY_NAME_1);
 		
 		((Mapping) spy).attrToAttrMap = new HashMap<String, Set<String>>();
-		((Mapping) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
 		((Mapping) spy).setUnmappedAttributesToNull = true;
 		
 		runHandle();
@@ -114,7 +110,6 @@ public class MappingTest extends AbstractComponentRuntimeTest {
 		attrToAttrMap.put("X", mappings);
 		
 		((Mapping) spy).attrToAttrMap = attrToAttrMap;
-		((Mapping) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
 		
 		runHandle();
 		assertHandle(1, 1, 1, 0);

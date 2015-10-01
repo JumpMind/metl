@@ -2,8 +2,6 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -21,11 +19,12 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.component.HandleParams.MessageTarget;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
+import org.jumpmind.metl.core.utils.TestUtils;
 import org.junit.Before;
+import org.junit.rules.ExpectedException;
 
-public abstract class AbstractComponentRuntimeTest {
+public abstract class AbstractComponentRuntimeTest<T> {
 
 	public static String MODEL_ATTR_ID_1 = "attr1";
 	public static String MODEL_ATTR_NAME_1 = "attr1Name";
@@ -43,9 +42,7 @@ public abstract class AbstractComponentRuntimeTest {
 	
 	// Standard tests that should be implemented for all components
 	public abstract void testHandleStartupMessage();
-	public abstract void testHandleEmptyPayload();
-	public abstract void testHandleUnitOfWorkInputMessage();
-	public abstract void testHandleUnitOfWorkFlow();
+	public abstract void testHandleUnitOfWorkLastMessage();
 	public abstract void testHandleNormal();
 	
 	public abstract IComponentRuntime getComponentSpy();
@@ -102,7 +99,6 @@ public abstract class AbstractComponentRuntimeTest {
 		when(flowStep.getComponent()).thenReturn(component);
 		
 		doReturn(eExecutionTracker).when((AbstractComponentRuntime) spy).getExecutionTracker();
-		doNothing().when((AbstractComponentRuntime) spy).sendMessage(any(Serializable.class), any(IMessageTarget.class), anyBoolean());
 		
 		spy.start(context);
 		setupCalled = true;
@@ -115,28 +111,50 @@ public abstract class AbstractComponentRuntimeTest {
 		
 		for(int i = 0; i < messages.size(); i++) {
 			HandleParams p = messages.get(i);
-			spy.handle(p.getInputMessage(), p.getTarget(), p.getUnitOfWorkLastMessage());
+			spy.handle(p.getInputMessage(), p.getCallback(), p.getUnitOfWorkLastMessage());
 		}
 	}
 	
-	public void assertHandle(int targetMessageCount, int numberInboundMessages,
-			int numberOutboundMessages, int numberEntitiesProcessed) {
-		assertHandle(targetMessageCount, numberInboundMessages, numberOutboundMessages, numberEntitiesProcessed, false, null, null);
+	public List<HandleMonitor> getExpectedMonitorSingle(int sends, int starts, int shutdowns, int lastIndex, int expectedPayloadSize) {
+		List<HandleMonitor> list = new ArrayList<HandleMonitor>();
+		HandleMonitor m = new HandleMonitor();
+		m.setStartupMessageCount(starts);
+		m.setShutdownMessageCount(shutdowns);
+		m.setSendMessageCount(sends);
+		m.setIndexLastMessage(lastIndex);
+		m.setExpectedPayloadSize(expectedPayloadSize);
+		list.add(m);
+		return list;
+	}
+	public void assertHandle(int numberInboundMessages, int numberEntitiesProcessed, List<HandleMonitor> expectedMonitors) {
+		for (int i = 0; i < expectedMonitors.size(); i++) {
+			HandleMonitor expected = expectedMonitors.get(i);
+			HandleMonitor actual = messages.get(i).getCallback().getMonitor();
+			
+			assertEquals("Send message counts do not match", expected.getSendMessageCount(), actual.getSendMessageCount());
+			assertEquals("Start message counts do not match", expected.getStartupMessageCount(), actual.getStartupMessageCount());
+			assertEquals("Shutdown message counts do not match", expected.getShutdownMessageCount(), actual.getShutdownMessageCount());
+			assertEquals("Last message positions do not match", expected.getIndexLastMessage(), actual.getIndexLastMessage());
+			TestUtils.assertList(expected.getTargetStepIds(), actual.getTargetStepIds());
+			assertEquals("Payload sized unexpected.", expected.getExpectedPayloadSize(), actual.getPayloads().size());
+			// TODO add payload assert
+		}
 	}
 	
+	/*
 	public void assertHandle(int targetMessageCount, int numberInboundMessages,
 			int numberOutboundMessages, int numberEntitiesProcessed, boolean unitOfWorkLastMessage) {
 		assertHandle(targetMessageCount, numberInboundMessages, numberOutboundMessages, numberEntitiesProcessed, unitOfWorkLastMessage, null, null);
 	}
 	
-	public void assertHandle(int targetMessageCount, int numberInboundMessages,
-			int numberOutboundMessages, int numberEntitiesProcessed, boolean unitOfWorkLastMessage, 
+	@SuppressWarnings("unchecked")
+    public void assertHandle(int numberInboundMessages, int numberEntitiesProcessed, boolean lastMessage, List<String> targetStepIds
 			Object entityKey, Object entityValue) {
 		
-		MessageTarget target = messages.get(0).getTarget();
+		ISendMessageCallback callback = messages.get(0).getCallback();
 		Message inputMessage = messages.get(0).getInputMessage();
 		
-		assertEquals("Target message counts are not equal", targetMessageCount, target.getTargetMessageCount());
+		//assertEquals("Target message counts are not equal", targetMessageCount, callback..getPayloadList().size());
 		assertEquals("Statistics inbound messages are not equal", numberInboundMessages, 
 				((AbstractComponentRuntime) spy).getComponentStatistics().getNumberInboundMessages());
 		assertEquals("Statistics outbound messages are not equal", numberOutboundMessages, 
@@ -146,25 +164,21 @@ public abstract class AbstractComponentRuntimeTest {
 		
 		if (entityKey != null) {
 			assertTrue("Expected entity key " + entityKey + " but there were not any output messages.",
-					target.getTargetMessageCount() > 0);
+					msgTarget.getPayloadList().size() > 0);
 		}
 		
-		for (int i = 0; i < target.getTargetMessageCount(); i++) {
-			assertEquals("Sequence numbers are not equal", inputMessage.getHeader().getSequenceNumber(), 
-					target.getMessage(i).getHeader().getSequenceNumber()); 
-			assertEquals("Unit of work not equal", unitOfWorkLastMessage, 
-					target.getMessage(i).getHeader().isUnitOfWorkLastMessage());
-			
+		for (int i = 0; i < msgTarget.getPayloadList().size(); i++) {			
 			if (i == 0 && entityKey != null) {
-				ArrayList<EntityData> actualPayload = target.getMessage(i).getPayload();
+				ArrayList<EntityData> actualPayload = (ArrayList<EntityData>)msgTarget.getPayloadList().get(i);
 				EntityData actualEntityData = actualPayload.get(i);
 				
 				assertEquals("Entity value not as expected", entityValue, actualEntityData.get(entityKey));
 				
 			}
 		}
+		
 	}
-	
+	*/
 	
 	public void setInputMessage(Message inputMessage) {
 		messages.get(0).setInputMessage(inputMessage);

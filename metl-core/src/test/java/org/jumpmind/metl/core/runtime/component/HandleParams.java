@@ -1,31 +1,33 @@
 package org.jumpmind.metl.core.runtime.component;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class HandleParams {
 	Message inputMessage;
-	MessageTarget target;
+	TestingSendMessageCallback callback;
 	Boolean unitOfWorkLastMessage;
 	
 	public HandleParams() {
 		this.inputMessage = new Message("inputMessage");
-		this.target = new MessageTarget();
+		this.callback = new TestingSendMessageCallback();
 		this.unitOfWorkLastMessage = false;
 	}
 	
 	public HandleParams(Message inputMessage) {
 		this.inputMessage = inputMessage;
-		this.target = new MessageTarget();
+		this.callback = new TestingSendMessageCallback();
 		this.unitOfWorkLastMessage = false;
 	}
 	
 	public HandleParams(Message inputMessage, boolean unitOfWorkLastMessage) {
 		this.inputMessage = inputMessage;
-		this.target = new MessageTarget();
+		this.callback = new TestingSendMessageCallback();
 		this.unitOfWorkLastMessage = unitOfWorkLastMessage;
 	}
 	
@@ -35,11 +37,11 @@ public class HandleParams {
 	void setInputMessage(Message inputMessage) {
 		this.inputMessage = inputMessage;
 	}
-	MessageTarget getTarget() {
-		return target;
+	TestingSendMessageCallback getCallback() {
+		return callback;
 	}
-	void setTarget(MessageTarget target) {
-		this.target = target;
+	void setTarget(TestingSendMessageCallback callback) {
+		this.callback = callback;
 	}
 	Boolean getUnitOfWorkLastMessage() {
 		return unitOfWorkLastMessage;
@@ -48,22 +50,31 @@ public class HandleParams {
 		this.unitOfWorkLastMessage = unitOfWorkLastMessage;
 	}
 	
-	
-	class MessageTarget implements IMessageTarget {
+	public class TestingSendMessageCallback implements ISendMessageCallback {
+		HandleMonitor monitor = new HandleMonitor();
+		
+		@Override
+		public void sendMessage(Serializable payload, boolean lastMessage, String... targetStepIds) {
+			monitor.getPayloads().add(payload);
+			if (lastMessage) {
+				monitor.setIndexLastMessage(monitor.getPayloads().size() - 1);
+			}
+			Collections.addAll(monitor.getTargetStepIds(), targetStepIds);
+			monitor.incrementSendMessageCount();
+		}
 
-        List<Message> targetMsgArray = new ArrayList<Message>();
+		@Override
+		public void sendShutdownMessage(boolean cancel) {
+			monitor.incrementShutdownMessageCount();
+		}
 
-        @Override
-        public void put(Message message) {
-            targetMsgArray.add(message);
-        }
+		@Override
+		public void sendStartupMessage() {
+			monitor.incrementStartupMessageCount();
+		}
 
-        public Message getMessage(int idx) {
-            return targetMsgArray.get(idx);
-        }
-
-        public int getTargetMessageCount() {
-            return targetMsgArray.size();
-        }
-    }
+		HandleMonitor getMonitor() {
+			return monitor;
+		}
+	}
 }

@@ -10,7 +10,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.StartupMessage;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
 public class Sorter extends AbstractComponentRuntime {
@@ -39,7 +39,7 @@ public class Sorter extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
@@ -57,7 +57,7 @@ public class Sorter extends AbstractComponentRuntime {
             
             for (EntityData record : sortedRecords) {
                 if (dataToSend.size() >= rowsPerMessage) {
-                    sendMessage(dataToSend, messageTarget, false);
+                    callback.sendMessage(dataToSend, false);
                     dataToSend = new ArrayList<EntityData>();
                 }
                 dataToSend.add(record);
@@ -66,7 +66,7 @@ public class Sorter extends AbstractComponentRuntime {
             sortedRecords.clear();
             
             if (dataToSend != null && dataToSend.size() > 0) {
-                sendMessage(dataToSend, messageTarget, true);
+                callback.sendMessage(dataToSend, true);
             }
         }
     }

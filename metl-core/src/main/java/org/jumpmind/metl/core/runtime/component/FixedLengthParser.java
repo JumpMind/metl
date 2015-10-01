@@ -17,7 +17,7 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class FixedLengthParser extends AbstractComponentRuntime {
 
@@ -44,7 +44,7 @@ public class FixedLengthParser extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
 
         ArrayList<String> inputRows = inputMessage.getPayload();
@@ -71,7 +71,7 @@ public class FixedLengthParser extends AbstractComponentRuntime {
             throw new IoException(e);
         }
 
-        sendMessage(outputPayload, messageTarget, unitOfWorkLastMessage);
+        callback.sendMessage(outputPayload, unitOfWorkLastMessage);
     }
 
     private EntityData processInputRow(String inputRow) throws IOException {

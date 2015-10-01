@@ -12,7 +12,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.StartupMessage;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Joiner extends AbstractComponentRuntime {
 
@@ -22,7 +22,7 @@ public class Joiner extends AbstractComponentRuntime {
 
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
-    int rowsPerMessage;
+    int rowsPerMessage = 1000;
     Map<Object, EntityData> joinedData = new LinkedHashMap<Object, EntityData>();
     
     List<String> attributesToJoinOn = new ArrayList<String>();
@@ -33,7 +33,7 @@ public class Joiner extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
@@ -45,13 +45,13 @@ public class Joiner extends AbstractComponentRuntime {
             Iterator<EntityData> itr = joinedData.values().iterator();
             while (itr.hasNext()) {
                 if (dataToSend.size() >= rowsPerMessage) {
-                    sendMessage(dataToSend, messageTarget, false);
+                    callback.sendMessage(dataToSend, false);
                     dataToSend = new ArrayList<EntityData>();
                 }
                 dataToSend.add(itr.next());
             }
             if (dataToSend != null && dataToSend.size() > 0) {
-                sendMessage(dataToSend, messageTarget, true);
+                callback.sendMessage(dataToSend, true);
             }
         }
     }

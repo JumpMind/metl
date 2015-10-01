@@ -1,9 +1,7 @@
 package org.jumpmind.metl.core.runtime;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 
 public class MessageHeader extends HashMap<String, Serializable> implements Serializable, Cloneable {
 
@@ -16,8 +14,6 @@ public class MessageHeader extends HashMap<String, Serializable> implements Seri
     boolean unitOfWorkLastMessage;
 
     String originatingStepId;
-
-    Collection<String> targetStepIds;
 
     public MessageHeader(String originatingStepId) {
         this.originatingStepId = originatingStepId;
@@ -53,29 +49,6 @@ public class MessageHeader extends HashMap<String, Serializable> implements Seri
 
     public void setUnitOfWorkLastMessage(boolean lastMessage) {
         this.unitOfWorkLastMessage = lastMessage;
-    }
-
-    public void setTargetStepIds(Collection<String> targetStepIds) {
-        this.targetStepIds = targetStepIds;
-    }
-
-    public Collection<String> getTargetStepIds() {
-        if (targetStepIds == null) {
-            targetStepIds = new HashSet<String>();
-        }
-        return targetStepIds;
-    }
-
-    public MessageHeader clone (boolean unitOfWorkLastMessage) {
-        MessageHeader mh = new MessageHeader(originatingStepId);
-        mh.putAll(this);
-        mh.setExecutionId(executionId);
-        mh.setSequenceNumber(sequenceNumber);
-        mh.setUnitOfWorkLastMessage(unitOfWorkLastMessage);
-        if (targetStepIds != null) {
-            mh.setTargetStepIds(new HashSet<String>(targetStepIds));
-        }
-        return mh;
     }
     
 }

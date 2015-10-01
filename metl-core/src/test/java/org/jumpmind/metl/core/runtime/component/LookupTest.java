@@ -19,7 +19,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import javafx.beans.binding.When;
 
 @RunWith(PowerMockRunner.class)
-public class LookupTest extends AbstractComponentRuntimeTest {
+public class LookupTest extends AbstractComponentRuntimeTest<ArrayList<EntityData>> {
 
 	@Test
 	@Override

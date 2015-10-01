@@ -10,7 +10,6 @@ import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.jumpmind.db.sql.SqlScriptReader;
-import org.jumpmind.metl.core.runtime.Message;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 
@@ -52,10 +51,6 @@ abstract public class AbstractRdbmsComponent extends AbstractComponentRuntime {
     	}
     	payload.add(jsonResults.toJSONString());
     	return payload;
-    }
-    
-    protected Message createResultMessage(Message inputMessage, List<Result> results, boolean unitOfWorkLastMessage) {
-        return createMessage(convertResultsToTextPayload(results), unitOfWorkLastMessage);
     }
     
     class Result {

@@ -1,7 +1,7 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.util.AppUtils;
 
 public class Delay extends AbstractComponentRuntime {
@@ -18,11 +18,10 @@ public class Delay extends AbstractComponentRuntime {
     }
     
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         AppUtils.sleep(delay);
-        getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(inputMessage.clone(getFlowStepId(), unitOfWorkLastMessage));
+        callback.sendMessage(inputMessage.getPayload(), unitOfWorkLastMessage);
     }
 
 }

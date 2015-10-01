@@ -17,55 +17,33 @@ import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class JoinerTest extends AbstractComponentRuntimeTest {
+public class JoinerTest extends AbstractComponentRuntimeTest<ArrayList<EntityData>> {
 
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
 		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(0, 1, 0, 0);
+		assertHandle(1,0, getExpectedMonitorSingle(0, 0, 0, -1, 0));
 	}
 
 	@Test
 	@Override
-	public void testHandleEmptyPayload() {
+	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
-		runHandle();
-		assertHandle(0, 1, 0, 0);
-	}
-
-	@Test
-	@Override
-	public void testHandleUnitOfWorkInputMessage() {
-		setupHandle();
-		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		//((Joiner) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE;
-		assertEquals("Unit of work not implemented for joiner", 1,2);
-		
-		runHandle();
-		assertHandle(1, 1, 1, 0, true);
-	}
-
-	@Test
-	@Override
-	public void testHandleUnitOfWorkFlow() {
-		setupHandle();
-		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		//((Joiner) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
 		setUnitOfWorkLastMessage(true);
-		assertEquals("Unit of work not implemented for joiner", 1,2);
+		
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(1, 1, 1, 0, true);
+		assertHandle(1,0, getExpectedMonitorSingle(0, 0, 0, -1, 0));
 	}
 
 	@Test
 	@Override
 	public void testHandleNormal() {
 		setupHandle();
+		setUnitOfWorkLastMessage(true);
 		
 		getInputMessage().setPayload(PayloadTestHelper.createPayloadWithMultipleEntityData());
 		
@@ -75,7 +53,7 @@ public class JoinerTest extends AbstractComponentRuntimeTest {
 		((Joiner) spy).attributesToJoinOn = attributesToJoinOn;
 		
 		runHandle();
-		assertHandle(0, 1, 0, 1);
+		assertHandle(1,1, getExpectedMonitorSingle(1, 0, 0, 0, 1));
 		
 		Map<Object, EntityData> joinedData = ((Joiner) spy).joinedData;
 		

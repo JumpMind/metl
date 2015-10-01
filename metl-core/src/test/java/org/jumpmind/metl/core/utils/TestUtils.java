@@ -17,6 +17,9 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.component.NoOp;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 public class TestUtils {
 
     public static void main(String[] args) {
@@ -118,5 +121,24 @@ public class TestUtils {
         component.setLastUpdateBy("Test");
         component.setLastUpdateTime(new Date());
         return component;
+    }
+    
+    public static void assertList(List<String> expected, List<String> actual) {
+    	assertNullNotNull(expected, actual);
+    	if (expected != null && actual != null) {
+    		assertEquals(expected.size(), actual.size());
+    		for (int i = 0; i < expected.size(); i++) {
+    			assertEquals(expected.get(i), actual.get(i));
+    		}
+    	}
+    }
+    
+    public static void assertNullNotNull(Object expected, Object actual) {
+    	if (expected == null && actual != null) {
+    		fail();
+    	}
+    	else if (expected != null && actual == null) {
+    		fail();
+    	}
     }
 }

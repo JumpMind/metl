@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
 public class Lookup extends AbstractComponentRuntime {
@@ -49,7 +49,7 @@ public class Lookup extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
 
         if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
@@ -63,21 +63,21 @@ public class Lookup extends AbstractComponentRuntime {
                 Iterator<Message> messages = queuedWhileWaitingForLookup.iterator();
                 while (messages.hasNext()) {
                     Message message = messages.next();
-                    enhanceAndSend(message, messageTarget, unitOfWorkLastMessage);
+                    enhanceAndSend(message, callback, unitOfWorkLastMessage);
                 }
             }
         } else if (!lookupInitialized) {
             queuedWhileWaitingForLookup.add(inputMessage);
         } else if (lookupInitialized) {
-            enhanceAndSend(inputMessage, messageTarget, unitOfWorkLastMessage);
+            enhanceAndSend(inputMessage, callback, unitOfWorkLastMessage);
         }
     }
 
-    protected void enhanceAndSend(Message message, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
-        
+    protected void enhanceAndSend(Message message, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+
         debug("Using lookup table: {}", lookup);
-        
-        ArrayList<EntityData> playload = new ArrayList<EntityData>();
+
+        ArrayList<EntityData> payload = new ArrayList<EntityData>();
 
         List<EntityData> datas = message.getPayload();
         for (int j = 0; j < datas.size(); j++) {
@@ -86,13 +86,10 @@ public class Lookup extends AbstractComponentRuntime {
             EntityData newData = new EntityData();
             newData.putAll(oldData);
             newData.put(replacementValueAttributeId, lookup.get(oldData.get(replacementKeyAttributeId)));
-            playload.add(newData);
+            payload.add(newData);
         }
 
-            Message newMessage = message.clone(getFlowStepId(), unitOfWorkLastMessage);
-            newMessage.setPayload(playload);
-            getComponentStatistics().incrementOutboundMessages();
-            messageTarget.put(newMessage);
+        callback.sendMessage(payload, unitOfWorkLastMessage);
     }
 
 }

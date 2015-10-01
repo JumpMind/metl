@@ -2,7 +2,6 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
 
-
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,9 +28,6 @@ import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.StartupMessage;
-import org.jumpmind.metl.core.runtime.component.ComponentContext;
-import org.jumpmind.metl.core.runtime.component.RdbmsReader;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
 import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
@@ -70,11 +66,11 @@ public class RdbmsReaderTest {
         RdbmsReader reader = new RdbmsReader();
         reader.start(new ComponentContext(null, readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message msg = new StartupMessage();
-        MessageTarget msgTarget = new MessageTarget();
+        SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
         reader.handle( msg, msgTarget, true);
 
-        assertEquals(2, msgTarget.getTargetMessageCount());
-        ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
+        assertEquals(2, msgTarget.getPayloadList().size());
+        ArrayList<EntityData> payload = msgTarget.getPayloadList().get(0);
         assertEquals("test row 1", payload.get(0).get("tt1col2"));
         assertEquals("test row x", payload.get(0).get("tt2coly"));
     }
@@ -89,11 +85,11 @@ public class RdbmsReaderTest {
         inboundPayload.add(new EntityData());
         message.setPayload(inboundPayload);
         
-        MessageTarget msgTarget = new MessageTarget();
+        SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
         reader.handle(message, msgTarget, true);
 
-        assertEquals(2, msgTarget.getTargetMessageCount());
-        ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
+        assertEquals(2, msgTarget.getPayloadList().size());
+        ArrayList<EntityData> payload = msgTarget.getPayloadList().get(0);
         assertEquals("test row 1", payload.get(0).get("tt1col2"));
         assertEquals("test row x", payload.get(0).get("tt2coly"));
         //TODO: can't test these like this anymore.  Need flow and startup message
@@ -112,11 +108,11 @@ public class RdbmsReaderTest {
         inboundPayload.add(new EntityData());
         message.setPayload(inboundPayload);
         
-        MessageTarget msgTarget = new MessageTarget();
+        SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
         reader.handle(message, msgTarget, true);
 
-        assertEquals(2, msgTarget.getTargetMessageCount());
-        ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
+        assertEquals(2, msgTarget.getPayloadList().size());
+        ArrayList<EntityData> payload = msgTarget.getPayloadList().get(0);
         assertEquals("test row 1", payload.get(0).get("tt1col2"));
         assertEquals("test row x", payload.get(0).get("tt2coly"));
         //TODO: can't test these like this anymore.  Need flow and startup message
@@ -319,21 +315,4 @@ public class RdbmsReaderTest {
         
     }
 
-    class MessageTarget implements IMessageTarget {
-
-        List<Message> targetMsgArray = new ArrayList<Message>();
-
-        @Override
-        public void put(Message message) {
-            targetMsgArray.add(message);
-        }
-
-        public Message getMessage(int idx) {
-            return targetMsgArray.get(idx);
-        }
-
-        public int getTargetMessageCount() {
-            return targetMsgArray.size();
-        }
-    }
 }

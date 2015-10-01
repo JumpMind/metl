@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.Http;
 import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -42,7 +42,7 @@ public class Web extends AbstractComponentRuntime {
         IResourceRuntime httpResource = getResourceRuntime();
         if (httpResource == null || !(httpResource instanceof Http)) {
             throw new IllegalStateException(String.format(
-                    "A target resource of type %s must be chosen.  Please choose a resource.",
+                    "A msgTarget resource of type %s must be chosen.  Please choose a resource.",
                     Http.TYPE));
         }
 
@@ -54,7 +54,7 @@ public class Web extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
 
         IStreamable streamable = getResourceReference();
@@ -88,7 +88,7 @@ public class Web extends AbstractComponentRuntime {
             }
             
             if (outputPayload.size() > 0) {
-                sendMessage(outputPayload, messageTarget, unitOfWorkLastMessage);
+                callback.sendMessage(outputPayload, unitOfWorkLastMessage);
             }
         } catch (IOException e) {
             throw new IoException(String.format("Error writing to %s ", streamable), e);

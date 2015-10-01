@@ -10,7 +10,7 @@ import javax.script.ScriptException;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Script extends AbstractComponentRuntime {
 
@@ -46,7 +46,7 @@ public class Script extends AbstractComponentRuntime {
         engine.put("component", this);        
         StringBuilder script = new StringBuilder();
         try {
-            script.append(String.format("import %s;\n", IMessageTarget.class.getName()));
+            script.append(String.format("import %s;\n", ISendMessageCallback.class.getName()));
             script.append(String.format("import %s.*;\n", Message.class.getPackage().getName()));
             script.append(String.format("import %s;\n", MessageScriptHelper.class.getName()));
             script.append("import org.jumpmind.db.sql.*;\n");
@@ -99,7 +99,7 @@ public class Script extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         invoke("setInputMessage", inputMessage);
         invoke("setMessageTarget", messageTarget);

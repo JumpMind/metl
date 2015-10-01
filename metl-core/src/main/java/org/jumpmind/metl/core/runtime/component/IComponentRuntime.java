@@ -2,7 +2,7 @@ package org.jumpmind.metl.core.runtime.component;
 
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public interface IComponentRuntime {
 
@@ -10,9 +10,9 @@ public interface IComponentRuntime {
     
     public void start(ComponentContext context);
 
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage);
+    public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkLastMessage);
     
-//    public void lastMessageReceived(IMessageTarget messageTarget);
+//    public void lastMessageReceived(ISendMessageCallback messageTarget);
     
     public void flowCompleted(boolean cancelled);
     

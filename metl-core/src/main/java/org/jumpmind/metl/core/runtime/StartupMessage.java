@@ -5,7 +5,13 @@ public class StartupMessage extends Message {
 	private static final long serialVersionUID = 1L;
 
 	public StartupMessage() {
-	    super(null);
+	    this(null);
+    }
+	
+	public StartupMessage(String originatingFlowStepId) {
+	    super(originatingFlowStepId);
 	    this.getHeader().setUnitOfWorkLastMessage(true);
     }
+	
+	
 }

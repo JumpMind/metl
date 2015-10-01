@@ -23,7 +23,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ModelAttributeScriptHelper.class)
-public class TransformerTest extends AbstractComponentRuntimeTest {
+public class TransformerTest extends AbstractComponentRuntimeTest<ArrayList<EntityData>> {
 	
 	public static String TRANSFORM_SOURCE = "transform me";
 	public static String TRANSFORM_EXP = "transform logic";

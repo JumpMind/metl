@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class TextReader extends AbstractComponentRuntime {
 
@@ -23,7 +23,7 @@ public class TextReader extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         int linesInMessage = 0;
         int textRowsPerMessage = context.getFlowStep().getComponent().getInt(SETTING_ROWS_PER_MESSAGE, 1000);
@@ -35,7 +35,7 @@ public class TextReader extends AbstractComponentRuntime {
             reader = new BufferedReader(new StringReader(context.getFlowStep().getComponent().get(SETTING_TEXT, "")));
             while ((currentLine = reader.readLine()) != null) {
                 if (linesInMessage == textRowsPerMessage) {
-                    sendMessage(payload, messageTarget, false);
+                    callback.sendMessage(payload, false);
                     linesInMessage = 0;
                     payload = new ArrayList<String>();
                 }
@@ -49,7 +49,7 @@ public class TextReader extends AbstractComponentRuntime {
             IOUtils.closeQuietly(reader);
         }
         
-        sendMessage(payload, messageTarget, unitOfWorkLastMessage);
+        callback.sendMessage(payload, unitOfWorkLastMessage);
     }
 
 }

@@ -1,12 +1,13 @@
 package org.jumpmind.metl.core.runtime.component;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MessageHeader;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class MessageLogger extends AbstractComponentRuntime {
 
@@ -17,14 +18,14 @@ public class MessageLogger extends AbstractComponentRuntime {
     }
     
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
 
         MessageHeader header = inputMessage.getHeader();
         log(LogLevel.INFO, String.format("Message(sequenceNumber=%d,unitOfWorkLastMessage=%s,source='%s')",
                 header.getSequenceNumber(), header.isUnitOfWorkLastMessage(),
                 getFlow().findFlowStepWithId(header.getOriginatingStepId()).getName()));
-        Object payload = inputMessage.getPayload();
+        Serializable payload = inputMessage.getPayload();
         if (payload instanceof List) {
             @SuppressWarnings("unchecked")
             List<Object> list = (List<Object>) payload;
@@ -40,8 +41,8 @@ public class MessageLogger extends AbstractComponentRuntime {
                 }
             }
         }
-        getComponentStatistics().incrementOutboundMessages();
-        messageTarget.put(inputMessage.clone(getFlowStepId(), unitOfWorkLastMessage));
+        
+        callback.sendMessage(payload, unitOfWorkLastMessage);
     }
 
 }

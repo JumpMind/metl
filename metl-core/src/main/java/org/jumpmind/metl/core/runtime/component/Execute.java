@@ -12,7 +12,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.tools.ant.taskdefs.PumpStreamHandler;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.symmetric.csv.CsvReader;
 import org.jumpmind.util.FormatUtils;
 
@@ -65,7 +65,7 @@ public class Execute extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
 
         try {
@@ -84,12 +84,9 @@ public class Execute extends AbstractComponentRuntime {
                 }
                 info("The output of the command was: %s", output);
 
-                getComponentStatistics().incrementOutboundMessages();
-                Message msg = inputMessage.clone(getFlowStepId(), unitOfWorkLastMessage);
                 ArrayList<String> payload = new ArrayList<String>();
                 payload.add(output);
-                msg.setPayload(payload);
-                messageTarget.put(msg);
+                callback.sendMessage(payload, true);
             } else {
                 info("The output of the command was: %s", output);
                 throw new IoException("%s failed with an error code of %d", ArrayUtils.toString(commands), code);

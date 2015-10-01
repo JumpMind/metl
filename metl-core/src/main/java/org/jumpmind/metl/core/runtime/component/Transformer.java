@@ -15,7 +15,7 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Transformer extends AbstractComponentRuntime {
 
@@ -43,7 +43,7 @@ public class Transformer extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();        
         Model inputModel = getComponent().getInputModel();
         List<EntityData> inDatas = inputMessage.getPayload();
@@ -69,7 +69,7 @@ public class Transformer extends AbstractComponentRuntime {
             getComponentStatistics().incrementNumberEntitiesProcessed();
         }
         
-        sendMessage(outDatas, messageTarget, unitOfWorkLastMessage);
+        callback.sendMessage(outDatas, unitOfWorkLastMessage);
     }    
 
 }

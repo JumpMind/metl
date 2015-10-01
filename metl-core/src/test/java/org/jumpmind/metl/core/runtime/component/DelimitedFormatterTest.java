@@ -18,9 +18,6 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.component.ComponentContext;
-import org.jumpmind.metl.core.runtime.component.DelimitedFormatter;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
 import org.jumpmind.metl.core.utils.TestUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -44,11 +41,11 @@ public class DelimitedFormatterTest {
         DelimitedFormatter delimitedFormatter = new DelimitedFormatter();
         delimitedFormatter.start(new ComponentContext(null, delimitedFormatterFlowStep, null, new ExecutionTrackerNoOp(), null, null, null));
         Message message = createInboundMessage();        
-        MessageTarget msgTarget = new MessageTarget();
+        SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
         delimitedFormatter.handle(message, msgTarget, true);
 
-        assertEquals(1, msgTarget.getTargetMessageCount());
-        ArrayList<EntityData> payload = msgTarget.getMessage(0).getPayload();
+        assertEquals(1, msgTarget.getPayloadList().size());
+        ArrayList<EntityData> payload = msgTarget.getPayloadList().get(0);
         assertEquals(1,payload.size());
         assertEquals("tt1col2_value|tt1col1_value|tt2col2_value|tt2col3_value|tt1col3_value|tt2col1_value", payload.get(0));
     }
@@ -131,21 +128,4 @@ public class DelimitedFormatterTest {
         return model;
     }
 
-    class MessageTarget implements IMessageTarget {
-
-        List<Message> targetMsgArray = new ArrayList<Message>();
-
-        @Override
-        public void put(Message message) {
-            targetMsgArray.add(message);
-        }
-
-        public Message getMessage(int idx) {
-            return targetMsgArray.get(idx);
-        }
-
-        public int getTargetMessageCount() {
-            return targetMsgArray.size();
-        }
-    }
 }

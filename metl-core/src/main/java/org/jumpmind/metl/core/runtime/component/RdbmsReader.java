@@ -17,9 +17,8 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.MessageManipulationStrategy;
 import org.jumpmind.metl.core.runtime.StartupMessage;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.dao.DataAccessException;
@@ -40,27 +39,25 @@ public class RdbmsReader extends AbstractRdbmsComponent {
 
     public final static String MATCH_ON_COLUMN_NAME_ONLY = "match.on.column.name";
 
-    public final static String MESSAGE_MANIPULATION_STRATEGY = "message.manipulation.strategy";
-
     List<String> sqls;
 
     long rowsPerMessage;
-
-    MessageManipulationStrategy messageManipulationStrategy = MessageManipulationStrategy.REPLACE;
 
     boolean trimColumns = false;
 
     boolean matchOnColumnNameOnly = false;
     
-    String unitOfWork;
-
     @Override
     protected void start() {
-        applySettings();
+        TypedProperties properties = getTypedProperties();
+        sqls = getSqlStatements(properties.get(SQL));
+        rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
+        trimColumns = properties.is(TRIM_COLUMNS);
+        matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
     }
 
     @Override
-    public void handle(final Message inputMessage, final IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
 
         getComponentStatistics().incrementInboundMessages();
 
@@ -68,11 +65,11 @@ public class RdbmsReader extends AbstractRdbmsComponent {
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
         int inboundRecordCount = 1;
-        ArrayList<EntityData> payload = null;
+        ArrayList<EntityData> inboundPayload = null;
         if (!(inputMessage instanceof StartupMessage)) {
-            payload = inputMessage.getPayload();
-            if (payload != null) {
-                inboundRecordCount = payload.size();
+            inboundPayload = inputMessage.getPayload();
+            if (inboundPayload != null) {
+                inboundRecordCount = inboundPayload.size();
             }
         }
 
@@ -82,41 +79,25 @@ public class RdbmsReader extends AbstractRdbmsComponent {
          * to it. If the reader is started by another component, then loop for
          * all records in the input message
          */
-        Message message = null;
+        ArrayList<EntityData> outboundPayload = null;
         for (int i = 0; i < inboundRecordCount; i++) {
-            if (payload != null && payload.size() > i && payload.get(i) instanceof EntityData) {
-                setParamsFromInboundMsgAndRec(paramMap, inputMessage, payload.get(i));
+            if (inboundPayload != null && inboundPayload.size() > i && inboundPayload.get(i) instanceof EntityData) {
+                setParamsFromInboundMsgAndRec(paramMap, inputMessage, inboundPayload.get(i));
             } else {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
             }
 
-            MessageResultSetExtractor messageResultSetExtractor = new MessageResultSetExtractor(inputMessage, messageTarget, unitOfWorkLastMessage);
+            MessageResultSetExtractor messageResultSetExtractor = new MessageResultSetExtractor(inputMessage, callback, unitOfWorkLastMessage);
             for (String sql : getSqls()) {
                 String sqlToExecute = FormatUtils.replaceTokens(sql, getComponentContext().getFlowParametersAsString(), true);
                 log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
                 messageResultSetExtractor.setSqlToExecute(sqlToExecute);
-                message = template.query(sqlToExecute, paramMap, messageResultSetExtractor);                
-                //TODO: deal with unitOfWork = SQL Statement                
+                outboundPayload = template.query(sqlToExecute, paramMap, messageResultSetExtractor);                        
             }
         }
-        if (message != null) {
-            if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) ||
-            		(unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && unitOfWorkLastMessage)) {
-                message.getHeader().setUnitOfWorkLastMessage(true);        	
-            }        	
-            messageTarget.put(message);
+        if (outboundPayload != null && outboundPayload.size() > 0) {
+            callback.sendMessage(outboundPayload, true);
         }
-    }
-
-    private Message createMessage(Message inputMessage, boolean unitOfWorkLastMessage) {
-        Message message;
-        if (messageManipulationStrategy == MessageManipulationStrategy.ENHANCE) {
-            message = inputMessage.clone(getFlowStepId(), unitOfWorkLastMessage);
-        } else {
-            message = inputMessage.clone(getFlowStepId(), new ArrayList<EntityData>(), unitOfWorkLastMessage);
-            message.setPayload(new ArrayList<EntityData>());
-        }
-        return message;
     }
 
     private ArrayList<String> getAttributeIds(ResultSetMetaData meta, Map<Integer, String> sqlEntityHints) throws SQLException {
@@ -203,17 +184,6 @@ public class RdbmsReader extends AbstractRdbmsComponent {
         } else {
             return null;
         }
-    }
-
-    protected void applySettings() {
-        TypedProperties properties = getTypedProperties();
-        sqls = getSqlStatements(properties.get(SQL));
-        rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
-        messageManipulationStrategy = MessageManipulationStrategy.valueOf(properties.get(MESSAGE_MANIPULATION_STRATEGY,
-                messageManipulationStrategy.name()));
-        trimColumns = properties.is(TRIM_COLUMNS);
-        matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
-        unitOfWork = properties.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
     }
 
     public Map<Integer, String> getSqlColumnEntityHints(String sql) {
@@ -316,10 +286,6 @@ public class RdbmsReader extends AbstractRdbmsComponent {
 		return rowsPerMessage;
 	}
 
-	MessageManipulationStrategy getMessageManipulationStrategy() {
-		return messageManipulationStrategy;
-	}
-
 	boolean isTrimColumns() {
 		return trimColumns;
 	}
@@ -328,45 +294,43 @@ public class RdbmsReader extends AbstractRdbmsComponent {
 		return matchOnColumnNameOnly;
 	}
 
-
-
-	class MessageResultSetExtractor implements ResultSetExtractor<Message> {
+	class MessageResultSetExtractor implements ResultSetExtractor<ArrayList<EntityData>> {
         Message inputMessage;
         
-        IMessageTarget messageTarget;
-
-        Message message;            
+        ISendMessageCallback callback;
 
         String sqlToExecute;
         
         int outputRecCount;
         
         boolean unitOfWorkLastMessage;
+        
+        ArrayList<EntityData> payload;
 
-        public MessageResultSetExtractor(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+        public MessageResultSetExtractor(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
             this.inputMessage = inputMessage;
-            this.messageTarget = messageTarget;
+            this.callback = callback;
             this.unitOfWorkLastMessage = unitOfWorkLastMessage;
         }
 
         @Override
-        public Message extractData(ResultSet rs) throws SQLException, DataAccessException {
+        public ArrayList<EntityData> extractData(ResultSet rs) throws SQLException, DataAccessException {
             ResultSetMetaData meta = rs.getMetaData();
             Map<Integer, String> columnHints = getSqlColumnEntityHints(sqlToExecute);
             ArrayList<String> attributeIds = getAttributeIds(meta, columnHints);
             long ts = System.currentTimeMillis();
             while (rs.next()) {
-                if (outputRecCount++ % rowsPerMessage == 0 && message != null) {
-                    messageTarget.put(message);
-                    message = null;
+                if (outputRecCount++ % rowsPerMessage == 0 && payload != null) {
+                    callback.sendMessage(payload, false);
+                    payload = null;
                 }
+                
+                if (payload == null) {
+                    payload = new ArrayList<>();
+                }
+
                 getComponentStatistics().incrementNumberEntitiesProcessed();
 
-                if (message == null) {
-                    message = createMessage(inputMessage, unitOfWorkLastMessage);
-                    getComponentStatistics().incrementOutboundMessages();
-                    message.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages());
-                }
 
                 EntityData rowData = new EntityData();
                 for (int i = 1; i <= meta.getColumnCount(); i++) {
@@ -376,7 +340,6 @@ public class RdbmsReader extends AbstractRdbmsComponent {
                     }
                     rowData.put(attributeIds.get(i - 1), value);
                 }
-                ArrayList<EntityData> payload = message.getPayload();
                 payload.add(rowData);
                 if (context.getDeployment() != null && context.getDeployment().asLogLevel() == LogLevel.DEBUG) {
                     logEntityAttributes(rowData);
@@ -388,7 +351,7 @@ public class RdbmsReader extends AbstractRdbmsComponent {
                     ts = newTs;
                 }
             }
-            return message;
+            return payload;
         }
 
         public void setSqlToExecute(String sqlToExecute) {

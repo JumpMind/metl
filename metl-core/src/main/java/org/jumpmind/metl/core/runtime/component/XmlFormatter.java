@@ -28,7 +28,7 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
@@ -59,8 +59,6 @@ public class XmlFormatter extends AbstractXML {
     boolean useParameterReplacement = true;
 
     String xmlFormat;
-    
-    String unitOfWork;
 
     @Override
     protected void start() {
@@ -69,7 +67,6 @@ public class XmlFormatter extends AbstractXML {
         ignoreNamespace = properties.is(IGNORE_NAMESPACE);
         useParameterReplacement = properties.is(PARAMETER_REPLACEMENT);
         xmlFormat = properties.get(XML_FORMAT);
-        unitOfWork = properties.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
 
         Setting templateSetting = getComponent().findSetting(XML_FORMATTER_TEMPLATE);
 
@@ -128,7 +125,7 @@ public class XmlFormatter extends AbstractXML {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
@@ -164,7 +161,7 @@ public class XmlFormatter extends AbstractXML {
         
         log(LogLevel.DEBUG, outputPayload.toString());
         
-        sendMessage(outputPayload, messageTarget, unitOfWorkLastMessage);
+        callback.sendMessage(outputPayload, unitOfWorkLastMessage);
     }
 
     private void processInputRow(Document document, EntityData inputRow) {
