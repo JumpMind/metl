@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import java.sql.ResultSet;
@@ -27,7 +47,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.StringUtils;
 
-public class RdbmsReader extends AbstractRdbmsComponent {
+public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     public static final String TYPE = "RDBMS Reader";
 
@@ -57,10 +77,7 @@ public class RdbmsReader extends AbstractRdbmsComponent {
     }
 
     @Override
-    public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-
-        getComponentStatistics().incrementInboundMessages();
-
+    public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         NamedParameterJdbcTemplate template = getJdbcTemplate();
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
@@ -87,12 +104,12 @@ public class RdbmsReader extends AbstractRdbmsComponent {
                 setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
             }
 
-            MessageResultSetExtractor messageResultSetExtractor = new MessageResultSetExtractor(inputMessage, callback, unitOfWorkLastMessage);
+            ResultSetToEntityDataConverter resultSetToEntityDataConverter = new ResultSetToEntityDataConverter(inputMessage, callback, unitOfWorkBoundaryReached);
             for (String sql : getSqls()) {
                 String sqlToExecute = FormatUtils.replaceTokens(sql, getComponentContext().getFlowParametersAsString(), true);
-                log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
-                messageResultSetExtractor.setSqlToExecute(sqlToExecute);
-                outboundPayload = template.query(sqlToExecute, paramMap, messageResultSetExtractor);                        
+                log(LogLevel.INFO, "About to run: " + sqlToExecute);
+                resultSetToEntityDataConverter.setSqlToExecute(sqlToExecute);
+                outboundPayload = template.query(sqlToExecute, paramMap, resultSetToEntityDataConverter);                        
             }
         }
         if (outboundPayload != null && outboundPayload.size() > 0) {
@@ -294,7 +311,7 @@ public class RdbmsReader extends AbstractRdbmsComponent {
 		return matchOnColumnNameOnly;
 	}
 
-	class MessageResultSetExtractor implements ResultSetExtractor<ArrayList<EntityData>> {
+	class ResultSetToEntityDataConverter implements ResultSetExtractor<ArrayList<EntityData>> {
         Message inputMessage;
         
         ISendMessageCallback callback;
@@ -307,7 +324,7 @@ public class RdbmsReader extends AbstractRdbmsComponent {
         
         ArrayList<EntityData> payload;
 
-        public MessageResultSetExtractor(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+        public ResultSetToEntityDataConverter(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
             this.inputMessage = inputMessage;
             this.callback = callback;
             this.unitOfWorkLastMessage = unitOfWorkLastMessage;

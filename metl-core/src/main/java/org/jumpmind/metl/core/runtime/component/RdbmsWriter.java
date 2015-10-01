@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -32,7 +52,7 @@ import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
-public class RdbmsWriter extends AbstractRdbmsComponent {
+public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 
     public static final String TYPE = "RDBMS Writer";
 
@@ -100,61 +120,6 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
             throw new IllegalStateException("A database writer must have an input model defined");
         }
 
-        applySettings();
-
-        DataSource dataSource = (DataSource) getResourceReference();
-        platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), quoteIdentifiers);
-        targetTables = new ArrayList<TargetTableDefintion>();
-
-        for (ModelEntity entity : model.getModelEntities()) {
-            Table table = platform.getTableFromCache(catalogName, schemaName, entity.getName(), true);
-            if (table != null) {
-                targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE, entity, table.copy()),
-                        new TargetTable(DmlType.INSERT, entity, table.copy())));
-            }
-        }
-    }
-
-    @Override
-    public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-
-        lastPreparedDml = null;
-        getComponentStatistics().incrementInboundMessages();
-
-        if (error == null) {
-            if (getResourceRuntime() == null) {
-                throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
-            }
-
-            ArrayList<EntityData> inputRows = inputMessage.getPayload();
-            if (inputRows != null && inputRows.size() > 0) {
-                ISqlTransaction transaction = platform.getSqlTemplate().startSqlTransaction();
-                transaction.setInBatchMode(batchMode);
-                try {
-                    write(transaction, inputMessage, callback, unitOfWorkLastMessage);
-                    transaction.commit();
-                    
-                } catch (Throwable ex) {
-                    error = ex;
-                    transaction.rollback();
-                    if (ex instanceof RuntimeException) {
-                        throw (RuntimeException) ex;
-                    } else {
-                        throw new RuntimeException(ex);
-                    }
-                } finally {
-                    transaction.close();
-                }
-            }
-
-            if (callback != null) {
-                callback.sendMessage(convertResultsToTextPayload(results), unitOfWorkLastMessage);
-            }
-        }
-
-    }
-
-    private void applySettings() {
         TypedProperties properties = getTypedProperties();
         batchMode = properties.is(BATCH_MODE, batchMode);
         replaceRows = properties.is(REPLACE);
@@ -172,6 +137,55 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
         if (isBlank(schemaName)) {
             schemaName = null;
         }
+
+        DataSource dataSource = (DataSource) getResourceReference();
+        platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), quoteIdentifiers);
+        targetTables = new ArrayList<TargetTableDefintion>();
+
+        for (ModelEntity entity : model.getModelEntities()) {
+            Table table = platform.getTableFromCache(catalogName, schemaName, entity.getName(), true);
+            if (table != null) {
+                targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE, entity, table.copy()),
+                        new TargetTable(DmlType.INSERT, entity, table.copy())));
+            }
+        }
+    }
+
+    @Override
+    public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        lastPreparedDml = null;
+
+        if (error == null) {
+            if (getResourceRuntime() == null) {
+                throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
+            }
+
+            ArrayList<EntityData> inputRows = inputMessage.getPayload();
+            if (inputRows != null && inputRows.size() > 0) {
+                ISqlTransaction transaction = platform.getSqlTemplate().startSqlTransaction();
+                transaction.setInBatchMode(batchMode);
+                try {
+                    write(transaction, inputMessage, callback, unitOfWorkBoundaryReached);
+                    transaction.commit();
+                    
+                } catch (Throwable ex) {
+                    error = ex;
+                    transaction.rollback();
+                    if (ex instanceof RuntimeException) {
+                        throw (RuntimeException) ex;
+                    } else {
+                        throw new RuntimeException(ex);
+                    }
+                } finally {
+                    transaction.close();
+                }
+            }
+
+            if (callback != null) {
+                callback.sendMessage(convertResultsToTextPayload(results), unitOfWorkBoundaryReached);
+            }
+        }
+
     }
 
     private Object[] getValues(boolean isUpdate, TargetTable modelTable, EntityData inputRow) {

@@ -11,9 +11,16 @@ cd metl-assemble
 ./gradlew war
 ~~~~~
 
-To deploy:
+To deploy standalone:
 ~~~~~
-cp ../metl-ui/build/libs/metl-is.war /opt/apache-tomcat-8.0.14/webapps/.
+cd ../metl-ui/build/libs
+java -jar metl.war
+~~~~~
+
+
+To deploy to Tomcat:
+~~~~~
+cp ../metl-ui/build/libs/metl.war /opt/apache-tomcat-8.0.14/webapps/.
 /opt/apache-tomcat-8.0.14/bin/catalina restart
 ~~~~~
 
