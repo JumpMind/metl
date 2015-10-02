@@ -52,6 +52,7 @@ import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Table.ColumnHeaderMode;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
@@ -110,10 +111,19 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, IBack
         addItem("Logging", Icons.LOGGING);
         addItem("About", FontAwesome.QUESTION);
         
-        VerticalLayout navigator = new VerticalLayout(table);
+        VerticalLayout navigator = new VerticalLayout();
+        navigator.addStyleName(ValoTheme.MENU_ROOT);
         navigator.setSizeFull();
-        navigator.setExpandRatio(table, 1);
         leftSplit.setFirstComponent(navigator);
+                
+        MenuBar leftMenuBar = new MenuBar();
+        leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
+        leftMenuBar.setWidth(100, Unit.PERCENTAGE);
+        navigator.addComponent(leftMenuBar);
+
+        navigator.addComponent(table);
+        navigator.setExpandRatio(table, 1);
+        
         addComponent(leftSplit);
         
         context.getBackgroundRefresherService().register(this);

@@ -35,10 +35,6 @@ import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamResult;
 
-import jlibs.xml.sax.XMLDocument;
-import jlibs.xml.xsd.XSInstance;
-import jlibs.xml.xsd.XSParser;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.xerces.xs.XSConstants;
@@ -72,6 +68,10 @@ import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
+
+import jlibs.xml.sax.XMLDocument;
+import jlibs.xml.xsd.XSInstance;
+import jlibs.xml.xsd.XSParser;
 
 @SuppressWarnings("serial")
 public class ImportXmlTemplateWindow extends Window implements ValueChangeListener, ClickListener, Receiver, SucceededListener {

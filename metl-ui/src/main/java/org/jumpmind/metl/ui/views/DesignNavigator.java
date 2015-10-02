@@ -383,6 +383,7 @@ public class DesignNavigator extends VerticalLayout {
                 searchBarLayout.setVisible(search.isChecked());
             }
         });
+        search.setVisible(false);
 
         layout.addComponent(leftMenuBar);
         layout.addComponent(rightMenuBar);

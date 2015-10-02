@@ -41,6 +41,7 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
+import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.CellStyleGenerator;
@@ -67,14 +68,18 @@ public class ManageNavigator extends Panel {
     public ManageNavigator(FolderType folderType, IConfigurationService configurationService) {
         this.configurationService = configurationService;
 
-        setCaption("Navigator");
         setSizeFull();
-        addStyleName("noborder");
+        
         addStyleName(ValoTheme.MENU_ROOT);
-
+        
         VerticalLayout content = new VerticalLayout();
         content.setSizeFull();
         setContent(content);
+        
+        MenuBar leftMenuBar = new MenuBar();
+        leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
+        leftMenuBar.setWidth(100, Unit.PERCENTAGE);
+        content.addComponent(leftMenuBar);
 
         treeTable = buildTreeTable();
         content.addComponent(treeTable);
