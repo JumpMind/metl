@@ -45,6 +45,7 @@ public class Develop {
         WebAppContext webapp = new WebAppContext();
         webapp.setParentLoaderPriority(true);
         webapp.setConfigurationDiscovered(true);
+        webapp.setContextPath("/metl");
         webapp.setWar("src/main/webapp");
         webapp.setResourceBase("src/main/webapp");
         webapp.addServlet(DefaultServlet.class, "/*");

@@ -1,0 +1,29 @@
+===== Sql Executor
+[cols="<25%h,<75%"]
+|===================================
+|Icon|image:rdbmswriter.png[]
+|Description|The Sql Executor is used to write data to a SQL compliant relational database by specifying an sql query.
+
+The Sql Executor can take one or more input messages.  The sql will be executed based on the 'Run When' option, either Per Entity - for every 
+entity record in an input message, Per Message - one time per message received or On Success - one time at flow completion.
+
+|Inbound Message Type|Model Based Message
+|Output Message Type|Text Based Message
+|===================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===================================
+|Name|Description
+|Resource|The SQL Database Resource on which the SQL query should be run to write the data.  
+include::../common-properties/input-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Run When|
+|Sql|Sql statement(s) to run.  Could be an insert, update or delete statement.  Multiple statements can be executed by including a semi-colon (;) between 
+sql statements.
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+ 
+|===================================
