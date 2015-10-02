@@ -32,8 +32,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.properties.TypedProperties;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,79 +51,64 @@ public class RdbmsReaderUnitTest extends AbstractRdbmsComponentTest {
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		inputMessage = new StartupMessage();
-		
+		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(0, 1, 1, 0);
+		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
 	}
 
 	@Test
 	@Override
-	public void testHandleShutdownMessage() {
-		inputMessage = new ShutdownMessage("test");
+	public void testHandleUnitOfWorkLastMessage() {
+		setupHandle();
+		setUnitOfWorkLastMessage(true);
+		
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(0, 1, 1, 0);
+		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
 	}
 	
-	@Test
-	public void testReceivesStartupWithResults() {
-		inputMessage = new StartupMessage();
-		
-		List<String> sqls = new ArrayList<String>();
-		sqls.add("select * from test");
-		this.sqls = sqls;
-		
-		runHandle();
-		assertHandle(1, 1, 0, 0);
-	}
-	
-	@Test
-	@Override
-	public void testHandleEmptyPayload() {
-		setupHandle();
-		runHandle();
-		assertHandle(0, 1, 0, 0);
-	}
-
-	@Test
-	@Override
-	public void testHandleUnitOfWorkInputMessage() {
-		setupHandle();
-		
-		inputMessage.setPayload(new ArrayList<EntityData>());
-		
-		runHandle();
-		assertHandle(1, 1, 1, 0, true);
-	}
-
-	@Test
-	@Override
-	public void testHandleUnitOfWorkFlow() {
-		setupHandle();
-		
-		inputMessage.setPayload(new ArrayList<EntityData>());
-		unitOfWorkLastMessage = true;
-		
-		runHandle();
-		assertHandle(1, 1, 1, 0, true);
-	}
-
 	@Test
 	@Override
 	public void testHandleNormal() {
+		
+	}
+	/*
+	@Test
+	@Override
+	public void testHandleNormal() {
+		// Setup
 		List<String> sqls = new ArrayList<String>();
 		sqls.add("select * from $(UNIT_TEST)");
-		
 		this.sqls = sqls;
 		
+		// Messages
+		Message message1 = new MessageBuilder("step1")
+				.setPayload(new PayloadBuilder()
+					.addRow(new EntityDataBuilder()
+						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+				.build()).buildED()).build();
+		
+		messages.clear();
+		messages.add(new HandleParams(message1, true));
+		
+		// Expected
+		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+						.addRow(new EntityDataBuilder()
+							.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+						.build()).buildED();
+		
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		
+		// Execute and Assert
 		runHandle();
-		assertHandle(1, 1, 0, 0);
+		assertHandle(1, expectedMonitors);
 	}
-
 	
 	@Test
 	public void testHandleWithFlowParameters() {
+		// Setup
 		List<String> sqls = new ArrayList<String>();
 		sqls.add("select * from $(UNIT_TEST)");
 		
@@ -130,8 +119,28 @@ public class RdbmsReaderUnitTest extends AbstractRdbmsComponentTest {
 		this.flowParametersAsString = flowParameters;
 		expectedFlowReplacementSql = "select * from GOES_BOOM";
 		
+		// Messages
+		Message message1 = new MessageBuilder("step1")
+				.setPayload(new PayloadBuilder()
+					.addRow(new EntityDataBuilder()
+						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+				.build()).buildED()).build();
+		
+		messages.clear();
+		messages.add(new HandleParams(message1, true));
+		
+		// Expected
+		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+						.addRow(new EntityDataBuilder()
+							.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+						.build()).buildED();
+		
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		
+		// Execute and Assert
 		runHandle();
-		assertHandle(1, 1, 0, 0);
+		assertHandle(1, expectedMonitors);
 	}
 	
 	@Test
@@ -179,7 +188,7 @@ public class RdbmsReaderUnitTest extends AbstractRdbmsComponentTest {
 		assertEquals(1, reader.getSqls().size());
 		assertEquals(eSql, reader.getSqls().get(0));
 	}
-
+	*/
 	@Override
 	public IComponentRuntime getComponentSpy() {
 		RdbmsReader reader = spy(new RdbmsReader());

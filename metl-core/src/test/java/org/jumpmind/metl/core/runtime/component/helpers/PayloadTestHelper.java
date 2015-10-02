@@ -21,6 +21,7 @@
 package org.jumpmind.metl.core.runtime.component.helpers;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntimeTest;
@@ -48,6 +49,18 @@ public class PayloadTestHelper {
 		entity.put(AbstractComponentRuntimeTest.MODEL_ATTR_ID_2, AbstractComponentRuntimeTest.MODEL_ATTR_NAME_2);
 		entity.put(AbstractComponentRuntimeTest.MODEL_ATTR_ID_3, AbstractComponentRuntimeTest.MODEL_ATTR_NAME_3);
 		payload.add(entity);
+		return payload;
+	}
+	
+	public static ArrayList<EntityData> createPayload(int rows, String... data) {
+		ArrayList<EntityData> payload = new ArrayList<EntityData>();
+		for (int r = 0; r < rows; r++) {
+			EntityData entity = new EntityData();
+			for (int i = 0; i + 1 < data.length; i=i+2) {
+				entity.put(data[i], data[i+1]);
+			}
+			payload.add(entity);
+		}
 		return payload;
 	}
 	

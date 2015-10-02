@@ -25,14 +25,19 @@ import static org.mockito.Mockito.spy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelTestHelper;
+import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,58 +59,27 @@ public class TransformerTest extends AbstractComponentRuntimeTest<ArrayList<Enti
 	public void testHandleStartupMessage() {
 		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(1, 1, 1, 0);
+		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 0));
 	}
 
-	@Test
+	@Test 
 	@Override
-	public void testHandleEmptyPayload() {
+	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
-		runHandle();
-		assertHandle(0, 1, 0, 0);
-	}
-
-	@Test
-	@Override
-	public void testHandleUnitOfWorkInputMessage() {
-		setupHandle();
-		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		//((Transformer) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE;
-		assertEquals("Unit of work not implemented for transformer", 1,2);
-		
-		runHandle();
-		assertHandle(1, 1, 1, 0, true);
-	}
-
-	@Test
-	@Override
-	public void testHandleUnitOfWorkFlow() {
-		setupHandle();
-		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		//((Transformer) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
 		setUnitOfWorkLastMessage(true);
-		assertEquals("Unit of work not implemented for transformer", 1,2);
+		
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(1, 1, 1, 0, true);
+		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 0));
 	}
 
 	@Test
 	@Override
 	public void testHandleNormal() {
+		// Setup
 		setupHandle();
-		
-		getInputMessage().setPayload(PayloadTestHelper.createPayloadWithEntityData(MODEL_ATTR_ID_1, TRANSFORM_SOURCE));
-		
-		Map<String, String> transformMap = new HashMap<String, String>();
-		transformMap.put(MODEL_ATTR_ID_1, TRANSFORM_EXP);
-		
-		((Transformer) spy).transformsByAttributeId = transformMap;
-		
 		PowerMockito.mockStatic(ModelAttributeScriptHelper.class);
-		
 		try {
 			PowerMockito.doReturn(TRANSFORM_RESULT).when(
 				ModelAttributeScriptHelper.class, 
@@ -119,9 +93,36 @@ public class TransformerTest extends AbstractComponentRuntimeTest<ArrayList<Enti
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+		Map<String, String> transformMap = new HashMap<String, String>();
+		transformMap.put(MODEL_ATTR_ID_1, TRANSFORM_EXP);
+		((Transformer) spy).transformsByAttributeId = transformMap;
 		
+		ModelTestHelper.createMockModel(inputModel, MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1, 
+				MODEL_ATTR_ID_1, MODEL_ENTITY_NAME_1);
+		
+		// Messages
+		Message message1 = new MessageBuilder("step1")
+				.setPayload(new PayloadBuilder()
+					.addRow(new EntityDataBuilder()
+						.addKV(MODEL_ATTR_ID_1, TRANSFORM_SOURCE)
+				.build()).buildED()).build();
+		
+		messages.clear();
+		messages.add(new HandleParams(message1, true));
+		
+		// Expected
+		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+						.addRow(new EntityDataBuilder()
+							.addKV(MODEL_ATTR_ID_1, TRANSFORM_RESULT)
+						.build()).buildED();
+		
+		
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		
+		// Execute and Assert
 		runHandle();
-		assertHandle(1, 1, 1, 1, false, MODEL_ATTR_ID_1, TRANSFORM_RESULT);
+		assertHandle(1, expectedMonitors);
 	}
 
 	@Override
@@ -135,8 +136,6 @@ public class TransformerTest extends AbstractComponentRuntimeTest<ArrayList<Enti
 		
 		ArrayList<EntityData> payload = new ArrayList<EntityData>(); 
 		getInputMessage().setPayload(payload);
-		ModelTestHelper.createMockModel(inputModel, MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1, 
-				MODEL_ATTR_ID_1, MODEL_ENTITY_NAME_1);
 	}
 
 	

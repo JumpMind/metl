@@ -39,6 +39,8 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.component.helpers.PayloadAssert;
+import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.utils.TestUtils;
 import org.junit.Before;
@@ -135,29 +137,61 @@ public abstract class AbstractComponentRuntimeTest<T> {
 		}
 	}
 	
-	public List<HandleMonitor> getExpectedMonitorSingle(int sends, int starts, int shutdowns, int lastIndex, int expectedPayloadSize) {
-		List<HandleMonitor> list = new ArrayList<HandleMonitor>();
-		HandleMonitor m = new HandleMonitor();
-		m.setStartupMessageCount(starts);
-		m.setShutdownMessageCount(shutdowns);
-		m.setSendMessageCount(sends);
-		m.setIndexLastMessage(lastIndex);
-		m.setExpectedPayloadSize(expectedPayloadSize);
+	public List<HandleMessageMonitor> getExpectedMessageMonitorSingle(int sends, int starts, int shutdowns, int expectedPayloadSize) {
+		return getExpectedMessageMonitorSingle(sends, starts, shutdowns, expectedPayloadSize, null);
+	}
+	
+	public List<HandleMessageMonitor> getExpectedMessageMonitorSingle(int sends, int starts, int shutdowns, int expectedPayloadSize, ArrayList<EntityData> payload) {
+		List<HandleMessageMonitor> list = new ArrayList<HandleMessageMonitor>();
+		HandleMessageMonitor m = getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payload);
 		list.add(m);
 		return list;
 	}
-	public void assertHandle(int numberInboundMessages, int numberEntitiesProcessed, List<HandleMonitor> expectedMonitors) {
+	
+	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize) {
+		List<Serializable> payloads = null;
+		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads);
+	}
+	
+	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, ArrayList<EntityData> payload) {
+		List<Serializable> payloads = new ArrayList<Serializable>();
+		if (payload != null) {
+			payloads.add(payload);
+		}
+		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads);
+	}
+	
+	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, List<Serializable> payloads) {
+		HandleMessageMonitor m = new HandleMessageMonitor();
+		m.setStartupMessageCount(starts);
+		m.setShutdownMessageCount(shutdowns);
+		m.setSendMessageCount(sends);
+		m.setExpectedPayloadSize(expectedPayloadSize);
+		if (payloads != null) {
+			m.setPayloads(payloads);
+		}
+		return m;
+	}
+	
+	
+	public void assertHandle(int numberEntitiesProcessed, List<HandleMessageMonitor> expectedMonitors) {
 		for (int i = 0; i < expectedMonitors.size(); i++) {
-			HandleMonitor expected = expectedMonitors.get(i);
-			HandleMonitor actual = messages.get(i).getCallback().getMonitor();
+			HandleMessageMonitor expected = expectedMonitors.get(i);
+			HandleMessageMonitor actual = messages.get(i).getCallback().getMonitor();
 			
-			assertEquals("Send message counts do not match", expected.getSendMessageCount(), actual.getSendMessageCount());
-			assertEquals("Start message counts do not match", expected.getStartupMessageCount(), actual.getStartupMessageCount());
-			assertEquals("Shutdown message counts do not match", expected.getShutdownMessageCount(), actual.getShutdownMessageCount());
-			assertEquals("Last message positions do not match", expected.getIndexLastMessage(), actual.getIndexLastMessage());
+			assertEquals("Statistics entities processed are not equal", numberEntitiesProcessed, 
+					((AbstractComponentRuntime) spy).getComponentStatistics().getNumberEntitiesProcessed());
+			assertEquals("Send message counts do not match [message " + (i + 1) + "]", expected.getSendMessageCount(), actual.getSendMessageCount());
+			assertEquals("Start message counts do not match [message " + (i + 1) + "]", expected.getStartupMessageCount(), actual.getStartupMessageCount());
+			assertEquals("Shutdown message counts do not match [message " + (i + 1) + "]", expected.getShutdownMessageCount(), actual.getShutdownMessageCount());
 			TestUtils.assertList(expected.getTargetStepIds(), actual.getTargetStepIds());
-			assertEquals("Payload sized unexpected.", expected.getExpectedPayloadSize(), actual.getPayloads().size());
-			// TODO add payload assert
+			assertEquals("Payload sized unexpected [message " + (i + 1) + "]", expected.getExpectedPayloadSize(), actual.getPayloads().size());
+			for (int p = 0; p < expected.getPayloads().size(); p++) {
+				Serializable expectedPayload = (Serializable) expected.getPayloads().get(p);
+				Serializable actualPayload = (Serializable) actual.getPayloads().get(p);
+				
+				PayloadAssert.assertPayload((i+1), (p+1), expectedPayload, actualPayload);
+			}
 		}
 	}
 	
@@ -213,7 +247,9 @@ public abstract class AbstractComponentRuntimeTest<T> {
 	
 	public void initHandleParams() {
 		messages = new ArrayList<HandleParams>();
-		HandleParams params = new HandleParams(new Message("inputMessage"));
+		Message m = new Message("step1");
+		m.setPayload(PayloadTestHelper.createPayloadWithMultipleEntityData());
+		HandleParams params = new HandleParams(m);
 		messages.add(params);
 	}
 	

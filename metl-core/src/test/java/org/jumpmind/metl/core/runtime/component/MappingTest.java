@@ -25,12 +25,17 @@ import static org.mockito.Mockito.spy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelTestHelper;
+import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,93 +51,120 @@ public class MappingTest extends AbstractComponentRuntimeTest<ArrayList<EntityDa
 	public void testHandleStartupMessage() {
 		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(0, 1, 0, 0);
+		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
 	}
 
 	@Test 
 	@Override
-	public void testHandleEmptyPayload() {
+	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
-		runHandle();
-		assertHandle(0, 1, 0, 0);
-	}
-	
-	@Test 
-	@Override
-	public void testHandleUnitOfWorkInputMessage() {
-		setupHandle();
+		setUnitOfWorkLastMessage(true);
 		
 		getInputMessage().setPayload(new ArrayList<EntityData>());
-
-		runHandle();
-		assertHandle(1, 1, 1, 0, true);
-	}
-	
-	@Test 
-	@Override
-	public void testHandleUnitOfWorkFlow() {
-		setupHandle();
-		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-setUnitOfWorkLastMessage(true);
 		
 		runHandle();
-		assertHandle(1, 1, 1, 0, true);
+		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 0));
 	}
 	
 	@Test 
 	@Override
 	public void testHandleNormal() {
+		// Setup
 		setupHandle();
-		
-		getInputMessage().setPayload(PayloadTestHelper.createPayloadWithEntityData(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1));
-		HashMap<String, Set<String>> attrToAttrMap = new HashMap<String, Set<String>>();
 		Set<String> mappings = new HashSet<String>();
 		mappings.add(MAPPING_TARGET_1);
 		
-		attrToAttrMap.put(MODEL_ATTR_ID_1, mappings);
+		((Mapping) spy).attrToAttrMap = new HashMap<String, Set<String>>();
+		((Mapping) spy).attrToAttrMap.put(MODEL_ATTR_ID_1, mappings);
 		
-		((Mapping) spy).attrToAttrMap = attrToAttrMap;
-
+		// Messages
+		Message message1 = new MessageBuilder("step1")
+				.setPayload(new PayloadBuilder()
+					.addRow(new EntityDataBuilder()
+						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+				.build()).buildED()).build();
+		
+		messages.clear();
+		messages.add(new HandleParams(message1, true));
+		
+		// Expected
+		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+						.addRow(new EntityDataBuilder()
+							.addKV(MAPPING_TARGET_1, MODEL_ATTR_NAME_1)
+						.build()).buildED();
+		
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		
+		// Execute and Assert
 		runHandle();
-		assertHandle(1, 1, 1, 1, false, MAPPING_TARGET_1, MODEL_ATTR_NAME_1);
+		assertHandle(1, expectedMonitors);
 	}
 	
 	@Test 
 	public void testHandleUnMappedToNull() {
+		// Setup
 		setupHandle();
-		
-		getInputMessage().setPayload(PayloadTestHelper.createPayloadWithEntityData(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1));
-		
-		HashMap<String, Set<String>> attrToAttrMap = new HashMap<String, Set<String>>();
 		Set<String> mappings = new HashSet<String>();
 		mappings.add(MAPPING_TARGET_1);
-		attrToAttrMap.put("X", mappings);
+		
+		((Mapping) spy).attrToAttrMap = new HashMap<String, Set<String>>();
+		((Mapping) spy).attrToAttrMap.put("X", mappings);
+		((Mapping) spy).setUnmappedAttributesToNull = true;
+		
+		// Messages
+		Message message1 = new MessageBuilder("step1")
+				.setPayload(new PayloadBuilder()
+					.addRow(new EntityDataBuilder()
+						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+				.build()).buildED()).build();
+		
+		messages.clear();
+		messages.add(new HandleParams(message1, true));
+		
+		
+		// Expected
+		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+						.addRow(new EntityDataBuilder()
+							.addKV(MODEL_ATTR_ID_1, null)
+						.build()).buildED();
+		
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
 		
 		ModelTestHelper.createMockModel(outputModel, MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1, MODEL_ENTITY_ID_1, MODEL_ENTITY_NAME_1);
 		
-		((Mapping) spy).attrToAttrMap = new HashMap<String, Set<String>>();
-		((Mapping) spy).setUnmappedAttributesToNull = true;
-		
+		// Execute and Assert
 		runHandle();
-		assertHandle(1, 1, 1, 1, false, MAPPING_TARGET_1, null);
+		assertHandle(1, expectedMonitors); 
 	}
 	
 	@Test 
 	public void testHandleNoMappingsFound() {
+		// Setup
 		setupHandle();
-		
-		getInputMessage().setPayload(PayloadTestHelper.createPayloadWithEntityData(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1));
-		HashMap<String, Set<String>> attrToAttrMap = new HashMap<String, Set<String>>();
 		Set<String> mappings = new HashSet<String>();
 		mappings.add(MAPPING_TARGET_1);
+		((Mapping) spy).attrToAttrMap = new HashMap<String, Set<String>>();
+		((Mapping) spy).attrToAttrMap.put("X", mappings);
 		
-		attrToAttrMap.put("X", mappings);
+		// Messages
+		Message message1 = new MessageBuilder("step1")
+				.setPayload(new PayloadBuilder()
+					.addRow(new EntityDataBuilder()
+						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+				.build()).buildED()).build();
+				
+		messages.clear();
+		messages.add(new HandleParams(message1, true));
 		
-		((Mapping) spy).attrToAttrMap = attrToAttrMap;
-		
+		// Expected
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 0));
+				
+		// Execute and Assert
 		runHandle();
-		assertHandle(1, 1, 1, 0);
+		assertHandle(0, expectedMonitors);
 	}
 	
 	@Override

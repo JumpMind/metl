@@ -51,14 +51,14 @@ public class HandleParams {
 	}
 	
 	public class TestingSendMessageCallback implements ISendMessageCallback {
-		HandleMonitor monitor = new HandleMonitor();
+		HandleMessageMonitor monitor = new HandleMessageMonitor();
 		
 		@Override
 		public void sendMessage(Serializable payload, boolean lastMessage, String... targetStepIds) {
-			monitor.getPayloads().add(payload);
-			if (lastMessage) {
-				monitor.setIndexLastMessage(monitor.getPayloads().size() - 1);
+			if (payload instanceof List) {
+				monitor.getPayloads().addAll((List) payload);
 			}
+			
 			Collections.addAll(monitor.getTargetStepIds(), targetStepIds);
 			monitor.incrementSendMessageCount();
 		}
@@ -73,7 +73,7 @@ public class HandleParams {
 			monitor.incrementStartupMessageCount();
 		}
 
-		HandleMonitor getMonitor() {
+		HandleMessageMonitor getMonitor() {
 			return monitor;
 		}
 	}

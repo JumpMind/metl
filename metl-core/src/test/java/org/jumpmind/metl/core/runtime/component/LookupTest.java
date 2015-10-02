@@ -26,17 +26,19 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
+import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import javafx.beans.binding.When;
 
 @RunWith(PowerMockRunner.class)
 public class LookupTest extends AbstractComponentRuntimeTest<ArrayList<EntityData>> {
@@ -45,83 +47,82 @@ public class LookupTest extends AbstractComponentRuntimeTest<ArrayList<EntityDat
 	@Override
 	public void testHandleStartupMessage() {
 		setInputMessage(new StartupMessage());
+		((Lookup) spy).sourceStepId = "step1";
 		runHandle();
-		assertHandle(0, 1, 0, 0);
+		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
 	}
 
 	@Test
 	@Override
-	public void testHandleEmptyPayload() {
+	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
-		runHandle();
-		assertHandle(0, 1, 0, 0);
-	}
-
-	@Test
-	@Override
-	public void testHandleUnitOfWorkInputMessage() {
-		setupHandle();
-		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		//((Lookup) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE;
-		assertEquals("Unit of work not implemented for lookup", 1,2);
-		
-		runHandle();
-		assertHandle(1, 1, 1, 0, true);
-	}
-
-	@Test
-	@Override
-	public void testHandleUnitOfWorkFlow() {
-		setupHandle();
-		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		//((Lookup) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
+		((Lookup) spy).sourceStepId = "step1";
 		setUnitOfWorkLastMessage(true);
-		assertEquals("Unit of work not implemented for lookup", 1,2);
+		
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(1, 1, 1, 0, true);
+		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
 	}
 
 	@Test
 	@Override
 	public void testHandleNormal() {
+		// Lookup setup
 		setupHandle();
+		
 		((Lookup) spy).sourceStepId = "step1";
-		
-		Message message1 = getInputMessage();
-		message1.setPayload(PayloadTestHelper.createPayloadWithMultipleEntityData());
-		message1.getHeader().setOriginatingStepId("step1");
-		
-		Message message2 = new Message("message2");
-		message2.setPayload(PayloadTestHelper.createPayloadWithMultipleEntityData());
-		message2.getHeader().setOriginatingStepId("step2");
-		
-		Message message3 = new Message("message3");
-		message3.setPayload(PayloadTestHelper.createPayloadWithMultipleEntityData());
-		message3.getHeader().setUnitOfWorkLastMessage(true);
-		message3.getHeader().setOriginatingStepId("step1");
-		
-		
-		messages.add(new HandleParams(message2));
-		messages.add(new HandleParams(message3, true));
-		
-		//((Lookup) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
-		
-		
 		((Lookup) spy).keyAttributeId = MODEL_ATTR_ID_1;
 		((Lookup) spy).valueAttributeId = MODEL_ATTR_ID_2;
 		((Lookup) spy).replacementKeyAttributeId = MODEL_ATTR_ID_1;
 		((Lookup) spy).replacementValueAttributeId = MODEL_ATTR_ID_3;
 		
+		// Messages
+		Message message1 = new MessageBuilder("step1")
+				.setPayload(new PayloadBuilder()
+						.addRow(new EntityDataBuilder()
+							.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+					.build()).buildED()).build();
+			
+		Message message2 = new MessageBuilder("step2")
+				.setPayload(new PayloadBuilder()
+						.addRow(new EntityDataBuilder()
+							.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+							.addKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
+							.addKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
+					.build()).buildED()).build();
 		
-		assertHandle(1, 1, 1, 1, false);
-		assertFalse(((Lookup) spy).lookupInitialized);
-		assertEquals(1, ((Lookup) spy).lookup.size());
-		assertTrue(((Lookup) spy).lookup.containsKey(MODEL_ATTR_ID_1));
+		Message message3 = new MessageBuilder("step1")
+				.setPayload(new PayloadBuilder()
+						.addRow(new EntityDataBuilder()
+							.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+							.addKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
+							.addKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
+					.build()).buildED()).build();
+		message3.getHeader().setUnitOfWorkLastMessage(true);
+		
+		messages.clear();
+		messages.add(new HandleParams(message1, false));
+		messages.add(new HandleParams(message2, false));
+		messages.add(new HandleParams(message3, true));
+		
+		// Expected
+		ArrayList<EntityData> expectedPayload = PayloadTestHelper.createPayload(1, 
+				MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1, 
+				MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2, 
+				MODEL_ATTR_ID_3, MODEL_ATTR_NAME_2);
+		
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(0, 0, 0, 0));
+		expectedMonitors.add(getExpectedMessageMonitor(0, 0, 0, 0));
+		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		
+			
+		// Execute and Assert
+		runHandle();
+		assertHandle(1, expectedMonitors);
 	}
-
+	
 	@Override
 	public IComponentRuntime getComponentSpy() {
 		return spy(new Lookup());

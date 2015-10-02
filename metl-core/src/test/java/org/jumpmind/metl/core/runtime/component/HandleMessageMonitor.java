@@ -4,12 +4,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HandleMonitor {
+public class HandleMessageMonitor {
 	private int shutdownMessageCount;
 	private int startupMessageCount;
 	private int sendMessageCount;
 	private List<Serializable> payloads = new ArrayList<Serializable>();
-	private int indexLastMessage = -1;
 	private List<String> targetStepIds = new ArrayList<String>();
 	private int expectedPayloadSize;
 	
@@ -49,12 +48,7 @@ public class HandleMonitor {
 	public void setPayloads(List<Serializable> payloads) {
 		this.payloads = payloads;
 	}
-	public int getIndexLastMessage() {
-		return indexLastMessage;
-	}
-	public void setIndexLastMessage(int indexLastMessage) {
-		this.indexLastMessage = indexLastMessage;
-	}
+	
 	public List<String> getTargetStepIds() {
 		return targetStepIds;
 	}

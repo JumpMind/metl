@@ -20,17 +20,18 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.ShutdownMessage;
+import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
+import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +45,7 @@ public class JoinerTest extends AbstractComponentRuntimeTest<ArrayList<EntityDat
 	public void testHandleStartupMessage() {
 		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(1,0, getExpectedMonitorSingle(0, 0, 0, -1, 0));
+		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
 	}
 
 	@Test
@@ -56,32 +57,54 @@ public class JoinerTest extends AbstractComponentRuntimeTest<ArrayList<EntityDat
 		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(1,0, getExpectedMonitorSingle(0, 0, 0, -1, 0));
+		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
 	}
 
 	@Test
 	@Override
 	public void testHandleNormal() {
+		// Join setup
 		setupHandle();
-		setUnitOfWorkLastMessage(true);
-		
-		getInputMessage().setPayload(PayloadTestHelper.createPayloadWithMultipleEntityData());
 		
 		List<String> attributesToJoinOn = new ArrayList<String>();
 		attributesToJoinOn.add(MODEL_ATTR_ID_1);
-		attributesToJoinOn.add(MODEL_ATTR_ID_2);
 		((Joiner) spy).attributesToJoinOn = attributesToJoinOn;
 		
+		// Messages
+		Message message1 = new MessageBuilder("step1")
+				.setPayload(new PayloadBuilder()
+					.addRow(new EntityDataBuilder()
+						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+						.addKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
+				.build()).buildED()).build();
+		
+		Message message2 = new MessageBuilder("step1")
+				.setPayload(new PayloadBuilder()
+					.addRow(new EntityDataBuilder()
+						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+						.addKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
+				.build()).buildED()).build();
+		
+		messages.clear();
+		messages.add(new HandleParams(message1, false));
+		messages.add(new HandleParams(message2, true));
+		
+		// Expected
+		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+						.addRow(new EntityDataBuilder()
+							.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+							.addKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
+							.addKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
+						.build()).buildED();
+						
+
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(0, 0, 0, 0));
+		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+				
+		// Execute and Assert
 		runHandle();
-		assertHandle(1,1, getExpectedMonitorSingle(1, 0, 0, 0, 1));
-		
-		Map<Object, EntityData> joinedData = ((Joiner) spy).joinedData;
-		
-		assertEquals(1, joinedData.size());
-		String expectedKey = MODEL_ATTR_ID_1 + "=" + MODEL_ATTR_NAME_1 + "&" + MODEL_ATTR_ID_2 + "=" + MODEL_ATTR_NAME_2;
-		assertTrue(joinedData.containsKey(expectedKey));
-		EntityData expectedEntity = joinedData.get(expectedKey);
-		assertEquals(3, expectedEntity.size());
+		assertHandle(2, expectedMonitors);
 	}
 
 	@Override
