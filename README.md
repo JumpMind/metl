@@ -29,4 +29,4 @@ To develop in [Eclipse](http://eclipse.org) run the following and import the pro
 ./gradlew develop
 ~~~~~
 
-To run in Eclipse, use the "Run Metl" launch shortcut
+To run in Eclipse, use the "Run Metl" launch shortcut.
