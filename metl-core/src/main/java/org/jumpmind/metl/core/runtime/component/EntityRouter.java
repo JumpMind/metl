@@ -1,9 +1,28 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +34,7 @@ import javax.script.ScriptException;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -35,7 +54,10 @@ public class EntityRouter extends AbstractComponentRuntime {
 
     long rowsPerMessage = 10000;
 
-    protected void applySettings() {
+    @Override
+    protected void start() {
+        ScriptEngineManager factory = new ScriptEngineManager();
+        scriptEngine = factory.getEngineByName("groovy");
         TypedProperties properties = getTypedProperties();
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         String json = getComponent().get(SETTING_CONFIG);
@@ -50,16 +72,8 @@ public class EntityRouter extends AbstractComponentRuntime {
     }
 
     @Override
-    protected void start() {
-        ScriptEngineManager factory = new ScriptEngineManager();
-        scriptEngine = factory.getEngineByName("groovy");
-        applySettings();
-    }
-
-    @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
-        Map<String, Message> outboundMessages = new HashMap<String, Message>();
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        Map<String, ArrayList<EntityData>> outboundMessages = new HashMap<String, ArrayList<EntityData>>();
         ArrayList<EntityData> inputDatas = inputMessage.getPayload();
         for (EntityData entityData : inputDatas) {
             bindEntityData(scriptEngine, entityData);
@@ -67,33 +81,26 @@ public class EntityRouter extends AbstractComponentRuntime {
                 for (Route route : routes) {
                     try {
                         if (Boolean.TRUE.equals(scriptEngine.eval(route.getMatchExpression()))) {
-                            Message message = outboundMessages.get(route.getTargetStepId());
-                            if (message == null) {
-                                message = new Message(getFlowStepId());
-                                message.setPayload(new ArrayList<EntityData>());
-                                message.getHeader().getTargetStepIds().add(route.getTargetStepId());
-                                outboundMessages.put(route.getTargetStepId(), message);
+                            ArrayList<EntityData> outboundPayload = outboundMessages.get(route.getTargetStepId());
+                            if (outboundPayload == null) {
+                                outboundPayload = new ArrayList<EntityData>();
+                                outboundMessages.put(route.getTargetStepId(), outboundPayload);
                             }
-                            ArrayList<EntityData> outputRows = message.getPayload();
-                            if (outputRows.size() >= rowsPerMessage) {
+                            if (outboundPayload.size() >= rowsPerMessage) {
                                 outboundMessages.remove(route.getTargetStepId());
-                                getComponentStatistics().incrementOutboundMessages();
-                                messageTarget.put(message);
+                                callback.sendMessage(outboundPayload, false, route.getTargetStepId());
                             }
-                            outputRows.add(entityData.copy());
+                            outboundPayload.add(entityData.copy());
                         }
                     } catch (ScriptException e) {
                         throw new RuntimeException(e);
                     }
                 }
             }
-
         }
 
-        Collection<Message> messages = outboundMessages.values();
-        for (Message message : messages) {
-            getComponentStatistics().incrementOutboundMessages();
-            messageTarget.put(message);
+        for (String targetFlowStepId : outboundMessages.keySet()) {
+            callback.sendMessage(outboundMessages.get(targetFlowStepId), true, targetFlowStepId);
         }
 
     }

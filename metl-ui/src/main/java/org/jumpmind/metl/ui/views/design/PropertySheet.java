@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -22,15 +42,14 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.persist.IConfigurationService;
-import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.IComponentFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
-import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
-import org.jumpmind.metl.core.runtime.component.definition.XMLSettingChoices;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.MessageType;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.ResourceCategory;
-import org.jumpmind.metl.core.runtime.component.definition.XMLExtraUnitOfWorkOptions;
+import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
+import org.jumpmind.metl.core.runtime.component.definition.XMLSettingChoices;
+import org.jumpmind.metl.core.runtime.flow.StepRuntime;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
@@ -136,12 +155,8 @@ public class PropertySheet extends Panel {
     }
     
     protected void addUnitOfWorkCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
-        XMLSetting setting = new XMLSetting(AbstractComponentRuntime.UNIT_OF_WORK, "Unit Of Work", AbstractComponentRuntime.UNIT_OF_WORK_FLOW, Type.CHOICE, true);
-        setting.setChoices(new XMLSettingChoices(AbstractComponentRuntime.UNIT_OF_WORK_FLOW, AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE));
-        XMLExtraUnitOfWorkOptions options = componentDefintion.getExtraUnitOfWorkOptions();
-        if (options != null) {
-            setting.getChoices().getChoice().addAll(options.getExtraUnitOfWorkOption());
-        }
+        XMLSetting setting = new XMLSetting(StepRuntime.UNIT_OF_WORK, "Unit Of Work", StepRuntime.UNIT_OF_WORK_FLOW, Type.CHOICE, true);
+        setting.setChoices(new XMLSettingChoices(StepRuntime.UNIT_OF_WORK_FLOW, StepRuntime.UNIT_OF_WORK_INPUT_MESSAGE));
         addSettingField(setting, component, formLayout);
     }
 

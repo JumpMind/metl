@@ -1,0 +1,41 @@
+===== RDBMS Writer
+[cols="<25%h,<75%"]
+|===================================
+|Icon|image:rdbmswriter.png[]
+|Description|The RDBMS Writer is used to write data to a SQL compliant relational database by specifying an input model.
+
+The RDBMS Writer can take one or more input messages.  The writer will be executed (i.e. the update and/or insert sql query run) for every 
+entity record within an input message that it receives.
+
+By default, input records will attempt to be inserted into the defined Input Model.  Parameters can be selected that will allow an update only 
+or a combination of an update and insert in either order depending on selections.  
+
+|Inbound Message Type|Model Based Message
+|Output Message Type|Text Based Message
+|===================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===================================
+|Name|Description
+|Resource|The SQL Database Resource on which the SQL query should be run to write the data.  
+include::../common-properties/input-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Catalog|The catalog where the target table resides 
+|Schema|The schema where the target table resides
+|Replace rows if they exist|Whether to execute an update sql if a unique key exception occurs on the default insert sql attempt
+|Update rows first instead of insert|Whether to execute an update sql first
+|Fallback to insert if no rows updated|Whether to execute an insert sql if at first the update sql updates no rows
+|Quote table and column names|Whether or not to include table and column names in quotes
+|Trim character data to fit within column|Whether to trim the character field data if the incoming values length is larger than the target column size
+|Continue on Error|Whether to continue processing records on a failure and count the error record in the ignore count
+|Batch Mode|Whether to execute the insert and/or update as a transaction allowing rollback capability upon failure (assuming the RDBMS is not an auto 
+commit system) 
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===================================
+IMPORTANT: Specifying both a Catalog and Schema, the flow will only use the Catalog value and ignore the Schema
+Specifying 'Fallback to insert...' has no affect unless 'Update rows first...' is also selected
+When no options are checked the default is to attempt an insert only

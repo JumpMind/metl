@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -8,7 +28,7 @@ import java.util.List;
 
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Multiplier extends AbstractComponentRuntime {
 
@@ -41,9 +61,7 @@ public class Multiplier extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
-
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
             List<EntityData> datas = inputMessage.getPayload();
             multipliers.addAll(datas);
@@ -53,18 +71,18 @@ public class Multiplier extends AbstractComponentRuntime {
                 Iterator<Message> messages = queuedWhileWaitingForMultiplier.iterator();
                 while (messages.hasNext()) {
                     Message message = messages.next();
-                    multiply(message, messageTarget, message.getHeader().isUnitOfWorkLastMessage());
+                    multiply(message, callback, message.getHeader().isUnitOfWorkLastMessage());
                 }
             }
         } else if (!multipliersInitialized) {
-            inputMessage.getHeader().setUnitOfWorkLastMessage(unitOfWorkLastMessage);
+            inputMessage.getHeader().setUnitOfWorkLastMessage(unitOfWorkBoundaryReached);
             queuedWhileWaitingForMultiplier.add(inputMessage);
         } else if (multipliersInitialized) {
-            multiply(inputMessage, messageTarget, unitOfWorkLastMessage);
+            multiply(inputMessage, callback, unitOfWorkBoundaryReached);
         }
     }
 
-    protected void multiply(Message message, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    protected void multiply(Message message, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         ArrayList<EntityData> multiplied = new ArrayList<EntityData>();
         for (int i = 0; i < multipliers.size(); i++) {
             EntityData multiplierData = multipliers.get(i);
@@ -78,14 +96,14 @@ public class Multiplier extends AbstractComponentRuntime {
                 newData.putAll(multiplierData);
                 multiplied.add(newData);
                 if (multiplied.size() >= rowsPerMessage) {
-                    sendMessage(multiplied, messageTarget, false);                    
+                    callback.sendMessage(multiplied, false);                    
                     multiplied = new ArrayList<EntityData>();
                 }
             }
         }
 
         if (multiplied.size() > 0) {
-            sendMessage(multiplied, messageTarget, true);               
+            callback.sendMessage(multiplied, true);               
         }
     }
 

@@ -11,9 +11,16 @@ cd metl-assemble
 ./gradlew war
 ~~~~~
 
-To deploy:
+To deploy standalone:
 ~~~~~
-cp ../metl-ui/build/libs/metl-is.war /opt/apache-tomcat-8.0.14/webapps/.
+cd ../metl-ui/build/libs
+java -jar metl.war
+~~~~~
+
+
+To deploy to Tomcat:
+~~~~~
+cp ../metl-ui/build/libs/metl.war /opt/apache-tomcat-8.0.14/webapps/.
 /opt/apache-tomcat-8.0.14/bin/catalina restart
 ~~~~~
 
@@ -21,3 +28,5 @@ To develop in [Eclipse](http://eclipse.org) run the following and import the pro
 ~~~~~
 ./gradlew develop
 ~~~~~
+
+To run in Eclipse, use the "Run Metl" launch shortcut.

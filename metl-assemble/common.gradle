@@ -11,10 +11,17 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
     apply plugin: 'java'
     apply plugin: 'license-report'
 	apply plugin: 'jacoco'
+	apply plugin: 'license'
 	
     sourceCompatibility=1.8
     targetCompatibility=1.8   
     
+    license {
+        header rootProject.file('HEADER')
+        strictCheck true
+        includes(["**/*.java", "**/*.properties", "**/*.xml"])
+    }
+
     configurations.all {
         // check for updates every build
         resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
@@ -30,6 +37,10 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
                        "Build-Scm-Version": scmVersion)
         }    
     }    
+    
+    test {
+        ignoreFailures true
+    }
     
     ext {
         antVersion = '1.7.0'

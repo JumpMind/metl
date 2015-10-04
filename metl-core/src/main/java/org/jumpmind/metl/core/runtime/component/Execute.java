@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -12,7 +32,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.tools.ant.taskdefs.PumpStreamHandler;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.symmetric.csv.CsvReader;
 import org.jumpmind.util.FormatUtils;
 
@@ -65,9 +85,7 @@ public class Execute extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
-
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             PumpStreamHandler outputHandler = new PumpStreamHandler(os);
@@ -84,12 +102,9 @@ public class Execute extends AbstractComponentRuntime {
                 }
                 info("The output of the command was: %s", output);
 
-                getComponentStatistics().incrementOutboundMessages();
-                Message msg = inputMessage.clone(getFlowStepId(), unitOfWorkLastMessage);
                 ArrayList<String> payload = new ArrayList<String>();
                 payload.add(output);
-                msg.setPayload(payload);
-                messageTarget.put(msg);
+                callback.sendMessage(payload, true);
             } else {
                 info("The output of the command was: %s", output);
                 throw new IoException("%s failed with an error code of %d", ArrayUtils.toString(commands), code);

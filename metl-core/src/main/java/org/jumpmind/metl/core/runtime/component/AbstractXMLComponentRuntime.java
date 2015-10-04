@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import java.util.HashMap;
@@ -9,18 +29,10 @@ import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.filter.ElementFilter;
 import org.jdom2.output.XMLOutputter;
-import org.jumpmind.metl.core.model.SettingDefinition;
-import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.properties.TypedProperties;
 
-abstract public class AbstractXML extends AbstractComponentRuntime {
+abstract public class AbstractXMLComponentRuntime extends AbstractComponentRuntime {
 
-    @SettingDefinition(
-            order = 10,
-            required = false,
-            type = Type.BOOLEAN,
-            label = "Ignore namespaces for XPath matching",
-            defaultValue = "true")
     public final static String IGNORE_NAMESPACE = "xml.formatter.ignore.namespace";
 
     public final static String XML_FORMATTER_XPATH = "xml.formatter.xpath";

@@ -1,6 +1,25 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,20 +44,13 @@ import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.util.ComponentUtil;
 import org.jumpmind.properties.TypedProperties;
 
 abstract public class AbstractComponentRuntime extends AbstractRuntimeObject implements IComponentRuntime {
 
-    public final static String INBOUND_QUEUE_CAPACITY = "inbound.queue.capacity"; 
-    
-    public static final String UNIT_OF_WORK = "unit.of.work";
-    
-    public static final String UNIT_OF_WORK_INPUT_MESSAGE = "Input Message";
-    
-    public static final String UNIT_OF_WORK_FLOW = "Flow";
+    public final static String INBOUND_QUEUE_CAPACITY = "inbound.queue.capacity";     
     
     public final static String ENABLED = "enabled";
 
@@ -48,7 +60,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     
     protected boolean shared = false;
     
-    protected XMLComponent definition;    
+    protected XMLComponent definition;   
     
     @Override
     public void register(XMLComponent definition) {
@@ -123,10 +135,6 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return context.getExecutionTracker();
     }
     
-    protected String getUnitOfWork() {
-        return context.getFlowStep().getComponent().get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
-    }
-    
     protected void debug(String msg, Object...args) {
         log(LogLevel.DEBUG, msg, args);
     }
@@ -186,26 +194,6 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     protected List<Object> getAttributeValues(Message inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
         return ComponentUtil.getAttributeValues(getInputModel(), rows, entityName, attributeName);
-    }
-    
-    protected Message createMessage(Serializable payload, boolean lastMessage) {
-        String unitOfWork = getUnitOfWork();
-        Message newMessage = new Message(getFlowStepId());
-        if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE)
-                || (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && lastMessage)) {
-            newMessage.getHeader().setUnitOfWorkLastMessage(true);
-        }
-        newMessage.getHeader().setSequenceNumber(getComponentStatistics().getNumberOutboundMessages()+1);
-        newMessage.setPayload(payload);
-        return newMessage;
-    }
-    
-    protected void sendMessage(Serializable payload, IMessageTarget messageTarget, boolean lastMessage) {
-        Message newMessage = createMessage(payload, lastMessage);                
-        getComponentStatistics().incrementOutboundMessages();
-        if (messageTarget != null) {
-            messageTarget.put(newMessage);
-        }
     }
     
 }

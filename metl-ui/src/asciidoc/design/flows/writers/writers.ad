@@ -1,0 +1,12 @@
+
+==== Writers
+
+Writers are a set of components that write data to the selected destination in the associated flow.  
+
+include::rdbms-writer.ad[]
+
+include::sql-executor.ad[]
+
+include::text-file-writer.ad[]
+
+include::zip.ad[]

@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -27,12 +47,12 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
-public class RdbmsWriter extends AbstractRdbmsComponent {
+public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 
     public static final String TYPE = "RDBMS Writer";
 
@@ -55,11 +75,11 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
     public final static String ATTRIBUTE_UPDATE_ENABLED = "update.enabled";
 
     public final static String BATCH_MODE = "batch.mode";
-    
+
     public final static String CONTINUE_ON_ERROR = "continue.on.error";
 
     boolean continueOnError = false;
-    
+
     boolean replaceRows = false;
 
     boolean updateFirst = false;
@@ -85,7 +105,7 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
     Throwable error;
 
     String lastPreparedDml;
-    
+
     @Override
     protected void start() {
         inboundEntityDataCount = 0;
@@ -100,60 +120,6 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
             throw new IllegalStateException("A database writer must have an input model defined");
         }
 
-        applySettings();
-
-        DataSource dataSource = (DataSource) getResourceReference();
-        platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), quoteIdentifiers);
-        targetTables = new ArrayList<TargetTableDefintion>();
-
-        for (ModelEntity entity : model.getModelEntities()) {
-            Table table = platform.getTableFromCache(catalogName, schemaName, entity.getName(), true);
-            if (table != null) {
-                targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE, entity, table.copy()), new TargetTable(
-                        DmlType.INSERT, entity, table.copy())));
-            }
-        }
-    }
-
-    @Override
-    public void handle(final Message inputMessage, final IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
-
-        lastPreparedDml = null;
-        getComponentStatistics().incrementInboundMessages();
-
-        if (error == null) {
-            if (getResourceRuntime() == null) {
-                throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
-            }
-
-            ArrayList<EntityData> inputRows = inputMessage.getPayload();
-            if (inputRows == null && messageTarget != null) {
-            	messageTarget.put(createResultMessage(inputMessage, new ArrayList<Result>(), unitOfWorkLastMessage));
-                getComponentStatistics().incrementOutboundMessages();
-                return;
-            }
-
-            ISqlTransaction transaction = platform.getSqlTemplate().startSqlTransaction();
-            transaction.setInBatchMode(batchMode);
-            try {
-                write(transaction, inputMessage, messageTarget, unitOfWorkLastMessage);
-                transaction.commit();
-            } catch (Throwable ex) {
-                error = ex;
-                transaction.rollback();
-                if (ex instanceof RuntimeException) {
-                    throw (RuntimeException) ex;
-                } else {
-                    throw new RuntimeException(ex);
-                }
-            } finally {
-                transaction.close();
-            }
-        }
-        
-    }
-
-    private void applySettings() {
         TypedProperties properties = getTypedProperties();
         batchMode = properties.is(BATCH_MODE, batchMode);
         replaceRows = properties.is(REPLACE);
@@ -171,8 +137,57 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
         if (isBlank(schemaName)) {
             schemaName = null;
         }
+
+        DataSource dataSource = (DataSource) getResourceReference();
+        platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), quoteIdentifiers);
+        targetTables = new ArrayList<TargetTableDefintion>();
+
+        for (ModelEntity entity : model.getModelEntities()) {
+            Table table = platform.getTableFromCache(catalogName, schemaName, entity.getName(), true);
+            if (table != null) {
+                targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE, entity, table.copy()),
+                        new TargetTable(DmlType.INSERT, entity, table.copy())));
+            }
+        }
     }
-    
+
+    @Override
+    public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        lastPreparedDml = null;
+
+        if (error == null) {
+            if (getResourceRuntime() == null) {
+                throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
+            }
+
+            ArrayList<EntityData> inputRows = inputMessage.getPayload();
+            if (inputRows != null && inputRows.size() > 0) {
+                ISqlTransaction transaction = platform.getSqlTemplate().startSqlTransaction();
+                transaction.setInBatchMode(batchMode);
+                try {
+                    write(transaction, inputMessage, callback, unitOfWorkBoundaryReached);
+                    transaction.commit();
+                    
+                } catch (Throwable ex) {
+                    error = ex;
+                    transaction.rollback();
+                    if (ex instanceof RuntimeException) {
+                        throw (RuntimeException) ex;
+                    } else {
+                        throw new RuntimeException(ex);
+                    }
+                } finally {
+                    transaction.close();
+                }
+            }
+
+            if (callback != null) {
+                callback.sendMessage(convertResultsToTextPayload(results), unitOfWorkBoundaryReached);
+            }
+        }
+
+    }
+
     private Object[] getValues(boolean isUpdate, TargetTable modelTable, EntityData inputRow) {
         ArrayList<Object> data = new ArrayList<Object>();
         for (TargetColumn modelColumn : modelTable.getTargetColumns()) {
@@ -191,18 +206,17 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
                 keyValues.add(inputRow.get(modelColumn.getModelAttribute().getId()));
             }
         }
-        return modelTable.getStatement()
-                .getValueArray(data.toArray(new Object[data.size()]), keyValues.toArray(new Object[keyValues.size()]));
+        return modelTable.getStatement().getValueArray(data.toArray(new Object[data.size()]),
+                keyValues.toArray(new Object[keyValues.size()]));
     }
 
-    private void write(ISqlTransaction transaction, Message inputMessage, IMessageTarget messageTarget,
-    		boolean unitOfWorkLastMessage) {
+    private void write(ISqlTransaction transaction, Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         long ts = System.currentTimeMillis();
         int totalStatementCount = 0;
         TargetTable modelTable = null;
         Object[] data = null;
-    	List<Result> results = new ArrayList<Result>();
-    	List<EntityData> inputRows = inputMessage.getPayload();
+        List<Result> results = new ArrayList<Result>();
+        List<EntityData> inputRows = inputMessage.getPayload();
         try {
             Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<TargetTableDefintion, WriteStats>();
             for (TargetTableDefintion targetTableDefinition : targetTables) {
@@ -233,7 +247,7 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
                                     stats.fallbackInsertCount += count;
                                     getComponentStatistics().incrementNumberEntitiesProcessed(count);
                                 }
-                            } else if (count == 0 && !continueOnError) {                                
+                            } else if (count == 0 && !continueOnError) {
                                 throw new SqlException(String.format("Failed to update row: \n%s\nWith values: \n%s\nWith types: \n%s\n",
                                         modelTable.getStatement().getSql(), Arrays.toString(data),
                                         Arrays.toString(modelTable.getStatement().getTypes())));
@@ -246,8 +260,9 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
                             modelTable = targetTableDefinition.getInsertTable();
                             if (modelTable.shouldProcess(inputRow)) {
                                 data = getValues(false, modelTable, inputRow);
-                                int count = execute(transaction, modelTable.getStatement(), new Object(), data, !replaceRows && !continueOnError);
-                                results.add(new Result(modelTable.getStatement().getSql(), count));                                
+                                int count = execute(transaction, modelTable.getStatement(), new Object(), data,
+                                        !replaceRows && !continueOnError);
+                                results.add(new Result(modelTable.getStatement().getSql(), count));
                                 totalStatementCount++;
                                 stats.insertCount += count;
                                 getComponentStatistics().incrementNumberEntitiesProcessed(count);
@@ -308,7 +323,7 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
                         msg.append("Fallback Inserts: ");
                         msg.append(stats.fallbackInsertCount);
                     }
-                    
+
                     if (stats.ignoredCount > 0) {
                         if (msg.length() > 0) {
                             msg.append(", ");
@@ -323,15 +338,13 @@ public class RdbmsWriter extends AbstractRdbmsComponent {
 
                 }
             }
-            
-            messageTarget.put(createResultMessage(inputMessage, results, unitOfWorkLastMessage));
 
         } catch (RuntimeException ex) {
             if (modelTable != null && data != null) {
-                log(LogLevel.ERROR, String.format(
-                        "Failed to run dml for the %s statement processed: \n%s\nWith values: \n%s\nWith types: \n%s\n",
-                        inboundEntityDataCount, modelTable.getStatement().getSql(), Arrays.toString(data),
-                        Arrays.toString(modelTable.getStatement().getTypes())));
+                log(LogLevel.ERROR,
+                        String.format("Failed to run dml for the %s statement processed: \n%s\nWith values: \n%s\nWith types: \n%s\n",
+                                inboundEntityDataCount, modelTable.getStatement().getSql(), Arrays.toString(data),
+                                Arrays.toString(modelTable.getStatement().getTypes())));
             }
             throw ex;
         }

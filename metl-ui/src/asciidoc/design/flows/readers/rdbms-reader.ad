@@ -9,7 +9,7 @@ every entity record within an input message that it receives.  Any entity/attrib
 be used as a parameter in the SQL parameter by specifying the input model entity and attribute name in the query prefaced with a colon.
 See <<rdbms-reader-example-1>> below.  
 
-Be default, the sql results will be mapped directly to the output model based on the table and column name of the 
+By default, the sql results will be mapped directly to the output model based on the table and column name of the 
 selected fields.  When aggregate or other functions are used within the sql statement the table and column name will
 not be available for mapping to the output model, so hints may be used to map the field directly to an output model
 entity and attribute.  See <<rdbms-reader-example-2>> below.

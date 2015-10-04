@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -17,7 +37,7 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
 public class FixedLengthFormatter extends AbstractComponentRuntime {
@@ -34,22 +54,22 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
     boolean useHeader;
 
     /* other vars */
-    TypedProperties properties;
     List<AttributeFormat> attributesList;
 
     @Override
     protected void start() {
-        applySettings();
+        TypedProperties properties = getTypedProperties();
+        useHeader = properties.is(FIXED_LENGTH_FORMATTER_WRITE_HEADER);
+        convertAttributeSettingsToAttributeFormat();
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (attributesList == null || attributesList.size() == 0) {
             throw new IllegalStateException(
                     "There are no format attributes configured.  Writing all entity fields to the output.");
         }
 
-        getComponentStatistics().incrementInboundMessages();
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
         ArrayList<String> outputPayload = new ArrayList<String>();
@@ -73,7 +93,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
             outputPayload.add(outputRec);
         }
 
-        sendMessage(outputPayload, messageTarget, unitOfWorkLastMessage);
+        callback.sendMessage(outputPayload, unitOfWorkBoundaryReached);
     }
 
     private String processInputRow(EntityData inputRow) {
@@ -89,13 +109,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
         }
         return stringBuilder.toString();
     }
-
-    private void applySettings() {
-        properties = getTypedProperties();
-        useHeader = properties.is(FIXED_LENGTH_FORMATTER_WRITE_HEADER);
-        convertAttributeSettingsToAttributeFormat();
-    }
-
+    
     private void convertAttributeSettingsToAttributeFormat() {
 
         Map<String, AttributeFormat> attributesMap = new HashMap<String, AttributeFormat>();

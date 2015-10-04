@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
@@ -13,7 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.metl.core.runtime.MessageManipulationStrategy;
+import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.Message;
 import org.junit.Before;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -21,16 +42,15 @@ import org.mockito.stubbing.Answer;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntimeTest {
+public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntimeTest<ArrayList<EntityData>> {
 
 	List<String> sqls;
 	String expectedFlowReplacementSql;
 	Map<String, Object> expectedParamMap;
 	long rowsPerMessage;
-    MessageManipulationStrategy messageManipulationStrategy;
     boolean trimColumns;
     boolean matchOnColumnNameOnly;
-
+    Message resultMessage;
     
 	@Before
 	public void reset() {
@@ -39,12 +59,13 @@ public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntim
 		expectedFlowReplacementSql = "";
 		expectedParamMap = new HashMap<String, Object>();
 		rowsPerMessage = 0L;
-	    messageManipulationStrategy = MessageManipulationStrategy.REPLACE;
 	    trimColumns = false;
 	    matchOnColumnNameOnly = false;
+	    resultMessage = new Message("resultMessage");
 	}
 	
-	public void setupHandle() {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+    public void setupHandle() {
 		
 		super.setupHandle();
 		
@@ -87,9 +108,9 @@ public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntim
 				}
 			});
 		} else {
-			when(mJdbcTemplate.query(anyString(), anyMap(), Mockito.any(ResultSetExtractor.class))).thenReturn(inputMessage);
+			when(mJdbcTemplate.query(anyString(), anyMap(), Mockito.any(ResultSetExtractor.class))).thenReturn(messages.get(0).getInputMessage());
 		}
-		doReturn(mJdbcTemplate).when((AbstractRdbmsComponent) spy).getJdbcTemplate();
+		doReturn(mJdbcTemplate).when((AbstractRdbmsComponentRuntime) spy).getJdbcTemplate();
 		
 	}
 }

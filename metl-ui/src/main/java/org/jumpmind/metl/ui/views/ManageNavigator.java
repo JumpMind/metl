@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.ui.views;
 
 import java.util.ArrayList;
@@ -21,6 +41,7 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
+import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.CellStyleGenerator;
@@ -47,14 +68,18 @@ public class ManageNavigator extends Panel {
     public ManageNavigator(FolderType folderType, IConfigurationService configurationService) {
         this.configurationService = configurationService;
 
-        setCaption("Navigator");
         setSizeFull();
-        addStyleName("noborder");
+        
         addStyleName(ValoTheme.MENU_ROOT);
-
+        
         VerticalLayout content = new VerticalLayout();
         content.setSizeFull();
         setContent(content);
+        
+        MenuBar leftMenuBar = new MenuBar();
+        leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
+        leftMenuBar.setWidth(100, Unit.PERCENTAGE);
+        content.addComponent(leftMenuBar);
 
         treeTable = buildTreeTable();
         content.addComponent(treeTable);

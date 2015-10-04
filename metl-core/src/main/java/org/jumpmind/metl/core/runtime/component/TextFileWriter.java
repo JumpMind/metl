@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import java.io.BufferedWriter;
@@ -12,7 +32,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IStreamable;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
@@ -41,25 +61,27 @@ public class TextFileWriter extends AbstractComponentRuntime {
     
     boolean append;
 
-    String unitOfWork;
-    
     String lineTerminator;
-
-    TypedProperties properties;
     
     BufferedWriter bufferedWriter = null;
 
     @Override
     protected void start() {        
-        applySettings();
+        TypedProperties properties = getTypedProperties();
+        relativePathAndFile = FormatUtils.replaceTokens(properties.get(TEXTFILEWRITER_RELATIVE_PATH), context.getFlowParametersAsString(), true);
+        mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
+        append = properties.is(TEXTFILEWRITER_APPEND);
+        lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
+        encoding = properties.get(TEXTFILEWRITER_ENCODING, DEFAULT_ENCODING);
+        if (lineTerminator != null) {
+            lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
+        }
     }
 
     @Override
-    public void handle( Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
-        
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (getResourceRuntime() == null) {
-            throw new IllegalStateException("The target resource has not been configured.  Please choose a resource.");
+            throw new IllegalStateException("The msgTarget resource has not been configured.  Please choose a resource.");
         }
         
         if (inputMessage.getHeader().getSequenceNumber() == 1) {
@@ -81,7 +103,9 @@ public class TextFileWriter extends AbstractComponentRuntime {
             throw new IoException(e);
         }
        
-        sendMessage("{\"status\":\"success\"}", messageTarget, unitOfWorkLastMessage);
+        if (callback != null) {
+            callback.sendMessage("{\"status\":\"success\"}", unitOfWorkBoundaryReached);
+        }
     }    
 
     @Override
@@ -98,20 +122,6 @@ public class TextFileWriter extends AbstractComponentRuntime {
         log(LogLevel.INFO,  String.format("Writing text file to %s", streamable.toString()));
         bufferedWriter = initializeWriter(streamable.getOutputStream(relativePathAndFile, mustExist));        
     }
-    
-    private void applySettings() {
-        properties = getTypedProperties();
-        relativePathAndFile = FormatUtils.replaceTokens(properties.get(TEXTFILEWRITER_RELATIVE_PATH), context.getFlowParametersAsString(), true);
-        mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
-        append = properties.is(TEXTFILEWRITER_APPEND);
-        lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
-        encoding = properties.get(TEXTFILEWRITER_ENCODING, DEFAULT_ENCODING);
-        if (lineTerminator != null) {
-            lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
-        }
-        unitOfWork = properties.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
-    }
-
 
     private BufferedWriter initializeWriter(OutputStream stream) {
         try {

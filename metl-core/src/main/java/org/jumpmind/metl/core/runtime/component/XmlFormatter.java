@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import java.io.StringReader;
@@ -28,11 +48,11 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
-public class XmlFormatter extends AbstractXML {
+public class XmlFormatter extends AbstractXMLComponentRuntime {
 
     public static final String PRETTY_FORMAT = "Pretty";
 
@@ -59,8 +79,6 @@ public class XmlFormatter extends AbstractXML {
     boolean useParameterReplacement = true;
 
     String xmlFormat;
-    
-    String unitOfWork;
 
     @Override
     protected void start() {
@@ -69,7 +87,6 @@ public class XmlFormatter extends AbstractXML {
         ignoreNamespace = properties.is(IGNORE_NAMESPACE);
         useParameterReplacement = properties.is(PARAMETER_REPLACEMENT);
         xmlFormat = properties.get(XML_FORMAT);
-        unitOfWork = properties.get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
 
         Setting templateSetting = getComponent().findSetting(XML_FORMATTER_TEMPLATE);
 
@@ -128,8 +145,7 @@ public class XmlFormatter extends AbstractXML {
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
         ArrayList<String> outputPayload = new ArrayList<String>();
@@ -164,7 +180,7 @@ public class XmlFormatter extends AbstractXML {
         
         log(LogLevel.DEBUG, outputPayload.toString());
         
-        sendMessage(outputPayload, messageTarget, unitOfWorkLastMessage);
+        callback.sendMessage(outputPayload, unitOfWorkBoundaryReached);
     }
 
     private void processInputRow(Document document, EntityData inputRow) {

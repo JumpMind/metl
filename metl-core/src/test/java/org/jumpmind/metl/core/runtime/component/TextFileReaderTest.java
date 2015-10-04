@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
@@ -17,9 +37,6 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.StartupMessage;
-import org.jumpmind.metl.core.runtime.component.ComponentContext;
-import org.jumpmind.metl.core.runtime.component.TextFileReader;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
@@ -56,18 +73,18 @@ public class TextFileReaderTest {
         TextFileReader reader = new TextFileReader();
         reader.start(new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message msg = new StartupMessage();
-        MessageTarget msgTarget = new MessageTarget();
+        SendMessageCallback<ArrayList<String>> msgTarget = new SendMessageCallback<ArrayList<String>>();
         reader.handle(msg, msgTarget, true);
 
-        assertEquals(4, msgTarget.getTargetMessageCount());
+        assertEquals(4, msgTarget.getPayloadList().size());
         ArrayList<String> payload;
-        payload = msgTarget.getMessage(0).getPayload();
+        payload = msgTarget.getPayloadList().get(0);
         assertEquals("This is the first line to read", payload.get(0));
-        payload = msgTarget.getMessage(1).getPayload();
+        payload = msgTarget.getPayloadList().get(1);
         assertEquals("This is the second line to read", payload.get(0));
-        payload = msgTarget.getMessage(2).getPayload();
+        payload = msgTarget.getPayloadList().get(2);
         assertEquals("This is the third line to read", payload.get(0));
-        payload = msgTarget.getMessage(3).getPayload();
+        payload = msgTarget.getPayloadList().get(3);
         assertEquals("This is the fourth line to read", payload.get(0));
 
     }
@@ -78,18 +95,18 @@ public class TextFileReaderTest {
         TextFileReader reader = new TextFileReader();
         reader.start(new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message msg = new StartupMessage();
-        MessageTarget msgTarget = new MessageTarget();
+        SendMessageCallback<ArrayList<String>> msgTarget = new SendMessageCallback<ArrayList<String>>();
         reader.handle(msg, msgTarget, true);
 
-        assertEquals(4, msgTarget.getTargetMessageCount());
+        assertEquals(4, msgTarget.getPayloadList().size());
         ArrayList<String> payload;
-        payload = msgTarget.getMessage(0).getPayload();
+        payload = msgTarget.getPayloadList().get(0);
         assertEquals("This is the first line to read", payload.get(0));
-        payload = msgTarget.getMessage(1).getPayload();
+        payload = msgTarget.getPayloadList().get(1);
         assertEquals("This is the second line to read", payload.get(0));
-        payload = msgTarget.getMessage(2).getPayload();
+        payload = msgTarget.getPayloadList().get(2);
         assertEquals("This is the third line to read", payload.get(0));
-        payload = msgTarget.getMessage(3).getPayload();
+        payload = msgTarget.getPayloadList().get(3);
         assertEquals("This is the fourth line to read", payload.get(0));
 
     }
@@ -161,21 +178,4 @@ public class TextFileReaderTest {
         return settings;
     }
 
-    class MessageTarget implements IMessageTarget {
-
-        List<Message> targetMsgArray = new ArrayList<Message>();
-
-        @Override
-        public void put(Message message) {
-            targetMsgArray.add(message);
-        }
-
-        public Message getMessage(int idx) {
-            return targetMsgArray.get(idx);
-        }
-
-        public int getTargetMessageCount() {
-            return targetMsgArray.size();
-        }
-    }
 }

@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import java.util.ArrayList;
@@ -6,7 +26,7 @@ import java.util.LinkedHashMap;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.StartupMessage;
-import org.jumpmind.metl.core.runtime.flow.IMessageTarget;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Deduper extends AbstractComponentRuntime {
 
@@ -19,13 +39,12 @@ public class Deduper extends AbstractComponentRuntime {
     LinkedHashMap<String, EntityData> deduped = new LinkedHashMap<String, EntityData>();
 
     @Override
-    protected void start() {        
+    protected void start() {
         rowsPerMessage = getComponent().getInt(ROWS_PER_MESSAGE, rowsPerMessage);
     }
 
     @Override
-    public void handle(Message inputMessage, IMessageTarget messageTarget, boolean unitOfWorkLastMessage) {
-        getComponentStatistics().incrementInboundMessages();
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
             for (EntityData entityData : payload) {
@@ -36,14 +55,14 @@ public class Deduper extends AbstractComponentRuntime {
                 }
             }
         }
-        
-        if (unitOfWorkLastMessage) {
+
+        if (unitOfWorkBoundaryReached) {
             if (deduped.size() > 0) {
                 int count = 0;
                 ArrayList<EntityData> payload = new ArrayList<EntityData>(rowsPerMessage);
                 for (EntityData data : deduped.values()) {
                     if (count >= rowsPerMessage) {
-                        sendMessage(payload, messageTarget, false);
+                        callback.sendMessage(payload, false);
                         payload = new ArrayList<EntityData>();
                         count = 0;
                     }
@@ -52,8 +71,8 @@ public class Deduper extends AbstractComponentRuntime {
                 }
 
                 deduped.clear();
-                
-                sendMessage(payload, messageTarget, true);
+
+                callback.sendMessage(payload, true);
             }
         }
     }

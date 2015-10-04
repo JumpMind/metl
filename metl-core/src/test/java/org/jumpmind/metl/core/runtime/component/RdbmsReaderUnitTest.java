@@ -1,3 +1,23 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
@@ -12,9 +32,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.MessageManipulationStrategy;
+import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.properties.TypedProperties;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,87 +45,70 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 
 @RunWith(PowerMockRunner.class)
-public class RdmsReaderUnitTest extends AbstractRdbmsComponentTest {
+public class RdbmsReaderUnitTest extends AbstractRdbmsComponentTest {
 
 	
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		inputMessage = new StartupMessage();
-		
+		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(0, 1, 1, 0);
+		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
 	}
 
 	@Test
 	@Override
-	public void testHandleShutdownMessage() {
-		inputMessage = new ShutdownMessage("test");
+	public void testHandleUnitOfWorkLastMessage() {
+		setupHandle();
+		setUnitOfWorkLastMessage(true);
+		
+		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(0, 1, 1, 0);
+		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
 	}
 	
-	@Test
-	public void testReceivesStartupWithResults() {
-		inputMessage = new StartupMessage();
-		
-		List<String> sqls = new ArrayList<String>();
-		sqls.add("select * from test");
-		this.sqls = sqls;
-		
-		runHandle();
-		assertHandle(1, 1, 0, 0);
-	}
-	
-	@Test
-	@Override
-	public void testHandleEmptyPayload() {
-		setupHandle();
-		runHandle();
-		assertHandle(0, 1, 0, 0);
-	}
-
-	@Test
-	@Override
-	public void testHandleUnitOfWorkInputMessage() {
-		setupHandle();
-		
-		inputMessage.setPayload(new ArrayList<EntityData>());
-		((RdbmsReader) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_INPUT_MESSAGE;
-		
-		runHandle();
-		assertHandle(1, 1, 1, 0, true);
-	}
-
-	@Test
-	@Override
-	public void testHandleUnitOfWorkFlow() {
-		setupHandle();
-		
-		inputMessage.setPayload(new ArrayList<EntityData>());
-		((RdbmsReader) spy).unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
-		unitOfWorkLastMessage = true;
-		
-		runHandle();
-		assertHandle(1, 1, 1, 0, true);
-	}
-
 	@Test
 	@Override
 	public void testHandleNormal() {
+		
+	}
+	/*
+	@Test
+	@Override
+	public void testHandleNormal() {
+		// Setup
 		List<String> sqls = new ArrayList<String>();
 		sqls.add("select * from $(UNIT_TEST)");
-		
 		this.sqls = sqls;
 		
+		// Messages
+		Message message1 = new MessageBuilder("step1")
+				.setPayload(new PayloadBuilder()
+					.addRow(new EntityDataBuilder()
+						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+				.build()).buildED()).build();
+		
+		messages.clear();
+		messages.add(new HandleParams(message1, true));
+		
+		// Expected
+		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+						.addRow(new EntityDataBuilder()
+							.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+						.build()).buildED();
+		
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		
+		// Execute and Assert
 		runHandle();
-		assertHandle(1, 1, 0, 0);
+		assertHandle(1, expectedMonitors);
 	}
-
 	
 	@Test
 	public void testHandleWithFlowParameters() {
+		// Setup
 		List<String> sqls = new ArrayList<String>();
 		sqls.add("select * from $(UNIT_TEST)");
 		
@@ -113,8 +119,28 @@ public class RdmsReaderUnitTest extends AbstractRdbmsComponentTest {
 		this.flowParametersAsString = flowParameters;
 		expectedFlowReplacementSql = "select * from GOES_BOOM";
 		
+		// Messages
+		Message message1 = new MessageBuilder("step1")
+				.setPayload(new PayloadBuilder()
+					.addRow(new EntityDataBuilder()
+						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+				.build()).buildED()).build();
+		
+		messages.clear();
+		messages.add(new HandleParams(message1, true));
+		
+		// Expected
+		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+						.addRow(new EntityDataBuilder()
+							.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+						.build()).buildED();
+		
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		
+		// Execute and Assert
 		runHandle();
-		assertHandle(1, 1, 0, 0);
+		assertHandle(1, expectedMonitors);
 	}
 	
 	@Test
@@ -143,33 +169,29 @@ public class RdmsReaderUnitTest extends AbstractRdbmsComponentTest {
 		
 		String eSql = "select * from test";
 		long eRowsPerMessage = 5l;
-		String eMessageManipulationStrategy = MessageManipulationStrategy.ENHANCE.name();
 		String eTrimColumns = "true";
 		String eMatchOnColumnNameOnly = "true";
 		
 		TypedProperties eProperties = new TypedProperties();
 		eProperties.setProperty(RdbmsReader.SQL, eSql);
 		eProperties.setProperty(RdbmsReader.ROWS_PER_MESSAGE, eRowsPerMessage);
-		eProperties.setProperty(RdbmsReader.MESSAGE_MANIPULATION_STRATEGY, eMessageManipulationStrategy);
 		eProperties.setProperty(RdbmsReader.TRIM_COLUMNS, eTrimColumns);
 		eProperties.setProperty(RdbmsReader.MATCH_ON_COLUMN_NAME_ONLY, eMatchOnColumnNameOnly);
 				
 		doReturn(eProperties).when(reader).getTypedProperties();
 		
 		// actual
-		reader.applySettings();
+		reader.start();
 		assertTrue(reader.isMatchOnColumnNameOnly());
 		assertTrue(reader.isTrimColumns());
 		assertEquals(eRowsPerMessage, reader.getRowsPerMessage());
 		assertEquals(1, reader.getSqls().size());
 		assertEquals(eSql, reader.getSqls().get(0));
-		assertEquals(MessageManipulationStrategy.ENHANCE, reader.getMessageManipulationStrategy());
 	}
-
+	*/
 	@Override
 	public IComponentRuntime getComponentSpy() {
 		RdbmsReader reader = spy(new RdbmsReader());
-		reader.unitOfWork = AbstractComponentRuntime.UNIT_OF_WORK_FLOW;
 		return reader;
 		
 	}
@@ -181,10 +203,6 @@ public class RdmsReaderUnitTest extends AbstractRdbmsComponentTest {
 		doReturn(this.sqls).when((RdbmsReader) spy).getSqls();
 		
 	}
-
-	
-	
-	
 	
 	
 }
