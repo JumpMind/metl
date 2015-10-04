@@ -1,0 +1,9 @@
+==== Web
+[cols="<25%h,<75%"]
+|===================================
+|Icon|image:web.png[]
+|Description|The web component allows REST or WSDL based web services to be called
+   
+|Inbound Message Type|Text Based Message
+|Output Message Type|Text Based Message
+|===================================

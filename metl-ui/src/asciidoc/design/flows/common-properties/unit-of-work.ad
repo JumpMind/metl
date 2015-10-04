@@ -1,0 +1,1 @@
+|Unit of Work|The Unit of Work specifies how messages sent from this component will be demarcated with the "end of work" flag.  See <<unit-of-work>>

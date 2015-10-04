@@ -1,0 +1,23 @@
+==== Delay
+[cols="<25%h,<75%"]
+|===================================
+|Icon|image:delay.png[]
+|Description|The Delay causes messages being sent through the delay component to be delayed/paused for the configured number of seconds before being sent to downstream components.
+   
+|Inbound Message Type|Any Message Type
+|Output Message Type|Any Message Type
+|===================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===================================
+|Name|Description
+include::../common-properties/input-model.ad[]
+include::../common-properties/output-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Delay (ms)|The amount of time in milliseconds that the messages will be delayed before being passed to downstream components
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===================================

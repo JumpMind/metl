@@ -1,0 +1,9 @@
+==== Format Fixed
+[cols="<25%h,<75%"]
+|===================================
+|Icon|image:fixedlengthformatter.png[]
+|Description|The format fixed component takes a model based message and formats its content into a fixed length text message
+   
+|Inbound Message Type|Model Based Message
+|Output Message Type|Text Based Message
+|===================================

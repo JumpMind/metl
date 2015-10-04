@@ -1,0 +1,9 @@
+==== Sorter
+[cols="<25%h,<75%"]
+|===================================
+|Icon|image:entityrouter.png[]
+|Description|The entity router routes model based records within a message to one or more downstream components based on the routing criteria configured in the component.
+   
+|Inbound Message Type|Model Based Message
+|Output Message Type|Model Based Message
+|===================================

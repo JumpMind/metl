@@ -1,0 +1,9 @@
+==== Parse Fixed
+[cols="<25%h,<75%"]
+|===================================
+|Icon|fixedlengthformatter.png[]
+|Description|The parse fixed length component takes an inbound text message in fixed length format and parses it into a model based outbound message.
+   
+|Inbound Message Type|Text Based Message
+|Output Message Type|Model Based Message
+|===================================

@@ -1,0 +1,9 @@
+==== Message Logger
+[cols="<25%h,<75%"]
+|===================================
+|Icon|image:log.png[]
+|Description|The message logger component takes inbound messages and logs them to the Metl console and log file.
+   
+|Inbound Message Type|Model Based Message
+|Output Message Type|Model Based Message
+|===================================

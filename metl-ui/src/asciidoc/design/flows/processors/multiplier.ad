@@ -1,0 +1,9 @@
+==== Multiplier
+[cols="<25%h,<75%"]
+|===================================
+|Icon|image:multiplier.png[]
+|Description|The multiplier component multiplies or duplicates an inbound message a number of times based on a seed set of inbound messages.
+   
+|Inbound Message Type|Model Based Message
+|Output Message Type|Model Based Message
+|===================================

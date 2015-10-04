@@ -1,0 +1,9 @@
+==== Joiner
+[cols="<25%h,<75%"]
+|===================================
+|Icon|image:joiner.png[]
+|Description|The joiner component acts like a sql join, joining together individual elements of records within messages.
+   
+|Inbound Message Type|Model Based Message
+|Output Message Type|Model Based Message
+|===================================

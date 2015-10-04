@@ -1,0 +1,9 @@
+==== Lookup
+[cols="<25%h,<75%"]
+|===================================
+|Icon|lookup.png[]
+|Description|The lookup component uses a specified source component and set of messages to look up record element values for a second set of input messages/records.
+   
+|Inbound Message Type|Model Based Message
+|Output Message Type|Model Based Message
+|===================================

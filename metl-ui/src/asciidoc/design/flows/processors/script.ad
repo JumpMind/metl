@@ -1,0 +1,9 @@
+==== Script
+[cols="<25%h,<75%"]
+|===================================
+|Icon|image:script.png[]
+|Description|The script component executes a configurable groovy script for each inbound message or record.  This component can be used to create custom logic not provided by an existing component
+   
+|Inbound Message Type|Any Message Type
+|Output Message Type|Any Message Type
+|===================================
