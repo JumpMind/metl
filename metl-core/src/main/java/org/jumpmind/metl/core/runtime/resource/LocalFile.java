@@ -30,7 +30,7 @@ public class LocalFile extends AbstractResourceRuntime {
 
 	public static final String TYPE = "Local File System";
 
-	@SettingDefinition(order = 0, required = true, type = Type.TEXT, label = "Path")
+	@SettingDefinition(order = 0, required = false, type = Type.TEXT, label = "Path")
 	public final static String LOCALFILE_PATH = "localfile.path";
 
 	@SettingDefinition(type = Type.BOOLEAN, order = 20, required = true, provided = true, defaultValue = "false", label = "Must Exist")
