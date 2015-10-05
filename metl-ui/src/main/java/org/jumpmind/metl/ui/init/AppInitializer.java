@@ -105,9 +105,13 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         ConfigDatabaseUpgrader dbUpgrader = ctx.getBean(ConfigDatabaseUpgrader.class);
         dbUpgrader.upgrade();
         if (!isInstalled) {
-            LoggerFactory.getLogger(getClass()).info("Installing Metl samples");
-            new SqlScript(new InputStreamReader(getClass().getResourceAsStream("/metl-samples.sql")), platform.getSqlTemplate(), true, ";",
-                    null).execute();
+            try {
+                LoggerFactory.getLogger(getClass()).info("Installing Metl samples");
+                new SqlScript(new InputStreamReader(getClass().getResourceAsStream("/metl-samples.sql")), platform.getSqlTemplate(), true, ";",
+                        null).execute();
+            } catch (Exception e) {
+                LoggerFactory.getLogger(getClass()).error("Failed to install Metl samples", e);
+            }
         }
         LoggerFactory.getLogger(getClass()).info("The configuration database has been initialized");
     }
