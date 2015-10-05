@@ -70,9 +70,9 @@ public class DeduperTest extends AbstractComponentRuntimeTest<ArrayList<EntityDa
 		Message message1 = new MessageBuilder("step1")
 				.setPayload(new PayloadBuilder()
 					.addRow(new EntityDataBuilder()
-						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build())
+						.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build())
 					.addRow(new EntityDataBuilder()
-						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build())
+						.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build())
 					.buildED()).build();
 		messages.clear();
 		messages.add(new HandleParams(message1, true));
@@ -82,7 +82,7 @@ public class DeduperTest extends AbstractComponentRuntimeTest<ArrayList<EntityDa
 		// Expected
 		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
 				.addRow(new EntityDataBuilder()
-					.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+					.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
 				.build()).buildED();
 
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();

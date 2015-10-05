@@ -18,6 +18,11 @@ public class MessageBuilder {
 		return this;
 	}
 	
+	public MessageBuilder setPayloadString(ArrayList<String> payload) {
+		this.message.setPayload(payload);
+		return this;
+	}
+	
 	public Message build() {
 		return this.message;
 	}

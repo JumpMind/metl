@@ -8,7 +8,7 @@ public class EntityDataBuilder {
 	public EntityDataBuilder() {
 	}
 	
-	public EntityDataBuilder addKV(String key, Object value) {
+	public EntityDataBuilder withKV(String key, Object value) {
 		entityData.put(key, value);
 		return this;
 	}

@@ -153,6 +153,13 @@ public abstract class AbstractComponentRuntimeTest<T> {
 		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads);
 	}
 	
+	public HandleMessageMonitor getExpectedTextMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, ArrayList<String> payload) {
+		List<Serializable> payloads = new ArrayList<Serializable>();
+		if (payload != null) {
+			payloads.add(payload);
+		}
+		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads);
+	}
 	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, ArrayList<EntityData> payload) {
 		List<Serializable> payloads = new ArrayList<Serializable>();
 		if (payload != null) {
@@ -194,45 +201,6 @@ public abstract class AbstractComponentRuntimeTest<T> {
 			}
 		}
 	}
-	
-	/*
-	public void assertHandle(int targetMessageCount, int numberInboundMessages,
-			int numberOutboundMessages, int numberEntitiesProcessed, boolean unitOfWorkLastMessage) {
-		assertHandle(targetMessageCount, numberInboundMessages, numberOutboundMessages, numberEntitiesProcessed, unitOfWorkLastMessage, null, null);
-	}
-	
-	@SuppressWarnings("unchecked")
-    public void assertHandle(int numberInboundMessages, int numberEntitiesProcessed, boolean lastMessage, List<String> targetStepIds
-			Object entityKey, Object entityValue) {
-		
-		ISendMessageCallback callback = messages.get(0).getCallback();
-		Message inputMessage = messages.get(0).getInputMessage();
-		
-		//assertEquals("Target message counts are not equal", targetMessageCount, callback..getPayloadList().size());
-		assertEquals("Statistics inbound messages are not equal", numberInboundMessages, 
-				((AbstractComponentRuntime) spy).getComponentStatistics().getNumberInboundMessages());
-		assertEquals("Statistics outbound messages are not equal", numberOutboundMessages, 
-				((AbstractComponentRuntime) spy).getComponentStatistics().getNumberOutboundMessages());
-		assertEquals("Statistics entities processed are not equal", numberEntitiesProcessed, 
-				((AbstractComponentRuntime) spy).getComponentStatistics().getNumberEntitiesProcessed());
-		
-		if (entityKey != null) {
-			assertTrue("Expected entity key " + entityKey + " but there were not any output messages.",
-					msgTarget.getPayloadList().size() > 0);
-		}
-		
-		for (int i = 0; i < msgTarget.getPayloadList().size(); i++) {			
-			if (i == 0 && entityKey != null) {
-				ArrayList<EntityData> actualPayload = (ArrayList<EntityData>)msgTarget.getPayloadList().get(i);
-				EntityData actualEntityData = actualPayload.get(i);
-				
-				assertEquals("Entity value not as expected", entityValue, actualEntityData.get(entityKey));
-				
-			}
-		}
-		
-	}
-	*/
 	
 	public void setInputMessage(Message inputMessage) {
 		messages.get(0).setInputMessage(inputMessage);

@@ -74,15 +74,15 @@ public class JoinerTest extends AbstractComponentRuntimeTest<ArrayList<EntityDat
 		Message message1 = new MessageBuilder("step1")
 				.setPayload(new PayloadBuilder()
 					.addRow(new EntityDataBuilder()
-						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
-						.addKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
+						.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+						.withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
 				.build()).buildED()).build();
 		
 		Message message2 = new MessageBuilder("step1")
 				.setPayload(new PayloadBuilder()
 					.addRow(new EntityDataBuilder()
-						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
-						.addKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
+						.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+						.withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
 				.build()).buildED()).build();
 		
 		messages.clear();
@@ -92,9 +92,9 @@ public class JoinerTest extends AbstractComponentRuntimeTest<ArrayList<EntityDat
 		// Expected
 		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
 						.addRow(new EntityDataBuilder()
-							.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
-							.addKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
-							.addKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
+							.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+							.withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
+							.withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
 						.build()).buildED();
 						
 
