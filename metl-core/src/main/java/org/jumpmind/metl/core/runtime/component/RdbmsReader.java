@@ -51,8 +51,6 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     public static final String TYPE = "RDBMS Reader";
 
-    public final static String SQL = "sql";
-
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
     public final static String TRIM_COLUMNS = "trim.columns";
@@ -70,7 +68,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     @Override
     protected void start() {
         TypedProperties properties = getTypedProperties();
-        sqls = getSqlStatements(properties.get(SQL));
+        sqls = getSqlStatements();
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         trimColumns = properties.is(TRIM_COLUMNS);
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);

@@ -22,6 +22,7 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -35,7 +36,9 @@ import java.util.Map;
 
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -63,6 +66,22 @@ public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntim
 	    matchOnColumnNameOnly = false;
 	    resultMessage = new Message("resultMessage");
 	}
+	
+	abstract protected boolean sqlRequired();
+	
+	@Test
+    public void testStartWhenSqlNotSet() {
+        setupStart();
+        if (sqlRequired()) {
+            try {
+                properties.setProperty(AbstractRdbmsComponentRuntime.SQL, "");
+                spy.start(context);
+                fail("Should have gotten a misconfigured exception");
+            } catch (MisconfiguredException ex) {
+
+            }
+        }
+    }
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
     public void setupHandle() {

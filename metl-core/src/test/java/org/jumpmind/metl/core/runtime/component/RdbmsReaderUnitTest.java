@@ -20,25 +20,12 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.StartupMessage;
-import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
-import org.jumpmind.properties.TypedProperties;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -54,6 +41,11 @@ public class RdbmsReaderUnitTest extends AbstractRdbmsComponentTest {
 		setInputMessage(new StartupMessage());
 		runHandle();
 		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
+	}
+	
+	@Override
+	protected boolean sqlRequired() {
+	    return true;
 	}
 
 	@Test
@@ -189,12 +181,11 @@ public class RdbmsReaderUnitTest extends AbstractRdbmsComponentTest {
 		assertEquals(eSql, reader.getSqls().get(0));
 	}
 	*/
-	@Override
-	public IComponentRuntime getComponentSpy() {
-		RdbmsReader reader = spy(new RdbmsReader());
-		return reader;
-		
-	}
+	
+    @Override
+    protected String getComponentId() {
+        return RdbmsReader.TYPE;
+    }
 
 	@Override
 	public void setupHandle() {

@@ -74,7 +74,6 @@ public class RdbmsReaderTest {
         readerFlowStepMultiQuery = createReaderFlowStepMultiQuery();
         Resource resource = readerFlowStep.getComponent().getResource();
         resourceRuntime = new ResourceFactory().create(resource, null);
-
     }
 
     @After

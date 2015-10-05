@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +32,14 @@ import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.jumpmind.db.sql.SqlScriptReader;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.properties.TypedProperties;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 
 abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRuntime {
+    
+    public final static String SQL = "sql";
 	
 	protected List<Result> results = new ArrayList<Result>();
 	
@@ -44,18 +50,24 @@ abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRun
     	return new NamedParameterJdbcTemplate((DataSource) this.context.getResourceRuntime().reference());
     }
     
-    protected List<String> getSqlStatements(String script) {
-        List<String> sqlStatements = new ArrayList<String>();
-        SqlScriptReader scriptReader = new SqlScriptReader(new StringReader(script));
-        try {
-            String sql = scriptReader.readSqlStatement();
-            while (sql != null) {
-                sqlStatements.add(sql);
-                sql = scriptReader.readSqlStatement();
+    protected List<String> getSqlStatements() {
+        TypedProperties properties = getTypedProperties();
+        String script = properties.get(SQL);
+        if (isNotBlank(script)) {
+            List<String> sqlStatements = new ArrayList<String>();
+            SqlScriptReader scriptReader = new SqlScriptReader(new StringReader(script));
+            try {
+                String sql = scriptReader.readSqlStatement();
+                while (sql != null) {
+                    sqlStatements.add(sql);
+                    sql = scriptReader.readSqlStatement();
+                }
+                return sqlStatements;
+            } finally {
+                IOUtils.closeQuietly(scriptReader);
             }
-            return sqlStatements;
-        } finally {
-            IOUtils.closeQuietly(scriptReader);
+        } else {
+            throw new MisconfiguredException("Please configure the SQL for %s", definition.getName());
         }
     }
         

@@ -21,7 +21,6 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -41,10 +40,10 @@ import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadAssert;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
-import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.utils.TestUtils;
+import org.jumpmind.properties.TypedProperties;
 import org.junit.Before;
-import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
 public abstract class AbstractComponentRuntimeTest<T> {
 
@@ -67,7 +66,13 @@ public abstract class AbstractComponentRuntimeTest<T> {
 	public abstract void testHandleUnitOfWorkLastMessage();
 	public abstract void testHandleNormal();
 	
-	public abstract IComponentRuntime getComponentSpy();
+	abstract protected String getComponentId();
+	
+	public IComponentRuntime getComponentSpy() {
+	    ComponentXMLFactory factory = new ComponentXMLFactory();
+	    factory.refresh();
+	    return Mockito.spy(factory.create(getComponentId()));
+	}
 	
 	IComponentRuntime spy;
 	
@@ -82,13 +87,14 @@ public abstract class AbstractComponentRuntimeTest<T> {
 	Map<String, Serializable> flowParameters;
 	FlowStep flowStep;
 	ExecutionTrackerNoOp eExecutionTracker;
+	TypedProperties properties;
 	
 	// internal testing variable so setupHandle and runHandle can be called independently
 	boolean setupCalled;
 	
 	@Before
 	public void reset() {
-		spy = getComponentSpy();
+		spy = getComponentSpy();		
 		
 		initHandleParams();
 		
@@ -102,6 +108,11 @@ public abstract class AbstractComponentRuntimeTest<T> {
 		flowParameters = new HashMap<String, Serializable>();
 		flowStep = mock(FlowStep.class);
 		eExecutionTracker = new ExecutionTrackerNoOp();
+		properties = new TypedProperties();
+	}	
+	
+	public void setupStart() {
+	    doReturn(properties).when((AbstractComponentRuntime) spy).getTypedProperties();
 	}
 	
 	public void setupHandle() {
