@@ -1,0 +1,9 @@
+==== Format Delimited
+[cols="<25%h,<75%"]
+|===================================
+|Icon|image:delimitedformatter.png[]
+|Description|The format delimited component takes a model based message and formats its content into a delimited text message
+   
+|Inbound Message Type|Model Based Message
+|Output Message Type|Text Based Message
+|===================================

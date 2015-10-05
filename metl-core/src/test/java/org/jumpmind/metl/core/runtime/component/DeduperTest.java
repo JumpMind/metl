@@ -20,9 +20,6 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.spy;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,7 +30,6 @@ import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -94,8 +90,8 @@ public class DeduperTest extends AbstractComponentRuntimeTest<ArrayList<EntityDa
 	}
 
 	@Override
-	public IComponentRuntime getComponentSpy() {
-		return spy(new Deduper());
+	protected String getComponentId() {
+	    return Deduper.TYPE;
 	}
 
 	

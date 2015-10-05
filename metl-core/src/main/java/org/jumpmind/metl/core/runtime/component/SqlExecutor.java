@@ -43,8 +43,6 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
 
     public static final String TYPE = "Sql Executor";
 
-    public final static String SQL = "sql";
-
     public final static String RUN_WHEN = "run.when";
 
     List<String> sqls;
@@ -54,7 +52,7 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
     @Override
     protected void start() {
         TypedProperties properties = getTypedProperties();
-        sqls = getSqlStatements(properties.get(SQL));
+        sqls = getSqlStatements();
         runWhen = properties.get(RUN_WHEN, PER_MESSAGE);
         if (getResourceRuntime() == null) {
             throw new IllegalStateException("This component requires a data source");

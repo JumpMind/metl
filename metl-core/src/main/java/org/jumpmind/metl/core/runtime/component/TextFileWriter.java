@@ -103,7 +103,9 @@ public class TextFileWriter extends AbstractComponentRuntime {
             throw new IoException(e);
         }
        
-        callback.sendMessage("{\"status\":\"success\"}", unitOfWorkBoundaryReached);
+        if (callback != null) {
+            callback.sendMessage("{\"status\":\"success\"}", unitOfWorkBoundaryReached);
+        }
     }    
 
     @Override

@@ -43,9 +43,9 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import org.h2.Driver;
-import org.jumpmind.db.persist.JdbcPersistenceManager;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
+import org.jumpmind.db.sql.SqlPersistenceManager;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
@@ -80,12 +80,12 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import com.cybercom.vaadin.spring.UIScope;
+
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
-import com.cybercom.vaadin.spring.UIScope;
 
 @Configuration
 @EnableTransactionManagement
@@ -199,7 +199,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton")
     public IPersistenceManager persistenceManager() {
         if (persistenceManager == null) {
-            persistenceManager = new JdbcPersistenceManager(configDatabasePlatform());
+            persistenceManager = new SqlPersistenceManager(configDatabasePlatform());
         }
         return persistenceManager;
     }

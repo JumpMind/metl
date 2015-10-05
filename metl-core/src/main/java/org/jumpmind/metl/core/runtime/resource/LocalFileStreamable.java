@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Resource;
 
@@ -54,10 +55,17 @@ public class LocalFileStreamable implements IStreamable {
     }
 
     protected File toFile(String relativePath, boolean mustExist) {
-        File file = new File(basePath, relativePath);
+        File file;
+    	if (StringUtils.isEmpty(basePath)) {
+    		file = new File(relativePath);
+    	} else {
+    		file = new File(basePath, relativePath);
+    	}
         if (!file.exists()) {
             if (!mustExist) {
-                file.getParentFile().mkdirs();
+            	if (file.getParentFile() != null) {
+            		file.getParentFile().mkdirs();
+            	} 
             } else {
                 throw new IoException("Could not find " + file.getAbsolutePath());
             }

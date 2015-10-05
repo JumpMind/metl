@@ -92,6 +92,22 @@ abstract class AbstractConfigurationService extends AbstractService implements
         params.put("deleted", 0);
         return find(ModelName.class, params, Model.class);
     }
+    
+    
+    @Override
+    public boolean isModelUsed(String id) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("outputModelId", id);
+        params.put("deleted", false);
+        if (count(Component.class, params) == 0) {
+            params.remove("outputModelId");
+            params.put("inputModelId", id);
+            if (count(Component.class, params) == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     @Override
     public List<ResourceName> findResourcesInProject(String projectVersionId) {

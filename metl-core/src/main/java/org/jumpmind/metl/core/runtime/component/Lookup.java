@@ -34,6 +34,8 @@ import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
 public class Lookup extends AbstractComponentRuntime {
+    
+    public final static String TYPE = "Lookup";
 
     public final static String SOURCE_STEP = "lookup.data.source.step";
     public final static String LOOKUP_KEY = "lookup.key.attribute";

@@ -279,8 +279,6 @@ public class DesignNavigator extends VerticalLayout {
             }
         });
 
-
-
         MenuItem projectMenu = leftMenuBar.addItem("Project", null);
         projectMenu.addItem("Manage", new Command() {
             @Override
@@ -383,6 +381,7 @@ public class DesignNavigator extends VerticalLayout {
                 searchBarLayout.setVisible(search.isChecked());
             }
         });
+        search.setVisible(false);
 
         layout.addComponent(leftMenuBar);
         layout.addComponent(rightMenuBar);
@@ -867,9 +866,13 @@ public class DesignNavigator extends VerticalLayout {
 
         } else if (object instanceof ModelName) {
             ModelName model = (ModelName) object;
-            ConfirmDialog.show("Delete Model?",
+            if (!context.getConfigurationService().isModelUsed(model.getId())) {
+                ConfirmDialog.show("Delete Model?",
                     "Are you sure you want to delete the '" + model.getName() + "' model?",
                     new DeleteModelConfirmationListener(model));
+            } else {
+                CommonUiUtils.notify("The model is currently in use.  It cannot be deleted.", Type.WARNING_MESSAGE);
+            }
         }
 
     }

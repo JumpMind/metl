@@ -20,9 +20,6 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.spy;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,13 +29,11 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -125,10 +120,10 @@ public class TransformerTest extends AbstractComponentRuntimeTest<ArrayList<Enti
 		assertHandle(1, expectedMonitors);
 	}
 
-	@Override
-	public IComponentRuntime getComponentSpy() {
-		return spy(new Transformer());
-	}
+    @Override
+    protected String getComponentId() {
+        return Transformer.TYPE;
+    }
 
 	@Override
 	public void setupHandle() {

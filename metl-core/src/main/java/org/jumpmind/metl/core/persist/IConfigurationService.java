@@ -74,6 +74,8 @@ public interface IConfigurationService {
     
     public Model findModel(String id);
     
+    public boolean isModelUsed(String id);
+    
     public User findUser(String id);
     
     public User findUserByLoginId(String loginId);

@@ -65,6 +65,10 @@ public abstract class AbstractService {
     protected <T> List<T> find(Class<T> clazz, Map<String, Object> params) {
         return persistenceManager.find(clazz, params, null, null, tableName(clazz));
     }
+    
+    protected <T> int count(Class<T> clazz, Map<String, Object> params) {
+        return persistenceManager.count(clazz, null, null, tableName(clazz), params);
+    }
 
     protected <T> T findOne(Class<T> clazz, Map<String, Object> params) {
         List<T> all = persistenceManager.find(clazz, params, null, null, tableName(clazz));

@@ -20,8 +20,6 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.mockito.Mockito.spy;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +28,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -107,10 +103,10 @@ public class JoinerTest extends AbstractComponentRuntimeTest<ArrayList<EntityDat
 		assertHandle(2, expectedMonitors);
 	}
 
-	@Override
-	public IComponentRuntime getComponentSpy() {
-		return spy(new Joiner());
-	}
+    @Override
+    protected String getComponentId() {
+        return Joiner.TYPE;
+    }
 	
 	
 }

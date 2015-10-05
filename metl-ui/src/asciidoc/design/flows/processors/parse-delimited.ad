@@ -1,0 +1,9 @@
+==== Parse Delimited
+[cols="<25%h,<75%"]
+|===================================
+|Icon|image:delimitedformatter.png[]
+|Description|The parse delimited component takes an inbound text message in delimited format and parses it into a model based outbound message.
+   
+|Inbound Message Type|Text Based Message
+|Output Message Type|Model Based Message
+|===================================
