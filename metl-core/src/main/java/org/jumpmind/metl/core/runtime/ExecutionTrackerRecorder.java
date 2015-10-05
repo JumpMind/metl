@@ -99,23 +99,28 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     @Override
     public void flowStepStarted(ComponentContext context) {
         super.flowStepStarted(context);
-        ExecutionStep step = steps.get(context.getFlowStep().getId());
-        if (step == null) {
-            step = new ExecutionStep();
-            this.steps.put(context.getFlowStep().getId(), step);
-        }
-        step.setExecutionId(executionId);
-        step.setApproximateOrder(context.getFlowStep().getApproximateOrder());
-        step.setComponentName(context.getFlowStep().getComponent().getName());
-        step.setFlowStepId(context.getFlowStep().getId());
+        ExecutionStep step = getExecutionStep(context);
         step.setStatus(ExecutionStatus.READY.name());
         this.recorder.record(step);
     }
-    
+
+    protected ExecutionStep getExecutionStep(ComponentContext context) {
+        ExecutionStep step = steps.get(context.getFlowStep().getId());
+        if (step == null) {
+            step = new ExecutionStep();
+            step.setExecutionId(executionId);
+            step.setApproximateOrder(context.getFlowStep().getApproximateOrder());
+            step.setComponentName(context.getFlowStep().getComponent().getName());
+            step.setFlowStepId(context.getFlowStep().getId());
+            this.steps.put(context.getFlowStep().getId(), step);
+        }
+        return step;
+    }
+
     @Override
     public void beforeHandle(ComponentContext context) {
         super.beforeHandle(context);
-        ExecutionStep step = steps.get(context.getFlowStep().getId());
+        ExecutionStep step = getExecutionStep(context);
         Date lastUpdateTime = step.getLastUpdateTime();
         if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             if (step.getStartTime() == null) {
@@ -128,11 +133,11 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             this.recorder.record(step);
         }
     }
-    
+
     @Override
     public void updateStatistics(ComponentContext context) {
         super.updateStatistics(context);
-        ExecutionStep step = steps.get(context.getFlowStep().getId());
+        ExecutionStep step = getExecutionStep(context);
         Date lastUpdateTime = step.getLastUpdateTime();
         if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             ComponentStatistics stats = context.getComponentStatistics();
@@ -149,7 +154,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     @Override
     public void afterHandle(ComponentContext context, Throwable error) {
         super.afterHandle(context, error);
-        ExecutionStep step = steps.get(context.getFlowStep().getId());
+        ExecutionStep step = getExecutionStep(context);
         Date lastUpdateTime = step.getLastUpdateTime();
         if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.READY.name());
@@ -167,40 +172,37 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     @Override
     public void flowStepFinished(ComponentContext context, Throwable error, boolean cancelled) {
         super.flowStepFinished(context, error, cancelled);
-        ExecutionStep step = steps.get(context.getFlowStep().getId());
-        if (step != null) {
-            if (step.getStartTime() == null) {
-                step.setStartTime(new Date());
-            }
-            step.setEndTime(new Date());
-            ExecutionStatus status = ExecutionStatus.DONE;
-            if (cancelled) {
-                status = ExecutionStatus.CANCELLED;
-            }
-            if (error != null) {
-                status = ExecutionStatus.ERROR;
-            }
-            step.setStatus(status.name());
-            ComponentStatistics stats = context.getComponentStatistics();
-            if (stats != null) {
-                step.setEntitiesProcessed(stats.getNumberEntitiesProcessed());
-                step.setMessagesReceived(stats.getNumberInboundMessages());
-                step.setMessagesProduced(stats.getNumberOutboundMessages());
-            }
-            step.setLastUpdateTime(new Date());
-            this.recorder.record(step);
+        ExecutionStep step = getExecutionStep(context);
+        if (step.getStartTime() == null) {
+            step.setStartTime(new Date());
         }
+        step.setEndTime(new Date());
+        ExecutionStatus status;
+        if (error != null) {
+            status = ExecutionStatus.ERROR;
+        } else if (cancelled) {
+            status = ExecutionStatus.CANCELLED;
+        } else {
+            status = ExecutionStatus.DONE;
+        }
+        step.setStatus(status.name());
+        ComponentStatistics stats = context.getComponentStatistics();
+        if (stats != null) {
+            step.setEntitiesProcessed(stats.getNumberEntitiesProcessed());
+            step.setMessagesReceived(stats.getNumberInboundMessages());
+            step.setMessagesProduced(stats.getNumberOutboundMessages());
+        }
+        step.setLastUpdateTime(new Date());
+        this.recorder.record(step);
     }
 
     @Override
     public void flowStepFailedOnComplete(ComponentContext context, Throwable error) {
         super.flowStepFailedOnComplete(context, error);
-        ExecutionStep step = steps.get(context.getFlowStep().getId());
-        if (step != null) {
-            step.setStatus(ExecutionStatus.ERROR.name());
-            step.setLastUpdateTime(new Date());
-            this.recorder.record(step);
-        }
+        ExecutionStep step = getExecutionStep(context);
+        step.setStatus(ExecutionStatus.ERROR.name());
+        step.setLastUpdateTime(new Date());
+        this.recorder.record(step);
     }
 
     @Override

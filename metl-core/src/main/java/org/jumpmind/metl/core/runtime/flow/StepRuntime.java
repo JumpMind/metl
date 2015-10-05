@@ -129,8 +129,7 @@ public class StepRuntime implements Runnable {
             msg = ExceptionUtils.getFullStackTrace(ex);
         }
         componentContext.getExecutionTracker().log(LogLevel.ERROR, componentContext, msg);
-        log.error("", ex);
-        flowRuntime.stop(false);
+        flowRuntime.stop(true);
     }
 
     @Override
@@ -173,6 +172,7 @@ public class StepRuntime implements Runnable {
                             componentContext.getComponentStatistics().incrementInboundMessages();
                             componentRuntime.handle(inputMessage, target, calculateUnitOfWorkLastMessage(inputMessage));
                         } catch (Exception ex) {
+                            cancelled = true;
                             recordError(ex);
                         } finally {
                             componentContext.getExecutionTracker().afterHandle(componentContext, error);
