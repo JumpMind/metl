@@ -164,6 +164,11 @@ public abstract class AbstractComponentRuntimeTest<T> {
 		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads);
 	}
 	
+	public HandleMessageMonitor getExpectedTextMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize) {
+		ArrayList<String> payloads = null;
+		return getExpectedTextMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads);
+	}
+	
 	public HandleMessageMonitor getExpectedTextMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, ArrayList<String> payload) {
 		List<Serializable> payloads = new ArrayList<Serializable>();
 		if (payload != null) {

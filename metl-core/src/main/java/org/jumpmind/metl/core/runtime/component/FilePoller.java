@@ -127,7 +127,7 @@ public class FilePoller extends AbstractComponentRuntime {
         IResourceRuntime resourceRuntime = getResourceRuntime();
         String path = resourceRuntime.getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
         if (useTriggerFile) {
-            File triggerFile = new File(path, triggerFilePath);
+            File triggerFile = getNewFile(path, triggerFilePath);
             if (triggerFile.exists()) {
                 pollForFiles(path, inputMessage, callback, unitOfWorkBoundaryReached);
                 FileUtils.deleteQuietly(triggerFile);
@@ -140,12 +140,12 @@ public class FilePoller extends AbstractComponentRuntime {
     }
 
     protected void pollForFiles(String path, Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        File pathDir = new File(path);
+        File pathDir = getNewFile(path);
         ArrayList<String> filePaths = new ArrayList<String>();
         ArrayList<File> fileReferences = new ArrayList<File>();
         String[] includes = StringUtils.isNotBlank(filePattern) ? filePattern.split(",")
                 : new String[] { "*" };
-        DirectoryScanner scanner = new DirectoryScanner();
+        DirectoryScanner scanner = getDirectoryScanner();
         scanner.setIncludes(includes);
         scanner.setBasedir(pathDir);
         scanner.setCaseSensitive(false);
@@ -153,7 +153,7 @@ public class FilePoller extends AbstractComponentRuntime {
         String[] files = scanner.getIncludedFiles();
         if (files.length > 0) {
             for(int i = 0; i < files.length && i < maxFilesToPoll; i++) {
-                File file = new File(path, files[i]);
+                File file = getNewFile(path, files[i]);
                 filesSent.add(file);
                 fileReferences.add(file);
             }
@@ -176,6 +176,18 @@ public class FilePoller extends AbstractComponentRuntime {
         }
     }
 
+    File getNewFile(String path) {
+    	return new File(path);
+    }
+    
+    File getNewFile(String path, String child) {
+    	return new File(path, child);
+    }
+    
+    DirectoryScanner getDirectoryScanner() {
+    	return new DirectoryScanner();
+    }
+    
     @Override
     public void flowCompletedWithErrors(Throwable myError) {
         if (ACTION_ARCHIVE.equals(actionOnError)) {
