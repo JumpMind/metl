@@ -62,6 +62,11 @@ public class FixedLengthParser extends AbstractComponentRuntime {
         numberOfHeaderLinesToSkip = getComponent().getInt(SETTING_HEADER_LINES_TO_SKIP, 0);
         convertAttributeSettingsToAttributeFormat();
     }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

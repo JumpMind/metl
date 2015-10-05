@@ -121,6 +121,11 @@ public class FilePoller extends AbstractComponentRuntime {
         maxFilesToPoll = properties.getInt(SETTING_MAX_FILES_TO_POLL);
 
     }
+        
+    @Override
+    public boolean supportsStartupMessages() {
+        return true;
+    }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

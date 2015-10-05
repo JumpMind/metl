@@ -296,17 +296,17 @@ public class FlowRuntime {
         return starterSteps;
     }
 
-    public void stop(boolean cancelled) {
+    public void cancel() {
         if (stepRuntimes != null) {
             for (StepRuntime stepRuntime : stepRuntimes.values()) {
                 if (stepRuntime.isRunning()) {
                     try {
                         stepRuntime.inQueue.clear();
-                        stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponentContext().getFlowStep().getId(), cancelled));
+                        stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponentContext().getFlowStep().getId(), true));
                     } catch (InterruptedException e) {
                     }
-                } else {
-                    stepRuntime.finished();
+                } else  {
+                    stepRuntime.cancel();
                 }
             }
         }

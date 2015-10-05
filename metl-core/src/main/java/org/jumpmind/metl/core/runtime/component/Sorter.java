@@ -74,6 +74,11 @@ public class Sorter extends AbstractComponentRuntime {
                     "Sort attribute must be a valid 'entity.attribute' in the input model.");
         }
     }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

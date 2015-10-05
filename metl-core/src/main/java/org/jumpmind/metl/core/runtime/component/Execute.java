@@ -64,6 +64,11 @@ public class Execute extends AbstractComponentRuntime {
         
         this.commands = parseCommand(line);
 
+    }    
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return true;
     }
     
     protected String[] parseCommand(String commandLine) {

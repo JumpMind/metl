@@ -150,6 +150,11 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             }
         }
     }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
     @Override
     public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

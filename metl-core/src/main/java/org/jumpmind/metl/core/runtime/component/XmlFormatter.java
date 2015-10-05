@@ -143,6 +143,11 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
             }
         }
     }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

@@ -37,5 +37,10 @@ public class LastUnitOfWork extends AbstractComponentRuntime {
         	callback.sendStartupMessage();
         }
     }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
 }

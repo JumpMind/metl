@@ -58,6 +58,11 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
             throw new IllegalStateException("This component requires a data source");
         }
     }
+        
+    @Override
+    public boolean supportsStartupMessages() {
+        return true;
+    }
 
     @Override
     public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

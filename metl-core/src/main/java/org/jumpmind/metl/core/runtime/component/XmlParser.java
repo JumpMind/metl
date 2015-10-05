@@ -80,6 +80,11 @@ public class XmlParser extends AbstractXMLComponentRuntime {
             }
         }
     }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
     @SuppressWarnings("unchecked")
     @Override

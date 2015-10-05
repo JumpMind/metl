@@ -69,6 +69,11 @@ public class Zip extends AbstractComponentRuntime {
         encoding = component.get(SETTING_ENCODING, encoding);
         fileNames = new ArrayList<String>();
     }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {

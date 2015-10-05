@@ -74,7 +74,13 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
         delimiter = properties.get(DELIMITED_FORMATTER_DELIMITER);
         quoteCharacter = properties.get(DELIMITED_FORMATTER_QUOTE_CHARACTER);
         useHeader = properties.is(DELIMITED_FORMATTER_WRITE_HEADER);
-        convertAttributeSettingsToAttributeFormat();    }
+        convertAttributeSettingsToAttributeFormat();    
+    }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
     @Override
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

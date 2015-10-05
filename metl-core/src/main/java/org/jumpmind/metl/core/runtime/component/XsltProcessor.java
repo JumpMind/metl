@@ -89,6 +89,11 @@ public class XsltProcessor extends AbstractComponentRuntime {
             throw new RuntimeException("The XSLT stylesheet is blank.  Edit the component and set a stylesheet.");
         }
     }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

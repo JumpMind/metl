@@ -41,6 +41,7 @@ import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
@@ -113,10 +114,16 @@ public class StepRuntime implements Runnable {
 
     public void start(IExecutionTracker tracker, IResourceFactory resourceFactory) {
         try {
-            componentContext.getExecutionTracker().flowStepStarted(componentContext);
             componentContext.setComponentStatistics(new ComponentStatistics());
-            componentRuntime.start(componentContext);
+            if (sourceStepRuntimes.size() == 0 && !componentRuntime.supportsStartupMessages()) {
+                throw new MisconfiguredException("%s must have an inbound connection from another component",
+                        componentRuntime.getComponentDefintion().getName());
+            } else {
+                componentContext.getExecutionTracker().flowStepStarted(componentContext);
+                componentRuntime.start(componentContext);
+            }
         } catch (RuntimeException ex) {
+            cancelled = true;
             recordError(ex);
             throw ex;
         }
@@ -127,9 +134,11 @@ public class StepRuntime implements Runnable {
         String msg = ex.getMessage();
         if (isBlank(msg)) {
             msg = ExceptionUtils.getFullStackTrace(ex);
+        } else {
+            log.error("", ex);
         }
         componentContext.getExecutionTracker().log(LogLevel.ERROR, componentContext, msg);
-        flowRuntime.stop(true);
+        flowRuntime.cancel();
     }
 
     @Override
@@ -231,11 +240,16 @@ public class StepRuntime implements Runnable {
             recordError(e);
         }
         running = false;
-        finished();
+        recordFlowStepFinished();
+    }
+    
+    private final void recordFlowStepFinished() {
+        componentContext.getExecutionTracker().flowStepFinished(componentContext, error, cancelled);
     }
 
-    public void finished() {
-        componentContext.getExecutionTracker().flowStepFinished(componentContext, error, cancelled);
+    public void cancel() {
+        this.cancelled = true;
+        recordFlowStepFinished();
     }
 
     public void setRunning(boolean running) {

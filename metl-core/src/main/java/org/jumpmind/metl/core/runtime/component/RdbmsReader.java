@@ -73,6 +73,11 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         trimColumns = properties.is(TRIM_COLUMNS);
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
     }
+        
+    @Override
+    public boolean supportsStartupMessages() {
+        return true;
+    }
 
     @Override
     public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

@@ -52,8 +52,6 @@ public class Script extends AbstractComponentRuntime {
 
     @Override
     protected void start() {
-        
-
         String importStatements = getComponent().get(IMPORTS);
         String initScript = getComponent().get(INIT_SCRIPT);
         String handleMessageScript = getComponent().get(HANDLE_SCRIPT);
@@ -115,9 +113,13 @@ public class Script extends AbstractComponentRuntime {
                 throw new RuntimeException(e);
             }
         }
-
     }
-
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return true;
+    }
+    
     @Override
     public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {
         invoke("setInputMessage", inputMessage);

@@ -115,7 +115,7 @@ public class AgentRuntime {
         for (FlowRuntime flowRuntime : new HashSet<FlowRuntime>(deployedFlows.values())) {
             if (executionId.equals(flowRuntime.getExecutionId())) {
                 if (flowRuntime.isRunning()) {
-                    flowRuntime.stop(true);
+                    flowRuntime.cancel();
                     cancelled = true;
                 }
             }
@@ -386,7 +386,7 @@ public class AgentRuntime {
         FlowRuntime flowRuntime = deployedFlows.get(deployment);
         if (flowRuntime != null) {
             try {
-                flowRuntime.stop(true);
+                flowRuntime.cancel();
                 log.info("Flow '{}' has been undeployed", deployment.getFlow().getName());
             } catch (Exception e) {
                 log.warn("Failed to stop '{}'", deployment.getFlow().getName(), e);
@@ -433,7 +433,7 @@ public class AgentRuntime {
                 flowRuntime.start(executionId, deployedResources, agent, notifications, globalSettings);
             } catch (Exception e) {
                 log.error("Error while waiting for the flow to complete", e);
-                flowRuntime.stop(false);
+                //flowRuntime.stop(true);
             } finally {
                 flowRuntime.waitForFlowCompletion();
                 flowRuntime.notifyStepsTheFlowIsComplete();

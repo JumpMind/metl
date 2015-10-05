@@ -67,7 +67,7 @@ abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRun
                 IOUtils.closeQuietly(scriptReader);
             }
         } else {
-            throw new MisconfiguredException("Please configure the SQL for %s", definition.getName());
+            throw new MisconfiguredException("Please configure the SQL for %s", componentDefinition.getName());
         }
     }
         

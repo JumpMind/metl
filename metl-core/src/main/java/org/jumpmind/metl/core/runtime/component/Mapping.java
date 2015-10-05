@@ -70,6 +70,11 @@ public class Mapping extends AbstractComponentRuntime {
             }
         }
     }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
     protected void validate() {
         String message = "The ";

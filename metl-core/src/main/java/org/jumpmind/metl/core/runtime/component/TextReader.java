@@ -41,6 +41,11 @@ public class TextReader extends AbstractComponentRuntime {
     @Override
     protected void start() {
     }
+        
+    @Override
+    public boolean supportsStartupMessages() {
+        return true;
+    }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

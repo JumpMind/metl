@@ -210,7 +210,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         super.log(level, context, output, args);
         if (deployment.asLogLevel().log(level)) {
             ExecutionStepLog log = new ExecutionStepLog();
-            log.setExecutionStepId(steps.get(context.getFlowStep().getId()).getId());
+            log.setExecutionStepId(getExecutionStep(context).getId());
             log.setLevel(level.name());
             if (args != null && args.length > 0) {
                 output = String.format(output, args);
