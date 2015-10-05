@@ -95,20 +95,21 @@ public class DelimitedParser extends AbstractComponentRuntime {
         int headerRowsToSkip = inputMessage.getHeader().getSequenceNumber() == 0 ? numberOfHeaderLinesToSkip : 0;
         try {
             int rowCount = 0;
-            for (String inputRow : inputRows) {
-                if (headerRowsToSkip == 0) {
-                    if (!inputMessage.getHeader().isUnitOfWorkLastMessage() || 
-                            (rowCount + numberOfFooterLinesToSkip < inputRows.size())) {
-                        EntityData data = processInputRow(inputRow);
-                        if (data != null) {
-                            getComponentStatistics().incrementNumberEntitiesProcessed();
-                            outputPayload.add(data);
-                        }
-                    }
-                } else {
-                    headerRowsToSkip--;
-                }
-                rowCount++;
+            if (inputRows != null) {
+	            for (String inputRow : inputRows) {
+	                if (headerRowsToSkip == 0) {
+	                    if (rowCount + numberOfFooterLinesToSkip < inputRows.size()) {
+	                        EntityData data = processInputRow(inputRow);
+	                        if (data != null) {
+	                            getComponentStatistics().incrementNumberEntitiesProcessed();
+	                            outputPayload.add(data);
+	                        }
+	                    }
+	                } else {
+	                    headerRowsToSkip--;
+	                }
+	                rowCount++;
+	            }
             }
         } catch (IOException e) {
             throw new IoException(e);
@@ -145,9 +146,10 @@ public class DelimitedParser extends AbstractComponentRuntime {
                 List<ModelEntity> entities = model.getModelEntities();
                 int index = 0;
                 for (ModelEntity modelEntity : entities) {
-                    List<ModelAttribute> attributes = modelEntity.getModelAttributes();
+                	List<ModelAttribute> attributes = modelEntity.getModelAttributes();
                     for (ModelAttribute modelAttribute : attributes) {
                         data.put(modelAttribute.getId(), csvReader.get(index));
+                        index++;
                     }
                 }
             }
@@ -196,7 +198,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
 
     }
 
-    private class AttributeFormat {
+    protected class AttributeFormat {
 
         public AttributeFormat(String attributeId, ModelEntity entity, ModelAttribute attribute) {
             this.attributeId = attributeId;

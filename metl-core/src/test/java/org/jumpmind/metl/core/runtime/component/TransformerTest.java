@@ -32,7 +32,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.ModelTestHelper;
+import org.jumpmind.metl.core.runtime.component.helpers.ModelHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,14 +92,14 @@ public class TransformerTest extends AbstractComponentRuntimeTest<ArrayList<Enti
 		transformMap.put(MODEL_ATTR_ID_1, TRANSFORM_EXP);
 		((Transformer) spy).transformsByAttributeId = transformMap;
 		
-		ModelTestHelper.createMockModel(inputModel, MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1, 
+		ModelHelper.createMockModel(inputModel, MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1, 
 				MODEL_ATTR_ID_1, MODEL_ENTITY_NAME_1);
 		
 		// Messages
 		Message message1 = new MessageBuilder("step1")
 				.setPayload(new PayloadBuilder()
 					.addRow(new EntityDataBuilder()
-						.addKV(MODEL_ATTR_ID_1, TRANSFORM_SOURCE)
+						.withKV(MODEL_ATTR_ID_1, TRANSFORM_SOURCE)
 				.build()).buildED()).build();
 		
 		messages.clear();
@@ -108,7 +108,7 @@ public class TransformerTest extends AbstractComponentRuntimeTest<ArrayList<Enti
 		// Expected
 		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
 						.addRow(new EntityDataBuilder()
-							.addKV(MODEL_ATTR_ID_1, TRANSFORM_RESULT)
+							.withKV(MODEL_ATTR_ID_1, TRANSFORM_RESULT)
 						.build()).buildED();
 		
 		

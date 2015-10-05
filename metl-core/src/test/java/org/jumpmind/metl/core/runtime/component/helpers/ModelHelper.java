@@ -31,8 +31,16 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.mockito.Mockito;
 
-public class ModelTestHelper {
-
+public class ModelHelper {
+	
+	public static final String MODEL_ID = "MODEL_ID";
+	public static final String MODEL_NAME = "MODEL_NAME";
+	
+	public static final String ENTITY_ID = "ENTITY_ID";
+	public static final String ENTITY_NAME = "ENTITY_NAME";
+	
+	public static final String ATTR_ID = "ATTR_ID";
+	public static final String ATTR_NAME = "ATTR_NAME";
 	
 	public static void createMockModel(Model target, String attrId, String attrName, String entityId, String entityName) {
 		 	ModelAttribute attr = mock(ModelAttribute.class);
@@ -53,5 +61,30 @@ public class ModelTestHelper {
 		
 			when(target.getModelEntities()).thenReturn(entities);
 			when(target.getAttributeById(Mockito.eq(attrId))).thenReturn(attr);
+	}
+	
+	public static Model createSimpleModel(int numberEntities, int attrPerEntity) {
+		ModelBuilder builder = new ModelBuilder()
+				.withDeleted(false)
+				.withName(MODEL_NAME)
+				.withId(MODEL_ID);
+		
+		for (int e = 0; e < numberEntities; e++) {
+			ModelEntityBuilder eBuilder = new ModelEntityBuilder()
+				.withModelId(MODEL_ID)
+				.withName(ENTITY_NAME + e)
+				.withId(ENTITY_ID + e);
+			
+			for (int a = 0; a < attrPerEntity; a++) {
+				eBuilder = eBuilder.withAttribute(new ModelAttributeBuilder()
+					.withEntityId(ENTITY_ID + e)
+					.withName(ATTR_NAME)
+					.withId(ATTR_ID + a + "-" + e).build());
+			}
+			builder = builder.withEntity(eBuilder.build());
+		}
+		return builder.build();
+		
+		
 	}
 }
