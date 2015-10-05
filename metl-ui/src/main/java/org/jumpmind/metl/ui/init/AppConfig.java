@@ -43,9 +43,9 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import org.h2.Driver;
-import org.jumpmind.db.persist.JdbcPersistenceManager;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
+import org.jumpmind.db.sql.SqlPersistenceManager;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
@@ -199,7 +199,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton")
     public IPersistenceManager persistenceManager() {
         if (persistenceManager == null) {
-            persistenceManager = new JdbcPersistenceManager(configDatabasePlatform());
+            persistenceManager = new SqlPersistenceManager(configDatabasePlatform());
         }
         return persistenceManager;
     }
