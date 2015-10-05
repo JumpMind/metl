@@ -34,6 +34,8 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.views.DesignNavigator;
+import org.jumpmind.symmetric.ui.common.ConfirmDialog;
+import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,6 +113,8 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
         newVersionButton = buttonBar.addButton("New Version", Icons.VERSION);
         newVersionButton.addClickListener(new NewProjectVersionClickListener());
+        newVersionButton.setEnabled(false);
+        newVersionButton.setDescription("Not yet supported");
 
         editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
@@ -328,26 +332,35 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     class RemoveClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            Object selected = treeTable.getValue();
-            if (selected instanceof ProjectVersion) {
-                ProjectVersion projectVersion = (ProjectVersion) selected;
-                projectVersion.setDeleted(true);
-                context.getConfigurationService().save(projectVersion);
+            ConfirmDialog.show("Delete Model?",
+                    "Are you sure you want to delete the selected project?",
+                    new IConfirmListener() {                        
+                        @Override
+                        public boolean onOk() {
+                            Object selected = treeTable.getValue();
+                            if (selected instanceof ProjectVersion) {
+                                ProjectVersion projectVersion = (ProjectVersion) selected;
+                                projectVersion.setDeleted(true);
+                                context.getConfigurationService().save(projectVersion);
 
-                if (projectVersion.getProject().getProjectVersions().size() <= 1) {
-                    selected = projectVersion.getProject();
-                }
-            }
+                                if (projectVersion.getProject().getProjectVersions().size() <= 1) {
+                                    selected = projectVersion.getProject();
+                                }
+                            }
 
-            if (selected instanceof Project) {
-                Project project = (Project) selected;
-                project.setDeleted(true);
-                context.getConfigurationService().save(project);
-            }
+                            if (selected instanceof Project) {
+                                Project project = (Project) selected;
+                                project.setDeleted(true);
+                                context.getConfigurationService().save(project);
+                            }
 
-            selectPrevious();
-            refresh();
-            projectNavigator.refresh();
+                            selectPrevious();
+                            refresh();
+                            projectNavigator.refresh();
+                            return true;                            
+                        }
+                    });
+
 
         }
     }

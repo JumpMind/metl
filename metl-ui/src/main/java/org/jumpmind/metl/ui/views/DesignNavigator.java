@@ -614,6 +614,10 @@ public class DesignNavigator extends VerticalLayout {
             }
             
             if (add) {
+                if (openProjectsLayout != null) {
+                    removeComponent(openProjectsLayout);
+                }
+                
                 addComponent(treeTable);
                 setExpandRatio(treeTable, 1);
             }
