@@ -542,7 +542,6 @@ public class DesignNavigator extends VerticalLayout {
     protected void finishEditingItem() {
         if (itemBeingEdited != null) {
             IConfigurationService configurationService = context.getConfigurationService();
-            Object selected = itemBeingEdited;
             Method method = null;
             try {
                 method = configurationService.getClass().getMethod("save",
@@ -563,18 +562,15 @@ public class DesignNavigator extends VerticalLayout {
             refreshOpenProjects();
             treeTable.refreshRowCache();
             treeTable.focus();
-            treeTable.setValue(selected);
             selectionChanged();
         }
     }
 
     protected void abortEditingItem() {
         if (itemBeingEdited != null) {
-            Object selected = itemBeingEdited;
             itemBeingEdited = null;
             refresh();
             treeTable.focus();
-            treeTable.setValue(selected);
         }
     }
 
@@ -911,7 +907,6 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void addNewFlow() {
-
         FolderName folder = findFolderWithName("Flows");
         if (folder != null) {
             treeTable.setChildrenAllowed(folder, true);

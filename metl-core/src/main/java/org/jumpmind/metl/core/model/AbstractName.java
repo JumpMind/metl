@@ -89,18 +89,4 @@ abstract public class AbstractName extends AbstractObject {
         return rowId;
     }
 
-    @Override
-    public int hashCode() {
-        return id.hashCode();
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof AbstractName && obj.getClass().equals(getClass())) {
-            return id.equals(((AbstractName)obj).getId());
-        } else {
-            return super.equals(obj);
-        }            
-    }
-
 }
