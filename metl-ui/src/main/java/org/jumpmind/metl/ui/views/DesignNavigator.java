@@ -542,6 +542,7 @@ public class DesignNavigator extends VerticalLayout {
     protected void finishEditingItem() {
         if (itemBeingEdited != null) {
             IConfigurationService configurationService = context.getConfigurationService();
+            Object selected = itemBeingEdited;
             Method method = null;
             try {
                 method = configurationService.getClass().getMethod("save",
@@ -559,10 +560,9 @@ public class DesignNavigator extends VerticalLayout {
                 configurationService.save(itemBeingEdited);
             }
             itemBeingEdited = null;
-            refreshOpenProjects();
             treeTable.refreshRowCache();
             treeTable.focus();
-            selectionChanged();
+            treeTable.setValue(selected);
         }
     }
 
@@ -576,16 +576,16 @@ public class DesignNavigator extends VerticalLayout {
 
     public void refresh() {
         refreshOpenProjects();
-
-        removeComponent(treeTable);
-
-        if (openProjectsLayout != null) {
-            removeComponent(openProjectsLayout);
-        }
-
+        
         setMenuItemsEnabled();
 
         if (treeTable.size() == 0) {
+            removeComponent(treeTable);
+
+            if (openProjectsLayout != null) {
+                removeComponent(openProjectsLayout);
+            }
+            
             openProjectsLayout = new VerticalLayout();
             openProjectsLayout.addStyleName(ValoTheme.LAYOUT_CARD);
             openProjectsLayout.setSizeFull();
@@ -604,8 +604,20 @@ public class DesignNavigator extends VerticalLayout {
             setExpandRatio(openProjectsLayout, 1);
             viewProjects();
         } else {
-            addComponent(treeTable);
-            setExpandRatio(treeTable, 1);
+            boolean add = true;
+            Iterator<Component> i = iterator();
+            while (i.hasNext()) {
+                if (i.next().equals(treeTable)) {
+                    add = false;
+                    break;
+                }
+            }
+            
+            if (add) {
+                addComponent(treeTable);
+                setExpandRatio(treeTable, 1);
+            }
+            
             treeTable.refreshRowCache();
         }
     }
