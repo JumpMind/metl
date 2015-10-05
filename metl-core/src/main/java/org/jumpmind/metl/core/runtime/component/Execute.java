@@ -87,9 +87,9 @@ public class Execute extends AbstractComponentRuntime {
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            ByteArrayOutputStream os = getByteArrayOutputStream();
             PumpStreamHandler outputHandler = new PumpStreamHandler(os);
-            org.apache.tools.ant.taskdefs.Execute antTask = new org.apache.tools.ant.taskdefs.Execute(outputHandler);
+            org.apache.tools.ant.taskdefs.Execute antTask = getAntTask(outputHandler);
             antTask.setCommandline(commands);
             info("About to execute: %s", ArrayUtils.toString(commands));
             int code = antTask.execute();
@@ -112,6 +112,14 @@ public class Execute extends AbstractComponentRuntime {
         } catch (IOException e) {
             throw new IoException(e);
         }
+    }
+    
+    org.apache.tools.ant.taskdefs.Execute getAntTask(PumpStreamHandler outputHandler) {
+    	return new org.apache.tools.ant.taskdefs.Execute(outputHandler);
+    }
+    
+    ByteArrayOutputStream getByteArrayOutputStream() {
+    	return new ByteArrayOutputStream();
     }
 
 }
