@@ -20,8 +20,6 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.mockito.Mockito.spy;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,13 +28,11 @@ import java.util.Set;
 
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -167,9 +163,9 @@ public class MappingTest extends AbstractComponentRuntimeTest<ArrayList<EntityDa
 		assertHandle(0, expectedMonitors);
 	}
 	
-	@Override
-	public IComponentRuntime getComponentSpy() {
-		return spy(new Mapping());
-	}
+    @Override
+    protected String getComponentId() {
+        return Mapping.TYPE;
+    }
 
 }
