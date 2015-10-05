@@ -230,4 +230,9 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTest<ArrayList<
 		return spy(new DelimitedParser());
 	}
 
+	@Override
+	protected String getComponentId() {
+		return DelimitedParser.TYPE;
+	}
+
 }
