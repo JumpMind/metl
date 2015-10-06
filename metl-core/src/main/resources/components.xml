@@ -539,10 +539,10 @@
             </setting>                                   
         </settings>
     </component>
-    <component id='Text Reader' category='READER' inputMessageType='text' outputMessageType='text'
+    <component id='Text Constant' category='READER' inputMessageType='text' outputMessageType='text'
         inputOutputModelsMatch='false'>
-        <name>Text Reader</name>
-        <className>org.jumpmind.metl.core.runtime.component.TextReader</className>
+        <name>Text Constant</name>
+        <className>org.jumpmind.metl.core.runtime.component.TextConstant</className>
         <description></description>      
         <settings>
             <setting id='text' type='multiline_text' required='false'>
