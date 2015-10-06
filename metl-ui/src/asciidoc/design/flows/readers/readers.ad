@@ -8,3 +8,5 @@ include::rdbms-reader.ad[]
 include::text-file-reader.ad[]
 
 include::file-poller.ad[]
+
+include::text-constant.ad[]
