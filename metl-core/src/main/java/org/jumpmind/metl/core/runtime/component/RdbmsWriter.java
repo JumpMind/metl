@@ -138,17 +138,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             schemaName = null;
         }
 
-        DataSource dataSource = (DataSource) getResourceReference();
-        platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), quoteIdentifiers);
-        targetTables = new ArrayList<TargetTableDefintion>();
-
-        for (ModelEntity entity : model.getModelEntities()) {
-            Table table = platform.getTableFromCache(catalogName, schemaName, entity.getName(), true);
-            if (table != null) {
-                targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE, entity, table.copy()),
-                        new TargetTable(DmlType.INSERT, entity, table.copy())));
-            }
-        }
+        
     }
     
     @Override
@@ -163,6 +153,26 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         if (error == null) {
             if (getResourceRuntime() == null) {
                 throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
+            }
+            
+            if (platform == null) {
+                DataSource dataSource = (DataSource) getResourceReference();
+                platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), quoteIdentifiers);
+            }
+            
+            if (targetTables == null) {
+                
+                Model model = getInputModel();
+
+                targetTables = new ArrayList<TargetTableDefintion>();
+
+                for (ModelEntity entity : model.getModelEntities()) {
+                    Table table = platform.getTableFromCache(catalogName, schemaName, entity.getName(), true);
+                    if (table != null) {
+                        targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE, entity, table.copy()),
+                                new TargetTable(DmlType.INSERT, entity, table.copy())));
+                    }
+                }
             }
 
             ArrayList<EntityData> inputRows = inputMessage.getPayload();
