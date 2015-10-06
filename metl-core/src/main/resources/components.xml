@@ -181,6 +181,15 @@
                 <defaultValue>true</defaultValue>
                 <description></description>
             </setting>
+            <setting id='file.sort.order' type='choice' required='false'>
+                <name>File Sort Order</name>
+                <defaultValue>Last Modified</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>Last Modified</choice>
+                    <choice>Name</choice>
+                </choices>
+            </setting>
             <setting id='max.files.to.poll' type='integer' required='true'>
                 <name>Max Files To Poll</name>
                 <defaultValue>1000</defaultValue>
