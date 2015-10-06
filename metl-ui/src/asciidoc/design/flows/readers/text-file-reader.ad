@@ -2,6 +2,8 @@
 [cols="<25%h,<75%"]
 |===================================
 |Icon|image:textfilereader.png[]
+|Use When|Data needs read from a text file
+|Samples|Flat File to Relational Database 
 |Description|The Text File Reader is used to read data from one or more text based files.
 
 The Text File Reader can read one or more files and pass the data read to downstream components.
@@ -20,6 +22,7 @@ like the Parse Delimited and Parse Fixed components.
 |===================================
 |Name|Description
 |Resource|The file based resource (either local or remote) on which the file to be read resides.
+include::../common-properties/unit-of-work.ad[]
 include::../common-properties/enabled.ad[]
 |Get File Name From Message|If selected, the path and file name to be read will be determined by the payload of the
 incoming message.  This option is used frequently with the File Poller component.  If this setting is not selected,
