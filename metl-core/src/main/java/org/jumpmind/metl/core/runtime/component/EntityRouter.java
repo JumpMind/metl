@@ -70,6 +70,11 @@ public class EntityRouter extends AbstractComponentRuntime {
             }
         }
     }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

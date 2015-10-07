@@ -36,8 +36,12 @@ public interface IComponentRuntime {
     
     public void flowCompletedWithErrors(Throwable myError);
     
-    public void stop();   
+    public void stop();
 
-    public ComponentContext getComponentContext(); 
+    public ComponentContext getComponentContext();
+    
+    public XMLComponent getComponentDefintion();
+    
+    public boolean supportsStartupMessages();
     
 }

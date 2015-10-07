@@ -378,11 +378,9 @@ public class DeployNavigator extends VerticalLayout {
 
     protected void abortEditingItem() {
         if (itemBeingEdited != null) {
-            Object selected = itemBeingEdited;
             itemBeingEdited = null;
             refresh();
             treeTable.focus();
-            treeTable.setValue(selected);
         }
     }
 

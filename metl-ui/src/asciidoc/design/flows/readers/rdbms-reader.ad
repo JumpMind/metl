@@ -2,7 +2,7 @@
 [cols="<25%h,<75%"]
 |===================================
 |Icon|image:rdbmsreader.png[]
-|Use When|Data needs extracted from a relational database 
+|Use When|Data needs read from a relational database 
 |Samples|Relational Database to Flat File, Normalized Table to Denormalized File, Normalized Table to Denormalized File v2
 |Description|The RDBMS Reader is used to read data from a sql compliant relational database by specifying an SQL query.
 
@@ -28,6 +28,7 @@ entity and attribute.  See <<rdbms-reader-example-2>> below.
 |Resource|The SQL Database Resource on which the SQL query should be run to read data.  
 include::../common-properties/input-model.ad[]
 include::../common-properties/output-model.ad[]
+include::../common-properties/unit-of-work.ad[]
 include::../common-properties/enabled.ad[]
 |Sql|The sql query or script that will be executed for this reader
 include::../common-properties/rows-per-message.ad[]

@@ -30,7 +30,7 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
-public class TextReader extends AbstractComponentRuntime {
+public class TextConstant extends AbstractComponentRuntime {
 
     public static final String TYPE = "Text Reader";
 
@@ -40,6 +40,11 @@ public class TextReader extends AbstractComponentRuntime {
 
     @Override
     protected void start() {
+    }
+        
+    @Override
+    public boolean supportsStartupMessages() {
+        return true;
     }
 
     @Override

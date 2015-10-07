@@ -72,6 +72,11 @@ public class Web extends AbstractComponentRuntime {
         bodyText = component.get(BODY_TEXT);
         parameterReplacement = component.getBoolean(PARAMETER_REPLACEMENT, false);
     }
+        
+    @Override
+    public boolean supportsStartupMessages() {
+        return true;
+    }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

@@ -38,6 +38,11 @@ public class Delay extends AbstractComponentRuntime {
     }
     
     @Override
+    public boolean supportsStartupMessages() {
+        return true;
+    }
+    
+    @Override
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         AppUtils.sleep(delay);
         callback.sendMessage(inputMessage.getPayload(), unitOfWorkBoundaryReached);

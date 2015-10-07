@@ -2,6 +2,8 @@
 [cols="<25%h,<75%"]
 |===================================
 |Icon|image:filepoller.png[]
+|Use When|A file based resource needs to be checked for the existence of a file or set of files
+|Samples|
 |Description|The File Poller is used to look at a file based directory structure and send a message to downstream components 
 if a file or files match a given file pattern exists.  The file poller sends a payload of an array list of strings with the file 
 names of each file found that matches the File Poller's File Pattern parameter.  The File pattern parameter can be a single pattern
@@ -16,7 +18,8 @@ or a list of patterns separated by commas.  Wildcards can be used in any pattern
 [options="header" cols="<25%,<75%"]
 |===================================
 |Name|Description
-|Resource|The File based resource on which the File Poller should operate  
+|Resource|The File based resource on which the File Poller should operate
+include::../common-properties/unit-of-work.ad[]  
 include::../common-properties/enabled.ad[]
 |File Pattern|The File Pattern specifies the pattern(s) of files to look for.  Multiple patterns can be specified in a comma delimited
 list.  Wildcards (*) can be used.  See examples below.

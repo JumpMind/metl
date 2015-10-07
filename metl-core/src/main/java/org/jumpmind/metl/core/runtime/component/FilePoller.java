@@ -67,6 +67,11 @@ public class FilePoller extends AbstractComponentRuntime {
     public final static String SETTING_USE_TRIGGER_FILE = "use.trigger.file";
     
     public final static String SETTING_MAX_FILES_TO_POLL = "max.files.to.poll";
+    
+    public final static String SORT_NAME = "Name";
+    public final static String SORT_MODIFIED = "Last Modified";
+
+    public final static String SETTING_FILE_SORT_ORDER = "file.sort.order";
 
     @SettingDefinition(order = 70, type = Type.TEXT, label = "Relative Trigger File Path")
     public final static String SETTING_TRIGGER_FILE_PATH = "trigger.file.path";
@@ -90,6 +95,8 @@ public class FilePoller extends AbstractComponentRuntime {
     String actionOnError = ACTION_NONE;
 
     String archiveOnErrorPath;
+    
+    String fileSortOption = SORT_MODIFIED;
 
     ArrayList<File> filesSent = new ArrayList<File>();
 
@@ -119,7 +126,13 @@ public class FilePoller extends AbstractComponentRuntime {
                 properties.get(SETTING_ARCHIVE_ON_SUCCESS_PATH),
                 context.getFlowParametersAsString(), true);
         maxFilesToPoll = properties.getInt(SETTING_MAX_FILES_TO_POLL);
+        fileSortOption = properties.get(SETTING_FILE_SORT_ORDER, fileSortOption);
 
+    }
+        
+    @Override
+    public boolean supportsStartupMessages() {
+        return true;
     }
 
     @Override
@@ -161,7 +174,13 @@ public class FilePoller extends AbstractComponentRuntime {
             Collections.sort(fileReferences, new Comparator<File>() {
                 @Override
                 public int compare(File o1, File o2) {
-                    return new Long(o1.lastModified()).compareTo(new Long(o2.lastModified()));
+                	int cmpr = 0;
+                	if (SORT_NAME.equals(fileSortOption)) {
+                		cmpr = new String(o1.getName()).compareTo(new String(o2.getName()));
+                    } else if (SORT_MODIFIED.equals(fileSortOption)) {
+                    	cmpr = new Long(o1.lastModified()).compareTo(new Long(o2.lastModified()));
+                    }
+                	return cmpr;
                 }
             });
             

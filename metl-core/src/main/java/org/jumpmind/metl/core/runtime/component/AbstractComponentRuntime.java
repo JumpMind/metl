@@ -60,11 +60,16 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     
     protected boolean shared = false;
     
-    protected XMLComponent definition;   
+    protected XMLComponent componentDefinition;   
     
     @Override
     public void register(XMLComponent definition) {
-        this.definition = definition;
+        this.componentDefinition = definition;
+    }
+    
+    @Override
+    public XMLComponent getComponentDefintion() {
+        return componentDefinition;
     }
 
     @Override
@@ -76,7 +81,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     abstract protected void start();
     
     public TypedProperties getTypedProperties() {
-        List<XMLSetting> settings = definition != null ? definition.getSettings().getSetting() : null;
+        List<XMLSetting> settings = componentDefinition != null ? componentDefinition.getSettings().getSetting() : null;
         if (settings == null) {
             settings = Collections.emptyList();
         }

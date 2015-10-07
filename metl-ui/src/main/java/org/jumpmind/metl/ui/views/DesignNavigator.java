@@ -560,36 +560,32 @@ public class DesignNavigator extends VerticalLayout {
                 configurationService.save(itemBeingEdited);
             }
             itemBeingEdited = null;
-            refreshOpenProjects();
             treeTable.refreshRowCache();
             treeTable.focus();
             treeTable.setValue(selected);
-            selectionChanged();
         }
     }
 
     protected void abortEditingItem() {
         if (itemBeingEdited != null) {
-            Object selected = itemBeingEdited;
             itemBeingEdited = null;
             refresh();
             treeTable.focus();
-            treeTable.setValue(selected);
         }
     }
 
     public void refresh() {
         refreshOpenProjects();
-
-        removeComponent(treeTable);
-
-        if (openProjectsLayout != null) {
-            removeComponent(openProjectsLayout);
-        }
-
+        
         setMenuItemsEnabled();
 
         if (treeTable.size() == 0) {
+            removeComponent(treeTable);
+
+            if (openProjectsLayout != null) {
+                removeComponent(openProjectsLayout);
+            }
+            
             openProjectsLayout = new VerticalLayout();
             openProjectsLayout.addStyleName(ValoTheme.LAYOUT_CARD);
             openProjectsLayout.setSizeFull();
@@ -608,8 +604,24 @@ public class DesignNavigator extends VerticalLayout {
             setExpandRatio(openProjectsLayout, 1);
             viewProjects();
         } else {
-            addComponent(treeTable);
-            setExpandRatio(treeTable, 1);
+            boolean add = true;
+            Iterator<Component> i = iterator();
+            while (i.hasNext()) {
+                if (i.next().equals(treeTable)) {
+                    add = false;
+                    break;
+                }
+            }
+            
+            if (add) {
+                if (openProjectsLayout != null) {
+                    removeComponent(openProjectsLayout);
+                }
+                
+                addComponent(treeTable);
+                setExpandRatio(treeTable, 1);
+            }
+            
             treeTable.refreshRowCache();
         }
     }
@@ -911,7 +923,6 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void addNewFlow() {
-
         FolderName folder = findFolderWithName("Flows");
         if (folder != null) {
             treeTable.setChildrenAllowed(folder, true);

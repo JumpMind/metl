@@ -108,6 +108,11 @@ public class TextFileReader extends AbstractComponentRuntime {
                 true);
         encoding = component.get(SETTING_ENCODING, encoding);
     }
+        
+    @Override
+    public boolean supportsStartupMessages() {
+        return true;
+    }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

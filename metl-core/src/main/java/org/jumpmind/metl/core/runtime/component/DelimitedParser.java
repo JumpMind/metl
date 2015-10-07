@@ -85,6 +85,11 @@ public class DelimitedParser extends AbstractComponentRuntime {
                     "This component requires an output model.  Please select one.");
         }
     }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

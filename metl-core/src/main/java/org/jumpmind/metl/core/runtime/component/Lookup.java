@@ -69,6 +69,11 @@ public class Lookup extends AbstractComponentRuntime {
             throw new IllegalStateException("The source step must be specified");
         }
     }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

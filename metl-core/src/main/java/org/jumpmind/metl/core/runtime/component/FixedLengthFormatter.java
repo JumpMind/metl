@@ -62,6 +62,11 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
         useHeader = properties.is(FIXED_LENGTH_FORMATTER_WRITE_HEADER);
         convertAttributeSettingsToAttributeFormat();
     }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
     @Override
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

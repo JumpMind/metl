@@ -4,3 +4,6 @@
 /.settings
 /build
 /.DS_Store
+
+/src/main/webapp/VAADIN/themes/apptheme/addons.scss
+/src/main/webapp/VAADIN/themes/images/addons.scss

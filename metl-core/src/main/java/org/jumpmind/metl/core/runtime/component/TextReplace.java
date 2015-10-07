@@ -53,6 +53,11 @@ public class TextReplace extends AbstractComponentRuntime {
             replaceWith = "";
         }
     }
+    
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

@@ -1,7 +1,9 @@
-===== Text File Writer
+==== Text File Writer
 [cols="<25%h,<75%"]
 |===================================
 |Icon|image:textfilewriter.png[]
+|Use When|Data needs written to a text based file
+|Samples|
 |Description|The Text File Writer is used to write data to a text based file.
 
 The Text File Writer can write to one output file either locally or to a remote destination.  Text files that 
