@@ -751,7 +751,7 @@
             </setting>
         </settings>
     </component>
-        <component id='UnZip' category='READER' inputMessageType='text' outputMessageType='none' resourceCategory='streamable' inputOutputModelsMatch='false'>
+        <component id='UnZip' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
         <name>Zip</name>
         <className>org.jumpmind.metl.core.runtime.component.UnZip</className>
         <description></description>

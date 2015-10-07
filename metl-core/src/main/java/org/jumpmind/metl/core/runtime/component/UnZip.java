@@ -41,6 +41,7 @@ import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IStreamable;
+import org.jumpmind.metl.core.runtime.resource.LocalFile;
 
 public class UnZip extends AbstractComponentRuntime {
 	public static final String TYPE = "UnZip";
@@ -79,25 +80,28 @@ public class UnZip extends AbstractComponentRuntime {
 	}
 
 	@Override
-	public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {
+	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
 		List<String> files = inputMessage.getPayload();
+		ArrayList<String> filePaths = new ArrayList<String>();
+    	
 		if (files != null) {
             fileNames.addAll(files);
         }
 		
         if (unitOfWorkBoundaryReached) {
         	IStreamable streamable = getResourceReference();
-    		ZipInputStream zis = null;
-            
+        	ZipInputStream zis = null;
+    		String path = getResourceRuntime().getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
+    		
     		for (String fileName : fileNames) {
     			log(LogLevel.INFO, "Preparing to extract file : %s", fileName);
-    		    File file = new File(fileName);
+    		    File file = getNewFile(fileName);
     			if (mustExist && !file.exists()) {
                     throw new IoException(String.format("Could not find file to extract: %s", fileName));
                 }
     			if (file.exists()) {
     				try {
-    					ZipFile zipFile = new ZipFile(file);
+    					ZipFile zipFile = getNewZipFile(file);
     					InputStream in = null;
     					OutputStream out = null;
     					try {
@@ -111,9 +115,10 @@ public class UnZip extends AbstractComponentRuntime {
     							log(LogLevel.INFO, entry.getName());
     								
 								if (!entry.isDirectory()) {
-    								out = streamable.getOutputStream(finalPath + entry.getName(), false);
+									out = streamable.getOutputStream(finalPath + entry.getName(), false);
     								in = zipFile.getInputStream(entry);
 		    					    IOUtils.copy(in, out);
+		    					    filePaths.add(getNewFile(path + finalPath, entry.getName()).getAbsolutePath());
 								}
 	    					}
     					} finally {
@@ -132,6 +137,24 @@ public class UnZip extends AbstractComponentRuntime {
         		}
     		}
         }
+        callback.sendMessage(filePaths, unitOfWorkBoundaryReached);
+	}
+	
+	File getNewFile(String file) {
+		return new File(file);
+	}
+	
+	File getNewFile(String path, String child) {
+		return new File(path, child);
+	}
+	
+	ZipFile getNewZipFile(File file) throws IOException {
+		return new ZipFile(file);
+	}
+
+	@Override
+	public boolean supportsStartupMessages() {
+		return false;
 	}
 	
 	
