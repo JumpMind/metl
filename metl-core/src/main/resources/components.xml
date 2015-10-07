@@ -742,6 +742,31 @@
             </setting>
         </settings>
     </component>
+        <component id='UnZip' category='READER' inputMessageType='text' outputMessageType='none' resourceCategory='streamable' inputOutputModelsMatch='false'>
+        <name>Zip</name>
+        <className>org.jumpmind.metl.core.runtime.component.UnZip</className>
+        <description></description>
+        <settings>
+            <setting id='target.path' type='text' required='true'>
+                <name>Target File Path</name>
+                <description></description>
+            </setting>
+            <setting id='target.sub.dir' type='boolean' required='false'>
+                <name>Create Sub Dir From File Name</name>
+                <description></description>
+            </setting>
+            <setting id='delete.on.complete' type='boolean' required='false'>
+                <name>Delete Source File</name>
+                <defaultValue>true</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='encoding' type='text' required='false'>
+                <name>Encoding</name>
+                <defaultValue>UTF-8</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
     <component id='Last Unit of Work' category='CONTROL' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='false'>
         <name>Last Unit of Work</name>
         <className>org.jumpmind.metl.core.runtime.component.LastUnitOfWork</className>
