@@ -47,6 +47,7 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.properties.TypedProperties;
@@ -115,8 +116,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             throw new IllegalStateException("A database writer must have a datasource defined");
         }
 
-        Model model = getInputModel();
-        if (model == null) {
+        if (getInputModel() == null) {
             throw new IllegalStateException("A database writer must have an input model defined");
         }
 
@@ -171,6 +171,8 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     if (table != null) {
                         targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE, entity, table.copy()),
                                 new TargetTable(DmlType.INSERT, entity, table.copy())));
+                    } else {
+                        throw new MisconfiguredException("Could not find table to write to: %s", Table.getFullyQualifiedTableName(catalogName, schemaName, entity.getName()));
                     }
                 }
             }
