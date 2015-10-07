@@ -29,7 +29,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class UnzipTest extends AbstractComponentRuntimeTest<ArrayList<String>> {
 
-	@Test
 	@Override
 	public void testHandleStartupMessage() {
 		setupHandle(true);
@@ -38,7 +37,6 @@ public class UnzipTest extends AbstractComponentRuntimeTest<ArrayList<String>> {
 		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 0));
 	}
 
-	@Test
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle(true);
