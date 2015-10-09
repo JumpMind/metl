@@ -138,9 +138,8 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             schemaName = null;
         }
 
-        
     }
-    
+
     @Override
     public boolean supportsStartupMessages() {
         return false;
@@ -154,14 +153,14 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             if (getResourceRuntime() == null) {
                 throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
             }
-            
+
             if (platform == null) {
                 DataSource dataSource = (DataSource) getResourceReference();
                 platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), quoteIdentifiers);
             }
-            
+
             if (targetTables == null) {
-                
+
                 Model model = getInputModel();
 
                 targetTables = new ArrayList<TargetTableDefintion>();
@@ -172,19 +171,20 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                         targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE, entity, table.copy()),
                                 new TargetTable(DmlType.INSERT, entity, table.copy())));
                     } else {
-                        throw new MisconfiguredException("Could not find table to write to: %s", Table.getFullyQualifiedTableName(catalogName, schemaName, entity.getName()));
+                        throw new MisconfiguredException("Could not find table to write to: %s",
+                                Table.getFullyQualifiedTableName(catalogName, schemaName, entity.getName()));
                     }
                 }
             }
 
-            ArrayList<EntityData> inputRows = inputMessage.getPayload();
+            ArrayList<EntityData> inputRows = inputMessage.getPayload();            
             if (inputRows != null && inputRows.size() > 0) {
                 ISqlTransaction transaction = platform.getSqlTemplate().startSqlTransaction();
                 transaction.setInBatchMode(batchMode);
                 try {
                     write(transaction, inputMessage, callback, unitOfWorkBoundaryReached);
                     transaction.commit();
-                    
+
                 } catch (Throwable ex) {
                     error = ex;
                     transaction.rollback();
@@ -238,6 +238,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<TargetTableDefintion, WriteStats>();
             for (TargetTableDefintion targetTableDefinition : targetTables) {
                 for (EntityData inputRow : inputRows) {
+                    log.info("processing input row " + inputRow);
                     inboundEntityDataCount++;
                     WriteStats stats = statsMap.get(targetTableDefinition);
                     if (stats == null) {
@@ -381,8 +382,8 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             lastPreparedDml = sql;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Submitting data {} with types {}", Arrays.toString(data), Arrays.toString(dmlStatement.getTypes()));
+        if (log.isInfoEnabled()) {
+            log.info("Submitting data {} with types {}", Arrays.toString(data), Arrays.toString(dmlStatement.getTypes()));
         }
 
         try {

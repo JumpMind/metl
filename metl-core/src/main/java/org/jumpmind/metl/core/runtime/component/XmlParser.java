@@ -106,7 +106,7 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                     for (Element element : entityMatches) {
                         String text = toXML(element);
                         Document childDocument = builder.build(new ByteArrayInputStream(text.getBytes()));
-                        getComponentStatistics().incrementNumberEntitiesProcessed();
+                        getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                         EntityData data = new EntityData();
                         for (XmlFormatterAttributeSetting attributeSetting : attributeSettings) {
                             List<Object> attributeMatches = (List<Object>) attributeSetting

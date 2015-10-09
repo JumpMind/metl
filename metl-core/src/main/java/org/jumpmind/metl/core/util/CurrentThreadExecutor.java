@@ -18,30 +18,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.core.runtime.component;
+package org.jumpmind.metl.core.util;
 
-import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
-import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
+import java.util.concurrent.Executor;
 
-public interface IComponentRuntime {
-
-    public void register(XMLComponent definition);
-    
-    public void start(int threadNumber, ComponentContext context);
-
-    public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached);
-    
-    public void flowCompleted(boolean cancelled);
-    
-    public void flowCompletedWithErrors(Throwable myError);
-    
-    public void stop();
-
-    public ComponentContext getComponentContext();
-    
-    public XMLComponent getComponentDefintion();
-    
-    public boolean supportsStartupMessages();   
-    
+public class CurrentThreadExecutor implements Executor {
+    public void execute(Runnable r) {
+        r.run();
+    }
 }

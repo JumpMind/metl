@@ -51,7 +51,7 @@ import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
-import org.jumpmind.metl.core.runtime.component.IComponentFactory;
+import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -75,7 +75,7 @@ public class FlowRuntime {
 
     Map<String, IResourceRuntime> resourceRuntimes = new HashMap<String, IResourceRuntime>();
 
-    IComponentFactory componentFactory;
+    IComponentRuntimeFactory componentFactory;
 
     IResourceFactory resourceFactory;
 
@@ -93,7 +93,7 @@ public class FlowRuntime {
     
     MailSession mailSession;
     
-    public FlowRuntime(AgentDeployment deployment, IComponentFactory componentFactory,
+    public FlowRuntime(AgentDeployment deployment, IComponentRuntimeFactory componentFactory,
             IResourceFactory resourceFactory, IExecutionTracker executionTracker,
             ExecutorService threadService) {
         this.executionTracker = executionTracker;
@@ -130,7 +130,7 @@ public class FlowRuntime {
             if (enabled) {
                 ComponentContext context = new ComponentContext(deployment, flowStep, flow, executionTracker, 
                         deployedResources.get(flowStep.getComponent().getResourceId()), parameters, globalSettings);
-                StepRuntime stepRuntime = new StepRuntime(componentFactory.create(flowStep.getComponent().getType()), context, this);
+                StepRuntime stepRuntime = new StepRuntime(componentFactory, context, this);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
         }
@@ -346,10 +346,14 @@ public class FlowRuntime {
     }
 
     public ComponentStatistics getComponentStatistics(String flowStepId) {
-        return stepRuntimes.get(flowStepId).getComponentRuntime().getComponentContext().getComponentStatistics();
+        return stepRuntimes.get(flowStepId).getComponentContext().getComponentStatistics();
     }
     
     public String getExecutionId() {
         return executionTracker.getExecutionId();
+    }
+    
+    public Agent getAgent() {
+        return agent;
     }
 }

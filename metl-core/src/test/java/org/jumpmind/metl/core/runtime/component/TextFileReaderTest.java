@@ -71,7 +71,7 @@ public class TextFileReaderTest {
     public void testTextReaderFlowFromStartupMsgSingleRowPerMessage() throws Exception {
 
         TextFileReader reader = new TextFileReader();
-        reader.start(new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
+        reader.start(0, new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message msg = new StartupMessage();
         SendMessageCallback<ArrayList<String>> msgTarget = new SendMessageCallback<ArrayList<String>>();
         reader.handle(msg, msgTarget, true);
@@ -93,7 +93,7 @@ public class TextFileReaderTest {
     public void testTextReaderFlowFromStartupMsgMultipleRowsPerMessage() throws Exception {
 
         TextFileReader reader = new TextFileReader();
-        reader.start(new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
+        reader.start(0, new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message msg = new StartupMessage();
         SendMessageCallback<ArrayList<String>> msgTarget = new SendMessageCallback<ArrayList<String>>();
         reader.handle(msg, msgTarget, true);

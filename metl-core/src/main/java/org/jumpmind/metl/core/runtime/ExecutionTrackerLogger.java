@@ -58,7 +58,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     }
 
     @Override
-    public void beforeHandle(ComponentContext context) {
+    public void beforeHandle(int threadNumber, ComponentContext context) {
         FlowStep flowStep = context.getFlowStep();
         String msg = String.format(
                 "[%s] Handling message for deployment: %s for component: %s", executionId, 
@@ -67,7 +67,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     }
 
     @Override
-    public void afterHandle(ComponentContext context, Throwable error) {
+    public void afterHandle(int threadNumber, ComponentContext context, Throwable error) {
         FlowStep flowStep = context.getFlowStep();
         String msg = String.format(
                 "[%s] Finished handling message for deployment: %s for component: %s", executionId, 
@@ -76,11 +76,11 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     }
     
     @Override
-    public void updateStatistics(ComponentContext component) {
+    public void updateStatistics(int threadNumber, ComponentContext component) {
     }
     
     @Override
-    public void flowStepStarted(ComponentContext context) {
+    public void flowStepStarted(int threadNumber, ComponentContext context) {
         FlowStep flowStep = context.getFlowStep();
         stepStartTimes.put(flowStep.getId(), System.currentTimeMillis());
         String msg = String.format(
@@ -90,7 +90,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     }
     
     @Override
-    public void flowStepFinished(ComponentContext context, Throwable error, boolean cancelled) {
+    public void flowStepFinished(int threadNumber, ComponentContext context, Throwable error, boolean cancelled) {
         FlowStep flowStep = context.getFlowStep();
         Long startTime = stepStartTimes.get(flowStep.getId());        
         long duration = startTime == null ? 0 : System.currentTimeMillis() - startTime;        
@@ -105,7 +105,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     }
 
     @Override
-    public void log(LogLevel level, ComponentContext context, String output, Object...args) {
+    public void log(int threadNumber, LogLevel level, ComponentContext context, String output, Object...args) {
         if (deployment.asLogLevel().log(level)) {
             if (args != null && args.length > 0) {
                 output = String.format(output, args);

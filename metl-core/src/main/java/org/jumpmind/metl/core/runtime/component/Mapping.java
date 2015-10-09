@@ -128,7 +128,7 @@ public class Mapping extends AbstractComponentRuntime {
             
             if (outputRow.size() > 0) {
                 outputPayload.add(outputRow);
-                getComponentStatistics().incrementNumberEntitiesProcessed();
+                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
             }
         }
 

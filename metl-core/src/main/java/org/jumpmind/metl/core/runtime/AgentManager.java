@@ -35,7 +35,7 @@ import org.jumpmind.metl.core.model.AgentStartMode;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
-import org.jumpmind.metl.core.runtime.component.IComponentFactory;
+import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.util.AppUtils;
 import org.slf4j.Logger;
@@ -51,14 +51,14 @@ public class AgentManager implements IAgentManager {
     
     IExecutionService executionService;
 
-    IComponentFactory componentFactory;
+    IComponentRuntimeFactory componentFactory;
 
     IResourceFactory resourceFactory;
 
     Map<Agent, AgentRuntime> engines = new HashMap<Agent, AgentRuntime>();
 
     public AgentManager(IConfigurationService configurationService, IExecutionService executionService,
-            IComponentFactory componentFactory, IResourceFactory resourceFactory) {
+            IComponentRuntimeFactory componentFactory, IResourceFactory resourceFactory) {
         this.executionService = executionService;
         this.configurationService = configurationService;
         this.componentFactory = componentFactory;

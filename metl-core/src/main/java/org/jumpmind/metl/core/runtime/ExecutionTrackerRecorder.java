@@ -97,30 +97,32 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
 
     @Override
-    public void flowStepStarted(ComponentContext context) {
-        super.flowStepStarted(context);
-        ExecutionStep step = getExecutionStep(context);
+    public void flowStepStarted(int threadNumber, ComponentContext context) {
+        super.flowStepStarted(threadNumber, context);
+        ExecutionStep step = getExecutionStep(threadNumber, context);
         step.setStatus(ExecutionStatus.READY.name());
         this.recorder.record(step);
     }
 
-    protected ExecutionStep getExecutionStep(ComponentContext context) {
-        ExecutionStep step = steps.get(context.getFlowStep().getId());
+    protected ExecutionStep getExecutionStep(int threadNumber, ComponentContext context) {
+        String id = context.getFlowStep().getId() + "-" + threadNumber;
+        ExecutionStep step = steps.get(id);
         if (step == null) {
             step = new ExecutionStep();
             step.setExecutionId(executionId);
+            step.setThreadNumber(threadNumber);
             step.setApproximateOrder(context.getFlowStep().getApproximateOrder());
             step.setComponentName(context.getFlowStep().getComponent().getName());
             step.setFlowStepId(context.getFlowStep().getId());
-            this.steps.put(context.getFlowStep().getId(), step);
+            this.steps.put(id, step);
         }
         return step;
     }
 
     @Override
-    public void beforeHandle(ComponentContext context) {
-        super.beforeHandle(context);
-        ExecutionStep step = getExecutionStep(context);
+    public void beforeHandle(int threadNumber, ComponentContext context) {
+        super.beforeHandle(threadNumber, context);
+        ExecutionStep step = getExecutionStep(threadNumber, context);
         Date lastUpdateTime = step.getLastUpdateTime();
         if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             if (step.getStartTime() == null) {
@@ -135,16 +137,16 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
 
     @Override
-    public void updateStatistics(ComponentContext context) {
-        super.updateStatistics(context);
-        ExecutionStep step = getExecutionStep(context);
+    public void updateStatistics(int threadNumber, ComponentContext context) {
+        super.updateStatistics(threadNumber, context);
+        ExecutionStep step = getExecutionStep(threadNumber, context);
         Date lastUpdateTime = step.getLastUpdateTime();
         if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             ComponentStatistics stats = context.getComponentStatistics();
             if (stats != null) {
-                step.setEntitiesProcessed(stats.getNumberEntitiesProcessed());
-                step.setMessagesReceived(stats.getNumberInboundMessages());
-                step.setMessagesProduced(stats.getNumberOutboundMessages());
+                step.setEntitiesProcessed(stats.getNumberEntitiesProcessed(threadNumber));
+                step.setMessagesReceived(stats.getNumberInboundMessages(threadNumber));
+                step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
             }
             step.setLastUpdateTime(new Date());
             this.recorder.record(step);
@@ -152,17 +154,17 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
 
     @Override
-    public void afterHandle(ComponentContext context, Throwable error) {
-        super.afterHandle(context, error);
-        ExecutionStep step = getExecutionStep(context);
+    public void afterHandle(int threadNumber, ComponentContext context, Throwable error) {
+        super.afterHandle(threadNumber, context, error);
+        ExecutionStep step = getExecutionStep(threadNumber, context);
         Date lastUpdateTime = step.getLastUpdateTime();
         if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.READY.name());
             ComponentStatistics stats = context.getComponentStatistics();
             if (stats != null) {
-                step.setEntitiesProcessed(stats.getNumberEntitiesProcessed());
-                step.setMessagesReceived(stats.getNumberInboundMessages());
-                step.setMessagesProduced(stats.getNumberOutboundMessages());
+                step.setEntitiesProcessed(stats.getNumberEntitiesProcessed(threadNumber));
+                step.setMessagesReceived(stats.getNumberInboundMessages(threadNumber));
+                step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
             }
             step.setLastUpdateTime(new Date());
             this.recorder.record(step);
@@ -170,9 +172,9 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
 
     @Override
-    public void flowStepFinished(ComponentContext context, Throwable error, boolean cancelled) {
-        super.flowStepFinished(context, error, cancelled);
-        ExecutionStep step = getExecutionStep(context);
+    public void flowStepFinished(int threadNumber, ComponentContext context, Throwable error, boolean cancelled) {
+        super.flowStepFinished(threadNumber, context, error, cancelled);
+        ExecutionStep step = getExecutionStep(threadNumber, context);
         if (step.getStartTime() == null) {
             step.setStartTime(new Date());
         }
@@ -188,9 +190,9 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         step.setStatus(status.name());
         ComponentStatistics stats = context.getComponentStatistics();
         if (stats != null) {
-            step.setEntitiesProcessed(stats.getNumberEntitiesProcessed());
-            step.setMessagesReceived(stats.getNumberInboundMessages());
-            step.setMessagesProduced(stats.getNumberOutboundMessages());
+            step.setEntitiesProcessed(stats.getNumberEntitiesProcessed(threadNumber));
+            step.setMessagesReceived(stats.getNumberInboundMessages(threadNumber));
+            step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
         }
         step.setLastUpdateTime(new Date());
         this.recorder.record(step);
@@ -199,18 +201,21 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     @Override
     public void flowStepFailedOnComplete(ComponentContext context, Throwable error) {
         super.flowStepFailedOnComplete(context, error);
-        ExecutionStep step = getExecutionStep(context);
+        steps.values().forEach(step -> setToErrorStatus(step));
+    }
+    
+    private void setToErrorStatus(ExecutionStep step) {
         step.setStatus(ExecutionStatus.ERROR.name());
         step.setLastUpdateTime(new Date());
-        this.recorder.record(step);
+        this.recorder.record(step);        
     }
 
     @Override
-    public void log(LogLevel level, ComponentContext context, String output, Object... args) {
-        super.log(level, context, output, args);
+    public void log(int threadNumber, LogLevel level, ComponentContext context, String output, Object... args) {
+        super.log(threadNumber, level, context, output, args);
         if (deployment.asLogLevel().log(level)) {
             ExecutionStepLog log = new ExecutionStepLog();
-            log.setExecutionStepId(getExecutionStep(context).getId());
+            log.setExecutionStepId(getExecutionStep(threadNumber, context).getId());
             log.setLevel(level.name());
             if (args != null && args.length > 0) {
                 output = String.format(output, args);

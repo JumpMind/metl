@@ -55,7 +55,7 @@ public class Deduper extends AbstractComponentRuntime {
             for (EntityData entityData : payload) {
                 String key = entityData.toString();
                 if (!deduped.containsKey(key)) {
-                    getComponentStatistics().incrementNumberEntitiesProcessed();
+                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                     deduped.put(key, entityData);
                 }
             }

@@ -40,7 +40,7 @@ import org.jumpmind.metl.core.runtime.component.definition.XMLSettings;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.metl.core.util.AbstractXMLFactory;
 
-public class ComponentXMLFactory extends AbstractXMLFactory implements IComponentFactory {
+public class ComponentRuntimeFromXMLFactory extends AbstractXMLFactory implements IComponentRuntimeFactory {
 
     Map<String, XMLComponent> componentsById;
 

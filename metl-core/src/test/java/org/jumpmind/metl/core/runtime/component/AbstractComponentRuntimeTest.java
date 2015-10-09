@@ -69,7 +69,7 @@ public abstract class AbstractComponentRuntimeTest<T> {
 	abstract protected String getComponentId();
 	
 	public IComponentRuntime getComponentSpy() {
-	    ComponentXMLFactory factory = new ComponentXMLFactory();
+	    ComponentRuntimeFromXMLFactory factory = new ComponentRuntimeFromXMLFactory();
 	    factory.refresh();
 	    return Mockito.spy(factory.create(getComponentId()));
 	}
@@ -133,7 +133,7 @@ public abstract class AbstractComponentRuntimeTest<T> {
 		
 		doReturn(eExecutionTracker).when((AbstractComponentRuntime) spy).getExecutionTracker();
 		
-		spy.start(context);
+		spy.start(0, context);
 		setupCalled = true;
 	}
 	
@@ -203,7 +203,7 @@ public abstract class AbstractComponentRuntimeTest<T> {
 			HandleMessageMonitor actual = messages.get(i).getCallback().getMonitor();
 			
 			assertEquals("Statistics entities processed are not equal", numberEntitiesProcessed, 
-					((AbstractComponentRuntime) spy).getComponentStatistics().getNumberEntitiesProcessed());
+					((AbstractComponentRuntime) spy).getComponentStatistics().getNumberEntitiesProcessed(1));
 			assertEquals("Send message counts do not match [message " + (i + 1) + "]", expected.getSendMessageCount(), actual.getSendMessageCount());
 			assertEquals("Start message counts do not match [message " + (i + 1) + "]", expected.getStartupMessageCount(), actual.getStartupMessageCount());
 			assertEquals("Shutdown message counts do not match [message " + (i + 1) + "]", expected.getShutdownMessageCount(), actual.getShutdownMessageCount());

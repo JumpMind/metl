@@ -20,50 +20,55 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ComponentStatistics {
 
-    private int numberInboundMessages = 0;
-    private int numberOutboundMessages = 0;
-    private int numberEntitiesProcessed = 0;
+    private Map<Integer, Integer> numberInboundMessages = new HashMap<>();
+    private Map<Integer, Integer> numberOutboundMessages = new HashMap<>();
+    private Map<Integer, Integer> numberEntitiesProcessed = new HashMap<>();
 
-    public int getNumberInboundMessages() {
-        return numberInboundMessages;
+    public int getNumberInboundMessages(int thread) {
+        Integer number = numberInboundMessages.get(thread);
+        return number != null ? number : 0;
     }
 
-    public void setNumberInboundMessages(int numberInboundMessages) {
-        this.numberInboundMessages = numberInboundMessages;
+    public void setNumberInboundMessages(int thread, int numberInboundMessages) {
+        this.numberInboundMessages.put(thread, numberInboundMessages);
     }
 
-    public void incrementInboundMessages() {
-        this.numberInboundMessages++;
+    public void incrementInboundMessages(int thread) {
+        this.numberInboundMessages.put(thread, getNumberInboundMessages(thread)+1);
     }
 
-    public void setNumberOutboundMessages(int numberOutboundMessages) {
-        this.numberOutboundMessages = numberOutboundMessages;
+    public void setNumberOutboundMessages(int thread, int numberOutboundMessages) {
+        this.numberOutboundMessages.put(thread, numberOutboundMessages);
     }
 
-    public int getNumberOutboundMessages() {
-        return numberOutboundMessages;
+    public int getNumberOutboundMessages(int thread) {
+        Integer number = numberOutboundMessages.get(thread);
+        return number != null ? number : 0;
     }
 
-    public void incrementOutboundMessages() {
-        this.numberOutboundMessages++;
+    public void incrementOutboundMessages(int thread) {
+        this.numberOutboundMessages.put(thread, getNumberOutboundMessages(thread)+1);
     }
 
-    public void setNumberEntitiesProcessed(int numberEntitiesProcessed) {
-        this.numberEntitiesProcessed = numberEntitiesProcessed;
+    public void setNumberEntitiesProcessed(int thread, int numberEntitiesProcessed) {
+        this.numberEntitiesProcessed.put(thread, getNumberEntitiesProcessed(thread)+1);
     }
 
-    public int getNumberEntitiesProcessed() {
-        return numberEntitiesProcessed;
+    public int getNumberEntitiesProcessed(int thread) {
+        Integer number = numberEntitiesProcessed.get(thread);
+        return number != null ? number : 0;
     }
 
-    public void incrementNumberEntitiesProcessed() {
-        numberEntitiesProcessed++;
+    public void incrementNumberEntitiesProcessed(int thread) {
+        this.numberEntitiesProcessed.put(thread, getNumberEntitiesProcessed(thread)+1);
     }
 
-    public void incrementNumberEntitiesProcessed(int count) {
-        numberEntitiesProcessed += count;
+    public void incrementNumberEntitiesProcessed(int thread, int count) {
+        this.numberEntitiesProcessed.put(thread, getNumberEntitiesProcessed(thread)+count);
     }
-
 }

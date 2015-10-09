@@ -112,7 +112,7 @@ public class EntityRouterTest {
         SendMessageCallback<ArrayList<EntityData>> target = new SendMessageCallback<ArrayList<EntityData>>();
         EntityRouter router = new EntityRouter();
         ComponentContext context = new ComponentContext(null, step, flow, new ExecutionTrackerNoOp(), null, null, null);
-        router.start(context);
+        router.start(0, context);
         Message inputMessage = new Message("");
         ArrayList<EntityData> datas = new ArrayList<EntityData>();
         for (EntityData entityData : data) {

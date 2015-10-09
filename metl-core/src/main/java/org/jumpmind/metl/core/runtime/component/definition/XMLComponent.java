@@ -84,6 +84,9 @@ public class XMLComponent implements Serializable {
 
     @XmlAttribute(required = false)
     protected boolean shareable;
+    
+    @XmlAttribute(required = false)
+    protected boolean supportsMultipleThreads;
 
     @XmlAttribute(required = false)
     protected boolean inputOutputModelsMatch;
@@ -186,6 +189,14 @@ public class XMLComponent implements Serializable {
 
     public XMLSettings getSettings() {
         return settings;
+    }
+    
+    public boolean isSupportsMultipleThreads() {
+        return supportsMultipleThreads;
+    }
+    
+    public void setSupportsMultipleThreads(boolean supportsMultipleThreads) {
+        this.supportsMultipleThreads = supportsMultipleThreads;
     }
 
 }

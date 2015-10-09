@@ -32,10 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -52,11 +49,13 @@ import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.model.StartType;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
-import org.jumpmind.metl.core.runtime.component.IComponentFactory;
+import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.flow.AsyncRecorder;
 import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
+import org.jumpmind.metl.core.util.LogUtils;
+import org.jumpmind.metl.core.util.ThreadUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +85,7 @@ public class AgentRuntime {
     
     IConfigurationService configurationService;
 
-    IComponentFactory componentFactory;
+    IComponentRuntimeFactory componentFactory;
 
     IExecutionService executionService;
 
@@ -101,7 +100,7 @@ public class AgentRuntime {
     AsyncRecorder recorder;
 
     public AgentRuntime(Agent agent, IConfigurationService configurationService,
-            IExecutionService executionService, IComponentFactory componentFactory,
+            IExecutionService executionService, IComponentRuntimeFactory componentFactory,
             IResourceFactory resourceFactory) {
         this.agent = agent;
         this.executionService = executionService;
@@ -144,22 +143,9 @@ public class AgentRuntime {
             if (agentName.indexOf(".") > 0) {
                 agentName = agentName.substring(0, agentName.indexOf("."));
             }
-            final String namePrefix = agentName.replaceAll("[^A-Za-z0-9]", "-");
-            
+            final String namePrefix = LogUtils.normalizeName(agentName);
 
-            this.flowStepsExecutionThreads = Executors.newCachedThreadPool(new ThreadFactory() {
-                final AtomicInteger threadNumber = new AtomicInteger(1);
-
-                public Thread newThread(Runnable r) {
-                    Thread t = new Thread(r);
-                    t.setName(namePrefix + "-step-" + threadNumber.getAndIncrement());
-                    t.setDaemon(true);
-                    if (t.getPriority() != Thread.NORM_PRIORITY) {
-                        t.setPriority(Thread.NORM_PRIORITY);
-                    }
-                    return t;
-                }
-            });
+            this.flowStepsExecutionThreads = ThreadUtils.createUnboundedThreadPool(namePrefix);
 
             this.flowExecutionScheduler = new ThreadPoolTaskScheduler();
             this.flowExecutionScheduler.setDaemon(true);

@@ -106,7 +106,7 @@ public class Lookup extends AbstractComponentRuntime {
 
         List<EntityData> datas = message.getPayload();
         for (int j = 0; j < datas.size(); j++) {
-            getComponentStatistics().incrementNumberEntitiesProcessed();
+            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
             EntityData oldData = datas.get(j);
             EntityData newData = new EntityData();
             newData.putAll(oldData);

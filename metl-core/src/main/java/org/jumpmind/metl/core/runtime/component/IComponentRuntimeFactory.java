@@ -25,7 +25,7 @@ import java.util.Map;
 
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 
-public interface IComponentFactory {
+public interface IComponentRuntimeFactory {
 
     public IComponentRuntime create(String type);
     

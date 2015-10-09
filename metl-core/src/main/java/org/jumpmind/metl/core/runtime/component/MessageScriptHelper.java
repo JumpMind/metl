@@ -37,6 +37,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.util.ComponentUtil;
+import org.jumpmind.metl.core.util.ThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -101,7 +102,7 @@ public class MessageScriptHelper {
     }
 
     protected void info(String message, Object... args) {
-        context.getExecutionTracker().log(LogLevel.INFO, context, message, args);
+        context.getExecutionTracker().log(ThreadUtils.getThreadNumber(), LogLevel.INFO, context, message, args);
     }
 
     protected void setInputMessage(Message inputMessage) {

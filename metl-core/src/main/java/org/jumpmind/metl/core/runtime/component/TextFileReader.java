@@ -212,7 +212,7 @@ public class TextFileReader extends AbstractComponentRuntime {
                         payload = new ArrayList<String>();
                     }
                     if (currentFileLinesRead > textHeaderLinesToSkip) {
-                        getComponentStatistics().incrementNumberEntitiesProcessed();
+                        getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                         payload.add(currentLine);
                         linesInMessage++;
                     }

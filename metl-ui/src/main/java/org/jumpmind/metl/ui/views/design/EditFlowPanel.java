@@ -37,7 +37,7 @@ import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderType;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.IAgentManager;
-import org.jumpmind.metl.core.runtime.component.IComponentFactory;
+import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -428,7 +428,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel {
                             .getComponent();
                     Component targetComp = flow.findFlowStepWithId(event.getTargetNodeId())
                             .getComponent();
-                    IComponentFactory factory = context.getComponentFactory();
+                    IComponentRuntimeFactory factory = context.getComponentFactory();
                     XMLComponent sourceDefn = factory
                             .getComonentDefinition(sourceComp.getType());
 

@@ -51,8 +51,8 @@
             </setting>                    
         </settings>
     </component>
-    <component id='RDBMS Writer' category='WRITER' inputMessageType='entity' outputMessageType='text' resourceCategory='datasource'
-        inputOutputModelsMatch='false'>
+    <component id='RDBMS Writer' category='WRITER' inputMessageType='entity' outputMessageType='text' resourceCategory='datasource' 
+        supportsMultipleThreads='true' inputOutputModelsMatch='false'>
         <name>RDBMS Writer</name>
         <className>org.jumpmind.metl.core.runtime.component.RdbmsWriter</className>
         <description></description>

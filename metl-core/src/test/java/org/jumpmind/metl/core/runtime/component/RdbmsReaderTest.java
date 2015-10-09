@@ -83,7 +83,7 @@ public class RdbmsReaderTest {
     @Test
     public void testReaderFlowFromStartupMsg() throws Exception {
         RdbmsReader reader = new RdbmsReader();
-        reader.start(new ComponentContext(null, readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
+        reader.start(0, new ComponentContext(null, readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message msg = new StartupMessage();
         SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
         reader.handle( msg, msgTarget, true);
@@ -98,7 +98,7 @@ public class RdbmsReaderTest {
     public void testReaderFlowFromSingleContentMsg() throws Exception {
 
         RdbmsReader reader = new RdbmsReader();
-        reader.start(new ComponentContext(null, readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
+        reader.start(0, new ComponentContext(null, readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message message = new Message("fake step id");
         ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
         inboundPayload.add(new EntityData());
@@ -121,7 +121,7 @@ public class RdbmsReaderTest {
     public void testReaderFlowFromMultipleContentMsgs() throws Exception {
 
         RdbmsReader reader = new RdbmsReader();
-        reader.start(new ComponentContext(null, readerFlowStepMultiQuery, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
+        reader.start(0, new ComponentContext(null, readerFlowStepMultiQuery, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
         Message message = new Message("fake step id");
         ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
         inboundPayload.add(new EntityData());

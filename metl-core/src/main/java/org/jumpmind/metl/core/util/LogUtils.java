@@ -86,6 +86,15 @@ public final class LogUtils {
                 ex.printStackTrace();
             }
         }
-
+    }
+    
+    public static String normalizeName(String name) {
+        if (name.startsWith("<")) {
+            name = name.substring(1);
+        }
+        if (name.endsWith(">")) {
+            name = name.substring(0, name.length()-1);
+        }
+        return name.replaceAll("[^A-Za-z0-9]", "-").toLowerCase();
     }
 }

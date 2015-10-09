@@ -106,7 +106,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
 	                    if (rowCount + numberOfFooterLinesToSkip < inputRows.size()) {
 	                        EntityData data = processInputRow(inputRow);
 	                        if (data != null) {
-	                            getComponentStatistics().incrementNumberEntitiesProcessed();
+	                            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
 	                            outputPayload.add(data);
 	                        }
 	                    }

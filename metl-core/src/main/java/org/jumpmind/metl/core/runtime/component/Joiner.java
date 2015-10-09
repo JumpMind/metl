@@ -93,7 +93,7 @@ public class Joiner extends AbstractComponentRuntime {
     
     private void join(ArrayList<EntityData> records) {        
         for (EntityData entityData : records) {
-            getComponentStatistics().incrementNumberEntitiesProcessed();
+            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
             StringBuilder key = new StringBuilder();
             for (String attributeId : attributesToJoinOn) {
                 if (key.length() > 0) {

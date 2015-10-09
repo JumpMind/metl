@@ -85,7 +85,7 @@ public class Sorter extends AbstractComponentRuntime {
         if (!(inputMessage instanceof StartupMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
             for (int i = 0; i < payload.size(); i++) {
-                getComponentStatistics().incrementNumberEntitiesProcessed();
+                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 EntityData record = payload.get(i);
                 sortedRecords.add(record);
             }

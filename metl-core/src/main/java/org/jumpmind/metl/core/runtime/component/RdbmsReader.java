@@ -349,7 +349,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                     payload = new ArrayList<>();
                 }
 
-                getComponentStatistics().incrementNumberEntitiesProcessed();
+                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
 
 
                 EntityData rowData = new EntityData();
@@ -367,7 +367,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                 
                 long newTs = System.currentTimeMillis();
                 if (newTs - ts > 10000) {
-                    getExecutionTracker().updateStatistics(context);
+                    getExecutionTracker().updateStatistics(threadNumber, context);
                     ts = newTs;
                 }
             }

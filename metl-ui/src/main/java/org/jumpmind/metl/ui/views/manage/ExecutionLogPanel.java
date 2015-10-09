@@ -143,14 +143,15 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
         stepTable.setMultiSelect(true);
         stepTable.setImmediate(true);
         stepTable.setSizeFull();
-        stepTable.setVisibleColumns(new Object[] { "componentName", "status", "messagesReceived",
+        stepTable.setVisibleColumns(new Object[] { "componentName", "threadNumber", "status", "messagesReceived",
                 "messagesProduced", "entitiesProcessed", "startTime", "endTime" });
-        stepTable.setColumnHeaders(new String[] { "Component Name", "Status", "Msgs Recvd",
+        stepTable.setColumnHeaders(new String[] { "Component Name", "Thread", "Status", "Msgs Recvd",
                 "Msgs Sent", "Entities Prcd", "Start", "End" });
         stepTable.setColumnWidth("status", 100);
         stepTable.setColumnWidth("messagesReceived", 100);
         stepTable.setColumnWidth("messagesProduced", 100);
         stepTable.setColumnWidth("entitiesProcessed", 100);
+        stepTable.setColumnWidth("threadNumber", 100);
         stepTable.setColumnWidth("startTime", 100);
         stepTable.setColumnExpandRatio("endTime", 1);
         stepTable.addValueChangeListener(new ValueChangeListener() {

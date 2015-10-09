@@ -32,10 +32,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
@@ -48,7 +51,11 @@ import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
+import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
+import org.jumpmind.metl.core.util.LogUtils;
+import org.jumpmind.metl.core.util.ThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,11 +65,15 @@ public class StepRuntime implements Runnable {
 
     public static final String UNIT_OF_WORK = "unit.of.work";
 
+    public static final String THREAD_COUNT = "thread.count";
+
     public static final String UNIT_OF_WORK_INPUT_MESSAGE = "Input Message";
 
     public static final String UNIT_OF_WORK_FLOW = "Flow";
 
     protected BlockingQueue<Message> inQueue;
+
+    protected Executor componentRuntimeExecutor;
 
     boolean running = false;
 
@@ -72,8 +83,6 @@ public class StepRuntime implements Runnable {
 
     Throwable error;
 
-    IComponentRuntime componentRuntime;
-
     List<StepRuntime> targetStepRuntimes;
 
     List<StepRuntime> sourceStepRuntimes;
@@ -82,19 +91,28 @@ public class StepRuntime implements Runnable {
 
     ComponentContext componentContext;
 
+    IComponentRuntimeFactory componentFactory;
+
+    XMLComponent componentDefintion;
+
     FlowRuntime flowRuntime;
 
-    public StepRuntime(IComponentRuntime componentRuntime, ComponentContext componentContext, FlowRuntime flowRuntime) {
+    Map<Integer, IComponentRuntime> componentRuntimeByThread = new HashMap<>();
+
+    Boolean startStep = null;
+
+    public StepRuntime(IComponentRuntimeFactory componentFactory, ComponentContext componentContext, FlowRuntime flowRuntime) {
         this.flowRuntime = flowRuntime;
         this.componentContext = componentContext;
-        this.componentRuntime = componentRuntime;
         int capacity = componentContext.getFlowStep().getComponent().getInt(AbstractComponentRuntime.INBOUND_QUEUE_CAPACITY, 1000);
-        inQueue = new LinkedBlockingQueue<Message>(capacity);
-        sourceStepRuntimeUnitOfWorkReceived = new HashMap<String, Boolean>();
+        this.inQueue = new LinkedBlockingQueue<Message>(capacity);
+        this.sourceStepRuntimeUnitOfWorkReceived = new HashMap<String, Boolean>();
+        this.componentFactory = componentFactory;
+        this.componentDefintion = componentFactory.getComonentDefinition(getComponentType());
     }
 
-    public boolean isStartStep() {
-        return sourceStepRuntimes == null || sourceStepRuntimes.size() == 0;
+    private String getComponentType() {
+        return componentContext.getFlowStep().getComponent().getType();
     }
 
     public void setTargetStepRuntimes(List<StepRuntime> targetStepRuntimes) {
@@ -106,9 +124,9 @@ public class StepRuntime implements Runnable {
     }
 
     protected void queue(Message message) throws InterruptedException {
-        if (inQueue.remainingCapacity() == 0 && message.getHeader().getOriginatingStepId()
-                .equalsIgnoreCase(componentRuntime.getComponentContext().getFlowStep().getId())) {
-            throw new RuntimeException("Inbound queue capacity on " + componentRuntime.getComponentContext().getFlowStep().getName()
+        if (inQueue.remainingCapacity() == 0
+                && message.getHeader().getOriginatingStepId().equalsIgnoreCase(componentContext.getFlowStep().getId())) {
+            throw new RuntimeException("Inbound queue capacity on " + componentContext.getFlowStep().getName()
                     + " not sufficient to handle inbound messages from other components in addition to inbound messages from itself.");
         }
         inQueue.put(message);
@@ -117,93 +135,133 @@ public class StepRuntime implements Runnable {
     public void start(IExecutionTracker tracker, IResourceFactory resourceFactory) {
         try {
             componentContext.setComponentStatistics(new ComponentStatistics());
-            if (sourceStepRuntimes.size() == 0 && !componentRuntime.supportsStartupMessages()) {
-                throw new MisconfiguredException("%s must have an inbound connection from another component",
-                        componentRuntime.getComponentDefintion().getName());
-            } else {
-                componentContext.getExecutionTracker().flowStepStarted(componentContext);
-                componentRuntime.start(componentContext);
+            startStep = sourceStepRuntimes == null || sourceStepRuntimes.size() == 0;
+            Component component = componentContext.getFlowStep().getComponent();
+            int threadCount = component.getInt(StepRuntime.THREAD_COUNT, 1);
+            String prefix = String.format("%s-%s", LogUtils.normalizeName(flowRuntime.getAgent().getName()),
+                    LogUtils.normalizeName(componentContext.getFlowStep().getName()));
+            this.componentRuntimeExecutor = ThreadUtils.createFixedThreadPool(prefix, threadCount);
+            for (int threadNumber = 1; threadNumber <= threadCount; threadNumber++) {
+                createComponentRuntime(threadNumber);
             }
         } catch (RuntimeException ex) {
-            cancelled = true;
-            recordError(ex);
+            recordError(1, ex);
             throw ex;
         }
     }
 
-    protected void recordError(Throwable ex) {
-        error = ex;
+    protected void createComponentRuntime(int threadNumber) {
+        String type = getComponentType();
+        IComponentRuntime componentRuntime = componentFactory.create(type);
+        componentRuntimeByThread.put(threadNumber, componentRuntime);
+        if (sourceStepRuntimes.size() == 0 && !componentRuntime.supportsStartupMessages()) {
+            throw new MisconfiguredException("%s must have an inbound connection from another component",
+                    componentRuntime.getComponentDefintion().getName());
+        } else {
+            componentContext.getExecutionTracker().flowStepStarted(threadNumber, componentContext);
+            componentRuntime.start(threadNumber, componentContext);
+        }
+    }
+
+    protected void recordError(int threadNumber, Throwable ex) {
         String msg = ex.getMessage();
         if (isBlank(msg)) {
             msg = ExceptionUtils.getFullStackTrace(ex);
         } else {
             log.error("", ex);
         }
-        componentContext.getExecutionTracker().log(LogLevel.ERROR, componentContext, msg);
-        flowRuntime.cancel();
+        componentContext.getExecutionTracker().log(threadNumber, LogLevel.ERROR, componentContext, msg);
+
+        /*
+         * First time through here
+         */
+        if (error == null) {
+            error = ex;
+            flowRuntime.cancel();
+        }
+    }
+
+    protected ISendMessageCallback createSendMessageCallback() {
+        return new SendMessageCallback();
     }
 
     @Override
     public void run() {
         try {
-            SendMessageCallback target = new SendMessageCallback();
+            ISendMessageCallback target = createSendMessageCallback();
             /*
-             * if we are a start step (don't have any input links), we'll only
+             * If we are a start step (don't have any input links), we'll only
              * get a single message which is the start message sent by the flow
              * runtime to kick things off. If we have input links, we must loop
              * until we get a shutdown message from one of our sources
              */
             while (flowRuntime.isRunning()) {
                 /*
-                 * continue to poll as long as the flow is running. other
+                 * Continue to poll as long as the flow is running. other
                  * components could be generating messages which could block if
                  * we don't continue to poll
                  */
-                Message inputMessage = inQueue.poll(5, TimeUnit.SECONDS);
-                if (running) {
+                final Message inputMessage = inQueue.poll(5, TimeUnit.SECONDS);
+                if (running && !cancelled) {
+
                     if (inputMessage instanceof ShutdownMessage) {
-                        ShutdownMessage shutdownMessage = (ShutdownMessage) inputMessage;
-
-                        cancelled = shutdownMessage.isCancelled();
-
-                        String fromStepId = inputMessage.getHeader().getOriginatingStepId();
-                        removeSourceStepRuntime(fromStepId);
-                        /*
-                         * When all of the source step runtimes have been
-                         * removed or when the shutdown message comes from
-                         * myself, then go ahead and shutdown
-                         */
-                        if (cancelled || fromStepId == null || sourceStepRuntimes == null || sourceStepRuntimes.size() == 0
-                                || fromStepId.equals(componentContext.getFlowStep().getId())) {
-                            shutdown(target);
-                        }
+                        process((ShutdownMessage) inputMessage, target);
                     } else if (inputMessage != null) {
-                        try {
-                            componentContext.getExecutionTracker().beforeHandle(componentContext);
-                            componentContext.getComponentStatistics().incrementInboundMessages();
-                            componentRuntime.handle(inputMessage, target, calculateUnitOfWorkLastMessage(inputMessage));
-                        } catch (Exception ex) {
-                            cancelled = true;
-                            recordError(ex);
-                        } finally {
-                            componentContext.getExecutionTracker().afterHandle(componentContext, error);
-                        }
-                        if (isStartStep() ||
-                                // TODO: this only works if the loop is to
-                                // yourself.
-                                // Larger loop detection and processing needed
-                        (sourceStepRuntimes.size() == 1 && sourceStepRuntimes.get(0).getComponentContext().equals(this.componentContext)
-                                && inQueue.size() == 0)) {
-                            shutdown(target);
-                        }
+                        process(inputMessage, target);
                     }
                 }
             }
         } catch (Exception ex) {
-            // TODO: notify the flow runtime that we have an error and let it
-            // gracefully shut things down
-            log.error("", ex);
-            error = ex;
+            recordError(1, ex);
+        }
+    }
+
+    protected void process(final Message inputMessage, ISendMessageCallback target) {
+        this.componentRuntimeExecutor.execute(new Runnable() {
+
+            @Override
+            public void run() {
+                int threadNumber = ThreadUtils.getThreadNumber();
+                try {
+                    componentContext.getExecutionTracker().beforeHandle(threadNumber, componentContext);
+                    componentContext.getComponentStatistics().incrementInboundMessages(threadNumber);
+                    componentRuntimeByThread.get(threadNumber).handle(inputMessage, target, calculateUnitOfWorkLastMessage(inputMessage));
+                    
+                    /*
+                     * Detect shutdown condition
+                     */
+                    if (startStep || (sourceStepRuntimes.size() == 1 && sourceStepRuntimes.get(0).getComponentContext().getFlowStep().getId()
+                            .equals(StepRuntime.this.componentContext.getFlowStep().getId()) && inQueue.size() == 0)) {
+                        StepRuntime.this.shutdown(threadNumber, target, false);
+                    }
+                } catch (Exception ex) {
+                    recordError(ThreadUtils.getThreadNumber(), ex);
+                } finally {
+                    componentContext.getExecutionTracker().afterHandle(threadNumber, componentContext, error);
+                }
+            }
+        });
+
+    }
+
+    protected void process(ShutdownMessage shutdownMessage, ISendMessageCallback target) {
+        cancelled = shutdownMessage.isCancelled();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Processing shutdown message for " + componentContext.getFlowStep().getName()
+                    + (cancelled ? ". The status was cancelled" : ""));
+        }
+
+        String fromStepId = shutdownMessage.getHeader().getOriginatingStepId();
+        removeSourceStepRuntime(fromStepId);
+
+        /*
+         * When all of the source step runtimes have been removed or when the
+         * shutdown message comes from myself, then go ahead and shutdown
+         */
+        if (cancelled || fromStepId == null || sourceStepRuntimes == null || sourceStepRuntimes.size() == 0
+                || fromStepId.equals(componentContext.getFlowStep().getId())) {
+            shutdown(1, target, true);
         }
     }
 
@@ -233,25 +291,59 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    private void shutdown(SendMessageCallback target) throws InterruptedException {
-        for (StepRuntime targetStepRuntime : targetStepRuntimes) {
-            targetStepRuntime.queue(new ShutdownMessage(componentContext.getFlowStep().getId(), cancelled));
-        }
+    private void stop(int threadNumber, IComponentRuntime componentRuntime) {
         try {
-            this.componentRuntime.stop();
+            componentRuntime.stop();
         } catch (Exception e) {
-            recordError(e);
+            recordError(threadNumber, e);
         }
+    }
+
+    private void shutdownTargets(StepRuntime targetStepRuntime) {
+        try {
+            targetStepRuntime.queue(new ShutdownMessage(componentContext.getFlowStep().getId(), cancelled));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void shutdown(int threadNumber, ISendMessageCallback target, boolean waitForShutdown) {
+        shutdownThreads(waitForShutdown);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Shutting down " + componentContext.getFlowStep().getName());
+        }
+
+        targetStepRuntimes.forEach(t -> shutdownTargets(t));
+        componentRuntimeByThread.values().forEach(c -> stop(threadNumber, c));
+
         finished = true;
         running = false;
+
         recordFlowStepFinished();
     }
 
+    private void shutdownThreads(boolean waitForShutdown) {
+        if (this.componentRuntimeExecutor instanceof ExecutorService) {
+            try {
+                ExecutorService service = (ExecutorService) this.componentRuntimeExecutor;
+                service.shutdown();
+                while (waitForShutdown && !service.isTerminated()) {
+                    service.awaitTermination(1, TimeUnit.SECONDS);
+                }
+            } catch (Exception e) {
+                recordError(1, e);
+            }
+        }
+    }
+
     private final void recordFlowStepFinished() {
-        componentContext.getExecutionTracker().flowStepFinished(componentContext, error, cancelled);
+        componentRuntimeByThread.keySet()
+                .forEach(e -> componentContext.getExecutionTracker().flowStepFinished(e, componentContext, error, cancelled));
     }
 
     public void cancel() {
+        shutdownThreads(true);
         if (!finished) {
             this.cancelled = true;
             recordFlowStepFinished();
@@ -267,29 +359,33 @@ public class StepRuntime implements Runnable {
     }
 
     public void flowCompletedWithoutError() {
+        componentRuntimeByThread.values().forEach(c -> flowCompletedWithoutError(c));
+    }
+
+    private void flowCompletedWithoutError(IComponentRuntime componentRuntime) {
         if (!cancelled) {
             try {
                 componentRuntime.flowCompleted(cancelled);
             } catch (Exception ex) {
-                recordError(ex);
+                recordError(1, ex);
                 componentContext.getExecutionTracker().flowStepFailedOnComplete(componentContext, ex);
             }
         }
     }
 
     public void flowCompletedWithErrors(Throwable myError, List<Throwable> allErrors) {
+        componentRuntimeByThread.values().forEach(c -> flowCompletedWithErrors(c, myError, allErrors));
+    }
+
+    private void flowCompletedWithErrors(IComponentRuntime componentRuntime, Throwable myError, List<Throwable> allErrors) {
         if (!cancelled) {
             try {
                 componentRuntime.flowCompletedWithErrors(myError);
             } catch (Exception ex) {
-                recordError(ex);
+                recordError(1, ex);
                 componentContext.getExecutionTracker().flowStepFailedOnComplete(componentContext, ex);
             }
         }
-    }
-
-    public IComponentRuntime getComponentRuntime() {
-        return this.componentRuntime;
     }
 
     public Throwable getError() {
@@ -302,7 +398,7 @@ public class StepRuntime implements Runnable {
 
     class SendMessageCallback implements ISendMessageCallback {
 
-        protected boolean isUnitOfWorkLastMessage(String unitOfWork, boolean lastMessage) {
+        private boolean isUnitOfWorkLastMessage(String unitOfWork, boolean lastMessage) {
             if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) || (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && lastMessage)) {
                 return true;
             } else {
@@ -310,17 +406,17 @@ public class StepRuntime implements Runnable {
             }
         }
 
-        protected Message createMessage(Message newMessage, Serializable payload, boolean lastMessage) {
+        private Message createMessage(Message newMessage, Serializable payload, boolean lastMessage) {
             FlowStep flowStep = componentContext.getFlowStep();
             ComponentStatistics statistics = componentContext.getComponentStatistics();
             String unitOfWork = flowStep.getComponent().get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
             newMessage.getHeader().setUnitOfWorkLastMessage(isUnitOfWorkLastMessage(unitOfWork, lastMessage));
-            newMessage.getHeader().setSequenceNumber(statistics.getNumberOutboundMessages() + 1);
+            newMessage.getHeader().setSequenceNumber(statistics.getNumberOutboundMessages(ThreadUtils.getThreadNumber()) + 1);
             newMessage.setPayload(payload);
             return newMessage;
         }
 
-        protected Serializable copy(Serializable payload) {
+        private Serializable copy(Serializable payload) {
             if (payload instanceof ArrayList) {
                 payload = (Serializable) ((ArrayList<?>) payload).clone();
                 ArrayList<?> old = (ArrayList<?>) payload;
@@ -336,17 +432,21 @@ public class StepRuntime implements Runnable {
             return payload;
         }
 
-        protected void sendMessage(Message message, String... targetFlowStepIds) {
+        private void sendMessage(Message message, String... targetFlowStepIds) {
             ComponentStatistics statistics = componentContext.getComponentStatistics();
-            statistics.incrementOutboundMessages();
+            statistics.incrementOutboundMessages(ThreadUtils.getThreadNumber());
 
             Collection<String> targetStepIds = targetFlowStepIds != null ? Arrays.asList(targetFlowStepIds) : Collections.emptyList();
 
             for (StepRuntime targetRuntime : targetStepRuntimes) {
                 boolean forward = targetStepIds == null || targetStepIds.size() == 0
-                        || targetStepIds.contains(targetRuntime.getComponentRuntime().getComponentContext().getFlowStep().getId());
+                        || targetStepIds.contains(targetRuntime.getComponentContext().getFlowStep().getId());
                 if (forward) {
                     try {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Sending " + message.getClass().getSimpleName() + " to "
+                                    + targetRuntime.getComponentContext().getFlowStep().getName());
+                        }
                         targetRuntime.queue(message);
                     } catch (Exception e) {
                         if (e instanceof RuntimeException) {

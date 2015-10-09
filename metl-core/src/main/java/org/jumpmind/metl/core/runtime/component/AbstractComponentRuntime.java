@@ -56,9 +56,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
 
     protected ComponentContext context;
     
-    protected boolean enabled = true;
-    
-    protected boolean shared = false;
+    protected int threadNumber;
     
     protected XMLComponent componentDefinition;   
     
@@ -73,8 +71,9 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     }
 
     @Override
-    final public void start(ComponentContext context) {
+    final public void start(int threadNumber, ComponentContext context) {
         this.context = context;
+        this.threadNumber = threadNumber;
         start();
     }
     
@@ -157,7 +156,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     }
     
     protected void log(LogLevel level, String msg, Object... args) {
-        getExecutionTracker().log(level, this.getComponentContext(), msg, args);
+        getExecutionTracker().log(threadNumber, level, this.getComponentContext(), msg, args);
     }
     
     protected Flow getFlow() {
@@ -199,6 +198,6 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     protected List<Object> getAttributeValues(Message inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
         return ComponentUtil.getAttributeValues(getInputModel(), rows, entityName, attributeName);
-    }
+    }    
     
 }

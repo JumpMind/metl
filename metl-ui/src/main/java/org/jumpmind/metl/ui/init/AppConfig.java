@@ -55,8 +55,8 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.AgentManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
-import org.jumpmind.metl.core.runtime.component.ComponentXMLFactory;
-import org.jumpmind.metl.core.runtime.component.IComponentFactory;
+import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFromXMLFactory;
+import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
 import org.jumpmind.metl.core.util.EnvConstants;
@@ -102,7 +102,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
     IConfigurationService configurationService;
 
-    IComponentFactory componentFactory;
+    IComponentRuntimeFactory componentFactory;
 
     IResourceFactory resourceFactory;
 
@@ -226,9 +226,9 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
-    public IComponentFactory componentFactory() {
+    public IComponentRuntimeFactory componentFactory() {
         if (componentFactory == null) {
-            componentFactory = new ComponentXMLFactory();
+            componentFactory = new ComponentRuntimeFromXMLFactory();
         }
         return componentFactory;
     }

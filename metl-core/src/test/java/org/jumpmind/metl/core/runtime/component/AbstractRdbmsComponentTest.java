@@ -75,7 +75,7 @@ public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntim
         if (sqlRequired()) {
             try {
                 properties.setProperty(AbstractRdbmsComponentRuntime.SQL, "");
-                spy.start(context);
+                spy.start(0, context);
                 fail("Should have gotten a misconfigured exception");
             } catch (MisconfiguredException ex) {
 

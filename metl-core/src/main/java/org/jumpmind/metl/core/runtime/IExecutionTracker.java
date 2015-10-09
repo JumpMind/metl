@@ -24,15 +24,15 @@ import org.jumpmind.metl.core.runtime.component.ComponentContext;
 
 public interface IExecutionTracker {
     
-    public void flowStepStarted(ComponentContext context);
+    public void flowStepStarted(int threadNumber, ComponentContext context);
     
-    public void beforeHandle(ComponentContext context);
+    public void beforeHandle(int threadNumber, ComponentContext context);
     
-    public void afterHandle(ComponentContext context, Throwable error);
+    public void afterHandle(int threadNumber, ComponentContext context, Throwable error);
     
-    public void updateStatistics(ComponentContext context);
+    public void updateStatistics(int threadNumber, ComponentContext context);
     
-    public void flowStepFinished(ComponentContext context, Throwable error, boolean cancelled);
+    public void flowStepFinished(int threadNumber, ComponentContext context, Throwable error, boolean cancelled);
     
     public void beforeFlow(String executionId);
     
@@ -40,7 +40,7 @@ public interface IExecutionTracker {
     
     public void flowStepFailedOnComplete(ComponentContext context, Throwable error);
 
-    public void log (LogLevel level, ComponentContext context, String output, Object... args);
+    public void log (int threadNumber, LogLevel level, ComponentContext context, String output, Object... args);
     
     public String getExecutionId();
     

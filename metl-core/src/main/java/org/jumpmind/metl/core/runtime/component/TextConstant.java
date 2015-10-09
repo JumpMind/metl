@@ -63,7 +63,7 @@ public class TextConstant extends AbstractComponentRuntime {
                     linesInMessage = 0;
                     payload = new ArrayList<String>();
                 }
-                getComponentStatistics().incrementNumberEntitiesProcessed();
+                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 payload.add(currentLine);
                 linesInMessage++;
             }

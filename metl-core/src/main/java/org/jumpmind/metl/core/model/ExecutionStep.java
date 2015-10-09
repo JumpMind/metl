@@ -28,6 +28,8 @@ public class ExecutionStep extends AbstractObject {
 
     private String executionId;
     
+    private int threadNumber = 0;
+    
     private String flowStepId;
     
     private String componentName;
@@ -45,6 +47,14 @@ public class ExecutionStep extends AbstractObject {
     private Date startTime;
     
     private Date endTime;
+    
+    public void setThreadNumber(int threadNumber) {
+        this.threadNumber = threadNumber;
+    }
+    
+    public int getThreadNumber() {
+        return threadNumber;
+    }
     
     @Override
     public void setName(String name) {

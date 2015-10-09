@@ -91,7 +91,7 @@ public class Web extends AbstractComponentRuntime {
         }
         try {
             for (String requestContent : inputPayload) {
-                getComponentStatistics().incrementNumberEntitiesProcessed();
+                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 if (parameterReplacement) {
                     requestContent = FormatUtils.replaceTokens(requestContent, context.getFlowParametersAsString(), true);
                 }

@@ -65,7 +65,7 @@ public class TextReplace extends AbstractComponentRuntime {
         ArrayList<String> out = new ArrayList<String>();
         if (in != null) {
             for (String string : in) {
-                getComponentStatistics().incrementNumberEntitiesProcessed();
+                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 out.add(string.replaceAll(searchFor, replaceWith));                
             }            
         }

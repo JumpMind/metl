@@ -42,7 +42,7 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.persist.IConfigurationService;
-import org.jumpmind.metl.core.runtime.component.IComponentFactory;
+import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.MessageType;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.ResourceCategory;
@@ -79,7 +79,7 @@ public class PropertySheet extends Panel {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    IComponentFactory componentFactory;
+    IComponentRuntimeFactory componentFactory;
 
     IConfigurationService configurationService;
 
@@ -134,7 +134,9 @@ public class PropertySheet extends Panel {
 
             if (obj instanceof Component) {
                 Component component = (Component) obj;
-                addComponentShared(formLayout, component);
+                XMLComponent componentDefintion = componentFactory.getComonentDefinition(component.getType());
+                addThreadCount(componentDefintion, formLayout, component);
+                addComponentShared(formLayout, component);                
             }
 
         }
@@ -158,6 +160,13 @@ public class PropertySheet extends Panel {
         XMLSetting setting = new XMLSetting(StepRuntime.UNIT_OF_WORK, "Unit Of Work", StepRuntime.UNIT_OF_WORK_FLOW, Type.CHOICE, true);
         setting.setChoices(new XMLSettingChoices(StepRuntime.UNIT_OF_WORK_FLOW, StepRuntime.UNIT_OF_WORK_INPUT_MESSAGE));
         addSettingField(setting, component, formLayout);
+    }
+    
+    protected void addThreadCount(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
+        if (componentDefintion.isSupportsMultipleThreads()) {
+            XMLSetting setting = new XMLSetting(StepRuntime.THREAD_COUNT, "Thread Count", "1", Type.INTEGER, true);
+            addSettingField(setting, component, formLayout);
+        }
     }
 
     protected void addOutputModelCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {

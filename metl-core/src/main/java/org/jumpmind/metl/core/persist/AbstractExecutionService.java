@@ -65,7 +65,11 @@ abstract public class AbstractExecutionService extends AbstractService implement
     	Collections.sort(steps, new Comparator<ExecutionStep>() {
     	    @Override
     	    public int compare(ExecutionStep o1, ExecutionStep o2) {
-    	        return new Integer(o1.getApproximateOrder()).compareTo(new Integer(o2.getApproximateOrder()));
+    	        int order = new Integer(o1.getApproximateOrder()).compareTo(new Integer(o2.getApproximateOrder()));
+    	        if (order == 0) {
+    	            order = new Integer(o1.getThreadNumber()).compareTo(new Integer(o2.getThreadNumber()));
+    	        }
+    	        return order;
     	    }
         });
     	return steps;

@@ -81,7 +81,7 @@ public class FixedLengthParser extends AbstractComponentRuntime {
                     if (!inputMessage.getHeader().isUnitOfWorkLastMessage() || (rowCount + numberOfFooterLinesToSkip < inputRows.size())) {
                         EntityData data = processInputRow(inputRow);
                         if (data != null) {
-                            getComponentStatistics().incrementNumberEntitiesProcessed();
+                            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                             outputPayload.add(data);
                         }
                     }

@@ -186,7 +186,7 @@ public class FilePoller extends AbstractComponentRuntime {
             
             for (File file : fileReferences) {
                 log(LogLevel.INFO, "File polled: " + file.getAbsolutePath());
-                getComponentStatistics().incrementNumberEntitiesProcessed();
+                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 filePaths.add(file.getAbsolutePath());
             }
             callback.sendMessage(filePaths, unitOfWorkLastMessage);

@@ -415,6 +415,7 @@
      <table name="execution_step" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="execution_id" type="CHAR" size="36" required="true" description="A unique identifier" />
+        <column name="thread_number" type="INTEGER" required="true" default="0" description="The thread number" />
         <column name="flow_step_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="component_name" type="VARCHAR" required="true" size="255" description="" />
         <column name="approximate_order" type="INTEGER" default="0" required="true" />

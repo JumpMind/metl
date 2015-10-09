@@ -27,15 +27,15 @@ public class ExecutionTrackerNoOp implements IExecutionTracker {
     String executionId;
     
     @Override
-    public void afterHandle(ComponentContext context, Throwable error) {
+    public void afterHandle(int threadNumber, ComponentContext context, Throwable error) {
     }
 
     @Override
-    public void beforeHandle(ComponentContext context) {
+    public void beforeHandle(int threadNumber, ComponentContext context) {
     }
 
     @Override
-    public void flowStepFinished(ComponentContext context, Throwable error, boolean cancelled) {
+    public void flowStepFinished(int threadNumber, ComponentContext context, Throwable error, boolean cancelled) {
     }
 
     @Override
@@ -48,15 +48,15 @@ public class ExecutionTrackerNoOp implements IExecutionTracker {
     }
 
     @Override
-    public void log(LogLevel level, ComponentContext context, String output, Object...args) {
+    public void log(int threadNumber, LogLevel level, ComponentContext context, String output, Object...args) {
     }
     
     @Override
-    public void updateStatistics(ComponentContext context) {
+    public void updateStatistics(int threadNumber, ComponentContext context) {
     }
 
     @Override
-    public void flowStepStarted(ComponentContext context) {
+    public void flowStepStarted(int threadNumber, ComponentContext context) {
     }
     
     @Override
