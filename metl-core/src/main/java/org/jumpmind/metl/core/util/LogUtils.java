@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.util;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.File;
 
 import org.apache.log4j.PatternLayout;
@@ -89,12 +91,16 @@ public final class LogUtils {
     }
     
     public static String normalizeName(String name) {
-        if (name.startsWith("<")) {
-            name = name.substring(1);
+        if (isNotBlank(name)) {
+            if (name.startsWith("<")) {
+                name = name.substring(1);
+            }
+            if (name.endsWith(">")) {
+                name = name.substring(0, name.length() - 1);
+            }
+            return name.replaceAll("[^A-Za-z0-9]", "-").toLowerCase();
+        } else {
+            return "test";
         }
-        if (name.endsWith(">")) {
-            name = name.substring(0, name.length()-1);
-        }
-        return name.replaceAll("[^A-Za-z0-9]", "-").toLowerCase();
     }
 }

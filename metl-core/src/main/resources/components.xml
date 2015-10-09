@@ -782,7 +782,7 @@
         </settings>
     </component>
     <component id='XmlReader' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
-        <name>XML Processor</name>
+        <name>XML Reader</name>
         <className>org.jumpmind.metl.core.runtime.component.XmlReader</className>
         <description></description>
         <settings>
