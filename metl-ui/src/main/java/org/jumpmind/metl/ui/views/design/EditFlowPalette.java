@@ -34,6 +34,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.ComponentName;
+import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.definition.XMLComponentUI;
 import org.slf4j.Logger;
@@ -125,8 +126,9 @@ public class EditFlowPalette extends VerticalLayout {
             componentAccordian.addTab(componentLayout, StringUtils.isAllUpperCase(category) ? category + "S" : category + "s");
             if (componentTypes != null) {
                 for (String componentType : componentTypes) {
+                    XMLComponent definition = context.getComponentFactory().getComonentDefinition(componentType);
                     ClassResource icon = getImageResourceForComponentType(componentType);
-                    addItemToFlowPanelSection(componentType, componentLayout, icon, null);
+                    addItemToFlowPanelSection(definition.getName(), componentType, componentLayout, icon, null);
                 }
             }
         }
@@ -139,17 +141,18 @@ public class EditFlowPalette extends VerticalLayout {
         List<ComponentName> components = context.getConfigurationService().findSharedComponentsInProject(projectVersionId);
         for (ComponentName component : components) {
             ClassResource icon = getImageResourceForComponentType(component.getType());
-            addItemToFlowPanelSection(component.getName(), componentLayout, icon, component.getId());
+            addItemToFlowPanelSection(component.getName(), null, componentLayout, icon, component.getId());
         }
     }
 
-    protected void addItemToFlowPanelSection(String labelName, VerticalLayout componentLayout, ClassResource icon, String componentId) {
+    protected void addItemToFlowPanelSection(String labelName, String componentType, VerticalLayout componentLayout, ClassResource icon, String componentId) {
 
         FlowPaletteItem paletteItem = new FlowPaletteItem(labelName);
         if (componentId != null) {
             paletteItem.setShared(true);
             paletteItem.setComponentId(componentId);
         } else {
+            paletteItem.setComponentType(componentType);
             paletteItem.setShared(false);
         }
         paletteItem.setIcon(icon);

@@ -480,7 +480,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel {
             WrapperTargetDetails details = (WrapperTargetDetails) event.getTargetDetails();
             DragAndDropWrapper wrapper = (DragAndDropWrapper) t.getSourceComponent();
             FlowPaletteItem flowPaletteItem = (FlowPaletteItem) wrapper.iterator().next();
-            if (flowPaletteItem.isShared) {
+            if (flowPaletteItem.isShared()) {
                 Component component = new Component();
                 component.setId(flowPaletteItem.getComponentId());
                 configurationService.refresh(component);
@@ -488,7 +488,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel {
                         details.getMouseEvent().getClientY() - details.getAbsoluteTop(), component);
             } else {
                 Component component = new Component();
-                component.setType(flowPaletteItem.getCaption());
+                component.setType(flowPaletteItem.getComponentType());
                 component.setShared(false);
                 addComponent(details.getMouseEvent().getClientX() - details.getAbsoluteLeft(),
                         details.getMouseEvent().getClientY() - details.getAbsoluteTop(), component);

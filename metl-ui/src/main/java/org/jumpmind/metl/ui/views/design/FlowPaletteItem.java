@@ -26,12 +26,22 @@ public class FlowPaletteItem extends Button {
     
     private static final long serialVersionUID = 1L;
     
+    String componentType;
+    
     String componentId;
     
     boolean isShared;
 
     public FlowPaletteItem(String label) {
         super(label);
+    }
+    
+    public void setComponentType(String componentType) {
+        this.componentType = componentType;
+    }
+    
+    public String getComponentType() {
+        return componentType;
     }
     
     public String getComponentId() {
