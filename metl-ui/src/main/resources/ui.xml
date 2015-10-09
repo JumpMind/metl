@@ -33,7 +33,7 @@
         <iconImage>/org/jumpmind/metl/core/runtime/component/rdbmsreader.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditRdbmsReaderPanel</className>
     </component-ui>
-    <component-ui id="Entity Router UI" componentId="Entity Router">
+    <component-ui id="Message Router UI" componentId="Message Router">
         <iconImage>/org/jumpmind/metl/core/runtime/component/entityrouter.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditEntityRouterPanel</className>
     </component-ui>

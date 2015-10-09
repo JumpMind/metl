@@ -27,7 +27,7 @@ import org.mockito.Mockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class UnzipTest extends AbstractComponentRuntimeTest<ArrayList<String>> {
+public class UnzipTest extends AbstractComponentRuntimeTestSupport<ArrayList<String>> {
 
 	@Override
 	public void testHandleStartupMessage() {

@@ -38,7 +38,7 @@ import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class MappingTest extends AbstractComponentRuntimeTest<ArrayList<EntityData>> {
+public class MappingTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
 
 	public static String MAPPING_TARGET_1 = "mapping1";
 	

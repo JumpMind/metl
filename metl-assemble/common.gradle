@@ -70,7 +70,8 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
         powerMockVersion = '1.5.3'
         springfoxSwaggerVersion = '2.0.0'
         reficioSoapVersion = '1.0.0-SNAPSHOT'
-                
+        kxmlVersion='2.3.0'
+
         env = System.getenv()                
     }
 

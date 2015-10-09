@@ -127,15 +127,20 @@
             </setting>
         </settings>
     </component>
-    <component id='Entity Router' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
+    <component id='Message Router' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none'
         inputOutputModelsMatch='true' shareable='false'>
-        <name>Entity Router</name>
-        <className>org.jumpmind.metl.core.runtime.component.EntityRouter</className>
+        <name>Message Router</name>
+        <className>org.jumpmind.metl.core.runtime.component.MessageRouter</className>
         <description></description>
         <settings>
             <setting id='rows.per.message' type='integer' required='true'>
                 <name>Rows/Msg</name>
                 <defaultValue>10000</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='only.route.first.match' type='boolean' required='false'>
+                <name>Only Route First Match</name>
+                <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
         </settings>
@@ -751,7 +756,7 @@
             </setting>
         </settings>
     </component>
-        <component id='UnZip' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
+    <component id='UnZip' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
         <name>Zip</name>
         <className>org.jumpmind.metl.core.runtime.component.UnZip</className>
         <description></description>
@@ -772,6 +777,29 @@
             <setting id='encoding' type='text' required='false'>
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
+    <component id='XmlReader' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
+        <name>XML Processor</name>
+        <className>org.jumpmind.metl.core.runtime.component.XmlReader</className>
+        <description></description>
+        <settings>
+            <setting id='get.file.name.from.message' type='boolean' required='false'>
+                <name>Expect fully qualified file names in incoming messages</name>
+                <description></description>
+            </setting>
+            <setting id='relative.path' type='text' required='false'>
+                <name>Relative path to a resource based file</name>
+                <description></description>
+            </setting>
+            <setting id='read.tag' type='text' required='false'>
+                <name>Tag to find and send, defaults to root</name>
+                <description></description>
+            </setting>
+            <setting id='read.tags.per.message' type='integer' required='false'>
+                <name>Number of read tags to send together</name>
                 <description></description>
             </setting>
         </settings>

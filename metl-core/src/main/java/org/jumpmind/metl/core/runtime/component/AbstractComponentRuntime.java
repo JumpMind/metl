@@ -191,6 +191,19 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return bindings;
     }
 
+    protected Bindings bindStringData(ScriptEngine scriptEngine, String value) {
+        Bindings bindings = scriptEngine.createBindings();
+        if (value != null) {
+        	bindings.put("text", value);
+        } else {
+            log(LogLevel.WARN, "Binding was unsuccessful since the value was null");
+        }
+        scriptEngine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
+        return bindings;
+    }
+
+    
+    
     protected Object getAttributeValue(Message inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
         return ComponentUtil.getAttributeValue(getInputModel(), rows, entityName, attributeName);

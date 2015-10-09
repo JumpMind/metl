@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntimeTest;
+import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntimeTestSupport;
 import org.jumpmind.metl.core.util.NameValue;
 
 public class PayloadTestHelper {
@@ -45,9 +45,9 @@ public class PayloadTestHelper {
 		ArrayList<EntityData> payload = new ArrayList<EntityData>();
 		
 		EntityData entity = new EntityData();
-		entity.put(AbstractComponentRuntimeTest.MODEL_ATTR_ID_1, AbstractComponentRuntimeTest.MODEL_ATTR_NAME_1);
-		entity.put(AbstractComponentRuntimeTest.MODEL_ATTR_ID_2, AbstractComponentRuntimeTest.MODEL_ATTR_NAME_2);
-		entity.put(AbstractComponentRuntimeTest.MODEL_ATTR_ID_3, AbstractComponentRuntimeTest.MODEL_ATTR_NAME_3);
+		entity.put(AbstractComponentRuntimeTestSupport.MODEL_ATTR_ID_1, AbstractComponentRuntimeTestSupport.MODEL_ATTR_NAME_1);
+		entity.put(AbstractComponentRuntimeTestSupport.MODEL_ATTR_ID_2, AbstractComponentRuntimeTestSupport.MODEL_ATTR_NAME_2);
+		entity.put(AbstractComponentRuntimeTestSupport.MODEL_ATTR_ID_3, AbstractComponentRuntimeTestSupport.MODEL_ATTR_NAME_3);
 		payload.add(entity);
 		return payload;
 	}
