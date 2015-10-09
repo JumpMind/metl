@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.core.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,10 @@ import org.jumpmind.metl.core.runtime.EntityData;
 
 public class ComponentUtil {
 
+	public static final int PAYLOAD_TYPE_UNKNOWN = 0;
+	public static final int PAYLOAD_TYPE_LIST_STRING = 1;
+	public static final int PAYLOAD_TYPE_LIST_ENTITY = 2;
+	
     public static Object getAttributeValue(Model model, List<EntityData> rows, String entityName, String attributeName) {
         List<Object> values = getAttributeValues(model, rows, entityName, attributeName);
         if (values.size() > 0) {
@@ -52,4 +57,17 @@ public class ComponentUtil {
         return values;
     }
 
+    public static int getPayloadType(Serializable payload) {
+    	if (payload != null && payload instanceof List) {
+    		if (((List) payload).size() > 0) {
+    			if (((List) payload).get(0) instanceof EntityData) {
+    				return PAYLOAD_TYPE_LIST_ENTITY;
+    			}
+    			else if (((List) payload).get(0) instanceof String) {
+    				return PAYLOAD_TYPE_LIST_STRING;
+    			}
+    		}
+    	}
+    	return PAYLOAD_TYPE_UNKNOWN;
+    }
 }

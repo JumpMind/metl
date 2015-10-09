@@ -38,6 +38,7 @@ dependencies {
     compile "oauth.signpost:oauth-signpost:1.2.1.2"    
     compile "ant:ant:$antVersion"
     compile "com.googlecode.json-simple:json-simple:1.1.1"
+    compile "kxml2:kxml2:$kxmlVersion"  
     testCompile "org.mockito:mockito-all:$mockitoVersion"
     testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
     testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"

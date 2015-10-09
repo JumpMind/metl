@@ -45,7 +45,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntimeTest<ArrayList<EntityData>> {
+public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
 
 	List<String> sqls;
 	String expectedFlowReplacementSql;

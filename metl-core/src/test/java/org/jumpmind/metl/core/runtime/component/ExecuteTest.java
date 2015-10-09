@@ -21,7 +21,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ModelAttributeScriptHelper.class)
-public class ExecuteTest extends AbstractComponentRuntimeTest<ArrayList<String>> {
+public class ExecuteTest extends AbstractComponentRuntimeTestSupport<ArrayList<String>> {
 
 	public static final String COMMAND_OUTPUT = "command output";
 	

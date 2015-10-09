@@ -29,8 +29,8 @@ import java.util.List;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Setting;
-import org.jumpmind.metl.core.runtime.component.EntityRouter;
-import org.jumpmind.metl.core.runtime.component.EntityRouter.Route;
+import org.jumpmind.metl.core.runtime.component.MessageRouter;
+import org.jumpmind.metl.core.runtime.component.MessageRouter.Route;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 
@@ -117,7 +117,7 @@ public class EditEntityRouterPanel extends AbstractFlowStepAwareComponentEditPan
         addComponent(table);
         setExpandRatio(table, 1.0f);
 
-        String json = flowStep.getComponent().get(EntityRouter.SETTING_CONFIG);
+        String json = flowStep.getComponent().get(MessageRouter.SETTING_CONFIG);
         if (isNotBlank(json)) {
             try {
                 List<Route> routes = new ObjectMapper().readValue(json, new TypeReference<List<Route>>() {
@@ -135,7 +135,7 @@ public class EditEntityRouterPanel extends AbstractFlowStepAwareComponentEditPan
         @SuppressWarnings("unchecked")
         List<Route> routes = new ArrayList<Route>((Collection<Route>) table.getItemIds());
         try {
-            Setting setting = flowStep.getComponent().findSetting(EntityRouter.SETTING_CONFIG);
+            Setting setting = flowStep.getComponent().findSetting(MessageRouter.SETTING_CONFIG);
             setting.setValue(new ObjectMapper().writeValueAsString(routes));
             context.getConfigurationService().save(setting);
         } catch (JsonProcessingException e) {

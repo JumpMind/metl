@@ -45,7 +45,7 @@ import org.jumpmind.properties.TypedProperties;
 import org.junit.Before;
 import org.mockito.Mockito;
 
-public abstract class AbstractComponentRuntimeTest<T> {
+public abstract class AbstractComponentRuntimeTestSupport<T> {
 
 	public static String MODEL_ATTR_ID_1 = "attr1";
 	public static String MODEL_ATTR_NAME_1 = "attr1Name";
@@ -203,7 +203,7 @@ public abstract class AbstractComponentRuntimeTest<T> {
 			HandleMessageMonitor actual = messages.get(i).getCallback().getMonitor();
 			
 			assertEquals("Statistics entities processed are not equal", numberEntitiesProcessed, 
-					((AbstractComponentRuntime) spy).getComponentStatistics().getNumberEntitiesProcessed(1));
+					((AbstractComponentRuntime) spy).getComponentStatistics().getNumberEntitiesProcessed(0));
 			assertEquals("Send message counts do not match [message " + (i + 1) + "]", expected.getSendMessageCount(), actual.getSendMessageCount());
 			assertEquals("Start message counts do not match [message " + (i + 1) + "]", expected.getStartupMessageCount(), actual.getStartupMessageCount());
 			assertEquals("Shutdown message counts do not match [message " + (i + 1) + "]", expected.getShutdownMessageCount(), actual.getShutdownMessageCount());
