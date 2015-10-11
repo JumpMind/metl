@@ -216,33 +216,32 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    protected void process(final Message inputMessage, ISendMessageCallback target) {
-        this.componentRuntimeExecutor.execute(new Runnable() {
-
-            @Override
-            public void run() {
-                int threadNumber = ThreadUtils.getThreadNumber();
-                try {
-                    componentContext.getExecutionTracker().beforeHandle(threadNumber, componentContext);
-                    componentContext.getComponentStatistics().incrementInboundMessages(threadNumber);
-                    componentRuntimeByThread.get(threadNumber).handle(inputMessage, target, calculateUnitOfWorkLastMessage(inputMessage));
-                    
-                    /*
-                     * Detect shutdown condition
-                     */
-                    if (startStep || (sourceStepRuntimes.size() == 1 && sourceStepRuntimes.get(0).getComponentContext().getFlowStep().getId()
-                            .equals(StepRuntime.this.componentContext.getFlowStep().getId()) && inQueue.size() == 0)) {
-                        StepRuntime.this.shutdown(threadNumber, target, false);
-                    }
-                } catch (Exception ex) {
-                    recordError(ThreadUtils.getThreadNumber(), ex);
-                } finally {
-                    componentContext.getExecutionTracker().afterHandle(threadNumber, componentContext, error);
-                }
-            }
-        });
-
+    protected void process(Message inputMessage, ISendMessageCallback target) {
+        this.componentRuntimeExecutor.execute(() -> processOnAnotherThread(inputMessage, target));
     }
+    
+    protected void processOnAnotherThread(Message inputMessage, ISendMessageCallback target) {
+        int threadNumber = ThreadUtils.getThreadNumber();
+        try {
+            componentContext.getExecutionTracker().beforeHandle(threadNumber, componentContext);
+            componentContext.getComponentStatistics().incrementInboundMessages(threadNumber);
+            componentRuntimeByThread.get(threadNumber).handle(inputMessage, target, calculateUnitOfWorkLastMessage(inputMessage));
+
+            /*
+             * Detect shutdown condition
+             */
+            if (startStep || (sourceStepRuntimes.size() == 1 && sourceStepRuntimes.get(0).getComponentContext().getFlowStep().getId()
+                    .equals(StepRuntime.this.componentContext.getFlowStep().getId()) && inQueue.size() == 0)) {
+                StepRuntime.this.shutdown(threadNumber, target, false);
+            }
+        } catch (Exception ex) {
+            recordError(ThreadUtils.getThreadNumber(), ex);
+        } finally {
+            componentContext.getExecutionTracker().afterHandle(threadNumber, componentContext, error);
+        }
+    }
+
+
 
     protected void process(ShutdownMessage shutdownMessage, ISendMessageCallback target) {
         cancelled = shutdownMessage.isCancelled();
