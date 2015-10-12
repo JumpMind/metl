@@ -78,13 +78,11 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        if (component.getType().equals(XmlFormatter.TYPE)) {
-            Button editButton = buttonBar.addButton("Edit Template", FontAwesome.FILE_CODE_O);
-            editButton.addClickListener(new EditTemplateClickListener());
+        Button editButton = buttonBar.addButton("Edit Template", FontAwesome.FILE_CODE_O);
+        editButton.addClickListener(new EditTemplateClickListener());
 
-            Button importButton = buttonBar.addButton("Import Template", FontAwesome.DOWNLOAD);
-            importButton.addClickListener(new ImportTemplateClickListener());
-        }
+        Button importButton = buttonBar.addButton("Import Template", FontAwesome.DOWNLOAD);
+        importButton.addClickListener(new ImportTemplateClickListener());
 
         filterField = buttonBar.addFilter();
         filterField.addTextChangeListener(this);

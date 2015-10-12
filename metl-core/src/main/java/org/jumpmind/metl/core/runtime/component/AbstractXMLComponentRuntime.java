@@ -43,6 +43,7 @@ abstract public class AbstractXMLComponentRuntime extends AbstractComponentRunti
         XMLOutputter xmlOutputter = new XMLOutputter();
         return xmlOutputter.outputString(element);
     }
+    
 
     @Override
     protected void start() {

@@ -109,20 +109,30 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                         getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                         EntityData data = new EntityData();
                         for (XmlFormatterAttributeSetting attributeSetting : attributeSettings) {
-                            List<Object> attributeMatches = (List<Object>) attributeSetting
-                                    .getExpression().evaluate(childDocument);
-                            for (Object object : attributeMatches) {
-                                if (object instanceof Attribute) {
-                                    data.put(attributeSetting.getSetting().getAttributeId(),
-                                            ((Attribute) object).getValue());
-                                } else if (object instanceof Content) {
-                                    data.put(attributeSetting.getSetting().getAttributeId(),
-                                            ((Content) object).getValue());
-                                } else if (object instanceof Element) {
-                                    data.put(attributeSetting.getSetting().getAttributeId(),
-                                            ((Element) object).getTextTrim());
+                            boolean resultsFound = false;
+                            Element targetElement = element;
+                            Document targetDocument = childDocument;
+                            do {
+                                List<Object> attributeMatches = (List<Object>) attributeSetting.getExpression().evaluate(targetDocument);
+                                for (Object object : attributeMatches) {
+                                    resultsFound = true;
+                                    if (object instanceof Attribute) {
+                                        data.put(attributeSetting.getSetting().getAttributeId(), ((Attribute) object).getValue());
+                                    } else if (object instanceof Content) {
+                                        data.put(attributeSetting.getSetting().getAttributeId(), ((Content) object).getValue());
+                                    } else if (object instanceof Element) {
+                                        data.put(attributeSetting.getSetting().getAttributeId(), ((Element) object).getTextTrim());
+                                    }
                                 }
-                            }
+                                
+                                if (!resultsFound && targetElement.getParentElement() != null) {
+                                    targetElement = targetElement.getParentElement();
+                                    targetDocument = builder.build(new ByteArrayInputStream(toXML(targetElement).getBytes()));
+                                } else {
+                                    targetDocument = null;
+                                    targetElement = null;
+                                }
+                            } while (!resultsFound && targetElement != null);
                         }
                         if (data.size() > 0) {
                             payload.add(data);
