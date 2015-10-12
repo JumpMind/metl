@@ -32,6 +32,8 @@ import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 public class MessageLogger extends AbstractComponentRuntime {
 
     public static final String TYPE = "Message Logger";
+    
+    public static String SETTING_QUALIFY_WITH_ENTITY_NAME = "qualify.with.entity.name";
 
     @Override
     protected void start() {
@@ -57,7 +59,7 @@ public class MessageLogger extends AbstractComponentRuntime {
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                     log(LogLevel.INFO,
                             String.format("Message Payload: %s",
-                                    getComponent().toRow((EntityData) object, false)));
+                                    getComponent().toRow((EntityData) object, context.getFlowStep().getComponent().getBoolean(SETTING_QUALIFY_WITH_ENTITY_NAME, true))));
                 } else {
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                     log(LogLevel.INFO, String.format("Message Payload: %s", object));
