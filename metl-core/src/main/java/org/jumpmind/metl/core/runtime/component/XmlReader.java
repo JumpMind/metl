@@ -111,6 +111,9 @@ public class XmlReader extends AbstractComponentRuntime {
 					prevEndLine = parser.getLineNumber();
 					if (parser.getName().equals(readTag)) {
 						StringBuilder xml = new StringBuilder();
+						if (startLine == 0) {
+							startLine = 1;
+						}
 						forward(startLine - lineNumberReader.getLineNumber(), lineNumberReader);
 						int linesToRead = parser.getLineNumber() - lineNumberReader.getLineNumber();
 						if (startLine >= lineNumberReader.getLineNumber()) {
