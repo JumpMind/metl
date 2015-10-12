@@ -81,9 +81,9 @@ public class NotificationEditPanel extends VerticalLayout implements IUiPanel {
         sampleSubjectByEvent.put(Notification.EventType.FLOW_ERROR.toString(), "Flow $(_flowName) - ERROR");
 
         sampleMessageByEvent = new HashMap<String, String>();
-        sampleMessageByEvent.put(Notification.EventType.FLOW_START.toString(), "Started flow $(_flowName) on agent $(_agentName) at $(_time) on $(_date)");
-        sampleMessageByEvent.put(Notification.EventType.FLOW_END.toString(), "Ended flow $(_flowName) on agent $(_agent) at $(_time) on $(_date)");
-        sampleMessageByEvent.put(Notification.EventType.FLOW_ERROR.toString(), "Error in flow $(_flowName) on agent $(_agentName) at $(_time) on $(_date)\n\n$(_errorText)");
+        sampleMessageByEvent.put(Notification.EventType.FLOW_START.toString(), "Started manipulatedFlow $(_flowName) on agent $(_agentName) at $(_time) on $(_date)");
+        sampleMessageByEvent.put(Notification.EventType.FLOW_END.toString(), "Ended manipulatedFlow $(_flowName) on agent $(_agent) at $(_time) on $(_date)");
+        sampleMessageByEvent.put(Notification.EventType.FLOW_ERROR.toString(), "Error in manipulatedFlow $(_flowName) on agent $(_agentName) at $(_time) on $(_date)\n\n$(_errorText)");
         
         FormLayout form = new FormLayout();
         form.setSizeFull();

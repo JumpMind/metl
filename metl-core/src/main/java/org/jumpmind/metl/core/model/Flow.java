@@ -288,7 +288,7 @@ public class Flow extends AbstractObject {
         Collections.sort(children, new YSorter());
         for (FlowStep child : children) {
             //TODO: this takes care of when you loop back to yourself, but not if there is a larger
-            //loop in the flow.  Work this out based on possibility of a broader cyclic graph
+            //loop in the manipulatedFlow.  Work this out based on possibility of a broader cyclic graph
             if (!starterStep.getId().equals(child.getId())) {
                 order = calculateApproximateOrder(order, child);
             }
@@ -313,6 +313,23 @@ public class Flow extends AbstractObject {
         Collections.sort(starterSteps, new XSorter());
         Collections.sort(starterSteps, new YSorter());
         return starterSteps;
+    }
+    
+    public List<FlowStep> findFinalSteps() {
+        List<FlowStep> finalSteps = new ArrayList<FlowStep>();
+        for (FlowStep flowStep : flowSteps) {
+            boolean hasSourceLink = false;
+            for (FlowStepLink flowStepLink : flowStepLinks) {
+                if (flowStep.getId().equals(flowStepLink.getSourceStepId())) {
+                    hasSourceLink = true;
+                }
+            }
+
+            if (!hasSourceLink) {
+                finalSteps.add(flowStep);
+            }
+        }
+        return finalSteps;
     }
     
     @Override

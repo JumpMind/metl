@@ -868,7 +868,7 @@ public class DesignNavigator extends VerticalLayout {
         if (object instanceof FlowName) {
             FlowName flow = (FlowName) object;
             ConfirmDialog.show("Delete Flow?",
-                    "Are you sure you want to delete the '" + flow.getName() + "' flow?",
+                    "Are you sure you want to delete the '" + flow.getName() + "' manipulatedFlow?",
                     new DeleteFlowConfirmationListener(flow));
         } else if (object instanceof ResourceName) {
             ResourceName resource = (ResourceName) object;
