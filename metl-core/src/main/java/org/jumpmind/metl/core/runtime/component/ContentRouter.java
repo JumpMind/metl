@@ -41,9 +41,9 @@ import org.jumpmind.properties.TypedProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class MessageRouter extends AbstractComponentRuntime {
+public class ContentRouter extends AbstractComponentRuntime {
 
-    public static final String TYPE = "Message Router";
+    public static final String TYPE = "Content Router";
 
     public static final String SETTING_CONFIG = "config";
 

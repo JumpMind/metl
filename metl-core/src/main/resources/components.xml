@@ -127,10 +127,10 @@
             </setting>
         </settings>
     </component>
-    <component id='Message Router' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none'
+    <component id='Content Router' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none'
         inputOutputModelsMatch='true' shareable='false'>
-        <name>Message Router</name>
-        <className>org.jumpmind.metl.core.runtime.component.MessageRouter</className>
+        <name>Content Router</name>
+        <className>org.jumpmind.metl.core.runtime.component.ContentRouter</className>
         <description></description>
         <settings>
             <setting id='rows.per.message' type='integer' required='true'>

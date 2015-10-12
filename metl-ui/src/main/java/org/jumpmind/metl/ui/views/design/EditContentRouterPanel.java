@@ -29,8 +29,8 @@ import java.util.List;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Setting;
-import org.jumpmind.metl.core.runtime.component.MessageRouter;
-import org.jumpmind.metl.core.runtime.component.MessageRouter.Route;
+import org.jumpmind.metl.core.runtime.component.ContentRouter;
+import org.jumpmind.metl.core.runtime.component.ContentRouter.Route;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
 
@@ -54,7 +54,7 @@ import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
 
 @SuppressWarnings("serial")
-public class EditEntityRouterPanel extends AbstractFlowStepAwareComponentEditPanel {
+public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPanel {
 
     Table table = new Table();
 
@@ -117,7 +117,7 @@ public class EditEntityRouterPanel extends AbstractFlowStepAwareComponentEditPan
         addComponent(table);
         setExpandRatio(table, 1.0f);
 
-        String json = flowStep.getComponent().get(MessageRouter.SETTING_CONFIG);
+        String json = flowStep.getComponent().get(ContentRouter.SETTING_CONFIG);
         if (isNotBlank(json)) {
             try {
                 List<Route> routes = new ObjectMapper().readValue(json, new TypeReference<List<Route>>() {
@@ -135,7 +135,7 @@ public class EditEntityRouterPanel extends AbstractFlowStepAwareComponentEditPan
         @SuppressWarnings("unchecked")
         List<Route> routes = new ArrayList<Route>((Collection<Route>) table.getItemIds());
         try {
-            Setting setting = flowStep.getComponent().findSetting(MessageRouter.SETTING_CONFIG);
+            Setting setting = flowStep.getComponent().findSetting(ContentRouter.SETTING_CONFIG);
             setting.setValue(new ObjectMapper().writeValueAsString(routes));
             context.getConfigurationService().save(setting);
         } catch (JsonProcessingException e) {
@@ -153,7 +153,7 @@ public class EditEntityRouterPanel extends AbstractFlowStepAwareComponentEditPan
                     @Override
                     protected void save(String text) {
                         route.setMatchExpression(text);
-                        EditEntityRouterPanel.this.save();
+                        EditContentRouterPanel.this.save();
                     }
                 };
                 textField.setWidth(100, Unit.PERCENTAGE);
@@ -181,7 +181,7 @@ public class EditEntityRouterPanel extends AbstractFlowStepAwareComponentEditPan
                         String stepId = (String) event.getProperty().getValue();
                         if (stepId != null) {
                             route.setTargetStepId(stepId);
-                            EditEntityRouterPanel.this.save();
+                            EditContentRouterPanel.this.save();
                         }
                     }
                 });

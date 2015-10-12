@@ -2,10 +2,10 @@
 [cols="<25%h,<75%"]
 |===================================
 |Icon|image:entityrouter.png[]
-|Description|The entity router routes model based records within a message to one or more downstream components based on the routing criteria configured in the component.
+|Description|The message router routes model based records within a message to one or more downstream components based on the routing criteria configured in the component.
    
-|Inbound Message Type|Model Based Message
-|Output Message Type|Model Based Message
+|Inbound Message Type|Any Message Type
+|Output Message Type|Any Message Type
 |===================================
 
 ====== Parameters
@@ -14,7 +14,6 @@
 |===================================
 |Name|Description
 include::../common-properties/input-model.ad[]
-include::../common-properties/output-model.ad[]
 include::../common-properties/unit-of-work.ad[]
 include::../common-properties/enabled.ad[]
 include::../common-properties/rows-per-message.ad[]

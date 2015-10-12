@@ -33,9 +33,9 @@
         <iconImage>/org/jumpmind/metl/core/runtime/component/rdbmsreader.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditRdbmsReaderPanel</className>
     </component-ui>
-    <component-ui id="Message Router UI" componentId="Message Router">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/entityrouter.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditEntityRouterPanel</className>
+    <component-ui id="Content Router UI" componentId="Content Router">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/contentrouter.png</iconImage>
+        <className>org.jumpmind.metl.ui.views.design.EditContentRouterPanel</className>
     </component-ui>
     <component-ui id="Format Delimited UI" componentId="Format Delimited">
         <iconImage>/org/jumpmind/metl/core/runtime/component/delimitedformatter.png</iconImage>

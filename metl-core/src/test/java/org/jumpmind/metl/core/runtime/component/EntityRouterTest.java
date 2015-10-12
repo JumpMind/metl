@@ -39,7 +39,7 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.component.MessageRouter.Route;
+import org.jumpmind.metl.core.runtime.component.ContentRouter.Route;
 import org.jumpmind.metl.core.util.NameValue;
 import org.jumpmind.metl.core.utils.TestUtils;
 import org.junit.Before;
@@ -62,7 +62,7 @@ public class EntityRouterTest {
         flow = TestUtils.createFlow("TestFlow", null);
 
         Setting[] settingData = createSettings();
-        Component component = TestUtils.createComponent(MessageRouter.TYPE, false, null,
+        Component component = TestUtils.createComponent(ContentRouter.TYPE, false, null,
                 createInputModel(), null, null, null, settingData);
         
         step = new FlowStep();
@@ -110,7 +110,7 @@ public class EntityRouterTest {
     
     protected SendMessageCallback<ArrayList<EntityData>> route(EntityData...data) {
         SendMessageCallback<ArrayList<EntityData>> target = new SendMessageCallback<ArrayList<EntityData>>();
-        MessageRouter router = new MessageRouter();
+        ContentRouter router = new ContentRouter();
         ComponentContext context = new ComponentContext(null, step, flow, new ExecutionTrackerNoOp(), null, null, null);
         router.start(0, context);
         Message inputMessage = new Message("");
@@ -146,7 +146,7 @@ public class EntityRouterTest {
         routes.add(new Route("TEST_TABLE_1.COL1=='Route to 1'", "Target 1"));
         routes.add(new Route("TEST_TABLE_2.COLX=='Route to 2'", "Target 2"));
         Setting[] settingData = new Setting[1];
-        settingData[0] = new Setting(MessageRouter.SETTING_CONFIG,
+        settingData[0] = new Setting(ContentRouter.SETTING_CONFIG,
                 new ObjectMapper().writeValueAsString(routes));
         return settingData;
     }

@@ -1,13 +1,13 @@
 
 ==== Processors
 
-Processors are a set of components that manipulate inbound messages in some way and pass the manipulated messages /d ata to other components downstream in the associated flow.  
+Processors are a set of components that manipulate inbound messages in some way and pass the manipulated messages data to other components downstream in the associated flow.  
 
 include::deduper.ad[]
 
 include::delay.ad[]
 
-include::entity-router.ad[]
+include::content-router.ad[]
 
 include::execute.ad[]
 
