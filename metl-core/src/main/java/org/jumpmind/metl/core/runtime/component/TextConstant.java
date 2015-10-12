@@ -36,12 +36,14 @@ public class TextConstant extends AbstractComponentRuntime {
 
     public static final String SETTING_ROWS_PER_MESSAGE = "rows.per.message";
 
+    public static final String SETTING_SPLIT_ON_LINE_FEED = "split.on.line.feed";
+
     public static final String SETTING_TEXT = "text";
 
     @Override
     protected void start() {
     }
-        
+
     @Override
     public boolean supportsStartupMessages() {
         return true;
@@ -51,28 +53,33 @@ public class TextConstant extends AbstractComponentRuntime {
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         int linesInMessage = 0;
         int textRowsPerMessage = context.getFlowStep().getComponent().getInt(SETTING_ROWS_PER_MESSAGE, 1000);
+        boolean splitOnLineFeed = context.getFlowStep().getComponent().getBoolean(SETTING_SPLIT_ON_LINE_FEED, false);
         ArrayList<String> payload = new ArrayList<String>();
 
-        BufferedReader reader = null;
-        String currentLine;
-        try {
-            reader = new BufferedReader(new StringReader(context.getFlowStep().getComponent().get(SETTING_TEXT, "")));
-            while ((currentLine = reader.readLine()) != null) {
-                if (linesInMessage == textRowsPerMessage) {
-                    callback.sendMessage(payload, false);
-                    linesInMessage = 0;
-                    payload = new ArrayList<String>();
+        if (!splitOnLineFeed) {
+            payload.add(context.getFlowStep().getComponent().get(SETTING_TEXT, ""));
+        } else {
+            BufferedReader reader = null;
+            String currentLine;
+            try {
+                reader = new BufferedReader(new StringReader(context.getFlowStep().getComponent().get(SETTING_TEXT, "")));
+                while ((currentLine = reader.readLine()) != null) {
+                    if (linesInMessage == textRowsPerMessage) {
+                        callback.sendMessage(payload, false);
+                        linesInMessage = 0;
+                        payload = new ArrayList<String>();
+                    }
+                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                    payload.add(currentLine);
+                    linesInMessage++;
                 }
-                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                payload.add(currentLine);
-                linesInMessage++;
+            } catch (IOException e) {
+                throw new IoException("Error reading from file " + e.getMessage());
+            } finally {
+                IOUtils.closeQuietly(reader);
             }
-        } catch (IOException e) {
-            throw new IoException("Error reading from file " + e.getMessage());
-        } finally {
-            IOUtils.closeQuietly(reader);
         }
-        
+
         callback.sendMessage(payload, unitOfWorkBoundaryReached);
     }
 
