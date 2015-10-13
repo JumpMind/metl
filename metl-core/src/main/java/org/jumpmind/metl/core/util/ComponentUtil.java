@@ -59,11 +59,11 @@ public class ComponentUtil {
 
     public static int getPayloadType(Serializable payload) {
     	if (payload != null && payload instanceof List) {
-    		if (((List) payload).size() > 0) {
-    			if (((List) payload).get(0) instanceof EntityData) {
+    		if (((List<?>) payload).size() > 0) {
+    			if (((List<?>) payload).get(0) instanceof EntityData) {
     				return PAYLOAD_TYPE_LIST_ENTITY;
     			}
-    			else if (((List) payload).get(0) instanceof String) {
+    			else if (((List<?>) payload).get(0) instanceof String) {
     				return PAYLOAD_TYPE_LIST_STRING;
     			}
     		}
