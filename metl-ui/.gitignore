@@ -7,3 +7,9 @@
 
 /src/main/webapp/VAADIN/themes/apptheme/addons.scss
 /src/main/webapp/VAADIN/themes/images/addons.scss
+/test_codb.h2.db
+/test_codb.lock.db
+/test_codb.trace.db
+/test_vertex_rte.h2.db
+/test_vertex_rte.lock.db
+/working/

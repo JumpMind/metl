@@ -129,6 +129,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
                         + "where configuration files can be found: -D" + SYS_CONFIG_DIR + "=/some/config/dir");
             }
         }
+        System.setProperty("h2.baseDir", configDir);
         if (printInstrutions) {
             System.out.println("The current config directory is " + configDir);
             System.out.println("The current working directory is " + System.getProperty("user.dir"));

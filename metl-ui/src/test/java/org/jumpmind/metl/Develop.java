@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,7 +39,8 @@ public class Develop {
         
         System.out.println(IOUtils.toString(new FileInputStream("../metl-server/src/main/resources/Metl.asciiart")));
 
-        System.setProperty("org.jumpmind.metl.ui.init.config.dir","build");
+        new File("working").mkdirs();
+        System.setProperty("org.jumpmind.metl.ui.init.config.dir","working");
         
         Server server = new Server(42000);
 
