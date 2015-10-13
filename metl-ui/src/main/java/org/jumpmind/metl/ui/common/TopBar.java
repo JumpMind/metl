@@ -65,9 +65,13 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
         menuBar.setWidth(100, Unit.PERCENTAGE);
         addComponent(menuBar);
         setExpandRatio(menuBar, 1.0f);
-        
+
+        Button helpButton = new Button("Help", FontAwesome.QUESTION_CIRCLE);
+        helpButton.addClickListener(event -> openHelp(event));
+        addComponent(helpButton);
+
         Button settingsButton = new Button(context.getUser().getLoginId(), FontAwesome.GEAR);
-        settingsButton.addClickListener(new ClickListener() {            
+        settingsButton.addClickListener(new ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
             }
@@ -75,16 +79,7 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
         addComponent(settingsButton);
 
         Button logoutButton = new Button("Logout", FontAwesome.SIGN_OUT);
-        logoutButton.addClickListener(new ClickListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void buttonClick(ClickEvent event) {
-                URI uri = Page.getCurrent().getLocation();
-                VaadinSession.getCurrent().close();        
-                Page.getCurrent().setLocation(uri.getPath());
-            }            
-        });
+        logoutButton.addClickListener(event -> logout());
         addComponent(logoutButton);
 
         Map<Category, List<TopBarLink>> menuItemsByCategory = viewManager.getMenuItemsByCategory();
@@ -126,6 +121,18 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
             }
         }
         viewManager.navigateTo(viewManager.getDefaultView());
+    }
+    
+    protected void logout() {
+        URI uri = Page.getCurrent().getLocation();
+        VaadinSession.getCurrent().close();
+        Page.getCurrent().setLocation(uri.getPath());
+    }
+
+    protected void openHelp(ClickEvent event) {
+        String docUrl = Page.getCurrent().getLocation().toString();
+        docUrl = docUrl.substring(0, docUrl.indexOf("/app"));
+        Page.getCurrent().open(docUrl + "/doc/html/user-guide.html", "doc");
     }
 
     protected void uncheckAll() {

@@ -151,5 +151,4 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
     
     task wrapper(type: Wrapper) {
         gradleVersion = '2.7'
-    }
-    
+    }    
