@@ -39,7 +39,7 @@ abstract public class DbTestUtils {
     Logger logger = LoggerFactory.getLogger(getClass());
 
     public static IDatabasePlatform createDatabasePlatform() throws Exception {
-        final String DB_DIR = "build/dbs";
+        final String DB_DIR = "./build/dbs";
         File dir = new File(DB_DIR);
         if (dir.exists()) {
             FileUtils.deleteDirectory(new File(DB_DIR));

@@ -258,7 +258,7 @@ public class RdbmsReaderTest {
     private static List<Setting> createResourceSettings() {
         List<Setting> settings = new ArrayList<Setting>(4);
         settings.add(new Setting(Datasource.DB_POOL_DRIVER, "org.h2.Driver"));
-        settings.add(new Setting(Datasource.DB_POOL_URL, "jdbc:h2:file:build/dbs/testdb"));
+        settings.add(new Setting(Datasource.DB_POOL_URL, "jdbc:h2:file:./build/dbs/testdb"));
         settings.add(new Setting(Datasource.DB_POOL_USER, "jumpmind"));
         settings.add(new Setting(Datasource.DB_POOL_PASSWORD, "jumpmind"));
         return settings;
