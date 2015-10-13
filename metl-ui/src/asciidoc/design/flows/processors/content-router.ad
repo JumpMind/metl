@@ -1,8 +1,10 @@
-==== Entity Router
+==== Content Router
 [cols="<25%h,<75%"]
 |===================================
-|Icon|image:entityrouter.png[]
-|Description|The message router routes model based records within a message to one or more downstream components based on the routing criteria configured in the component.
+|Icon|image:contentrouter.png[]
+|Use When|Content within a message needs to be routed to different downstream components
+|Samples|Partition By Gender
+|Description|The content router routes content within a message to one or more downstream components based on the routing criteria configured in the component.
    
 |Inbound Message Type|Any Message Type
 |Output Message Type|Any Message Type
@@ -17,6 +19,7 @@ include::../common-properties/input-model.ad[]
 include::../common-properties/unit-of-work.ad[]
 include::../common-properties/enabled.ad[]
 include::../common-properties/rows-per-message.ad[]
+|Only Route First Match|If checked, the content router will only route an inbound content to the first criteria in the criteria list that evaluates to true, not all criteria in the list that evaluate to true.
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===================================
@@ -34,11 +37,19 @@ is NOT passed to the step at the right.
 The target step is the connected downstream component that will receive the message if the groovy expression 
 evaluates to true.
 
-TIP: The inbound message will go to ALL target steps where the expression evaluates to true (i.e. a message can go to more than one target step).
+TIP: The inbound message will go to ALL target steps where the expression evaluates to true (i.e. a message can go to more than one target step)
+unless the "Only Route First Match" option is checked.
 
 [id="entity-router-example-1",reftext="Example 1"]
-====== Example 1.  Sample groovy expressions
+====== Example 1.  Sample groovy expressions for an entity based message
 ----
-if (ENTITY.get("ATTRIBUTE").equalsIgnoreCase("VALUE 1")) return true;
-if (ENTITY.get("ATTRIBUTE").equalsIgnoreCase("VALUE 2")) return true;
+if (ENTITY.ATTRIBUTE=='Value 1')) return true;
+if (ENTITY.ATTRIBUTE=='Value 2') return true;
+----
+
+[id="entity-router-example-2",reftext="Example 2"]
+====== Example 2.  Sample groovy expressions for a text based message
+----
+if (text.indexOf("Some text string") > 0) return true;
+if (text.indexOf("Some other text string") > 0) return true;
 ----
