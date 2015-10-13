@@ -20,7 +20,7 @@ entity and attribute.  See <<rdbms-reader-example-2>> below.
 |Output Message Type|Model Based Message
 |===========================================
 
-======= Parameters
+====== Parameters
 
 [options="header" cols="<25%,<75%"]
 |===========================================

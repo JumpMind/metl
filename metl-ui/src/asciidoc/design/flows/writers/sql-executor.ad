@@ -13,7 +13,7 @@ one time per message received, Per Entity - for every entity record in an input 
 |Output Message Type|Text Based Message
 |===========================================
 
-======= Parameters
+====== Parameters
 
 [options="header" cols="<25%,<75%"]
 |===========================================
