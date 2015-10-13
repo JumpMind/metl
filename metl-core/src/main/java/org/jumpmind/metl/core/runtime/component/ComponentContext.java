@@ -36,7 +36,7 @@ public class ComponentContext {
     
     FlowStep flowStep;
 
-    Flow flow;
+    Flow manipulatedFlow;
 
     IExecutionTracker executionTracker;
 
@@ -48,14 +48,14 @@ public class ComponentContext {
     
     ComponentStatistics componentStatistics = new ComponentStatistics();
 
-    public ComponentContext(AgentDeployment deployment, FlowStep flowStep, Flow flow, IExecutionTracker executionTracker,
+    public ComponentContext(AgentDeployment deployment, FlowStep flowStep, Flow manipulatedFlow, IExecutionTracker executionTracker,
             IResourceRuntime resource, Map<String, Serializable> flowParameters, Map<String, String> globalSettings) {
         this.deployment = deployment;
         if (flowParameters == null) {
             flowParameters = new HashMap<String, Serializable>();
         }
         this.flowStep = flowStep;
-        this.flow = flow;
+        this.manipulatedFlow = manipulatedFlow;
         this.executionTracker = executionTracker;
         this.resourceRuntime = resource;
         this.flowParameters = flowParameters;
@@ -70,8 +70,8 @@ public class ComponentContext {
         return flowStep;
     }
 
-    public Flow getFlow() {
-        return flow;
+    public Flow getManipulatedFlow() {
+        return manipulatedFlow;
     }
 
     public IExecutionTracker getExecutionTracker() {

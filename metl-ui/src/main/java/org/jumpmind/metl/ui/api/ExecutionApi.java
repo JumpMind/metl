@@ -70,7 +70,7 @@ public class ExecutionApi {
     @Autowired
     IExecutionService executionService;
 
-    @ApiOperation(value = "Invoke a flow that is deployed to an agent by name")
+    @ApiOperation(value = "Invoke a manipulatedFlow that is deployed to an agent by name")
     @RequestMapping(
             value = "/agents/{agentName}/deployments/{deploymentName}/invoke",
             method = RequestMethod.GET)
@@ -78,7 +78,7 @@ public class ExecutionApi {
     @ResponseBody
     public final ExecutionResults invoke(
             @ApiParam(value = "The name of the agent to use") @PathVariable("agentName") String agentName,
-            @ApiParam(value = "The name of the flow deployment to invoke") @PathVariable("deploymentName") String deploymentName,
+            @ApiParam(value = "The name of the manipulatedFlow deployment to invoke") @PathVariable("deploymentName") String deploymentName,
             HttpServletRequest req) {
         agentName = decode(agentName);
         deploymentName = decode(deploymentName);

@@ -315,6 +315,23 @@ public class Flow extends AbstractObject {
         return starterSteps;
     }
     
+    public List<FlowStep> findFinalSteps() {
+        List<FlowStep> finalSteps = new ArrayList<FlowStep>();
+        for (FlowStep flowStep : flowSteps) {
+            boolean hasSourceLink = false;
+            for (FlowStepLink flowStepLink : flowStepLinks) {
+                if (flowStep.getId().equals(flowStepLink.getSourceStepId())) {
+                    hasSourceLink = true;
+                }
+            }
+
+            if (!hasSourceLink) {
+                finalSteps.add(flowStep);
+            }
+        }
+        return finalSteps;
+    }
+    
     @Override
     public AbstractObject copy() {
         Flow newFlow = (Flow)super.copy();
@@ -333,9 +350,11 @@ public class Flow extends AbstractObject {
         }
 
         for (FlowStepLink flowStepLink : flowStepLinks) {
+            String oldSourceStepId= flowStepLink.getSourceStepId();
+            String oldTargetStepId = flowStepLink.getTargetStepId();
             flowStepLink = (FlowStepLink)flowStepLink.copy();
-            flowStepLink.setSourceStepId(oldToNewFlowStepIds.get(flowStepLink.getSourceStepId()));
-            flowStepLink.setTargetStepId(oldToNewFlowStepIds.get(flowStepLink.getTargetStepId()));
+            flowStepLink.setSourceStepId(oldToNewFlowStepIds.get(oldSourceStepId));
+            flowStepLink.setTargetStepId(oldToNewFlowStepIds.get(oldTargetStepId));
             newFlow.getFlowStepLinks().add(flowStepLink);
         }
 

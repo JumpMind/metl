@@ -83,13 +83,15 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         Execution execution = getExecution();
         execution.setEndTime(new Date());
         ExecutionStatus status = ExecutionStatus.DONE;
-        for (ExecutionStep executionStep : steps.values()) {
-            if (ExecutionStatus.ERROR.name().equals(executionStep.getStatus())) {
-                status = ExecutionStatus.ERROR;
-            }
+        if (steps != null) {
+            for (ExecutionStep executionStep : steps.values()) {
+                if (ExecutionStatus.ERROR.name().equals(executionStep.getStatus())) {
+                    status = ExecutionStatus.ERROR;
+                }
 
-            if (ExecutionStatus.CANCELLED.name().equals(executionStep.getStatus())) {
-                status = ExecutionStatus.CANCELLED;
+                if (ExecutionStatus.CANCELLED.name().equals(executionStep.getStatus())) {
+                    status = ExecutionStatus.CANCELLED;
+                }
             }
         }
         execution.setStatus(status.name());
@@ -203,11 +205,11 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         super.flowStepFailedOnComplete(context, error);
         steps.values().forEach(step -> setToErrorStatus(step));
     }
-    
+
     private void setToErrorStatus(ExecutionStep step) {
         step.setStatus(ExecutionStatus.ERROR.name());
         step.setLastUpdateTime(new Date());
-        this.recorder.record(step);        
+        this.recorder.record(step);
     }
 
     @Override

@@ -315,7 +315,7 @@ public class AgentRuntime {
     
                 FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory,
                         resourceFactory, new ExecutionTrackerRecorder(agent, deployment, recorder),
-                        flowStepsExecutionThreads);
+                        flowStepsExecutionThreads, configurationService);
                 deployedFlows.put(deployment, flowRuntime);
     
                 if (deployment.asStartType() == StartType.ON_DEPLOY) {
@@ -418,7 +418,7 @@ public class AgentRuntime {
                 List<Notification> notifications = configurationService.findNotificationsForDeployment(deployment);
                 flowRuntime.start(executionId, deployedResources, agent, notifications, globalSettings);
             } catch (Exception e) {
-                log.error("Error while waiting for the flow to complete", e);
+                log.error("Error while waiting for the manipulatedFlow to complete", e);
                 //flowRuntime.stop(true);
             } finally {
                 flowRuntime.waitForFlowCompletion();

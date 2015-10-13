@@ -160,7 +160,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     }
     
     protected Flow getFlow() {
-        return context.getFlow();
+        return context.getManipulatedFlow();
     }
     
     protected Bindings bindEntityData(ScriptEngine scriptEngine, EntityData entityData) {

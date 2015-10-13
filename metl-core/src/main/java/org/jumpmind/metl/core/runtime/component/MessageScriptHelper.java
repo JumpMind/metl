@@ -66,7 +66,7 @@ public class MessageScriptHelper {
         this.context = component.getComponentContext();
         this.resource = context.getResourceRuntime();
         this.componentStatistics = context.getComponentStatistics();
-        this.flow = context.getFlow();
+        this.flow = context.getManipulatedFlow();
         this.flowStep = context.getFlowStep();
     }
 
