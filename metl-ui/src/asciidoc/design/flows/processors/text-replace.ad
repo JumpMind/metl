@@ -1,9 +1,9 @@
-==== Text Replace
+===== Text Replace
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|regex_replace.png[]
 |Description|The text replace component uses a regular expression to replace a piece of text with another piece of text within a text based message.
    
 |Inbound Message Type|Text Based Message
 |Output Message Type|Text Based Message
-|===================================
+|===========================================

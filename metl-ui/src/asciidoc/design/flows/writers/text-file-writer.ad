@@ -1,6 +1,6 @@
-==== Text File Writer
+===== Text File Writer
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:textfilewriter.png[]
 |Use When|Data needs written to a text based file
 |Samples|
@@ -12,12 +12,12 @@ processing component like the Format Delimited and Format Fixed components.
 
 |Inbound Message Type|Text Based Message
 |Output Message Type|Text Based Message
-|===================================
+|===========================================
 
 ====== Parameters
 
 [options="header" cols="<25%,<75%"]
-|===================================
+|===========================================
 |Name|Description
 |Resource|The file based resource (either local or remote) on which the file will be written.
 include::../common-properties/unit-of-work.ad[]
@@ -30,6 +30,6 @@ absolute path specified in the File based resource
 |Encoding|The encoding of the file
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
-|===================================
+|===========================================
 IMPORTANT: Specifying None on the Action on Error does NOT stop the flow from failing when a file cannot be written.  It simply 
 specifies what should be done with the file when the error condition does occur.

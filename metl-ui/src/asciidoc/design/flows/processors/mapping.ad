@@ -1,9 +1,9 @@
-==== Mapping
+===== Mapping
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:mapping.png[]
 |Description|The mapping component allows you to map messages from one model structure to another.
    
 |Inbound Message Type|Model Based Message
 |Output Message Type|Model Based Message
-|===================================
+|===========================================

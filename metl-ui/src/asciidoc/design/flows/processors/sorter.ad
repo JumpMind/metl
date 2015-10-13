@@ -1,9 +1,28 @@
-==== Sorter
+===== Sorter
 [cols="<25%h,<75%"]
-|===================================
-|Icon|image:entityrouter.png[]
-|Description|The entity router routes model based records within a message to one or more downstream components based on the routing criteria configured in the component.
-   
+|===========================================
+|Icon|image:sorter.png[]
+|Use When|Data needs to be sorted
+|Samples| 
+|Description|The Sorter is used to sort data elements within a message that is being processed through a flow.
+
 |Inbound Message Type|Model Based Message
 |Output Message Type|Model Based Message
-|===================================
+|===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description 
+include::../common-properties/input-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Sort Entity.Attribute|The model Entity and Attribute to sort the data by.  The entity and attribute must be 
+concatenated with a period (entity.attribute)
+include::../common-properties/rows-per-message.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===========================================
+
+

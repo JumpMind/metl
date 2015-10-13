@@ -1,6 +1,6 @@
-==== Zip
+===== Zip
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:zip.png[]
 |Use When|Data needs to be put in a compressed file 
 |Samples|
@@ -8,12 +8,12 @@
 
 |Inbound Message Type|Model Based Message
 |Output Message Type|Model Based Message
-|===================================
+|===========================================
 
 ====== Parameters
 
 [options="header" cols="<25%,<75%"]
-|===================================
+|===========================================
 |Name|Description
 |Resource|The file based resource (either local or remote) on which the compressed file will be written.  
 include::../common-properties/unit-of-work.ad[]
@@ -24,4 +24,4 @@ absolute path specified in the File based resource.
 |Encoding|File encoding type, defaults to UTF-8
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
-|===================================
+|===========================================

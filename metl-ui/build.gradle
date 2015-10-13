@@ -64,3 +64,5 @@ dependencies {
 }
 
 develop.dependsOn vaadinCompileWidgetset
+develop.dependsOn generateDocs
+assemble.dependsOn generateDocs
