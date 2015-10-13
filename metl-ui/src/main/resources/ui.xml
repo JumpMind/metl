@@ -100,7 +100,7 @@
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-multiplier-48x48.png</iconImage>
     </component-ui>   
     <component-ui id="Sequence UI" componentId="Sequence">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-sequence-48x48.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-sequencing-48x48.png</iconImage>
     </component-ui>       
     <component-ui id="Sorter UI" componentId="Sorter">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-sorter-48x48.png</iconImage>
