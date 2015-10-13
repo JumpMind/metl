@@ -18,8 +18,6 @@ public class CallFlowFlowManipulator implements IFlowManipulator {
 
     @Override
     public Flow manipulate(Flow flow, FlowStep flowStep, IConfigurationService configurationService) {
-        flow = (Flow) flow.copy();
-
         String flowId = flowStep.getComponent().get(CallFlow.SETTING_FLOW_ID);
         if (isBlank(flowId)) {
             throw new MisconfiguredException(
@@ -32,9 +30,8 @@ public class CallFlowFlowManipulator implements IFlowManipulator {
         List<FlowStepLink> finalLinks = flow.getFlowStepLinks();
 
         // remove source links to this step
-        List<FlowStepLink> sourceLinksBefore = flow.findFlowStepLinksWithTarget(flowStep.getId());
-
-        finalLinks.removeAll(sourceLinksBefore);
+        List<FlowStepLink> beforeLinks = flow.findFlowStepLinksWithTarget(flowStep.getId());
+        finalLinks.removeAll(beforeLinks);
 
         List<FlowStep> flowToCallStartSteps = flowToCall.findStartSteps();
 
@@ -46,8 +43,8 @@ public class CallFlowFlowManipulator implements IFlowManipulator {
 
         // Add links from source steps to this flow's startup steps
         for (FlowStep flowToCallStartStep : flowToCallStartSteps) {
-            for (FlowStepLink beforeLinks : sourceLinksBefore) {
-                finalLinks.add(new FlowStepLink(beforeLinks.getSourceStepId(), flowToCallStartStep.getId()));
+            for (FlowStepLink beforeLink : beforeLinks) {
+                finalLinks.add(new FlowStepLink(beforeLink.getSourceStepId(), flowToCallStartStep.getId()));
             }
         }
 

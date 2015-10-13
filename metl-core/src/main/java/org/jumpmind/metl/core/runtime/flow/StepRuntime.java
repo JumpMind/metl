@@ -191,13 +191,13 @@ public class StepRuntime implements Runnable {
             ISendMessageCallback target = createSendMessageCallback();
             /*
              * If we are a start step (don't have any input links), we'll only
-             * get a single message which is the start message sent by the manipulatedFlow
+             * get a single message which is the start message sent by the flow
              * runtime to kick things off. If we have input links, we must loop
              * until we get a shutdown message from one of our sources
              */
             while (flowRuntime.isRunning()) {
                 /*
-                 * Continue to poll as long as the manipulatedFlow is running. other
+                 * Continue to poll as long as the flow is running. other
                  * components could be generating messages which could block if
                  * we don't continue to poll
                  */

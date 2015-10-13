@@ -130,7 +130,7 @@ public class FlowRuntime {
         executionTracker.beforeFlow(executionId);
         sendNotifications(Notification.EventType.FLOW_START);
 
-        /* create a step runtime for every component in the manipulatedFlow */
+        /* create a step runtime for every component in the flow */
         for (FlowStep flowStep : manipulatedFlow.getFlowSteps()) {
             boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true);
             if (enabled) {
@@ -203,7 +203,7 @@ public class FlowRuntime {
     }
     
     protected Flow manipulateFlow(Flow flow) {
-        for (FlowStep flowStep : flow.getFlowSteps()) {
+        for (FlowStep flowStep : new ArrayList<>(flow.getFlowSteps())) {
             XMLComponent componentDefintion = componentFactory.getComonentDefinition(flowStep.getComponent().getType());
             if (isNotBlank(componentDefintion.getFlowManipulatorClassName())) {
                 try {

@@ -288,7 +288,7 @@ public class Flow extends AbstractObject {
         Collections.sort(children, new YSorter());
         for (FlowStep child : children) {
             //TODO: this takes care of when you loop back to yourself, but not if there is a larger
-            //loop in the manipulatedFlow.  Work this out based on possibility of a broader cyclic graph
+            //loop in the flow.  Work this out based on possibility of a broader cyclic graph
             if (!starterStep.getId().equals(child.getId())) {
                 order = calculateApproximateOrder(order, child);
             }
@@ -350,9 +350,11 @@ public class Flow extends AbstractObject {
         }
 
         for (FlowStepLink flowStepLink : flowStepLinks) {
+            String oldSourceStepId= flowStepLink.getSourceStepId();
+            String oldTargetStepId = flowStepLink.getTargetStepId();
             flowStepLink = (FlowStepLink)flowStepLink.copy();
-            flowStepLink.setSourceStepId(oldToNewFlowStepIds.get(flowStepLink.getSourceStepId()));
-            flowStepLink.setTargetStepId(oldToNewFlowStepIds.get(flowStepLink.getTargetStepId()));
+            flowStepLink.setSourceStepId(oldToNewFlowStepIds.get(oldSourceStepId));
+            flowStepLink.setTargetStepId(oldToNewFlowStepIds.get(oldTargetStepId));
             newFlow.getFlowStepLinks().add(flowStepLink);
         }
 

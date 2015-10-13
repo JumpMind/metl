@@ -109,6 +109,7 @@
         <settings>
             <setting id='flow.id' type='flow' required='true'>
                 <name>Flow</name>
+                <description></description>
             </setting>
         </settings>        
     </component>    

@@ -32,6 +32,7 @@ import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.AbstractObjectWithSettings;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
+import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Model;
@@ -483,6 +484,34 @@ public class PropertySheet extends Panel {
                         formLayout.addComponent(sourceStepsCombo);
                     }
                     break;
+                case FLOW:
+                    if (value instanceof FlowStep) {
+                        FlowStep step = (FlowStep) value;
+                        String projectVersionId = step.getComponent().getProjectVersionId();
+                        List<FlowName> flows = configurationService.findFlowsInProject(projectVersionId);
+                        final AbstractSelect combo = new ComboBox(definition.getName());
+                        combo.setImmediate(true);
+                        for (FlowName name : flows) {
+                            if (!step.getFlowId().equals(name.getId())) {
+                                combo.addItem(name.getId());
+                                combo.setItemCaption(name.getId(), name.getName());
+                            }
+                        }
+                        combo.setValue(obj.get(definition.getId()));
+                        combo.setDescription(description);
+                        combo.setNullSelectionAllowed(false);
+                        combo.addValueChangeListener(new ValueChangeListener() {
+
+                            private static final long serialVersionUID = 1L;
+
+                            @Override
+                            public void valueChange(ValueChangeEvent event) {
+                                saveSetting(definition.getId(), (String) combo.getValue(), obj);
+                            }
+                        });
+                        formLayout.addComponent(combo);
+                    }
+                    break;                    
                 case ENTITY_COLUMN:
                     if (component != null) {
                         List<ModelEntity> entities = new ArrayList<ModelEntity>();
