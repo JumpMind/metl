@@ -34,6 +34,7 @@ public class FlowPaletteItem extends Button {
 
     public FlowPaletteItem(String label) {
         super(label);
+        addStyleName("hidefocus");
     }
     
     public void setComponentType(String componentType) {
