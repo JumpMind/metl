@@ -1,6 +1,6 @@
-==== RDBMS Writer
+===== RDBMS Writer
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:rdbmswriter.png[]
 |Use When|Data needs written to a relational database
 |Samples|
@@ -14,12 +14,12 @@ or a combination of an update and insert in either order depending on selections
 
 |Inbound Message Type|Model Based Message
 |Output Message Type|Text Based Message
-|===================================
+|===========================================
 
-====== Parameters
+======= Parameters
 
 [options="header" cols="<25%,<75%"]
-|===================================
+|===========================================
 |Name|Description
 |Resource|The SQL Database Resource on which the SQL query should be run to write the data.  
 include::../common-properties/input-model.ad[]
@@ -37,7 +37,7 @@ include::../common-properties/enabled.ad[]
 commit system) 
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
-|===================================
+|===========================================
 IMPORTANT: Specifying both a Catalog and Schema, the flow will only use the Catalog value and ignore the Schema
 Specifying 'Fallback to insert...' has no affect unless 'Update rows first...' is also selected
 When no options are checked the default is to attempt an insert only

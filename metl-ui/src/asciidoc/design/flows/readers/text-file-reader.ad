@@ -1,6 +1,6 @@
-==== Text File Reader
+===== Text File Reader
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:textfilereader.png[]
 |Use When|Data needs read from a text file
 |Samples|Flat File to Relational Database 
@@ -14,12 +14,12 @@ like the Parse Delimited and Parse Fixed components.
 
 |Inbound Message Type|Text Based Message
 |Output Message Type|Text Based Message
-|===================================
+|===========================================
 
-====== Parameters
+======= Parameters
 
 [options="header" cols="<25%,<75%"]
-|===================================
+|===========================================
 |Name|Description
 |Resource|The file based resource (either local or remote) on which the file to be read resides.
 include::../common-properties/unit-of-work.ad[]
@@ -39,6 +39,6 @@ include::../common-properties/archive-on-error-path.ad[]
 |Header Lines to Skip|The number of header lines in the file that should be skipped and not sent to downstream components
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
-|===================================
+|===========================================
 IMPORTANT: Specifying None on the Action on Error does NOT stop the flow from failing when a file cannot be read.  It simply 
 specifies what should be done with the file when the error condition does occur.

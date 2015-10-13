@@ -1,9 +1,9 @@
-==== XML Formatter
+===== XML Formatter
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:xmlformatter.png[]
 |Description|The XML Formatter component takes an inbound model based message and formats into an xml formatted text message.
    
 |Inbound Message Type|Model Based Message
 |Output Message Type|Text Based Message
-|===================================
+|===========================================

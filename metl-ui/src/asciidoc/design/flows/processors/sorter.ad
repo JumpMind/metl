@@ -1,6 +1,6 @@
-==== Sorter
+===== Sorter
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:sorter.png[]
 |Use When|Data needs to be sorted
 |Samples| 
@@ -8,12 +8,12 @@
 
 |Inbound Message Type|Model Based Message
 |Output Message Type|Model Based Message
-|===================================
+|===========================================
 
-====== Parameters
+======= Parameters
 
 [options="header" cols="<25%,<75%"]
-|===================================
+|===========================================
 |Name|Description 
 include::../common-properties/input-model.ad[]
 include::../common-properties/unit-of-work.ad[]
@@ -23,6 +23,6 @@ concatenated with a period (entity.attribute)
 include::../common-properties/rows-per-message.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
-|===================================
+|===========================================
 
 

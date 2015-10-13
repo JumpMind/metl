@@ -1,9 +1,9 @@
-==== Transformer
+===== Transformer
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:transformer.png[]
 |Description|The transformer component allows transformation functions to be applied to record elements from inbound messages.
    
 |Inbound Message Type|Model Based Message
 |Output Message Type|Model Based Message
-|===================================
+|===========================================

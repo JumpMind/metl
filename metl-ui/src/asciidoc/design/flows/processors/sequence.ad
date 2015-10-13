@@ -1,9 +1,9 @@
-==== Sequence
+===== Sequence
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:sequence.png[]
 |Description|The sequence component generates a sequence number that can be placed into a record element in a given message.
    
 |Inbound Message Type|Model Based Message
 |Output Message Type|Model Based Message
-|===================================
+|===========================================
