@@ -20,9 +20,16 @@
  */
 package org.jumpmind.metl.core.utils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+import org.custommonkey.xmlunit.XMLUnit;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.Component;
@@ -36,12 +43,12 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.component.NoOp;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.junit.Assert;
 
 public class TestUtils {
-
+	public static final String XML_BASIC = "Base.xml";
+	public static final String XML_SINGLE_LINE = "SingleLine.xml";
+	
     public static void main(String[] args) {
         System.out.println(Integer.MAX_VALUE);
     }
@@ -143,12 +150,40 @@ public class TestUtils {
         return component;
     }
     
-    public static void assertList(List<String> expected, List<String> actual) {
+    public static File getTestXMLFile(String fileName) {
+    	ClassLoader classLoader = TestUtils.class.getClassLoader();
+    	return new File(classLoader.getResource(fileName).getFile());
+    }
+    
+    public static String getTestXMLFileContent(String fileName) {
+    	try {
+    		return FileUtils.readFileToString(getTestXMLFile(fileName));
+    	}
+    	catch (Exception e) {
+    		return null;
+    	}
+    }
+    
+    public static void assertList(List<String> expected, List<String> actual, boolean isXML) {
     	assertNullNotNull(expected, actual);
     	if (expected != null && actual != null) {
     		assertEquals(expected.size(), actual.size());
     		for (int i = 0; i < expected.size(); i++) {
-    			assertEquals(expected.get(i), actual.get(i));
+    			if (isXML) {
+    				try {
+    					assertNullNotNull(expected.get(i), actual.get(i));
+    					if (expected.get(i).length() == 0 || actual.get(i).length() == 0) {
+    						assertEquals(expected.get(i).length(), actual.get(i).length());
+    					}
+    					XMLUnit.compareXML(expected.get(i), actual.get(i));
+    				}
+    				catch (Exception e) {
+    					Assert.fail("Unable to compare xml payloads" + e.getMessage());
+    				}
+    			}
+    			else {
+    				assertEquals(expected.get(i), actual.get(i));
+    			}
     		}
     	}
     }
@@ -161,4 +196,5 @@ public class TestUtils {
     		fail();
     	}
     }
+
 }

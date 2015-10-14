@@ -11,6 +11,7 @@ public class HandleMessageMonitor {
 	private List<Serializable> payloads = new ArrayList<Serializable>();
 	private List<String> targetStepIds = new ArrayList<String>();
 	private int expectedPayloadSize;
+	private boolean xmlPayload;
 	
 	public void incrementShutdownMessageCount() {
 		this.shutdownMessageCount++;
@@ -63,6 +64,16 @@ public class HandleMessageMonitor {
 	void setExpectedPayloadSize(int expectedPayloadSize) {
 		this.expectedPayloadSize = expectedPayloadSize;
 	}
+
+	boolean isXmlPayload() {
+		return xmlPayload;
+	}
+
+	void setXmlPayload(boolean xmlPayload) {
+		this.xmlPayload = xmlPayload;
+	}
+	
+	
 	
 	
 }

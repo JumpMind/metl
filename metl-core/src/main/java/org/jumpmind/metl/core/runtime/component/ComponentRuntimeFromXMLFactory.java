@@ -117,6 +117,8 @@ public class ComponentRuntimeFromXMLFactory extends AbstractXMLFactory implement
                         }
                         
                         xmlComponent.getSettings().getSetting().add(0, new XMLSetting(AbstractComponentRuntime.ENABLED, "Enabled", "true", Type.BOOLEAN, true));
+                        xmlComponent.getSettings().getSetting().add(new XMLSetting(AbstractComponentRuntime.LOG_INPUT, "Log Input", "false", Type.BOOLEAN, false));
+                        xmlComponent.getSettings().getSetting().add(new XMLSetting(AbstractComponentRuntime.LOG_OUTPUT, "Log Output", "false", Type.BOOLEAN, false));
                         xmlComponent.getSettings().getSetting().add(new XMLSetting(AbstractComponentRuntime.INBOUND_QUEUE_CAPACITY, "Inbound Queue Capacity", "100", Type.INTEGER, true));
                     }
                 }

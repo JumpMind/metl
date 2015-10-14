@@ -46,6 +46,7 @@ dependencies {
     testCompile "org.mockito:mockito-all:$mockitoVersion"
     testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
     testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"
+    testCompile "xmlunit:xmlunit:$xmlunitVersion"
 
 }
 

@@ -285,7 +285,7 @@ public class Component extends AbstractObjectWithSettings {
         return folderId;
     }
 
-    public Row toRow(EntityData data, boolean qualifyWithEntityName) {
+	public Row toRow(EntityData data, boolean qualifyWithEntityName) {
         Row row = new Row(data.size());
         Set<String> attributeIds = data.keySet();
         for (String attributeId : attributeIds) {

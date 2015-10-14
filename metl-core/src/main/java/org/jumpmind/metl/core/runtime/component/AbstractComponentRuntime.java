@@ -54,6 +54,10 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     
     public final static String ENABLED = "enabled";
 
+    public final static String LOG_INPUT = "logInput";
+
+    public final static String LOG_OUTPUT = "logOutput";
+
     protected ComponentContext context;
     
     protected int threadNumber;
@@ -168,7 +172,8 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         Model model = context.getFlowStep().getComponent().getInputModel();
         List<ModelEntity> entities = model.getModelEntities();
         for (ModelEntity modelEntity : entities) {
-            HashMap<String, Object> boundEntity = new HashMap<String, Object>();
+        	HashMap<String, Object> boundEntity = new HashMap<String, Object>();
+        	bindings.put("ENTITY_NAME", modelEntity.getName());
             bindings.put(modelEntity.getName(), boundEntity);
         }
 
