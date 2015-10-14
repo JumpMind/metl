@@ -3,7 +3,8 @@ apply from: '../metl-assemble/common.gradle'
 apply plugin: 'fi.jasoft.plugin.vaadin'
 
 configurations {
-    executableWar
+    executableWar 
+    provided
 }
 
 eclipse {
@@ -36,8 +37,9 @@ war {
 vaadin.version = vaadinVersion
 vaadin.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
 vaadin.manageWidgetset = true
-vaadin.manageDependencies = true
+vaadin.manageDependencies = false
 vaadin.push = true
+sourceSets.main.compileClasspath += [configurations.provided]
 
 dependencies {
     compile project(":metl-core")
@@ -51,12 +53,13 @@ dependencies {
     compile "io.springfox:springfox-swagger-ui:$springfoxSwaggerVersion"
     compile "org.reficio:soap-builder:$reficioSoapVersion"
     compile "jlibs:jlibs-xml:1.0"
-//    compile "javax.servlet:javax.servlet-api:$servletVersion"
-    
-//    testCompile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
-//    testCompile "org.eclipse.jetty:jetty-jmx:$jettyVersion"
-//    testCompile "org.eclipse.jetty:jetty-annotations:$jettyVersion"
-    
+    compile "com.vaadin:vaadin-server:$vaadinVersion"    
+    compile "com.vaadin:vaadin-themes:$vaadinVersion"    
+    provided "com.vaadin:vaadin-client-compiler:$vaadinVersion"   
+    compile "javax.servlet:javax.servlet-api:$servletVersion"    
+    testCompile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
+    testCompile "org.eclipse.jetty:jetty-jmx:$jettyVersion"
+    testCompile "org.eclipse.jetty:jetty-annotations:$jettyVersion"    
     executableWar project(":metl-server")
     
 }

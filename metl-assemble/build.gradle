@@ -12,6 +12,6 @@ buildscript {
         classpath 'fi.jasoft.plugin:gradle-vaadin-plugin:0.10.2'
         classpath 'io.spring.gradle:docbook-reference-plugin:0.3.0'  
         classpath 'com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2'
-        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
+        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'      
     }
 }
