@@ -34,7 +34,7 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 	public void testHandleStartupMessage() {
 		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 1));
 	}
 
 	@Test
@@ -46,7 +46,7 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 1));
 	}
 
 	@Test
@@ -164,12 +164,12 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		// Expected
 		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
 				.addRow(new EntityDataBuilder()
-					.withKV(ModelHelper.ATTR_ID + "0_0", "red")
-					.withKV(ModelHelper.ATTR_ID + "1_0", "yellow")
-					.withKV(ModelHelper.ATTR_ID + "2_0", "green")
-					.withKV(ModelHelper.ATTR_ID + "0_1", "blue")
-					.withKV(ModelHelper.ATTR_ID + "1_1", "purple")
-					.withKV(ModelHelper.ATTR_ID + "2_1", "orange")
+					.withKV(ModelHelper.ATTR_ID + "0-0", "red")
+					.withKV(ModelHelper.ATTR_ID + "1-0", "yellow")
+					.withKV(ModelHelper.ATTR_ID + "2-0", "green")
+					.withKV(ModelHelper.ATTR_ID + "0-1", "blue")
+					.withKV(ModelHelper.ATTR_ID + "1-1", "purple")
+					.withKV(ModelHelper.ATTR_ID + "2-1", "orange")
 				.build()).buildED();
 				
 
@@ -207,12 +207,12 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		// Expected
 		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
 				.addRow(new EntityDataBuilder()
-					.withKV(ModelHelper.ATTR_ID + "0_0", "red")
-					.withKV(ModelHelper.ATTR_ID + "1_0", "yellow")
-					.withKV(ModelHelper.ATTR_ID + "2_0", "green")
-					.withKV(ModelHelper.ATTR_ID + "0_1", "blue")
-					.withKV(ModelHelper.ATTR_ID + "1_1", "purple")
-					.withKV(ModelHelper.ATTR_ID + "2_1", "orange")
+					.withKV(ModelHelper.ATTR_ID + "0-0", "red")
+					.withKV(ModelHelper.ATTR_ID + "1-0", "yellow")
+					.withKV(ModelHelper.ATTR_ID + "2-0", "green")
+					.withKV(ModelHelper.ATTR_ID + "0-1", "blue")
+					.withKV(ModelHelper.ATTR_ID + "1-1", "purple")
+					.withKV(ModelHelper.ATTR_ID + "2-1", "orange")
 				.build()).buildED();
 				
 

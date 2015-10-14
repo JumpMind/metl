@@ -59,7 +59,7 @@ public class MappingTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 1));
 	}
 	
 	@Test 
@@ -156,7 +156,7 @@ public class MappingTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 		
 		// Expected
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 0));
+		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1));
 				
 		// Execute and Assert
 		runHandle();

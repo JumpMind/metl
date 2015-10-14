@@ -54,7 +54,7 @@ public class TransformerTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 	public void testHandleStartupMessage() {
 		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 1));
 	}
 
 	@Test 
@@ -66,7 +66,7 @@ public class TransformerTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 1));
 	}
 
 	@Test

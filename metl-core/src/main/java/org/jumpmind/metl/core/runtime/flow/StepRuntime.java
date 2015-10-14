@@ -232,7 +232,7 @@ public class StepRuntime implements Runnable {
             boolean unitOfWorkLastMessage = calculateUnitOfWorkLastMessage(inputMessage);
             
             Component component = componentContext.getFlowStep().getComponent();
-            boolean logInput = component.getBoolean(AbstractComponentRuntime.LOG_INPUT, true);
+            boolean logInput = component.getBoolean(AbstractComponentRuntime.LOG_INPUT, false);
             
             if (logInput) {
             	logInput(inputMessage, target, unitOfWorkLastMessage);
@@ -538,7 +538,7 @@ public class StepRuntime implements Runnable {
             statistics.incrementOutboundMessages(ThreadUtils.getThreadNumber());
 
             Component component = componentContext.getFlowStep().getComponent();
-            boolean logOutput = component.getBoolean(AbstractComponentRuntime.LOG_OUTPUT, true);
+            boolean logOutput = component.getBoolean(AbstractComponentRuntime.LOG_OUTPUT, false);
             
             if (logOutput) {
             	logOutput(message, targetFlowStepIds);
