@@ -21,6 +21,7 @@
 package org.jumpmind.metl.core.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -302,6 +303,21 @@ public class Component extends AbstractObjectWithSettings {
         return row;
     }
 
+	public Set<String> getEntityNames(EntityData data) {
+		Set<String> names = new HashSet<String>();
+		
+		Set<String> attributeIds = data.keySet();
+	    for (String attributeId : attributeIds) {
+	        ModelAttribute attribute = inputModel.getAttributeById(attributeId);
+            if (attribute != null) {
+                ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+                names.add(entity.getName());
+            }
+        }
+		return names;
+	}
+	
+	
     @Override
     public AbstractObject copy() {
         Component component = (Component) super.copy();
