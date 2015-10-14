@@ -1,9 +1,9 @@
-==== Execute
+===== Execute
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:execute.png[]
 |Description|The execute component executes an operating system command on the host on which the agent is running.
    
 |Inbound Message Type|Any Message Type
 |Output Message Type|Text Based Message
-|===================================
+|===========================================

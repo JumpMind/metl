@@ -1,0 +1,21 @@
+
+<Item ChangeType="UPS" ID="000000310" Type="Stock" ItemCost="6.6" Taxable="true" POSDepartmentID="522" Size="2188" Color="0000003985" RegistryEligible="true" SizeRequired="false"
+    AuthorizedForSale="true" SerializedItem="false" UINType="" UINCaptureTime="" ExternalSystemCreateUIN="false" Discountable="true" DamageDiscountable="true" UOMCode="UN">
+    <ShortName>COTTON U/W</ShortName>
+    <LongDescription>COTTON FULL COVER BRA BLACK 46C</LongDescription>
+    <MerchandiseHierarchy>5:052206185585</MerchandiseHierarchy>
+    <RetailStoreItem VatCode="" ChangeType="UPS" TaxGroup="1" AgeRestrictionId="0">
+        <RetailStoreID>04175</RetailStoreID>
+        <RegularPrice CurrencyCode="USD" IncludesTax="true">24.5</RegularPrice>
+        <POSIdentity ChangeType="UPS" POSItemID="36053202622188" SupplierID="5513" MinimumSaleUnitCount="1" QuantityModifiable="Optional" PriceEntryRequired="false"
+            PriceModifiable="true" SpecialOrderEligible="false" Returnable="true" EmployeeDiscountAllowed="true" ClearanceIndicator="false" MarkdownIndicator="false" />
+        <POSIdentity ChangeType="UPS" POSItemID="584320072188" SupplierID="5513" MinimumSaleUnitCount="1" QuantityModifiable="Optional" PriceEntryRequired="false"
+            PriceModifiable="true" SpecialOrderEligible="false" Returnable="true" EmployeeDiscountAllowed="true" ClearanceIndicator="false" MarkdownIndicator="false" />
+        <POSIdentity ChangeType="UPS" POSItemID="000062604855" SupplierID="5513" MinimumSaleUnitCount="1" QuantityModifiable="Optional" PriceEntryRequired="false"
+            PriceModifiable="true" SpecialOrderEligible="false" Returnable="true" EmployeeDiscountAllowed="true" ClearanceIndicator="false" MarkdownIndicator="false" />
+        <POSIdentity ChangeType="UPS" POSItemID="62604855" SupplierID="5513" MinimumSaleUnitCount="1" QuantityModifiable="Optional" PriceEntryRequired="false"
+            PriceModifiable="true" SpecialOrderEligible="false" Returnable="true" EmployeeDiscountAllowed="true" ClearanceIndicator="false" MarkdownIndicator="false" />
+    </RetailStoreItem>
+    <UINLabel Name="">
+    </UINLabel>
+</Item>

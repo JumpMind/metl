@@ -102,6 +102,17 @@
             </setting>   
         </settings>
     </component>
+    <component id='Call Flow' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none'>
+        <name>Call Flow</name>
+        <className>org.jumpmind.metl.core.runtime.component.CallFlow</className>
+        <flowManipulatorClassName>org.jumpmind.metl.core.runtime.component.CallFlowFlowManipulator</flowManipulatorClassName>
+        <settings>
+            <setting id='flow.id' type='flow' required='true'>
+                <name>Flow</name>
+                <description></description>
+            </setting>
+        </settings>        
+    </component>    
     <component id='Deduper' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='true'>
         <name>Deduper</name>
@@ -361,6 +372,11 @@
         <className>org.jumpmind.metl.core.runtime.component.MessageLogger</className>
         <description></description>
         <settings>
+            <setting id='qualify.with.entity.name' type='boolean' required='false'>
+                <name>Qualify Entity Attributes with Entity Name</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>        
         </settings>
     </component>
     <component id='Multiplier' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
@@ -554,11 +570,16 @@
                 <name>Text</name>
                 <description></description>
             </setting>
+            <setting id='split.on.line.feed' type='boolean' required='false'>
+                <name>Split On Line Feed</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
             <setting id='rows.per.message' type='integer' required='false'>
                 <name>Rows / Msg</name>
                 <defaultValue>10000</defaultValue>
                 <description></description>
-            </setting>            
+            </setting>                                    
         </settings>
     </component>    
     <component id='Text File Reader' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable'
@@ -757,7 +778,7 @@
         </settings>
     </component>
     <component id='UnZip' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
-        <name>Zip</name>
+        <name>UnZip</name>
         <className>org.jumpmind.metl.core.runtime.component.UnZip</className>
         <description></description>
         <settings>

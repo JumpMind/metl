@@ -57,7 +57,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 public class AppInitializer implements WebApplicationInitializer, ServletContextListener {
 
-    protected static final String SYS_CONFIG_DIR = AppUI.class.getPackage().getName() + ".config.dir";
+    protected static final String SYS_CONFIG_DIR = AppInitializer.class.getPackage().getName() + ".config.dir";
 
     public static ThreadLocal<AnnotationConfigWebApplicationContext> applicationContextRef = new ThreadLocal<>();
 
@@ -129,6 +129,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
                         + "where configuration files can be found: -D" + SYS_CONFIG_DIR + "=/some/config/dir");
             }
         }
+        System.setProperty("h2.baseDir", configDir);
         if (printInstrutions) {
             System.out.println("The current config directory is " + configDir);
             System.out.println("The current working directory is " + System.getProperty("user.dir"));

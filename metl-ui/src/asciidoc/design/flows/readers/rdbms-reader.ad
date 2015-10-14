@@ -1,6 +1,6 @@
-==== RDBMS Reader
+===== RDBMS Reader
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:rdbmsreader.png[]
 |Use When|Data needs read from a relational database 
 |Samples|Relational Database to Flat File, Normalized Table to Denormalized File, Normalized Table to Denormalized File v2
@@ -18,12 +18,12 @@ entity and attribute.  See <<rdbms-reader-example-2>> below.
 
 |Inbound Message Type|Model Based Message
 |Output Message Type|Model Based Message
-|===================================
+|===========================================
 
 ====== Parameters
 
 [options="header" cols="<25%,<75%"]
-|===================================
+|===========================================
 |Name|Description
 |Resource|The SQL Database Resource on which the SQL query should be run to read data.  
 include::../common-properties/input-model.ad[]
@@ -38,10 +38,10 @@ before they are placed in the output model format
 include::../common-properties/message-strategy.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
-|===================================
+|===========================================
 
 [id="rdbms-reader-example-1",reftext="Example 1"]
-====== Example 1.  Using Input Message Entity/Attribute as a parameter
+======= Example 1.  Using Input Message Entity/Attribute as a parameter
 ----
 select 
    field1, 
@@ -55,7 +55,7 @@ In the example above, the SQL Reader query will be run for each input record wit
 Each time the query is run, field3 will be restricted by the incoming row's INPUT_MODEL_ENTITY_NAME.INPUT_MODEL_ATTRIBUTE field. 
 
 [id="rdbms-reader-example-2",reftext="Example 2"]
-====== Example 2.  Using Hints to Map to the Output Model
+======= Example 2.  Using Hints to Map to the Output Model
 ----
 select 
    field1,

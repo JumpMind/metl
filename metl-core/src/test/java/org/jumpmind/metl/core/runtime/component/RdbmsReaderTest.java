@@ -111,7 +111,7 @@ public class RdbmsReaderTest {
         ArrayList<EntityData> payload = msgTarget.getPayloadList().get(0);
         assertEquals("test row 1", payload.get(0).get("tt1col2"));
         assertEquals("test row x", payload.get(0).get("tt2coly"));
-        //TODO: can't test these like this anymore.  Need flow and startup message
+        //TODO: can't test these like this anymore.  Need manipulatedFlow and startup message
         // as this is calculated at the runtime level based on incoming messages
 //        assertEquals(false, msgTarget.getMessage(0).getHeader().isUnitOfWorkLastMessage());
 //        assertEquals(true, msgTarget.getMessage(1).getHeader().isUnitOfWorkLastMessage());
@@ -134,7 +134,7 @@ public class RdbmsReaderTest {
         ArrayList<EntityData> payload = msgTarget.getPayloadList().get(0);
         assertEquals("test row 1", payload.get(0).get("tt1col2"));
         assertEquals("test row x", payload.get(0).get("tt2coly"));
-        //TODO: can't test these like this anymore.  Need flow and startup message
+        //TODO: can't test these like this anymore.  Need manipulatedFlow and startup message
         // as this is calculated at the runtime level based on incoming messages
 //        assertEquals(false, msgTarget.getMessage(0).getHeader().isUnitOfWorkLastMessage());
 //        assertEquals(true, msgTarget.getMessage(1).getHeader().isUnitOfWorkLastMessage());
@@ -258,7 +258,7 @@ public class RdbmsReaderTest {
     private static List<Setting> createResourceSettings() {
         List<Setting> settings = new ArrayList<Setting>(4);
         settings.add(new Setting(Datasource.DB_POOL_DRIVER, "org.h2.Driver"));
-        settings.add(new Setting(Datasource.DB_POOL_URL, "jdbc:h2:file:build/dbs/testdb"));
+        settings.add(new Setting(Datasource.DB_POOL_URL, "jdbc:h2:file:./build/dbs/testdb"));
         settings.add(new Setting(Datasource.DB_POOL_USER, "jumpmind"));
         settings.add(new Setting(Datasource.DB_POOL_PASSWORD, "jumpmind"));
         return settings;

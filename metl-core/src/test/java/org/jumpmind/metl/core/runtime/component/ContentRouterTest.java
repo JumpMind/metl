@@ -50,7 +50,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(PowerMockRunner.class)
-public class EntityRouterTest {
+public class ContentRouterTest {
 
     Flow flow;
     

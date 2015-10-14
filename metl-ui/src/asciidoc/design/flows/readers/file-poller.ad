@@ -1,6 +1,6 @@
-==== File Poller
+===== File Poller
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:filepoller.png[]
 |Use When|A file based resource needs to be checked for the existence of a file or set of files
 |Samples|
@@ -11,12 +11,12 @@ or a list of patterns separated by commas.  Wildcards can be used in any pattern
 
 |Inbound Message Type|None
 |Output Message Type|Text Based Message
-|===================================
+|===========================================
 
 ====== Parameters
 
 [options="header" cols="<25%,<75%"]
-|===================================
+|===========================================
 |Name|Description
 |Resource|The File based resource on which the File Poller should operate
 include::../common-properties/unit-of-work.ad[]  
@@ -38,14 +38,14 @@ is set to false, no file triggering mechanism will be used
 parameter are ready for processing.
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
-|===================================
+|===========================================
 
-====== Example 1.  Search for all .csv files
+======= Example 1.  Search for all .csv files
 ----
 *.csv
 ----
 
-====== Example 2.  Search for all.csv and all .txt files
+======= Example 2.  Search for all.csv and all .txt files
 ----
 *.csv,*.txt
 ----

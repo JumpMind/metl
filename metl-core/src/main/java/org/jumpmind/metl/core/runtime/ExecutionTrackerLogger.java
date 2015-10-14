@@ -84,7 +84,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
         FlowStep flowStep = context.getFlowStep();
         stepStartTimes.put(flowStep.getId(), System.currentTimeMillis());
         String msg = String.format(
-                "[%s] Started flow step for deployment: %s for component: %s", executionId, 
+                "[%s] Started manipulatedFlow step for deployment: %s for component: %s", executionId, 
                 deployment.getName(), flowStep.getName());
         log.info(msg);
     }
@@ -95,7 +95,7 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
         Long startTime = stepStartTimes.get(flowStep.getId());        
         long duration = startTime == null ? 0 : System.currentTimeMillis() - startTime;        
         String msg = String.format(
-                "[%s] Finished flow step for deployment: %s for component: %s in %s", executionId, 
+                "[%s] Finished manipulatedFlow step for deployment: %s for component: %s in %s", executionId, 
                 deployment.getName(), flowStep.getName(), LogUtils.formatDuration(duration));
         log.info(msg);
     }

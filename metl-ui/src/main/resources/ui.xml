@@ -22,109 +22,115 @@
 -->
 <ui>
     <component-ui id="RDBMS Writer UI" componentId="RDBMS Writer">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/rdbmswriter.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-reader-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditRdbmsWriterPanel</className>
     </component-ui>
     <component-ui id="Sql Executor UI" componentId="Sql Executor">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/rdbmswriter.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-writer-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditRdbmsReaderPanel</className>        
     </component-ui>       
     <component-ui id="RDBMS Reader UI" componentId="RDBMS Reader">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/rdbmsreader.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-reader-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditRdbmsReaderPanel</className>
     </component-ui>
     <component-ui id="Content Router UI" componentId="Content Router">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/contentrouter.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-entity-router-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditContentRouterPanel</className>
     </component-ui>
     <component-ui id="Format Delimited UI" componentId="Format Delimited">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/delimitedformatter.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delimitedformatter-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
     </component-ui>
     <component-ui id="Parse Delimited UI" componentId="Parse Delimited">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/delimitedformatter.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delimitedformatter-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
     </component-ui>      
     <component-ui id="Mapping UI" componentId="Mapping">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/mapping.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-mapping-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.mapping.EditMappingPanel</className>
     </component-ui>
     <component-ui id="Format Fixed UI" componentId="Format Fixed">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/fixedlengthformatter.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-fixed-length-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
     </component-ui>
     <component-ui id="Parse Fixed UI" componentId="Parse Fixed">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/fixedlengthformatter.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-fixed-length-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
     </component-ui>
     <component-ui id="Joiner UI" componentId="Joiner">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/joiner.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-joiner-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditJoinerPanel</className>
     </component-ui>
     <component-ui id="Lookup UI" componentId="Lookup">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/lookup.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-lookup-48x48.png</iconImage>
     </component-ui>    
     <component-ui id="Script UI" componentId="Script">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/script.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-script-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditScriptPanel</className>
     </component-ui>
     <component-ui id="Transformer UI" componentId="Transformer">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/transformer.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-transform-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditTransformerPanel</className>
     </component-ui>
     <component-ui id="Format XML UI" componentId="Format XML">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/xmlformatter.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditXmlFormatPanel</className>
     </component-ui>
     <component-ui id="Parse XML UI" componentId="Parse XML">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/xmlformatter.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditXmlFormatPanel</className>
     </component-ui>
     <component-ui id="XSLT Processor UI" componentId="XSLT Processor">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/xsltprocessor.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xslt-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditXsltPanel</className>
     </component-ui>
     <component-ui id="Deduper UI" componentId="Deduper">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/deduper.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-deduper-48x48.png</iconImage>
     </component-ui>    
     <component-ui id="Delay UI" componentId="Delay">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/delay.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delay-48x48.png</iconImage>
     </component-ui>   
     <component-ui id="Execute UI" componentId="Execute">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/execute.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-execute-48x48.png</iconImage>
     </component-ui>  
     <component-ui id="Message Logger UI" componentId="Message Logger">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/log.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-message-logger-48x48.png</iconImage>
     </component-ui>
     <component-ui id="Multiplier UI" componentId="Multiplier">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/multiplier.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-multiplier-48x48.png</iconImage>
     </component-ui>   
     <component-ui id="Sequence UI" componentId="Sequence">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/sequence.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-sequencing-48x48.png</iconImage>
     </component-ui>       
     <component-ui id="Sorter UI" componentId="Sorter">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/sorter.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-sorter-48x48.png</iconImage>
     </component-ui> 
     <component-ui id="Text File Reader UI" componentId="Text File Reader">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/textfilereader.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-file-48x48.png</iconImage>
     </component-ui> 
     <component-ui id="Text File Writer UI" componentId="Text File Writer">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/textfilewriter.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-writer-48x48.png</iconImage>
     </component-ui>    
     <component-ui id="Text Replace UI" componentId="Text Replace">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/regex_replace.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-regex-replace-48x48.png</iconImage>
     </component-ui>    
     <component-ui id="Web UI" componentId="Web">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/web.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-web-48x48.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditWebPanel</className>
     </component-ui>                        
     <component-ui id="Zip UI" componentId="Zip">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/zip.png</iconImage>
-    </component-ui>    
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-zip-48x48.png</iconImage>
+    </component-ui>   
+    <component-ui id="UnZip UI" componentId="UnZip">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-zip-48x48.png</iconImage>
+    </component-ui>      
     <component-ui id="File Poller UI" componentId="File Poller">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/filepoller.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-file-poller-48x48.png</iconImage>
     </component-ui>     
     <component-ui id="Text Constant UI" componentId="Text Constant">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/textfilereader.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-file-48x48.png</iconImage>
+    </component-ui>    
+    <component-ui id="XML Reader UI" componentId="XML Reader">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-48x48.png</iconImage>
     </component-ui>                             
 </ui>

@@ -1,6 +1,6 @@
-==== Text Constant
+===== Text Constant
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:textfilereader.png[]
 |Use When|A text constant is needed in message content in the flow
 |Samples|
@@ -8,12 +8,12 @@
 
 |Inbound Message Type|Any Message Type
 |Output Message Type|Text Based Message
-|===================================
+|===========================================
 
 ====== Parameters
 
 [options="header" cols="<25%,<75%"]
-|===================================
+|===========================================
 |Name|Description
 include::../common-properties/unit-of-work.ad[]
 include::../common-properties/enabled.ad[]
@@ -21,9 +21,9 @@ include::../common-properties/enabled.ad[]
 include::../common-properties/rows-per-message.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
-|===================================
+|===========================================
 
-====== Example 1.  Sample Text Constant Text
+======= Example 1.  Sample Text Constant Text
 ----
 4,Diane,Prince,F
 3,Clark,Kent,M

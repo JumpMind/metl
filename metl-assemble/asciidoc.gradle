@@ -14,10 +14,7 @@ task generateDocs(type: Copy) {
     
     dependsOn asciidoctor
     
-    destinationDir = file("$buildDir/doc")
-    if (project.properties.containsKey('pro')) {
-        destinationDir = file(rootProject.buildDir.path + "/../../metl-ui/src/main/webapp/doc")
-    }
+    destinationDir = file(rootProject.buildDir.path + "/../../metl-ui/src/main/webapp/doc")
 
     into('html') {
         from ("$buildDir/src/asciidoc/html5") { include "user-guide.html" }

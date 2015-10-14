@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.flow;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,6 +47,7 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Notification;
+import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.StartupMessage;
@@ -52,6 +55,7 @@ import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -93,14 +97,17 @@ public class FlowRuntime {
     
     MailSession mailSession;
     
+    IConfigurationService configurationService;
+    
     public FlowRuntime(AgentDeployment deployment, IComponentRuntimeFactory componentFactory,
             IResourceFactory resourceFactory, IExecutionTracker executionTracker,
-            ExecutorService threadService) {
+            ExecutorService threadService, IConfigurationService configurationService) {
         this.executionTracker = executionTracker;
         this.deployment = deployment;
         this.componentFactory = componentFactory;
         this.resourceFactory = resourceFactory;
         this.threadService = threadService;
+        this.configurationService = configurationService;
     }
     
     public AgentDeployment getDeployment() {
@@ -109,33 +116,32 @@ public class FlowRuntime {
 
     @SuppressWarnings("unchecked")
     public void start(String executionId, Map<String, IResourceRuntime> deployedResources, Agent agent, List<Notification> notifications,
-            Map<String, String> globalSettings) throws InterruptedException {
-        
+            Map<String, String> globalSettings) throws InterruptedException {        
         this.stepRuntimes = new HashMap<String, StepRuntime>();
         this.agent = agent;
         this.notifications = notifications;
         this.mailSession = new MailSession(globalSettings);
+        
         Map<String, Serializable> parameters = getFlowParameters(deployment.getAgentDeploymentParameters(), agent.getAgentParameters());
-        this.flowParameters = MapUtils.typedMap(parameters, String.class, String.class);
+        this.flowParameters = MapUtils.typedMap(parameters, String.class, String.class);        
         
-        Flow flow = deployment.getFlow();
-        List<FlowStep> steps = flow.getFlowSteps();
-        
+        Flow manipulatedFlow = manipulateFlow(deployment.getFlow());
+
         executionTracker.beforeFlow(executionId);
         sendNotifications(Notification.EventType.FLOW_START);
 
         /* create a step runtime for every component in the flow */
-        for (FlowStep flowStep : steps) {
+        for (FlowStep flowStep : manipulatedFlow.getFlowSteps()) {
             boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true);
             if (enabled) {
-                ComponentContext context = new ComponentContext(deployment, flowStep, flow, executionTracker, 
+                ComponentContext context = new ComponentContext(deployment, flowStep, manipulatedFlow, executionTracker, 
                         deployedResources.get(flowStep.getComponent().getResourceId()), parameters, globalSettings);
                 StepRuntime stepRuntime = new StepRuntime(componentFactory, context, this);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
         }
         
-        List<FlowStepLink> links = flow.getFlowStepLinks();
+        List<FlowStepLink> links = manipulatedFlow.getFlowStepLinks();
 
         /* for each step runtime, set their list of msgTarget step runtimes */
         for (String stepId : stepRuntimes.keySet()) {
@@ -166,8 +172,8 @@ public class FlowRuntime {
         List<StepRuntime> startSteps = findStartSteps();
         
         /* start up each step runtime */
-        flow.calculateApproximateOrder();
-        List<FlowStep> flowSteps = flow.getFlowSteps();
+        manipulatedFlow.calculateApproximateOrder();
+        List<FlowStep> flowSteps = manipulatedFlow.getFlowSteps();
         for (FlowStep flowStep : flowSteps) {
             StepRuntime stepRuntime = stepRuntimes.get(flowStep.getId());
             if (stepRuntime != null) {
@@ -194,6 +200,24 @@ public class FlowRuntime {
         for (StepRuntime stepRuntime : startSteps) {
             stepRuntime.queue(startMessage);
         }
+    }
+    
+    protected Flow manipulateFlow(Flow flow) {
+        for (FlowStep flowStep : new ArrayList<>(flow.getFlowSteps())) {
+            XMLComponent componentDefintion = componentFactory.getComonentDefinition(flowStep.getComponent().getType());
+            if (isNotBlank(componentDefintion.getFlowManipulatorClassName())) {
+                try {
+                    IFlowManipulator flowManipulator = (IFlowManipulator) Class.forName(componentDefintion.getFlowManipulatorClassName())
+                            .newInstance();
+                    flow = flowManipulator.manipulate(flow, flowStep, configurationService);
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return flow;
     }
 
     protected Map<String, Serializable> getFlowParameters(List<AgentDeploymentParameter> deployParameters, List<AgentParameter> agentParameters) {

@@ -75,6 +75,9 @@ public class XMLComponent implements Serializable {
 
     @XmlElement(required = true)
     protected String className;
+    
+    @XmlElement(required = true)
+    protected String flowManipulatorClassName;    
 
     @XmlAttribute(required = true)
     protected String id;
@@ -201,4 +204,12 @@ public class XMLComponent implements Serializable {
     
     
 
+    public void setFlowManipulatorClassName(String flowManipulatorClassName) {
+        this.flowManipulatorClassName = flowManipulatorClassName;
+    }
+    
+    public String getFlowManipulatorClassName() {
+        return flowManipulatorClassName;
+    }
+    
 }

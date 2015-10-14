@@ -1,6 +1,6 @@
-==== Sql Executor
+===== Sql Executor
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:rdbmswriter.png[]
 |Use When|Data needs written to a database using a specific sql
 |Samples|
@@ -11,12 +11,12 @@ one time per message received, Per Entity - for every entity record in an input 
 
 |Inbound Message Type|Model Based Message
 |Output Message Type|Text Based Message
-|===================================
+|===========================================
 
 ====== Parameters
 
 [options="header" cols="<25%,<75%"]
-|===================================
+|===========================================
 |Name|Description
 |Resource|The SQL Database Resource on which the SQL query should be run to write the data.  
 include::../common-properties/input-model.ad[]
@@ -29,4 +29,4 @@ sql statements.
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
  
-|===================================
+|===========================================

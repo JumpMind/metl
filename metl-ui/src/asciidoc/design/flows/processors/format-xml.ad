@@ -1,9 +1,9 @@
-==== Format XML
+===== Format XML
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:xmlformatter.png[]
 |Description|The format xml component takes a model based message and formats its content into an xml text message
    
 |Inbound Message Type|Model Based Message
 |Output Message Type|Text Based Message
-|===================================
+|===========================================

@@ -1,9 +1,9 @@
-==== Parse XML
+===== Parse XML
 [cols="<25%h,<75%"]
-|===================================
+|===========================================
 |Icon|image:xmlformatter.png[]
 |Description|The parse xml component takes an inbound text message in xml format and parses it into a model based outbound message.
    
 |Inbound Message Type|Model Based Message
 |Output Message Type|Model Based Message
-|===================================
+|===========================================
