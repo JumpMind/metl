@@ -56,7 +56,7 @@ public class HandleParams {
 		@Override
 		public void sendMessage(Serializable payload, boolean lastMessage, String... targetStepIds) {
 			if (payload instanceof List) {
-				monitor.getPayloads().addAll((List) payload);
+				monitor.getPayloads().add(payload);
 			}
 			
 			Collections.addAll(monitor.getTargetStepIds(), targetStepIds);

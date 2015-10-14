@@ -1,6 +1,7 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
@@ -10,7 +11,9 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
+import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.StartupMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
@@ -20,7 +23,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 public class XmlReader extends AbstractComponentRuntime {
 
-	public static final String TYPE = "XmlProcessor";
+	public static final String TYPE = "XmlReader";
 
 	public final static String SETTING_GET_FILE_FROM_MESSAGE = "get.file.name.from.message";
 
@@ -49,11 +52,14 @@ public class XmlReader extends AbstractComponentRuntime {
 
 	@Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-		List<String> files = getFilesToRead(inputMessage);
-		try {
-			processFiles(files, callback, unitOfWorkBoundaryReached);
-		} catch (Exception e) {
-			throw new IoException(e);
+		if (!(inputMessage instanceof StartupMessage)) {
+			List<String> files = getFilesToRead(inputMessage);
+		
+			try {
+				processFiles(files, callback, unitOfWorkBoundaryReached);
+			} catch (Exception e) {
+				throw new IoException(e);
+			}
 		}
 
 	}
@@ -80,17 +86,17 @@ public class XmlReader extends AbstractComponentRuntime {
 		for (String file : files) {
 			File xmlFile = null;
 			if (!getFileNameFromMessage) {
-				xmlFile = new File(path, file);
+				xmlFile = getFile(path, file);
 			}
 			else {
-				xmlFile = new File(file);
+				xmlFile = getFile(file);
 			}
-			parser.setInput(new FileReader(xmlFile));
-			LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(file));
+			parser.setInput(getFileReader(xmlFile));
+			LineNumberReader lineNumberReader = new LineNumberReader(getFileReader(xmlFile));
 			lineNumberReader.setLineNumber(1);
 			int startCol = 0;
-			int startLine = 0;
-			int prevEndLine = 0;
+			int startLine = 1;
+			int prevEndLine = 1;
 			int prevEndCol = 0;
 			int eventType = parser.getEventType();
 			String line = null;
@@ -105,22 +111,19 @@ public class XmlReader extends AbstractComponentRuntime {
 						startCol = prevEndCol;
 						startLine = prevEndLine;
 					}
+					prevEndCol = parser.getColumnNumber();
+					prevEndLine = parser.getLineNumber();
 					break;
 				case XmlPullParser.END_TAG:
 					prevEndCol = parser.getColumnNumber();
 					prevEndLine = parser.getLineNumber();
 					if (parser.getName().equals(readTag)) {
 						StringBuilder xml = new StringBuilder();
-						if (startLine == 0) {
-							startLine = 1;
-						}
 						forward(startLine - lineNumberReader.getLineNumber(), lineNumberReader);
 						int linesToRead = parser.getLineNumber() - lineNumberReader.getLineNumber();
-						if (startLine >= lineNumberReader.getLineNumber()) {
-							line = lineNumberReader.readLine();
-						} else {
-							linesToRead++;
-						}
+						
+						line = lineNumberReader.readLine();
+						
 						while (linesToRead >= 0 && line != null) {
 							if (startCol > 0) {
 								if (line.length() > startCol) {
@@ -156,9 +159,27 @@ public class XmlReader extends AbstractComponentRuntime {
 
 			IOUtils.closeQuietly(lineNumberReader);
 		}
-		callback.sendMessage(outboundPayload, unitOfWorkLastMessage);
+		if (outboundPayload.size() > 0) {
+			callback.sendMessage(outboundPayload, unitOfWorkLastMessage);
+		}
 	}
 
+	File getFile(String p) {
+		return new File(p);
+	}
+	
+	File getFile(String p, String f) {
+		return new File(p, f);
+	}
+	
+	FileReader getFileReader(File f) throws FileNotFoundException {
+		return new FileReader(f);
+	}
+	
+	FileReader getFileReader(String f) throws FileNotFoundException {
+		return new FileReader(f);
+	}
+	
 	protected static void forward(int lines, LineNumberReader lineNumberReader) throws IOException {
 		while (lines > 0 && (lineNumberReader.readLine()) != null) {
 			lines--;

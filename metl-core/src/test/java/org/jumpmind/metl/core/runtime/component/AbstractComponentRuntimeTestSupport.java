@@ -159,9 +159,14 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 		return list;
 	}
 	
+	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, boolean xmlPayload) {
+		List<Serializable> payloads = null;
+		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads, xmlPayload);
+	}
+	
 	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize) {
 		List<Serializable> payloads = null;
-		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads);
+		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads, false);
 	}
 	
 	public HandleMessageMonitor getExpectedTextMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize) {
@@ -174,22 +179,38 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 		if (payload != null) {
 			payloads.add(payload);
 		}
-		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads);
+		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads, false);
+	}
+	public HandleMessageMonitor getExpectedTextMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, ArrayList<String> payload, boolean xmlPayload) {
+		List<Serializable> payloads = new ArrayList<Serializable>();
+		if (payload != null) {
+			payloads.add(payload);
+		}
+		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads, xmlPayload);
 	}
 	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, ArrayList<EntityData> payload) {
 		List<Serializable> payloads = new ArrayList<Serializable>();
 		if (payload != null) {
 			payloads.add(payload);
 		}
-		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads);
+		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads, false);
+	}
+	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, ArrayList<EntityData> payload, boolean xmlPayload) {
+		List<Serializable> payloads = new ArrayList<Serializable>();
+		if (payload != null) {
+			payloads.add(payload);
+		}
+		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads, xmlPayload);
 	}
 	
-	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, List<Serializable> payloads) {
+	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, 
+			int expectedPayloadSize, List<Serializable> payloads, boolean xmlPayload) {
 		HandleMessageMonitor m = new HandleMessageMonitor();
 		m.setStartupMessageCount(starts);
 		m.setShutdownMessageCount(shutdowns);
 		m.setSendMessageCount(sends);
 		m.setExpectedPayloadSize(expectedPayloadSize);
+		m.setXmlPayload(xmlPayload);
 		if (payloads != null) {
 			m.setPayloads(payloads);
 		}
@@ -207,13 +228,13 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 			assertEquals("Send message counts do not match [message " + (i + 1) + "]", expected.getSendMessageCount(), actual.getSendMessageCount());
 			assertEquals("Start message counts do not match [message " + (i + 1) + "]", expected.getStartupMessageCount(), actual.getStartupMessageCount());
 			assertEquals("Shutdown message counts do not match [message " + (i + 1) + "]", expected.getShutdownMessageCount(), actual.getShutdownMessageCount());
-			TestUtils.assertList(expected.getTargetStepIds(), actual.getTargetStepIds());
+			TestUtils.assertList(expected.getTargetStepIds(), actual.getTargetStepIds(), expected.isXmlPayload());
 			assertEquals("Payload sized unexpected [message " + (i + 1) + "]", expected.getExpectedPayloadSize(), actual.getPayloads().size());
 			for (int p = 0; p < expected.getPayloads().size(); p++) {
 				Serializable expectedPayload = (Serializable) expected.getPayloads().get(p);
 				Serializable actualPayload = (Serializable) actual.getPayloads().get(p);
 				
-				PayloadAssert.assertPayload((i+1), (p+1), expectedPayload, actualPayload);
+				PayloadAssert.assertPayload((i+1), (p+1), expectedPayload, actualPayload, expected.isXmlPayload());
 			}
 		}
 	}

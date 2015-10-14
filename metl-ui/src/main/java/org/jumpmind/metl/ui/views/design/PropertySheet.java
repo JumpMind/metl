@@ -136,7 +136,7 @@ public class PropertySheet extends Panel {
                 Component component = (Component) obj;
                 XMLComponent componentDefintion = componentFactory.getComonentDefinition(component.getType());
                 addThreadCount(componentDefintion, formLayout, component);
-                addComponentShared(formLayout, component);                
+                addComponentShared(formLayout, component);      
             }
 
         }
@@ -256,7 +256,7 @@ public class PropertySheet extends Panel {
         formLayout.addComponent(checkBox);
 
     }
-
+    
     protected void addInputModelCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
         if (value instanceof FlowStep) {
             FlowStep step = (FlowStep) value;

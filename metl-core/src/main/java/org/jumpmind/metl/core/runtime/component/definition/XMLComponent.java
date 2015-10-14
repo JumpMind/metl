@@ -198,5 +198,7 @@ public class XMLComponent implements Serializable {
     public void setSupportsMultipleThreads(boolean supportsMultipleThreads) {
         this.supportsMultipleThreads = supportsMultipleThreads;
     }
+    
+    
 
 }

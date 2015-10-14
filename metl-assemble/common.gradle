@@ -96,7 +96,8 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
         springfoxSwaggerVersion = '2.0.0'
         reficioSoapVersion = '1.0.0-SNAPSHOT'
         kxmlVersion='2.3.0'
-
+		xmlunitVersion='1.6'
+		
         env = System.getenv()                
     }
 

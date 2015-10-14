@@ -10,7 +10,7 @@ import org.junit.Assert;
 
 public class PayloadAssert extends Assert {
 	
-	public static void assertPayload(int messageNumber, int payloadNumber, Serializable expected, Serializable actual) {
+	public static void assertPayload(int messageNumber, int payloadNumber, Serializable expected, Serializable actual, boolean isPayloadXML) {
 		TestUtils.assertNullNotNull(expected, actual);
 		if (expected != null && actual != null) {
 			if (expected instanceof List && actual instanceof List) {
@@ -39,7 +39,7 @@ public class PayloadAssert extends Assert {
 					
 					// Check for String list
 					else if (((List) expected).get(0) instanceof String && ((List) actual).get(0) instanceof String) {
-						TestUtils.assertList((List)expected, (List)actual);
+						TestUtils.assertList((List)expected, (List)actual, isPayloadXML);
 					}
 					
 					// Oops not supported yet
@@ -49,6 +49,9 @@ public class PayloadAssert extends Assert {
 				}
 				
 				
+			}
+			else if (expected instanceof List && !(actual instanceof List)) {
+				fail("Expected payload was a List but actual payload was not a List");
 			}
 			else {
 				// TODO future support for a payload that is not a list
