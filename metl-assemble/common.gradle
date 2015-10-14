@@ -66,40 +66,6 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
     test {
         ignoreFailures true
     }
-    
-    ext {
-        antVersion = '1.7.0'
-        log4jVersion = '1.2.17'
-        slf4jVersion = '1.7.12'
-        springVersion = '4.1.6.RELEASE'
-        vaadinVersion = '7.5.7'
-        groovyVersion = '2.4.3'
-        jettyVersion = '9.3.3.v20150827'
-        commonsLangVersion = '2.6'
-        commonsDbcpVersion = '1.4'
-        commonsIoVersion = '2.4'
-        commonsNetVersion = '3.3'
-        httpComponentsVersion = '4.3.2'
-        jaxenVersion = '1.1.4'
-        jacksonVersion = '2.5.2'
-        javaMailVersion = '1.4.7'
-        jdomVersion = '2.0.5'
-        jt400Version = '8.4'
-        symmetricVersion = '3.7.x-SNAPSHOT'
-        servletVersion = '3.0.1'
-        h2Version = '1.4.190'
-        mysqlVersion = '5.1.29'
-        jtdsVersion = '1.3.1'
-        postgresqlVersion = '9.2-1002-jdbc4'
-        mockitoVersion = '1.9.5'
-        powerMockVersion = '1.5.3'
-        springfoxSwaggerVersion = '2.0.0'
-        reficioSoapVersion = '1.0.0-SNAPSHOT'
-        kxmlVersion='2.3.0'
-		xmlunitVersion='1.6'
-		
-        env = System.getenv()                
-    }
 
     repositories {
         mavenCentral()        

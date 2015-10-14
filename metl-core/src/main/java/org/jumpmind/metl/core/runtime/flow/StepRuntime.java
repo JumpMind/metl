@@ -454,9 +454,6 @@ public class StepRuntime implements Runnable {
             boolean forward = targetStepIds == null || targetStepIds.size() == 0
                     || targetStepIds.contains(targetRuntime.getComponentContext().getFlowStep().getId());
             if (forward) {
-            	String target = targetRuntime.getComponentContext().getFlowStep().getId() != null ?
-        			componentContext.getManipulatedFlow().findFlowStepWithId(targetRuntime.getComponentContext().getFlowStep().getId()).getName() : "UNKNOWN";
-        			
     			componentContext.getExecutionTracker().log(
     					threadNumber,
     					LogLevel.INFO, 
