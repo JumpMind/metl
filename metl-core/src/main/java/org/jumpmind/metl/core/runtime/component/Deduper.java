@@ -32,8 +32,6 @@ public class Deduper extends AbstractComponentRuntime {
 
     public static final String TYPE = "Deduper";
 
-    public final static String ROWS_PER_MESSAGE = "rows.per.message";
-
     int rowsPerMessage = 10000;
 
     LinkedHashMap<String, EntityData> deduped = new LinkedHashMap<String, EntityData>();

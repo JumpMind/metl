@@ -45,8 +45,6 @@ public class Sorter extends AbstractComponentRuntime {
 
     public final static String SORT_ATTRIBUTE = "sort.attribute";
 
-    public final static String ROWS_PER_MESSAGE = "rows.per.message";
-
     int rowsPerMessage;
     
     String sortAttributeId;

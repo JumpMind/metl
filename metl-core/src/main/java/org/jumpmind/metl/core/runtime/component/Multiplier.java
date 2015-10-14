@@ -34,8 +34,6 @@ public class Multiplier extends AbstractComponentRuntime {
 
     public static final String TYPE = "Multiplier";
 
-    public final static String ROWS_PER_MESSAGE = "rows.per.message";
-
     public final static String MULTIPLIER_SOURCE_STEP = "multiplier.source.step";
 
     boolean multipliersInitialized = false;

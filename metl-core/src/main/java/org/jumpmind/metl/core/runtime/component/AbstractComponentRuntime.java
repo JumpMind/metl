@@ -57,6 +57,8 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     public final static String LOG_INPUT = "logInput";
 
     public final static String LOG_OUTPUT = "logOutput";
+    
+    public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
     protected ComponentContext context;
     
@@ -91,6 +93,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return getComponent().toTypedProperties(settings);
     }
     
+    @Override
     public void stop() {
     }
     

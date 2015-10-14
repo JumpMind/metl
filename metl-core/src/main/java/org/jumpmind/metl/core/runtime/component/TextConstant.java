@@ -34,8 +34,6 @@ public class TextConstant extends AbstractComponentRuntime {
 
     public static final String TYPE = "Text Reader";
 
-    public static final String SETTING_ROWS_PER_MESSAGE = "rows.per.message";
-
     public static final String SETTING_SPLIT_ON_LINE_FEED = "split.on.line.feed";
 
     public static final String SETTING_TEXT = "text";
@@ -52,7 +50,7 @@ public class TextConstant extends AbstractComponentRuntime {
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         int linesInMessage = 0;
-        int textRowsPerMessage = context.getFlowStep().getComponent().getInt(SETTING_ROWS_PER_MESSAGE, 1000);
+        int textRowsPerMessage = context.getFlowStep().getComponent().getInt(ROWS_PER_MESSAGE, 1000);
         boolean splitOnLineFeed = context.getFlowStep().getComponent().getBoolean(SETTING_SPLIT_ON_LINE_FEED, false);
         ArrayList<String> payload = new ArrayList<String>();
 

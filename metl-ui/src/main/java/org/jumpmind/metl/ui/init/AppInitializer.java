@@ -120,17 +120,21 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     public void contextDestroyed(ServletContextEvent sce) {
     }
 
-    protected String getConfigDir(boolean printInstrutions) {
+    protected String getConfigDir(boolean printInstructions) {
         String configDir = System.getProperty(SYS_CONFIG_DIR);
         if (isBlank(configDir)) {
             configDir = System.getProperty("user.home") + "/.metl";
-            if (printInstrutions) {
+            if (printInstructions) {
                 System.out.println("You can configure the following system property to point to a working directory "
                         + "where configuration files can be found: -D" + SYS_CONFIG_DIR + "=/some/config/dir");
             }
         }
-        System.setProperty("h2.baseDir", configDir);
-        if (printInstrutions) {
+        
+        if (isBlank(System.getProperty("h2.baseDir"))) {
+            System.setProperty("h2.baseDir", configDir);
+        }
+        
+        if (printInstructions) {
             System.out.println("The current config directory is " + configDir);
             System.out.println("The current working directory is " + System.getProperty("user.dir"));
             System.out.println("");
