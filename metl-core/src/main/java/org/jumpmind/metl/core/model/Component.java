@@ -56,8 +56,6 @@ public class Component extends AbstractObjectWithSettings {
 
     List<ComponentAttributeSetting> attributeSettings;
 
-    boolean logInputs;
-    
     public Component() {
     }
 
@@ -286,14 +284,6 @@ public class Component extends AbstractObjectWithSettings {
     public String getFolderId() {
         return folderId;
     }
-    
-    public boolean isLogInputs() {
-		return logInputs;
-	}
-
-	public void setLogInputs(boolean logInputs) {
-		this.logInputs = logInputs;
-	}
 
 	public Row toRow(EntityData data, boolean qualifyWithEntityName) {
         Row row = new Row(data.size());

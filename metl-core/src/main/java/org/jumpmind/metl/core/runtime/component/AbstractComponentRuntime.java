@@ -119,7 +119,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return context.getFlowStep();
     }
     
-    public Component getComponent() {
+    protected Component getComponent() {
         return context.getFlowStep().getComponent();
     }
     

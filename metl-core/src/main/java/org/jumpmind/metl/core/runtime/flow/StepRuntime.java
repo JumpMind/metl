@@ -413,7 +413,7 @@ public class StepRuntime implements Runnable {
     	int threadNumber = ThreadUtils.getThreadNumber();
     	
     	String source = header.getOriginatingStepId() != null ?
-    			componentContext.getFlow().findFlowStepWithId(header.getOriginatingStepId()).getName() : "ENTRY";
+    			componentContext.getManipulatedFlow().findFlowStepWithId(header.getOriginatingStepId()).getName() : "ENTRY";
     			
     	componentContext.getExecutionTracker().log(
         		threadNumber,
@@ -455,7 +455,7 @@ public class StepRuntime implements Runnable {
                     || targetStepIds.contains(targetRuntime.getComponentContext().getFlowStep().getId());
             if (forward) {
             	String target = targetRuntime.getComponentContext().getFlowStep().getId() != null ?
-        			componentContext.getFlow().findFlowStepWithId(targetRuntime.getComponentContext().getFlowStep().getId()).getName() : "UNKNOWN";
+        			componentContext.getManipulatedFlow().findFlowStepWithId(targetRuntime.getComponentContext().getFlowStep().getId()).getName() : "UNKNOWN";
         			
     			componentContext.getExecutionTracker().log(
     					threadNumber,
