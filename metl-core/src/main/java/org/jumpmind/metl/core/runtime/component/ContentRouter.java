@@ -100,10 +100,7 @@ public class ContentRouter extends AbstractComponentRuntime {
             bindEntityData(scriptEngine, entityData);
             if (routes != null) {
                 for (Route route : routes) {
-                	if (onlyRouteFirstMatch && getComponentStatistics().getNumberEntitiesProcessed(threadNumber) > 0) {
-                		break;
-                	}
-                    try {
+                	try {
                     	if (Boolean.TRUE.equals(scriptEngine.eval(route.getMatchExpression()))) {
                         	getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                         	
@@ -117,6 +114,9 @@ public class ContentRouter extends AbstractComponentRuntime {
                                 callback.sendMessage(outboundPayload, false, route.getTargetStepId());
                             }
                             outboundPayload.add(entityData.copy());
+                            if (onlyRouteFirstMatch) {
+                        		break;
+                        	}
                         }
                     } catch (ScriptException e) {
                         throw new RuntimeException(e);
