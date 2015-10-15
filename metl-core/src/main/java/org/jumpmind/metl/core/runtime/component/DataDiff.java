@@ -45,17 +45,29 @@ public class DataDiff extends AbstractComponentRuntime {
     File databaseFile;
 
     RdbmsWriter databaseWriter;
+    
+    @Override
+    protected void start() {
+        TypedProperties properties = getTypedProperties();
+        this.sourceStep1Id = properties.get(SOURCE_1);
+        this.sourceStep2Id = properties.get(SOURCE_2);
+        this.inMemoryCompare = properties.is(IN_MEMORY_COMPARE);
+        this.rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
+        Component comp = context.getFlowStep().getComponent();
+        comp.setOutputModel(comp.getInputModel());
+        Model inputModel = context.getFlowStep().getComponent().getInputModel();
+        if (inputModel == null) {
+            throw new MisconfiguredException("The input model is not set and it is required");
+        }
+    }
 
     @Override
     public void handle(Message message, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         createDatabase();
-
         loadIntoDatabase(message);
-
         if (unitOfWorkBoundaryReached) {
             calculateDiff(callback);
         }
-
     }
 
     protected void calculateDiff(ISendMessageCallback callback) {
@@ -222,21 +234,6 @@ public class DataDiff extends AbstractComponentRuntime {
             }
 
             log(LogLevel.INFO, "Creating databasePlatform with the following url: %s", ds.getUrl());
-        }
-    }
-
-    @Override
-    protected void start() {
-        TypedProperties properties = getTypedProperties();
-        this.sourceStep1Id = properties.get(SOURCE_1);
-        this.sourceStep2Id = properties.get(SOURCE_2);
-        this.inMemoryCompare = properties.is(IN_MEMORY_COMPARE);
-        this.rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
-        Component comp = context.getFlowStep().getComponent();
-        comp.setOutputModel(comp.getInputModel());
-        Model inputModel = context.getFlowStep().getComponent().getInputModel();
-        if (inputModel == null) {
-            throw new MisconfiguredException("The input model is not set and it is required");
         }
     }
 
