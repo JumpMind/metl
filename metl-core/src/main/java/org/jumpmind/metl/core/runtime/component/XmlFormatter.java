@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -44,7 +43,6 @@ import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
-import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
@@ -68,17 +66,13 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
     public final static String XML_FORMATTER_TEMPLATE = "xml.formatter.template";
 
-    Document templateDocument;
-
-    List<XmlFormatterAttributeSetting> attributeSettings;
-
-    Map<String, XmlFormatterEntitySetting> entitySettings;
-
     boolean ignoreNamespace = true;
 
     boolean useParameterReplacement = true;
 
     String xmlFormat;
+
+    String template;
 
     @Override
     protected void start() {
@@ -87,44 +81,53 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         ignoreNamespace = properties.is(IGNORE_NAMESPACE);
         useParameterReplacement = properties.is(PARAMETER_REPLACEMENT);
         xmlFormat = properties.get(XML_FORMAT);
+        template = properties.get(XML_FORMATTER_TEMPLATE);
 
-        Setting templateSetting = getComponent().findSetting(XML_FORMATTER_TEMPLATE);
+    }
 
-        if (templateSetting != null && StringUtils.isNotBlank(templateSetting.getValue())) {
-            SAXBuilder builder = new SAXBuilder();
-            builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
-            builder.setFeature("http://xml.org/sax/features/validation", false);
-            try {
-                String xml = templateSetting.getValue();
-                if (useParameterReplacement) {
-                    xml = FormatUtils.replaceTokens(xml, context.getFlowParametersAsString(), true);
-                }
-                templateDocument = builder.build(new StringReader(xml));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+    @Override
+    public boolean supportsStartupMessages() {
+        return false;
+    }
+
+    @Override
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        ArrayList<EntityData> inputRows = inputMessage.getPayload();
+
+        ArrayList<String> outputPayload = new ArrayList<String>();
+
+        SAXBuilder builder = new SAXBuilder();
+        builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
+        builder.setFeature("http://xml.org/sax/features/validation", false);
+        Document document = null;
+        try {
+            document = builder.build(new StringReader(FormatUtils.replaceTokens(template, context.getFlowParametersAsString(), true)));
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         Model model = getComponent().getInputModel();
-        entitySettings = new HashMap<String, XmlFormatterEntitySetting>();
-        attributeSettings = new ArrayList<XmlFormatterAttributeSetting>();
+        Map<String, XmlFormatterEntitySetting> entitySettings = new HashMap<String, XmlFormatterEntitySetting>();
+        List<XmlFormatterAttributeSetting> attributeSettings = new ArrayList<XmlFormatterAttributeSetting>();
 
         if (model != null) {
-            Map<Element, Namespace> namespaces = removeNamespaces(templateDocument);
+            Map<Element, Namespace> namespaces = removeNamespaces(document);
             for (ComponentEntitySetting compEntitySetting : getComponent().getEntitySettings()) {
                 if (compEntitySetting.getName().equals(XML_FORMATTER_XPATH)) {
                     XPathExpression<Element> expression = XPathFactory.instance().compile(compEntitySetting.getValue(), Filters.element());
-                    List<Element> matches = expression.evaluate(templateDocument.getRootElement());
+                    List<Element> matches = expression.evaluate(document.getRootElement());
                     if (matches.size() == 0) {
                         log(LogLevel.WARN, "XPath expression " + compEntitySetting.getValue() + " did not find any matches");
                     } else {
                         Element templateElement = matches.get(0);
-                        entitySettings.put(compEntitySetting.getEntityId(), new XmlFormatterEntitySetting(compEntitySetting, expression,
-                                templateElement));
+                        entitySettings.put(compEntitySetting.getEntityId(),
+                                new XmlFormatterEntitySetting(compEntitySetting, expression, templateElement));
                     }
                 }
             }
-            restoreNamespaces(templateDocument, namespaces);
+            restoreNamespaces(document, namespaces);
 
             for (ComponentAttributeSetting compAttrSetting : getComponent().getAttributeSettings()) {
                 if (compAttrSetting.getName().equals(XML_FORMATTER_XPATH)) {
@@ -142,20 +145,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                 }
             }
         }
-    }
-    
-    @Override
-    public boolean supportsStartupMessages() {
-        return false;
-    }
 
-    @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        ArrayList<EntityData> inputRows = inputMessage.getPayload();
-
-        ArrayList<String> outputPayload = new ArrayList<String>();
-
-        Document document = templateDocument.clone();
         Map<Element, Namespace> namespaces = removeNamespaces(document);
 
         for (XmlFormatterEntitySetting entitySetting : entitySettings.values()) {
@@ -166,7 +156,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         }
 
         for (EntityData inputRow : inputRows) {
-            processInputRow(document, inputRow);
+            processInputRow(document, inputRow, entitySettings, attributeSettings);
         }
 
         restoreNamespaces(document, namespaces);
@@ -182,14 +172,15 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         }
         xmlOutputter.setFormat(format);
         outputPayload.add(xmlOutputter.outputString(document));
-        
+
         log(LogLevel.DEBUG, outputPayload.toString());
-        
+
         callback.sendMessage(outputPayload, unitOfWorkBoundaryReached);
     }
 
-    private void processInputRow(Document document, EntityData inputRow) {
-        Set<XmlFormatterEntitySetting> inputEntitySettings = getEntitySettings(inputRow);
+    private void processInputRow(Document document, EntityData inputRow, Map<String, XmlFormatterEntitySetting> entitySettings,
+            List<XmlFormatterAttributeSetting> attributeSettings) {
+        Set<XmlFormatterEntitySetting> inputEntitySettings = getEntitySettings(inputRow, entitySettings);
 
         // apply attributes whose entities do not need to repeat
         applyAttributeXpath(document, inputRow, attributeSettings);
@@ -200,16 +191,16 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                 applyAttributeXpath(document, inputRow, entitySetting.getAttributeSettings());
                 entitySetting.setFirstTimeApply(false);
             } else {
-                Map<Element, Namespace> namespaces = removeNamespaces(templateDocument);
-                applyAttributeXpath(templateDocument, inputRow, entitySetting.getAttributeSettings());
-                restoreNamespaces(templateDocument, namespaces);
+                Map<Element, Namespace> namespaces = removeNamespaces(document);
+                applyAttributeXpath(document, inputRow, entitySetting.getAttributeSettings());
+                restoreNamespaces(document, namespaces);
                 Element clonedElement = entitySetting.getTemplateElement().clone();
                 entitySetting.getParentElement().addContent(clonedElement);
             }
         }
     }
 
-    private Set<XmlFormatterEntitySetting> getEntitySettings(EntityData inputRow) {
+    private Set<XmlFormatterEntitySetting> getEntitySettings(EntityData inputRow, Map<String, XmlFormatterEntitySetting> entitySettings) {
         Set<XmlFormatterEntitySetting> entitySettingSet = new HashSet<XmlFormatterEntitySetting>();
         Model model = getComponent().getInputModel();
         if (model != null && inputRow.size() > 0) {
