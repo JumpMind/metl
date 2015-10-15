@@ -33,8 +33,16 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 	@Override
 	public void testHandleStartupMessage() {
 		setInputMessage(new ControlMessage());
+
+		// Expected
+		Message expectedMessage = new MessageBuilder().withPayload(
+				new PayloadBuilder().buildED()).build();
+				
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
+				
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0));
+		assertHandle(0, expectedMonitors);
 	}
 
 	@Test
@@ -45,8 +53,15 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		
 		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
+		// Expected
+		Message expectedMessage = new MessageBuilder().withPayload(
+				new PayloadBuilder().buildED()).build();
+				
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
+				
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0));
+		assertHandle(0, expectedMonitors);
 	}
 
 	@Test
