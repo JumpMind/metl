@@ -119,22 +119,22 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
             
             /* @formatter:off */
             String[][] CONFIG = {
-                    {"PROJECT", "WHERE ID='%3$s' ORDER BY ID",                                                                                                                                                                              },
-                    {"PROJECT_VERSION", "WHERE ID='%2$s' ORDER BY ID",                                                                                                                                                                                                                                },
-                    {"FOLDER", "WHERE PROJECT_VERSION_ID='%2$s' ORDER BY ID",                                                                                                                                                                                                                         },
-                    {"MODEL", "WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0 ORDER BY ID",                                                                                                                                                                                                            },
-                    {"MODEL_ENTITY", "WHERE MODEL_ID in (SELECT ID FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0) ORDER BY ID",                                                                                                                                                       },
-                    {"MODEL_ATTRIBUTE", "WHERE ENTITY_ID IN (SELECT ID FROM %1$s_MODEL_ENTITY WHERE MODEL_ID in (SELECT ID FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)) ORDER BY ID",                                                                                              },
-                    {"RESOURCE", "WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0 ORDER BY ID",                                                                                                                                                                                                         },
-                    {"RESOURCE_SETTING", "WHERE RESOURCE_ID IN (SELECT ID FROM %1$s_RESOURCE WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0) ORDER BY RESOURCE_ID, NAME",                                                                                                                                             },
-                    {"COMPONENT", "WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0 ORDER BY ID",                                                                                                                                                                                                        },
-                    {"COMPONENT_SETTING", "WHERE COMPONENT_ID IN (SELECT ID FROM %1$s_COMPONENT WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0) ORDER BY ID",                                                                                                                                          },
-                    {"COMPONENT_ENTITY_SETTING", "WHERE COMPONENT_ID IN (SELECT ID FROM %1$s_COMPONENT WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0) ORDER BY ID",                                                                                                                                   },
-                    {"COMPONENT_ATTRIBUTE_SETTING", "WHERE COMPONENT_ID IN (SELECT ID FROM %1$s_COMPONENT WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0) ORDER BY ID",                                                                                                                                },
-                    {"FLOW", "WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0 ORDER BY ID",                                                                                                                                                                                                             },
-                    {"FLOW_PARAMETER", "WHERE FLOW_ID IN (SELECT ID FROM %1$s_FLOW WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0) ORDER BY ID",                                                                                                                                                       },
-                    {"FLOW_STEP", "WHERE FLOW_ID IN (SELECT ID FROM %1$s_FLOW WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0) ORDER BY ID",                                                                                                                                                            },
-                    {"FLOW_STEP_LINK", "WHERE SOURCE_STEP_ID IN (SELECT ID FROM %1$s_FLOW_STEP WHERE FLOW_ID IN (SELECT ID FROM %1$s_FLOW WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)) ORDER BY SOURCE_STEP_ID, TARGET_STEP_ID",                                                                                               },
+                    {"PROJECT", "WHERE ID='%3$s'"," ORDER BY ID",                                                                                                                                                                              },
+                    {"PROJECT_VERSION", "WHERE ID='%2$s'"," ORDER BY ID",                                                                                                                                                                                                                                },
+                    {"FOLDER", "WHERE PROJECT_VERSION_ID='%2$s'"," ORDER BY ID",                                                                                                                                                                                                                         },
+                    {"MODEL", "WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0"," ORDER BY ID",                                                                                                                                                                                                            },
+                    {"MODEL_ENTITY", "WHERE MODEL_ID in (SELECT ID FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)"," ORDER BY ID",                                                                                                                                                       },
+                    {"MODEL_ATTRIBUTE", "WHERE ENTITY_ID IN (SELECT ID FROM %1$s_MODEL_ENTITY WHERE MODEL_ID in (SELECT ID FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0))"," ORDER BY ID",                                                                                              },
+                    {"RESOURCE", "WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0"," ORDER BY ID",                                                                                                                                                                                                         },
+                    {"RESOURCE_SETTING", "WHERE RESOURCE_ID IN (SELECT ID FROM %1$s_RESOURCE WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)"," ORDER BY RESOURCE_ID, NAME",                                                                                                                                             },
+                    {"COMPONENT", "WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0"," ORDER BY ID",                                                                                                                                                                                                        },
+                    {"COMPONENT_SETTING", "WHERE COMPONENT_ID IN (SELECT ID FROM %1$s_COMPONENT WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)"," ORDER BY ID",                                                                                                                                          },
+                    {"COMPONENT_ENTITY_SETTING", "WHERE COMPONENT_ID IN (SELECT ID FROM %1$s_COMPONENT WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)"," ORDER BY ID",                                                                                                                                   },
+                    {"COMPONENT_ATTRIBUTE_SETTING", "WHERE COMPONENT_ID IN (SELECT ID FROM %1$s_COMPONENT WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)"," ORDER BY ID",                                                                                                                                },
+                    {"FLOW", "WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0"," ORDER BY ID",                                                                                                                                                                                                             },
+                    {"FLOW_PARAMETER", "WHERE FLOW_ID IN (SELECT ID FROM %1$s_FLOW WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)"," ORDER BY ID",                                                                                                                                                       },
+                    {"FLOW_STEP", "WHERE FLOW_ID IN (SELECT ID FROM %1$s_FLOW WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)"," ORDER BY ID",                                                                                                                                                            },
+                    {"FLOW_STEP_LINK", "WHERE SOURCE_STEP_ID IN (SELECT ID FROM %1$s_FLOW_STEP WHERE FLOW_ID IN (SELECT ID FROM %1$s_FLOW WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0))"," ORDER BY SOURCE_STEP_ID, TARGET_STEP_ID",                                                                                               },
             };
             /* @formatter:on */
 
@@ -147,7 +147,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
 
             for (int i = 0; i < CONFIG.length; i++) {
                 String[] entry = CONFIG[i];
-                out.append(export(entry[0], entry[1], projectVersion));
+                out.append(export(entry[0], entry[1], entry[2], projectVersion));
             }
             
             return out.toString();   
@@ -156,10 +156,10 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
         }
     }
     
-    protected String export (String table, String where, ProjectVersion projectVersion) throws IOException {
+    protected String export (String table, String where, String orderBy, ProjectVersion projectVersion) throws IOException {
         DbExport export = new DbExport(databasePlatform);        
         export.setWhereClause(String.format(
-                where,
+                where + orderBy,
                 tablePrefix, projectVersion.getId(), projectVersion.getProjectId()));
         export.setFormat(Format.SQL);
         export.setUseQuotedIdentifiers(false);
