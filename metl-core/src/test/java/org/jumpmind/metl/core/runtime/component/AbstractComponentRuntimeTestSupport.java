@@ -151,56 +151,6 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 		}
 	}
 	
-	
-	
-	/*
-	
-	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, boolean xmlPayload) {
-		List<Serializable> payloads = null;
-		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads, xmlPayload);
-	}
-	
-	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize) {
-		List<Serializable> payloads = null;
-		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads, false);
-	}
-	
-	public HandleMessageMonitor getExpectedTextMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize) {
-		ArrayList<String> payloads = null;
-		return getExpectedTextMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads);
-	}
-	
-	public HandleMessageMonitor getExpectedTextMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, ArrayList<String> payload) {
-		List<Serializable> payloads = new ArrayList<Serializable>();
-		if (payload != null) {
-			payloads.add(payload);
-		}
-		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads, false);
-	}
-	public HandleMessageMonitor getExpectedTextMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, ArrayList<String> payload, boolean xmlPayload) {
-		List<Serializable> payloads = new ArrayList<Serializable>();
-		if (payload != null) {
-			payloads.add(payload);
-		}
-		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads, xmlPayload);
-	}
-	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, ArrayList<EntityData> payload) {
-		List<Serializable> payloads = new ArrayList<Serializable>();
-		if (payload != null) {
-			payloads.add(payload);
-		}
-		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads, false);
-	}
-	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, ArrayList<EntityData> payload, boolean xmlPayload) {
-		List<Serializable> payloads = new ArrayList<Serializable>();
-		if (payload != null) {
-			payloads.add(payload);
-		}
-		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads, xmlPayload);
-	}
-	*/
-	
-	
 	public HandleMessageMonitor getExpectedMessageMonitor(int starts, int shutdowns) {
 		Message m = null;
 		return getExpectedMessageMonitor(starts, shutdowns, false, m);
