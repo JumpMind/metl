@@ -10,7 +10,9 @@ import java.util.List;
 
 import org.apache.tools.ant.DirectoryScanner;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.properties.TypedProperties;
@@ -26,8 +28,17 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 	public void testHandleStartupMessage() {
 		setupHandle(true);
 		setInputMessage(new StartupMessage());
+		// Expected
+		Message expectedMessage = new MessageBuilder().withPayloadString(
+				new PayloadBuilder()
+						.addRow("fileAbsolutePath").buildString()).build();
+		
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
+				
+		// Execute and Assert
 		runHandle();
-		assertHandle(1, getExpectedMessageMonitorSingle(1, 0, 0, 1));
+		assertHandle(1, expectedMonitors);
 	}
 
 	@Test
@@ -36,10 +47,17 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 		setupHandle(true);
 		setUnitOfWorkLastMessage(true);
 		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
+		// Expected
+		Message expectedMessage = new MessageBuilder().withPayloadString(
+				new PayloadBuilder()
+						.addRow("fileAbsolutePath").buildString()).build();
 		
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
+				
+		// Execute and Assert
 		runHandle();
-		assertHandle(1, getExpectedMessageMonitorSingle(1, 0, 0, 1));
+		assertHandle(1, expectedMonitors);
 	}
 
 	@Test
@@ -49,11 +67,12 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 		setupHandle(true);
 		
 		// Expected
-		ArrayList<String> expectedPayload = new PayloadBuilder()
-						.addRow("fileAbsolutePath").buildString();
+		Message expectedMessage = new MessageBuilder().withPayloadString(
+				new PayloadBuilder()
+						.addRow("fileAbsolutePath").buildString()).build();
 		
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedTextMessageMonitor(1, 0, 0, 1, expectedPayload));
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
 				
 		// Execute and Assert
 		runHandle();
@@ -72,7 +91,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 		
 		// Expected
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedTextMessageMonitor(0, 0, 1, 0));
+		expectedMonitors.add(getExpectedMessageMonitor(0, 1));
 				
 		// Execute and Assert
 		runHandle();
@@ -87,11 +106,12 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 		((FilePoller) spy).useTriggerFile = true;
 		
 		// Expected
-		ArrayList<String> expectedPayload = new PayloadBuilder()
-				.addRow("fileAbsolutePath").buildString();
+		Message expectedMessage = new MessageBuilder().withPayloadString(
+				new PayloadBuilder()
+				.addRow("fileAbsolutePath").buildString()).build();
 
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedTextMessageMonitor(1, 0, 0, 1, expectedPayload));
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
 				
 		// Execute and Assert
 		runHandle();
@@ -112,7 +132,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 		
 		// Expected
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedTextMessageMonitor(0, 0, 1, 0));
+		expectedMonitors.add(getExpectedMessageMonitor(0,1));
 				
 		// Execute and Assert
 		runHandle();

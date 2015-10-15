@@ -42,7 +42,7 @@ public class DeduperTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 	public void testHandleStartupMessage() {
 		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}
 
 	@Test
@@ -54,7 +54,7 @@ public class DeduperTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}
 
 	@Test
@@ -64,7 +64,7 @@ public class DeduperTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 		setUnitOfWorkLastMessage(true);
 		
 		Message message1 = new MessageBuilder("step1")
-				.setPayload(new PayloadBuilder()
+				.withPayload(new PayloadBuilder()
 					.addRow(new EntityDataBuilder()
 						.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build())
 					.addRow(new EntityDataBuilder()
@@ -76,13 +76,13 @@ public class DeduperTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 		((Deduper) spy).deduped = new LinkedHashMap<String, EntityData>();
 		
 		// Expected
-		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+		Message expectedMessage = new MessageBuilder().withPayload(new PayloadBuilder()
 				.addRow(new EntityDataBuilder()
 					.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
-				.build()).buildED();
+				.build()).buildED()).build();
 
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
 		
 		// Execute and Assert
 		runHandle();

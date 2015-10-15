@@ -56,11 +56,12 @@ public class HandleParams {
 		@Override
 		public void sendMessage(Serializable payload, boolean lastMessage, String... targetStepIds) {
 			if (payload instanceof List) {
-				monitor.getPayloads().add(payload);
+				Message message = new Message("unitTest");
+				message.setPayload(payload);
+				monitor.getMessages().add(message);
 			}
 			
 			Collections.addAll(monitor.getTargetStepIds(), targetStepIds);
-			monitor.incrementSendMessageCount();
 		}
 
 		@Override

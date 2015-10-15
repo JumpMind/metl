@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
@@ -174,7 +175,8 @@ public class TestUtils {
     					if (expected.get(i).length() == 0 || actual.get(i).length() == 0) {
     						assertEquals(expected.get(i).length(), actual.get(i).length());
     					}
-    					XMLUnit.compareXML(expected.get(i), actual.get(i));
+    					XMLUnit.setIgnoreWhitespace(true);
+    					XMLAssert.assertXMLEqual(expected.get(i), actual.get(i));
     				}
     				catch (Exception e) {
     					Assert.fail("Unable to compare xml payloads" + e.getMessage());

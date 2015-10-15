@@ -20,7 +20,7 @@ public class SorterTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 		setupHandle();
 		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}
 
 	@Test
@@ -32,7 +32,7 @@ public class SorterTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}
 
 	@Test
@@ -43,19 +43,19 @@ public class SorterTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 		((Sorter) spy).sortAttributeId = MODEL_ATTR_ID_1;
 		
 		Message message1 = new MessageBuilder("step1")
-				.setPayload(new PayloadBuilder()
+				.withPayload(new PayloadBuilder()
 						.addRow(new EntityDataBuilder()
 							.withKV(MODEL_ATTR_ID_1, "superman")
 					.build()).buildED()).build();
 		
 		Message message2 = new MessageBuilder("step2")
-				.setPayload(new PayloadBuilder()
+				.withPayload(new PayloadBuilder()
 						.addRow(new EntityDataBuilder()
 							.withKV(MODEL_ATTR_ID_1, "iron man")
 					.build()).buildED()).build();
 		
 		Message message3 = new MessageBuilder("step2")
-				.setPayload(new PayloadBuilder()
+				.withPayload(new PayloadBuilder()
 						.addRow(new EntityDataBuilder()
 							.withKV(MODEL_ATTR_ID_1, "flash")
 					.build()).buildED()).build();
@@ -66,14 +66,32 @@ public class SorterTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 		messages.add(new HandleParams(message3, true));
 		
 		// Expected
-		ArrayList<EntityData> expectedPayload = PayloadTestHelper.createPayload(1, 
-				MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1, 
-				MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2, 
-				MODEL_ATTR_ID_3, MODEL_ATTR_NAME_2);
+		Message expectedMessage1 = new MessageBuilder().withPayload(
+				new PayloadBuilder().buildED()).build();
 		
+		Message expectedMessage2 = new MessageBuilder().withPayload(new PayloadBuilder()
+				.addRow(new EntityDataBuilder()
+						.withKV(MODEL_ATTR_ID_1, "flash")
+					.build()).buildED()).build();
+		
+		Message expectedMessage3 = new MessageBuilder().withPayload(new PayloadBuilder()
+				.addRow(new EntityDataBuilder()
+						.withKV(MODEL_ATTR_ID_1, "iron man")
+					.build()).buildED()).build();
+		
+		Message expectedMessage4 = new MessageBuilder().withPayload(new PayloadBuilder()
+				.addRow(new EntityDataBuilder()
+					.withKV(MODEL_ATTR_ID_1, "superman")
+				.build()).buildED()).build();
+
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();		
+		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, null));
+		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, null));
+		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, 
+				expectedMessage1, expectedMessage2, expectedMessage3, expectedMessage4));
+		
 		runHandle();
-		assertHandle(0, expectedMonitors);
+		assertHandle(3, expectedMonitors);
 		
 	}
 

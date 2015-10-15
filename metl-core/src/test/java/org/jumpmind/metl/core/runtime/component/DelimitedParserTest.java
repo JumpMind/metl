@@ -34,7 +34,7 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 	public void testHandleStartupMessage() {
 		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 1));
+		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}
 
 	@Test
@@ -46,7 +46,7 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 1));
+		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}
 
 	@Test
@@ -58,7 +58,7 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		setUnitOfWorkLastMessage(true);
 		
 		Message message1 = new MessageBuilder("step1")
-				.setPayloadString(new PayloadBuilder()
+				.withPayloadString(new PayloadBuilder()
 					.addRow("red,yellow,green,blue,purple,orange")
 					.buildString()).build();
 		messages.clear();
@@ -75,14 +75,14 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		((DelimitedParser) spy).attributes.add(mAttr);
 		
 		// Expected
-		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+		Message expectedMessage = new MessageBuilder().withPayload(
+				new PayloadBuilder()
 				.addRow(new EntityDataBuilder()
 					.withKV(ModelHelper.ATTR_ID + "0_0", "red")
-				.build()).buildED();
+				.build()).buildED()).build();
 				
-
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
 				
 		runHandle();
 		assertHandle(1, expectedMonitors);
@@ -111,7 +111,7 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		setUnitOfWorkLastMessage(true);
 		
 		Message message1 = new MessageBuilder("step1")
-				.setPayloadString(new PayloadBuilder()
+				.withPayloadString(new PayloadBuilder()
 					.addRow("red,yellow,green,blue,purple,orange")
 					.buildString()).build();
 		messages.clear();
@@ -128,14 +128,15 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		((DelimitedParser) spy).attributes.add(mAttr);
 		
 		// Expected
-		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+		Message expectedMessage = new MessageBuilder().withPayload(
+				new PayloadBuilder()
 				.addRow(new EntityDataBuilder()
 					.withKV(ModelHelper.ATTR_ID + "0_0", "maroon")
-				.build()).buildED();
+				.build()).buildED()).build();
 				
 
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
 				
 		runHandle();
 		assertHandle(1, expectedMonitors);
@@ -149,7 +150,7 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		setUnitOfWorkLastMessage(true);
 		
 		Message message1 = new MessageBuilder("step1")
-				.setPayloadString(new PayloadBuilder()
+				.withPayloadString(new PayloadBuilder()
 					.addRow("red,yellow,green,blue,purple,orange")
 					.buildString()).build();
 		messages.clear();
@@ -162,7 +163,8 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		
 		
 		// Expected
-		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+		Message expectedMessage = new MessageBuilder().withPayload(
+				new PayloadBuilder()
 				.addRow(new EntityDataBuilder()
 					.withKV(ModelHelper.ATTR_ID + "0-0", "red")
 					.withKV(ModelHelper.ATTR_ID + "1-0", "yellow")
@@ -170,11 +172,11 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 					.withKV(ModelHelper.ATTR_ID + "0-1", "blue")
 					.withKV(ModelHelper.ATTR_ID + "1-1", "purple")
 					.withKV(ModelHelper.ATTR_ID + "2-1", "orange")
-				.build()).buildED();
+				.build()).buildED()).build();
 				
 
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
 			
 		// Execute and Assert
 		runHandle();
@@ -189,7 +191,7 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		setUnitOfWorkLastMessage(true);
 		
 		Message message1 = new MessageBuilder("step1")
-				.setPayloadString(new PayloadBuilder()
+				.withPayloadString(new PayloadBuilder()
 					.addRow("h1,h2,h3,h4,h5,h6")
 					.addRow("red,yellow,green,blue,purple,orange")
 					.addRow("f1,f2,f3,f4,f5,f6")
@@ -205,7 +207,8 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		
 		
 		// Expected
-		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+		Message expectedMessage = new MessageBuilder().withPayload(
+				new PayloadBuilder()
 				.addRow(new EntityDataBuilder()
 					.withKV(ModelHelper.ATTR_ID + "0-0", "red")
 					.withKV(ModelHelper.ATTR_ID + "1-0", "yellow")
@@ -213,11 +216,11 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 					.withKV(ModelHelper.ATTR_ID + "0-1", "blue")
 					.withKV(ModelHelper.ATTR_ID + "1-1", "purple")
 					.withKV(ModelHelper.ATTR_ID + "2-1", "orange")
-				.build()).buildED();
+				.build()).buildED()).build();
 				
 
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
 			
 		// Execute and Assert
 		runHandle();

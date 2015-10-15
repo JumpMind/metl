@@ -119,9 +119,15 @@ public class XmlReader extends AbstractComponentRuntime {
 					prevEndLine = parser.getLineNumber();
 					if (parser.getName().equals(readTag)) {
 						StringBuilder xml = new StringBuilder();
-						forward(startLine - lineNumberReader.getLineNumber(), lineNumberReader);
-						int linesToRead = parser.getLineNumber() - lineNumberReader.getLineNumber();
 						
+						forward(startLine, lineNumberReader);
+						
+						//lineNumberReader.setLineNumber(startLine);
+						
+						int linesToRead = parser.getLineNumber() - lineNumberReader.getLineNumber();
+						if (lineNumberReader.getLineNumber() > startLine) {
+							startCol = 0;
+						}
 						line = lineNumberReader.readLine();
 						
 						while (linesToRead >= 0 && line != null) {
@@ -151,6 +157,7 @@ public class XmlReader extends AbstractComponentRuntime {
 							callback.sendMessage(outboundPayload, false);
 							outboundPayload = new ArrayList<String>();
 						}
+						startCol = 0;
 					}
 					break;
 				}
@@ -180,9 +187,9 @@ public class XmlReader extends AbstractComponentRuntime {
 		return new FileReader(f);
 	}
 	
-	protected static void forward(int lines, LineNumberReader lineNumberReader) throws IOException {
-		while (lines > 0 && (lineNumberReader.readLine()) != null) {
-			lines--;
+	protected static void forward(int toLine, LineNumberReader lineNumberReader) throws IOException {
+		while (lineNumberReader.getLineNumber() < toLine) {
+			lineNumberReader.readLine();
 		}
 	}
 

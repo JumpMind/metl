@@ -9,16 +9,19 @@ public class MessageBuilder {
 	
 	Message message;
 	
+	public MessageBuilder() {
+		message = new Message("unitTest");
+	}
 	public MessageBuilder(String originatingStepId) {
 		message = new Message(originatingStepId);
 	}
 	
-	public MessageBuilder setPayload(ArrayList<EntityData> payload) {
+	public MessageBuilder withPayload(ArrayList<EntityData> payload) {
 		this.message.setPayload(payload);
 		return this;
 	}
 	
-	public MessageBuilder setPayloadString(ArrayList<String> payload) {
+	public MessageBuilder withPayloadString(ArrayList<String> payload) {
 		this.message.setPayload(payload);
 		return this;
 	}

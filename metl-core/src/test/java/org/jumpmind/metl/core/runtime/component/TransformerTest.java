@@ -53,8 +53,12 @@ public class TransformerTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 	@Override
 	public void testHandleStartupMessage() {
 		setInputMessage(new StartupMessage());
+		// Expected
+		Message expectedMessage1 = new MessageBuilder().withPayload(
+				new PayloadBuilder().buildED()).build();
+		
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 1));
+		assertHandle(0, getExpectedMessageMonitor(0, 0, false, expectedMessage1));
 	}
 
 	@Test 
@@ -65,8 +69,12 @@ public class TransformerTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 		
 		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
+		// Expected
+		Message expectedMessage1 = new MessageBuilder().withPayload(
+				new PayloadBuilder().buildED()).build();
+		
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 1));
+		assertHandle(0, getExpectedMessageMonitor(0, 0, false, expectedMessage1));
 	}
 
 	@Test
@@ -97,7 +105,7 @@ public class TransformerTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 		
 		// Messages
 		Message message1 = new MessageBuilder("step1")
-				.setPayload(new PayloadBuilder()
+				.withPayload(new PayloadBuilder()
 					.addRow(new EntityDataBuilder()
 						.withKV(MODEL_ATTR_ID_1, TRANSFORM_SOURCE)
 				.build()).buildED()).build();
@@ -106,14 +114,15 @@ public class TransformerTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 		messages.add(new HandleParams(message1, true));
 		
 		// Expected
-		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
-						.addRow(new EntityDataBuilder()
+		Message expectedMessage1 = new MessageBuilder().withPayload(
+				new PayloadBuilder()
+				.addRow(new EntityDataBuilder()
 							.withKV(MODEL_ATTR_ID_1, TRANSFORM_RESULT)
-						.build()).buildED();
+						.build()).buildED()).build();
 		
 		
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, expectedMessage1));
 		
 		// Execute and Assert
 		runHandle();

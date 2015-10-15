@@ -30,7 +30,7 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport<ArrayList
 	public void testHandleStartupMessage() {
 		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport<ArrayList
 		((XmlReader) spy).getFileNameFromMessage = true;
 		
 		Message message1 = new MessageBuilder("step1")
-				.setPayloadString(new PayloadBuilder()
+				.withPayloadString(new PayloadBuilder()
 					.addRow("/Users/joshhicks/Documents/clients/Ascena/work/RMS/mom-4175/ItemExport_4175.xml")
 					.buildString()).build();
 		
@@ -53,11 +53,12 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport<ArrayList
 		messages.add(new HandleParams(message1, true));
 		
 		// Expected
-		ArrayList<String> expectedPayload = new PayloadBuilder()
-				.addRow(TestUtils.getTestXMLFileContent(TestUtils.XML_BASIC)).buildString();
+		Message expectedMessage = new MessageBuilder().withPayloadString(
+				new PayloadBuilder()
+					.addRow(TestUtils.getTestXMLFileContent(TestUtils.XML_BASIC)).buildString()).build();
 		
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedTextMessageMonitor(1, 0, 0, 1, expectedPayload, true));
+		expectedMonitors.add(getExpectedMessageMonitor(true, expectedMessage));
 						
 		runHandle();
 		assertHandle(1, expectedMonitors);
@@ -71,7 +72,7 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport<ArrayList
 		((XmlReader) spy).readTag = "Header";
 		
 		Message message1 = new MessageBuilder("step1")
-				.setPayloadString(new PayloadBuilder()
+				.withPayloadString(new PayloadBuilder()
 					.addRow("/Users/joshhicks/Documents/clients/Ascena/work/RMS/mom-4175/ItemExport_4175.xml")
 					.buildString()).build();
 		
@@ -79,18 +80,57 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport<ArrayList
 		messages.add(new HandleParams(message1, true));
 		
 		// Expected
-		ArrayList<String> expectedPayload = new PayloadBuilder()
-				.addRow("<Header>" + 
+		Message expectedMessage = new MessageBuilder().withPayloadString(
+				new PayloadBuilder()
+					.addRow("<Header>" + 
 							"<Title>Title</Title>" + 
-						"</Header>").buildString();
+						"</Header>").buildString()).build();
 		
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedTextMessageMonitor(1, 0, 0, 1, expectedPayload, true));
+		expectedMonitors.add(getExpectedMessageMonitor(true, expectedMessage));
 						
 		runHandle();
 		assertHandle(1, expectedMonitors);
 	}
 
+	@Test
+	public void testHandleForReadTagMultiple() {
+		// Setup
+		setupHandle(TestUtils.XML_BASIC);
+		((XmlReader) spy).getFileNameFromMessage = true;
+		((XmlReader) spy).readTag = "Item";
+		
+		Message message1 = new MessageBuilder("step1")
+				.withPayloadString(new PayloadBuilder()
+					.addRow("/Users/joshhicks/Documents/clients/Ascena/work/RMS/mom-4175/ItemExport_4175.xml")
+					.buildString()).build();
+		
+		messages.clear();
+		messages.add(new HandleParams(message1, true));
+		
+		// Expected
+		Message expectedMessage1 = new MessageBuilder().withPayloadString(new PayloadBuilder()
+				.addRow("<Item>" + 
+							"<Id>1</Id>" + 
+							"<Name>Hat</Name>" + 
+							"<Size>Large</Size>" + 
+						"</Item>").buildString()).build();
+		
+		Message expectedMessage2 = new MessageBuilder().withPayloadString(new PayloadBuilder()
+				.addRow("<Item>" + 
+							"<Id>2</Id>" + 
+							"<Name>Shirt</Name>" + 
+							"<Size>Medium</Size>" + 
+						"</Item>").buildString()).build();
+					
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(true, expectedMessage1, expectedMessage2));
+						
+		runHandle();
+		assertHandle(2, expectedMonitors);
+	}
+
+	
 	@Test
 	public void testHandleForSingleLineXML() {
 		// Setup
@@ -98,7 +138,7 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport<ArrayList
 		((XmlReader) spy).getFileNameFromMessage = true;
 		
 		Message message1 = new MessageBuilder("step1")
-				.setPayloadString(new PayloadBuilder()
+				.withPayloadString(new PayloadBuilder()
 					.addRow("/Users/joshhicks/Documents/clients/Ascena/work/RMS/mom-4175/ItemExport_4175.xml")
 					.buildString()).build();
 		
@@ -106,11 +146,13 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport<ArrayList
 		messages.add(new HandleParams(message1, true));
 		
 		// Expected
-		ArrayList<String> expectedPayload = new PayloadBuilder()
-				.addRow(TestUtils.getTestXMLFileContent(TestUtils.XML_SINGLE_LINE)).buildString();
+		Message expectedMessage1 = new MessageBuilder().withPayloadString(
+				new PayloadBuilder()
+					.addRow(TestUtils.getTestXMLFileContent(TestUtils.XML_SINGLE_LINE))
+					.buildString()).build();
 		
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedTextMessageMonitor(1, 0, 0, 1, expectedPayload, true));
+		expectedMonitors.add(getExpectedMessageMonitor(true, expectedMessage1));
 						
 		runHandle();
 		assertHandle(1, expectedMonitors);

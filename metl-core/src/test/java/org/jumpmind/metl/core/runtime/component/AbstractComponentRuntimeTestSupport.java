@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,10 +39,12 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageAssert;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadAssert;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
 import org.jumpmind.metl.core.utils.TestUtils;
 import org.jumpmind.properties.TypedProperties;
+import org.junit.Assert;
 import org.junit.Before;
 import org.mockito.Mockito;
 
@@ -148,16 +151,9 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 		}
 	}
 	
-	public List<HandleMessageMonitor> getExpectedMessageMonitorSingle(int sends, int starts, int shutdowns, int expectedPayloadSize) {
-		return getExpectedMessageMonitorSingle(sends, starts, shutdowns, expectedPayloadSize, null);
-	}
 	
-	public List<HandleMessageMonitor> getExpectedMessageMonitorSingle(int sends, int starts, int shutdowns, int expectedPayloadSize, ArrayList<EntityData> payload) {
-		List<HandleMessageMonitor> list = new ArrayList<HandleMessageMonitor>();
-		HandleMessageMonitor m = getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payload);
-		list.add(m);
-		return list;
-	}
+	
+	/*
 	
 	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, int expectedPayloadSize, boolean xmlPayload) {
 		List<Serializable> payloads = null;
@@ -202,39 +198,65 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 		}
 		return getExpectedMessageMonitor(sends, starts, shutdowns, expectedPayloadSize, payloads, xmlPayload);
 	}
+	*/
 	
-	public HandleMessageMonitor getExpectedMessageMonitor(int sends, int starts, int shutdowns, 
-			int expectedPayloadSize, List<Serializable> payloads, boolean xmlPayload) {
+	
+	public HandleMessageMonitor getExpectedMessageMonitor(int starts, int shutdowns) {
+		Message m = null;
+		return getExpectedMessageMonitor(starts, shutdowns, false, m);
+	}
+	
+	public HandleMessageMonitor getExpectedMessageMonitor(boolean xmlPayload, Message... messages) {
+		return getExpectedMessageMonitor(0, 0, xmlPayload, messages);
+	}
+	
+	public HandleMessageMonitor getExpectedMessageMonitor(Message... messages) {
+		return getExpectedMessageMonitor(0, 0, false, messages);
+	}
+		
+	public HandleMessageMonitor getExpectedMessageMonitor(int starts, int shutdowns, boolean xmlPayload, Message... messages) {
 		HandleMessageMonitor m = new HandleMessageMonitor();
 		m.setStartupMessageCount(starts);
 		m.setShutdownMessageCount(shutdowns);
-		m.setSendMessageCount(sends);
-		m.setExpectedPayloadSize(expectedPayloadSize);
 		m.setXmlPayload(xmlPayload);
-		if (payloads != null) {
-			m.setPayloads(payloads);
+		if (messages == null || messages[0] == null) {
+			m.setMessages(new ArrayList<Message>());
+		}
+		else {
+			m.setMessages(Arrays.asList(messages));
 		}
 		return m;
 	}
 	
+	public void assertHandle(int numberEntitiesProcessed, HandleMessageMonitor expectedMonitors) {
+		List<HandleMessageMonitor> list = new ArrayList<HandleMessageMonitor>();
+		list.add(expectedMonitors);
+		assertHandle(numberEntitiesProcessed, list);
+	}
 	
 	public void assertHandle(int numberEntitiesProcessed, List<HandleMessageMonitor> expectedMonitors) {
-		for (int i = 0; i < expectedMonitors.size(); i++) {
-			HandleMessageMonitor expected = expectedMonitors.get(i);
-			HandleMessageMonitor actual = messages.get(i).getCallback().getMonitor();
+		
+		TestUtils.assertNullNotNull(expectedMonitors, messages);
+		
+		if (messages != null) {
+			Assert.assertEquals("Expected monitor size should message the input messages", 
+					expectedMonitors.size(), messages.size());
 			
-			assertEquals("Statistics entities processed are not equal", numberEntitiesProcessed, 
-					((AbstractComponentRuntime) spy).getComponentStatistics().getNumberEntitiesProcessed(0));
-			assertEquals("Send message counts do not match [message " + (i + 1) + "]", expected.getSendMessageCount(), actual.getSendMessageCount());
-			assertEquals("Start message counts do not match [message " + (i + 1) + "]", expected.getStartupMessageCount(), actual.getStartupMessageCount());
-			assertEquals("Shutdown message counts do not match [message " + (i + 1) + "]", expected.getShutdownMessageCount(), actual.getShutdownMessageCount());
-			TestUtils.assertList(expected.getTargetStepIds(), actual.getTargetStepIds(), expected.isXmlPayload());
-			assertEquals("Payload sized unexpected [message " + (i + 1) + "]", expected.getExpectedPayloadSize(), actual.getPayloads().size());
-			for (int p = 0; p < expected.getPayloads().size(); p++) {
-				Serializable expectedPayload = (Serializable) expected.getPayloads().get(p);
-				Serializable actualPayload = (Serializable) actual.getPayloads().get(p);
-				
-				PayloadAssert.assertPayload((i+1), (p+1), expectedPayload, actualPayload, expected.isXmlPayload());
+			// Loop through all input messages 
+			for (int i = 0; i < messages.size(); i++) {
+				HandleMessageMonitor expected = expectedMonitors.get(i);
+				HandleMessageMonitor actual = messages.get(i).getCallback().getMonitor();
+			
+				assertEquals("Statistics entities processed are not equal", numberEntitiesProcessed, 
+						((AbstractComponentRuntime) spy).getComponentStatistics().getNumberEntitiesProcessed(0));
+				assertEquals("Send message counts do not match [message " + (i + 1) + "]", expected.getSendMessageCount(), actual.getSendMessageCount());
+				assertEquals("Start message counts do not match [message " + (i + 1) + "]", expected.getStartupMessageCount(), actual.getStartupMessageCount());
+				assertEquals("Shutdown message counts do not match [message " + (i + 1) + "]", expected.getShutdownMessageCount(), actual.getShutdownMessageCount());
+				TestUtils.assertList(expected.getTargetStepIds(), actual.getTargetStepIds(), expected.isXmlPayload());
+			
+				for (int m = 0; m < expected.getMessages().size(); m++) {
+					MessageAssert.assertMessage(m, expected.getMessages().get(m), actual.getMessages().get(m), expected.isXmlPayload());
+				}
 			}
 		}
 	}

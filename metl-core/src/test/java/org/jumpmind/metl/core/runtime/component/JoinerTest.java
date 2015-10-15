@@ -41,7 +41,7 @@ public class JoinerTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 	public void testHandleStartupMessage() {
 		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}
 
 	@Test
@@ -53,7 +53,7 @@ public class JoinerTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}
 
 	@Test
@@ -68,14 +68,14 @@ public class JoinerTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 		
 		// Messages
 		Message message1 = new MessageBuilder("step1")
-				.setPayload(new PayloadBuilder()
+				.withPayload(new PayloadBuilder()
 					.addRow(new EntityDataBuilder()
 						.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
 						.withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
 				.build()).buildED()).build();
 		
 		Message message2 = new MessageBuilder("step1")
-				.setPayload(new PayloadBuilder()
+				.withPayload(new PayloadBuilder()
 					.addRow(new EntityDataBuilder()
 						.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
 						.withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
@@ -86,17 +86,18 @@ public class JoinerTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 		messages.add(new HandleParams(message2, true));
 		
 		// Expected
-		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+		Message expectedMessage = new MessageBuilder("step1")
+				.withPayload(new PayloadBuilder()
 						.addRow(new EntityDataBuilder()
 							.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
 							.withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
 							.withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
-						.build()).buildED();
+						.build()).buildED()).build();
 						
 
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(0, 0, 0, 0));
-		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		expectedMonitors.add(getExpectedMessageMonitor(0, 0));
+		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, expectedMessage));
 				
 		// Execute and Assert
 		runHandle();

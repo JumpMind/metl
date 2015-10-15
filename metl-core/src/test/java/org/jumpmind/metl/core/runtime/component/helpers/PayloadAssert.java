@@ -10,7 +10,7 @@ import org.junit.Assert;
 
 public class PayloadAssert extends Assert {
 	
-	public static void assertPayload(int messageNumber, int payloadNumber, Serializable expected, Serializable actual, boolean isPayloadXML) {
+	public static void assertPayload(int messageNumber, Serializable expected, Serializable actual, boolean isPayloadXML) {
 		TestUtils.assertNullNotNull(expected, actual);
 		if (expected != null && actual != null) {
 			if (expected instanceof List && actual instanceof List) {
@@ -27,11 +27,11 @@ public class PayloadAssert extends Assert {
 							EntityData actualData = (EntityData) ((List) actual).get(i);
 							
 							for (String key : expectedData.keySet()) {
-								assertTrue(printPayloadKeyNotFound(key, messageNumber, payloadNumber, i+1, (List)actual), 
+								assertTrue(printPayloadKeyNotFound(key, messageNumber, i+1, (List)actual), 
 										actualData.containsKey(key));
 								
 								// TODO attempting to shortcut value assert with assertEquals may need more detailed asserts.
-								assertEquals(printPayloadValuesNotEqual(messageNumber, payloadNumber, i+1, key, (List)actual), 
+								assertEquals(printPayloadValuesNotEqual(messageNumber, i+1, key, (List)actual), 
 										expectedData.get(key), actualData.get(key));
 							}
 						}
@@ -57,20 +57,14 @@ public class PayloadAssert extends Assert {
 				// TODO future support for a payload that is not a list
 			}
 		}
-		else {
-			// Both were null assert ok
-		}
-		
 	}
 	
-	public static String printPayloadKeyNotFound(String key, int messageNumber, int payloadNumber, int row, List<EntityData> payload) {
+	public static String printPayloadKeyNotFound(String key, int messageNumber, int row, List<EntityData> payload) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("Actual key[")
 			.append(key)
 			.append("] not found in message [")
 			.append(messageNumber)
-			.append("] payload[")
-			.append(payloadNumber)
 			.append("] row[")
 			.append(row)
 			.append("]");
@@ -79,12 +73,10 @@ public class PayloadAssert extends Assert {
 		return sb.toString();
 	}
 	
-	public static String printPayloadValuesNotEqual(int messageNumber, int payloadNumber, int row, String key, List<EntityData> payload) {
+	public static String printPayloadValuesNotEqual(int messageNumber, int row, String key, List<EntityData> payload) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("Values do not match in message [")
 			.append(messageNumber)
-			.append("] payload[")
-			.append(payloadNumber)
 			.append("] row[")
 			.append(row)
 			.append("] for key[")

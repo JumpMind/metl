@@ -10,7 +10,9 @@ import java.util.List;
 import org.apache.tools.ant.taskdefs.PumpStreamHandler;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,8 +32,18 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport<ArrayList<S
 	public void testHandleStartupMessage() {
 		setupHandle(0);
 		setInputMessage(new StartupMessage());
+		
+		// Expected
+		Message expectedMessage = new MessageBuilder().withPayloadString(
+				new PayloadBuilder()
+				.addRow(COMMAND_OUTPUT).buildString()).build();
+				
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
+				
+				
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 1));
+		assertHandle(0, getExpectedMessageMonitor(expectedMessage));
 	}
 
 	@Test
@@ -42,8 +54,17 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport<ArrayList<S
 		
 		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
+		// Expected
+		Message expectedMessage = new MessageBuilder().withPayloadString(
+				new PayloadBuilder()
+				.addRow(COMMAND_OUTPUT).buildString()).build();
+				
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
+				
+				
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 1));
+		assertHandle(0, getExpectedMessageMonitor(expectedMessage));
 	}
 
 	@Test
@@ -53,11 +74,12 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport<ArrayList<S
 		setupHandle(0);
 		
 		// Expected
-		ArrayList<String> expectedPayload = new PayloadBuilder()
-				.addRow(COMMAND_OUTPUT).buildString();
+		Message expectedMessage = new MessageBuilder().withPayloadString(
+				new PayloadBuilder()
+				.addRow(COMMAND_OUTPUT).buildString()).build();
 				
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedTextMessageMonitor(1, 0, 0, 1, expectedPayload));
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
 				
 		runHandle();
 		assertHandle(0, expectedMonitors);
@@ -69,11 +91,12 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport<ArrayList<S
 		setupHandle(1);
 		
 		// Expected
-		ArrayList<String> expectedPayload = new PayloadBuilder()
-				.addRow(COMMAND_OUTPUT).buildString();
+		Message expectedMessage = new MessageBuilder().withPayloadString(
+				new PayloadBuilder()
+				.addRow(COMMAND_OUTPUT).buildString()).build();
 				
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedTextMessageMonitor(1, 0, 0, 1, expectedPayload));
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
 				
 		try {
 			runHandle();
@@ -91,11 +114,12 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport<ArrayList<S
 		((Execute) spy).continueOnError = true;
 		
 		// Expected
-		ArrayList<String> expectedPayload = new PayloadBuilder()
-				.addRow(COMMAND_OUTPUT).buildString();
+		Message expectedMessage = new MessageBuilder().withPayloadString(
+				new PayloadBuilder()
+				.addRow(COMMAND_OUTPUT).buildString()).build();
 				
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedTextMessageMonitor(1, 0, 0, 1, expectedPayload));
+		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
 				
 		runHandle();
 		assertHandle(0, expectedMonitors);

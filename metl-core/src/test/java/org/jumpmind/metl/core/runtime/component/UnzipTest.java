@@ -34,7 +34,7 @@ public class UnzipTest extends AbstractComponentRuntimeTestSupport<ArrayList<Str
 		setupHandle(true);
 		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class UnzipTest extends AbstractComponentRuntimeTestSupport<ArrayList<Str
 		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}
 
 	@Override
@@ -54,18 +54,18 @@ public class UnzipTest extends AbstractComponentRuntimeTestSupport<ArrayList<Str
 		setupHandle(true);
 		
 		Message message1 = new MessageBuilder("step1")
-				.setPayloadString(new PayloadBuilder()
+				.withPayloadString(new PayloadBuilder()
 					.addRow("test.zip")
 					.buildString()).build();
 		messages.clear();
 		messages.add(new HandleParams(message1, true));
 		
 		// Expected
-		ArrayList<String> expectedPayload = new PayloadBuilder()
-				.addRow("").buildString();
+		Message expectedMessage = new MessageBuilder().withPayloadString(
+				new PayloadBuilder().addRow("").buildString()).build();
 				
 		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedTextMessageMonitor(1, 0, 0, 1, expectedPayload));
+		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, expectedMessage));
 				
 		runHandle();
 		assertHandle(0, expectedMonitors);

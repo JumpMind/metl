@@ -10,6 +10,11 @@
 				<Name>Hat</Name>
 				<Size>Large</Size>
 			</Item>
+			<Item>
+				<Id>2</Id>
+				<Name>Shirt</Name>
+				<Size>Medium</Size>
+			</Item>
 		</ItemList>
 	</Body>
 </Package>

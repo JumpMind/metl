@@ -40,7 +40,7 @@ public class RdbmsReaderUnitTest extends AbstractRdbmsComponentTest {
 	public void testHandleStartupMessage() {
 		setInputMessage(new StartupMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}
 	
 	@Override
@@ -57,7 +57,7 @@ public class RdbmsReaderUnitTest extends AbstractRdbmsComponentTest {
 		getInputMessage().setPayload(new ArrayList<EntityData>());
 		
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitorSingle(0, 0, 0, 0));
+		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}
 	
 	@Test
