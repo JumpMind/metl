@@ -36,20 +36,25 @@ import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.properties.TypedProperties;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-
 abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRuntime {
-    
+
     public final static String SQL = "sql";
-	
-	protected List<Result> results = new ArrayList<Result>();
-	
-	protected NamedParameterJdbcTemplate getJdbcTemplate() {
-    	if (getResourceRuntime() == null) {
+
+    protected List<Result> results = new ArrayList<Result>();
+
+    protected DataSource dataSource;
+
+    protected NamedParameterJdbcTemplate getJdbcTemplate() {
+        if (dataSource == null && getResourceRuntime() == null) {
             throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
         }
-    	return new NamedParameterJdbcTemplate((DataSource) this.context.getResourceRuntime().reference());
+
+        if (dataSource == null) {
+            dataSource = (DataSource) this.context.getResourceRuntime().reference();
+        }
+        return new NamedParameterJdbcTemplate(dataSource);
     }
-    
+
     protected List<String> getSqlStatements() {
         TypedProperties properties = getTypedProperties();
         String script = properties.get(SQL);
@@ -70,29 +75,33 @@ abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRun
             throw new MisconfiguredException("Please configure the SQL for %s", componentDefinition.getName());
         }
     }
-        
+    
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     @SuppressWarnings("unchecked")
     protected ArrayList<String> convertResultsToTextPayload(List<Result> results) {
-    	ArrayList<String> payload = new ArrayList<String>();
-    	JSONArray jsonResults = new JSONArray();
-    	for (Result result:results) {
-    		JSONObject jsonResult = new JSONObject();
-    		jsonResult.put("Sql", result.sql);
-    		jsonResult.put("Rows Affected", result.numberRowsAffected);
-    		jsonResults.add(jsonResult);
-    	}
-    	payload.add(jsonResults.toJSONString());
-    	return payload;
+        ArrayList<String> payload = new ArrayList<String>();
+        JSONArray jsonResults = new JSONArray();
+        for (Result result : results) {
+            JSONObject jsonResult = new JSONObject();
+            jsonResult.put("Sql", result.sql);
+            jsonResult.put("Rows Affected", result.numberRowsAffected);
+            jsonResults.add(jsonResult);
+        }
+        payload.add(jsonResults.toJSONString());
+        return payload;
     }
-    
-    class Result {
-    	String sql;
-    	int numberRowsAffected;
 
-    	Result (String sql, int numberRowsAffected) {
-    		this.sql = sql;
-    		this.numberRowsAffected = numberRowsAffected;
-    	}
+    class Result {
+        String sql;
+        int numberRowsAffected;
+
+        Result(String sql, int numberRowsAffected) {
+            this.sql = sql;
+            this.numberRowsAffected = numberRowsAffected;
+        }
     }
 
 }

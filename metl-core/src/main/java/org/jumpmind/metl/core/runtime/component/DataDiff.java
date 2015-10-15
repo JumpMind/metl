@@ -5,6 +5,7 @@ import java.sql.Types;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.h2.Driver;
 import org.jumpmind.db.model.Column;
 import org.jumpmind.db.model.Table;
@@ -12,10 +13,13 @@ import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.ResettableBasicDataSource;
+import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
@@ -55,26 +59,21 @@ public class DataDiff extends AbstractComponentRuntime {
     }
 
     protected void calculateDiff(ISendMessageCallback callback) {
-        // select where in _1 and not in _2 for DEL
-        // select where in _2 and not in _1 for ADD
         Model inputModel = context.getFlowStep().getComponent().getInputModel();
         List<ModelEntity> entities = inputModel.getModelEntities();
         for (ModelEntity entity : entities) {
             StringBuilder addSql = new StringBuilder("select ");
             StringBuilder chgSql = new StringBuilder(addSql);
             StringBuilder delSql = new StringBuilder(addSql);
-            List<ModelAttribute> attributes = entity.getModelAttributes();
-            for (ModelAttribute attribute : attributes) {
-                addSql.append("curr.").append(attribute.getName()).append(",");
-                delSql.append("orig.").append(attribute.getName()).append(",");
-                chgSql.append("curr.").append(attribute.getName()).append(",");
-            }
-            
+            appendColumns(addSql, "curr.", entity);
+            appendColumns(delSql, "orig.", entity);
+            appendColumns(chgSql, "curr.", entity);
+
             addSql.append(" from " + entity.getName() + "_2 curr left join " + entity.getName() + "_1 orig on ");
             delSql.append(" from " + entity.getName() + "_1 orig left join " + entity.getName() + "_2 curr on ");
             chgSql.append(" from " + entity.getName() + "_1 orig join " + entity.getName() + "_2 curr on ");
             boolean secondPk = false;
-            for (ModelAttribute attribute : attributes) {
+            for (ModelAttribute attribute : entity.getModelAttributes()) {
                 if (attribute.isPk()) {
                     if (secondPk) {
                         addSql.append(" and ");
@@ -87,18 +86,18 @@ public class DataDiff extends AbstractComponentRuntime {
                     secondPk = true;
                 }
             }
-            
+
             addSql.append(" where ");
             delSql.append(" where ");
             chgSql.append(" where ");
             secondPk = false;
             boolean secondCol = false;
-            for (ModelAttribute attribute : attributes) {
+            for (ModelAttribute attribute : entity.getModelAttributes()) {
                 if (attribute.isPk()) {
                     if (secondPk) {
                         addSql.append(" or ");
                         delSql.append(" or ");
-                    } 
+                    }
                     addSql.append("orig.").append(attribute.getName()).append(" is null");
                     delSql.append("curr.").append(attribute.getName()).append(" is null");
                     secondPk = true;
@@ -114,7 +113,45 @@ public class DataDiff extends AbstractComponentRuntime {
             log(LogLevel.INFO, "Generated diff sql for ADD: %s", addSql);
             log(LogLevel.INFO, "Generated diff sql for CHG: %s", chgSql);
             log(LogLevel.INFO, "Generated diff sql for DEL: %s", delSql);
+
+            RdbmsReader reader = new RdbmsReader();
+            reader.setDataSource(databasePlatform.getDataSource());
+            reader.setContext(context);
+            reader.setComponentDefinition(componentDefinition);
+            reader.setRowsPerMessage(rowsPerMessage);
+
+            reader.setSql(addSql.toString());
+            reader.setEntityChangeType(ChangeType.ADD);
+            reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
+
+            reader.setSql(chgSql.toString());
+            reader.setEntityChangeType(ChangeType.CHG);
+            reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
+
+            reader.setSql(delSql.toString());
+            reader.setEntityChangeType(ChangeType.DEL);
+            reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
+
         }
+        
+        ResettableBasicDataSource ds = databasePlatform.getDataSource();
+        ds.close();
+        
+        databasePlatform = null;
+        
+        if (databaseFile != null) {
+            log(LogLevel.INFO, "Deleting database file: %s", databaseFile);           
+            FileUtils.deleteQuietly(databaseFile);
+        }
+
+    }
+
+    protected void appendColumns(StringBuilder sql, String prefix, ModelEntity entity) {
+        for (ModelAttribute attribute : entity.getModelAttributes()) {
+            sql.append(prefix).append(attribute.getName()).append(" /* ").append(entity.getName()).append(".").append(attribute.getName())
+                    .append(" */").append(",");
+        }
+        sql.replace(sql.length() - 1, sql.length(), "");
     }
 
     protected void loadIntoDatabase(Message message) {
@@ -189,23 +226,14 @@ public class DataDiff extends AbstractComponentRuntime {
     }
 
     @Override
-    public void stop() {
-        if (databaseFile != null) {
-            log(LogLevel.INFO, "Deleting databasePlatform file: %s", databaseFile);
-            ResettableBasicDataSource ds = databasePlatform.getDataSource();
-            ds.close();
-            // FileUtils.deleteQuietly(databaseFile);
-        }
-    }
-
-    @Override
     protected void start() {
         TypedProperties properties = getTypedProperties();
         this.sourceStep1Id = properties.get(SOURCE_1);
         this.sourceStep2Id = properties.get(SOURCE_2);
         this.inMemoryCompare = properties.is(IN_MEMORY_COMPARE);
         this.rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
-
+        Component comp = context.getFlowStep().getComponent();
+        comp.setOutputModel(comp.getInputModel());
         Model inputModel = context.getFlowStep().getComponent().getInputModel();
         if (inputModel == null) {
             throw new MisconfiguredException("The input model is not set and it is required");

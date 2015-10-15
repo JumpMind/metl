@@ -28,9 +28,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -41,6 +42,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.FlowStep;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.runtime.LogLevel;
@@ -48,7 +50,6 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MessageHeader;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.ShutdownMessage;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
@@ -102,6 +103,8 @@ public class StepRuntime implements Runnable {
     Map<Integer, IComponentRuntime> componentRuntimeByThread = new HashMap<>();
 
     Boolean startStep = null;
+    
+    Set<String> liveSourceStepIds;
 
     public StepRuntime(IComponentRuntimeFactory componentFactory, ComponentContext componentContext, FlowRuntime flowRuntime) {
         this.flowRuntime = flowRuntime;
@@ -123,6 +126,10 @@ public class StepRuntime implements Runnable {
 
     public void setSourceStepRuntimes(List<StepRuntime> sourceStepRuntimes) {
         this.sourceStepRuntimes = sourceStepRuntimes;
+        this.liveSourceStepIds = new HashSet<>();
+        for (StepRuntime stepRuntime : sourceStepRuntimes) {
+            this.liveSourceStepIds.add(stepRuntime.getComponentContext().getFlowStep().getId());
+        }
     }
 
     protected void queue(Message message) throws InterruptedException {
@@ -229,15 +236,15 @@ public class StepRuntime implements Runnable {
             componentContext.getComponentStatistics().incrementInboundMessages(threadNumber);
             
             IComponentRuntime componentRuntime = componentRuntimeByThread.get(threadNumber);
-            boolean unitOfWorkLastMessage = calculateUnitOfWorkLastMessage(inputMessage);
+            boolean unitOfWorkBoundaryReached = calculateUnitOfWorkLastMessage(inputMessage);
             
             Component component = componentContext.getFlowStep().getComponent();
             boolean logInput = component.getBoolean(AbstractComponentRuntime.LOG_INPUT, false);
             
             if (logInput) {
-            	logInput(inputMessage, target, unitOfWorkLastMessage);
+            	logInput(inputMessage, target, unitOfWorkBoundaryReached);
             }
-            componentRuntime.handle(inputMessage, target, unitOfWorkLastMessage);
+            componentRuntime.handle(inputMessage, target, unitOfWorkBoundaryReached);
             
             /*
              * Detect shutdown condition
@@ -264,13 +271,13 @@ public class StepRuntime implements Runnable {
         }
 
         String fromStepId = shutdownMessage.getHeader().getOriginatingStepId();
-        removeSourceStepRuntime(fromStepId);
+        liveSourceStepIds.remove(fromStepId);
 
         /*
          * When all of the source step runtimes have been removed or when the
          * shutdown message comes from myself, then go ahead and shutdown
          */
-        if (cancelled || fromStepId == null || sourceStepRuntimes == null || sourceStepRuntimes.size() == 0
+        if (cancelled || fromStepId == null || liveSourceStepIds == null || liveSourceStepIds.size() == 0
                 || fromStepId.equals(componentContext.getFlowStep().getId())) {
             shutdown(1, target, true);
         }
@@ -285,21 +292,10 @@ public class StepRuntime implements Runnable {
             lastMessage &= sourceStepRuntimeUnitOfWorkReceived.get(sourceRuntime.getComponentContext().getFlowStep().getId()) != null;
         }
         if (lastMessage) {
+            // TODO figure out when/how to reset the last unit of work calc
             // sourceStepRuntimeUnitOfWorkReceived.clear();
         }
         return lastMessage;
-    }
-
-    private void removeSourceStepRuntime(String stepId) {
-        if (sourceStepRuntimes != null) {
-            Iterator<StepRuntime> it = sourceStepRuntimes.iterator();
-            while (it.hasNext()) {
-                StepRuntime sourceRuntime = (StepRuntime) it.next();
-                if (sourceRuntime.getComponentContext().getFlowStep().getId().equals(stepId)) {
-                    it.remove();
-                }
-            }
-        }
     }
 
     private void stop(int threadNumber, IComponentRuntime componentRuntime) {
@@ -419,8 +415,8 @@ public class StepRuntime implements Runnable {
         		threadNumber,
         		LogLevel.INFO, 
         		componentContext,
-        		String.format("INPUT %s(sequenceNumber=%d,unitOfWorkLastMessage=%s,source='%s')", inputMessage.getClass().getSimpleName(),
-                header.getSequenceNumber(), header.isUnitOfWorkLastMessage(),source));
+        		String.format("INPUT %s(sequenceNumber=%d,unitOfWorkLastMessage=%s,unitOfWorkBoundaryReached=%s,source='%s')", inputMessage.getClass().getSimpleName(),
+                header.getSequenceNumber(), header.isUnitOfWorkLastMessage(), unitOfWorkBoundaryReached, source));
         Serializable payload = inputMessage.getPayload();
         if (payload instanceof List) {
             @SuppressWarnings("unchecked")

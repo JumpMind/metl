@@ -292,7 +292,7 @@ public class Component extends AbstractObjectWithSettings {
 
             @Override
             public String toString() {
-                return String.format("{{ChangeType: %s}, %s}", data.getChangeType(), super.toString());
+                return String.format("{{ChangeType=%s}, %s}", data.getChangeType(), super.toString());
             }
         };
         Set<String> attributeIds = data.keySet();

@@ -58,7 +58,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     List<String> sqls;
 
-    long rowsPerMessage;
+    long rowsPerMessage = 10000;
 
     boolean trimColumns = false;
 
@@ -117,7 +117,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             }
         }
         if (outboundPayload != null && outboundPayload.size() > 0) {
-            callback.sendMessage(outboundPayload, true);
+            callback.sendMessage(outboundPayload, unitOfWorkBoundaryReached);
         }
     }
 
@@ -299,6 +299,11 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     
     public void setSqls(List<String> sqls) {
         this.sqls = sqls;
+    }
+    
+    public void setSql(String sql) {
+        this.sqls = new ArrayList<>(1);
+        this.sqls.add(sql);
     }
     
     public void setRowsPerMessage(long rowsPerMessage) {
