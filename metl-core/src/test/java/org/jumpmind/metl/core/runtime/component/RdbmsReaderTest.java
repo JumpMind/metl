@@ -47,7 +47,7 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
@@ -84,7 +84,7 @@ public class RdbmsReaderTest {
     public void testReaderFlowFromStartupMsg() throws Exception {
         RdbmsReader reader = new RdbmsReader();
         reader.start(0, new ComponentContext(null, readerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
-        Message msg = new StartupMessage();
+        Message msg = new ControlMessage();
         SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
         reader.handle( msg, msgTarget, true);
 

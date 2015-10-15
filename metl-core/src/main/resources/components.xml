@@ -21,87 +21,6 @@
 
 -->
 <components>
-    <component id='RDBMS Reader' category='READER' inputMessageType='any' outputMessageType='entity' resourceCategory='datasource'
-        inputOutputModelsMatch='false'>
-        <name>RDBMS Reader</name>
-        <className>org.jumpmind.metl.core.runtime.component.RdbmsReader</className>
-        <description></description>
-        <extraUnitOfWorkOptions>
-            <extraUnitOfWorkOption>SQL Statement</extraUnitOfWorkOption>
-        </extraUnitOfWorkOptions>
-        <settings>
-            <setting id='sql' type='multiline_text' required='true'>
-                <name>Sql</name>
-                <description></description>
-            </setting>
-            <setting id='rows.per.message' type='integer' required='true'>
-                <name>Rows/Msg</name>
-                <defaultValue>1000</defaultValue>
-                <description></description>
-            </setting>
-            <setting id='trim.columns' type='boolean' required='true'>
-                <name>Trim Columns</name>
-                <defaultValue>false</defaultValue>
-                <description></description>
-            </setting>
-            <setting id='match.on.column.name' type='boolean' required='true'>
-                <name>Match On Column Name</name>
-                <defaultValue>false</defaultValue>
-                <description></description>
-            </setting>                    
-        </settings>
-    </component>
-    <component id='RDBMS Writer' category='WRITER' inputMessageType='entity' outputMessageType='text' resourceCategory='datasource' 
-        supportsMultipleThreads='true' inputOutputModelsMatch='false'>
-        <name>RDBMS Writer</name>
-        <className>org.jumpmind.metl.core.runtime.component.RdbmsWriter</className>
-        <description></description>
-        <settings>
-            <setting id='catalog' type='text' required='false'>
-                <name>Catalog</name>
-                <description></description>
-            </setting>
-            <setting id='schema' type='text' required='false'>
-                <name>Schema</name>
-                <description></description>
-            </setting>
-            <setting id='replace' type='boolean' required='false'>
-                <name>Replace rows if they exist</name>
-                <defaultValue>false</defaultValue>
-                <description></description>
-            </setting>
-            <setting id='update.first' type='boolean' required='false'>
-                <name>Update rows first instead of insert</name>
-                <defaultValue>false</defaultValue>
-                <description></description>
-            </setting>
-            <setting id='insert.fallback' type='boolean' required='false'>
-                <name>Fallback to insert if no rows updated</name>
-                <defaultValue>false</defaultValue>
-                <description></description>
-            </setting>
-            <setting id='quote.identifiers' type='boolean' required='false'>
-                <name>Quote table and column names</name>
-                <defaultValue>false</defaultValue>
-                <description></description>
-            </setting>
-            <setting id='fit.to.column' type='boolean' required='false'>
-                <name>Trim character data to fit within column</name>
-                <defaultValue>false</defaultValue>
-                <description></description>
-            </setting>
-            <setting id='continue.on.error' type='boolean' required='false'>
-                <name>Continue on Error</name>
-                <defaultValue>false</defaultValue>
-                <description></description>
-            </setting>
-            <setting id='batch.mode' type='boolean' required='false'>
-                <name>Batch Mode</name>
-                <defaultValue>false</defaultValue>
-                <description></description>
-            </setting>   
-        </settings>
-    </component>
     <component id='Call Flow' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none'>
         <name>Call Flow</name>
         <className>org.jumpmind.metl.core.runtime.component.CallFlow</className>
@@ -112,6 +31,27 @@
                 <description></description>
             </setting>
         </settings>        
+    </component>    
+    <component id='DataDiff' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
+        inputOutputModelsMatch='true'>
+        <name>Data Diff</name>
+        <className>org.jumpmind.metl.core.runtime.component.DataDiff</className>
+        <settings>
+            <setting id='source.1' type='source_step' required='true'>
+                <name>Source of Old Version</name>
+            </setting>
+            <setting id='source.2' type='source_step' required='true'>
+                <name>Source of New Version</name>
+            </setting>                            
+            <setting id='rows.per.message' type='integer' required='false'>
+                <name>Rows/Msg</name>
+                <defaultValue>10000</defaultValue>
+            </setting>
+            <setting id='in.memory.compare' type='boolean' required='true'>
+                <name>In Memory Compare</name>
+                <defaultValue>true</defaultValue>
+            </setting>             
+        </settings>
     </component>    
     <component id='Deduper' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='true'>
@@ -466,6 +406,87 @@
             </setting>
         </settings>
     </component>
+    <component id='RDBMS Reader' category='READER' inputMessageType='any' outputMessageType='entity' resourceCategory='datasource'
+        inputOutputModelsMatch='false'>
+        <name>RDBMS Reader</name>
+        <className>org.jumpmind.metl.core.runtime.component.RdbmsReader</className>
+        <description></description>
+        <extraUnitOfWorkOptions>
+            <extraUnitOfWorkOption>SQL Statement</extraUnitOfWorkOption>
+        </extraUnitOfWorkOptions>
+        <settings>
+            <setting id='sql' type='multiline_text' required='true'>
+                <name>Sql</name>
+                <description></description>
+            </setting>
+            <setting id='rows.per.message' type='integer' required='true'>
+                <name>Rows/Msg</name>
+                <defaultValue>1000</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='trim.columns' type='boolean' required='true'>
+                <name>Trim Columns</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='match.on.column.name' type='boolean' required='true'>
+                <name>Match On Column Name</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>                    
+        </settings>
+    </component>
+    <component id='RDBMS Writer' category='WRITER' inputMessageType='entity' outputMessageType='text' resourceCategory='datasource' 
+        supportsMultipleThreads='true' inputOutputModelsMatch='false'>
+        <name>RDBMS Writer</name>
+        <className>org.jumpmind.metl.core.runtime.component.RdbmsWriter</className>
+        <description></description>
+        <settings>
+            <setting id='catalog' type='text' required='false'>
+                <name>Catalog</name>
+                <description></description>
+            </setting>
+            <setting id='schema' type='text' required='false'>
+                <name>Schema</name>
+                <description></description>
+            </setting>
+            <setting id='replace' type='boolean' required='false'>
+                <name>Replace rows if they exist</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='update.first' type='boolean' required='false'>
+                <name>Update rows first instead of insert</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='insert.fallback' type='boolean' required='false'>
+                <name>Fallback to insert if no rows updated</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='quote.identifiers' type='boolean' required='false'>
+                <name>Quote table and column names</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='fit.to.column' type='boolean' required='false'>
+                <name>Trim character data to fit within column</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='continue.on.error' type='boolean' required='false'>
+                <name>Continue on Error</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='batch.mode' type='boolean' required='false'>
+                <name>Batch Mode</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>   
+        </settings>
+    </component>    
     <component id='Script' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='any' inputOutputModelsMatch='false'>
         <name>Script</name>
         <className>org.jumpmind.metl.core.runtime.component.Script</className>

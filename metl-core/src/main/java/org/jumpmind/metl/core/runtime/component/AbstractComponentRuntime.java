@@ -57,6 +57,8 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     public final static String LOG_INPUT = "logInput";
 
     public final static String LOG_OUTPUT = "logOutput";
+    
+    public final static String ROWS_PER_MESSAGE = "rows.per.message";
 
     protected ComponentContext context;
     
@@ -91,6 +93,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return getComponent().toTypedProperties(settings);
     }
     
+    @Override
     public void stop() {
     }
     
@@ -207,8 +210,6 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return bindings;
     }
 
-    
-    
     protected Object getAttributeValue(Message inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
         return ComponentUtil.getAttributeValue(getInputModel(), rows, entityName, attributeName);
@@ -217,6 +218,18 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     protected List<Object> getAttributeValues(Message inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
         return ComponentUtil.getAttributeValues(getInputModel(), rows, entityName, attributeName);
-    }    
+    }
+    
+    public void setComponentDefinition(XMLComponent componentDefinition) {
+        this.componentDefinition = componentDefinition;
+    }
+    
+    public void setContext(ComponentContext context) {
+        this.context = context;
+    }
+    
+    public void setThreadNumber(int threadNumber) {
+        this.threadNumber = threadNumber;
+    }
     
 }

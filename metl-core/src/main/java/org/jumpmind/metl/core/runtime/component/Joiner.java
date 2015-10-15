@@ -31,7 +31,7 @@ import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Joiner extends AbstractComponentRuntime {
@@ -40,9 +40,8 @@ public class Joiner extends AbstractComponentRuntime {
 
     public final static String JOIN_ATTRIBUTE = "join.attribute";
 
-    public final static String ROWS_PER_MESSAGE = "rows.per.message";
-
     int rowsPerMessage = 1000;
+    
     Map<Object, EntityData> joinedData = new LinkedHashMap<Object, EntityData>();
     
     List<String> attributesToJoinOn = new ArrayList<String>();
@@ -70,7 +69,7 @@ public class Joiner extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (!(inputMessage instanceof StartupMessage)) {
+        if (!(inputMessage instanceof ControlMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
             join(payload);
         }

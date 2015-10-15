@@ -35,9 +35,10 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
@@ -51,19 +52,19 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     public static final String TYPE = "RDBMS Reader";
 
-    public final static String ROWS_PER_MESSAGE = "rows.per.message";
-
     public final static String TRIM_COLUMNS = "trim.columns";
 
     public final static String MATCH_ON_COLUMN_NAME_ONLY = "match.on.column.name";
 
     List<String> sqls;
 
-    long rowsPerMessage;
+    long rowsPerMessage = 10000;
 
     boolean trimColumns = false;
 
     boolean matchOnColumnNameOnly = false;
+    
+    ChangeType entityChangeType = ChangeType.ADD;
     
     @Override
     protected void start() {
@@ -86,7 +87,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
         int inboundRecordCount = 1;
         ArrayList<EntityData> inboundPayload = null;
-        if (!(inputMessage instanceof StartupMessage)) {
+        if (!(inputMessage instanceof ControlMessage)) {
             inboundPayload = inputMessage.getPayload();
             if (inboundPayload != null) {
                 inboundRecordCount = inboundPayload.size();
@@ -116,7 +117,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             }
         }
         if (outboundPayload != null && outboundPayload.size() > 0) {
-            callback.sendMessage(outboundPayload, true);
+            callback.sendMessage(outboundPayload, unitOfWorkBoundaryReached);
         }
     }
 
@@ -296,7 +297,30 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         return entities;
     }
     
+    public void setSqls(List<String> sqls) {
+        this.sqls = sqls;
+    }
     
+    public void setSql(String sql) {
+        this.sqls = new ArrayList<>(1);
+        this.sqls.add(sql);
+    }
+    
+    public void setRowsPerMessage(long rowsPerMessage) {
+        this.rowsPerMessage = rowsPerMessage;
+    }
+    
+    public void setMatchOnColumnNameOnly(boolean matchOnColumnNameOnly) {
+        this.matchOnColumnNameOnly = matchOnColumnNameOnly;
+    }
+    
+    public void setTrimColumns(boolean trimColumns) {
+        this.trimColumns = trimColumns;
+    }
+    
+    public void setEntityChangeType(ChangeType entityChangeType) {
+        this.entityChangeType = entityChangeType;
+    }
     
     List<String> getSqls() {
 		return sqls;
@@ -353,6 +377,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
 
                 EntityData rowData = new EntityData();
+                rowData.setChangeType(entityChangeType);
                 for (int i = 1; i <= meta.getColumnCount(); i++) {
                     Object value = JdbcUtils.getResultSetValue(rs, i);
                     if (trimColumns && value instanceof String) {

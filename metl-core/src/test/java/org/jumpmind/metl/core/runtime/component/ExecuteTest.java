@@ -11,7 +11,7 @@ import org.apache.tools.ant.taskdefs.PumpStreamHandler;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.junit.Assert;
@@ -31,7 +31,7 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport<ArrayList<S
 	@Override
 	public void testHandleStartupMessage() {
 		setupHandle(0);
-		setInputMessage(new StartupMessage());
+		setInputMessage(new ControlMessage());
 		
 		// Expected
 		Message expectedMessage = new MessageBuilder().withPayloadString(

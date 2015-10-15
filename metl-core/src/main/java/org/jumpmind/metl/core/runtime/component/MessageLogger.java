@@ -32,24 +32,25 @@ import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 public class MessageLogger extends AbstractComponentRuntime {
 
     public static final String TYPE = "Message Logger";
-    
+
     public static String SETTING_QUALIFY_WITH_ENTITY_NAME = "qualify.with.entity.name";
 
     @Override
     protected void start() {
     }
-        
+
     @Override
     public boolean supportsStartupMessages() {
         return true;
     }
-    
+
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         MessageHeader header = inputMessage.getHeader();
-        log(LogLevel.INFO, String.format("Message(sequenceNumber=%d,unitOfWorkLastMessage=%s,source='%s')",
-                header.getSequenceNumber(), header.isUnitOfWorkLastMessage(),
-                getFlow().findFlowStepWithId(header.getOriginatingStepId()).getName()));
+        log(LogLevel.INFO,
+                String.format("%s(sequenceNumber=%d,unitOfWorkLastMessage=%s,unitOfWorkBoundaryReached=%s,source='%s')",
+                        inputMessage.getClass().getSimpleName(), header.getSequenceNumber(), header.isUnitOfWorkLastMessage(),
+                        unitOfWorkBoundaryReached, getFlow().findFlowStepWithId(header.getOriginatingStepId()).getName()));
         Serializable payload = inputMessage.getPayload();
         if (payload instanceof List) {
             @SuppressWarnings("unchecked")
@@ -57,16 +58,15 @@ public class MessageLogger extends AbstractComponentRuntime {
             for (Object object : list) {
                 if (object instanceof EntityData && getComponent().getInputModel() != null) {
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                    log(LogLevel.INFO,
-                            String.format("Message Payload: %s",
-                                    getComponent().toRow((EntityData) object, context.getFlowStep().getComponent().getBoolean(SETTING_QUALIFY_WITH_ENTITY_NAME, true))));
+                    log(LogLevel.INFO, String.format("Message Payload: %s", getComponent().toRow((EntityData) object,
+                            context.getFlowStep().getComponent().getBoolean(SETTING_QUALIFY_WITH_ENTITY_NAME, true))));
                 } else {
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                     log(LogLevel.INFO, String.format("Message Payload: %s", object));
                 }
             }
         }
-        
+
         callback.sendMessage(payload, unitOfWorkBoundaryReached);
     }
 

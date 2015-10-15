@@ -47,8 +47,6 @@ public class ContentRouter extends AbstractComponentRuntime {
 
     public static final String SETTING_CONFIG = "config";
 
-    public final static String ROWS_PER_MESSAGE = "rows.per.message";
-
     public final static String ONLY_ROUTE_FIRST_MATCH = "only.route.first.match";
 
     List<Route> routes;

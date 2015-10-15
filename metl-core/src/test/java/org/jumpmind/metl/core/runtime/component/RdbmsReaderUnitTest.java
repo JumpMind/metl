@@ -25,7 +25,7 @@ import static org.mockito.Mockito.doReturn;
 import java.util.ArrayList;
 
 import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -38,7 +38,7 @@ public class RdbmsReaderUnitTest extends AbstractRdbmsComponentTest {
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		setInputMessage(new StartupMessage());
+		setInputMessage(new ControlMessage());
 		runHandle();
 		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}

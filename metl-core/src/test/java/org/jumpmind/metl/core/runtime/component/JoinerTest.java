@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
@@ -39,7 +39,7 @@ public class JoinerTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		setInputMessage(new StartupMessage());
+		setInputMessage(new ControlMessage());
 		runHandle();
 		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}

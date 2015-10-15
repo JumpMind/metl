@@ -15,7 +15,7 @@ import java.util.zip.ZipFile;
 
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -32,7 +32,7 @@ public class UnzipTest extends AbstractComponentRuntimeTestSupport<ArrayList<Str
 	@Override
 	public void testHandleStartupMessage() {
 		setupHandle(true);
-		setInputMessage(new StartupMessage());
+		setInputMessage(new ControlMessage());
 		runHandle();
 		assertHandle(0, getExpectedMessageMonitor(0, 0));
 	}

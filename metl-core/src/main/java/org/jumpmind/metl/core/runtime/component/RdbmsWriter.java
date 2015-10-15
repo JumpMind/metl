@@ -94,12 +94,16 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     String catalogName;
 
     String schemaName;
+    
+    String tableSuffix = "";
+    
+    String tablePrefix = "";
 
     int inboundEntityDataCount = 0;
 
     boolean batchMode = false;
 
-    IDatabasePlatform platform;
+    IDatabasePlatform databasePlatform;
 
     List<TargetTableDefintion> targetTables;
 
@@ -113,11 +117,11 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         error = null;
 
         if (getResourceRuntime() == null) {
-            throw new IllegalStateException("A database writer must have a datasource defined");
+            throw new IllegalStateException("A databasePlatform writer must have a datasource defined");
         }
 
         if (getInputModel() == null) {
-            throw new IllegalStateException("A database writer must have an input model defined");
+            throw new IllegalStateException("A databasePlatform writer must have an input model defined");
         }
 
         TypedProperties properties = getTypedProperties();
@@ -150,23 +154,23 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         lastPreparedDml = null;
 
         if (error == null) {
-            if (getResourceRuntime() == null) {
-                throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
-            }
+            if (databasePlatform == null) {
+                if (getResourceRuntime() == null) {
+                    throw new RuntimeException("The data source resource has not been configured.  Please configure it.");
+                }
 
-            if (platform == null) {
                 DataSource dataSource = (DataSource) getResourceReference();
-                platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), quoteIdentifiers);
+                databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), quoteIdentifiers);
             }
 
             if (targetTables == null) {
-
                 Model model = getInputModel();
 
                 targetTables = new ArrayList<TargetTableDefintion>();
 
                 for (ModelEntity entity : model.getModelEntities()) {
-                    Table table = platform.getTableFromCache(catalogName, schemaName, entity.getName(), true);
+                    Table table = databasePlatform.getTableFromCache(catalogName, schemaName, tablePrefix + entity.getName() + tableSuffix,
+                            true);
                     if (table != null) {
                         targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE, entity, table.copy()),
                                 new TargetTable(DmlType.INSERT, entity, table.copy())));
@@ -179,7 +183,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 
             ArrayList<EntityData> inputRows = inputMessage.getPayload();            
             if (inputRows != null && inputRows.size() > 0) {
-                ISqlTransaction transaction = platform.getSqlTemplate().startSqlTransaction();
+                ISqlTransaction transaction = databasePlatform.getSqlTemplate().startSqlTransaction();
                 transaction.setInBatchMode(batchMode);
                 try {
                     write(transaction, inputMessage, callback, unitOfWorkBoundaryReached);
@@ -407,6 +411,40 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         }
         return value;
     }
+    
+    public void setTablePrefix(String tablePrefix) {
+        this.tablePrefix = tablePrefix;
+        this.targetTables = null;
+    }
+    
+    public void setTableSuffix(String tableSuffix) {
+        this.tableSuffix = tableSuffix;
+        this.targetTables = null;
+    }
+    
+    public void setBatchMode(boolean batchMode) {
+        this.batchMode = batchMode;
+    }
+    
+    public void setFitToColumn(boolean fitToColumn) {
+        this.fitToColumn = fitToColumn;
+    }
+    
+    public void setInsertFallback(boolean insertFallback) {
+        this.insertFallback = insertFallback;
+    }
+    
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+    
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
+    }
+    
+    public void setDatabasePlatform(IDatabasePlatform platform) {
+        this.databasePlatform = platform;
+    }
 
     class TargetTableDefintion {
 
@@ -479,7 +517,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                 }
             }
 
-            statement = platform.createDmlStatement(dmlType, table, null);
+            statement = databasePlatform.createDmlStatement(dmlType, table, null);
 
             for (Column column : table.getColumns()) {
                 ModelAttribute attr = entity.getModelAttributeByName(column.getName());

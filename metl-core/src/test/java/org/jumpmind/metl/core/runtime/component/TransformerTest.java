@@ -29,7 +29,7 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelHelper;
@@ -52,7 +52,7 @@ public class TransformerTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		setInputMessage(new StartupMessage());
+		setInputMessage(new ControlMessage());
 		// Expected
 		Message expectedMessage1 = new MessageBuilder().withPayload(
 				new PayloadBuilder().buildED()).build();

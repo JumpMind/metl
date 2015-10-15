@@ -112,10 +112,11 @@
 
     <table name="model_attribute" description="">
         <column name="id" primaryKey="true" required="true" type="CHAR" size="36" />
-        <column name="entity_id" type="CHAR" size="36" required="true" description="A version number" />
-        <column name="name" type="VARCHAR" size="255" required="true" description="" />
+        <column name="entity_id" type="CHAR" size="36" required="true"  />
+        <column name="name" type="VARCHAR" size="255" required="true"  />
         <column name="type" type="VARCHAR" size="50" required="true" description="INTEGER, STRING, LONG, BOOLEAN, DECIMAL, ENUM, COMPLEX, SEQUENCE" />
         <column name="type_entity_id" type="CHAR" size="36" description="Must be filled out when type is COMPLEX or SEQUENCE" />
+        <column name="pk" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this is a primary key."/>
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />

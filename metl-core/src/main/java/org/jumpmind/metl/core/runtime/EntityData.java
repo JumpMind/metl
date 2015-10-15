@@ -26,21 +26,34 @@ import org.jumpmind.util.LinkedCaseInsensitiveMap;
 public class EntityData extends LinkedCaseInsensitiveMap<Object> {
 
     private static final long serialVersionUID = 1L;
-    
+
+    public enum ChangeType {
+        ADD, CHG, DEL
+    };
+
+    ChangeType changeType = ChangeType.ADD;
+
     public EntityData() {
     }
-    
-    public EntityData(NameValue...nameValues) {
+
+    public EntityData(NameValue... nameValues) {
         if (nameValues != null) {
             for (NameValue nameValue : nameValues) {
                 put(nameValue.getName(), nameValue.getValue());
             }
         }
     }
-    
+
     public EntityData copy() {
-        return (EntityData)this.clone();
+        return (EntityData) this.clone();
     }
 
+    public ChangeType getChangeType() {
+        return changeType;
+    }
+
+    public void setChangeType(ChangeType changeType) {
+        this.changeType = changeType;
+    }
 
 }

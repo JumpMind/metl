@@ -20,8 +20,6 @@
  */
 package org.jumpmind.metl.core.model;
 
-
-
 public class ModelAttribute extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
@@ -33,9 +31,10 @@ public class ModelAttribute extends AbstractObject {
     DataType type;
 
     String typeEntityId;
+    
+    boolean pk;
 
-    public ModelAttribute() {
-    	
+    public ModelAttribute() {    	
     }
     
     public ModelAttribute(String id, String entityId, String name) {
@@ -91,5 +90,13 @@ public class ModelAttribute extends AbstractObject {
 	public void setTypeEntityId(String typeEntityId) {
 		this.typeEntityId = typeEntityId;
 	}
+	
+	public void setPk(boolean pk) {
+        this.pk = pk;
+    }
+	
+	public boolean isPk() {
+        return pk;
+    }
 
 }

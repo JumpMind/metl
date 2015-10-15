@@ -50,11 +50,14 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TextField;
@@ -85,7 +88,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     Button removeButton;
 
     Button importButton;
-
+    
     TextField filterField;
 
     public EditModelPanel(ApplicationContext context, String modelId) {
@@ -101,7 +104,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
         addAttributeButton = buttonBar.addButton("Add Attribute", FontAwesome.COLUMNS);
         addAttributeButton.addClickListener(new AddAttributeClickListener());
-
+        
         editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
         editButton.addClickListener(new EditClickListener());
 
@@ -191,6 +194,42 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             }
         });
         treeTable.setColumnHeader("type", "Type");
+        
+        treeTable.addGeneratedColumn("pk", new ColumnGenerator() {
+            public Object generateCell(Table source, Object itemId, Object columnId) {
+                if (itemId instanceof ModelAttribute) {
+                    final ModelAttribute obj = (ModelAttribute) itemId;
+                    if (lastEditItemIds.contains(itemId)) {
+                        final CheckBox cbox = new CheckBox();
+                        cbox.setValue(obj.isPk());
+                        cbox.setImmediate(true);
+                        cbox.addValueChangeListener(event -> togglePk(obj));
+                        cbox.addBlurListener(new BlurListener() {
+                            public void blur(BlurEvent event) {
+                                Collection<?> items = treeTable.getItemIds();
+                                boolean found = false;
+                                for (Object item : items) {
+                                    if (item.equals(obj)) {
+                                        found = true;
+                                    } else if (found) {
+                                        selectOnly(item);
+                                        editSelectedItem();
+                                        break;
+                                    }
+                                }
+                            }
+                        });
+
+                        return cbox;
+                    } else if (obj.isPk()) {
+                        return new Label(FontAwesome.KEY.getHtml(), ContentMode.HTML);
+                    }
+                } 
+                return null;
+            }
+        });
+        treeTable.setColumnHeader("pk", "PK");
+        treeTable.setColumnWidth("pk", 40);
 
         treeTable.addItemClickListener(new TreeTableItemClickListener());
         treeTable.addValueChangeListener(new TreeTableValueChangeListener());
@@ -235,7 +274,12 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         addAll("", model.getModelEntities());
         setButtonsEnabled();
     }
-
+    
+    protected void togglePk(ModelAttribute a) {
+        a.setPk(!a.isPk());
+        context.getConfigurationService().save(a);
+    }
+    
     public void setButtonsEnabled() {
         Set<Object> selected = getSelectedItems();
         addAttributeButton.setEnabled(selected.size() > 0);
