@@ -20,15 +20,15 @@
  */
 package org.jumpmind.metl.core.runtime;
 
-public class StartupMessage extends Message {
+public class ControlMessage extends Message {
 
 	private static final long serialVersionUID = 1L;
 
-	public StartupMessage() {
+	public ControlMessage() {
 	    this(null);
     }
 	
-	public StartupMessage(String originatingFlowStepId) {
+	public ControlMessage(String originatingFlowStepId) {
 	    super(originatingFlowStepId);
 	    this.getHeader().setUnitOfWorkLastMessage(true);
     }

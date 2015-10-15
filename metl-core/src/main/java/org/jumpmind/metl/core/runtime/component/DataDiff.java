@@ -5,7 +5,6 @@ import java.sql.Types;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.h2.Driver;
 import org.jumpmind.db.model.Column;
 import org.jumpmind.db.model.Table;
@@ -44,9 +43,82 @@ public class DataDiff extends AbstractComponentRuntime {
     RdbmsWriter databaseWriter;
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {
+    public void handle(Message message, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         createDatabase();
-        String originatingStepId = inputMessage.getHeader().getOriginatingStepId();
+
+        loadIntoDatabase(message);
+
+        if (unitOfWorkBoundaryReached) {
+            calculateDiff(callback);
+        }
+
+    }
+
+    protected void calculateDiff(ISendMessageCallback callback) {
+        // select where in _1 and not in _2 for DEL
+        // select where in _2 and not in _1 for ADD
+        Model inputModel = context.getFlowStep().getComponent().getInputModel();
+        List<ModelEntity> entities = inputModel.getModelEntities();
+        for (ModelEntity entity : entities) {
+            StringBuilder addSql = new StringBuilder("select ");
+            StringBuilder chgSql = new StringBuilder(addSql);
+            StringBuilder delSql = new StringBuilder(addSql);
+            List<ModelAttribute> attributes = entity.getModelAttributes();
+            for (ModelAttribute attribute : attributes) {
+                addSql.append("curr.").append(attribute.getName()).append(",");
+                delSql.append("orig.").append(attribute.getName()).append(",");
+                chgSql.append("curr.").append(attribute.getName()).append(",");
+            }
+            
+            addSql.append(" from " + entity.getName() + "_2 curr left join " + entity.getName() + "_1 orig on ");
+            delSql.append(" from " + entity.getName() + "_1 orig left join " + entity.getName() + "_2 curr on ");
+            chgSql.append(" from " + entity.getName() + "_1 orig join " + entity.getName() + "_2 curr on ");
+            boolean secondPk = false;
+            for (ModelAttribute attribute : attributes) {
+                if (attribute.isPk()) {
+                    if (secondPk) {
+                        addSql.append(" and ");
+                        delSql.append(" and ");
+                        delSql.append(" and ");
+                    }
+                    addSql.append("curr.").append(attribute.getName()).append("=").append("orig.").append(attribute.getName());
+                    delSql.append("curr.").append(attribute.getName()).append("=").append("orig.").append(attribute.getName());
+                    chgSql.append("curr.").append(attribute.getName()).append("=").append("orig.").append(attribute.getName());
+                    secondPk = true;
+                }
+            }
+            
+            addSql.append(" where ");
+            delSql.append(" where ");
+            chgSql.append(" where ");
+            secondPk = false;
+            boolean secondCol = false;
+            for (ModelAttribute attribute : attributes) {
+                if (attribute.isPk()) {
+                    if (secondPk) {
+                        addSql.append(" or ");
+                        delSql.append(" or ");
+                    } 
+                    addSql.append("orig.").append(attribute.getName()).append(" is null");
+                    delSql.append("curr.").append(attribute.getName()).append(" is null");
+                    secondPk = true;
+                } else {
+                    if (secondCol) {
+                        chgSql.append(" or ");
+                    }
+                    chgSql.append("curr.").append(attribute.getName()).append(" != ").append("orig.").append(attribute.getName());
+                    secondCol = true;
+                }
+            }
+
+            log(LogLevel.INFO, "Generated diff sql for ADD: %s", addSql);
+            log(LogLevel.INFO, "Generated diff sql for CHG: %s", chgSql);
+            log(LogLevel.INFO, "Generated diff sql for DEL: %s", delSql);
+        }
+    }
+
+    protected void loadIntoDatabase(Message message) {
+        String originatingStepId = message.getHeader().getOriginatingStepId();
         String tableSuffix = null;
         if (sourceStep1Id.equals(originatingStepId)) {
             tableSuffix = "_1";
@@ -55,19 +127,17 @@ public class DataDiff extends AbstractComponentRuntime {
         }
 
         if (databaseWriter == null) {
+            databaseWriter = new RdbmsWriter();
             databaseWriter.setDatabasePlatform(databasePlatform);
+            databaseWriter.setComponentDefinition(componentDefinition);
+            databaseWriter.setContext(context);
+            databaseWriter.setThreadNumber(threadNumber);
         }
 
         if (tableSuffix != null) {
             databaseWriter.setTableSuffix(tableSuffix);
-            databaseWriter.handle(inputMessage, null, false);
+            databaseWriter.handle(message, null, false);
         }
-        
-        if (unitOfWorkBoundaryReached) {
-            // select where in _1 and not in _2 for DEL
-            // select where in _2 and not in _1 for ADD
-        }
-
     }
 
     protected void createDatabase() {
@@ -81,7 +151,7 @@ public class DataDiff extends AbstractComponentRuntime {
                 databaseFile = new File(System.getProperty("h2.baseDir"), uuid + ".h2.db");
                 ds.setUrl("jdbc:h2:file:./" + uuid);
             }
-            databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(ds, new SqlTemplateSettings(), false);
+            databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(ds, new SqlTemplateSettings(), true);
 
             Model inputModel = context.getFlowStep().getComponent().getInputModel();
             List<ModelEntity> entities = inputModel.getModelEntities();
@@ -103,6 +173,8 @@ public class DataDiff extends AbstractComponentRuntime {
                     } else {
                         column.setTypeCode(Types.LONGVARCHAR);
                     }
+
+                    column.setPrimaryKey(attribute.isPk());
                     table.addColumn(column);
                 }
                 databasePlatform.createTables(false, false, table);
@@ -120,7 +192,9 @@ public class DataDiff extends AbstractComponentRuntime {
     public void stop() {
         if (databaseFile != null) {
             log(LogLevel.INFO, "Deleting databasePlatform file: %s", databaseFile);
-            FileUtils.deleteQuietly(databaseFile);
+            ResettableBasicDataSource ds = databasePlatform.getDataSource();
+            ds.close();
+            // FileUtils.deleteQuietly(databaseFile);
         }
     }
 

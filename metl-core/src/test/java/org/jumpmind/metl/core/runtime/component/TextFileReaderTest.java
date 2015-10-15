@@ -36,7 +36,7 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
@@ -72,7 +72,7 @@ public class TextFileReaderTest {
 
         TextFileReader reader = new TextFileReader();
         reader.start(0, new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
-        Message msg = new StartupMessage();
+        Message msg = new ControlMessage();
         SendMessageCallback<ArrayList<String>> msgTarget = new SendMessageCallback<ArrayList<String>>();
         reader.handle(msg, msgTarget, true);
 
@@ -94,7 +94,7 @@ public class TextFileReaderTest {
 
         TextFileReader reader = new TextFileReader();
         reader.start(0, new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
-        Message msg = new StartupMessage();
+        Message msg = new ControlMessage();
         SendMessageCallback<ArrayList<String>> msgTarget = new SendMessageCallback<ArrayList<String>>();
         reader.handle(msg, msgTarget, true);
 

@@ -10,7 +10,7 @@ import java.util.List;
 import org.apache.tools.ant.taskdefs.PumpStreamHandler;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,7 +29,7 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport<ArrayList<S
 	@Override
 	public void testHandleStartupMessage() {
 		setupHandle(0);
-		setInputMessage(new StartupMessage());
+		setInputMessage(new ControlMessage());
 		runHandle();
 		assertHandle(0, getExpectedMessageMonitorSingle(1, 0, 0, 1));
 	}

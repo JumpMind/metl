@@ -221,10 +221,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                         });
 
                         return cbox;
-                    } else {
-                        if (obj.isPk()) {
-                            return new Label(FontAwesome.KEY.getHtml(), ContentMode.HTML);
-                        }
+                    } else if (obj.isPk()) {
+                        return new Label(FontAwesome.KEY.getHtml(), ContentMode.HTML);
                     }
                 } 
                 return null;

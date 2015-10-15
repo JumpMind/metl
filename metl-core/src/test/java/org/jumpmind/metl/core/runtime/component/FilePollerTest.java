@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.apache.tools.ant.DirectoryScanner;
 import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.properties.TypedProperties;
@@ -25,7 +25,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 	@Override
 	public void testHandleStartupMessage() {
 		setupHandle(true);
-		setInputMessage(new StartupMessage());
+		setInputMessage(new ControlMessage());
 		runHandle();
 		assertHandle(1, getExpectedMessageMonitorSingle(1, 0, 0, 1));
 	}

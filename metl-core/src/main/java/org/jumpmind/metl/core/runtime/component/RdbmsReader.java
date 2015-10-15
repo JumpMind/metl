@@ -35,9 +35,10 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
@@ -63,6 +64,8 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     boolean matchOnColumnNameOnly = false;
     
+    ChangeType entityChangeType = ChangeType.ADD;
+    
     @Override
     protected void start() {
         TypedProperties properties = getTypedProperties();
@@ -84,7 +87,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
         int inboundRecordCount = 1;
         ArrayList<EntityData> inboundPayload = null;
-        if (!(inputMessage instanceof StartupMessage)) {
+        if (!(inputMessage instanceof ControlMessage)) {
             inboundPayload = inputMessage.getPayload();
             if (inboundPayload != null) {
                 inboundRecordCount = inboundPayload.size();
@@ -294,7 +297,25 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         return entities;
     }
     
+    public void setSqls(List<String> sqls) {
+        this.sqls = sqls;
+    }
     
+    public void setRowsPerMessage(long rowsPerMessage) {
+        this.rowsPerMessage = rowsPerMessage;
+    }
+    
+    public void setMatchOnColumnNameOnly(boolean matchOnColumnNameOnly) {
+        this.matchOnColumnNameOnly = matchOnColumnNameOnly;
+    }
+    
+    public void setTrimColumns(boolean trimColumns) {
+        this.trimColumns = trimColumns;
+    }
+    
+    public void setEntityChangeType(ChangeType entityChangeType) {
+        this.entityChangeType = entityChangeType;
+    }
     
     List<String> getSqls() {
 		return sqls;
@@ -351,6 +372,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
 
                 EntityData rowData = new EntityData();
+                rowData.setChangeType(entityChangeType);
                 for (int i = 1; i <= meta.getColumnCount(); i++) {
                     Object value = JdbcUtils.getResultSetValue(rs, i);
                     if (trimColumns && value instanceof String) {

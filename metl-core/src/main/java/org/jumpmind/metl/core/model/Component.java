@@ -287,7 +287,14 @@ public class Component extends AbstractObjectWithSettings {
     }
 
 	public Row toRow(EntityData data, boolean qualifyWithEntityName) {
-        Row row = new Row(data.size());
+        Row row = new Row(data.size()) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String toString() {
+                return String.format("{{ChangeType: %s}, %s}", data.getChangeType(), super.toString());
+            }
+        };
         Set<String> attributeIds = data.keySet();
         for (String attributeId : attributeIds) {
             ModelAttribute attribute = inputModel.getAttributeById(attributeId);
@@ -345,4 +352,5 @@ public class Component extends AbstractObjectWithSettings {
 
         return component;
     }
+    
 }

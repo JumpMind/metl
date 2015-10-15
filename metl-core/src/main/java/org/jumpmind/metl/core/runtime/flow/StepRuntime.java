@@ -48,7 +48,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MessageHeader;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.ShutdownMessage;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
@@ -419,7 +419,7 @@ public class StepRuntime implements Runnable {
         		threadNumber,
         		LogLevel.INFO, 
         		componentContext,
-        		String.format("INPUT Message(sequenceNumber=%d,unitOfWorkLastMessage=%s,source='%s')",
+        		String.format("INPUT %s(sequenceNumber=%d,unitOfWorkLastMessage=%s,source='%s')", inputMessage.getClass().getSimpleName(),
                 header.getSequenceNumber(), header.isUnitOfWorkLastMessage(),source));
         Serializable payload = inputMessage.getPayload();
         if (payload instanceof List) {
@@ -458,7 +458,7 @@ public class StepRuntime implements Runnable {
     					threadNumber,
     					LogLevel.INFO, 
     					componentContext,
-    					String.format("OUTPUT Message(sequenceNumber=%d,unitOfWorkLastMessage=%s)",
+    					String.format("OUTPUT %s(sequenceNumber=%d,unitOfWorkLastMessage=%s)", message.getClass().getSimpleName(),
     	                message.getHeader().getSequenceNumber(), message.getHeader().isUnitOfWorkLastMessage()));
         	
     			Serializable payload = message.getPayload();
@@ -573,7 +573,7 @@ public class StepRuntime implements Runnable {
         @Override
         public void sendStartupMessage() {
             FlowStep flowStep = componentContext.getFlowStep();
-            sendMessage(new StartupMessage(flowStep.getId()));
+            sendMessage(new ControlMessage(flowStep.getId()));
         }
 
         @Override

@@ -50,7 +50,7 @@ import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.runtime.ShutdownMessage;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
@@ -192,7 +192,7 @@ public class FlowRuntime {
             threadService.execute(stepRuntime);
         }
 
-        StartupMessage startMessage = new StartupMessage();
+        ControlMessage startMessage = new ControlMessage();
         /*
          * for each start step (step that has no input msgs), send a start
          * message to that step

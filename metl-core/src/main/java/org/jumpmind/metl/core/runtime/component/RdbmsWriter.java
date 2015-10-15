@@ -414,10 +414,12 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     
     public void setTablePrefix(String tablePrefix) {
         this.tablePrefix = tablePrefix;
+        this.targetTables = null;
     }
     
     public void setTableSuffix(String tableSuffix) {
         this.tableSuffix = tableSuffix;
+        this.targetTables = null;
     }
     
     public void setBatchMode(boolean batchMode) {

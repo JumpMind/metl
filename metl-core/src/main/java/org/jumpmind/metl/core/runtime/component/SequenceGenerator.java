@@ -29,7 +29,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.util.FormatUtils;
 
@@ -118,7 +118,7 @@ public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (!(inputMessage instanceof StartupMessage)) {
+        if (!(inputMessage instanceof ControlMessage)) {
             ArrayList<EntityData> outgoingPayload = new ArrayList<EntityData>();
             ArrayList<EntityData> payload = inputMessage.getPayload();
             for (EntityData entityData : payload) {

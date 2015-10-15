@@ -25,7 +25,7 @@ import java.util.LinkedHashMap;
 
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Deduper extends AbstractComponentRuntime {
@@ -48,7 +48,7 @@ public class Deduper extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (!(inputMessage instanceof StartupMessage)) {
+        if (!(inputMessage instanceof ControlMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
             for (EntityData entityData : payload) {
                 String key = entityData.toString();

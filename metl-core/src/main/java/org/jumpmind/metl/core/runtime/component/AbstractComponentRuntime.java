@@ -210,8 +210,6 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return bindings;
     }
 
-    
-    
     protected Object getAttributeValue(Message inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
         return ComponentUtil.getAttributeValue(getInputModel(), rows, entityName, attributeName);
@@ -220,6 +218,18 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     protected List<Object> getAttributeValues(Message inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
         return ComponentUtil.getAttributeValues(getInputModel(), rows, entityName, attributeName);
-    }    
+    }
+    
+    public void setComponentDefinition(XMLComponent componentDefinition) {
+        this.componentDefinition = componentDefinition;
+    }
+    
+    public void setContext(ComponentContext context) {
+        this.context = context;
+    }
+    
+    public void setThreadNumber(int threadNumber) {
+        this.threadNumber = threadNumber;
+    }
     
 }

@@ -29,7 +29,7 @@ import org.apache.commons.lang.ObjectUtils;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.StartupMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
@@ -80,7 +80,7 @@ public class Sorter extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (!(inputMessage instanceof StartupMessage)) {
+        if (!(inputMessage instanceof ControlMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
             for (int i = 0; i < payload.size(); i++) {
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
