@@ -91,7 +91,7 @@ public class Transformer extends AbstractComponentRuntime {
             getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
         }
         
-        callback.sendMessage(outDatas, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, outDatas, unitOfWorkBoundaryReached);
     }    
 
 }

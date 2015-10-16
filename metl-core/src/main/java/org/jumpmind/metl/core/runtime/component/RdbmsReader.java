@@ -117,7 +117,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             }
         }
         if (outboundPayload != null && outboundPayload.size() > 0) {
-            callback.sendMessage(outboundPayload, unitOfWorkBoundaryReached);
+            callback.sendMessage(null, outboundPayload, unitOfWorkBoundaryReached);
         }
     }
 
@@ -365,7 +365,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             long ts = System.currentTimeMillis();
             while (rs.next()) {
                 if (outputRecCount++ % rowsPerMessage == 0 && payload != null) {
-                    callback.sendMessage(payload, false);
+                    callback.sendMessage(null, payload, false);
                     payload = null;
                 }
                 

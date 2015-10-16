@@ -99,14 +99,14 @@ public class Multiplier extends AbstractComponentRuntime {
                 newData.putAll(multiplierData);
                 multiplied.add(newData);
                 if (multiplied.size() >= rowsPerMessage) {
-                    callback.sendMessage(multiplied, false);                    
+                    callback.sendMessage(null, multiplied, false);                    
                     multiplied = new ArrayList<EntityData>();
                 }
             }
         }
 
         if (multiplied.size() > 0) {
-            callback.sendMessage(multiplied, true);               
+            callback.sendMessage(null, multiplied, true);               
         }
     }
 

@@ -88,7 +88,7 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
         }
 
         if (callback != null) {
-        	callback.sendMessage(convertResultsToTextPayload(results), unitOfWorkBoundaryReached);
+        	callback.sendMessage(null, convertResultsToTextPayload(results), unitOfWorkBoundaryReached);
         }
     }
 

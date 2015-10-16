@@ -79,13 +79,13 @@ public class Joiner extends AbstractComponentRuntime {
             Iterator<EntityData> itr = joinedData.values().iterator();
             while (itr.hasNext()) {
                 if (dataToSend.size() >= rowsPerMessage) {
-                    callback.sendMessage(dataToSend, false);
+                    callback.sendMessage(null, dataToSend, false);
                     dataToSend = new ArrayList<EntityData>();
                 }
                 dataToSend.add(itr.next());
             }
             if (dataToSend != null && dataToSend.size() > 0) {
-                callback.sendMessage(dataToSend, true);
+                callback.sendMessage(null, dataToSend, true);
             }
         }
     }   

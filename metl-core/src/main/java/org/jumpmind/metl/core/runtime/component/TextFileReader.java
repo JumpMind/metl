@@ -25,8 +25,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -108,7 +111,7 @@ public class TextFileReader extends AbstractComponentRuntime {
                 true);
         encoding = component.get(SETTING_ENCODING, encoding);
     }
-        
+
     @Override
     public boolean supportsStartupMessages() {
         return true;
@@ -193,6 +196,8 @@ public class TextFileReader extends AbstractComponentRuntime {
         filesRead.addAll(files);
 
         for (String file : files) {
+            Map<String, Serializable> headers = new HashMap<>(1);
+            headers.put("source.file.path", file);
             InputStream inStream = null;
             BufferedReader reader = null;
             int currentFileLinesRead = 0;
@@ -207,7 +212,7 @@ public class TextFileReader extends AbstractComponentRuntime {
                 while ((currentLine = reader.readLine()) != null) {
                     currentFileLinesRead++;
                     if (linesInMessage == textRowsPerMessage) {
-                        initAndSendMessage(payload, callback, false);
+                        callback.sendMessage(headers, payload, false);
                         linesInMessage = 0;
                         payload = new ArrayList<String>();
                     }
@@ -217,7 +222,7 @@ public class TextFileReader extends AbstractComponentRuntime {
                         linesInMessage++;
                     }
                 }
-                initAndSendMessage(payload, callback, unitOfWorkLastMessage);
+                callback.sendMessage(headers, payload, unitOfWorkLastMessage);
                 linesInMessage = 0;
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
@@ -227,9 +232,5 @@ public class TextFileReader extends AbstractComponentRuntime {
             }
         }
 
-    }
-
-    private void initAndSendMessage(ArrayList<String> payload, ISendMessageCallback callback, boolean lastMessage) {
-        callback.sendMessage(payload, lastMessage);
     }
 }

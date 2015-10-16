@@ -63,7 +63,7 @@ public class TextConstant extends AbstractComponentRuntime {
                 reader = new BufferedReader(new StringReader(context.getFlowStep().getComponent().get(SETTING_TEXT, "")));
                 while ((currentLine = reader.readLine()) != null) {
                     if (linesInMessage == textRowsPerMessage) {
-                        callback.sendMessage(payload, false);
+                        callback.sendMessage(null, payload, false);
                         linesInMessage = 0;
                         payload = new ArrayList<String>();
                     }
@@ -78,7 +78,7 @@ public class TextConstant extends AbstractComponentRuntime {
             }
         }
 
-        callback.sendMessage(payload, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, payload, unitOfWorkBoundaryReached);
     }
 
 }
