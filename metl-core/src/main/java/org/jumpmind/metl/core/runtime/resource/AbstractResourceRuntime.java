@@ -28,21 +28,17 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.util.FormatUtils;
 
 public abstract class AbstractResourceRuntime extends AbstractRuntimeObject implements IResourceRuntime {
 
     protected Resource resource;
     protected TypedProperties resourceRuntimeSettings;
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void start(IResourceFactory resourceFactory, Resource resource,
             TypedProperties overrides) {
@@ -56,14 +52,6 @@ public abstract class AbstractResourceRuntime extends AbstractRuntimeObject impl
             combined.putAll(overrides);
         }
         
-        Set<Entry<Object, Object>> entries = combined.entrySet();
-        for (Entry<Object, Object> entry : entries) {
-            String value = (String)entry.getValue();
-            if (value != null) {
-                value = FormatUtils.replaceTokens(value, (Map)System.getProperties(), true);
-                entry.setValue(value);
-            }
-        }
         
         resourceRuntimeSettings = combined;
         
