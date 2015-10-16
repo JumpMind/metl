@@ -111,7 +111,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
 
         log(LogLevel.DEBUG, outputPayload.toString());
         
-        callback.sendMessage(outputPayload, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
     }
 
     public static String getBatchXml(Model model, ArrayList<EntityData> inputRows, boolean outputAllAttributes) {

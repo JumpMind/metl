@@ -114,7 +114,7 @@ public class Lookup extends AbstractComponentRuntime {
             payload.add(newData);
         }
 
-        callback.sendMessage(payload, unitOfWorkLastMessage);
+        callback.sendMessage(null, payload, unitOfWorkLastMessage);
     }
 
 }

@@ -134,7 +134,7 @@ public class UnZip extends AbstractComponentRuntime {
         		}
     		}
         }
-        callback.sendMessage(filePaths, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, filePaths, unitOfWorkBoundaryReached);
 	}
 	
 	File getNewFile(String file) {

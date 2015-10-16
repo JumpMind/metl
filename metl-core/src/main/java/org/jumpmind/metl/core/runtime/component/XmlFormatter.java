@@ -175,7 +175,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
         log(LogLevel.DEBUG, outputPayload.toString());
 
-        callback.sendMessage(outputPayload, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
     }
 
     private void processInputRow(Document document, EntityData inputRow, Map<String, XmlFormatterEntitySetting> entitySettings,

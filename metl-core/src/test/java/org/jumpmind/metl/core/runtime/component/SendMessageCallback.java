@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
@@ -39,7 +40,7 @@ class SendMessageCallback<T> implements ISendMessageCallback {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void sendMessage(Serializable payload, boolean lastMessage, String... targetStepIds) {
+    public void sendMessage(Map<String, Serializable> additionalHeaders, Serializable payload, boolean lastMessage, String... targetStepIds) {
         payloadList.add((T)payload);
         this.targetStepIds.add(Arrays.asList(targetStepIds));
     }

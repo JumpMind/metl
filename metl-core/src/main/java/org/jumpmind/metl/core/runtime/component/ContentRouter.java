@@ -109,7 +109,7 @@ public class ContentRouter extends AbstractComponentRuntime {
                             }
                             if (outboundPayload.size() >= rowsPerMessage) {
                                 outboundMessages.remove(route.getTargetStepId());
-                                callback.sendMessage(outboundPayload, false, route.getTargetStepId());
+                                callback.sendMessage(null, outboundPayload, false, route.getTargetStepId());
                             }
                             outboundPayload.add(entityData.copy());
                             if (onlyRouteFirstMatch) {
@@ -124,7 +124,7 @@ public class ContentRouter extends AbstractComponentRuntime {
         }
 
         for (String targetFlowStepId : outboundMessages.keySet()) {
-            callback.sendMessage(outboundMessages.get(targetFlowStepId), true, targetFlowStepId);
+            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), true, targetFlowStepId);
         }
 
     }
@@ -146,7 +146,7 @@ public class ContentRouter extends AbstractComponentRuntime {
                             }
                             if (outboundPayload.size() >= rowsPerMessage) {
                                 outboundMessages.remove(route.getTargetStepId());
-                                callback.sendMessage(outboundPayload, false, route.getTargetStepId());
+                                callback.sendMessage(null, outboundPayload, false, route.getTargetStepId());
                             }
                             outboundPayload.add(data);
                         }
@@ -158,7 +158,7 @@ public class ContentRouter extends AbstractComponentRuntime {
         }
 
         for (String targetFlowStepId : outboundMessages.keySet()) {
-            callback.sendMessage(outboundMessages.get(targetFlowStepId), true, targetFlowStepId);
+            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), true, targetFlowStepId);
         }
 
     }

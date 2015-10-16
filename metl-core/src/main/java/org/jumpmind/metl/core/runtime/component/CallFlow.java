@@ -18,7 +18,7 @@ public class CallFlow extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {
-        messageTarget.sendMessage(inputMessage.getPayload(), unitOfWorkBoundaryReached);
+        messageTarget.sendMessage(null, inputMessage.getPayload(), unitOfWorkBoundaryReached);
     }
 
     @Override

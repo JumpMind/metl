@@ -1,9 +1,9 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -54,7 +54,7 @@ public class HandleParams {
 		HandleMessageMonitor monitor = new HandleMessageMonitor();
 		
 		@Override
-		public void sendMessage(Serializable payload, boolean lastMessage, String... targetStepIds) {
+		public void sendMessage(Map<String, Serializable> additionalHeaders, Serializable payload, boolean lastMessage, String... targetStepIds) {
 			if (payload instanceof List) {
 				Message message = new Message("unitTest");
 				message.setPayload(payload);

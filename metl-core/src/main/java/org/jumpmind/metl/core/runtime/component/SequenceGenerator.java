@@ -137,7 +137,7 @@ public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 outgoingPayload.add(entityData);
             }
-            callback.sendMessage(outgoingPayload, unitOfWorkBoundaryReached);
+            callback.sendMessage(null, outgoingPayload, unitOfWorkBoundaryReached);
         }
     }
 
