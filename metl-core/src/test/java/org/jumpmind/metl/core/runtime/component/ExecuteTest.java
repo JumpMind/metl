@@ -27,6 +27,18 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport<ArrayList<S
 
 	public static final String COMMAND_OUTPUT = "command output";
 	
+	@Override
+	public void testStartDefaults() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void testStartWithValues() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	@Test
 	@Override
 	public void testHandleStartupMessage() {

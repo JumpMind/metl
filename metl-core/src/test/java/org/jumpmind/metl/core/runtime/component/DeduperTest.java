@@ -37,6 +37,18 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class DeduperTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
 
+	@Override
+	public void testStartDefaults() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void testStartWithValues() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
@@ -93,6 +105,8 @@ public class DeduperTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 	protected String getComponentId() {
 	    return Deduper.TYPE;
 	}
+
+
 
 	
 }

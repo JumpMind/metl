@@ -49,6 +49,18 @@ public class TransformerTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 	public static String TRANSFORM_EXP = "transform logic";
 	public static String TRANSFORM_RESULT = "transformed";
 	
+	@Override
+	public void testStartDefaults() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void testStartWithValues() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	@Test
 	@Override
 	public void testHandleStartupMessage() {

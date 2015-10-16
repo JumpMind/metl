@@ -20,15 +20,22 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.component.helpers.ComponentAttributeSettingsBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
+import org.jumpmind.metl.core.utils.TestUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -36,6 +43,37 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class JoinerTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
 
+	@Test
+	@Override
+	public void testStartDefaults() {
+		setupStart(null);
+		
+		try {
+			((Joiner) spy).start();
+		}
+		catch (Exception e) {
+			assertTrue(e instanceof IllegalStateException);
+		}
+	}
+	
+	@Test
+	@Override
+	public void testStartWithValues() {
+		setupStart(new SettingsBuilder().build());
+		
+		((Joiner) spy).getComponent().setInputModel(new Model());
+		((Joiner) spy).getComponent().setAttributeSettings(
+				new ComponentAttributeSettingsBuilder()
+				.withSetting(MODEL_ATTR_ID_1, "1", Joiner.JOIN_ATTRIBUTE, "true").build());
+		
+		((Joiner) spy).start();
+		
+		List<String> expectedList = new ArrayList<String>();
+		expectedList.add(MODEL_ATTR_ID_1);
+		
+		TestUtils.assertList(expectedList, ((Joiner) spy).attributesToJoinOn, false);
+	}
+	
 	@Test
 	@Override
 	public void testHandleStartupMessage() {

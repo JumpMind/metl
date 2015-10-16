@@ -1,12 +1,14 @@
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 
 import org.jumpmind.metl.core.runtime.ControlMessage;
-import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -14,6 +16,33 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class TextConstantTest extends AbstractComponentRuntimeTestSupport<ArrayList<String>> {
 
+	@Test
+	@Override
+	public void testStartDefaults() {
+		setupStart(new SettingsBuilder().build());
+		
+		((TextConstant) spy).start();
+		
+		assertEquals(1000, ((TextConstant) spy).textRowsPerMessage);
+		assertEquals(false, ((TextConstant) spy).splitOnLineFeed);
+		assertEquals("", ((TextConstant) spy).constantText);
+	}
+	
+	@Test
+	@Override
+	public void testStartWithValues() {
+		setupStart(new SettingsBuilder()
+			.withSetting(TextConstant.ROWS_PER_MESSAGE, "10")
+			.withSetting(TextConstant.SETTING_SPLIT_ON_LINE_FEED, "true")
+			.withSetting(TextConstant.SETTING_TEXT, "replace").build());
+		
+		((TextConstant) spy).start();
+		
+		assertEquals(10, ((TextConstant) spy).textRowsPerMessage);
+		assertEquals(true, ((TextConstant) spy).splitOnLineFeed);
+		assertEquals("replace", ((TextConstant) spy).constantText);
+	}	
+	
 	@Test
 	@Override
 	public void testHandleStartupMessage() {

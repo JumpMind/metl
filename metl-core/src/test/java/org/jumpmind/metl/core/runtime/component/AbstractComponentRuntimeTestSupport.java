@@ -36,6 +36,7 @@ import java.util.Map;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
@@ -68,6 +69,8 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 	public abstract void testHandleStartupMessage();
 	public abstract void testHandleUnitOfWorkLastMessage();
 	public abstract void testHandleNormal();
+	public abstract void testStartDefaults();
+	public abstract void testStartWithValues();
 	
 	abstract protected String getComponentId();
 	
@@ -114,10 +117,20 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 		properties = new TypedProperties();
 	}	
 	
-	public void setupStart() {
+	public void setupStart(List<Setting> settings) {
+		Component component = new Component();
+		component.setSettings(settings);
+		
+		when(context.getFlowStep()).thenReturn(flowStep);
+		when(flowStep.getComponent()).thenReturn(component);
+		
 	    doReturn(properties).when((AbstractComponentRuntime) spy).getTypedProperties();
+	    doReturn(flowStep).when((AbstractComponentRuntime) spy).getFlowStep();
+	    
+	    doReturn(component).when((AbstractComponentRuntime) spy).getComponent();
+	    ((AbstractComponentRuntime) spy).setContext(context);
 	}
-	
+
 	public void setupHandle() {
 		doNothing().when((AbstractComponentRuntime) spy).start();
 		

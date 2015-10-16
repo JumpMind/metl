@@ -42,6 +42,18 @@ public class MappingTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 
 	public static String MAPPING_TARGET_1 = "mapping1";
 	
+	@Override
+	public void testStartDefaults() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void testStartWithValues() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	@Test
 	@Override
 	public void testHandleStartupMessage() {

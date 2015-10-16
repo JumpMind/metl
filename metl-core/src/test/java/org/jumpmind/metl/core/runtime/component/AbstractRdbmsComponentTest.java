@@ -71,7 +71,7 @@ public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntim
 	
 	@Test
     public void testStartWhenSqlNotSet() {
-        setupStart();
+        setupStart(null);
         if (sqlRequired()) {
             try {
                 properties.setProperty(AbstractRdbmsComponentRuntime.SQL, "");

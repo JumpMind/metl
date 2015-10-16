@@ -1,20 +1,72 @@
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
 public class TextReplaceTest extends AbstractComponentRuntimeTestSupport<ArrayList<String>> {
+	
 
+	@Test
+	@Override
+	public void testStartDefaults() {
+		setupStart(new SettingsBuilder()
+				.withSetting(TextReplace.SETTING_SEARCH_FOR, "")
+				.withSetting(TextReplace.SETTING_REPLACE_WITH, "").build());
+		
+		try {
+			((TextReplace) spy).start();
+		}
+		catch (Exception e) {
+			assertTrue(e instanceof IllegalStateException);
+		}
+		
+		assertEquals("", ((TextReplace) spy).searchFor);
+		assertEquals("", ((TextReplace) spy).replaceWith);
+	}
+	
+	@Test
+	@Override
+	public void testStartWithValues() {
+		setupStart(new SettingsBuilder()
+				.withSetting(TextReplace.SETTING_SEARCH_FOR, "search")
+				.withSetting(TextReplace.SETTING_REPLACE_WITH, "replace").build());
+		 
+		((TextReplace) spy).start();
+		
+		assertEquals("search", ((TextReplace) spy).searchFor);
+		assertEquals("replace", ((TextReplace) spy).replaceWith);
+	}
+	
+	@Test
+	public void testStartWithMissingProperties() {
+		setupStart(new SettingsBuilder()
+			.withSetting(TextReplace.SETTING_SEARCH_FOR, null)
+			.withSetting(TextReplace.SETTING_REPLACE_WITH, "replace").build());
+				
+		try {
+			((TextReplace) spy).start();
+		}
+		catch (Exception e) {
+			assertTrue(e instanceof IllegalStateException);
+		}
+	}
+	
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
@@ -102,4 +154,5 @@ public class TextReplaceTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 	protected String getComponentId() {
 		return TextReplace.TYPE;
 	}
+
 }

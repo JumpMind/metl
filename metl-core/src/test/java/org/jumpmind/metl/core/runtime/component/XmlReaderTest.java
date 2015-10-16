@@ -25,6 +25,18 @@ import org.mockito.Mockito;
 
 public class XmlReaderTest extends AbstractComponentRuntimeTestSupport<ArrayList<String>>{
 
+	@Override
+	public void testStartDefaults() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void testStartWithValues() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	@Test
 	@Override
 	public void testHandleStartupMessage() {

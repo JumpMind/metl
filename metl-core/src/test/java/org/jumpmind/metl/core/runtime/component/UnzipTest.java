@@ -30,6 +30,18 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class UnzipTest extends AbstractComponentRuntimeTestSupport<ArrayList<String>> {
 
 	@Override
+	public void testStartDefaults() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void testStartWithValues() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
 	public void testHandleStartupMessage() {
 		setupHandle(true);
 		setInputMessage(new ControlMessage());

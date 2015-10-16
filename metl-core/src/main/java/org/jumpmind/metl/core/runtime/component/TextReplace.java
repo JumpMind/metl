@@ -44,8 +44,8 @@ public class TextReplace extends AbstractComponentRuntime {
     @Override
     protected void start() {
         Component component = getComponent();
-        searchFor = component.get(SETTING_SEARCH_FOR);
-        replaceWith = component.get(SETTING_REPLACE_WITH);
+        searchFor = component.get(SETTING_SEARCH_FOR, "");
+        replaceWith = component.get(SETTING_REPLACE_WITH, "");
         if (isBlank(searchFor)) {
             throw new IllegalStateException("Requires a 'Search For' expression");
         }
