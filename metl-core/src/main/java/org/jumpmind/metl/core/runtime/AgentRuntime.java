@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
@@ -57,6 +58,7 @@ import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.ThreadUtils;
 import org.jumpmind.properties.TypedProperties;
+import org.jumpmind.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -256,6 +258,7 @@ public class AgentRuntime {
         return deployment;
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     protected void deployResources(Flow flow) {
         Set<Resource> flowResources = flow.findResources();
         for (Resource flowResource : flowResources) {
@@ -267,6 +270,14 @@ public class AgentRuntime {
             TypedProperties overrideSettings = agent.toTypedProperties(flowResource);
             TypedProperties combined = new TypedProperties(defaultSettings);
             combined.putAll(overrideSettings);
+            Set<Entry<Object, Object>> entries = combined.entrySet();
+            for (Entry<Object, Object> entry : entries) {
+                String value = (String)entry.getValue();
+                if (value != null) {
+                    value = FormatUtils.replaceTokens(value, (Map)System.getProperties(), true);
+                    entry.setValue(value);
+                }
+            }
     
             boolean deploy = true;
             if (alreadyDeployed != null) {
@@ -298,7 +309,7 @@ public class AgentRuntime {
     
             if (deploy) {
                 log.info("Deploying the {} resource to the {} agent", flowResource.getName(), agent.getName());
-                IResourceRuntime resource = resourceFactory.create(flowResource, overrideSettings);
+                IResourceRuntime resource = resourceFactory.create(flowResource, combined);
                 deployedResources.put(flowResource.getId(), resource);
             }
         }
