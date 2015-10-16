@@ -32,14 +32,21 @@ import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class TextConstant extends AbstractComponentRuntime {
 
-    public static final String TYPE = "Text Reader";
+    public static final String TYPE = "Text Constant";
 
     public static final String SETTING_SPLIT_ON_LINE_FEED = "split.on.line.feed";
 
     public static final String SETTING_TEXT = "text";
 
+    int textRowsPerMessage;
+    boolean splitOnLineFeed;
+    String constantText;
+    
     @Override
     protected void start() {
+    	textRowsPerMessage = context.getFlowStep().getComponent().getInt(ROWS_PER_MESSAGE, 1000);
+        splitOnLineFeed = context.getFlowStep().getComponent().getBoolean(SETTING_SPLIT_ON_LINE_FEED, false);
+        constantText = context.getFlowStep().getComponent().get(SETTING_TEXT, "");
     }
 
     @Override
@@ -50,17 +57,16 @@ public class TextConstant extends AbstractComponentRuntime {
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         int linesInMessage = 0;
-        int textRowsPerMessage = context.getFlowStep().getComponent().getInt(ROWS_PER_MESSAGE, 1000);
-        boolean splitOnLineFeed = context.getFlowStep().getComponent().getBoolean(SETTING_SPLIT_ON_LINE_FEED, false);
         ArrayList<String> payload = new ArrayList<String>();
 
         if (!splitOnLineFeed) {
-            payload.add(context.getFlowStep().getComponent().get(SETTING_TEXT, ""));
+        	getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+            payload.add(constantText);
         } else {
             BufferedReader reader = null;
             String currentLine;
             try {
-                reader = new BufferedReader(new StringReader(context.getFlowStep().getComponent().get(SETTING_TEXT, "")));
+                reader = new BufferedReader(new StringReader(constantText));
                 while ((currentLine = reader.readLine()) != null) {
                     if (linesInMessage == textRowsPerMessage) {
                         callback.sendMessage(null, payload, false);
