@@ -45,6 +45,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
@@ -78,6 +79,10 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     public final static String BATCH_MODE = "batch.mode";
 
     public final static String CONTINUE_ON_ERROR = "continue.on.error";
+    
+    public final static String TABLE_SUFFIX = "table.suffix";
+    
+    public final static String TABLE_PREFIX = "table.prefix";
 
     boolean continueOnError = false;
 
@@ -132,6 +137,14 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         insertFallback = properties.is(INSERT_FALLBACK);
         quoteIdentifiers = properties.is(QUOTE_IDENTIFIERS);
         fitToColumn = properties.is(FIT_TO_COLUMN);
+        tableSuffix = properties.get(TABLE_SUFFIX, "");
+        if (tableSuffix == null) {
+            tableSuffix = "";
+        }
+        tablePrefix = properties.get(TABLE_PREFIX, "");
+        if (tablePrefix == null) {
+            tablePrefix = "";
+        }
         catalogName = FormatUtils.replaceTokens(properties.get(CATALOG), context.getFlowParametersAsString(), true);
         if (isBlank(catalogName)) {
             catalogName = null;
@@ -173,7 +186,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                             true);
                     if (table != null) {
                         targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE, entity, table.copy()),
-                                new TargetTable(DmlType.INSERT, entity, table.copy())));
+                                new TargetTable(DmlType.INSERT, entity, table.copy()), new TargetTable(DmlType.DELETE, entity, table.copy())));
                     } else {
                         throw new MisconfiguredException("Could not find table to write to: %s",
                                 Table.getFullyQualifiedTableName(catalogName, schemaName, entity.getName()));
@@ -249,7 +262,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                         stats = new WriteStats();
                         statsMap.put(targetTableDefinition, stats);
                     }
-                    if (updateFirst) {
+                    if (updateFirst || inputRow.getChangeType() == ChangeType.CHG) {
                         modelTable = targetTableDefinition.getUpdateTable();
                         if (modelTable.shouldProcess(inputRow)) {
                             data = getValues(true, modelTable, inputRow);
@@ -277,7 +290,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                                 stats.ignoredCount++;
                             }
                         }
-                    } else {
+                    } else if (inputRow.getChangeType() == ChangeType.ADD) {
                         try {
                             modelTable = targetTableDefinition.getInsertTable();
                             if (modelTable.shouldProcess(inputRow)) {
@@ -306,6 +319,16 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                             } else {
                                 stats.ignoredCount++;
                             }
+                        }
+                    } else if (inputRow.getChangeType() == ChangeType.DEL) {
+                        modelTable = targetTableDefinition.getDeleteTable();
+                        if (modelTable.shouldProcess(inputRow)) {
+                            data = getValues(false, modelTable, inputRow);
+                            int count = execute(transaction, modelTable.getStatement(), new Object(), data, !replaceRows && !continueOnError);
+                            results.add(new Result(modelTable.getStatement().getSql(), count));
+                            totalStatementCount++;
+                            stats.deleteCount += count;
+                            getComponentStatistics().incrementNumberEntitiesProcessed(count);
                         }
                     }
                 }
@@ -336,6 +359,14 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                         }
                         msg.append("Updated: ");
                         msg.append(stats.updateCount);
+                    }
+                    
+                    if (stats.deleteCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append("Deleted: ");
+                        msg.append(stats.deleteCount);
                     }
 
                     if (stats.fallbackInsertCount > 0) {
@@ -374,7 +405,6 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     }
 
     private int execute(ISqlTransaction transaction, DmlStatement dmlStatement, Object marker, Object[] data, boolean logFailure) {
-
         String sql = dmlStatement.getSql();
 
         if (!sql.equals(lastPreparedDml)) {
@@ -453,12 +483,19 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         TargetTable updateTable;
 
         TargetTable insertTable;
+        
+        TargetTable deleteTable;
 
-        public TargetTableDefintion(ModelEntity modelEntity, TargetTable updateTable, TargetTable insertTable) {
+        public TargetTableDefintion(ModelEntity modelEntity, TargetTable updateTable, TargetTable insertTable, TargetTable deleteTable) {
             super();
             this.modelEntity = modelEntity;
             this.updateTable = updateTable;
             this.insertTable = insertTable;
+            this.deleteTable = deleteTable;
+        }
+        
+        public TargetTable getDeleteTable() {
+            return deleteTable;
         }
 
         public TargetTable getInsertTable() {
@@ -506,14 +543,16 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                 }
             }
 
-            /*
-             * Remove columns that are not enabled for this dml type
-             */
-            for (ModelAttribute attribute : attributes) {
-                ComponentAttributeSetting setting = getComponent().getSingleAttributeSetting(attribute.getId(),
-                        dmlType == DmlType.INSERT ? ATTRIBUTE_INSERT_ENABLED : ATTRIBUTE_UPDATE_ENABLED);
-                if (setting != null && !Boolean.parseBoolean(setting.getValue())) {
-                    table.removeColumn(table.findColumn(attribute.getName()));
+            if (dmlType == DmlType.INSERT || dmlType == DmlType.UPDATE) {
+                /*
+                 * Remove columns that are not enabled for this dml type
+                 */
+                for (ModelAttribute attribute : attributes) {
+                    ComponentAttributeSetting setting = getComponent().getSingleAttributeSetting(attribute.getId(),
+                            dmlType == DmlType.INSERT ? ATTRIBUTE_INSERT_ENABLED : ATTRIBUTE_UPDATE_ENABLED);
+                    if (setting != null && !Boolean.parseBoolean(setting.getValue())) {
+                        table.removeColumn(table.findColumn(attribute.getName()));
+                    }
                 }
             }
 
@@ -602,6 +641,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     class WriteStats {
         int ignoredCount;
         int insertCount;
+        int deleteCount;
         int updateCount;
         int fallbackInsertCount;
         int fallbackUpdateCount;

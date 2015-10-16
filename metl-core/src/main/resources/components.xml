@@ -485,6 +485,12 @@
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>   
+            <setting id='table.prefix' type='text' required='false'>
+                <name>Table Prefix</name>
+            </setting>
+            <setting id='table.suffix' type='text' required='false'>
+                <name>Table Suffix</name>
+            </setting>                                    
         </settings>
     </component>    
     <component id='Script' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='any' inputOutputModelsMatch='false'>
