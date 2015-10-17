@@ -29,6 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
@@ -44,6 +47,8 @@ import com.vaadin.ui.MenuBar.MenuItem;
 public class TopBar extends HorizontalLayout implements ViewChangeListener {
 
     private static final long serialVersionUID = 1L;
+    
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
     MenuBar menuBar;
 
@@ -86,18 +91,22 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
         Set<Category> categories = menuItemsByCategory.keySet();
         for (Category category : categories) {
             if (!context.getUser().hasPrivilege(category.name())) {
+                log.info("{} does not have access to the {} menu tab", context.getUser(), category.name());
                 continue;
             }
             List<TopBarLink> links = menuItemsByCategory.get(category);
-            if (viewManager.getDefaultView() == null && links.size() > 0) {
-                viewManager.setDefaultView(links.get(0).id());
-            }
+            boolean needDefaultView = viewManager.getDefaultView() == null && links.size() > 0; 
             MenuItem categoryItem = null;
             if (links.size() > 1) {
                 categoryItem = menuBar.addItem(category.name(), null);
                 categoryItem.setCheckable(true);
                 categoryItems.add(categoryItem);
             }
+            
+            if (needDefaultView) {
+                viewManager.setDefaultView(links.get(0).id());
+            }
+            
             for (final TopBarLink menuLink : links) {
                 Command command = new Command() {
 

@@ -36,6 +36,7 @@ public class Group extends AbstractObject {
     }
     
     public Group(String name) {
+        this();
         this.name = name;
     }
 

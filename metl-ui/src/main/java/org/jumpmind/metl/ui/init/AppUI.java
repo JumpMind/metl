@@ -173,9 +173,11 @@ public class AppUI extends UI implements LoginListener {
                 user.setLoginId("admin");
                 appCtx.getConfigurationService().save(user);
                 Group group = new Group("admin");
+                user.getGroups().add(group);
                 appCtx.getConfigurationService().save(group);
                 for (Privilege priv : Privilege.values()) {
                     GroupPrivilege groupPriv = new GroupPrivilege(group.getId(), priv.name());
+                    group.getGroupPrivileges().add(groupPriv);
                     appCtx.getConfigurationService().save(groupPriv);
                 }
                 UserGroup userGroup = new UserGroup(user.getId(), group.getId());
