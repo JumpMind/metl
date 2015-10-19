@@ -20,7 +20,6 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ public class JoinerTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 	@Test
 	@Override
 	public void testStartDefaults() {
-		setupStart(null);
+		setupStart(new SettingsBuilder().build());
 		
 		try {
 			((Joiner) spy).start();
