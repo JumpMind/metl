@@ -54,8 +54,6 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table.ColumnGenerator;
@@ -101,20 +99,8 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
         
         ButtonBar buttonBar = new ButtonBar();
         
-        removeButton = buttonBar.addButton("Remove", Icons.DELETE, new ClickListener() {
-            
-            @Override
-            public void buttonClick(ClickEvent event) {
-                remove();
-            }
-        });
-        cancelButton = buttonBar.addButton("Cancel", Icons.CANCEL, new ClickListener() {
-            
-            @Override
-            public void buttonClick(ClickEvent event) {
-                cancel();
-            }
-        });
+        removeButton = buttonBar.addButton("Remove", Icons.DELETE, event -> remove());
+        cancelButton = buttonBar.addButton("Cancel", Icons.CANCEL, event -> cancel());
         addComponent(buttonBar);
 
         HorizontalLayout header1 = new HorizontalLayout();
@@ -202,8 +188,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
         addComponent(splitPanel);
         setExpandRatio(splitPanel, 1.0f);
 
-        refreshUI(getExecutionData());
-        context.getBackgroundRefresherService().register(this);
+        context.getBackgroundRefresherService().register(this);        
     }
 
     @Override
