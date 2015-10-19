@@ -23,9 +23,14 @@ package org.jumpmind.metl.core.runtime.component;
 import static org.mockito.Mockito.doReturn;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
+import org.jumpmind.metl.core.utils.TestUtils;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -34,16 +39,50 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class RdbmsReaderUnitTest extends AbstractRdbmsComponentTest {
 
+	@Test
 	@Override
 	public void testStartDefaults() {
-		// TODO Auto-generated method stub
-		
+		setupStart(new SettingsBuilder().build());
+		try {
+			((RdbmsReader) spy).start();
+		}
+		catch (Exception e) {
+			Assert.assertTrue(e instanceof MisconfiguredException);
+		}
 	}
 
+	@Test
+	public void testStartDefaultsNoException() {
+		setupStart(new SettingsBuilder().build());
+		properties.setProperty(RdbmsReader.SQL, "select * from dual");
+		
+		((RdbmsReader) spy).start();
+		
+		List<String> expected = new ArrayList<String>();
+		expected.add("select * from dual");
+		
+		TestUtils.assertList(expected, ((RdbmsReader) spy).sqls, false);
+		Assert.assertEquals(-1, ((RdbmsReader) spy).rowsPerMessage);
+		Assert.assertEquals(false, ((RdbmsReader) spy).trimColumns);
+		Assert.assertEquals(false, ((RdbmsReader) spy).matchOnColumnNameOnly);
+	}
+
+	
+	@Test
 	@Override
 	public void testStartWithValues() {
-		// TODO Auto-generated method stub
+		setupStart(new SettingsBuilder().build());
 		
+		properties.setProperty(RdbmsReader.SQL, "select * from dual");
+		properties.setProperty(RdbmsReader.ROWS_PER_MESSAGE, "5");
+		properties.setProperty(RdbmsReader.TRIM_COLUMNS, "true");
+		properties.setProperty(RdbmsReader.MATCH_ON_COLUMN_NAME_ONLY, "true");
+		
+		((RdbmsReader) spy).start();
+		
+		Assert.assertEquals(5, ((RdbmsReader) spy).rowsPerMessage);
+		Assert.assertEquals(true, ((RdbmsReader) spy).trimColumns);
+		Assert.assertEquals(true, ((RdbmsReader) spy).matchOnColumnNameOnly);
 	}
 	
 	@Test
