@@ -27,6 +27,7 @@ import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
+import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.AgentResource;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentName;
@@ -112,11 +113,9 @@ public interface IConfigurationService {
     
     public Agent findAgent(String agentId);
     
-    public List<Agent> findAgentsInFolder(Folder folder);
+    public List<AgentName> findAgentsInFolder(Folder folder);
     
     public List<Agent> findAgentsForHost(String hostName);
-    
-    public List<AgentDeployment> findAgentDeployments();
     
     public List<AgentDeployment> findAgentDeploymentsFor(Flow flow);
     
