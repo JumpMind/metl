@@ -22,6 +22,7 @@ package org.jumpmind.metl.ui.init;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -85,7 +86,7 @@ public class BackgroundRefresherService implements Serializable {
                     }
                 }
             }
-        }, interval);
+        }, new Date(), interval);
     }    
 
     public void register(IBackgroundRefreshable refreshing) {
