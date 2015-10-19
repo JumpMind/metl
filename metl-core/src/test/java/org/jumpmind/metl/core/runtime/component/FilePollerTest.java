@@ -9,30 +9,90 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.tools.ant.DirectoryScanner;
-import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.component.helpers.ComponentBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
+import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.properties.TypedProperties;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+
+
 @RunWith(PowerMockRunner.class)
 public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayList<String>> {
 
+	@Test
 	@Override
 	public void testStartDefaults() {
-		// TODO Auto-generated method stub
+		Resource resource = mock(Resource.class);
+		when(resource.getType()).thenReturn(LocalFile.TYPE);
+		setupStart(new ComponentBuilder().withResource(resource).build());
 		
+		((FilePoller) spy).start();
+		
+		Assert.assertEquals(false,  ((FilePoller) spy).useTriggerFile);
+		Assert.assertEquals(false,  ((FilePoller) spy).recurse);
+		Assert.assertEquals(true,  ((FilePoller) spy).cancelOnNoFiles);
+		Assert.assertEquals(FilePoller.ACTION_NONE,  ((FilePoller) spy).actionOnSuccess);
+		Assert.assertEquals(FilePoller.ACTION_NONE,  ((FilePoller) spy).actionOnError);
+		Assert.assertEquals(FilePoller.SORT_MODIFIED,  ((FilePoller) spy).fileSortOption);
+	}
+	
+	@Test
+	public void testStartDefaultsInvalidResourceType() {
+		Resource resource = mock(Resource.class);
+		when(resource.getType()).thenReturn("test");
+		setupStart(new ComponentBuilder().withResource(resource).build());
+		
+		try {
+			((FilePoller) spy).start();
+		}
+		catch (Exception e) {
+			Assert.assertTrue(e instanceof IllegalStateException);
+		}
 	}
 
+	@Test
 	@Override
 	public void testStartWithValues() {
-		// TODO Auto-generated method stub
+		Resource resource = mock(Resource.class);
+		when(resource.getType()).thenReturn(LocalFile.TYPE);
+		setupStart(new ComponentBuilder().withResource(resource).build());
 		
+		
+		properties.put(FilePoller.SETTING_FILE_PATTERN, "*.jar");
+		properties.put(FilePoller.SETTING_TRIGGER_FILE_PATH, "/trigger");
+		properties.put(FilePoller.SETTING_USE_TRIGGER_FILE, "true");
+		properties.put(FilePoller.SETTING_RECURSE, "true");
+		properties.put(FilePoller.SETTING_CANCEL_ON_NO_FILES, "true");
+		properties.put(FilePoller.SETTING_ACTION_ON_SUCCESS, FilePoller.ACTION_DELETE);
+		properties.put(FilePoller.SETTING_ACTION_ON_ERROR, FilePoller.ACTION_DELETE);
+		properties.put(FilePoller.SETTING_ARCHIVE_ON_ERROR_PATH, "/archive-fail");
+		properties.put(FilePoller.SETTING_ARCHIVE_ON_SUCCESS_PATH, "/archive-success");
+		properties.put(FilePoller.SETTING_MAX_FILES_TO_POLL, "10");
+		properties.put(FilePoller.SETTING_FILE_SORT_ORDER, FilePoller.SORT_NAME);
+		
+		((FilePoller) spy).start();
+		
+		Assert.assertEquals("*.jar",  ((FilePoller) spy).filePattern);
+		Assert.assertEquals("/trigger",  ((FilePoller) spy).triggerFilePath);
+		Assert.assertEquals(true,  ((FilePoller) spy).useTriggerFile);
+		Assert.assertEquals(true,  ((FilePoller) spy).recurse);
+		Assert.assertEquals(true,  ((FilePoller) spy).cancelOnNoFiles);
+		Assert.assertEquals(FilePoller.ACTION_DELETE,  ((FilePoller) spy).actionOnSuccess);
+		Assert.assertEquals(FilePoller.ACTION_DELETE,  ((FilePoller) spy).actionOnError);
+		Assert.assertEquals("/archive-fail",  ((FilePoller) spy).archiveOnErrorPath);
+		Assert.assertEquals("/archive-success",  ((FilePoller) spy).archiveOnSuccessPath);
+		Assert.assertEquals(10,  ((FilePoller) spy).maxFilesToPoll);
+		Assert.assertEquals(FilePoller.SORT_NAME,  ((FilePoller) spy).fileSortOption);
 	}
 	
 	@Test
