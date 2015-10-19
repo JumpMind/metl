@@ -37,6 +37,7 @@ import java.util.Map;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -71,7 +72,7 @@ public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntim
 	
 	@Test
     public void testStartWhenSqlNotSet() {
-        setupStart(null);
+        setupStart(new SettingsBuilder().build());
         if (sqlRequired()) {
             try {
                 properties.setProperty(AbstractRdbmsComponentRuntime.SQL, "");

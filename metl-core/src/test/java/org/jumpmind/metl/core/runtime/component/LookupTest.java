@@ -30,6 +30,8 @@ import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
+import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -37,16 +39,37 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class LookupTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
 
+	@Test
 	@Override
 	public void testStartDefaults() {
-		// TODO Auto-generated method stub
-		
+		setupStart(new SettingsBuilder().build());
+		try {
+			((Lookup) spy).start();
+		}
+		catch (Exception e) {
+			Assert.assertTrue(e instanceof IllegalStateException);
+		}
 	}
 
+	@Test
 	@Override
 	public void testStartWithValues() {
-		// TODO Auto-generated method stub
+		setupStart(new SettingsBuilder().build());
 		
+		properties.put(Lookup.SOURCE_STEP, "source1");
+		properties.put(Lookup.LOOKUP_KEY, MODEL_ATTR_ID_1);
+		properties.put(Lookup.LOOKUP_VALUE, "value");
+		properties.put(Lookup.REPLACEMENT_KEY_ATTRIBUTE, MODEL_ATTR_ID_2);
+		properties.put(Lookup.REPLACEMENT_VALUE_ATTRIBUTE, "value2");
+			
+		((Lookup) spy).start();
+		
+		Assert.assertEquals(false, ((Lookup) spy).lookupInitialized);
+		Assert.assertEquals("source1", ((Lookup) spy).sourceStepId);
+		Assert.assertEquals(MODEL_ATTR_ID_1, ((Lookup) spy).keyAttributeId);
+		Assert.assertEquals("value", ((Lookup) spy).valueAttributeId);
+		Assert.assertEquals(MODEL_ATTR_ID_2, ((Lookup) spy).replacementKeyAttributeId);
+		Assert.assertEquals("value2", ((Lookup) spy).replacementValueAttributeId);
 	}
 	
 	@Test

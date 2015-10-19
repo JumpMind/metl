@@ -34,14 +34,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.metl.core.model.Component;
+import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.Setting;
-import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageAssert;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadAssert;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
 import org.jumpmind.metl.core.utils.TestUtils;
 import org.jumpmind.properties.TypedProperties;
@@ -92,6 +91,7 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 	Map<String, String> flowParametersAsString;
 	Map<String, Serializable> flowParameters;
 	FlowStep flowStep;
+	Flow flow;
 	ExecutionTrackerNoOp eExecutionTracker;
 	TypedProperties properties;
 	
@@ -113,22 +113,29 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 		flowParametersAsString = new HashMap<String, String>();
 		flowParameters = new HashMap<String, Serializable>();
 		flowStep = mock(FlowStep.class);
+		flow = mock(Flow.class);
 		eExecutionTracker = new ExecutionTrackerNoOp();
 		properties = new TypedProperties();
 	}	
 	
-	public void setupStart(List<Setting> settings) {
-		Component component = new Component();
-		component.setSettings(settings);
-		
+	public void setupStart(Component component) {
 		when(context.getFlowStep()).thenReturn(flowStep);
+		when(context.getManipulatedFlow()).thenReturn(flow);
 		when(flowStep.getComponent()).thenReturn(component);
+		when(flow.findFlowStepWithId(Mockito.anyString())).thenReturn(flowStep);
+		
+		component.setInputModel(inputModel);
 		
 	    doReturn(properties).when((AbstractComponentRuntime) spy).getTypedProperties();
 	    doReturn(flowStep).when((AbstractComponentRuntime) spy).getFlowStep();
 	    
 	    doReturn(component).when((AbstractComponentRuntime) spy).getComponent();
 	    ((AbstractComponentRuntime) spy).setContext(context);
+	}
+	public void setupStart(List<Setting> settings) {
+		Component component = new Component();
+		component.setSettings(settings);
+		setupStart(component);
 	}
 
 	public void setupHandle() {

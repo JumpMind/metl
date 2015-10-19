@@ -3,30 +3,69 @@ package org.jumpmind.metl.core.runtime.component;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.ModelAttributeBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
+import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
 public class SorterTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
 
-	
+	@Test
 	@Override
 	public void testStartDefaults() {
-		// TODO Auto-generated method stub
-		
+		setupStart(new SettingsBuilder().build());
+		try {
+			((Sorter) spy).start();
+		}
+		catch (Exception e) {
+			Assert.assertTrue(e instanceof IllegalStateException);
+		}
 	}
 
+	@Test
+	public void testStartIncorrectEntityAttribute() {
+		properties.put(Sorter.SORT_ATTRIBUTE, MODEL_ATTR_ID_1);
+		
+		setupStart(new SettingsBuilder().build());
+		try {
+			((Sorter) spy).start();
+		}
+		catch (Exception e) {
+			Assert.assertTrue(e instanceof IllegalStateException);
+		}
+	}
+	
+	@Test
+	public void testStartAttributeMissingFromModel() {
+		setupStart(new SettingsBuilder().build());
+				
+		properties.put(Sorter.SORT_ATTRIBUTE, "ENTITY1." + MODEL_ATTR_ID_1);
+		
+		Mockito.when(inputModel.getAttributeByName("ENTITY1", MODEL_ATTR_ID_1))
+			.thenReturn(new ModelAttributeBuilder().withId(MODEL_ATTR_ID_1).build());
+		
+		((Sorter) spy).start();
+		Assert.assertEquals(MODEL_ATTR_ID_1, ((Sorter) spy).sortAttributeId);
+	}
+
+	
 	@Override
 	public void testStartWithValues() {
-		// TODO Auto-generated method stub
+		setupStart(new SettingsBuilder()
+			.withSetting(Sorter.SORT_ATTRIBUTE, MODEL_ATTR_ID_1)
+			.withSetting(Sorter.ROWS_PER_MESSAGE, "5").build());
+		((Sorter) spy).start();
+		
 		
 	}
 	

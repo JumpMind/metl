@@ -27,13 +27,16 @@ import java.util.Map;
 
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.component.helpers.ComponentAttributeSettingsBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.ComponentBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -49,15 +52,26 @@ public class TransformerTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 	public static String TRANSFORM_EXP = "transform logic";
 	public static String TRANSFORM_RESULT = "transformed";
 	
+	@Test
 	@Override
 	public void testStartDefaults() {
-		// TODO Auto-generated method stub
+		setupStart(new ComponentBuilder().withAttributeSettings(
+				new ComponentAttributeSettingsBuilder().build()).build());
 		
+		((Transformer) spy).start();
 	}
 
+	@Test
 	@Override
 	public void testStartWithValues() {
-		// TODO Auto-generated method stub
+		setupStart(new ComponentBuilder().withAttributeSettings(
+			new ComponentAttributeSettingsBuilder()
+			.withSetting(MODEL_ATTR_ID_1, "Component1", Transformer.TRANSFORM_EXPRESSION, "value == 'A'")
+			.build()).build());
+		
+		((Transformer) spy).start();
+		Assert.assertTrue(((Transformer) spy).transformsByAttributeId.containsKey(MODEL_ATTR_ID_1));
+		Assert.assertEquals("value == 'A'", ((Transformer) spy).transformsByAttributeId.get(MODEL_ATTR_ID_1));
 		
 	}
 	
