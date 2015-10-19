@@ -24,29 +24,41 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+
+
 @RunWith(PowerMockRunner.class)
 public class DeduperTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
 
+	@Test
 	@Override
 	public void testStartDefaults() {
-		// TODO Auto-generated method stub
+		setupStart(new SettingsBuilder().build());
+		((Deduper) spy).start();
 		
+		Assert.assertEquals(10000, ((Deduper) spy).rowsPerMessage);
 	}
 
+	@Test
 	@Override
 	public void testStartWithValues() {
-		// TODO Auto-generated method stub
+		setupStart(new SettingsBuilder()
+				.withSetting(Deduper.ROWS_PER_MESSAGE, "5").build());
 		
+		((Deduper) spy).start();
+		
+		Assert.assertEquals(5, ((Deduper) spy).rowsPerMessage);
 	}
 	
 	@Test

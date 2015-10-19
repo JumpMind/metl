@@ -1,6 +1,7 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.mockito.Mockito.mock;
+
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
@@ -14,6 +15,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,16 +29,44 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport<ArrayList<S
 
 	public static final String COMMAND_OUTPUT = "command output";
 	
+	@Test
 	@Override
 	public void testStartDefaults() {
-		// TODO Auto-generated method stub
-		
+		setupStart(new SettingsBuilder().build());
+		try {
+			((Execute) spy).start();
+		}
+		catch (Exception e) {
+			Assert.assertTrue(e instanceof IllegalStateException);
+		}
 	}
 
+	@Test
 	@Override
 	public void testStartWithValues() {
-		// TODO Auto-generated method stub
+		setupStart(new SettingsBuilder()
+				.withSetting(Execute.COMMAND, "top")
+				.withSetting(Execute.CONTINUE_ON_ERROR, "true")
+				.withSetting(Execute.SUCCESS_CODE, "1").build());
 		
+		((Execute) spy).start();
+		
+		String[] actual = ((Execute) spy).commands;
+		String[] expected = new String[] { "top" };
+		
+		Assert.assertArrayEquals(expected, actual);
+		Assert.assertTrue(((Execute) spy).continueOnError);
+		Assert.assertEquals(1, ((Execute) spy).successCode);
+	}
+	
+	@Test
+	public void testStartDetaultsWithCommand() {
+		setupStart(new SettingsBuilder()
+				.withSetting(Execute.COMMAND, "top").build());
+		((Execute) spy).start();
+		
+		Assert.assertFalse(((Execute) spy).continueOnError);
+		Assert.assertEquals(0, ((Execute) spy).successCode);
 	}
 	
 	@Test
