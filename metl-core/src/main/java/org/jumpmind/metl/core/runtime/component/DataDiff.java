@@ -1,6 +1,9 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Types;
 import java.util.List;
 import java.util.UUID;
@@ -42,10 +45,10 @@ public class DataDiff extends AbstractComponentRuntime {
 
     IDatabasePlatform databasePlatform;
 
-    File databaseFile;
-
     RdbmsWriter databaseWriter;
-    
+
+    String databaseName;
+
     @Override
     protected void start() {
         TypedProperties properties = getTypedProperties();
@@ -145,17 +148,26 @@ public class DataDiff extends AbstractComponentRuntime {
             reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
 
         }
-        
+
         ResettableBasicDataSource ds = databasePlatform.getDataSource();
         ds.close();
-        
+
         databasePlatform = null;
-        
-        if (databaseFile != null) {
-            log(LogLevel.INFO, "Deleting database file: %s", databaseFile);           
-            FileUtils.deleteQuietly(databaseFile);
+
+        if (!inMemoryCompare) {
+            try {
+                Files.list(Paths.get(System.getProperty("h2.baseDir"))).filter(path -> path.toFile().getName().startsWith(databaseName))
+                        .forEach(path -> deleteDatabaseFile(path.toFile()));
+            } catch (IOException e) {
+                log.warn("Failed to delete file", e);
+            }
         }
 
+    }
+    
+    protected void deleteDatabaseFile(File file) {
+        log(LogLevel.INFO, "Deleting database file: %s", file.getName());
+        FileUtils.deleteQuietly(file);
     }
 
     protected void appendColumns(StringBuilder sql, String prefix, ModelEntity entity) {
@@ -193,12 +205,11 @@ public class DataDiff extends AbstractComponentRuntime {
         if (databasePlatform == null) {
             ResettableBasicDataSource ds = new ResettableBasicDataSource();
             ds.setDriverClassName(Driver.class.getName());
-            String uuid = UUID.randomUUID().toString();
+            databaseName = UUID.randomUUID().toString();
             if (inMemoryCompare) {
-                ds.setUrl("jdbc:h2:mem:" + uuid);
+                ds.setUrl("jdbc:h2:mem:" + databaseName);
             } else {
-                databaseFile = new File(System.getProperty("h2.baseDir"), uuid + ".h2.db");
-                ds.setUrl("jdbc:h2:file:./" + uuid);
+                ds.setUrl("jdbc:h2:file:./" + databaseName);
             }
             databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(ds, new SqlTemplateSettings(), true);
 
