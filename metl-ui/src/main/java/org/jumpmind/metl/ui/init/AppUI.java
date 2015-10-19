@@ -85,7 +85,7 @@ public class AppUI extends UI implements LoginListener {
 	@Override
     protected void init(VaadinRequest request) {
         
-        setPollInterval(5000);
+        setPollInterval(1500);
         
         WebApplicationContext ctx = getWebApplicationContext();
         

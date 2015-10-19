@@ -65,7 +65,7 @@ public class MailServerPanel extends VerticalLayout implements IUiPanel {
         final GlobalSetting hostNameSetting = getGlobalSetting(MailSession.SETTING_HOST_NAME, "localhost");
         final GlobalSetting transportSetting = getGlobalSetting(MailSession.SETTING_TRANSPORT, "smtp");
         final GlobalSetting portSetting = getGlobalSetting(MailSession.SETTING_PORT_NUMBER, "25");
-        final GlobalSetting fromSetting = getGlobalSetting(MailSession.SETTING_FROM, "symmetricis@localhost");
+        final GlobalSetting fromSetting = getGlobalSetting(MailSession.SETTING_FROM, "metl@localhost");
         final GlobalSetting usernameSetting = getGlobalSetting(MailSession.SETTING_USERNAME, "");
         final GlobalSetting passwordSetting = getGlobalSetting(MailSession.SETTING_PASSWORD, "");
         final GlobalSetting useTlsSetting = getGlobalSetting(MailSession.SETTING_USE_TLS, "false");
