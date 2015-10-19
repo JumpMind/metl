@@ -26,32 +26,56 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.component.helpers.ComponentAttributeSettingsBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.ComponentBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.ModelBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
+
+
 
 @RunWith(PowerMockRunner.class)
 public class MappingTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
 
 	public static String MAPPING_TARGET_1 = "mapping1";
 	
+	@Test
 	@Override
 	public void testStartDefaults() {
-		// TODO Auto-generated method stub
-		
+		inputModel = null;
+		outputModel = null;
+		setupStart(new SettingsBuilder().build());
+		try {
+			((Mapping) spy).start();
+		}
+		catch (Exception e) {
+			Assert.assertTrue(e instanceof IllegalStateException);
+		}
 	}
 
+	@Test
 	@Override
 	public void testStartWithValues() {
-		// TODO Auto-generated method stub
+		inputModel = new ModelBuilder().build();
+		outputModel = new ModelBuilder().build();
 		
+		setupStart(new ComponentBuilder().withAttributeSettings(new ComponentAttributeSettingsBuilder()
+				.withSetting(MODEL_ATTR_ID_1, "Component1", Mapping.ATTRIBUTE_MAPS_TO, "mappedValue")
+				.build()).build());
+		
+		((Mapping) spy).start();
+		Assert.assertTrue(((Mapping) spy).attrToAttrMap.containsKey(MODEL_ATTR_ID_1));
+		Assert.assertTrue(((Mapping) spy).attrToAttrMap.get(MODEL_ATTR_ID_1).contains("mappedValue"));
 	}
 	
 	@Test

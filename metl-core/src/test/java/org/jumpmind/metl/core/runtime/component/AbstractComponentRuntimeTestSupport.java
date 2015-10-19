@@ -125,6 +125,7 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 		when(flow.findFlowStepWithId(Mockito.anyString())).thenReturn(flowStep);
 		
 		component.setInputModel(inputModel);
+		component.setOutputModel(outputModel);
 		
 	    doReturn(properties).when((AbstractComponentRuntime) spy).getTypedProperties();
 	    doReturn(flowStep).when((AbstractComponentRuntime) spy).getFlowStep();
