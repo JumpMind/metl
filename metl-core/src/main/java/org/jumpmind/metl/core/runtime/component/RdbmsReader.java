@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -147,8 +149,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                             + "or set 'useCursors=true' on the JDBC URL.)"
                             + "Query column = " + i);
                 }
-                String attributeId = getAttributeId(tableName, columnName);
-                attributeIds.add(attributeId);
+                attributeIds.add(getAttributeId(tableName, columnName));
             }
         }
 
@@ -175,11 +176,11 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     private String getAttributeId(String tableName, String columnName) {
         if (getOutputModel() != null) {
             ModelAttribute modelAttribute = getOutputModel().getAttributeByName(tableName, columnName);
-            if (modelAttribute == null) {
-                throw new SqlException("Table and Column not found in output model and not specified via hint.  " + "Table Name = "
-                        + tableName + " Column Name = " + columnName);
-            }
-            return modelAttribute.getId();
+            if (modelAttribute != null) {
+                return modelAttribute.getId();
+            } else {
+                return null;
+            }            
         } else {
             throw new SqlException("No output model was specified for the db reader component.  An output model is required.");
         }
@@ -375,15 +376,17 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
 
-
                 EntityData rowData = new EntityData();
                 rowData.setChangeType(entityChangeType);
                 for (int i = 1; i <= meta.getColumnCount(); i++) {
-                    Object value = JdbcUtils.getResultSetValue(rs, i);
-                    if (trimColumns && value instanceof String) {
-                        value = value.toString().trim();
+                    String attributeId = attributeIds.get(i - 1);
+                    if (isNotBlank(attributeId)) {
+                        Object value = JdbcUtils.getResultSetValue(rs, i);
+                        if (trimColumns && value instanceof String) {
+                            value = value.toString().trim();
+                        }
+                        rowData.put(attributeId, value);
                     }
-                    rowData.put(attributeIds.get(i - 1), value);
                 }
                 payload.add(rowData);
                 if (context.getDeployment() != null && context.getDeployment().asLogLevel() == LogLevel.DEBUG) {
