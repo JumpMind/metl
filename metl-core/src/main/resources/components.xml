@@ -581,7 +581,11 @@
                     <choice>PER ENTITY</choice>
                 </choices>
             </setting>
-            <setting id='sql' type='multiline_text' required='true'>
+            <setting id='sql.file' type='text'>
+                <name>File</name>
+                <description></description>
+            </setting>                                               
+            <setting id='sql' type='multiline_text'>
                 <name>Sql</name>
                 <description></description>
             </setting>                                   

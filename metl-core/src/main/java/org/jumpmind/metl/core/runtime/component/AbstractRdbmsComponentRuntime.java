@@ -24,6 +24,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -55,7 +56,7 @@ abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRun
         return new NamedParameterJdbcTemplate(dataSource);
     }
 
-    protected List<String> getSqlStatements() {
+    protected List<String> getSqlStatements(boolean required) {
         TypedProperties properties = getTypedProperties();
         String script = properties.get(SQL);
         if (isNotBlank(script)) {
@@ -71,8 +72,10 @@ abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRun
             } finally {
                 IOUtils.closeQuietly(scriptReader);
             }
-        } else {
+        } else if (required) {
             throw new MisconfiguredException("Please configure the SQL for %s", componentDefinition.getName());
+        } else {
+            return Collections.emptyList();
         }
     }
     

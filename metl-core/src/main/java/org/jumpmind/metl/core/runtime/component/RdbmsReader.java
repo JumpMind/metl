@@ -69,7 +69,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     @Override
     protected void start() {
         TypedProperties properties = getTypedProperties();
-        sqls = getSqlStatements();
+        sqls = getSqlStatements(true);
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         trimColumns = properties.is(TRIM_COLUMNS);
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
