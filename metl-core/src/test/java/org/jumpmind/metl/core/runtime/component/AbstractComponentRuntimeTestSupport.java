@@ -109,6 +109,7 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 		inputModel = mock(Model.class);
 		outputModel = mock(Model.class);
 		component = mock(Component.class);
+		
 		componentStatistics = new ComponentStatistics();
 		flowParametersAsString = new HashMap<String, String>();
 		flowParameters = new HashMap<String, Serializable>();
