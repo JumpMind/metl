@@ -40,11 +40,11 @@ import org.jumpmind.util.FormatUtils;
 public class TextFileWriter extends AbstractComponentRuntime {
 
     public static final String TYPE = "Text File Writer";
-    
+
     public final static String DEFAULT_ENCODING = "UTF-8";
-    
+
     public final static String TEXTFILEWRITER_ENCODING = "textfilewriter.encoding";
-    
+
     public final static String TEXTFILEWRITER_RELATIVE_PATH = "textfilewriter.relative.path";
 
     public static final String TEXTFILEWRITER_MUST_EXIST = "textfilewriter.must.exist";
@@ -54,21 +54,22 @@ public class TextFileWriter extends AbstractComponentRuntime {
     public static final String TEXTFILEWRITER_TEXT_LINE_TERMINATOR = "textfilewriter.text.line.terminator";
 
     String encoding;
-    
+
     String relativePathAndFile;
-    
+
     boolean mustExist;
-    
+
     boolean append;
 
     String lineTerminator;
-    
+
     BufferedWriter bufferedWriter = null;
 
     @Override
-    protected void start() {        
+    protected void start() {
         TypedProperties properties = getTypedProperties();
-        relativePathAndFile = FormatUtils.replaceTokens(properties.get(TEXTFILEWRITER_RELATIVE_PATH), context.getFlowParametersAsString(), true);
+        relativePathAndFile = FormatUtils.replaceTokens(properties.get(TEXTFILEWRITER_RELATIVE_PATH), context.getFlowParametersAsString(),
+                true);
         mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
         append = properties.is(TEXTFILEWRITER_APPEND);
         lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
@@ -77,55 +78,57 @@ public class TextFileWriter extends AbstractComponentRuntime {
             lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
         }
     }
-    
+
     @Override
     public boolean supportsStartupMessages() {
         return false;
     }
 
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (getResourceRuntime() == null) {
             throw new IllegalStateException("The msgTarget resource has not been configured.  Please choose a resource.");
         }
-        
+
         if (inputMessage.getHeader().getSequenceNumber() == 1) {
             initStreamAndWriter();
         }
-        
-        ArrayList<String> recs = inputMessage.getPayload();
         try {
-            for (String rec : recs) {
-                bufferedWriter.write(rec);
-                if (lineTerminator != null) {
-                    bufferedWriter.write(lineTerminator);
-                } else {
-                    bufferedWriter.newLine();
+            Object payload = inputMessage.getPayload();
+            if (payload instanceof ArrayList) {
+                ArrayList<?> recs = (ArrayList<?>) payload;
+                for (Object rec : recs) {
+                    bufferedWriter.write(rec != null ? rec.toString() : "");
+                    if (lineTerminator != null) {
+                        bufferedWriter.write(lineTerminator);
+                    } else {
+                        bufferedWriter.newLine();
+                    }
                 }
+                bufferedWriter.flush();
+
+            } else if (payload instanceof String) {
+                bufferedWriter.write((String) payload);
+            } else {
+                bufferedWriter.write("");
             }
-            bufferedWriter.flush();
         } catch (IOException e) {
             throw new IoException(e);
         }
-       
-        if (callback != null) {
+        
+        if (unitOfWorkBoundaryReached && callback != null) {
+            close();
             callback.sendMessage(null, "{\"status\":\"success\"}", unitOfWorkBoundaryReached);
         }
-    }    
-
-    @Override
-    public void stop() {
-        close();
-        super.stop();
     }
-    
+
     private void initStreamAndWriter() {
         IStreamable streamable = (IStreamable) getResourceReference();
         if (!append && streamable.supportsDelete()) {
             streamable.delete(relativePathAndFile);
         }
-        log(LogLevel.INFO,  String.format("Writing text file to %s", streamable.toString()));
-        bufferedWriter = initializeWriter(streamable.getOutputStream(relativePathAndFile, mustExist));        
+        log(LogLevel.INFO, String.format("Writing text file to %s", streamable.toString()));
+        bufferedWriter = initializeWriter(streamable.getOutputStream(relativePathAndFile, mustExist));
     }
 
     private BufferedWriter initializeWriter(OutputStream stream) {
