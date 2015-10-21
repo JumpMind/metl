@@ -4,6 +4,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.util.List;
 
+import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
@@ -18,41 +19,44 @@ public class CallFlowFlowManipulator implements IFlowManipulator {
 
     @Override
     public Flow manipulate(Flow flow, FlowStep flowStep, IConfigurationService configurationService) {
-        String flowId = flowStep.getComponent().get(CallFlow.SETTING_FLOW_ID);
-        if (isBlank(flowId)) {
-            throw new MisconfiguredException(
-                    "When using the 'Call Flow' component you must specify the flow you want to call.  It is currently blank");
-        }
 
-        Flow flowToCall = configurationService.findFlow(flowId);
+        Component comp = flowStep.getComponent();
+        if (comp.getBoolean(AbstractComponentRuntime.ENABLED, true)) {
+            String flowId = comp.get(CallFlow.SETTING_FLOW_ID);
+            if (isBlank(flowId)) {
+                throw new MisconfiguredException(
+                        "When using the 'Call Flow' component you must specify the flow you want to call.  It is currently blank");
+            }
 
-        List<FlowStep> finalSteps = flow.getFlowSteps();
-        List<FlowStepLink> finalLinks = flow.getFlowStepLinks();
+            Flow flowToCall = configurationService.findFlow(flowId);
 
-        // remove source links to this step
-        List<FlowStepLink> beforeLinks = flow.findFlowStepLinksWithTarget(flowStep.getId());
-        finalLinks.removeAll(beforeLinks);
+            List<FlowStep> finalSteps = flow.getFlowSteps();
+            List<FlowStepLink> finalLinks = flow.getFlowStepLinks();
 
-        List<FlowStep> flowToCallStartSteps = flowToCall.findStartSteps();
+            // remove source links to this step
+            List<FlowStepLink> beforeLinks = flow.findFlowStepLinksWithTarget(flowStep.getId());
+            finalLinks.removeAll(beforeLinks);
 
-        List<FlowStep> flowToCallFinalSteps = flowToCall.findFinalSteps();
+            List<FlowStep> flowToCallStartSteps = flowToCall.findStartSteps();
 
-        // Add links and steps from the callable flow to this flow
-        finalSteps.addAll(flowToCall.getFlowSteps());
-        finalLinks.addAll(flowToCall.getFlowStepLinks());
+            List<FlowStep> flowToCallFinalSteps = flowToCall.findFinalSteps();
 
-        // Add links from source steps to this flow's startup steps
-        for (FlowStep flowToCallStartStep : flowToCallStartSteps) {
-            for (FlowStepLink beforeLink : beforeLinks) {
-                finalLinks.add(new FlowStepLink(beforeLink.getSourceStepId(), flowToCallStartStep.getId()));
+            // Add links and steps from the callable flow to this flow
+            finalSteps.addAll(flowToCall.getFlowSteps());
+            finalLinks.addAll(flowToCall.getFlowStepLinks());
+
+            // Add links from source steps to this flow's startup steps
+            for (FlowStep flowToCallStartStep : flowToCallStartSteps) {
+                for (FlowStepLink beforeLink : beforeLinks) {
+                    finalLinks.add(new FlowStepLink(beforeLink.getSourceStepId(), flowToCallStartStep.getId()));
+                }
+            }
+
+            // Add links from last steps to the call flow step
+            for (FlowStep flowToCallFinalStep : flowToCallFinalSteps) {
+                finalLinks.add(new FlowStepLink(flowToCallFinalStep.getId(), flowStep.getId()));
             }
         }
-
-        // Add links from last steps to the call flow step
-        for (FlowStep flowToCallFinalStep : flowToCallFinalSteps) {
-            finalLinks.add(new FlowStepLink(flowToCallFinalStep.getId(), flowStep.getId()));
-        }
-
         return flow;
     }
 
