@@ -81,7 +81,7 @@ public class Transformer extends AbstractComponentRuntime {
                 ModelAttribute attribute = inputModel.getAttributeById(attributeId);
                 if (attribute != null) {
                     ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
-                    if (!processedEntities.contains(entity)) {
+                    if (entity != null && !processedEntities.contains(entity)) {
                         List<ModelAttribute> attributes = entity.getModelAttributes();
                         for (ModelAttribute modelAttribute : attributes) {
                             attributeIds.add(modelAttribute.getId());
