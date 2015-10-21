@@ -104,7 +104,8 @@ public class Mapping extends AbstractComponentRuntime {
         ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
 
         for (EntityData inputRow : inputRows) {
-            EntityData outputRow = new EntityData();            
+            EntityData outputRow = new EntityData();    
+            outputRow.setChangeType(inputRow.getChangeType());
             
             for (Entry<String, Object> attrEntry : inputRow.entrySet()) {
                 Set<String> newAttrIds = attrToAttrMap.get(attrEntry.getKey());

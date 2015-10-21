@@ -93,7 +93,7 @@ public class DataDiff extends AbstractComponentRuntime {
                     if (secondPk) {
                         addSql.append(" and ");
                         delSql.append(" and ");
-                        delSql.append(" and ");
+                        chgSql.append(" and ");
                     }
                     addSql.append("curr.").append(attribute.getName()).append("=").append("orig.").append(attribute.getName());
                     delSql.append("curr.").append(attribute.getName()).append("=").append("orig.").append(attribute.getName());
@@ -123,6 +123,10 @@ public class DataDiff extends AbstractComponentRuntime {
                     chgSql.append("curr.").append(attribute.getName()).append(" != ").append("orig.").append(attribute.getName());
                     secondCol = true;
                 }
+            }
+            
+            if (entity.hasOnlyPrimaryKeys()) {
+                chgSql.append(" 1=0 ");
             }
 
             log(LogLevel.INFO, "Generated diff sql for ADD: %s", addSql);
