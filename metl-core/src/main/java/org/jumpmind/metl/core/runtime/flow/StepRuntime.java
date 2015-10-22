@@ -91,6 +91,8 @@ public class StepRuntime implements Runnable {
 
     Map<String, Boolean> sourceStepRuntimeUnitOfWorkReceived;
 
+    Set<String> targetStepRuntimeUnitOfWorkSent;
+
     ComponentContext componentContext;
 
     IComponentRuntimeFactory componentFactory;
@@ -111,6 +113,7 @@ public class StepRuntime implements Runnable {
         int capacity = componentContext.getFlowStep().getComponent().getInt(AbstractComponentRuntime.INBOUND_QUEUE_CAPACITY, 1000);
         this.inQueue = new LinkedBlockingQueue<Message>(capacity);
         this.sourceStepRuntimeUnitOfWorkReceived = new HashMap<String, Boolean>();
+        this.targetStepRuntimeUnitOfWorkSent = new HashSet<String>();
         this.componentFactory = componentFactory;
         this.componentDefintion = componentFactory.getComonentDefinition(getComponentType());
     }
@@ -246,6 +249,10 @@ public class StepRuntime implements Runnable {
             target.setCurrentInputMessage(threadNumber, inputMessage);
             componentRuntime.handle(inputMessage, target, unitOfWorkBoundaryReached);
 
+            if (unitOfWorkBoundaryReached) {
+            	verifyAndSendLastMessageToTargets(target);
+            }
+            
             /*
              * Detect shutdown condition
              */
@@ -281,6 +288,18 @@ public class StepRuntime implements Runnable {
         }
     }
 
+    private void verifyAndSendLastMessageToTargets(ISendMessageCallback target) {
+    	for (StepRuntime targetRuntime : targetStepRuntimes) {
+    		if (!targetStepRuntimeUnitOfWorkSent.contains(targetRuntime.getComponentContext().getFlowStep().getId())) {
+    			log.info("Automatically sending a last unit of work message from " + componentContext.getFlowStep().getComponent().getName() + 
+    					" to " + targetRuntime.getComponentContext().getFlowStep().getComponent().getName() + 
+    					" because one was received but not sent forward." );
+    			target.sendControlMessage();
+    		}
+    		
+    	}
+    }
+    
     private boolean calculateUnitOfWorkLastMessage(Message inputMessage) {
         boolean lastMessage = true;
         if (inputMessage.getHeader().isUnitOfWorkLastMessage()) {
@@ -543,6 +562,9 @@ public class StepRuntime implements Runnable {
                                     + targetRuntime.getComponentContext().getFlowStep().getName());
                         }
                         targetRuntime.queue(message);
+                        if (message.getHeader().isUnitOfWorkLastMessage()) {
+                        	targetStepRuntimeUnitOfWorkSent.add(targetRuntime.getComponentContext().getFlowStep().getId());
+                        }
                     } catch (Exception e) {
                         if (e instanceof RuntimeException) {
                             throw (RuntimeException) e;
