@@ -204,7 +204,7 @@ public class TableColumnSelectWindow extends ResizableWindow {
 	protected void addCatalogsToResource(Resource resource) {
 		Datasource dataSourceResource = (Datasource) context.getResourceFactory().create(resource, null);
 		DataSource dataSource = (DataSource) dataSourceResource.reference();
-		IDatabasePlatform platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), true);
+		IDatabasePlatform platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), true, false);
 		for (String catalogName : platform.getDdlReader().getCatalogNames()) {
 			Catalog catalog = new Catalog(catalogName);
 			addItem(catalog, platform, catalog.getName(), FontAwesome.CUBES, resource, true);

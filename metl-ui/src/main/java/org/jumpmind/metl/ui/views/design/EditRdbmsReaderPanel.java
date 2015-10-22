@@ -78,7 +78,7 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
             resource.put(BasicDataSourcePropertyConstants.DB_POOL_MIN_IDLE, "2");
             Datasource dataSourceResource = (Datasource) context.getResourceFactory().create(resource, null);
             DataSource dataSource = dataSourceResource.reference();
-            platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), false);
+            platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), false, false);
 
             queryPanel = new QueryPanel(new IDb() {
 

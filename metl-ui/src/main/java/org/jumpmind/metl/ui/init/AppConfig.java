@@ -176,7 +176,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     public IDatabasePlatform configDatabasePlatform() {
         if (databasePlatform == null) {
             databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(
-                    configDataSource(), new SqlTemplateSettings(), true);
+                    configDataSource(), new SqlTemplateSettings(), true, false);
         }
         return databasePlatform;
     }

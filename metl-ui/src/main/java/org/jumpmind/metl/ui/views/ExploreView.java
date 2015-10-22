@@ -116,7 +116,7 @@ public class ExploreView extends VerticalLayout implements View {
             if (platform == null) {                
                 DataSource dataSource = resource.reference();
                 platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource,
-                        new SqlTemplateSettings(), false);
+                        new SqlTemplateSettings(), false, false);
             }
             return platform;
         }

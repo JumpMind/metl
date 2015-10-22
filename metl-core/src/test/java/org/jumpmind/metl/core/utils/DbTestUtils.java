@@ -52,7 +52,7 @@ abstract public class DbTestUtils {
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_PASSWORD, "jumpmind");
         DataSource ds = BasicDataSourceFactory.create(properties);
         return JdbcDatabasePlatformFactory.createNewPlatformInstance(ds, new SqlTemplateSettings(),
-                false);
+                false, false);
     }
 
 }

@@ -15,10 +15,10 @@ import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -88,6 +88,7 @@ public class XmlReader extends AbstractComponentRuntime {
 
 
         for (String file : files) {
+            log(LogLevel.INFO, "Reading %s", file);
             Map<String, Serializable> headers = new HashMap<>();
             headers.put("source.file.path", file);
             File xmlFile = null;

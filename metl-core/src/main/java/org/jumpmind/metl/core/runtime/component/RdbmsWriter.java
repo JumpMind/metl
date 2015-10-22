@@ -173,7 +173,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                 }
 
                 DataSource dataSource = (DataSource) getResourceReference();
-                databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), quoteIdentifiers);
+                databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), quoteIdentifiers, false);
             }
 
             if (targetTables == null) {
