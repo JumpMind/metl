@@ -231,8 +231,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
     @Override
     public ProjectVersion findProjectVersion(String projectVersionId) {
-        ProjectVersion projectVersion = new ProjectVersion(projectVersionId);
-        refresh(projectVersion);
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", projectVersionId);
+        ProjectVersion projectVersion = 
+        findOne(ProjectVersion.class, params);
+        if (projectVersion != null) {
+            refresh(projectVersion);
+        }
         return projectVersion;
     }
 
