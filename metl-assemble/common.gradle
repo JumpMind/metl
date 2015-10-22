@@ -23,6 +23,20 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
         includes(["**/*.java", "**/*.properties", "**/*.xml"])
     }
     
+    repositories {
+        // uncomment this if you want to use your local maven repository to test undelivered
+        /// changes (like symmetricds changes)
+        //mavenLocal()
+        mavenCentral()        
+        maven { url "http://maven.vaadin.com/vaadin-addons" }
+        maven { url "http://maven.jumpmind.com/repo" }
+        maven { url "http://repo.reficio.org/maven" }
+        maven { url "https://repository.jboss.org/nexus/content/repositories/deprecated" }
+        maven { url "http://www.soapui.org/repository/maven2" }
+        maven { url "https://github.com/santhosh-tekuri/maven-repository/raw/master" }
+        jcenter()        
+    }       
+    
     configurations { deployerJars }
     configurations { testArtifacts.extendsFrom testRuntime }
 
@@ -67,18 +81,6 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
         ignoreFailures true
     }
 
-    repositories {
-        mavenLocal()
-        mavenCentral()        
-        maven { url "http://maven.vaadin.com/vaadin-addons" }
-        maven { url "http://maven.jumpmind.com/repo" }
-        maven { url "http://repo.reficio.org/maven" }
-        maven { url "https://repository.jboss.org/nexus/content/repositories/deprecated" }
-        maven { url "http://www.soapui.org/repository/maven2" }
-        maven { url "https://github.com/santhosh-tekuri/maven-repository/raw/master" }
-        jcenter()        
-    }
-    
     eclipse {
         classpath {
             downloadSources = true
