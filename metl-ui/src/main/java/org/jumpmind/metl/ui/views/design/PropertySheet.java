@@ -511,6 +511,12 @@ public class PropertySheet extends Panel {
                         });
                         formLayout.addComponent(combo);
                     }
+                    break;       
+                case STREAMABLE_RESOURCE:
+                    formLayout.addComponent(createResourceCombo(definition, obj, ResourceCategory.STREAMABLE));
+                    break;
+                case DATASOURCE_RESOURCE:
+                    formLayout.addComponent(createResourceCombo(definition, obj, ResourceCategory.DATASOURCE));
                     break;                    
                 case ENTITY_COLUMN:
                     if (component != null) {
@@ -594,7 +600,30 @@ public class PropertySheet extends Panel {
 
             }
         }
+    }
+    
+    protected AbstractSelect createResourceCombo(XMLSetting definition, AbstractObjectWithSettings obj, ResourceCategory category) {
+        FlowStep step = (FlowStep) value;
+        String projectVersionId = step.getComponent().getProjectVersionId();
+        final AbstractSelect combo = new ComboBox(definition.getName());
+        combo.setImmediate(true);
+        combo.setDescription(definition.getDescription());
+        combo.setNullSelectionAllowed(false);
+        List<String> types = resourceFactory.getResourceTypes(category);
+        if (types != null) {
+            List<Resource> resources = configurationService.findResourcesByTypes(projectVersionId,
+                    types.toArray(new String[types.size()]));
+            if (resources != null) {
+                for (Resource resource : resources) {
+                    combo.addItem(resource.getId());
+                    combo.setItemCaption(resource.getId(), resource.getName());
+                }
 
+                combo.setValue(obj.get(definition.getId()));
+            }
+        }
+        combo.addValueChangeListener(event->saveSetting(definition.getId(), (String) combo.getValue(), obj));
+        return combo;
     }
 
     protected void saveSetting(String key, String text, AbstractObjectWithSettings obj) {

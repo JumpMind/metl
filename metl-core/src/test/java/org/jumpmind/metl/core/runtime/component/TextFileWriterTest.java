@@ -28,7 +28,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
@@ -49,6 +51,7 @@ import org.junit.Test;
 public class TextFileWriterTest {
 
     private static IResourceRuntime resourceRuntime;
+    private static Map<String, IResourceRuntime> deployedResources;
     private static FlowStep writerFlowStep;
     private static final String FILE_PATH = "build/files/";
     private static final String FILE_NAME = "text_test_writer.txt";
@@ -57,7 +60,9 @@ public class TextFileWriterTest {
     public static void setup() throws Exception {
         writerFlowStep = createWriterFlowStep();
         Resource resource = writerFlowStep.getComponent().getResource();
-        resourceRuntime = new ResourceFactory().create(resource, null);    
+        deployedResources = new HashMap<>();
+        resourceRuntime = new ResourceFactory().create(resource, null);
+        deployedResources.put(resource.getId(), resourceRuntime);
     }
 
     @After
@@ -67,7 +72,7 @@ public class TextFileWriterTest {
     @Test
     public void testTextWriterMultipleRowsPerMessage() throws Exception {
         TextFileWriter writer = new TextFileWriter();
-        writer.start(0, new ComponentContext(null, writerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
+        writer.start(0, new ComponentContext(null, writerFlowStep, null, new ExecutionTrackerNoOp(), deployedResources, null, null));
         writer.handle(createMultipleRowTextMessageToWrite(), null, true);
         checkTextFile();
     }
@@ -75,7 +80,7 @@ public class TextFileWriterTest {
     @Test
     public void testTextWriterSingleRowPerMessage() throws Exception {
         TextFileWriter writer = new TextFileWriter();
-        writer.start(0, new ComponentContext(null, writerFlowStep, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
+        writer.start(0, new ComponentContext(null, writerFlowStep, null, new ExecutionTrackerNoOp(), deployedResources, null, null));
         writer.handle(createSingleRowTextMessageToWrite(1, false), null, true);
         writer.handle(createSingleRowTextMessageToWrite(2, false), null, true);
         writer.handle(createSingleRowTextMessageToWrite(3, false), null, true);

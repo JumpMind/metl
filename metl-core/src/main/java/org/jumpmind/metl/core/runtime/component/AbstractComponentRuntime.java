@@ -37,6 +37,7 @@ import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
@@ -127,11 +128,21 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     }
     
     protected IResourceRuntime getResourceRuntime() {
-        return context.getResourceRuntime();
+        Resource resource = getComponent().getResource();
+        if (resource != null) {
+           return context.getDeployedResources().get(resource.getId());
+        } else {
+            return null;
+        }
     }
     
     protected <T> T getResourceReference() {
-        return context.getResourceRuntime().reference();
+        IResourceRuntime resource = getResourceRuntime();
+        if (resource != null) {
+            return getResourceRuntime().reference();
+        } else {
+            return null;
+        }
     }
     
     protected Model getOutputModel() {

@@ -142,5 +142,7 @@
     <component-ui id="Data Diff UI" componentId="DataDiff">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-joiner-48x48-color.png</iconImage>
     </component-ui>
-                                 
+    <component-ui id="File Util UI" componentId="File Util">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-file-48x48-color.png</iconImage>
+    </component-ui>
 </ui>

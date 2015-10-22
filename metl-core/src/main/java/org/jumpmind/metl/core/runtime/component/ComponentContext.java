@@ -40,7 +40,7 @@ public class ComponentContext {
 
     IExecutionTracker executionTracker;
 
-    IResourceRuntime resourceRuntime;
+    Map<String, IResourceRuntime> deployedResources;
     
     Map<String, Serializable> flowParameters;
     
@@ -49,7 +49,7 @@ public class ComponentContext {
     ComponentStatistics componentStatistics = new ComponentStatistics();
 
     public ComponentContext(AgentDeployment deployment, FlowStep flowStep, Flow manipulatedFlow, IExecutionTracker executionTracker,
-            IResourceRuntime resource, Map<String, Serializable> flowParameters, Map<String, String> globalSettings) {
+            Map<String, IResourceRuntime> deployedResources, Map<String, Serializable> flowParameters, Map<String, String> globalSettings) {
         this.deployment = deployment;
         if (flowParameters == null) {
             flowParameters = new HashMap<String, Serializable>();
@@ -57,7 +57,7 @@ public class ComponentContext {
         this.flowStep = flowStep;
         this.manipulatedFlow = manipulatedFlow;
         this.executionTracker = executionTracker;
-        this.resourceRuntime = resource;
+        this.deployedResources = deployedResources;
         this.flowParameters = flowParameters;
         this.globalSettings = globalSettings;
     }
@@ -77,9 +77,13 @@ public class ComponentContext {
     public IExecutionTracker getExecutionTracker() {
         return executionTracker;
     }
-
+    
+    public Map<String, IResourceRuntime> getDeployedResources() {
+        return deployedResources;
+    }
+    
     public IResourceRuntime getResourceRuntime() {
-        return resourceRuntime;
+        return deployedResources.get(flowStep.getComponent().getResourceId());
     }
 
     public Map<String, Serializable> getFlowParameters() {

@@ -26,7 +26,9 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
@@ -51,6 +53,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class TextFileReaderTest {
 
     private static IResourceRuntime resourceRuntime;
+    private static Map<String, IResourceRuntime> deployedResources;
     private static FlowStep readerFlow;
     private static final String FILE_PATH = "build/files/";
     private static final String FILE_NAME = "text_test.txt";
@@ -60,7 +63,9 @@ public class TextFileReaderTest {
         createTestFileToRead();
         readerFlow = createTextReaderFlowStep();
         Resource resource = readerFlow.getComponent().getResource();
+        deployedResources = new HashMap<>();
         resourceRuntime = new ResourceFactory().create(resource, null);
+        deployedResources.put(resource.getId(), resourceRuntime);
     }
 
     @After
@@ -71,7 +76,7 @@ public class TextFileReaderTest {
     public void testTextReaderFlowFromStartupMsgSingleRowPerMessage() throws Exception {
 
         TextFileReader reader = new TextFileReader();
-        reader.start(0, new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
+        reader.start(0, new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), deployedResources, null, null));
         Message msg = new ControlMessage();
         SendMessageCallback<ArrayList<String>> msgTarget = new SendMessageCallback<ArrayList<String>>();
         reader.handle(msg, msgTarget, true);
@@ -93,7 +98,7 @@ public class TextFileReaderTest {
     public void testTextReaderFlowFromStartupMsgMultipleRowsPerMessage() throws Exception {
 
         TextFileReader reader = new TextFileReader();
-        reader.start(0, new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), resourceRuntime, null, null));
+        reader.start(0, new ComponentContext(null, readerFlow, null, new ExecutionTrackerNoOp(), deployedResources, null, null));
         Message msg = new ControlMessage();
         SendMessageCallback<ArrayList<String>> msgTarget = new SendMessageCallback<ArrayList<String>>();
         reader.handle(msg, msgTarget, true);

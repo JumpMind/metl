@@ -207,13 +207,17 @@
                     <choice>Delete</choice>
                     <choice>Touch</choice>
                 </choices>
-            </setting>
+            </setting>        
+            <setting id='target.resource' type='streamable_resource' required='true'>
+                <name>Target Resource</name>
+                <description></description>
+            </setting>                        
             <setting id='relative.path' type='text' required='false'>
-                <name>File Path</name>
+                <name>Source Path</name>
                 <description></description>
             </setting>
-            <setting id='target.directory' type='text' required='false'>
-                <name>Target Directory</name>
+            <setting id='target.relative.path' type='text' required='true'>
+                <name>Target Path</name>
                 <description></description>
             </setting>
             <setting id='get.file.name.from.message' type='boolean' required='false'>

@@ -46,6 +46,7 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.core.model.Resource;
+import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.model.StartType;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -260,8 +261,10 @@ public class AgentRuntime {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     protected void deployResources(Flow flow) {
-        Set<Resource> flowResources = flow.findResources();
-        for (Resource flowResource : flowResources) {
+        List<ResourceName> flowResourceNames = 
+        configurationService.findResourcesInProject(flow.getProjectVersionId());
+        for (ResourceName flowResourceName : flowResourceNames) {
+            Resource flowResource = configurationService.findResource(flowResourceName.getId());
             IResourceRuntime alreadyDeployed = deployedResources.get(flowResource.getId());
     
             Map<String, SettingDefinition> settings = resourceFactory

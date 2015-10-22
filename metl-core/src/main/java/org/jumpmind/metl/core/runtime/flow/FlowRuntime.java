@@ -135,7 +135,7 @@ public class FlowRuntime {
             boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true);
             if (enabled) {
                 ComponentContext context = new ComponentContext(deployment, flowStep, manipulatedFlow, executionTracker, 
-                        deployedResources.get(flowStep.getComponent().getResourceId()), parameters, globalSettings);
+                        deployedResources, parameters, globalSettings);
                 StepRuntime stepRuntime = new StepRuntime(componentFactory, context, this);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
