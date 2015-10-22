@@ -70,7 +70,7 @@ public class HandleParams {
 		}
 
 		@Override
-		public void sendStartupMessage() {
+		public void sendControlMessage() {
 			monitor.incrementStartupMessageCount();
 		}
 

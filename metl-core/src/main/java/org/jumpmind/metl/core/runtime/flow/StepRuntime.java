@@ -561,7 +561,7 @@ public class StepRuntime implements Runnable {
         }
 
         @Override
-        public void sendStartupMessage() {
+        public void sendControlMessage() {
             FlowStep flowStep = componentContext.getFlowStep();
             sendMessage(new ControlMessage(flowStep.getId()));
         }

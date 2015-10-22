@@ -29,6 +29,6 @@ public interface ISendMessageCallback {
     
     public void sendShutdownMessage(boolean cancel);
     
-    public void sendStartupMessage();
+    public void sendControlMessage();
     
 }

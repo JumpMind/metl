@@ -129,7 +129,7 @@ public class ContentRouter extends AbstractComponentRuntime {
         }
         
         if (unitOfWorkBoundaryReached) {
-        	callback.sendStartupMessage();
+        	callback.sendControlMessage();
         }
 
     }

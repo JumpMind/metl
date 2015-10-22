@@ -34,7 +34,7 @@ public class LastUnitOfWork extends AbstractComponentRuntime {
     @Override
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {    
         if (unitOfWorkBoundaryReached) {
-        	callback.sendStartupMessage();
+        	callback.sendControlMessage();
         }
     }
     

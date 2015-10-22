@@ -51,7 +51,7 @@ class SendMessageCallback<T> implements ISendMessageCallback {
     }
     
     @Override
-    public void sendStartupMessage() {
+    public void sendControlMessage() {
         sentStartup = true;
     }
 
