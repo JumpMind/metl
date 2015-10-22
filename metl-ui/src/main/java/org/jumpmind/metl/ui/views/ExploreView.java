@@ -172,18 +172,6 @@ public class ExploreView extends VerticalLayout implements View {
 
             dbs.clear();
 
-            dbs.add(new IDb() {
-                @Override
-                public IDatabasePlatform getPlatform() {
-                    return platform;
-                }
-
-                @Override
-                public String getName() {
-                    return "Metl DB";
-                }
-            });
-            
             IAgentManager agentManager = context.getAgentManager();
             Collection<Agent> agents = agentManager.getAvailableAgents();
             for (Agent agent : agents) {
@@ -203,7 +191,20 @@ public class ExploreView extends VerticalLayout implements View {
                 public int compare(IDb o1, IDb o2) {
                     return o1.getName().compareTo(o2.getName());
                 }
-            });            
+            });
+            
+            dbs.add(0, new IDb() {
+                @Override
+                public IDatabasePlatform getPlatform() {
+                    return platform;
+                }
+
+                @Override
+                public String getName() {
+                    return "Metl DB";
+                }
+            });
+
         }
         
         @Override
