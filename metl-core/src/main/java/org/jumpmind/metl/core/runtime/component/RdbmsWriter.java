@@ -255,7 +255,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<TargetTableDefintion, WriteStats>();
             for (TargetTableDefintion targetTableDefinition : targetTables) {
                 for (EntityData inputRow : inputRows) {
-                    log.info("processing input row " + inputRow);
+                    log.debug("processing input row; {}", inputRow);
                     inboundEntityDataCount++;
                     WriteStats stats = statsMap.get(targetTableDefinition);
                     if (stats == null) {
@@ -416,8 +416,8 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             lastPreparedDml = sql;
         }
 
-        if (log.isInfoEnabled()) {
-            log.info("Submitting data {} with types {}", Arrays.toString(data), Arrays.toString(dmlStatement.getTypes()));
+        if (log.isDebugEnabled()) {
+            log.debug("Submitting data {} with types {}", Arrays.toString(data), Arrays.toString(dmlStatement.getTypes()));
         }
 
         try {

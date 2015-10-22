@@ -59,6 +59,7 @@ public class ModelHelper {
 			attributes.add(attr);
 			entities.add(entity);
 		
+			when(target.getEntityById(entityId)).thenReturn(entity);
 			when(target.getModelEntities()).thenReturn(entities);
 			when(target.getAttributeById(Mockito.eq(attrId))).thenReturn(attr);
 	}

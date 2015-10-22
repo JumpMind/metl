@@ -34,6 +34,7 @@ import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentDeploymentParameter;
+import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.AgentParameter;
 import org.jumpmind.metl.core.model.AgentResource;
 import org.jumpmind.metl.core.model.AgentResourceSetting;
@@ -255,7 +256,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
-    public List<Agent> findAgentsInFolder(Folder folder) {
+    public List<AgentName> findAgentsInFolder(Folder folder) {
         Map<String, Object> params = new HashMap<String, Object>();
         String folderId = null;
         if (folder != null) {
@@ -263,7 +264,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         }
         params.put("folderId", folderId);
         params.put("deleted", 0);
-        return findAgents(params, folder);
+        return find(AgentName.class, params, Agent.class);
     }
 
     @Override
@@ -348,11 +349,6 @@ abstract class AbstractConfigurationService extends AbstractService implements
         agentDeployment.setAgentDeploymentParameters(persistenceManager.find(
                 AgentDeploymentParameter.class, params, null, null,
                 tableName(AgentDeploymentParameter.class)));
-    }
-
-    @Override
-    public List<AgentDeployment> findAgentDeployments() {
-        return persistenceManager.find(AgentDeployment.class, null, null, tableName(AgentDeployment.class));
     }
 
     @Override

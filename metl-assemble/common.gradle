@@ -68,6 +68,7 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
     }
 
     repositories {
+        mavenLocal()
         mavenCentral()        
         maven { url "http://maven.vaadin.com/vaadin-addons" }
         maven { url "http://maven.jumpmind.com/repo" }

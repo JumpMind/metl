@@ -16,6 +16,7 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
@@ -50,6 +51,10 @@ public class XmlReader extends AbstractComponentRuntime {
         relativePathAndFile = component.get(SETTING_RELATIVE_PATH, relativePathAndFile);
         readTagsPerMessage = component.getInt(SETTING_READ_TAGS_PER_MESSAGE, readTagsPerMessage);
         readTag = component.get(SETTING_READ_TAG, readTag);
+        
+        if (!getFileNameFromMessage && component.getResource() == null) {
+            throw new MisconfiguredException("A resource has not been selected.  The resource is required if not configured to get the file name from the inbound message");
+        }
     }
 
     @Override

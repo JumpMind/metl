@@ -69,13 +69,28 @@ public class Transformer extends AbstractComponentRuntime {
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         Model inputModel = getComponent().getInputModel();
         List<EntityData> inDatas = inputMessage.getPayload();
-        ArrayList<EntityData> outDatas = new ArrayList<EntityData>(inDatas.size());
-        
+        ArrayList<EntityData> outDatas = new ArrayList<EntityData>(inDatas.size());        
         for (EntityData inData : inDatas) {
             EntityData outData = new EntityData();
+            outData.setChangeType(inData.getChangeType());
             outDatas.add(outData);
-            Set<String> attributeIds = new HashSet<String>(inData.keySet());
-            attributeIds.addAll(transformsByAttributeId.keySet());
+            
+            Set<String> attributeIds = new HashSet<String>();
+            Set<ModelEntity> processedEntities = new HashSet<ModelEntity>();
+            for (String attributeId : inData.keySet()) {
+                ModelAttribute attribute = inputModel.getAttributeById(attributeId);
+                if (attribute != null) {
+                    ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+                    if (entity != null && !processedEntities.contains(entity)) {
+                        List<ModelAttribute> attributes = entity.getModelAttributes();
+                        for (ModelAttribute modelAttribute : attributes) {
+                            attributeIds.add(modelAttribute.getId());
+                        }
+                        processedEntities.add(entity);
+                    }
+                }
+            }
+            
             for (String attributeId : attributeIds) {
                 String transform = transformsByAttributeId.get(attributeId);
                 Object value = inData.get(attributeId);

@@ -83,6 +83,14 @@ public class ModelEntity extends AbstractObject {
     public void setName(String name) {
         this.name = name;
     }
+    
+    public boolean hasOnlyPrimaryKeys() {
+        boolean pksOnly = true;
+        for (ModelAttribute modelAttribute : modelAttributes) {
+            pksOnly &= modelAttribute.isPk();
+        }
+        return pksOnly;
+    }
 
     @Override
     public AbstractObject copy() {

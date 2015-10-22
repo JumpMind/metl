@@ -28,6 +28,8 @@ import java.util.List;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.jumpmind.metl.core.utils.TestUtils;
 import org.junit.Assert;
@@ -102,12 +104,13 @@ public class RdbmsReaderUnitTest extends AbstractRdbmsComponentTest {
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
-		setUnitOfWorkLastMessage(true);
-		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		
+		setUnitOfWorkLastMessage(true);		
+		getInputMessage().setPayload(new ArrayList<EntityData>());		
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0));
+		/* 
+		 * Expect one empty message when no data is selected
+		 */
+		assertHandle(0, getExpectedMessageMonitor(new MessageBuilder().withPayload(new PayloadBuilder().buildED()).build()));
 	}
 	
 	@Test

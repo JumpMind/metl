@@ -41,13 +41,13 @@ public class Joiner extends AbstractComponentRuntime {
     public final static String JOIN_ATTRIBUTE = "join.attribute";
 
     int rowsPerMessage = 1000;
-    
+
     Map<Object, EntityData> joinedData = new LinkedHashMap<Object, EntityData>();
-    
+
     List<String> attributesToJoinOn = new ArrayList<String>();
 
     @Override
-    protected void start() {        
+    protected void start() {
         Component component = getComponent();
         Model inputModel = component.getInputModel();
         if (inputModel == null) {
@@ -55,13 +55,16 @@ public class Joiner extends AbstractComponentRuntime {
         }
 
         List<ComponentAttributeSetting> settings = component.getAttributeSettings();
-        for (ComponentAttributeSetting componentAttributeSetting : settings) {
-            if (componentAttributeSetting.getName().equals(JOIN_ATTRIBUTE) && Boolean.parseBoolean(componentAttributeSetting.getValue())) {
-                attributesToJoinOn.add(componentAttributeSetting.getAttributeId());
+        if (settings != null) {
+            for (ComponentAttributeSetting componentAttributeSetting : settings) {
+                if (componentAttributeSetting.getName().equals(JOIN_ATTRIBUTE)
+                        && Boolean.parseBoolean(componentAttributeSetting.getValue())) {
+                    attributesToJoinOn.add(componentAttributeSetting.getAttributeId());
+                }
             }
         }
     }
-    
+
     @Override
     public boolean supportsStartupMessages() {
         return false;
@@ -88,16 +91,16 @@ public class Joiner extends AbstractComponentRuntime {
                 callback.sendMessage(null, dataToSend, true);
             }
         }
-    }   
-    
-    private void join(ArrayList<EntityData> records) {        
+    }
+
+    private void join(ArrayList<EntityData> records) {
         for (EntityData entityData : records) {
             getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
             StringBuilder key = new StringBuilder();
             for (String attributeId : attributesToJoinOn) {
                 if (key.length() > 0) {
                     key.append("&");
-                } 
+                }
                 key.append(attributeId);
                 key.append("=");
                 key.append(entityData.get(attributeId));
@@ -111,11 +114,11 @@ public class Joiner extends AbstractComponentRuntime {
             }
         }
     }
-    
+
     private void mergeRecords(EntityData sourceRecord, EntityData targetRecord) {
         Iterator<Map.Entry<String, Object>> itr = sourceRecord.entrySet().iterator();
         while (itr.hasNext()) {
-            Map.Entry<String,Object> column = (Map.Entry<String, Object>)itr.next();
+            Map.Entry<String, Object> column = (Map.Entry<String, Object>) itr.next();
             if (column != null) {
                 if (column.getValue() != null) {
                     targetRecord.put(column.getKey(), column.getValue());

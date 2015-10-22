@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.jumpmind.metl.core.model.AbstractObject;
-import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploymentSummary;
+import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderType;
@@ -224,16 +224,18 @@ public class ManageNavigator extends Panel {
     }
 
     protected void addAgentsToFolder(Folder folder) {
-        List<Agent> agents = configurationService.findAgentsInFolder(folder == agentsFolder ? null
+        List<AgentName> agents = configurationService.findAgentsInFolder(folder == agentsFolder ? null
                 : folder);
-        for (Agent agent : agents) {
+        for (AgentName agent : agents) {
+            
+           List<AgentDeploymentSummary> deployments = configurationService.findAgentDeploymentSummary(agent.getId());
+            
             treeTable.addItem(agent);
             treeTable.setItemIcon(agent, Icons.AGENT);
-            treeTable.setChildrenAllowed(agent, agent.getAgentDeployments().size() > 0);
+            treeTable.setChildrenAllowed(agent, deployments.size() > 0);
             treeTable.setParent(agent, folder);
 
-            List<AgentDeployment> deployments = agent.getAgentDeployments();
-            for (AgentDeployment agentDeployment : deployments) {
+            for (AgentDeploymentSummary agentDeployment : deployments) {
                 treeTable.addItem(agentDeployment);
                 treeTable.setItemIcon(agentDeployment, Icons.DEPLOYMENT);
                 treeTable.setParent(agentDeployment, agent);

@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Agent;
+import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderType;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -432,8 +433,9 @@ public class DeployNavigator extends VerticalLayout {
     }
 
     protected void openItem(Object item) {
-        if (item instanceof Agent) {
-            Agent agent = (Agent) item;
+        if (item instanceof AgentName) {
+            AgentName agentName = (AgentName) item;
+            Agent agent = context.getConfigurationService().findAgent(agentName.getId());
             tabbedPanel.addCloseableTab(agent.getId(), agent.getName(), Icons.AGENT,
                     new EditAgentPanel(context, tabbedPanel, agent));
         }
@@ -532,14 +534,15 @@ public class DeployNavigator extends VerticalLayout {
             agent.setName("New Agent");
             agent.setFolder(folder);
             context.getConfigurationService().save(agent);
-            addAgent(folder, agent);
-            expand(folder, agent);
-            startEditingItem(agent);
+            AgentName name = new AgentName(agent);
+            addAgent(folder, name);
+            expand(folder, name);
+            startEditingItem(name);
         }
 
     }
 
-    protected void addAgent(Folder folder, Agent agent) {
+    protected void addAgent(Folder folder, AgentName agent) {
         treeTable.setChildrenAllowed(folder, true);
         treeTable.addItem(agent);
         treeTable.setItemIcon(agent, Icons.AGENT);
@@ -564,8 +567,8 @@ public class DeployNavigator extends VerticalLayout {
             addChildren(child);
         }
 
-        List<Agent> agents = context.getConfigurationService().findAgentsInFolder(folder);
-        for (Agent agent : agents) {
+        List<AgentName> agents = context.getConfigurationService().findAgentsInFolder(folder);
+        for (AgentName agent : agents) {
             addAgent(folder, agent);
         }
 
@@ -573,7 +576,8 @@ public class DeployNavigator extends VerticalLayout {
 
     protected void deleteTreeItems(AbstractObject obj) {
         if (obj instanceof Agent) {
-            Agent agent = (Agent) obj;
+            AgentName agentName = (AgentName) obj;
+            Agent agent = context.getConfigurationService().findAgent(agentName.getId());
             context.getConfigurationService().delete(agent);
             context.getAgentManager().refresh(agent);
             refresh();
