@@ -105,13 +105,15 @@ public class FileUtil extends AbstractComponentRuntime {
     @Override
     public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {
         List<String> files = getFilesToRead(inputMessage);
-        for (String fileName : files) {
-            try {
-                if (action.equals(ACTION_COPY)) {
-                    copyFile(fileName);
+        if (files != null) {
+            for (String fileName : files) {
+                try {
+                    if (action.equals(ACTION_COPY)) {
+                        copyFile(fileName);
+                    }
+                } catch (Exception e) {
+                    throw new IoException("Error processing file " + e.getMessage());
                 }
-            } catch (Exception e) {
-                throw new IoException("Error processing file " + e.getMessage());
             }
         }
     }
