@@ -190,6 +190,52 @@
             </setting>
         </settings>
     </component>
+     <component id='File Util' category='PROCESSOR' inputMessageType='any' outputMessageType='none' resourceCategory='streamable'
+        inputOutputModelsMatch='false'>
+        <name>File Util</name>
+        <className>org.jumpmind.metl.core.runtime.component.FileUtil</className>
+        <description></description>
+        <settings>
+            <setting id='action' type='choice' required='false'>
+                <name>Action</name>
+                <defaultValue>Copy</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>Copy</choice>
+                    <choice>Rename</choice>
+                    <choice>Move</choice>
+                    <choice>Delete</choice>
+                    <choice>Touch</choice>
+                </choices>
+            </setting>
+            <setting id='relative.path' type='text' required='false'>
+                <name>File Path</name>
+                <description></description>
+            </setting>
+            <setting id='target.directory' type='text' required='false'>
+                <name>Target Directory</name>
+                <description></description>
+            </setting>
+            <setting id='get.file.name.from.message' type='boolean' required='false'>
+                <name>Get File Name From Message</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='must.exist' type='boolean' required='true'>
+                <name>Must Exist</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
+            <setting id='new.name' type='text' required='false'>
+                <name>New Name</name>
+                <description></description>
+            </setting>
+            <setting id='append.to.name' type='text' required='false'>
+                <name>Append To Name</name>
+                <description></description>
+            </setting>
+        </settings>
+    </component>
     <component id='Format Delimited' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none'
         inputOutputModelsMatch='false'>
         <name>Format Delimited</name>

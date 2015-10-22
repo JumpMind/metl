@@ -32,6 +32,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -124,7 +125,11 @@ public class ContentRouter extends AbstractComponentRuntime {
         }
 
         for (String targetFlowStepId : outboundMessages.keySet()) {
-            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), true, targetFlowStepId);
+            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), false, targetFlowStepId);
+        }
+        
+        if (unitOfWorkBoundaryReached) {
+        	callback.sendStartupMessage();
         }
 
     }

@@ -21,8 +21,10 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -62,12 +64,17 @@ public class MessageScriptHelper {
     
     protected IResourceRuntime resource;
 
+    protected Map<String, Object> scriptContext;
+    
+    protected boolean unitOfWorkBoundaryReached;
+    
     public MessageScriptHelper(IComponentRuntime component) {
         this.context = component.getComponentContext();
         this.resource = context.getResourceRuntime();
         this.componentStatistics = context.getComponentStatistics();
         this.flow = context.getManipulatedFlow();
         this.flowStep = context.getFlowStep();
+        this.scriptContext = new HashMap<String, Object>(); 
     }
 
     protected JdbcTemplate getJdbcTemplate() {
@@ -108,6 +115,10 @@ public class MessageScriptHelper {
     protected void setInputMessage(Message inputMessage) {
         this.inputMessage = inputMessage;
     }
+    
+    protected void setUnitOfWorkBoundaryReached(boolean unitOfWorkBoundaryReached) {
+    	this.unitOfWorkBoundaryReached = unitOfWorkBoundaryReached;
+    }
 
     protected Object getAttributeValue(String entityName, String attributeName) {
         Model model = flowStep.getComponent().getInputModel();
@@ -125,7 +136,11 @@ public class MessageScriptHelper {
         this.messageTarget = messageTarget;
     }
 
-    protected void onInit() {
+    protected Map<String, Object> getScriptContext() {
+		return scriptContext;
+	}
+
+	protected void onInit() {
     }
 
     protected void onHandle() {        

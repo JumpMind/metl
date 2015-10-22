@@ -23,8 +23,12 @@ package org.jumpmind.metl.core.runtime.component;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.StringReader;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -34,6 +38,7 @@ import org.json.simple.JSONObject;
 import org.jumpmind.db.sql.SqlScriptReader;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.properties.TypedProperties;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRuntime {
@@ -52,6 +57,20 @@ abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRun
         if (dataSource == null) {
             dataSource = (DataSource) this.context.getResourceRuntime().reference();
         }
+        DataSource dataSource = (DataSource) context.getResourceRuntime().reference();
+        NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        String sql = "select ID_STR_RT from ASCENA_INTEGRATION_CNTL where EFFECTIVE_START_TIME < current_timestamp and EFFECTIVE_END_TIME > current_timestamp";
+        List<String> stores = jdbcTemplate.query(sql, new RowMapper<String>() {
+
+			@Override
+			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getString("ID_STR_RT");
+			}
+        	
+        });
+        Set<String> storeSet = new HashSet<String>();
+        storeSet.addAll(stores);
+        
         return new NamedParameterJdbcTemplate(dataSource);
     }
 

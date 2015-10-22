@@ -124,6 +124,7 @@ public class Script extends AbstractComponentRuntime {
     public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {
         invoke("setInputMessage", inputMessage);
         invoke("setMessageTarget", messageTarget);
+        invoke("setUnitOfWorkBoundaryReached", unitOfWorkBoundaryReached);
         invoke("onHandle");
     }
 

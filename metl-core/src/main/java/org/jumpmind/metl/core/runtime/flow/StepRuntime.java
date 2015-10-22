@@ -406,8 +406,13 @@ public class StepRuntime implements Runnable {
 
         int threadNumber = ThreadUtils.getThreadNumber();
 
-        String source = header.getOriginatingStepId() != null
-                ? componentContext.getManipulatedFlow().findFlowStepWithId(header.getOriginatingStepId()).getName() : "ENTRY";
+        String source = "ENTRY";
+        try {
+        	source = componentContext.getManipulatedFlow().findFlowStepWithId(header.getOriginatingStepId()).getName();
+        }
+        catch (NullPointerException e) {
+        	// Do nothing allow "ENTRY" as the source. 
+        }
 
         componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
                 String.format("INPUT %s{sequenceNumber=%d,unitOfWorkLastMessage=%s,unitOfWorkBoundaryReached=%s,source='%s',headers=%s}",
