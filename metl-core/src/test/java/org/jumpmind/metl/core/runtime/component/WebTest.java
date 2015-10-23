@@ -7,6 +7,7 @@ import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.jumpmind.metl.core.runtime.resource.Http;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -14,6 +15,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doReturn;
 
+@Ignore
 @RunWith(PowerMockRunner.class)
 public class WebTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
 
