@@ -297,6 +297,9 @@ public class PropertySheet extends Panel {
     }
 
     protected void addResourceCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
+        if (componentDefintion == null) {
+            log.info("null kaboom " + component.getName() + " " + component.getType());
+        }
         if (componentDefintion.getResourceCategory() != null && componentDefintion.getResourceCategory() != ResourceCategory.NONE
                 && value instanceof FlowStep) {
             FlowStep step = (FlowStep) value;

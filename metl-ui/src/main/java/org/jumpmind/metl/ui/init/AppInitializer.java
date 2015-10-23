@@ -160,6 +160,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
                 throw new IoException(e);
             }
         }
+        properties.put("config.dir", configDir);
         return properties;
     }
 

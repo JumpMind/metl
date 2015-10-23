@@ -20,33 +20,15 @@
  */
 package org.jumpmind.metl.ui.views;
 
-import java.io.Serializable;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
 
-import org.apache.commons.dbcp.BasicDataSource;
 import org.jumpmind.db.platform.IDatabasePlatform;
-import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
-import org.jumpmind.db.sql.SqlTemplateSettings;
-import org.jumpmind.metl.core.model.Agent;
-import org.jumpmind.metl.core.runtime.AgentRuntime;
-import org.jumpmind.metl.core.runtime.IAgentManager;
-import org.jumpmind.metl.core.runtime.resource.Datasource;
-import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.ui.common.AppConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
+import org.jumpmind.metl.ui.common.DbProvider;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.symmetric.ui.common.UiComponent;
-import org.jumpmind.symmetric.ui.sqlexplorer.IDb;
-import org.jumpmind.symmetric.ui.sqlexplorer.IDbProvider;
 import org.jumpmind.symmetric.ui.sqlexplorer.SqlExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -79,8 +61,8 @@ public class ExploreView extends VerticalLayout implements View {
     
     @PostConstruct
     protected void init () {
-        dbProvider = new DbProvider();
-        explorer = new SqlExplorer(System.getProperty("java.io.tmpdir"),
+        dbProvider = new DbProvider(context);
+        explorer = new SqlExplorer(context.getConfigDir(),
                 dbProvider, "admin", AppConstants.DEFAULT_LEFT_SPLIT);
         addComponent(explorer);
     }
@@ -91,126 +73,5 @@ public class ExploreView extends VerticalLayout implements View {
         explorer.refresh();
     }
 
-    class DbResource implements IDb, Serializable {
-
-        private static final long serialVersionUID = 1L;
-
-        IResourceRuntime resource;
-
-        Agent agent;
-
-        IDatabasePlatform platform;
-
-        public DbResource(Agent agent, IResourceRuntime resource) {
-            this.resource = resource;
-            this.agent = agent;
-        }
-
-        @Override
-        public String getName() {
-            return agent.getName() + " > " + resource.getResource().getName();
-        }
-
-        @Override
-        public IDatabasePlatform getPlatform() {
-            if (platform == null) {                
-                DataSource dataSource = resource.reference();
-                platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource,
-                        new SqlTemplateSettings(), false, false);
-            }
-            return platform;
-        }
-        
-        public void close() {
-            if (platform != null) {
-                BasicDataSource ds = (BasicDataSource)platform.getDataSource();
-                if (ds != null) {
-                    try {
-                        ds.close();
-                    } catch (SQLException e) {
-                    }
-                }
-            }
-        }
-        
-        public Agent getAgent() {
-            return agent;
-        }
-
-        public IResourceRuntime getResource() {
-            return resource;
-        }
-
-        @Override
-        public int hashCode() {
-            return resource.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof DbResource) {
-                return resource.equals(((DbResource) obj).getResource());
-            } else {
-                return super.equals(obj);
-            }
-        }
-
-    }
-    
-    class DbProvider implements IDbProvider, Serializable {
-        
-        private static final long serialVersionUID = 1L;
-        
-        List<IDb> dbs = new ArrayList<IDb>();
-        
-        public void refresh() {
-            for (IDb db : dbs) {
-                if (db instanceof DbResource) {
-				    ((DbResource)db).close();
-                }
-            }
-
-            dbs.clear();
-
-            IAgentManager agentManager = context.getAgentManager();
-            Collection<Agent> agents = agentManager.getAvailableAgents();
-            for (Agent agent : agents) {
-                AgentRuntime runtime = agentManager.getAgentRuntime(agent);
-                Collection<IResourceRuntime> resources = runtime.getDeployedResources();
-                for (IResourceRuntime iResource : resources) {
-                    if (iResource.getResource().getType().equals(Datasource.TYPE)) {
-                        DbResource db = new DbResource(agent, iResource);
-                        dbs.add(db);                        
-                    }
-                }
-
-            }
-
-            Collections.sort(dbs, new Comparator<IDb>() {
-                @Override
-                public int compare(IDb o1, IDb o2) {
-                    return o1.getName().compareTo(o2.getName());
-                }
-            });
-            
-            dbs.add(0, new IDb() {
-                @Override
-                public IDatabasePlatform getPlatform() {
-                    return platform;
-                }
-
-                @Override
-                public String getName() {
-                    return "Metl DB";
-                }
-            });
-
-        }
-        
-        @Override
-        public List<IDb> getDatabases() {
-            return dbs;
-        }
-    }
 
 }

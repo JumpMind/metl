@@ -326,6 +326,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel {
 
             XMLComponent definition = context.getComponentFactory()
                     .getComonentDefinition(type);
+            if (definition == null) {
+                log.error("Could not find defintion of type {}", type);
+            }
             node.setInputLabel(definition.getInputMessageType().getLetter());
             node.setOutputLabel(definition.getOutputMessageType().getLetter());
 
