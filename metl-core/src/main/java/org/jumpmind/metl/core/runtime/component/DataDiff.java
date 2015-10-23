@@ -1,5 +1,7 @@
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -53,7 +55,14 @@ public class DataDiff extends AbstractComponentRuntime {
     protected void start() {
         TypedProperties properties = getTypedProperties();
         this.sourceStep1Id = properties.get(SOURCE_1);
+        if (isBlank(sourceStep1Id)) {
+            throw new MisconfiguredException("Please choose a step where the original data comes from");
+        }
         this.sourceStep2Id = properties.get(SOURCE_2);
+        if (isBlank(sourceStep2Id)) {
+            throw new MisconfiguredException("Please choose a step where the data to compare comes from");
+        }
+        
         this.inMemoryCompare = properties.is(IN_MEMORY_COMPARE);
         this.rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
         Component comp = context.getFlowStep().getComponent();
