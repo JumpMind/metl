@@ -6,23 +6,26 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.jumpmind.metl.core.runtime.resource.Http;
+import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
-@Ignore
 @RunWith(PowerMockRunner.class)
 public class WebTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
 
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		setupHandle();
+		((Web) spy).bodyFrom = "Message";
+		
 		setInputMessage(new ControlMessage());
 		runHandle();
 		assertHandle(0, getExpectedMessageMonitor(0, 0));
@@ -33,6 +36,8 @@ public class WebTest extends AbstractComponentRuntimeTestSupport<ArrayList<Entit
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
 		setUnitOfWorkLastMessage(true);
+		((Web) spy).bodyFrom = "Message";
+		
 		
 		getInputMessage().setPayload(new ArrayList<String>());
 		
@@ -81,6 +86,16 @@ public class WebTest extends AbstractComponentRuntimeTestSupport<ArrayList<Entit
 	@Override
 	protected String getComponentId() {
 		return Web.TYPE;
+	}
+	
+	@Override
+	public void setupHandle() {
+		super.setupHandle();
+		
+		HttpOutputStream outputStream = mock(HttpOutputStream.class);
+		Mockito.when(resource.getOutputStream(Mockito.anyString(), Mockito.anyBoolean())).thenReturn(outputStream);
+		
+		
 	}
 
 }

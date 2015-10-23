@@ -89,32 +89,35 @@ public class Web extends AbstractComponentRuntime {
         } else {
             inputPayload.add(bodyText);
         }
-        try {
-            for (String requestContent : inputPayload) {
-                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                if (parameterReplacement) {
-                    requestContent = FormatUtils.replaceTokens(requestContent, context.getFlowParametersAsString(), true);
-                }
-                HttpOutputStream os = (HttpOutputStream) streamable.getOutputStream(relativePath,
-                        false);
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,
-                        DEFAULT_CHARSET));
-                try {
-                    writer.write(requestContent);
-                } finally {
-                    writer.close();
-                    String response = os.getResponse();
-                    if (response != null) {
-                        outputPayload.add(response);
-                    }
-                }
-            }
-            
-            if (outputPayload.size() > 0) {
-                callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
-            }
-        } catch (IOException e) {
-            throw new IoException(String.format("Error writing to %s ", streamable), e);
+        
+        if (inputPayload != null) {
+	        try {
+	            for (String requestContent : inputPayload) {
+	                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+	                if (parameterReplacement) {
+	                    requestContent = FormatUtils.replaceTokens(requestContent, context.getFlowParametersAsString(), true);
+	                }
+	                HttpOutputStream os = (HttpOutputStream) streamable.getOutputStream(relativePath,
+	                        false);
+	                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,
+	                        DEFAULT_CHARSET));
+	                try {
+	                    writer.write(requestContent);
+	                } finally {
+	                    writer.close();
+	                    String response = os.getResponse();
+	                    if (response != null) {
+	                        outputPayload.add(response);
+	                    }
+	                }
+	            }
+	            
+	            if (outputPayload.size() > 0) {
+	                callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
+	            }
+	        } catch (IOException e) {
+	            throw new IoException(String.format("Error writing to %s ", streamable), e);
+	        }
         }
     }
 
