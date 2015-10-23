@@ -138,7 +138,7 @@ public class XmlParser extends AbstractXMLComponentRuntime {
 	                        if (data.size() > 0) {
 	                            payload.add(data);
 	                        } else {
-	                            log(LogLevel.WARN, "Found entity element: <%s/> with no attributes",
+	                            log(LogLevel.WARN, "Found entity element: <%s/> with no matching attributes.  Please make sure your xpath expressions match",
 	                                    element.getName());
 	                        }
 	                    }
