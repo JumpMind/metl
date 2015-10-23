@@ -1,4 +1,4 @@
-This project builds a web application that is a visual integration environment.  It is currently in development and is slated for a milestone release in September of 2015.
+This project builds a web application that is a visual integration environment.  It is currently in development.  To run the latest and greatest use the following instructions.  The latest milestone release can be downloaded  (https://github.com/JumpMind/metl/releases/latest).
 
 ## Build Me, Run Me
 
