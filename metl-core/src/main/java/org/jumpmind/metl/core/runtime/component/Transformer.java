@@ -69,7 +69,7 @@ public class Transformer extends AbstractComponentRuntime {
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         Model inputModel = getComponent().getInputModel();
         List<EntityData> inDatas = inputMessage.getPayload();
-        ArrayList<EntityData> outDatas = new ArrayList<EntityData>(inDatas.size());        
+        ArrayList<EntityData> outDatas = new ArrayList<EntityData>(inDatas != null ? inDatas.size() : 0);        
         
         if (inDatas != null) {
 	        for (EntityData inData : inDatas) {

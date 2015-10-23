@@ -42,11 +42,13 @@ import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageAssert;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
+import org.jumpmind.metl.core.runtime.resource.IStreamable;
 import org.jumpmind.metl.core.utils.TestUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.junit.Assert;
 import org.junit.Before;
 import org.mockito.Mockito;
+import org.omg.CORBA.portable.Streamable;
 
 public abstract class AbstractComponentRuntimeTestSupport<T> {
 
@@ -94,6 +96,7 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 	Flow flow;
 	ExecutionTrackerNoOp eExecutionTracker;
 	TypedProperties properties;
+	IStreamable resource;
 	
 	// internal testing variable so setupHandle and runHandle can be called independently
 	boolean setupCalled;
@@ -115,6 +118,8 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 		flowParameters = new HashMap<String, Serializable>();
 		flowStep = mock(FlowStep.class);
 		flow = mock(Flow.class);
+		resource = mock(IStreamable.class);
+		
 		eExecutionTracker = new ExecutionTrackerNoOp();
 		properties = new TypedProperties();
 	}	
@@ -157,6 +162,7 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 		when(flowStep.getComponent()).thenReturn(component);
 		
 		doReturn(eExecutionTracker).when((AbstractComponentRuntime) spy).getExecutionTracker();
+		doReturn(resource).when((AbstractComponentRuntime) spy).getResourceReference();
 		
 		spy.start(0, context);
 		setupCalled = true;
