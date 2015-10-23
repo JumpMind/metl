@@ -73,7 +73,7 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
                        "Project-Artifact": project.name,                       
                        "Build-Version": appVersion,
                        "Build-Time": new SimpleDateFormat("yyyyMMdd-HHmm").format(new Date()),
-                       "Build-Scm-Version": scmVersion)
+                       "Build-Scm-Version": gitVersion)
         }    
     }    
     
