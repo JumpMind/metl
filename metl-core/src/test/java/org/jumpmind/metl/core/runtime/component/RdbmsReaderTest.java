@@ -68,9 +68,11 @@ public class RdbmsReaderTest {
     private static FlowStep readerFlowStep;
     private static FlowStep readerFlowStepMultiQuery;
     private static Map<String, IResourceRuntime> deployedResources;
+    private static Resource resource;
 
     @BeforeClass
     public static void setup() throws Exception {
+        resource = createResource(createResourceSettings());
         platform = createPlatformAndTestDatabase();
         readerFlowStep = createReaderFlowStep();
         readerFlowStepMultiQuery = createReaderFlowStepMultiQuery();
@@ -78,7 +80,7 @@ public class RdbmsReaderTest {
         deployedResources = new HashMap<>();
         resourceRuntime = new ResourceFactory().create(resource, null);
         deployedResources.put(resource.getId(), resourceRuntime);
-        
+
     }
 
     @After
@@ -91,7 +93,7 @@ public class RdbmsReaderTest {
         reader.start(0, new ComponentContext(null, readerFlowStep, null, new ExecutionTrackerNoOp(), deployedResources, null, null));
         Message msg = new ControlMessage();
         SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
-        reader.handle( msg, msgTarget, true);
+        reader.handle(msg, msgTarget, true);
 
         assertEquals(2, msgTarget.getPayloadList().size());
         ArrayList<EntityData> payload = msgTarget.getPayloadList().get(0);
@@ -108,7 +110,7 @@ public class RdbmsReaderTest {
         ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
         inboundPayload.add(new EntityData());
         message.setPayload(inboundPayload);
-        
+
         SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
         reader.handle(message, msgTarget, true);
 
@@ -116,22 +118,26 @@ public class RdbmsReaderTest {
         ArrayList<EntityData> payload = msgTarget.getPayloadList().get(0);
         assertEquals("test row 1", payload.get(0).get("tt1col2"));
         assertEquals("test row x", payload.get(0).get("tt2coly"));
-        //TODO: can't test these like this anymore.  Need manipulatedFlow and startup message
+        // TODO: can't test these like this anymore. Need manipulatedFlow and
+        // startup message
         // as this is calculated at the runtime level based on incoming messages
-//        assertEquals(false, msgTarget.getMessage(0).getHeader().isUnitOfWorkLastMessage());
-//        assertEquals(true, msgTarget.getMessage(1).getHeader().isUnitOfWorkLastMessage());
+        // assertEquals(false,
+        // msgTarget.getMessage(0).getHeader().isUnitOfWorkLastMessage());
+        // assertEquals(true,
+        // msgTarget.getMessage(1).getHeader().isUnitOfWorkLastMessage());
     }
 
     @Test
     public void testReaderFlowFromMultipleContentMsgs() throws Exception {
 
         RdbmsReader reader = new RdbmsReader();
-        reader.start(0, new ComponentContext(null, readerFlowStepMultiQuery, null, new ExecutionTrackerNoOp(), deployedResources, null, null));
+        reader.start(0,
+                new ComponentContext(null, readerFlowStepMultiQuery, null, new ExecutionTrackerNoOp(), deployedResources, null, null));
         Message message = new Message("fake step id");
         ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
         inboundPayload.add(new EntityData());
         message.setPayload(inboundPayload);
-        
+
         SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
         reader.handle(message, msgTarget, true);
 
@@ -139,43 +145,45 @@ public class RdbmsReaderTest {
         ArrayList<EntityData> payload = msgTarget.getPayloadList().get(0);
         assertEquals("test row 1", payload.get(0).get("tt1col2"));
         assertEquals("test row x", payload.get(0).get("tt2coly"));
-        //TODO: can't test these like this anymore.  Need manipulatedFlow and startup message
+        // TODO: can't test these like this anymore. Need manipulatedFlow and
+        // startup message
         // as this is calculated at the runtime level based on incoming messages
-//        assertEquals(false, msgTarget.getMessage(0).getHeader().isUnitOfWorkLastMessage());
-//        assertEquals(true, msgTarget.getMessage(1).getHeader().isUnitOfWorkLastMessage());
+        // assertEquals(false,
+        // msgTarget.getMessage(0).getHeader().isUnitOfWorkLastMessage());
+        // assertEquals(true,
+        // msgTarget.getMessage(1).getHeader().isUnitOfWorkLastMessage());
     }
-    
+
     @Test
     public void testCountColumnSeparatingCommas() {
-        
+
         RdbmsReader reader = new RdbmsReader();
-        
+
         int count = reader.countColumnSeparatingCommas("ISNULL(a,''), b, *");
-        assertEquals(count, 2);        
+        assertEquals(count, 2);
         count = reader.countColumnSeparatingCommas("ISNULL(a,('')), b, *");
-        assertEquals(count,2);
+        assertEquals(count, 2);
     }
 
     @Test
     public void testGetSqlColumnEntityHints() throws Exception {
-        
+
         RdbmsReader reader = new RdbmsReader();
         String sql = "select\r\n ISNULL(a,ISNULL(z,'')) /*COLA*/, b/*COLB*/, c/*  COLC */ from test;";
         Map<Integer, String> hints = reader.getSqlColumnEntityHints(sql);
         assertEquals(hints.get(1), "COLA");
         assertEquals(hints.get(2), "COLB");
         assertEquals(hints.get(3), "COLC");
-        
+
     }
-    
+
     private static FlowStep createReaderFlowStep() {
 
         Folder folder = TestUtils.createFolder("Test Folder");
         Flow flow = TestUtils.createFlow("TestFlow", folder);
         Setting[] settingData = createReaderSettings();
-        Component componentVersion = TestUtils.createComponent(RdbmsReader.TYPE, false,
-                createResource(createResourceSettings()), null, createOutputModel(), null,
-                null, settingData);
+        Component componentVersion = TestUtils.createComponent(RdbmsReader.TYPE, false, resource, null, createOutputModel(), null, null,
+                settingData);
         FlowStep readerComponent = new FlowStep();
         readerComponent.setFlowId(flow.getId());
         readerComponent.setComponentId(componentVersion.getId());
@@ -186,24 +194,22 @@ public class RdbmsReaderTest {
         readerComponent.setComponent(componentVersion);
         return readerComponent;
     }
-    
+
     private static FlowStep createReaderFlowStepMultiQuery() {
 
         Folder folder = TestUtils.createFolder("Test Folder");
         Flow flow = TestUtils.createFlow("TestFlow", folder);
         Setting[] settingData = createReaderSettingsMultiQuery();
-        Component componentVersion = TestUtils.createComponent(RdbmsReader.TYPE, false,
-                createResource(createResourceSettings()), null, createOutputModel(), null,
-                null, settingData);
-        FlowStep readerComponent = new FlowStep();
-        readerComponent.setFlowId(flow.getId());
-        readerComponent.setComponentId(componentVersion.getId());
-        readerComponent.setCreateBy("Test");
-        readerComponent.setCreateTime(new Date());
-        readerComponent.setLastUpdateBy("Test");
-        readerComponent.setLastUpdateTime(new Date());
-        readerComponent.setComponent(componentVersion);
-        return readerComponent;
+        Component component = TestUtils.createComponent(RdbmsReader.TYPE, false, resource, null,
+                createOutputModel(), null, null, settingData);
+        FlowStep step = new FlowStep();
+        step.setFlowId(flow.getId());
+        step.setCreateBy("Test");
+        step.setCreateTime(new Date());
+        step.setLastUpdateBy("Test");
+        step.setLastUpdateTime(new Date());
+        step.setComponent(component);
+        return step;
     }
 
     private static Model createOutputModel() {
@@ -224,7 +230,7 @@ public class RdbmsReaderTest {
 
         return modelVersion;
     }
-    
+
     private static Resource createResource(List<Setting> settings) {
         Resource resource = new Resource();
         Folder folder = TestUtils.createFolder("Test Folder Resource");
@@ -241,8 +247,7 @@ public class RdbmsReaderTest {
 
         Setting[] settingData = new Setting[2];
         settingData[0] = new Setting(RdbmsReader.SQL,
-                "select * From test_table_1 tt1 inner join test_table_2 tt2"
-                + " on tt1.col1 = tt2.colx order by tt1.col1");
+                "select * From test_table_1 tt1 inner join test_table_2 tt2" + " on tt1.col1 = tt2.colx order by tt1.col1");
         settingData[1] = new Setting(RdbmsReader.ROWS_PER_MESSAGE, "2");
 
         return settingData;
@@ -251,10 +256,8 @@ public class RdbmsReaderTest {
     private static Setting[] createReaderSettingsMultiQuery() {
 
         Setting[] settingData = new Setting[2];
-        settingData[0] = new Setting(RdbmsReader.SQL,
-                "select * From test_table_1 tt1 inner join test_table_2 tt2"
-                + " on tt1.col1 = tt2.colx order by tt1.col1;\n\n"
-                + "select * from test_table_2 where colx = 4;");
+        settingData[0] = new Setting(RdbmsReader.SQL, "select * From test_table_1 tt1 inner join test_table_2 tt2"
+                + " on tt1.col1 = tt2.colx order by tt1.col1;\n\n" + "select * from test_table_2 where colx = 4;");
         settingData[1] = new Setting(RdbmsReader.ROWS_PER_MESSAGE, "2");
 
         return settingData;
@@ -301,7 +304,7 @@ public class RdbmsReaderTest {
         table.addColumns(columns);
         return table;
     }
-    
+
     private static Table createTestTable2() {
 
         Table table = new Table("test_table_2");
@@ -318,25 +321,17 @@ public class RdbmsReaderTest {
     private static void populateTestDatabase(IDatabasePlatform platform, Database database) {
 
         ISqlTemplate template = platform.getSqlTemplate();
-        DmlStatement statement = platform.createDmlStatement(DmlType.INSERT,
-                database.findTable("test_table_1"), null);
-        template.update(statement.getSql(),
-                statement.getValueArray(new Object[] { 1, "test row 1", 7.7 }, new Object[] { 1 }));
-        template.update(statement.getSql(),
-                statement.getValueArray(new Object[] { 2, "test row 2", 8.8 }, new Object[] { 1 }));
-        template.update(statement.getSql(),
-                statement.getValueArray(new Object[] { 3, "test row 3", 9.9 }, new Object[] { 1 }));
-        
-        statement = platform.createDmlStatement(DmlType.INSERT, database.findTable("test_table_2"),null);
-        template.update(statement.getSql(),
-                statement.getValueArray(new Object[] { 1, "test row x", 7.7 }, new Object[] { 1 }));
-        template.update(statement.getSql(),
-                statement.getValueArray(new Object[] { 2, "test row y", 8.8 }, new Object[] { 1 }));
-        template.update(statement.getSql(),
-                statement.getValueArray(new Object[] { 3, "test row z", 9.9 }, new Object[] { 1 }));
-        template.update(statement.getSql(),
-                statement.getValueArray(new Object[] { 4, "test row zz", 4.9 }, new Object[] { 1 }));
-        
+        DmlStatement statement = platform.createDmlStatement(DmlType.INSERT, database.findTable("test_table_1"), null);
+        template.update(statement.getSql(), statement.getValueArray(new Object[] { 1, "test row 1", 7.7 }, new Object[] { 1 }));
+        template.update(statement.getSql(), statement.getValueArray(new Object[] { 2, "test row 2", 8.8 }, new Object[] { 1 }));
+        template.update(statement.getSql(), statement.getValueArray(new Object[] { 3, "test row 3", 9.9 }, new Object[] { 1 }));
+
+        statement = platform.createDmlStatement(DmlType.INSERT, database.findTable("test_table_2"), null);
+        template.update(statement.getSql(), statement.getValueArray(new Object[] { 1, "test row x", 7.7 }, new Object[] { 1 }));
+        template.update(statement.getSql(), statement.getValueArray(new Object[] { 2, "test row y", 8.8 }, new Object[] { 1 }));
+        template.update(statement.getSql(), statement.getValueArray(new Object[] { 3, "test row z", 9.9 }, new Object[] { 1 }));
+        template.update(statement.getSql(), statement.getValueArray(new Object[] { 4, "test row zz", 4.9 }, new Object[] { 1 }));
+
     }
 
 }

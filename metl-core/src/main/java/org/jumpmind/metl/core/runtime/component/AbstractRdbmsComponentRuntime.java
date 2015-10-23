@@ -51,7 +51,7 @@ abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRun
         }
 
         if (dataSource == null) {
-            dataSource = (DataSource) this.context.getResourceRuntime().reference();
+            dataSource = (DataSource) getResourceRuntime().reference();
         }
         return new NamedParameterJdbcTemplate(dataSource);
     }

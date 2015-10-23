@@ -6,7 +6,9 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.tools.ant.DirectoryScanner;
 import org.jumpmind.metl.core.model.Resource;
@@ -15,13 +17,13 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.properties.TypedProperties;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 
@@ -221,12 +223,18 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 		
 		((FilePoller) spy).maxFilesToPoll = 5;
 		
-		IResourceRuntime mockResourceRuntime = mock(IResourceRuntime.class);
+		IResourceRuntime mockResourceRuntime = Mockito.spy(new LocalFile());
+		Resource resource = new Resource();
+		when(component.getResource()).thenReturn(resource);
+		when(component.getResourceId()).thenReturn(resource.getId());
+		Map<String, IResourceRuntime> deployedResources = new HashMap<>();
+		deployedResources.put(component.getResourceId(), mockResourceRuntime);
+		when(context.getDeployedResources()).thenReturn(deployedResources);
+		
 		TypedProperties mockTypedProperties = mock(TypedProperties.class);
 		File mockFile = mock(File.class);
 		DirectoryScanner mockDirectoryScanner = mock(DirectoryScanner.class);
 		
-		when(((FilePoller) spy).getResourceRuntime()).thenReturn(mockResourceRuntime);
 		when(mockResourceRuntime.getResourceRuntimeSettings()).thenReturn(mockTypedProperties);
 		when(mockTypedProperties.get(anyString())).thenReturn("localFilePath");
 		
