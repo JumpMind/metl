@@ -31,7 +31,7 @@ war {
             it.isDirectory() ? it : project.zipTree(it)
         }
     }    
-    manifest { attributes 'Main-Class': 'org.jumpmind.metl.StartWebServer' }
+    manifest { attributes 'Main-Class': 'org.jumpmind.metl.Metl' }
 }
 
 vaadin.version = vaadinVersion

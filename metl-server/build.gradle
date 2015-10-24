@@ -6,5 +6,8 @@ dependencies {
     compile "org.eclipse.jetty:jetty-jmx:$jettyVersion"
     compile "org.eclipse.jetty:jetty-annotations:$jettyVersion"
     compile "commons-io:commons-io:$commonsIoVersion"
-
+    compile "commons-lang:commons-lang:2.6"
+ 	compile (group:"org.jumpmind.symmetric", name:"symmetric-wrapper", version:"$symmetricVersion", changing:true) {
+       exclude group:"bouncycastle"
+    }
 }

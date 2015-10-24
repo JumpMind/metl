@@ -38,7 +38,7 @@ public class StartWebServer {
     
     public static final int PORT = 42000;
 
-    public static void main(String[] args) throws Exception {
+    public static void runWebServer() throws Exception {
 
         System.out.println(IOUtils.toString(StartWebServer.class.getResource("/Metl.asciiart")));
 
@@ -66,5 +66,4 @@ public class StartWebServer {
         
         server.join();
     }
-
 }
