@@ -45,6 +45,8 @@ public class Wrapper {
         if (!configFile.exists()) {   
             try {
                 String propContent = IOUtils.toString(Wrapper.class.getClassLoader().getResourceAsStream(configFileName));
+                propContent = propContent.replace("$(metl.war)", jarFileName);
+                propContent = propContent.replace("$(java.io.tmpdir)", appHomeDir + File.separator + "tmp");                
                 FileUtils.write(configFile, propContent);
             } catch (Exception e) {
             	System.out.println("Unable to write config file for service wrapper." + e.getMessage());
