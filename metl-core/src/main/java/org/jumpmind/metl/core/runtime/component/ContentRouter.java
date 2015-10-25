@@ -32,7 +32,6 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -96,6 +95,7 @@ public class ContentRouter extends AbstractComponentRuntime {
         ArrayList<EntityData> inputDatas = inputMessage.getPayload();
         
         for (EntityData entityData : inputDatas) {
+            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
             bindEntityData(scriptEngine, entityData);
             if (routes != null) {
                 for (Route route : routes) {
@@ -130,10 +130,11 @@ public class ContentRouter extends AbstractComponentRuntime {
     }
     
     @SuppressWarnings("unchecked")
-    void handleStringListPayload(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+    protected void handleStringListPayload(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
     	Map<String, ArrayList<String>> outboundMessages = new HashMap<String, ArrayList<String>>();
         ArrayList<String> inputDatas = (ArrayList<String>) inputMessage.getPayload();
         for (String data : inputDatas) {
+            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
             bindStringData(scriptEngine, data);
             if (routes != null) {
                 for (Route route : routes) {

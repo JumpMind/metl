@@ -33,15 +33,14 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.IStreamable;
 import org.jumpmind.properties.TypedProperties;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -110,7 +109,6 @@ public class UnzipTest extends AbstractComponentRuntimeTestSupport<ArrayList<Str
 
 	public void setupHandle(boolean fileExists) {
 		super.setupHandle();
-		((UnZip) spy).fileNames = new ArrayList<String>();
 		
 		IResourceRuntime mockResourceRuntime = mock(IResourceRuntime.class);
 		IStreamable mockStreamable = mock(IStreamable.class);

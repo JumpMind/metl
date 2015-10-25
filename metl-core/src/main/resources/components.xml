@@ -858,12 +858,12 @@
             </setting>
         </settings>
     </component>
-    <component id='UnZip' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
+    <component id='UnZip' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='none' inputOutputModelsMatch='false'>
         <name>UnZip</name>
         <className>org.jumpmind.metl.core.runtime.component.UnZip</className>
         <description></description>
         <settings>
-            <setting id='target.path' type='text' required='true'>
+            <setting id='target.resource' type='streamable_resource' required='true'>
                 <name>Target File Path</name>
                 <description></description>
             </setting>
