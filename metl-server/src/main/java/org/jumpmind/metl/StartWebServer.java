@@ -32,6 +32,7 @@ import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AllowSymLinkAliasChecker;
 import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.util.log.JavaUtilLog;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.Configuration.ClassList;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -45,12 +46,13 @@ public class StartWebServer {
     }
     
     protected static void disableJettyLogging() {
-        System.setProperty("org.eclipse.jetty.util.log.class","org.eclipse.jetty.util.log.JavaUtilLog");
-        Logger rootLogger = Logger.getLogger("");
+        System.setProperty("org.eclipse.jetty.util.log.class", JavaUtilLog.class.getName());
+        Logger.getLogger(JavaUtilLog.class.getName()).setLevel(Level.SEVERE);
+        Logger rootLogger = Logger.getLogger("org.eclipse.jetty");
         for (Handler handler : rootLogger.getHandlers()) {
-            handler.setLevel(Level.WARNING);
+            handler.setLevel(Level.SEVERE);
         }
-        rootLogger.setLevel(Level.WARNING);
+        rootLogger.setLevel(Level.SEVERE);
     }
 
     public static void runWebServer() throws Exception {

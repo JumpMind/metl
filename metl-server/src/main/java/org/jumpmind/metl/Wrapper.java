@@ -39,10 +39,9 @@ public class Wrapper {
     	ProtectionDomain protectionDomain = Wrapper.class.getProtectionDomain();
     	String jarFileName=protectionDomain.getCodeSource().getLocation().getFile();
     	
-        String configDir = getConfigDir(false);
-    	String applHomeDir = new String(configDir);
+        String appHomeDir = getConfigDir(false);
     	
-        File configFile = new File(configDir, configFileName);
+        File configFile = new File(appHomeDir, configFileName);
         if (!configFile.exists()) {   
             try {
                 String propContent = IOUtils.toString(Wrapper.class.getClassLoader().getResourceAsStream(configFileName));
@@ -52,10 +51,10 @@ public class Wrapper {
             	System.exit(-1);
             }
         }
-        System.out.println("Calling WrapperHelper with parameters:  applHomeDir==>" + applHomeDir + ", configFile ==>" + 
-        		configDir + "/" + configFileName + " jarfile==> " + 
+        System.out.println("Calling WrapperHelper with parameters:  applHomeDir==>" + appHomeDir + ", configFile ==>" + 
+                appHomeDir + "/" + configFileName + " jarfile==> " + 
         		jarFileName);
-        WrapperHelper.run(args, applHomeDir, configDir + File.separator + configFileName,
+        WrapperHelper.run(args, appHomeDir, appHomeDir + File.separator + configFileName,
         		jarFileName);
     }
     
