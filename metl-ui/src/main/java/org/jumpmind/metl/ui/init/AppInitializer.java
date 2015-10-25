@@ -140,7 +140,6 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             System.out.println("");
             System.out.println("The current working directory is " + System.getProperty("user.dir"));
             System.out.println("");
-            System.out.println("");
         }
         return configDir;
     }

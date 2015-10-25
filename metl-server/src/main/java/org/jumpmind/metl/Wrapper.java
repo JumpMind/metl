@@ -22,6 +22,7 @@ package org.jumpmind.metl;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.File;
+import java.security.ProtectionDomain;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -34,8 +35,9 @@ public class Wrapper {
     
     public static void runServiceWrapper(String[] args) throws Exception {
 
-    	String configFileName="metl_service.conf";    	
-    	String jarFileName="metl.war";
+    	String configFileName="metl_service.conf";   
+    	ProtectionDomain protectionDomain = Wrapper.class.getProtectionDomain();
+    	String jarFileName=protectionDomain.getCodeSource().getLocation().getFile();
     	
         String configDir = getConfigDir(false);
     	String applHomeDir = new String(configDir);
@@ -52,9 +54,9 @@ public class Wrapper {
         }
         System.out.println("Calling WrapperHelper with parameters:  applHomeDir==>" + applHomeDir + ", configFile ==>" + 
         		configDir + "/" + configFileName + " jarfile==> " + 
-        		configDir + File.separator + jarFileName);
+        		jarFileName);
         WrapperHelper.run(args, applHomeDir, configDir + File.separator + configFileName,
-        		configDir + File.separator + jarFileName);
+        		jarFileName);
     }
     
     protected static String getConfigDir(boolean printInstructions) {
