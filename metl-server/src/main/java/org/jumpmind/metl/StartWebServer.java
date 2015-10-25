@@ -23,6 +23,8 @@ package org.jumpmind.metl;
 import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.security.ProtectionDomain;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
@@ -37,9 +39,24 @@ import org.eclipse.jetty.webapp.WebAppContext;
 public class StartWebServer {
     
     public static final int PORT = 42000;
+    
+    public static void main(String[] args) throws Exception {
+        runWebServer();
+    }
+    
+    protected static void disableJettyLogging() {
+        System.setProperty("org.eclipse.jetty.util.log.class","org.eclipse.jetty.util.log.JavaUtilLog");
+        Logger rootLogger = Logger.getLogger("");
+        for (Handler handler : rootLogger.getHandlers()) {
+            handler.setLevel(Level.WARNING);
+        }
+        rootLogger.setLevel(Level.WARNING);
+    }
 
     public static void runWebServer() throws Exception {
 
+        disableJettyLogging();
+        
         System.out.println(IOUtils.toString(StartWebServer.class.getResource("/Metl.asciiart")));
 
         Server server = new Server(PORT);

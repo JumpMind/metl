@@ -20,28 +20,14 @@
  */
 package org.jumpmind.metl;
 
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public class Metl {
 
     public static void main(String[] args) throws Exception {
-        disableLogging();
         if (args.length == 0) {
             StartWebServer.runWebServer();
         } else {
             Wrapper.runServiceWrapper(args);
         }
-    }
-
-    protected static void disableLogging() {
-        System.setProperty("org.eclipse.jetty.util.log.class","org.eclipse.jetty.util.log.JavaUtilLog");
-        Logger rootLogger = Logger.getLogger("");
-        for (Handler handler : rootLogger.getHandlers()) {
-            handler.setLevel(Level.WARNING);
-        }
-        rootLogger.setLevel(Level.WARNING);
     }
 
 }
