@@ -28,4 +28,19 @@ include::../common-properties/shared.ad[]
 |===========================================
 
 ====== Component Editor
-Double clicking on the 
+Double clicking on the Delimited Formatter component in the flow will result in the Delimited Formatter editor being displayed as shown below.
+
+image:editors/delimited-formatter-editor.png[]
+
+The delimited formatter editor display a row for every entity and attribute in the input model, and allows setting the ordinal position of each
+for the delimited output.  Order the attributes in the order in which they should be displayed in the delimited result.  Attributes can be ordered
+by:
+
+.Attribute Ordering Options
+* Selecting an attribute and dragging it up or down in the list
+* Selecting an attribute clicking the "Move Up", "Move Down", "Move Top" or "Move Botton" buttons
+* Selecting an attribute or set of attributes, clicking "Cut" to remove them and then "Pasting them elsewhere in the list
+
+In addition to specifying the order of the attributes in the delimited list, transform functions can also be applied to each attribute.  These
+transform functions are good for applying formatting, etc.
+
