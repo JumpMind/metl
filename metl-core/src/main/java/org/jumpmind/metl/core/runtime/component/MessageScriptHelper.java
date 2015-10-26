@@ -98,7 +98,7 @@ public class MessageScriptHelper {
 
             if (entityDataIterator.hasNext()) {
                 EntityData data = entityDataIterator.next();
-                return flowStep.getComponent().toRow(data, false);
+                return flowStep.getComponent().toRow(data, false, true);
             } else {
                 return null;
             }

@@ -286,7 +286,7 @@ public class Component extends AbstractObjectWithSettings {
         return folderId;
     }
 
-	public Row toRow(EntityData data, boolean qualifyWithEntityName) {
+	public Row toRow(EntityData data, boolean qualifyWithEntityName, boolean input) {
         Row row = new Row(data.size()) {
             private static final long serialVersionUID = 1L;
 
@@ -295,12 +295,14 @@ public class Component extends AbstractObjectWithSettings {
                 return String.format("{{ChangeType=%s}, %s}", data.getChangeType(), super.toString());
             }
         };
+        Model model = input ? inputModel : outputModel;
         Set<String> attributeIds = data.keySet();
         for (String attributeId : attributeIds) {
-        	if (inputModel != null) {
-	            ModelAttribute attribute = inputModel.getAttributeById(attributeId);
+            
+        	if (model != null) {
+	            ModelAttribute attribute = model.getAttributeById(attributeId);
 	            if (attribute != null) {
-	                ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+	                ModelEntity entity = model.getEntityById(attribute.getEntityId());
 	                if (qualifyWithEntityName) {
 	                    row.put(entity.getName() + "." + attribute.getName(), data.get(attributeId));
 	                } else {
@@ -315,19 +317,21 @@ public class Component extends AbstractObjectWithSettings {
         return row;
     }
 
-	public Set<String> getEntityNames(EntityData data) {
-		Set<String> names = new HashSet<String>();
-		
-		Set<String> attributeIds = data.keySet();
-	    for (String attributeId : attributeIds) {
-	        ModelAttribute attribute = inputModel.getAttributeById(attributeId);
-            if (attribute != null) {
-                ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
-                names.add(entity.getName());
+    public Set<String> getEntityNames(EntityData data, boolean input) {
+        Set<String> names = new HashSet<String>();
+        Model model = input ? inputModel : outputModel;
+        if (model != null) {
+            Set<String> attributeIds = data.keySet();
+            for (String attributeId : attributeIds) {
+                ModelAttribute attribute = model.getAttributeById(attributeId);
+                if (attribute != null) {
+                    ModelEntity entity = model.getEntityById(attribute.getEntityId());
+                    names.add(entity.getName());
+                }
             }
         }
-		return names;
-	}
+        return names;
+    }
 	
 	
     @Override

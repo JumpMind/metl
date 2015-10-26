@@ -189,9 +189,9 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         	HashMap<String, Object> boundEntity = new HashMap<String, Object>();
         	bindings.put(modelEntity.getName(), boundEntity);
         }
-        bindings.put("ENTITY_NAMES", context.getFlowStep().getComponent().getEntityNames(entityData));
         
-
+        bindings.put("CHANGE_TYPE", entityData.getChangeType().name());
+        bindings.put("ENTITY_NAMES", context.getFlowStep().getComponent().getEntityNames(entityData, true));                
         Set<String> attributeIds = entityData.keySet();
         for (String attributeId : attributeIds) {
             ModelAttribute attribute = model.getAttributeById(attributeId);

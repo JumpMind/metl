@@ -58,8 +58,6 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
     public static final String RAW_FORMAT = "Raw";
 
-    public final static String PARAMETER_REPLACEMENT = "xml.formatter.parameter.replacement";
-
     public final static String XML_FORMAT = "xml.formatter.xml.format";
 
     public static final String TYPE = "Format XML";
@@ -67,8 +65,6 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
     public final static String XML_FORMATTER_TEMPLATE = "xml.formatter.template";
 
     boolean ignoreNamespace = true;
-
-    boolean useParameterReplacement = true;
 
     String xmlFormat;
 
@@ -79,7 +75,6 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         super.start();
         TypedProperties properties = getTypedProperties();
         ignoreNamespace = properties.is(IGNORE_NAMESPACE);
-        useParameterReplacement = properties.is(PARAMETER_REPLACEMENT);
         xmlFormat = properties.get(XML_FORMAT);
         template = properties.get(XML_FORMATTER_TEMPLATE);
 
