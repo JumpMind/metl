@@ -475,6 +475,14 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     public void setDatabasePlatform(IDatabasePlatform platform) {
         this.databasePlatform = platform;
     }
+    
+    public void setReplaceRows(boolean replaceRows) {
+        this.replaceRows = replaceRows;
+    }
+    
+    public void setUpdateFirst(boolean updateFirst) {
+        this.updateFirst = updateFirst;
+    }
 
     class TargetTableDefintion {
 

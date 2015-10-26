@@ -224,6 +224,7 @@ public class DataDiff extends AbstractComponentRuntime {
             databaseWriter = new RdbmsWriter();
             databaseWriter.setDatabasePlatform(databasePlatform);
             databaseWriter.setComponentDefinition(componentDefinition);
+            databaseWriter.setReplaceRows(true);
             databaseWriter.setContext(context);
             databaseWriter.setThreadNumber(threadNumber);
         }
@@ -254,7 +255,7 @@ public class DataDiff extends AbstractComponentRuntime {
                 List<ModelAttribute> attributes = entity.getModelAttributes();
                 for (ModelAttribute attribute : attributes) {
                     DataType dataType = attribute.getDataType();
-                    Column column = new Column(attribute.getName());
+                    Column column = new Column(attribute.getName());                   
                     if (dataType.isNumeric()) {
                         column.setTypeCode(Types.DECIMAL);
                     } else if (dataType.isBoolean()) {
