@@ -59,7 +59,7 @@ public class MessageLogger extends AbstractComponentRuntime {
                 if (object instanceof EntityData && getComponent().getInputModel() != null) {
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                     log(LogLevel.INFO, String.format("Message Payload: %s", getComponent().toRow((EntityData) object,
-                            context.getFlowStep().getComponent().getBoolean(SETTING_QUALIFY_WITH_ENTITY_NAME, true))));
+                            context.getFlowStep().getComponent().getBoolean(SETTING_QUALIFY_WITH_ENTITY_NAME, true), true)));
                 } else {
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                     log(LogLevel.INFO, String.format("Message Payload: %s", object));

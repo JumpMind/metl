@@ -203,7 +203,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         paramMap.clear();
         paramMap.putAll(getParamsFromHeader(inputMessage));
         if (entityData != null) {
-            paramMap.putAll(this.getComponent().toRow(entityData, true));
+            paramMap.putAll(this.getComponent().toRow(entityData, true, true));
         }
     }
 
