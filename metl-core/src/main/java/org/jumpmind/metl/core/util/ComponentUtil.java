@@ -26,18 +26,41 @@ import java.util.List;
 
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 
 public class ComponentUtil {
 
-	public static final int PAYLOAD_TYPE_UNKNOWN = 0;
-	public static final int PAYLOAD_TYPE_LIST_STRING = 1;
-	public static final int PAYLOAD_TYPE_LIST_ENTITY = 2;
-	
+    public static final int PAYLOAD_TYPE_UNKNOWN = 0;
+    public static final int PAYLOAD_TYPE_LIST_STRING = 1;
+    public static final int PAYLOAD_TYPE_LIST_ENTITY = 2;
+
     public static Object getAttributeValue(Model model, List<EntityData> rows, String entityName, String attributeName) {
         List<Object> values = getAttributeValues(model, rows, entityName, attributeName);
         if (values.size() > 0) {
             return values.get(0);
+        }
+        return null;
+    }
+    
+    public static Object getAttributeValue(Model model, EntityData data, String entityName, String attributeName) {
+        ModelEntity modelEntity = model.getEntityByName(entityName);
+        if (modelEntity != null) {
+            ModelAttribute attribute = modelEntity.getModelAttributeByName(attributeName);
+            if (attribute != null) {
+               return data.get(attribute.getId());
+            }
+        }
+        return null;
+    }
+
+    public static Object getAttributeValue(Model model, EntityData data, String attributeName) {
+        List<ModelEntity> entites = model.getModelEntities();
+        for (ModelEntity modelEntity : entites) {
+            ModelAttribute attribute = modelEntity.getModelAttributeByName(attributeName);
+            if (attribute != null) {
+               return data.get(attribute.getId());
+            }
         }
         return null;
     }
@@ -58,16 +81,15 @@ public class ComponentUtil {
     }
 
     public static int getPayloadType(Serializable payload) {
-    	if (payload != null && payload instanceof List) {
-    		if (((List<?>) payload).size() > 0) {
-    			if (((List<?>) payload).get(0) instanceof EntityData) {
-    				return PAYLOAD_TYPE_LIST_ENTITY;
-    			}
-    			else if (((List<?>) payload).get(0) instanceof String) {
-    				return PAYLOAD_TYPE_LIST_STRING;
-    			}
-    		}
-    	}
-    	return PAYLOAD_TYPE_UNKNOWN;
+        if (payload != null && payload instanceof List) {
+            if (((List<?>) payload).size() > 0) {
+                if (((List<?>) payload).get(0) instanceof EntityData) {
+                    return PAYLOAD_TYPE_LIST_ENTITY;
+                } else if (((List<?>) payload).get(0) instanceof String) {
+                    return PAYLOAD_TYPE_LIST_STRING;
+                }
+            }
+        }
+        return PAYLOAD_TYPE_UNKNOWN;
     }
 }
