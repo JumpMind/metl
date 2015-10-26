@@ -64,7 +64,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 
 @SuppressWarnings("serial")
-public class EditXmlFormatPanel extends AbstractComponentEditPanel implements TextChangeListener {
+public class EditXmlParserPanel extends AbstractComponentEditPanel implements TextChangeListener {
 
     Table table = new Table();
 
@@ -179,6 +179,7 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
     }
 
     protected void buildXpathChoices() {
+        xpathChoices = new HashSet<String>();
         SAXBuilder builder = new SAXBuilder();
         builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
         builder.setFeature("http://xml.org/sax/features/validation", false);
@@ -186,7 +187,6 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
         if (StringUtils.isNotBlank(setting.getValue())) {
             try {
                 Document document = builder.build(new StringReader(setting.getValue()));
-                xpathChoices = new HashSet<String>();
                 buildXpathChoicesFromElement("/" + document.getRootElement().getName(), document.getRootElement());
             } catch (Exception e) {
                 throw new RuntimeException(e);
