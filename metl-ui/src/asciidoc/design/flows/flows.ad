@@ -30,6 +30,8 @@ The following table shows a list of available components.
 |<<format-fixed>>|image:metl-fixed-length-48x48-color.png[]|Model based data needs to be formatted into fixed length text
 |<<format-xml>>|image:metl-xml-formatter-48x48-color.png[]|Model based data needs to be formatted into xml text
 |<<joiner>>||
+3+|Writers
+|<<rdbms-writer>>|image:metl-writer-48x48-color.png[]|Data needs written to a relational database
 |===========================================
 
 include::readers/readers.ad[]

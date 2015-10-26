@@ -1,9 +1,10 @@
+[id="rdbms-writer",reftext="RDBMS Writer"]
 ===== RDBMS Writer
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:rdbmswriter.png[]
+|Icon|image:metl-writer-48x48-color.png[]
 |Use When|Data needs written to a relational database
-|Samples|
+|Samples|Flat File to Relational Database, DB request to WSDL to DB results
 |Description|The RDBMS Writer is used to write data to a SQL compliant relational database by specifying an input model.
 
 The RDBMS Writer can take one or more input messages.  The writer will be executed (i.e. the update and/or insert sql query run) for every 
