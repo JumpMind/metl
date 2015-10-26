@@ -1,9 +1,60 @@
+[id="format-xml",reftext="Format XML"]
 ===== Format XML
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:xmlformatter.png[]
+|Icon|image:metl-xml-formatter-48x48-color.png[]
+|Use When|Model based data needs to be formatted into xml text
+|Samples|Relational Database to Flat File, DB request to WSDL to DB results
 |Description|The format xml component takes a model based message and formats its content into an xml text message
    
 |Inbound Message Type|Model Based Message
 |Output Message Type|Text Based Message
 |===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description
+include::../common-properties/input-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Ignore namespaces for XPath matching|
+|XML Format|
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===========================================
+
+====== Component Editor
+Double clicking on the Format XML component in the flow will result in the Format XML editor being displayed as shown below.
+
+image:editors/format-xml-editor.png[]
+
+The first step in configuring the xml output is to specify the xml template that will be used to define the xml tag structure of the document.
+The XML template can be imported from an XSD or WSDL source that resides in a file or at a specified URL.  Clicking the "Import Template" button
+opens the import dialog show below.
+
+image:editors/format-xml-editor-import-template.png[]
+
+An XML template can also be manually entered by clicking the "Edit Template" button.
+
+Once an XML template is defined XPath is used to map entities/attributes from the model to the xml template.  See examples below.
+
+====== Example 1.  Format Person Entity to XML
+XML Template
+----
+<Persons>
+    <Person>
+        <Id></Id>
+        <FirstName></FirstName>
+        <LastName></LastName>
+        <Gender></Gender>
+    </Person>
+</Persons>
+----
+
+XPath Mapping
+
+image:editors/format-xml-editor.png[]

@@ -2,6 +2,8 @@
 [cols="<25%h,<75%"]
 |===========================================
 |Icon|image:joiner.png[]
+|Use When|
+|Samples|Normalized Table to Denormalized File
 |Description|The joiner component acts like a sql join, joining together individual elements of records within messages.
    
 |Inbound Message Type|Model Based Message

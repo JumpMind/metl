@@ -1,7 +1,8 @@
+[id="text-file-writer",reftext="Text File Writer"]
 ===== Text File Writer
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:textfilewriter.png[]
+|Icon|image:metl-text-writer-48x48-color.png[]
 |Use When|Data needs written to a text based file
 |Samples|
 |Description|The Text File Writer is used to write data to a text based file.
@@ -28,6 +29,8 @@ absolute path specified in the File based resource
 |Append|Add input data to the end of an existing file
 |Line Terminator|String to append to the end of each line written to the file
 include::../common-properties/encoding.ad[]
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===========================================

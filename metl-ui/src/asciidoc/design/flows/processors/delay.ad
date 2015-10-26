@@ -4,6 +4,7 @@
 |===========================================
 |Icon|image:metl-delay-48x48-color.png[]
 |Use When|A delay is needed when sending data between components
+|Samples|
 |Description|The Delay causes messages being sent through the delay component to be delayed/paused for the configured number of seconds before being sent to downstream components.
    
 |Inbound Message Type|Any Message Type

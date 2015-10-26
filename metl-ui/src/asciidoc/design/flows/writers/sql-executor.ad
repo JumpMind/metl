@@ -1,8 +1,9 @@
+[id="sql-executor",reftext="SQL Executor"]
 ===== Sql Executor
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:rdbmswriter.png[]
-|Use When|Data needs written to a database using a specific sql
+|Icon|image:metl-writer-48x48-color.png[]
+|Use When|Data needs written to or deleted from a database using a specific sql statement 
 |Samples|
 |Description|The Sql Executor is used to write data to a SQL compliant relational database by specifying an sql query.
 
@@ -26,7 +27,8 @@ include::../common-properties/enabled.ad[]
 completion. 
 |Sql|Sql statement(s) to run.  Could be an insert, update or delete statement.  Multiple statements can be executed by including a semi-colon (;) between 
 sql statements.
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
- 
 |===========================================

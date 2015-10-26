@@ -286,11 +286,6 @@
                 <defaultValue>true</defaultValue>
                 <description></description>
             </setting>
-            <setting id='xml.formatter.parameter.replacement' type='boolean' required='false'>
-                <name>Parameter replacement</name>
-                <defaultValue>true</defaultValue>
-                <description></description>
-            </setting>
             <setting id='xml.formatter.xml.format' type='choice' required='false'>
                 <name>XML Format</name>
                 <defaultValue>Pretty</defaultValue>
