@@ -27,6 +27,8 @@ The following table shows a list of available components.
 |<<execute>>|image:metl-execute-48x48-color.png[]|There is a need to execute an operating system command as part of a flow
 |<<file-util>>|image:metl-file-util-48X48-color.png[]|Files need to be renamed, copied, moved or deleted
 |<<format-delimited>>|image:metl-delimitedformatter-48x48-color.png[]|Model based data needs to be formatted into delimited text
+|<<format-fixed>>|image:metl-fixed-length-48x48-color.png[]|Model based data needs to be formatted into fixed length text
+|<<format-xml>>|image:metl-xml-formatter-48x48-color.png[]|Model based data needs to be formatted into xml text
 |===========================================
 
 include::readers/readers.ad[]
