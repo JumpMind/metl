@@ -35,6 +35,7 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Mapping extends AbstractComponentRuntime {
@@ -90,7 +91,7 @@ public class Mapping extends AbstractComponentRuntime {
         }
 
         if (!message.equals("The ")) {
-            throw new IllegalStateException(message);
+            throw new MisconfiguredException(message);
         }
     }
 
