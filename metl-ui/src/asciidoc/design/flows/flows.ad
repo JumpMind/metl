@@ -29,6 +29,7 @@ The following table shows a list of available components.
 |<<format-delimited>>|image:metl-delimitedformatter-48x48-color.png[]|Model based data needs to be formatted into delimited text
 |<<format-fixed>>|image:metl-fixed-length-48x48-color.png[]|Model based data needs to be formatted into fixed length text
 |<<format-xml>>|image:metl-xml-formatter-48x48-color.png[]|Model based data needs to be formatted into xml text
+|<<joiner>>||
 |===========================================
 
 include::readers/readers.ad[]

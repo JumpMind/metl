@@ -4,6 +4,7 @@
 |===========================================
 |Icon|image:metl-xml-formatter-48x48-color.png[]
 |Use When|Model based data needs to be formatted into xml text
+|Samples|Relational Database to Flat File, DB request to WSDL to DB results
 |Description|The format xml component takes a model based message and formats its content into an xml text message
    
 |Inbound Message Type|Model Based Message
@@ -41,7 +42,7 @@ An XML template can also be manually entered by clicking the "Edit Template" but
 
 Once an XML template is defined XPath is used to map entities/attributes from the model to the xml template.  See examples below.
 
-======= Example 1.  Format Person Entity to XML
+====== Example 1.  Format Person Entity to XML
 XML Template
 ----
 <Persons>
