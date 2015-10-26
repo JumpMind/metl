@@ -98,7 +98,7 @@ public class EditFlowPalette extends VerticalLayout {
     }
 
     protected String getImageResourceNameForComponentType(String type) {
-        String icon = "/org/jumpmind/metl/core/runtime/component/metl-puzzle-48x48.png";
+        String icon = "/org/jumpmind/metl/core/runtime/component/metl-puzzle-48x48-color.png";
         XMLComponentUI def = context.getUiFactory().getDefinition(type);
         if (def != null && isNotBlank(def.getIconImage())) {
             icon = def.getIconImage();

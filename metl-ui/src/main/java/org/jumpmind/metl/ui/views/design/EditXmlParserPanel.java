@@ -187,7 +187,9 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
         if (StringUtils.isNotBlank(setting.getValue())) {
             try {
                 Document document = builder.build(new StringReader(setting.getValue()));
-                buildXpathChoicesFromElement("/" + document.getRootElement().getName(), document.getRootElement());
+                String prefix = "/" + document.getRootElement().getName();
+                xpathChoices.add(prefix);
+                buildXpathChoicesFromElement(prefix, document.getRootElement());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
