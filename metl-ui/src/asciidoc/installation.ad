@@ -117,7 +117,7 @@ service Metl stop
 
 For windows, use the local services control panel to stop the Metl service.
 
-=== Uinstalling Metl as a service
+=== Uninstalling Metl as a service
 
 To uninstall Metl as a service, run teh following from a command line.
 
