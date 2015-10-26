@@ -26,7 +26,7 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
     repositories {
         // uncomment this if you want to use your local maven repository to test undelivered
         /// changes (like symmetricds changes)
-        mavenLocal()
+        //mavenLocal()
         mavenCentral()        
         maven { url "http://maven.vaadin.com/vaadin-addons" }
         maven { url "http://maven.jumpmind.com/repo" }
