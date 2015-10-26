@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.apache.commons.io.IOUtils.closeQuietly;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -31,7 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -106,9 +107,10 @@ public class XmlReader extends AbstractComponentRuntime {
         XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
         ArrayList<String> outboundPayload = new ArrayList<String>();
 
-
-        for (String file : files) {
+        int filesProcessed = 0;
+        for (String file : files) {            
             log(LogLevel.INFO, "Reading %s", file);
+            filesProcessed++;
             Map<String, Serializable> headers = new HashMap<>();
             headers.put("source.file.path", file);
             File xmlFile = null;
@@ -148,8 +150,6 @@ public class XmlReader extends AbstractComponentRuntime {
                             StringBuilder xml = new StringBuilder();
 
                             forward(startLine, lineNumberReader);
-
-                            // lineNumberReader.setLineNumber(startLine);
 
                             int linesToRead = parser.getLineNumber() - lineNumberReader.getLineNumber();
                             if (lineNumberReader.getLineNumber() > startLine) {
@@ -191,10 +191,10 @@ public class XmlReader extends AbstractComponentRuntime {
                 eventType = parser.next();
             }
 
-            IOUtils.closeQuietly(lineNumberReader);
+            closeQuietly(lineNumberReader);
 
             if (outboundPayload.size() > 0) {
-                callback.sendMessage(headers, outboundPayload, unitOfWorkLastMessage);
+                callback.sendMessage(headers, outboundPayload, filesProcessed == files.size() && unitOfWorkLastMessage);
             }
         }
 
