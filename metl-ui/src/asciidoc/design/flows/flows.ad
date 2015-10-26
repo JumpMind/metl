@@ -18,6 +18,14 @@ The following table shows a list of available components.
 |<<unzip>>|image:metl-zip-48X48-color.png[]|A compressed zip file needs to be extracted in order to process its content
 |<<rdbms-reader>>|image:metl-reader-48x48-color.png[]|Data needs read from a relational database
 |<<text-constant>>|image:metl-text-file-48X48-color.png[]|A text constant is needed in message content in the flow
+3+|Processors
+|<<call-flow>>|image:metl-flow-48x48-color.png[]|A flow needs to be called from another flow
+|<<content-router>>|image:metl-content-router-48x48-color.png[]|Content within a message needs to be routed to different downstream components in the existing flow
+|<<data-diff>>|image:metl-data-diff-48X48-color.png[]|A set of model based data needs compared to another set of model based data in order to generate insert/update/delete instructions for a writer component
+|<<deduper>>|image:metl-deduper-48x48-color.png[]|Input model based records must be deduplicated before being sent to downstream components
+|<<delay>>|image:metl-delay-48x48-color.png[]|A delay is needed when sending data between components
+|<<execute>>|image:metl-execute-48x48-color.png[]|There is a need to execute an operating system command as part of a flow
+|<<file-util>>|image:metl-file-util-48X48-color.png[]|Files need to be renamed, copied, moved or deleted
 |===========================================
 
 include::readers/readers.ad[]

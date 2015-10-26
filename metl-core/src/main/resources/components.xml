@@ -34,7 +34,7 @@
     </component>    
     <component id='DataDiff' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='true'>
-        <name>Data Diff</name>
+        <name>Model Data Diff</name>
         <className>org.jumpmind.metl.core.runtime.component.DataDiff</className>
         <settings>
             <setting id='source.1' type='source_step' required='true'>
@@ -205,7 +205,6 @@
                     <choice>Rename</choice>
                     <choice>Move</choice>
                     <choice>Delete</choice>
-                    <choice>Touch</choice>
                 </choices>
             </setting>        
             <setting id='target.resource' type='streamable_resource' required='true'>
@@ -221,7 +220,7 @@
                 <description></description>
             </setting>
             <setting id='get.file.name.from.message' type='boolean' required='false'>
-                <name>Get File Name From Message</name>
+                <name>Get Input File Name From Message</name>
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
@@ -231,7 +230,7 @@
                 <description></description>
             </setting>
             <setting id='new.name' type='text' required='false'>
-                <name>New Name</name>
+                <name>Target File Name</name>
                 <description></description>
             </setting>
             <setting id='append.to.name' type='text' required='false'>

@@ -1,11 +1,12 @@
-[id="delay",reftext="Delay"]
-===== Delay
+[id="call-flow",reftext="Call Flow"]
+===== Text Constant
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-delay-48x48-color.png[]
-|Use When|A delay is needed when sending data between components
-|Description|The Delay causes messages being sent through the delay component to be delayed/paused for the configured number of seconds before being sent to downstream components.
-   
+|Icon|image:metl-flow-48X48-color.png[]
+|Use When|A flow needs to be called from another flow
+|Samples|
+|Description|The Call Flow component allows a flow to be called from another flow.   
+
 |Inbound Message Type|Any Message Type
 |Output Message Type|Any Message Type
 |===========================================
@@ -19,7 +20,7 @@ include::../common-properties/input-model.ad[]
 include::../common-properties/output-model.ad[]
 include::../common-properties/unit-of-work.ad[]
 include::../common-properties/enabled.ad[]
-|Delay (ms)|The amount of time in milliseconds that the messages will be delayed before being passed to downstream components
+|Flow|The flow to be called
 include::../common-properties/log-input.ad[]
 include::../common-properties/log-output.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]

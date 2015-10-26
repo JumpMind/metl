@@ -3,6 +3,10 @@
 
 Processors are a set of components that manipulate inbound messages in some way and pass the manipulated messages data to other components downstream in the associated flow.  
 
+include::call-flow.ad[]
+
+include::data-diff.ad[]
+
 include::deduper.ad[]
 
 include::delay.ad[]
@@ -10,6 +14,8 @@ include::delay.ad[]
 include::content-router.ad[]
 
 include::execute.ad[]
+
+include::file-util.ad[]
 
 include::format-delimited.ad[]
 
