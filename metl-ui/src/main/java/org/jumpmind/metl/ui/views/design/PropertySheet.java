@@ -305,7 +305,6 @@ public class PropertySheet extends Panel {
             FlowStep step = (FlowStep) value;
             final AbstractSelect resourcesCombo = new ComboBox("Resource");
             resourcesCombo.setImmediate(true);
-            resourcesCombo.setRequired(true);
             List<String> types = resourceFactory.getResourceTypes(componentDefintion.getResourceCategory());
             String projectVersionId = step.getComponent().getProjectVersionId();
             if (types != null) {
