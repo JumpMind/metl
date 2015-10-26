@@ -27,7 +27,7 @@ absolute path specified in the File based resource
 |Must Exist|Requires the file to exist prior to writing
 |Append|Add input data to the end of an existing file
 |Line Terminator|String to append to the end of each line written to the file
-|Encoding|The encoding of the file
+include::../common-properties/encoding.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===========================================

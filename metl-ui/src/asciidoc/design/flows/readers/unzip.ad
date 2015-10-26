@@ -1,0 +1,28 @@
+===== Unzip
+[cols="<25%h,<75%"]
+|===========================================
+|Icon|image:metl-zip-48X48-color.png[]
+|Use When|A compressed zip file needs to be extracted in order to process its content
+|Samples|
+|Description|The Unzip component allows a compressed archive/zip file to be extracted so that its contents can be processed in the flow. 
+
+|Inbound Message Type|Text Based Message
+|Output Message Type|Text Based Message
+|===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Target File Resource|The target file resource where extracted files will be written
+|Create Sub Dir From File Name|Whether to create a root sub-directory for the extracted files that will match the zip file name
+|Delete Source File|Whether the source zip file should be deleted after its contents have been extracted
+include::../common-properties/encoding.ad[]
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===========================================

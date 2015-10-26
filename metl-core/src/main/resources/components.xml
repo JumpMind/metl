@@ -864,7 +864,7 @@
         <description></description>
         <settings>
             <setting id='target.resource' type='streamable_resource' required='true'>
-                <name>Target File Path</name>
+                <name>Target File Resource</name>
                 <description></description>
             </setting>
             <setting id='target.sub.dir' type='boolean' required='false'>
@@ -893,7 +893,7 @@
                 <description></description>
             </setting>
             <setting id='relative.path' type='text' required='false'>
-                <name>Relative path to a resource based file</name>
+                <name>File Path</name>
                 <description></description>
             </setting>
             <setting id='read.tag' type='text' required='false'>

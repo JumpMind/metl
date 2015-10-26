@@ -1,7 +1,7 @@
 ===== Text Constant
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:textfilereader.png[]
+|Icon|image:metl-text-file-48X48-color[]
 |Use When|A text constant is needed in message content in the flow
 |Samples|
 |Description|The Text Constant allows a constant text literal to be placed in the payload of a message and sent to downstream components.   
@@ -19,6 +19,8 @@ include::../common-properties/unit-of-work.ad[]
 include::../common-properties/enabled.ad[]
 |Text|The text constant that will be placed into the message payload and sent to downstream systems
 include::../common-properties/rows-per-message.ad[]
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===========================================
