@@ -36,6 +36,8 @@ include::../common-properties/enabled.ad[]
 |Continue on Error|Whether to continue processing records on a failure and count the error record in the ignore count
 |Batch Mode|Whether to execute the insert and/or update as a transaction allowing rollback capability upon failure (assuming the RDBMS is not an auto 
 commit system) 
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===========================================

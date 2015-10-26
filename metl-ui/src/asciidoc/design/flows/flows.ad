@@ -32,6 +32,9 @@ The following table shows a list of available components.
 |<<joiner>>||
 3+|Writers
 |<<rdbms-writer>>|image:metl-writer-48x48-color.png[]|Data needs written to a relational database
+|<<sql-executor>>|image:metl-writer-48x48-color.png[]|Data needs written to or deleted from a database using a specific sql statement
+|<<text-file-writer>>|image:metl-text-writer-48x48-color.png[]|Data needs written to a text based file
+|<<zip>>|image:metl-zip-48x48-color.png[]|Data needs to be put in a compressed file 
 |===========================================
 
 include::readers/readers.ad[]
