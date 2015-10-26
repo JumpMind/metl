@@ -1,9 +1,31 @@
+[id="format-delimited",reftext="Format Delimited"]
 ===== Format Delimited
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:delimitedformatter.png[]
+|Icon|image:metl-delimitedformatter-48x48-color.png[]
+|Use When|Model based data needs to be formatted into delimited text
 |Description|The format delimited component takes a model based message and formats its content into a delimited text message
    
 |Inbound Message Type|Model Based Message
 |Output Message Type|Text Based Message
 |===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description
+include::../common-properties/input-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Delimiter|The character that should be used to delimit the attribute values
+|Quote Character|The character that should be used to quote the attribute values that are of type String
+|Header line|Whether a header line should be created that contains attribute column names
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===========================================
+
+====== Component Editor
+Double clicking on the 
