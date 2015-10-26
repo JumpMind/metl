@@ -2,7 +2,7 @@
 ===== Text Constant
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-text-file-48X48-color.png[]
+|Icon|image:metl-text-constant-48X48-color.png[]
 |Use When|A text constant is needed in message content in the flow
 |Samples|
 |Description|The Text Constant allows a constant text literal to be placed in the payload of a message and sent to downstream components.   
