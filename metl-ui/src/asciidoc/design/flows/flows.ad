@@ -1,7 +1,24 @@
 
 === Flows
 
-TODO
+Each integration is written as a flow.  A flow defines the input to be read, the processing rules to be applied, and the output to be written.  Flows are a graphical
+set of instructions for how data is integrated from a source system to a target system.  
+
+Flows consist of a set of components (readers, processors or writers) connected together to form the flow.
+
+The following table shows a list of available components.
+
+[options="header" cols="<25%,<5%,<70%"]
+|===========================================
+|Name|Icon|Use When
+3+|Readers
+|<<file-poller>>|image:metl-file-poller-48x48-color.png[]|A file based resource needs to be checked for the existence of a file or set of files
+|<<text-file-reader>>|image:metl-text-file-48X48-color.png[]|Data needs read from a text file
+|<<xml-reader>>|image:metl-xml-formatter-48X48-color.png[]|An XML file needs to be read and element content of that file sent as individual messages
+|<<unzip>>|image:metl-zip-48X48-color.png[]|A compressed zip file needs to be extracted in order to process its content
+|<<rdbms-reader>>|image:metl-reader-48x48-color.png[]|Data needs read from a relational database
+|<<text-constant>>|image:metl-text-file-48X48-color.png[]|A text constant is needed in message content in the flow
+|===========================================
 
 include::readers/readers.ad[]
 
