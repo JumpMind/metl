@@ -1,0 +1,34 @@
+[id="file-util",reftext="File Util"]
+===== File Util
+[cols="<25%h,<75%"]
+|===========================================
+|Icon|image:metl-file-util-48X48-color.png[]
+|Use When|Files need to be renamed, copied, moved or deleted
+|Samples|
+|Description|The File Util component provides a sets of file utilities that can be used to manipulate files at the operating system level including copying, reanmeing, moving or deleting.
+
+|Inbound Message Type|Any Message Type
+|===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description
+|Resource|The source file based resource (either local or remote) on which the source file(s) to be manipulated reside
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Action|Either Copy, Rename, Move, Delete or Touch.  Copy will copy the file, move will move the file, delete will delete the file, and touch will update the files last updated date/time.
+|Target Resource|The target resource to which target files will be written if the Action is Copy or Move
+|Source Path|The path and file name of the source file(s) to be manipulated.  Wildcard character (*) can be used.
+|Target Path|The target path and file name used to write files if the Action is Copy, Move, or Rename.  If a wildcard character is used in the Source Path, the Target Path should
+be specified as a path only, and the target file names will be derived from the source file names. 
+|Get File Name From Message|
+|Must Exist|
+|Append To Name|
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===========================================
+

@@ -40,7 +40,7 @@
         <className>org.jumpmind.metl.ui.views.design.EditRdbmsReaderPanel</className>
     </component-ui>
     <component-ui id="Content Router UI" componentId="Content Router">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-entity-router-48x48-color.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-content-router-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditContentRouterPanel</className>
     </component-ui>
     <component-ui id="Format Delimited UI" componentId="Format Delimited">

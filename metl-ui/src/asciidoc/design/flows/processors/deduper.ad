@@ -1,7 +1,9 @@
+[id="deduper",reftext="Deduper"]
 ===== Deduper
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:deduper.png[]
+|Icon|image:metl-deduper-48x48-color.png[]
+|Use When|Input model based records must be deduplicated before being sent to downstream components
 |Description|The Deduper removes duplicate records from a message or set of messages in a given unit of work.  See <<unit-of-work>>.
 Once the complete unit of work has been received by the deduper, the unit of work will repackage the records from the inbound
 message(s) to a set of output messages based on the configured number of records per message, and send those deduped outbound messages
@@ -20,6 +22,8 @@ include::../common-properties/input-model.ad[]
 include::../common-properties/unit-of-work.ad[]
 include::../common-properties/enabled.ad[]
 include::../common-properties/rows-per-message.ad[]
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===========================================
