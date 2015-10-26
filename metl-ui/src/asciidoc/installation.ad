@@ -1,4 +1,126 @@
 [id="installation",reftext="Installation"]
 == Installation
 
-TODO
+Metl is provided as a web application archive (war) file.  The .war file can be deployed in two different ways.
+
+. Deployed stand-alone using Metl's embedded Jetty server
+. Deployed to an existing servlet container (i.e. Tomcat, JBoss, Websphere, Oracle Application Server, etc.)  
+
+=== Deployed stand-alone using Metl's embedded Jetty server
+
+The simplest way to run Metl is to run it stand-alone using the internal Jetty container.  In order to run Metl stand-alone, simply
+run the following from a command line.
+
+TIP: A Java 8 run-time environment must be installed and in the path to run java.
+
+----
+java -jar metl.war
+----
+
+In the simplest form shown above, Metl will choose a configuration direction based on the logged in user's home directory (i.e. /users/myusername/.metl)
+for linux based systems and (c:/users/myusername/.metl) on windows based systems.  In this form metl will use a file based H2 database for for the Metl
+data store.
+
+=== Deployed to an existing servlet container 
+
+In order to deploy Metl to an existing servlet container, simply copy the metl.war file to the deploy directory of the application server.
+
+=== Specifying the Metl configuration directory
+
+The default configuration directory can be set by specifying the system property org.jumpmind.metl.ui.init.config.dir.
+
+----
+java -Dorg.jumpmind.metl.ui.init.config.dir=/opt/metl -jar metl.war
+----
+
+=== Application properties file (metl.properties)
+
+Metl will create a default properties file in its configuration directory of one does not exist.  The property file is named metl.properties and
+had the following content.
+
+----
+db.driver=org.h2.Driver
+db.url=jdbc:h2:./metl-dev
+execution.retention.time.ms=3600000
+execution.retention.time.ms.cancelled=60000
+log.to.console.enabled=true
+log.to.file.enabled=true
+table.prefix=METL
+#log.file=
+----
+
+Specifying an alternate database resource for metl configuration and run-time data is as simple as specifying a jdbc driver and url in the
+metl.properties file.  
+
+----
+db.driver=net.sourceforge.jtds.jdbc.Driver
+db.url=jdbc:jtds:sqlserver://myserver:1433/mydatabase
+db.user=myuserid
+db.password=mypassword
+----
+
+By default, Metl uses a DBCP connection pool.  In addition to those above, all DBCP configuration settings can be set in the metl.properties file including:
+
+----
+db.validation.query=
+db.pool.initial.size=
+db.pool.max.active=
+db.pool.max.idle=
+db.pool.min.idle=
+db.pool.max.wait.millis=
+db.pool.min.evictable.idle.millis=
+db.test.on.borrow=
+db.test.on.return=
+db.test.while.idle=
+----
+
+=== Installing Metl as a service
+
+Metl can be installed as a linux/unix or windows service.  To install Metl as a service, run the following from a command line.
+
+----
+java -jar metl.war install
+----
+
+By default, Metl will be installed as a service with service name Metl.  A service configuration file named metl_service.conf 
+will be written to the configuration directy and can be used to further configure the Metl service.  
+
+=== Starting the Metl service
+
+To start the Metl service, run the following from a command line
+
+----
+java -jar metl.war start
+----
+
+or, use the operating system tools to start and stop the service.  On linux:
+
+----
+service Metl startl
+----
+
+For windows, use the local services control panel to start the Metl service.
+
+=== Stopping the Metl service
+
+To stop the Metl service, run the following from a command line
+
+----
+java -jar metl.war stop
+----
+
+or, use the operating system tools to start and stop the service.  On linux:
+
+----
+service Metl stop
+----
+
+For windows, use the local services control panel to stop the Metl service.
+
+=== Uinstalling Metl as a service
+
+To uninstall Metl as a service, run teh following from a command line.
+
+----
+java -jar metl.war uninstall
+----
