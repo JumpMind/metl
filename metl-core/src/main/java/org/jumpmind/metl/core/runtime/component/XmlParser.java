@@ -80,10 +80,7 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                 }
             }
         }
-        
-        if (entitySettings.size() == 0) {
-        	throw new MisconfiguredException("At least one XPATH setting must be provided.");
-        }
+
     }
     
     @Override
