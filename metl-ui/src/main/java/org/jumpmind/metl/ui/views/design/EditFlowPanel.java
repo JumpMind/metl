@@ -51,6 +51,7 @@ import org.jumpmind.metl.ui.diagram.NodeDoubleClickedEvent;
 import org.jumpmind.metl.ui.diagram.NodeMovedEvent;
 import org.jumpmind.metl.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.metl.ui.views.DesignNavigator;
+import org.jumpmind.metl.ui.views.IFlowRunnable;
 import org.jumpmind.metl.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.util.AppUtils;
@@ -76,7 +77,7 @@ import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class EditFlowPanel extends HorizontalLayout implements IUiPanel {
+public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRunnable {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -344,7 +345,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel {
         return list;
     }
 
-    protected void runFlow() {
+    public void runFlow() {
         final String DESIGN_FOLDER_NAME = "<Design Time>";
         final String AGENT_NAME = String.format("<%s on %s>", context.getUser().getLoginId(), AppUtils.getHostName());
         IAgentManager agentManager = context.getAgentManager();
@@ -390,7 +391,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel {
 
         String executionId = agentManager.getAgentRuntime(myDesignAgent).scheduleNow(deployment);
         if (executionId != null) {
-            ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context, tabs);
+            ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context, tabs, this);
             tabs.addCloseableTab(executionId, "Run " + flow.getName(), Icons.LOG, logPanel);
         }
     }
