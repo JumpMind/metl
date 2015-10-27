@@ -87,7 +87,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
     PropertySheet propertySheet;
 
-    DesignNavigator projectNavigator;
+    DesignNavigator designNavigator;
 
     EditFlowPalette componentPalette;
 
@@ -116,9 +116,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         this.flow = context.getConfigurationService().findFlow(flowId);
         this.context = context;
         this.tabs = tabs;
-        this.projectNavigator = designNavigator;
+        this.designNavigator = designNavigator;
 
-        this.propertySheet = new PropertySheet(context);
+        this.propertySheet = new PropertySheet(context, tabs);
         this.propertySheet.setListener(new IPropertySheetChangeListener() {
 
             @Override
@@ -282,7 +282,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         
         propertySheet.setSource(flowStep);
 
-        projectNavigator.refresh();
+        designNavigator.refresh();
         
 
     }
@@ -409,10 +409,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                 propertySheet.setSource(flowStep);
                 delButton.setEnabled(true);
             } else if (e instanceof NodeDoubleClickedEvent) {
-                NodeDoubleClickedEvent event = (NodeDoubleClickedEvent) e;
-                Node node = event.getNode();
-                FlowStep flowStep = flow.findFlowStepWithId(node.getId());
-                projectNavigator.open(flowStep, flow, propertySheet);
+                propertySheet.openAdvancedEditor();
             } else if (e instanceof NodeMovedEvent) {
                 NodeMovedEvent event = (NodeMovedEvent) e;
                 Node node = event.getNode();
