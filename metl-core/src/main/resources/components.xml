@@ -883,7 +883,8 @@
             </setting>
         </settings>
     </component>
-    <component id='XmlReader' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
+    <component id='XmlReader' category='READER' inputMessageType='text' outputMessageType='text' 
+    	supportsMultipleThreads='true' resourceCategory='streamable' inputOutputModelsMatch='false'>
         <name>XML Reader</name>
         <className>org.jumpmind.metl.core.runtime.component.XmlReader</className>
         <description></description>
