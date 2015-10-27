@@ -21,8 +21,10 @@
 package org.jumpmind.metl.ui.views.design;
 
 import java.io.StringReader;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Attribute;
@@ -72,7 +74,7 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
 
     TextField filterField;
 
-    Set<String> xpathChoices;
+    Collection<String> xpathChoices;
 
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
@@ -115,6 +117,12 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
         if (model != null) {
             table.removeAllItems();
             String upperFilterText = StringUtils.trimToEmpty(filterText).toUpperCase();
+            Collections.sort(model.getModelEntities(), new Comparator<ModelEntity>() {
+                public int compare(ModelEntity entity1, ModelEntity entity2) {
+                    return entity1.getName().toLowerCase().compareTo(entity2.getName().toLowerCase());
+                }
+            });
+
             for (ModelEntity entity : model.getModelEntities()) {
                 boolean firstAttribute = true;
                 boolean entityMatches = upperFilterText.equals("") || entity.getName().toUpperCase().indexOf(upperFilterText) >= 0;
@@ -179,7 +187,7 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
     }
 
     protected void buildXpathChoices() {
-        xpathChoices = new HashSet<String>();
+        xpathChoices = new ArrayList<>();
         SAXBuilder builder = new SAXBuilder();
         builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
         builder.setFeature("http://xml.org/sax/features/validation", false);
@@ -187,24 +195,30 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
         if (StringUtils.isNotBlank(setting.getValue())) {
             try {
                 Document document = builder.build(new StringReader(setting.getValue()));
-                String prefix = "/" + document.getRootElement().getName();
-                xpathChoices.add(prefix);
-                buildXpathChoicesFromElement(prefix, document.getRootElement());
+                buildXpathChoicesForElement("", document.getRootElement());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
     }
+    
+    protected void buildXpathChoicesForElement(String prefix, Element element) {
+        String base = "/" + element.getName();
+        String newPrefix = prefix + base;
+        xpathChoices.add(newPrefix);
+        for (Attribute attr : element.getAttributes()) {
+            xpathChoices.add(newPrefix + "/@" + attr.getName());
+        }
+        xpathChoices.add(base);
+        for (Attribute attr : element.getAttributes()) {
+            xpathChoices.add(base + "/@" + attr.getName());
+        }
+        buildXpathChoicesForChildElements(newPrefix, element);
+    }
 
-    protected void buildXpathChoicesFromElement(String prefix, Element parentElement) {
+    protected void buildXpathChoicesForChildElements(String prefix, Element parentElement) {
         for (Element element : parentElement.getChildren()) {
-            String text = prefix + "/" + element.getName();
-            xpathChoices.add(text);
-            for (Attribute attr : element.getAttributes()) {
-                String attrText = text + "/@" + attr.getName();
-                xpathChoices.add(attrText);
-            }
-            buildXpathChoicesFromElement(text, element);
+            buildXpathChoicesForElement(prefix, element);
         }
     }
 
