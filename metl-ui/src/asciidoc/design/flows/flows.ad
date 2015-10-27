@@ -29,7 +29,7 @@ The following table shows a list of available components.
 |<<format-delimited>>|image:metl-delimitedformatter-48x48-color.png[]|Model based data needs to be formatted into delimited text
 |<<format-fixed>>|image:metl-fixed-length-48x48-color.png[]|Model based data needs to be formatted into fixed length text
 |<<format-xml>>|image:metl-xml-formatter-48x48-color.png[]|Model based data needs to be formatted into xml text
-|<<joiner>>||
+|<<joiner>>|image:metl-joiner-48x48-color.png[]|Different instances of model based records need to be merged into a single instance that combines the attributes from all instances.
 3+|Writers
 |<<rdbms-writer>>|image:metl-writer-48x48-color.png[]|Data needs written to a relational database
 |<<sql-executor>>|image:metl-writer-48x48-color.png[]|Data needs written to or deleted from a database using a specific sql statement
