@@ -40,6 +40,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class XmlParser extends AbstractXMLComponentRuntime {
@@ -78,6 +79,10 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                     }
                 }
             }
+        }
+        
+        if (entitySettings.size() == 0) {
+        	throw new MisconfiguredException("At least one XPATH setting must be provided.");
         }
     }
     
