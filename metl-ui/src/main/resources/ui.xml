@@ -28,7 +28,7 @@
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delay-48x48-color.png</iconImage>
     </component-ui>    
     <component-ui id="RDBMS Writer UI" componentId="RDBMS Writer">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-reader-48x48-color.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-writer-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditRdbmsWriterPanel</className>
     </component-ui>
     <component-ui id="Sql Executor UI" componentId="Sql Executor">
@@ -40,7 +40,7 @@
         <className>org.jumpmind.metl.ui.views.design.EditRdbmsReaderPanel</className>
     </component-ui>
     <component-ui id="Content Router UI" componentId="Content Router">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-entity-router-48x48-color.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-content-router-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditContentRouterPanel</className>
     </component-ui>
     <component-ui id="Format Delimited UI" componentId="Format Delimited">
@@ -84,7 +84,7 @@
     </component-ui>
     <component-ui id="Parse XML UI" componentId="Parse XML">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditXmlFormatPanel</className>
+        <className>org.jumpmind.metl.ui.views.design.EditXmlParserPanel</className>
     </component-ui>
     <component-ui id="XSLT Processor UI" componentId="XSLT Processor">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xslt-48x48-color.png</iconImage>
@@ -134,15 +134,15 @@
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-file-poller-48x48-color.png</iconImage>
     </component-ui>     
     <component-ui id="Text Constant UI" componentId="Text Constant">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-file-48x48-color.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-constant-48x48-color.png</iconImage>
     </component-ui>    
     <component-ui id="XML Reader UI" componentId="XmlReader">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-48x48-color.png</iconImage>
     </component-ui>
     <component-ui id="Data Diff UI" componentId="DataDiff">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-joiner-48x48-color.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-data-diff-48X48-color.png</iconImage>
     </component-ui>
     <component-ui id="File Util UI" componentId="File Util">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-file-48x48-color.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-file-util-48x48-color.png</iconImage>
     </component-ui>
 </ui>

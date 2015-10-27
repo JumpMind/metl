@@ -1,7 +1,10 @@
+[id="delay",reftext="Delay"]
 ===== Delay
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:delay.png[]
+|Icon|image:metl-delay-48x48-color.png[]
+|Use When|A delay is needed when sending data between components
+|Samples|
 |Description|The Delay causes messages being sent through the delay component to be delayed/paused for the configured number of seconds before being sent to downstream components.
    
 |Inbound Message Type|Any Message Type
@@ -18,6 +21,8 @@ include::../common-properties/output-model.ad[]
 include::../common-properties/unit-of-work.ad[]
 include::../common-properties/enabled.ad[]
 |Delay (ms)|The amount of time in milliseconds that the messages will be delayed before being passed to downstream components
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===========================================

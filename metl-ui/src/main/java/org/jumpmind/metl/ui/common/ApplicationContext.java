@@ -79,6 +79,10 @@ public class ApplicationContext implements Serializable {
     public IConfigurationService getConfigurationService() {
         return configurationService;
     }
+    
+    public String getConfigDir() {
+        return environment.getProperty("config.dir");
+    }
 
     public IExecutionService getExecutionService() {
         return executionService;

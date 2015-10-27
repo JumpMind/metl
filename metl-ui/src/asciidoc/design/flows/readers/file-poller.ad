@@ -1,7 +1,8 @@
+[id="file-poller",reftext="File Poller"]
 ===== File Poller
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:filepoller.png[]
+|Icon|image:metl-file-poller-48x48-color.png[]
 |Use When|A file based resource needs to be checked for the existence of a file or set of files
 |Samples|
 |Description|The File Poller is used to look at a file based directory structure and send a message to downstream components 
@@ -36,6 +37,8 @@ parameter.  If the trigger file does not exist, the File Poller will send a shut
 is set to false, no file triggering mechanism will be used
 |Relative Trigger File Path|The relative path and file name of a trigger file that will be used to indicate the files that match the File Pattern 
 parameter are ready for processing.
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===========================================

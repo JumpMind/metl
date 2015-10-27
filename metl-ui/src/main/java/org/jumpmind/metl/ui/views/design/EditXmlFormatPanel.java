@@ -241,6 +241,8 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
             Setting templateSetting = component.findSetting(XmlFormatter.XML_FORMATTER_TEMPLATE);
             templateSetting.setValue(editor.getValue());
             context.getConfigurationService().save(templateSetting);
+            buildXpathChoices();
+            updateTable(filterField.getValue());
             return true;
         }
     }

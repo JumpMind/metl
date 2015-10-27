@@ -1,7 +1,8 @@
+[id="zip",reftext="Zip"]
 ===== Zip
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:zip.png[]
+|Icon|image:metl-zip-48x48-color.png[]
 |Use When|Data needs to be put in a compressed file 
 |Samples|
 |Description|The Zip component is used to generate a compressed file of data provided to it.
@@ -22,6 +23,8 @@ include::../common-properties/enabled.ad[]
 absolute path specified in the File based resource.
 |Delete Source Files|Whether to delete the source files upon completion of creating the compressed file
 |Encoding|File encoding type, defaults to UTF-8
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===========================================

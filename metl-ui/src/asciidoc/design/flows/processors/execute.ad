@@ -1,9 +1,28 @@
+[id="execute",reftext="Execute"]
 ===== Execute
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:execute.png[]
+|Icon|image:metl-execute-48x48-color.png[]
+|Use When|There is a need to execute an operating system command as part of a flow
+|Samples|
 |Description|The execute component executes an operating system command on the host on which the agent is running.
-   
+
 |Inbound Message Type|Any Message Type
 |Output Message Type|Text Based Message
+|===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Command|The operating system command to be executed for every inbound message to the component
+|Continue on Error|Whether the flow should continue if the Command fails to execute properly
+|Success Code|The code that should be returned in the text based outbound message if the Command is successful
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
 |===========================================

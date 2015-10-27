@@ -63,10 +63,12 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
         header1.setSpacing(true);
         header1.setMargin(new MarginInfo(false, true, false, true));
         header1.setWidth(100f, Unit.PERCENTAGE);
-        header1.addComponent(new Label("<b>Input Model:</b> &nbsp;"
-                + (component.getInputModel() != null ? component.getInputModel().getName() : "?"), ContentMode.HTML));
-        header1.addComponent(new Label("<b>Output Model:</b> &nbsp;"
-                + (component.getOutputModel() != null ? component.getOutputModel().getName() : "?"), ContentMode.HTML));
+        header1.addComponent(
+                new Label("<b>Input Model:</b> &nbsp;" + (component.getInputModel() != null ? component.getInputModel().getName() : "?"),
+                        ContentMode.HTML));
+        header1.addComponent(
+                new Label("<b>Output Model:</b> &nbsp;" + (component.getOutputModel() != null ? component.getOutputModel().getName() : "?"),
+                        ContentMode.HTML));
         addComponent(header1);
 
         HorizontalLayout header2 = new HorizontalLayout();
@@ -107,26 +109,39 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
     }
 
     protected void autoMap(boolean fuzzy) {
-        for (ModelEntity entity : component.getInputModel().getModelEntities()) {
-            for (ModelAttribute attr : entity.getModelAttributes()) {
+        for (ModelEntity entity1 : component.getInputModel().getModelEntities()) {
+            for (ModelAttribute attr : entity1.getModelAttributes()) {
+                /* look for exact match first */
                 for (ModelEntity entity2 : component.getOutputModel().getModelEntities()) {
+                    boolean foundExactMatch = false;
                     for (ModelAttribute attr2 : entity2.getModelAttributes()) {
-                        autoMap(attr, attr2, fuzzy);
+                        foundExactMatch |= autoMap(entity1, entity2, attr, attr2, fuzzy, true);
                     }
+
+                    if (!foundExactMatch) {
+                        for (ModelAttribute attr2 : entity2.getModelAttributes()) {
+                            autoMap(entity1, entity2, attr, attr2, fuzzy, false);
+                        }
+                    }
+
                 }
+
             }
         }
     }
 
-    protected void autoMap(ModelAttribute attr, ModelAttribute attr2, boolean fuzzy) {
+    protected boolean autoMap(ModelEntity entity1, ModelEntity entity2, ModelAttribute attr, ModelAttribute attr2, boolean fuzzy,
+            boolean exact) {
         boolean isMapped = false;
+        boolean exactMatch = exact && attr.getName().equalsIgnoreCase(attr2.getName()) && entity1.getName().equals(entity2.getName());
         for (ComponentAttributeSetting setting : component.getAttributeSettings()) {
             if (setting.getName().equals(Mapping.ATTRIBUTE_MAPS_TO) && setting.getValue().equals(attr2.getId())) {
                 isMapped = true;
                 break;
             }
         }
-        if (!isMapped && ((fuzzy && fuzzyMatches(attr.getName(), attr2.getName())) || attr.getName().equalsIgnoreCase(attr2.getName()))) {
+        if (!isMapped && ((fuzzy && fuzzyMatches(attr.getName(), attr2.getName()))
+                || ((!exact && attr.getName().equalsIgnoreCase(attr2.getName())) || exactMatch))) {
             ComponentAttributeSetting setting = new ComponentAttributeSetting();
             setting.setAttributeId(attr.getId());
             setting.setComponentId(component.getId());
@@ -136,6 +151,8 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
             context.getConfigurationService().save(setting);
             diagram.markAsDirty();
         }
+
+        return exact;
     }
 
     protected boolean fuzzyMatches(String str1, String str2) {
@@ -155,8 +172,8 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
 
         for (int i = 1; i <= str1.length(); i++) {
             for (int j = 1; j <= str2.length(); j++) {
-                distance[i][j] = minimum(distance[i - 1][j] + 1, distance[i][j - 1] + 1, distance[i - 1][j - 1]
-                        + ((str1.charAt(i - 1) == str2.charAt(j - 1)) ? 0 : 1));
+                distance[i][j] = minimum(distance[i - 1][j] + 1, distance[i][j - 1] + 1,
+                        distance[i - 1][j - 1] + ((str1.charAt(i - 1) == str2.charAt(j - 1)) ? 0 : 1));
             }
         }
 

@@ -29,6 +29,7 @@ import java.util.Set;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentAttributeSettingsBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
@@ -59,7 +60,7 @@ public class MappingTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 			((Mapping) spy).start();
 		}
 		catch (Exception e) {
-			Assert.assertTrue(e instanceof IllegalStateException);
+			Assert.assertTrue(e instanceof MisconfiguredException);
 		}
 	}
 

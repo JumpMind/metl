@@ -1,0 +1,31 @@
+[id="data-diff",reftext="Model Data Diff"]
+===== Model Data Diff
+[cols="<25%h,<75%"]
+|===========================================
+|Icon|image:metl-data-diff-48X48-color.png[]
+|Use When|A set of model based data needs compared to another set of model based data in order to generate insert/update/delete instructions for a writer component
+|Samples|
+|Description|The Model Data Diff component compares two sets of model based data in order to generate insert/update/delete instructions for a writer component in order to get
+the model based data sets to match.  
+
+|Inbound Message Type|Model Based Message
+|Output Message Type|Model Based Message
+|===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description
+include::../common-properties/input-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Source of Old Version|The source component that is sending data to the data diff component that represents the old or prior data for the compare
+|Source of New Version|The source component that is sending data to the data diff component that represents the new or current data for the compare
+include::../common-properties/rows-per-message.ad[]
+|In Memory Compare|Whether the compare should be done in memory or on disk.  If checked, the compare will be done completely in memory
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===========================================

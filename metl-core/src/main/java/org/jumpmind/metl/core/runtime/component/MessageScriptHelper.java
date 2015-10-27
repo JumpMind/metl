@@ -33,6 +33,7 @@ import org.jumpmind.db.sql.Row;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
@@ -58,7 +59,10 @@ public class MessageScriptHelper {
 
     protected Message inputMessage;
 
+    @Deprecated
     protected ISendMessageCallback messageTarget;
+    
+    protected ISendMessageCallback callback;
     
     protected ComponentStatistics componentStatistics;
     
@@ -98,7 +102,7 @@ public class MessageScriptHelper {
 
             if (entityDataIterator.hasNext()) {
                 EntityData data = entityDataIterator.next();
-                return flowStep.getComponent().toRow(data, false);
+                return flowStep.getComponent().toRow(data, false, true);
             } else {
                 return null;
             }
@@ -108,7 +112,7 @@ public class MessageScriptHelper {
         }
     }
 
-    protected void info(String message, Object... args) {
+    protected void info(String message, Object... args) {        
         context.getExecutionTracker().log(ThreadUtils.getThreadNumber(), LogLevel.INFO, context, message, args);
     }
 
@@ -119,11 +123,30 @@ public class MessageScriptHelper {
     protected void setUnitOfWorkBoundaryReached(boolean unitOfWorkBoundaryReached) {
     	this.unitOfWorkBoundaryReached = unitOfWorkBoundaryReached;
     }
+    
+    protected boolean containsEntity(String entityName, EntityData data) {
+        return flowStep.getComponent().getEntityNames(data, true).contains(entityName);
+    }
+    
+    protected void putAttributeValue(String entityName, String attributeName, EntityData data, Object value) {
+        ModelAttribute attribute = flowStep.getComponent().getInputModel().getAttributeByName(entityName, attributeName);
+        data.put(attribute.getId(), value);
+    }
+    
+    protected Object getAttributeValue(String entityName, String attributeName, EntityData data) {
+        Model model = flowStep.getComponent().getInputModel();
+        return ComponentUtil.getAttributeValue(model, data, entityName, attributeName);
+    }
 
     protected Object getAttributeValue(String entityName, String attributeName) {
         Model model = flowStep.getComponent().getInputModel();
         ArrayList<EntityData> rows = inputMessage.getPayload();
         return ComponentUtil.getAttributeValue(model, rows, entityName, attributeName);
+    }
+    
+    protected Object getAttributeValue(String attributeName, EntityData data) {
+        Model model = flowStep.getComponent().getInputModel();
+        return ComponentUtil.getAttributeValue(model, data, attributeName);
     }
 
     protected List<Object> getAttributeValues(String entityName, String attributeName) {
@@ -132,8 +155,13 @@ public class MessageScriptHelper {
         return ComponentUtil.getAttributeValues(model, rows, entityName, attributeName);
     }
     
-    protected void setMessageTarget(ISendMessageCallback messageTarget) {
-        this.messageTarget = messageTarget;
+    protected void forwardMessage() {
+        callback.sendMessage(null, inputMessage.getPayload(), unitOfWorkBoundaryReached);
+    }
+    
+    protected void setSendMessageCallback(ISendMessageCallback callback) {
+        this.messageTarget = callback;
+        this.callback = callback;
     }
 
     protected Map<String, Object> getScriptContext() {

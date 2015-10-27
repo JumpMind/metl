@@ -37,6 +37,7 @@ import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.Table;
+import org.jumpmind.metl.ui.views.IFlowRunnable;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
@@ -84,22 +85,30 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
     Button removeButton;
     
     Button cancelButton;
+    
+    Button rerunButton;
 
     String executionId;
     
     ApplicationContext context;
     
     TabbedPanel parentTabSheet;
+    
+    IFlowRunnable flowRunnable;
 
-    public ExecutionLogPanel(String executionId, ApplicationContext context, TabbedPanel parentTabSheet) {
+    public ExecutionLogPanel(String executionId, ApplicationContext context, TabbedPanel parentTabSheet, IFlowRunnable flowRunnable) {
         this.executionService = context.getExecutionService();
         this.executionId = executionId;
         this.context = context;
         this.parentTabSheet = parentTabSheet;
+        this.flowRunnable = flowRunnable;
         
         ButtonBar buttonBar = new ButtonBar();
         
+        rerunButton = buttonBar.addButton("Rerun", Icons.RUN, event -> rerun());
+        rerunButton.setVisible(false);
         removeButton = buttonBar.addButton("Remove", Icons.DELETE, event -> remove());
+        removeButton.setVisible(false);
         cancelButton = buttonBar.addButton("Cancel", Icons.CANCEL, event -> cancel());
         addComponent(buttonBar);
 
@@ -205,6 +214,11 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
     public void deselected() {
     }
     
+    protected void rerun() {
+        parentTabSheet.closeTab(executionId);
+        flowRunnable.runFlow();
+    }
+    
     protected void remove() {
         ConfirmDialog.show("Delete Execution?",
                 "Are you sure you want to delete this execution?",
@@ -299,6 +313,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
             }
         }
         
+        rerunButton.setVisible(isDone() && flowRunnable != null);
         removeButton.setVisible(isDone());
         cancelButton.setVisible(!isDone());
     }

@@ -56,8 +56,6 @@ import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.views.design.EditFlowPanel;
 import org.jumpmind.metl.ui.views.design.EditModelPanel;
-import org.jumpmind.metl.ui.views.design.IComponentEditPanel;
-import org.jumpmind.metl.ui.views.design.IFlowStepAware;
 import org.jumpmind.metl.ui.views.design.ManageProjectsPanel;
 import org.jumpmind.metl.ui.views.design.PropertySheet;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
@@ -749,20 +747,6 @@ public class DesignNavigator extends VerticalLayout {
                 || selected instanceof ModelName || selected instanceof ResourceName;
     }
 
-    public void open(FlowStep flowStep, Flow flow, PropertySheet propertySheet) {
-        context.getConfigurationService().refresh(flowStep.getComponent());
-        String type = flowStep.getComponent().getType();
-        IComponentEditPanel panel = context.getUiFactory().create(type);
-        if (panel != null) {
-            if (panel instanceof IFlowStepAware) {
-                ((IFlowStepAware) panel).makeAwareOf(flowStep, flow);
-            }
-            panel.init(flowStep.getComponent(), context, propertySheet);
-            tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
-        }
-
-    }
-
     public void open(Object item) {
         if (item instanceof FlowName) {
             FlowName flow = (FlowName) item;
@@ -774,7 +758,7 @@ public class DesignNavigator extends VerticalLayout {
             tabs.addCloseableTab(model.getId(), model.getName(), Icons.MODEL, editModel);
         } else if (item instanceof ResourceName) {
             ResourceName resource = (ResourceName) item;
-            PropertySheet sheet = new PropertySheet(context);            
+            PropertySheet sheet = new PropertySheet(context, tabs);            
             sheet.setSource(context.getConfigurationService().findResource(resource.getId()));
             tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item),
                     sheet);

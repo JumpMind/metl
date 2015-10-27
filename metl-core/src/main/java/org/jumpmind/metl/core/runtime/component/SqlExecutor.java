@@ -125,7 +125,7 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
         } else if (runWhen.equals(PER_ENTITY)) {
             List<EntityData> datas = inputMessage.getPayload();
             for (EntityData entityData : datas) {
-                params.putAll(getComponent().toRow(entityData, false));
+                params.putAll(getComponent().toRow(entityData, false, true));
                 int count = template.update(sqlToExecute, params);
                 results.add(new Result(sqlToExecute, count));
                 getComponentStatistics().incrementNumberEntitiesProcessed(count);

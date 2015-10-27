@@ -23,6 +23,8 @@ package org.jumpmind.metl;
 import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.security.ProtectionDomain;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
@@ -30,6 +32,7 @@ import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AllowSymLinkAliasChecker;
 import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.util.log.JavaUtilLog;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.Configuration.ClassList;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -37,9 +40,25 @@ import org.eclipse.jetty.webapp.WebAppContext;
 public class StartWebServer {
     
     public static final int PORT = 42000;
-
+    
     public static void main(String[] args) throws Exception {
+        runWebServer();
+    }
+    
+    protected static void disableJettyLogging() {
+        System.setProperty("org.eclipse.jetty.util.log.class", JavaUtilLog.class.getName());
+        Logger.getLogger(JavaUtilLog.class.getName()).setLevel(Level.SEVERE);
+        Logger rootLogger = Logger.getLogger("org.eclipse.jetty");
+        for (Handler handler : rootLogger.getHandlers()) {
+            handler.setLevel(Level.SEVERE);
+        }
+        rootLogger.setLevel(Level.SEVERE);
+    }
 
+    public static void runWebServer() throws Exception {
+
+        disableJettyLogging();
+        
         System.out.println(IOUtils.toString(StartWebServer.class.getResource("/Metl.asciiart")));
 
         Server server = new Server(PORT);
@@ -66,5 +85,4 @@ public class StartWebServer {
         
         server.join();
     }
-
 }

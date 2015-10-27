@@ -126,7 +126,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             configDir = System.getProperty("user.home") + "/.metl";
             if (printInstructions) {
                 System.out.println("You can configure the following system property to point to a working directory "
-                        + "where configuration files can be found: -D" + SYS_CONFIG_DIR + "=/some/config/dir");
+                        + "where configuration files can be found:\n  -D" + SYS_CONFIG_DIR + "=/some/config/dir");
             }
         }
         
@@ -135,9 +135,10 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         }
         
         if (printInstructions) {
-            System.out.println("The current config directory is " + configDir);
-            System.out.println("The current working directory is " + System.getProperty("user.dir"));
             System.out.println("");
+            System.out.println("The current config directory is " + configDir);
+            System.out.println("");
+            System.out.println("The current working directory is " + System.getProperty("user.dir"));
             System.out.println("");
         }
         return configDir;
@@ -160,6 +161,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
                 throw new IoException(e);
             }
         }
+        properties.put("config.dir", configDir);
         return properties;
     }
 

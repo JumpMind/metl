@@ -1,0 +1,28 @@
+[id="call-flow",reftext="Call Flow"]
+===== Text Constant
+[cols="<25%h,<75%"]
+|===========================================
+|Icon|image:metl-flow-48X48-color.png[]
+|Use When|A flow needs to be called from another flow
+|Samples|
+|Description|The Call Flow component allows a flow to be called from another flow.   
+
+|Inbound Message Type|Any Message Type
+|Output Message Type|Any Message Type
+|===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description
+include::../common-properties/input-model.ad[]
+include::../common-properties/output-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Flow|The flow to be called
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===========================================

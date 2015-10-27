@@ -34,7 +34,7 @@
     </component>    
     <component id='DataDiff' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='true'>
-        <name>Data Diff</name>
+        <name>Model Data Diff</name>
         <className>org.jumpmind.metl.core.runtime.component.DataDiff</className>
         <settings>
             <setting id='source.1' type='source_step' required='true'>
@@ -205,7 +205,6 @@
                     <choice>Rename</choice>
                     <choice>Move</choice>
                     <choice>Delete</choice>
-                    <choice>Touch</choice>
                 </choices>
             </setting>        
             <setting id='target.resource' type='streamable_resource' required='true'>
@@ -221,7 +220,7 @@
                 <description></description>
             </setting>
             <setting id='get.file.name.from.message' type='boolean' required='false'>
-                <name>Get File Name From Message</name>
+                <name>Get Input File Name From Message</name>
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
@@ -231,7 +230,7 @@
                 <description></description>
             </setting>
             <setting id='new.name' type='text' required='false'>
-                <name>New Name</name>
+                <name>Target File Name</name>
                 <description></description>
             </setting>
             <setting id='append.to.name' type='text' required='false'>
@@ -284,11 +283,6 @@
         <settings>
             <setting id='xml.formatter.ignore.namespace' type='boolean' required='false'>
                 <name>Ignore namespaces for XPath matching</name>
-                <defaultValue>true</defaultValue>
-                <description></description>
-            </setting>
-            <setting id='xml.formatter.parameter.replacement' type='boolean' required='false'>
-                <name>Parameter replacement</name>
                 <defaultValue>true</defaultValue>
                 <description></description>
             </setting>
@@ -858,13 +852,13 @@
             </setting>
         </settings>
     </component>
-    <component id='UnZip' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
+    <component id='UnZip' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='none' inputOutputModelsMatch='false'>
         <name>UnZip</name>
         <className>org.jumpmind.metl.core.runtime.component.UnZip</className>
         <description></description>
         <settings>
-            <setting id='target.path' type='text' required='true'>
-                <name>Target File Path</name>
+            <setting id='target.resource' type='streamable_resource' required='true'>
+                <name>Target File Resource</name>
                 <description></description>
             </setting>
             <setting id='target.sub.dir' type='boolean' required='false'>
@@ -883,8 +877,7 @@
             </setting>
         </settings>
     </component>
-    <component id='XmlReader' category='READER' inputMessageType='text' outputMessageType='text' 
-    	supportsMultipleThreads='true' resourceCategory='streamable' inputOutputModelsMatch='false'>
+    <component id='XmlReader' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
         <name>XML Reader</name>
         <className>org.jumpmind.metl.core.runtime.component.XmlReader</className>
         <description></description>
@@ -894,7 +887,7 @@
                 <description></description>
             </setting>
             <setting id='relative.path' type='text' required='false'>
-                <name>Relative path to a resource based file</name>
+                <name>File Path</name>
                 <description></description>
             </setting>
             <setting id='read.tag' type='text' required='false'>

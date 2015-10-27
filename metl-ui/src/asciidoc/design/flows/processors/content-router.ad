@@ -1,8 +1,9 @@
+[id="content-router",reftext="Content Router"]
 ===== Content Router
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:contentrouter.png[]
-|Use When|Content within a message needs to be routed to different downstream components
+|Icon|image:metl-content-router-48x48-color.png[]
+|Use When|Content within a message needs to be routed to different downstream components in the existing flow
 |Samples|Partition By Gender
 |Description|The content router routes content within a message to one or more downstream components based on the routing criteria configured in the component.
    
@@ -20,6 +21,8 @@ include::../common-properties/unit-of-work.ad[]
 include::../common-properties/enabled.ad[]
 include::../common-properties/rows-per-message.ad[]
 |Only Route First Match|If checked, the content router will only route an inbound content to the first criteria in the criteria list that evaluates to true, not all criteria in the list that evaluate to true.
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===========================================

@@ -1,9 +1,81 @@
+[id="joiner",reftext="Joiner"]
 ===== Joiner
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:joiner.png[]
-|Description|The joiner component acts like a sql join, joining together individual elements of records within messages.
+|Icon|image:metl-joiner-48x48-color.png[]
+|Use When|Different instances of model based records need to be merged into a single instance that combines the attributes from all instances.
+|Samples|Normalized Table to Denormalized File
+|Description|The Joiner component takes different instances of entities (records) and merges them together based on a a set of join criteria.
    
 |Inbound Message Type|Model Based Message
 |Output Message Type|Model Based Message
 |===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description
+include::../common-properties/input-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+include::../common-properties/rows-per-message.ad[]
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===========================================
+
+====== Component Editor
+Double clicking on the Joiner component in the flow will result in the Joiner editor being displayed as shown below.  The Joiner editor
+displays a row for every entity/attribute in the input model and allows the selection of the columns on which to use as the key for the join/merge.
+
+image:editors/joiner-editor.png[]
+
+======= Example 1. Sample Merge
+Model with Entity DENORMALIZED_PERSON having the following attributes:
+
+----
+* ADDRESS1
+* ADDRESS2
+* CELL_PHONE
+* CITY
+* FIRST_NAME
+* GENDER
+* HOOME_PHONE
+* LAST_NAME
+* POSTAL_CODE
+* STATE
+* WORK_PHONE
+----
+
+A joiner component with two sources, Person and Address Mapper which sends the following columns:
+
+----
+* ADDRESS1
+* ADDRESS2
+* CITY
+* FIRST_NAME
+* GENDER
+* LAST_NAME
+* POSTAL_CODE
+* STATE
+----
+
+The second source to the joiner is the Home Phone Mapper which sends the following columns:
+
+----
+* FIRST_NAME
+* LAST_NAME
+* HOME_PHONE
+----
+
+The join criteria selected on the Component Editor is 
+
+----
+* FIRST_NAME
+* LAST_NAME
+----
+
+The joiner will merge rows with the same FIRST_NAME and LAST_NAME, combining their attributes into a single entity instance (record), and then forward that
+record to downstream components. 

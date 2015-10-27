@@ -42,8 +42,6 @@ import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.SettingDefinition;
-import org.jumpmind.metl.core.persist.IConfigurationService;
-import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.MessageType;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.ResourceCategory;
@@ -51,8 +49,10 @@ import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSettingChoices;
 import org.jumpmind.metl.core.runtime.flow.StepRuntime;
-import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.common.Icons;
+import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.definition.XMLComponentUI;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdatePasswordField;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextArea;
@@ -66,8 +66,10 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.ui.AbsoluteLayout;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
@@ -76,27 +78,65 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-public class PropertySheet extends Panel {
+public class PropertySheet extends AbsoluteLayout {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    IComponentRuntimeFactory componentFactory;
-
-    IConfigurationService configurationService;
-
-    IResourceFactory resourceFactory;
+    ApplicationContext context;
 
     IPropertySheetChangeListener listener;
 
     Object value;
+    
+    Panel panel;
+    
+    Button editButton;
+    
+    TabbedPanel tabs;
 
-    public PropertySheet(ApplicationContext context) {
-        this.componentFactory = context.getComponentFactory();
-        this.configurationService = context.getConfigurationService();
-        this.resourceFactory = context.getResourceFactory();
+    public PropertySheet(ApplicationContext context, TabbedPanel tabs) {
+        this.tabs = tabs;
+        this.context = context;
+        
         setSizeFull();
-        addStyleName("noborder");
+                
+        panel = new Panel();
+        panel.setSizeFull();
+        panel.addStyleName("noborder");
+        addComponent(panel);
+        
+        editButton = new Button("Advanced Settings");
+        editButton.addClickListener(event -> openAdvancedEditor());
+        addComponent(editButton, "right: 25px; top: 10px;");
+
     }
+    
+    protected boolean hasAdvancedEditor() {
+        if (value instanceof FlowStep) {
+            FlowStep flowStep = (FlowStep) value;
+            String type = flowStep.getComponent().getType();
+            XMLComponentUI definition = context.getUiFactory().getDefinition(type);
+            return definition != null && definition.getClassName() != null;
+        } else {
+            return false;
+        }        
+    }
+    
+    public void openAdvancedEditor() {
+        if (value instanceof FlowStep) {
+            FlowStep flowStep = (FlowStep) value;
+            Flow flow = context.getConfigurationService().findFlow(flowStep.getFlowId());
+            String type = flowStep.getComponent().getType();
+            IComponentEditPanel panel = context.getUiFactory().create(type);
+            if (panel != null) {
+                if (panel instanceof IFlowStepAware) {
+                    ((IFlowStepAware) panel).makeAwareOf(flowStep, flow);
+                }
+                panel.init(flowStep.getComponent(), context, this);
+                tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
+            }
+        }
+    }  
 
     public void setListener(IPropertySheetChangeListener listener) {
         this.listener = listener;
@@ -108,6 +148,7 @@ public class PropertySheet extends Panel {
 
     public void setSource(Object obj) {
         value = obj;
+        editButton.setVisible(hasAdvancedEditor());
         FormLayout formLayout = new FormLayout();
         formLayout.setWidth(100, Unit.PERCENTAGE);
         formLayout.setMargin(false);
@@ -120,7 +161,7 @@ public class PropertySheet extends Panel {
 
             if (obj instanceof Component) {
                 Component component = (Component) obj;
-                configurationService.refresh(component);
+                context.getConfigurationService().refresh(component);
                 addComponentProperties(formLayout, component);
             }
 
@@ -135,17 +176,17 @@ public class PropertySheet extends Panel {
 
             if (obj instanceof Component) {
                 Component component = (Component) obj;
-                XMLComponent componentDefintion = componentFactory.getComonentDefinition(component.getType());
+                XMLComponent componentDefintion = context.getComponentFactory().getComonentDefinition(component.getType());
                 addThreadCount(componentDefintion, formLayout, component);
                 addComponentShared(formLayout, component);      
             }
 
         }
-        setContent(formLayout);
+        panel.setContent(formLayout);
     }
 
     protected void addComponentProperties(FormLayout formLayout, Component component) {
-        XMLComponent componentDefintion = componentFactory.getComonentDefinition(component.getType());
+        XMLComponent componentDefintion = context.getComponentFactory().getComonentDefinition(component.getType());
         addComponentName(formLayout, component);
         TextField textField = new TextField("Component Type");
         textField.setValue(component.getType());
@@ -179,7 +220,7 @@ public class PropertySheet extends Panel {
                 final AbstractSelect combo = new ComboBox("Output Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
-                List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
+                List<ModelName> models = context.getConfigurationService().findModelsInProject(projectVersionId);
                 if (models != null) {
                     for (ModelName model : models) {
                         combo.addItem(model);
@@ -195,11 +236,11 @@ public class PropertySheet extends Panel {
                     public void valueChange(ValueChangeEvent event) {
                         ModelName model = (ModelName) combo.getValue();
                         if (model != null) {
-                            component.setOutputModel(configurationService.findModel(model.getId()));
+                            component.setOutputModel(context.getConfigurationService().findModel(model.getId()));
                         } else {
                             component.setOutputModel(null);
                         }
-                        configurationService.save((AbstractObject) component);
+                        context.getConfigurationService().save((AbstractObject) component);
                         setSource(value);
                     }
                 });
@@ -216,7 +257,7 @@ public class PropertySheet extends Panel {
 
             protected void save(String text) {
                 component.setName(text);
-                configurationService.save(component);
+                context.getConfigurationService().save(component);
                 if (listener != null) {
                     listener.componentNameChanged(component);
                 }
@@ -251,7 +292,7 @@ public class PropertySheet extends Panel {
                 // TODO: Refresh palette for the existing manipulatedFlow to have this item
                 // display in shared definitions
                 component.setShared((boolean) event.getProperty().getValue());
-                configurationService.save(component);
+                context.getConfigurationService().save(component);
             }
         });
         formLayout.addComponent(checkBox);
@@ -266,7 +307,7 @@ public class PropertySheet extends Panel {
                 final AbstractSelect combo = new ComboBox("Input Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
-                List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
+                List<ModelName> models = context.getConfigurationService().findModelsInProject(projectVersionId);
                 if (models != null) {
                     for (ModelName model : models) {
                         combo.addItem(model);
@@ -282,11 +323,11 @@ public class PropertySheet extends Panel {
                     public void valueChange(ValueChangeEvent event) {
                         ModelName model = (ModelName) combo.getValue();
                         if (model != null) {
-                            component.setInputModel(configurationService.findModel(model.getId()));
+                            component.setInputModel(context.getConfigurationService().findModel(model.getId()));
                         } else {
                             component.setInputModel(null);
                         }
-                        configurationService.save((AbstractObject) component);
+                        context.getConfigurationService().save((AbstractObject) component);
                         setSource(value);
                     }
                 });
@@ -297,16 +338,18 @@ public class PropertySheet extends Panel {
     }
 
     protected void addResourceCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
+        if (componentDefintion == null) {
+            log.info("null kaboom " + component.getName() + " " + component.getType());
+        }
         if (componentDefintion.getResourceCategory() != null && componentDefintion.getResourceCategory() != ResourceCategory.NONE
                 && value instanceof FlowStep) {
             FlowStep step = (FlowStep) value;
             final AbstractSelect resourcesCombo = new ComboBox("Resource");
             resourcesCombo.setImmediate(true);
-            resourcesCombo.setRequired(true);
-            List<String> types = resourceFactory.getResourceTypes(componentDefintion.getResourceCategory());
+            List<String> types = context.getResourceFactory().getResourceTypes(componentDefintion.getResourceCategory());
             String projectVersionId = step.getComponent().getProjectVersionId();
             if (types != null) {
-                List<Resource> resources = configurationService.findResourcesByTypes(projectVersionId,
+                List<Resource> resources = context.getConfigurationService().findResourcesByTypes(projectVersionId,
                         types.toArray(new String[types.size()]));
                 if (resources != null) {
                     for (Resource resource : resources) {
@@ -322,7 +365,7 @@ public class PropertySheet extends Panel {
                 @Override
                 public void valueChange(ValueChangeEvent event) {
                     component.setResource((Resource) resourcesCombo.getValue());
-                    configurationService.save(component);
+                    context.getConfigurationService().save(component);
                 }
             });
 
@@ -333,12 +376,12 @@ public class PropertySheet extends Panel {
     protected List<XMLSetting> buildSettings(Object obj) {
         if (obj instanceof Component) {
             Component component = (Component) obj;
-            XMLComponent definition = componentFactory.getComonentDefinition(component.getType());
+            XMLComponent definition = context.getComponentFactory().getComonentDefinition(component.getType());
             return definition.getSettings().getSetting();
         } else if (obj instanceof Resource) {
             Resource resource = (Resource) obj;
             List<XMLSetting> xmlSettings = new ArrayList<XMLSetting>();
-            Map<String, SettingDefinition> resourceSettings = resourceFactory.getSettingDefinitionsForResourceType(resource.getType());
+            Map<String, SettingDefinition> resourceSettings = context.getResourceFactory().getSettingDefinitionsForResourceType(resource.getType());
             for (String key : resourceSettings.keySet()) {
                 SettingDefinition def = resourceSettings.get(key);
                 XMLSetting setting = new XMLSetting();
@@ -459,7 +502,7 @@ public class PropertySheet extends Panel {
                 case SOURCE_STEP:
                     if (value instanceof FlowStep) {
                         FlowStep step = (FlowStep) value;
-                        Flow flow = configurationService.findFlow(step.getFlowId());
+                        Flow flow = context.getConfigurationService().findFlow(step.getFlowId());
                         final AbstractSelect sourceStepsCombo = new ComboBox(definition.getName());
                         sourceStepsCombo.setImmediate(true);
 
@@ -488,7 +531,7 @@ public class PropertySheet extends Panel {
                     if (value instanceof FlowStep) {
                         FlowStep step = (FlowStep) value;
                         String projectVersionId = step.getComponent().getProjectVersionId();
-                        List<FlowName> flows = configurationService.findFlowsInProject(projectVersionId);
+                        List<FlowName> flows = context.getConfigurationService().findFlowsInProject(projectVersionId);
                         final AbstractSelect combo = new ComboBox(definition.getName());
                         combo.setImmediate(true);
                         for (FlowName name : flows) {
@@ -575,7 +618,7 @@ public class PropertySheet extends Panel {
                         public void textChange(TextChangeEvent event) {
                             Setting data = obj.findSetting(definition.getId());
                             data.setValue(event.getText());
-                            configurationService.save(data);
+                            context.getConfigurationService().save(data);
                         }
                     });
                     formLayout.addComponent(editor);
@@ -609,9 +652,9 @@ public class PropertySheet extends Panel {
         combo.setImmediate(true);
         combo.setDescription(definition.getDescription());
         combo.setNullSelectionAllowed(false);
-        List<String> types = resourceFactory.getResourceTypes(category);
+        List<String> types = context.getResourceFactory().getResourceTypes(category);
         if (types != null) {
-            List<Resource> resources = configurationService.findResourcesByTypes(projectVersionId,
+            List<Resource> resources = context.getConfigurationService().findResourcesByTypes(projectVersionId,
                     types.toArray(new String[types.size()]));
             if (resources != null) {
                 for (Resource resource : resources) {
@@ -629,7 +672,7 @@ public class PropertySheet extends Panel {
     protected void saveSetting(String key, String text, AbstractObjectWithSettings obj) {
         Setting data = obj.findSetting(key);
         data.setValue(text);
-        configurationService.save(data);
+        context.getConfigurationService().save(data);
     }
 
 }

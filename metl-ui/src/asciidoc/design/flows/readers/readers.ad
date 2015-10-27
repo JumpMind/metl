@@ -10,3 +10,8 @@ include::text-file-reader.ad[]
 include::file-poller.ad[]
 
 include::text-constant.ad[]
+
+include::unzip.ad[]
+
+include::xml-reader.ad[]
+

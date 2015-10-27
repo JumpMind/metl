@@ -1,9 +1,47 @@
+[id="format-delimited",reftext="Format Delimited"]
 ===== Format Delimited
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:delimitedformatter.png[]
+|Icon|image:metl-delimitedformatter-48x48-color.png[]
+|Use When|Model based data needs to be formatted into delimited text
+|Samples|Relational Database to Flat File
 |Description|The format delimited component takes a model based message and formats its content into a delimited text message
    
 |Inbound Message Type|Model Based Message
 |Output Message Type|Text Based Message
 |===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description
+include::../common-properties/input-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Delimiter|The character that should be used to delimit the attribute values
+|Quote Character|The character that should be used to quote the attribute values that are of type String
+|Header line|Whether a header line should be created that contains attribute column names
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===========================================
+
+====== Component Editor
+Double clicking on the Format delimited component in the flow will result in the Format Delimited editor being displayed as shown below.
+
+image:editors/format-delimited-editor.png[]
+
+The editor displays a row for every entity and attribute in the input model, and allows setting the ordinal position of each
+for the delimited output.  Order the attributes in the order in which they should be displayed in the delimited result.  Attributes can be ordered
+by:
+
+.Attribute Ordering Options
+* Selecting an attribute and dragging it up or down in the list
+* Selecting an attribute clicking the "Move Up", "Move Down", "Move Top" or "Move Botton" buttons
+* Selecting an attribute or set of attributes, clicking "Cut" to remove them and then "Pasting them elsewhere in the list
+
+In addition to specifying the order of the attributes in the delimited list, transform functions can also be applied to each attribute.  These
+transform functions are good for applying formatting, etc.
+
