@@ -46,22 +46,23 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 public class ModelAttributeScriptHelper {
 
     Object value;
-    
+
     EntityData data;
-    
+
     ModelAttribute attribute;
-    
+
     ModelEntity entity;
-    
+
     ComponentContext context;
-    
+
     Message message;
-    
+
     public static final RemoveAttribute REMOVE_ATTRIBUTE = new RemoveAttribute();
-    
+
     static private ThreadLocal<ScriptEngine> scriptEngine = new ThreadLocal<ScriptEngine>();
 
-    public ModelAttributeScriptHelper(Message message, ComponentContext context, ModelAttribute attribute, ModelEntity entity, EntityData data, Object value) {
+    public ModelAttributeScriptHelper(Message message, ComponentContext context, ModelAttribute attribute, ModelEntity entity,
+            EntityData data, Object value) {
         this.context = context;
         this.value = value;
         this.data = data;
@@ -69,25 +70,25 @@ public class ModelAttributeScriptHelper {
         this.entity = entity;
         this.message = message;
     }
-    
+
     public Object nullvalue() {
         return null;
     }
-    
+
     public Integer integer() {
         String text = value != null ? value.toString() : "0";
         text = isNotBlank(text) ? text : "0";
         return Integer.parseInt(text);
     }
-    
+
     public Serializable flowParameter(String parameterName) {
         return context.getFlowParameters().get(parameterName);
     }
-    
+
     public Serializable messageParameter(String parameterName) {
         return message.getHeader().get(parameterName);
     }
-    
+
     public String abbreviate(int maxwidth) {
         String text = value != null ? value.toString() : "";
         return StringUtils.abbreviate(text, maxwidth);
@@ -139,21 +140,21 @@ public class ModelAttributeScriptHelper {
         String text = value != null ? value.toString() : "";
         return StringUtils.replace(text, searchString, replacement);
     }
-    
+
     public Date currentdate() {
         return new Date();
     }
-    
+
     public String currentdate(String format) {
         Date currentDate = new Date();
         return formatdate(format, currentDate);
-                
+
     }
-    
+
     public RemoveAttribute remove() {
         return REMOVE_ATTRIBUTE;
     }
-    
+
     public Date parsedate(String pattern, String nulldate) {
         String text = value != null ? value.toString() : "";
         if (isNotBlank(text) && !text.equals(nulldate)) {
@@ -162,12 +163,12 @@ public class ModelAttributeScriptHelper {
             return null;
         }
     }
-    
+
     public Date parsedate(String pattern) {
         String text = value != null ? value.toString() : "";
         return parseDateFromText(pattern, text);
     }
-    
+
     public String formatdate(String pattern) {
         FastDateFormat formatter = FastDateFormat.getInstance(pattern);
         if (value instanceof Date) {
@@ -193,12 +194,12 @@ public class ModelAttributeScriptHelper {
             return "";
         }
     }
-    
+
     public String parseAndFormatDate(String parsePattern, String formatPattern) {
         Date dateToFormat = parsedate(parsePattern);
         return formatdate(formatPattern, dateToFormat);
     }
-    
+
     public Object nvl(Object substituteForNull) {
         if (value == null) {
             return substituteForNull;
@@ -206,19 +207,19 @@ public class ModelAttributeScriptHelper {
             return value;
         }
     }
-    
+
     private Date parseDateFromText(String pattern, String valueToParse) {
         if (isNotBlank(valueToParse)) {
-            return FormatUtils.parseDate(valueToParse, new String[] { pattern});
+            return FormatUtils.parseDate(valueToParse, new String[] { pattern });
         } else {
             return null;
-        }        
+        }
     }
-    
+
     public String stringConstant(String value) {
         return value;
     }
-    
+
     protected Object eval() {
         return value;
     }
@@ -228,8 +229,7 @@ public class ModelAttributeScriptHelper {
         Method[] methods = ModelAttributeScriptHelper.class.getMethods();
         LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
         for (Method method : methods) {
-            if (method.getDeclaringClass().equals(ModelAttributeScriptHelper.class)
-                    && Modifier.isPublic(method.getModifiers())
+            if (method.getDeclaringClass().equals(ModelAttributeScriptHelper.class) && Modifier.isPublic(method.getModifiers())
                     && !Modifier.isStatic(method.getModifiers())) {
                 StringBuilder sig = new StringBuilder(method.getName());
                 sig.append("(");
@@ -251,20 +251,20 @@ public class ModelAttributeScriptHelper {
         return signatures.toArray(new String[signatures.size()]);
     }
 
-    public static Object eval(Message message, ComponentContext context, ModelAttribute attribute, Object value, ModelEntity entity, EntityData data, String expression) {
+    public static Object eval(Message message, ComponentContext context, ModelAttribute attribute, Object value, ModelEntity entity,
+            EntityData data, String expression) {
         ScriptEngine engine = scriptEngine.get();
         if (engine == null) {
             ScriptEngineManager factory = new ScriptEngineManager();
             engine = factory.getEngineByName("groovy");
             scriptEngine.set(engine);
         }
-
         engine.put("value", value);
         engine.put("data", data);
         engine.put("entity", entity);
         engine.put("attribute", attribute);
         engine.put("message", message);
-        engine.put("context", context);
+        engine.put("context", context);        
 
         try {
             String importString = "import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;\n";
@@ -273,14 +273,13 @@ public class ModelAttributeScriptHelper {
                     expression);
             return engine.eval(importString + code);
         } catch (ScriptException e) {
-            throw new RuntimeException("Unable to evaluate groovy script.  Attribute ==> " + attribute.getName() + 
-                    ".  Value ==> " + value.toString() + "." + 
-                    e.getCause().getMessage(), e);
+            throw new RuntimeException("Unable to evaluate groovy script.  Attribute ==> " + attribute.getName() + ".  Value ==> "
+                    + value.toString() + "." + e.getCause().getMessage(), e);
         }
     }
-    
+
     static class RemoveAttribute {
-        
+
     }
 
 }

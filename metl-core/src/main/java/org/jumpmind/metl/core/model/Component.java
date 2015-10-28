@@ -296,23 +296,8 @@ public class Component extends AbstractObjectWithSettings {
             }
         };
         Model model = input ? inputModel : outputModel;
-        Set<String> attributeIds = data.keySet();
-        for (String attributeId : attributeIds) {
-            
-        	if (model != null) {
-	            ModelAttribute attribute = model.getAttributeById(attributeId);
-	            if (attribute != null) {
-	                ModelEntity entity = model.getEntityById(attribute.getEntityId());
-	                if (qualifyWithEntityName) {
-	                    row.put(entity.getName() + "." + attribute.getName(), data.get(attributeId));
-	                } else {
-	                    row.put(attribute.getName(), data.get(attributeId));
-	                }
-	            }
-        	}
-        	else {
-        		row.put(attributeId, data.get(attributeId));
-        	}
+        if (model != null) {
+            return model.toRow(data, qualifyWithEntityName);
         }
         return row;
     }

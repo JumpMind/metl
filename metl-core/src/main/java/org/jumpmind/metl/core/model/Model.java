@@ -24,7 +24,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+
+import org.jumpmind.db.sql.Row;
+import org.jumpmind.metl.core.runtime.EntityData;
 
 public class Model extends AbstractObject {
 
@@ -35,21 +39,21 @@ public class Model extends AbstractObject {
     String name;
 
     String folderId;
-    
+
     String projectVersionId;
-    
+
     String rowId = UUID.randomUUID().toString();
 
     List<ModelEntity> modelEntities;
 
     boolean shared;
-    
+
     boolean deleted = false;
 
     public Model() {
         this.modelEntities = new ArrayList<ModelEntity>();
     }
-    
+
     public Model(String id) {
         this();
         this.setId(id);
@@ -92,14 +96,14 @@ public class Model extends AbstractObject {
     public void setShared(boolean shared) {
         this.shared = shared;
     }
-    
+
     public ModelEntity getEntityById(String entityId) {
         for (ModelEntity entity : modelEntities) {
             if (entity.getId().equalsIgnoreCase(entityId)) {
                 return entity;
             }
         }
-        return null;        
+        return null;
     }
 
     public ModelEntity getEntityByName(String entityName) {
@@ -110,7 +114,7 @@ public class Model extends AbstractObject {
         }
         return null;
     }
-    
+
     public ModelAttribute getAttributeById(String attributeId) {
         for (ModelEntity entity : modelEntities) {
             for (ModelAttribute modelAttribute : entity.getModelAttributes()) {
@@ -119,7 +123,7 @@ public class Model extends AbstractObject {
                 }
             }
         }
-        return null;        
+        return null;
     }
 
     public ModelAttribute getAttributeByName(String entityName, String attributeName) {
@@ -133,9 +137,9 @@ public class Model extends AbstractObject {
         }
         return null;
     }
-    
+
     public List<ModelAttribute> getAttributesByName(String attributeName) {
-        List<ModelAttribute> attributes = new ArrayList<ModelAttribute>();        
+        List<ModelAttribute> attributes = new ArrayList<ModelAttribute>();
         for (ModelEntity entity : modelEntities) {
             for (ModelAttribute modelAttribute : entity.getModelAttributes()) {
                 if (modelAttribute.getName().equalsIgnoreCase(attributeName)) {
@@ -145,66 +149,90 @@ public class Model extends AbstractObject {
         }
         return attributes;
     }
-    
+
     public List<ModelEntity> getModelEntities() {
         return modelEntities;
     }
 
     public void setModelEntities(List<ModelEntity> modelEntities) {
-    	this.modelEntities = modelEntities;
+        this.modelEntities = modelEntities;
     }
 
     public void setProjectVersionId(String projectVersionId) {
         this.projectVersionId = projectVersionId;
     }
-    
+
     public String getProjectVersionId() {
         return projectVersionId;
     }
-    
+
     public void setRowId(String rowId) {
         this.rowId = rowId;
     }
-    
+
     public String getRowId() {
         return rowId;
     }
-    
+
     @Override
     public boolean isSettingNameAllowed() {
         return true;
     }
-    
+
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
-    
+
     public boolean isDeleted() {
         return deleted;
     }
-    
+
     public void sortAttributes() {
         for (ModelEntity modelEntity : modelEntities) {
             AbstractObjectNameBasedSorter.sort(modelEntity.getModelAttributes());
         }
     }
-    
+
+    public Row toRow(EntityData data, boolean qualifyWithEntityName) {
+        Row row = new Row(data.size()) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String toString() {
+                return String.format("{{ChangeType=%s}, %s}", data.getChangeType(), super.toString());
+            }
+        };
+        Set<String> attributeIds = data.keySet();
+        for (String attributeId : attributeIds) {
+            ModelAttribute attribute = getAttributeById(attributeId);
+            if (attribute != null) {
+                ModelEntity entity = getEntityById(attribute.getEntityId());
+                if (qualifyWithEntityName) {
+                    row.put(entity.getName() + "." + attribute.getName(), data.get(attributeId));
+                } else {
+                    row.put(attribute.getName(), data.get(attributeId));
+                }
+            }
+        }
+        return row;
+    }
+
     @Override
     public AbstractObject copy() {
         Map<String, String> oldToNewEntityIds = new HashMap<String, String>();
-        Model model = (Model)super.copy();
+        Model model = (Model) super.copy();
         model.setModelEntities(new ArrayList<ModelEntity>());
         for (ModelEntity modelEntity : modelEntities) {
             String oldId = modelEntity.getId();
-            modelEntity = (ModelEntity)modelEntity.copy();
+            modelEntity = (ModelEntity) modelEntity.copy();
             oldToNewEntityIds.put(oldId, modelEntity.getId());
             modelEntity.setModelId(model.getId());
             model.getModelEntities().add(modelEntity);
         }
-        
+
         for (ModelEntity modelEntity : modelEntities) {
-             List<ModelAttribute> attributes = modelEntity.getModelAttributes();
-             for (ModelAttribute modelAttribute : attributes) {
+            List<ModelAttribute> attributes = modelEntity.getModelAttributes();
+            for (ModelAttribute modelAttribute : attributes) {
                 modelAttribute.setTypeEntityId(oldToNewEntityIds.get(modelAttribute.getTypeEntityId()));
             }
         }
