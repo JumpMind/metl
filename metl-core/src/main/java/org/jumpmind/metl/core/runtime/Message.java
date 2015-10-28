@@ -21,6 +21,8 @@
 package org.jumpmind.metl.core.runtime;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Iterator;
 
 public class Message implements Serializable {
 
@@ -45,6 +47,23 @@ public class Message implements Serializable {
 
     public <T extends Serializable> void setPayload(T payload) {
         this.payload = payload;
+    }
+    
+    public String getTextFromPayload() {
+        StringBuilder b = new StringBuilder();
+        if (payload instanceof Collection) {
+            Iterator<?> i = ((Collection<?>)payload).iterator();
+            while (i.hasNext()) {
+                Object obj = i.next();
+                b.append(obj);
+                if (i.hasNext()) {
+                    b.append(System.getProperty("line.separator"));
+                }
+            }
+        } else if (payload instanceof CharSequence) {
+            b.append((CharSequence)payload);
+        }
+        return b.toString();
     }
     
 }

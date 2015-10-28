@@ -35,7 +35,7 @@ import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 public class ComponentContext {
 
     AgentDeployment deployment;
-    
+
     FlowStep flowStep;
 
     Flow manipulatedFlow;
@@ -43,17 +43,17 @@ public class ComponentContext {
     IExecutionTracker executionTracker;
 
     Map<String, IResourceRuntime> deployedResources;
-    
+
     Map<String, Serializable> flowParameters;
-    
+
     Map<String, String> globalSettings;
-    
+
     ComponentStatistics componentStatistics = new ComponentStatistics();
 
     public ComponentContext(AgentDeployment deployment, FlowStep flowStep, Flow manipulatedFlow, IExecutionTracker executionTracker,
             Map<String, IResourceRuntime> deployedResources, Map<String, Serializable> flowParameters, Map<String, String> globalSettings) {
         this.deployment = deployment;
-        this.flowParameters = Collections.synchronizedMap(new HashMap<>(flowParameters));
+        this.flowParameters = Collections.synchronizedMap(flowParameters == null ? new HashMap<>() : new HashMap<>(flowParameters));
         this.flowStep = flowStep;
         this.manipulatedFlow = manipulatedFlow;
         this.executionTracker = executionTracker;
@@ -77,11 +77,11 @@ public class ComponentContext {
     public IExecutionTracker getExecutionTracker() {
         return executionTracker;
     }
-    
+
     public Map<String, IResourceRuntime> getDeployedResources() {
         return deployedResources;
     }
-    
+
     public IResourceRuntime getResourceRuntime() {
         return deployedResources.get(flowStep.getComponent().getResourceId());
     }
@@ -89,7 +89,7 @@ public class ComponentContext {
     public Map<String, Serializable> getFlowParameters() {
         return flowParameters;
     }
-    
+
     public Map<String, String> getFlowParametersAsString() {
         Map<String, String> params = new HashMap<String, String>();
         for (String key : new HashSet<>(flowParameters.keySet())) {
@@ -102,11 +102,11 @@ public class ComponentContext {
         }
         return params;
     }
-    
+
     public void setComponentStatistics(ComponentStatistics componentStatistics) {
         this.componentStatistics = componentStatistics;
     }
-    
+
     public ComponentStatistics getComponentStatistics() {
         return componentStatistics;
     }

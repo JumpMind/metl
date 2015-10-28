@@ -30,6 +30,7 @@ include::../common-properties/action-on-success.ad[]
 include::../common-properties/archive-on-success-path.ad[]
 include::../common-properties/action-on-error.ad[]
 include::../common-properties/archive-on-error-path.ad[]
+|Files/Msg|The number of file paths that should be published per message.  The default value is 1.
 |Use Trigger File|Many systems post a single trigger file to designate that other data files are ready to process.  The existence of the trigger
 file indicates the other files are ready to process.  If "Use Trigger File" is true, the File Poller will first check for the existence of a file
 named the same as the Relative Trigger File Path parameter.  If that file exists, the File Poller will then check for files matching the File Pattern

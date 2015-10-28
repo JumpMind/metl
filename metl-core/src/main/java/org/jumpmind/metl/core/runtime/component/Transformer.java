@@ -101,7 +101,7 @@ public class Transformer extends AbstractComponentRuntime {
 	                    ModelEntity entity = inputModel.getEntityById(attribute.getEntityId()); 
 	                    
 	                    // Transform
-	                    value = ModelAttributeScriptHelper.eval(attribute, value, entity, inData, transform);
+	                    value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute, value, entity, inData, transform);
 	                }
 	                if (value != ModelAttributeScriptHelper.REMOVE_ATTRIBUTE) {
 	                    outData.put(attributeId, value);

@@ -93,7 +93,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
 
         String outputRec;
         for (EntityData inputRow : inputRows) {
-            outputRec = processInputRow(inputRow);
+            outputRec = processInputRow(inputMessage, inputRow);
             log(LogLevel.DEBUG, String.format("Generated record: %s", outputRec));
             outputPayload.add(outputRec);
         }
@@ -101,12 +101,12 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
         callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
     }
 
-    private String processInputRow(EntityData inputRow) {
+    private String processInputRow(Message inputMessage, EntityData inputRow) {
         StringBuilder stringBuilder = new StringBuilder();
         for (AttributeFormat attribute : attributesList) {
             Object value = inputRow.get(attribute.getAttributeId());
             if (isNotBlank(attribute.getFormatFunction())) {
-                value = ModelAttributeScriptHelper.eval(attribute.getAttribute(), value, attribute.getEntity(), 
+                value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, attribute.getEntity(), 
                         inputRow, attribute.getFormatFunction());
             }
             String paddedValue = StringUtils.pad(value != null ? value.toString() : "", attribute.getLength(), " ", true);

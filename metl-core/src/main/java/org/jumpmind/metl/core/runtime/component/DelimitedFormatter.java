@@ -110,14 +110,14 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
 
         String outputRec;
         for (EntityData inputRow : inputRows) {
-            outputRec = processInputRow(inputRow);
+            outputRec = processInputRow(inputMessage, inputRow);
             outputPayload.add(outputRec);
         }
         
         callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
     }
 
-    private String processInputRow(EntityData inputRow) {
+    private String processInputRow(Message inputMessage, EntityData inputRow) {
 
         Writer writer = new StringWriter();
         CsvWriter csvWriter = getCsvWriter(writer);
@@ -126,7 +126,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
                 for (AttributeFormat attribute : attributes) {
                     Object object = inputRow.get(attribute.getAttributeId());
                     if (isNotBlank(attribute.getFormatFunction())) {
-                        object = ModelAttributeScriptHelper.eval(attribute.getAttribute(), object,
+                        object = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), object,
                                 attribute.getEntity(), inputRow, attribute.getFormatFunction());
                     }
 

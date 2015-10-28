@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -154,6 +155,13 @@ public class MessageScriptHelper {
         ArrayList<EntityData> rows = inputMessage.getPayload();
         return ComponentUtil.getAttributeValues(model, rows, entityName, attributeName);
     }
+    
+    protected void forwardMessageWithParameter(String parameterName, Serializable value) {
+        Map<String, Serializable> headers = new HashMap<>();
+        headers.put(parameterName, value);
+        callback.sendMessage(headers, inputMessage.getPayload(), unitOfWorkBoundaryReached);
+    }
+
     
     protected void forwardMessage() {
         callback.sendMessage(null, inputMessage.getPayload(), unitOfWorkBoundaryReached);

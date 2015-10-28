@@ -182,14 +182,15 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                 targetTables = new ArrayList<TargetTableDefintion>();
 
                 for (ModelEntity entity : model.getModelEntities()) {
-                    Table table = databasePlatform.getTableFromCache(catalogName, schemaName, tablePrefix + entity.getName() + tableSuffix,
+                    String tableName = tablePrefix + entity.getName() + tableSuffix;
+                    Table table = databasePlatform.getTableFromCache(catalogName, schemaName, tableName,
                             true);
                     if (table != null) {
                         targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE, entity, table.copy()),
                                 new TargetTable(DmlType.INSERT, entity, table.copy()), new TargetTable(DmlType.DELETE, entity, table.copy())));
                     } else {
                         throw new MisconfiguredException("Could not find table to write to: %s",
-                                Table.getFullyQualifiedTableName(catalogName, schemaName, entity.getName()));
+                                Table.getFullyQualifiedTableName(catalogName, schemaName, Table.getFullyQualifiedTableName(catalogName, schemaName, tableName)));
                     }
                 }
             }

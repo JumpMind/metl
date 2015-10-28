@@ -22,6 +22,7 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import org.apache.commons.lang.time.FastDateFormat;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
@@ -51,15 +53,21 @@ public class ModelAttributeScriptHelper {
     
     ModelEntity entity;
     
+    ComponentContext context;
+    
+    Message message;
+    
     public static final RemoveAttribute REMOVE_ATTRIBUTE = new RemoveAttribute();
     
     static private ThreadLocal<ScriptEngine> scriptEngine = new ThreadLocal<ScriptEngine>();
 
-    public ModelAttributeScriptHelper(ModelAttribute attribute, ModelEntity entity, EntityData data, Object value) {
+    public ModelAttributeScriptHelper(Message message, ComponentContext context, ModelAttribute attribute, ModelEntity entity, EntityData data, Object value) {
+        this.context = context;
         this.value = value;
         this.data = data;
         this.attribute = attribute;
         this.entity = entity;
+        this.message = message;
     }
     
     public Object nullvalue() {
@@ -70,6 +78,14 @@ public class ModelAttributeScriptHelper {
         String text = value != null ? value.toString() : "0";
         text = isNotBlank(text) ? text : "0";
         return Integer.parseInt(text);
+    }
+    
+    public Serializable flowParameter(String parameterName) {
+        return context.getFlowParameters().get(parameterName);
+    }
+    
+    public Serializable messageParameter(String parameterName) {
+        return message.getHeader().get(parameterName);
     }
     
     public String abbreviate(int maxwidth) {
@@ -235,7 +251,7 @@ public class ModelAttributeScriptHelper {
         return signatures.toArray(new String[signatures.size()]);
     }
 
-    public static Object eval(ModelAttribute attribute, Object value, ModelEntity entity, EntityData data, String expression) {
+    public static Object eval(Message message, ComponentContext context, ModelAttribute attribute, Object value, ModelEntity entity, EntityData data, String expression) {
         ScriptEngine engine = scriptEngine.get();
         if (engine == null) {
             ScriptEngineManager factory = new ScriptEngineManager();
@@ -247,11 +263,13 @@ public class ModelAttributeScriptHelper {
         engine.put("data", data);
         engine.put("entity", entity);
         engine.put("attribute", attribute);
+        engine.put("message", message);
+        engine.put("context", context);
 
         try {
             String importString = "import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;\n";
             String code = String.format(
-                    "return new ModelAttributeScriptHelper(attribute, entity, data, value) { public Object eval() { return %s } }.eval()",
+                    "return new ModelAttributeScriptHelper(message, context, attribute, entity, data, value) { public Object eval() { return %s } }.eval()",
                     expression);
             return engine.eval(importString + code);
         } catch (ScriptException e) {

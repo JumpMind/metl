@@ -97,6 +97,8 @@ public class FilePoller extends AbstractComponentRuntime {
     String archiveOnErrorPath;
     
     String fileSortOption = SORT_MODIFIED;
+    
+    int filesPerMessage = 1000;
 
     ArrayList<File> filesSent = new ArrayList<File>();
 
@@ -110,6 +112,7 @@ public class FilePoller extends AbstractComponentRuntime {
         }
         TypedProperties properties = getTypedProperties();
 
+        filesPerMessage = properties.getInt(ROWS_PER_MESSAGE);
         filePattern = FormatUtils.replaceTokens(properties.get(SETTING_FILE_PATTERN),
                 context.getFlowParametersAsString(), true);
         triggerFilePath = FormatUtils.replaceTokens(properties.get(SETTING_TRIGGER_FILE_PATH),
@@ -154,7 +157,6 @@ public class FilePoller extends AbstractComponentRuntime {
 
     protected void pollForFiles(String path, Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         File pathDir = getNewFile(path);
-        ArrayList<String> filePaths = new ArrayList<String>();
         ArrayList<File> fileReferences = new ArrayList<File>();
         String[] includes = StringUtils.isNotBlank(filePattern) ? filePattern.split(",")
                 : new String[] { "*" };
@@ -184,12 +186,20 @@ public class FilePoller extends AbstractComponentRuntime {
                 }
             });
             
+            ArrayList<String> filePaths = new ArrayList<>();
             for (File file : fileReferences) {
                 log(LogLevel.INFO, "File polled: " + file.getAbsolutePath());
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 filePaths.add(file.getAbsolutePath());
+                if (filePaths.size() <= filesPerMessage) {
+                    callback.sendMessage(null, filePaths, unitOfWorkLastMessage);
+                    filePaths = new ArrayList<>();
+                }
             }
-            callback.sendMessage(null, filePaths, unitOfWorkLastMessage);
+            
+            if (filePaths.size() > 0) {
+                callback.sendMessage(null, filePaths, unitOfWorkLastMessage);
+            }
         } else if (cancelOnNoFiles) {
             callback.sendShutdownMessage(true);
         }

@@ -104,7 +104,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
 	            for (String inputRow : inputRows) {
 	                if (headerRowsToSkip == 0) {
 	                    if (rowCount + numberOfFooterLinesToSkip < inputRows.size()) {
-	                        EntityData data = processInputRow(inputRow);
+	                        EntityData data = processInputRow(inputMessage, inputRow);
 	                        if (data != null) {
 	                            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
 	                            outputPayload.add(data);
@@ -123,7 +123,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
         callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
     }
 
-    private EntityData processInputRow(String inputRow) throws IOException {
+    private EntityData processInputRow(Message inputMessage, String inputRow) throws IOException {
 
         CsvReader csvReader = new CsvReader(new ByteArrayInputStream(inputRow.getBytes()),
                 Charset.forName(encoding));
@@ -140,7 +140,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
                 for (AttributeFormat attribute : attributes) {
                     Object value = csvReader.get(attribute.getOrdinal() - 1);
                     if (isNotBlank(attribute.getFormatFunction())) {
-                        value = ModelAttributeScriptHelper.eval(attribute.getAttribute(), value,
+                        value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value,
                                 attribute.getEntity(), data, attribute.getFormatFunction());
                     }
 

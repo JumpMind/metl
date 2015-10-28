@@ -79,7 +79,7 @@ public class FixedLengthParser extends AbstractComponentRuntime {
             for (String inputRow : inputRows) {
                 if (headerRowsToSkip == 0) {
                     if (!inputMessage.getHeader().isUnitOfWorkLastMessage() || (rowCount + numberOfFooterLinesToSkip < inputRows.size())) {
-                        EntityData data = processInputRow(inputRow);
+                        EntityData data = processInputRow(inputMessage, inputRow);
                         if (data != null) {
                             getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                             outputPayload.add(data);
@@ -97,7 +97,7 @@ public class FixedLengthParser extends AbstractComponentRuntime {
         callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
     }
 
-    private EntityData processInputRow(String inputRow) throws IOException {
+    private EntityData processInputRow(Message inputMessage, String inputRow) throws IOException {
         if (attributesList.size() > 0) {
             EntityData data = new EntityData();
             for (AttributeFormat attribute : attributesList) {
@@ -105,7 +105,7 @@ public class FixedLengthParser extends AbstractComponentRuntime {
                 Object value = inputRow.substring(0, length).trim();
                 inputRow = inputRow.substring(length);
                 if (isNotBlank(attribute.getFormatFunction())) {
-                    value = ModelAttributeScriptHelper.eval(attribute.getAttribute(), value, attribute.getEntity(), data,
+                    value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, attribute.getEntity(), data,
                             attribute.getFormatFunction());
                 }
 

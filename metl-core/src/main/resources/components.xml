@@ -146,6 +146,10 @@
                     <choice>Name</choice>
                 </choices>
             </setting>
+            <setting id='rows.per.message' type='integer' required='false'>
+                <name>Files/Msg</name>
+                <defaultValue>1</defaultValue>
+            </setting>            
             <setting id='max.files.to.poll' type='integer' required='true'>
                 <name>Max Files To Poll</name>
                 <defaultValue>1000</defaultValue>
