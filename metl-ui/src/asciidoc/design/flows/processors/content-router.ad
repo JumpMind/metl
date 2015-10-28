@@ -46,7 +46,7 @@ unless the "Only Route First Match" option is checked.
 [id="entity-router-example-1",reftext="Example 1"]
 ======= Example 1.  Sample groovy expressions for an entity based message
 ----
-if (ENTITY.ATTRIBUTE=='Value 1')) return true;
+if (ENTITY.ATTRIBUTE=='Value 1') return true;
 if (ENTITY.ATTRIBUTE=='Value 2') return true;
 ----
 
