@@ -92,12 +92,14 @@ public class ComponentContext {
 
     public Map<String, String> getFlowParametersAsString() {
         Map<String, String> params = new HashMap<String, String>();
-        for (String key : new HashSet<>(flowParameters.keySet())) {
-            Serializable value = flowParameters.get(key);
-            if (value != null) {
-                params.put(key, value.toString());
-            } else {
-                params.put(key, null);
+        if (flowParameters != null) {
+            for (String key : new HashSet<>(flowParameters.keySet())) {
+                Serializable value = flowParameters.get(key);
+                if (value != null) {
+                    params.put(key, value.toString());
+                } else {
+                    params.put(key, null);
+                }
             }
         }
         return params;

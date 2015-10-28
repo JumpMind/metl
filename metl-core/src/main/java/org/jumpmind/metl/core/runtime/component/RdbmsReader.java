@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -201,18 +202,9 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
          * parms should be used for every record.
          */
         paramMap.clear();
-        paramMap.putAll(getParamsFromHeader(inputMessage));
+        paramMap.putAll(context.getFlowParameters() == null ? Collections.emptyMap() : context.getFlowParameters());
         if (entityData != null) {
             paramMap.putAll(this.getComponent().toRow(entityData, true, true));
-        }
-    }
-
-    protected Map<String, Object> getParamsFromHeader(final Message inputMessage) {
-        if (inputMessage != null && inputMessage.getHeader() != null) {
-            Map<String, Object> paramMap = new HashMap<String, Object>(context.getFlowParameters());
-            return paramMap;
-        } else {
-            return null;
         }
     }
 

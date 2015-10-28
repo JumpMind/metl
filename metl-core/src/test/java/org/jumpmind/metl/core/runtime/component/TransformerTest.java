@@ -113,6 +113,8 @@ public class TransformerTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 			PowerMockito.doReturn(TRANSFORM_RESULT).when(
 				ModelAttributeScriptHelper.class, 
 				"eval",
+				Mockito.any(Message.class), 
+				Mockito.any(ComponentContext.class), 
 				Mockito.any(ModelAttribute.class), 
 				Mockito.anyObject(), 
 				Mockito.any(ModelEntity.class), 
