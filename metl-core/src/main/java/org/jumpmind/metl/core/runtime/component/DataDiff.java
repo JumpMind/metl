@@ -27,6 +27,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,6 +42,7 @@ import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.metl.core.model.Component;
+import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
@@ -57,6 +61,14 @@ public class DataDiff extends AbstractComponentRuntime {
     public static String SOURCE_2 = "source.2";
     public static String IN_MEMORY_COMPARE = "in.memory.compare";
 
+    public final static String ENTITY_ADD_ENABLED = "add.enabled";
+
+    public final static String ENTITY_CHG_ENABLED = "chg.enabled";
+
+    public final static String ENTITY_DEL_ENABLED = "del.enabled";
+
+    public final static String ENTITY_ORDER = "order";
+
     int rowsPerMessage = 10000;
 
     String sourceStep1Id;
@@ -71,6 +83,8 @@ public class DataDiff extends AbstractComponentRuntime {
 
     String databaseName;
 
+    List<ModelEntity> entities;
+
     @Override
     protected void start() {
         TypedProperties properties = getTypedProperties();
@@ -82,7 +96,7 @@ public class DataDiff extends AbstractComponentRuntime {
         if (isBlank(sourceStep2Id)) {
             throw new MisconfiguredException("Please choose a step where the data to compare comes from");
         }
-        
+
         this.inMemoryCompare = properties.is(IN_MEMORY_COMPARE);
         this.rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
         Component comp = context.getFlowStep().getComponent();
@@ -91,6 +105,22 @@ public class DataDiff extends AbstractComponentRuntime {
         if (inputModel == null) {
             throw new MisconfiguredException("The input model is not set and it is required");
         }
+
+        entities = new ArrayList<>(inputModel.getModelEntities());
+        Collections.sort(entities, new Comparator<ModelEntity>() {
+            @Override
+            public int compare(ModelEntity o1, ModelEntity o2) {
+                ComponentEntitySetting order1 = context.getFlowStep().getComponent().getSingleEntitySetting(o1.getId(),
+                        DataDiff.ENTITY_ORDER);
+                int orderValue1 = order1 != null ? Integer.parseInt(order1.getValue()) : 0;
+
+                ComponentEntitySetting order2 = context.getFlowStep().getComponent().getSingleEntitySetting(o2.getId(),
+                        DataDiff.ENTITY_ORDER);
+                int orderValue2 = order2 != null ? Integer.parseInt(order2.getValue()) : 0;
+
+                return new Integer(orderValue1).compareTo(new Integer(orderValue2));
+            }
+        });
     }
 
     @Override
@@ -103,9 +133,15 @@ public class DataDiff extends AbstractComponentRuntime {
     }
 
     protected void calculateDiff(ISendMessageCallback callback) {
-        Model inputModel = context.getFlowStep().getComponent().getInputModel();
-        List<ModelEntity> entities = inputModel.getModelEntities();
         for (ModelEntity entity : entities) {
+            Component component = context.getFlowStep().getComponent();
+            ComponentEntitySetting add = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_ADD_ENABLED);
+            ComponentEntitySetting chg = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_CHG_ENABLED);
+            ComponentEntitySetting del = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_DEL_ENABLED);
+            boolean addEnabled = add != null ? Boolean.parseBoolean(add.getValue()) : true;
+            boolean chgEnabled = chg != null ? Boolean.parseBoolean(chg.getValue()) : true;
+            boolean delEnabled = del != null ? Boolean.parseBoolean(del.getValue()) : true;
+
             StringBuilder addSql = new StringBuilder("select ");
             StringBuilder chgSql = new StringBuilder(addSql);
             StringBuilder delSql = new StringBuilder(addSql);
@@ -153,7 +189,7 @@ public class DataDiff extends AbstractComponentRuntime {
                     secondCol = true;
                 }
             }
-            
+
             if (entity.hasOnlyPrimaryKeys()) {
                 chgSql.append(" 1=0 ");
             }
@@ -168,17 +204,23 @@ public class DataDiff extends AbstractComponentRuntime {
             reader.setComponentDefinition(componentDefinition);
             reader.setRowsPerMessage(rowsPerMessage);
 
-            reader.setSql(addSql.toString());
-            reader.setEntityChangeType(ChangeType.ADD);
-            reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
+            if (addEnabled) {
+                reader.setSql(addSql.toString());
+                reader.setEntityChangeType(ChangeType.ADD);
+                reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
+            }
 
-            reader.setSql(chgSql.toString());
-            reader.setEntityChangeType(ChangeType.CHG);
-            reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
+            if (chgEnabled) {
+                reader.setSql(chgSql.toString());
+                reader.setEntityChangeType(ChangeType.CHG);
+                reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
+            }
 
-            reader.setSql(delSql.toString());
-            reader.setEntityChangeType(ChangeType.DEL);
-            reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
+            if (delEnabled) {
+                reader.setSql(delSql.toString());
+                reader.setEntityChangeType(ChangeType.DEL);
+                reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
+            }
 
         }
 
@@ -197,7 +239,7 @@ public class DataDiff extends AbstractComponentRuntime {
         }
 
     }
-    
+
     protected void deleteDatabaseFile(File file) {
         log(LogLevel.INFO, "Deleting database file: %s", file.getName());
         FileUtils.deleteQuietly(file);
@@ -255,7 +297,7 @@ public class DataDiff extends AbstractComponentRuntime {
                 List<ModelAttribute> attributes = entity.getModelAttributes();
                 for (ModelAttribute attribute : attributes) {
                     DataType dataType = attribute.getDataType();
-                    Column column = new Column(attribute.getName());                   
+                    Column column = new Column(attribute.getName());
                     if (dataType.isNumeric()) {
                         column.setTypeCode(Types.DECIMAL);
                     } else if (dataType.isBoolean()) {

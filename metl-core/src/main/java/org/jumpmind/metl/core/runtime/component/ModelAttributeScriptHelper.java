@@ -183,6 +183,14 @@ public class ModelAttributeScriptHelper {
         return formatdate(formatPattern, dateToFormat);
     }
     
+    public Object nvl(Object substituteForNull) {
+        if (value == null) {
+            return substituteForNull;
+        } else {
+            return value;
+        }
+    }
+    
     private Date parseDateFromText(String pattern, String valueToParse) {
         if (isNotBlank(valueToParse)) {
             return FormatUtils.parseDate(valueToParse, new String[] { pattern});

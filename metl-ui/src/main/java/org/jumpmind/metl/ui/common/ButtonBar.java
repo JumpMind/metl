@@ -84,6 +84,7 @@ public class ButtonBar extends HorizontalLayout {
         textField.setIcon(FontAwesome.SEARCH);
         textField.setTextChangeEventMode(TextChangeEventMode.LAZY);
         textField.setTextChangeTimeout(500);
+        textField.setNullRepresentation("");
         addRight(textField);
         return textField;
     }
