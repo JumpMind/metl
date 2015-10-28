@@ -21,6 +21,7 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -52,9 +53,7 @@ public class ComponentContext {
     public ComponentContext(AgentDeployment deployment, FlowStep flowStep, Flow manipulatedFlow, IExecutionTracker executionTracker,
             Map<String, IResourceRuntime> deployedResources, Map<String, Serializable> flowParameters, Map<String, String> globalSettings) {
         this.deployment = deployment;
-        if (flowParameters == null) {
-            flowParameters = new HashMap<String, Serializable>();
-        }
+        this.flowParameters = Collections.synchronizedMap(new HashMap<>(flowParameters));
         this.flowStep = flowStep;
         this.manipulatedFlow = manipulatedFlow;
         this.executionTracker = executionTracker;
