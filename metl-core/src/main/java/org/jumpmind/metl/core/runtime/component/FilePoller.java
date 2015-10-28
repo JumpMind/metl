@@ -192,7 +192,7 @@ public class FilePoller extends AbstractComponentRuntime {
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 filePaths.add(file.getAbsolutePath());
                 if (filePaths.size() <= filesPerMessage) {
-                    callback.sendMessage(null, filePaths, unitOfWorkLastMessage);
+                    callback.sendMessage(null, filePaths, false);
                     filePaths = new ArrayList<>();
                 }
             }

@@ -227,8 +227,6 @@ public class DataDiff extends AbstractComponentRuntime {
         ResettableBasicDataSource ds = databasePlatform.getDataSource();
         ds.close();
 
-        databasePlatform = null;
-
         if (!inMemoryCompare) {
             try {
                 Files.list(Paths.get(System.getProperty("h2.baseDir"))).filter(path -> path.toFile().getName().startsWith(databaseName))
@@ -237,6 +235,10 @@ public class DataDiff extends AbstractComponentRuntime {
                 log.warn("Failed to delete file", e);
             }
         }
+        
+        databasePlatform = null;
+        databaseName = null;
+        databaseWriter = null;
 
     }
 
