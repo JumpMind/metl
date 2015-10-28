@@ -105,7 +105,7 @@ public class PropertySheet extends AbsoluteLayout {
         panel.addStyleName("noborder");
         addComponent(panel);
         
-        editButton = new Button("Advanced Settings");
+        editButton = new Button("Component Editor");
         editButton.addClickListener(event -> openAdvancedEditor());
         addComponent(editButton, "right: 25px; top: 10px;");
 
