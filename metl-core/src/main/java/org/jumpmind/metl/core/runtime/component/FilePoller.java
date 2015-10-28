@@ -68,6 +68,8 @@ public class FilePoller extends AbstractComponentRuntime {
     
     public final static String SETTING_MAX_FILES_TO_POLL = "max.files.to.poll";
     
+    public final static String SETTING_MIN_FILES_TO_POLL = "min.files.to.poll";
+    
     public final static String SORT_NAME = "Name";
     public final static String SORT_MODIFIED = "Last Modified";
 
@@ -87,6 +89,8 @@ public class FilePoller extends AbstractComponentRuntime {
     boolean cancelOnNoFiles = true;
     
     int maxFilesToPoll;
+    
+    int minFilesToPoll = 1;
 
     String actionOnSuccess = ACTION_NONE;
 
@@ -129,6 +133,7 @@ public class FilePoller extends AbstractComponentRuntime {
                 properties.get(SETTING_ARCHIVE_ON_SUCCESS_PATH),
                 context.getFlowParametersAsString(), true);
         maxFilesToPoll = properties.getInt(SETTING_MAX_FILES_TO_POLL);
+        minFilesToPoll = properties.getInt(SETTING_MIN_FILES_TO_POLL);
         fileSortOption = properties.get(SETTING_FILE_SORT_ORDER, fileSortOption);
 
     }
@@ -166,7 +171,7 @@ public class FilePoller extends AbstractComponentRuntime {
         scanner.setCaseSensitive(false);
         scanner.scan();
         String[] files = scanner.getIncludedFiles();
-        if (files.length > 0) {
+        if (files.length >= minFilesToPoll) {
             for(int i = 0; i < files.length && i < maxFilesToPoll; i++) {
                 File file = getNewFile(path, files[i]);
                 filesSent.add(file);

@@ -149,7 +149,12 @@
             <setting id='rows.per.message' type='integer' required='false'>
                 <name>Files/Msg</name>
                 <defaultValue>1</defaultValue>
-            </setting>            
+            </setting>   
+            <setting id='min.files.to.poll' type='integer' required='true'>
+                <name>Min Files To Poll</name>
+                <defaultValue>1</defaultValue>
+                <description></description>
+            </setting>                                 
             <setting id='max.files.to.poll' type='integer' required='true'>
                 <name>Max Files To Poll</name>
                 <defaultValue>1000</defaultValue>
