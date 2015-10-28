@@ -98,7 +98,9 @@ public class Transformer extends AbstractComponentRuntime {
 	                Object value = inData.get(attributeId);
 	                if (isNotBlank(transform)) {
 	                    ModelAttribute attribute = inputModel.getAttributeById(attributeId);
-	                    ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());                    
+	                    ModelEntity entity = inputModel.getEntityById(attribute.getEntityId()); 
+	                    
+	                    // Transform
 	                    value = ModelAttributeScriptHelper.eval(attribute, value, entity, inData, transform);
 	                }
 	                if (value != ModelAttributeScriptHelper.REMOVE_ATTRIBUTE) {

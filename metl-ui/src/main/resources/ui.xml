@@ -141,6 +141,7 @@
     </component-ui>
     <component-ui id="Data Diff UI" componentId="DataDiff">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-data-diff-48X48-color.png</iconImage>
+        <className>org.jumpmind.metl.ui.views.design.EditDataDiffPanel</className>        
     </component-ui>
     <component-ui id="File Util UI" componentId="File Util">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-file-util-48x48-color.png</iconImage>
