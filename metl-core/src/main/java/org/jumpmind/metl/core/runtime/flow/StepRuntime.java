@@ -496,7 +496,9 @@ public class StepRuntime implements Runnable {
             currentInputMessages.put(threadNumber, currentInputMessage);
         }
 
-        private boolean isUnitOfWorkLastMessage(String unitOfWork, boolean lastMessage) {
+        private boolean isUnitOfWorkLastMessage(boolean lastMessage) {
+            FlowStep flowStep = componentContext.getFlowStep();
+            String unitOfWork = flowStep.getComponent().get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
             if (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_INPUT_MESSAGE) || (unitOfWork.equalsIgnoreCase(UNIT_OF_WORK_FLOW) && lastMessage)) {
                 return true;
             } else {
@@ -506,9 +508,7 @@ public class StepRuntime implements Runnable {
 
         private Message createMessage(Message newMessage, Map<String, Serializable> headerSettings, Serializable payload,
                 boolean lastMessage) {
-            FlowStep flowStep = componentContext.getFlowStep();
             ComponentStatistics statistics = componentContext.getComponentStatistics();
-            String unitOfWork = flowStep.getComponent().get(UNIT_OF_WORK, UNIT_OF_WORK_FLOW);
             MessageHeader header = newMessage.getHeader();
             Message inputMessage = currentInputMessages.get(ThreadUtils.getThreadNumber());
             if (inputMessage != null) {
@@ -517,7 +517,7 @@ public class StepRuntime implements Runnable {
             if (headerSettings != null) {
                 header.putAll(headerSettings);
             }
-            header.setUnitOfWorkLastMessage(isUnitOfWorkLastMessage(unitOfWork, lastMessage));
+            header.setUnitOfWorkLastMessage(isUnitOfWorkLastMessage(lastMessage));
             header.setSequenceNumber(statistics.getNumberOutboundMessages(ThreadUtils.getThreadNumber()) + 1);
             newMessage.setPayload(payload);
             return newMessage;
@@ -585,7 +585,7 @@ public class StepRuntime implements Runnable {
         @Override
         public void sendControlMessage() {
             FlowStep flowStep = componentContext.getFlowStep();
-            sendMessage(new ControlMessage(flowStep.getId()));
+            sendMessage(createMessage(new ControlMessage(flowStep.getId()), null, null, true));
         }
 
         @Override

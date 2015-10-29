@@ -159,7 +159,7 @@ public class ContentRouter extends AbstractComponentRuntime {
         }
 
         for (String targetFlowStepId : outboundMessages.keySet()) {
-            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), true, targetFlowStepId);
+            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), unitOfWorkBoundaryReached, targetFlowStepId);
         }
 
     }

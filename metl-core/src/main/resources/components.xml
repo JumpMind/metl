@@ -199,7 +199,7 @@
             </setting>
         </settings>
     </component>
-     <component id='File Util' category='PROCESSOR' inputMessageType='any' outputMessageType='none' resourceCategory='streamable'
+     <component id='File Util' category='PROCESSOR' inputMessageType='any' outputMessageType='text' resourceCategory='streamable'
         inputOutputModelsMatch='false'>
         <name>File Util</name>
         <className>org.jumpmind.metl.core.runtime.component.FileUtil</className>
