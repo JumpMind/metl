@@ -161,7 +161,10 @@ public class MessageScriptHelper {
         headers.put(parameterName, value);
         callback.sendMessage(headers, inputMessage.getPayload(), unitOfWorkBoundaryReached);
     }
-
+    
+    protected void forwardMessageWithParameters(Map<String,Serializable> params) {
+        callback.sendMessage(params, inputMessage.getPayload(), unitOfWorkBoundaryReached);
+    }
     
     protected void forwardMessage() {
         callback.sendMessage(null, inputMessage.getPayload(), unitOfWorkBoundaryReached);
