@@ -79,7 +79,7 @@ abstract public class AbstractObjectWithSettings extends AbstractObject {
         settings.add(settingData);
         return settingData;
     }
-    
+
     public Setting findSetting(String name, String value) {
         for (Setting settingData : settings) {
             if (name.equals(settingData.getName()) && StringUtils.equals(value, settingData.getValue())) {
@@ -93,7 +93,7 @@ abstract public class AbstractObjectWithSettings extends AbstractObject {
         settings.add(settingData);
         return settingData;
     }
-    
+
     public List<String> getList(String name) {
         List<String> list = new ArrayList<String>();
         for (Setting settingData : settings) {
@@ -105,12 +105,14 @@ abstract public class AbstractObjectWithSettings extends AbstractObject {
     }
 
     public String get(String name, String defaultValue) {
+        String value = null;
         for (Setting settingData : settings) {
             if (name.equals(settingData.getName())) {
-                return settingData.getValue();
+                value = settingData.getValue();
+                break;
             }
         }
-        return defaultValue;
+        return value != null ? value : defaultValue;
     }
 
     public long getLong(String name, long defaultValue) {
@@ -155,7 +157,7 @@ abstract public class AbstractObjectWithSettings extends AbstractObject {
         }
         return properties;
     }
-    
+
     public TypedProperties toTypedProperties(List<XMLSetting> definitions) {
         TypedProperties properties = new TypedProperties();
         for (XMLSetting definition : definitions) {

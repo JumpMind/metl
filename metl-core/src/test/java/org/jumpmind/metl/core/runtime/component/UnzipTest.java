@@ -130,7 +130,6 @@ public class UnzipTest extends AbstractComponentRuntimeTestSupport<ArrayList<Str
 		
 		when(((UnZip) spy).getResourceReference()).thenReturn(mockStreamable);
 		when(((UnZip) spy).getNewFile(anyString())).thenReturn(mockFile);
-		when(((UnZip) spy).getNewFile(anyString(), anyString())).thenReturn(mockFile);
 		try {
 			when(((UnZip) spy).getNewZipFile(Mockito.any(File.class))).thenReturn(mockZipFile);
 		}

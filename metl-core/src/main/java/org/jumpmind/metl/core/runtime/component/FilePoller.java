@@ -35,6 +35,7 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -110,9 +111,9 @@ public class FilePoller extends AbstractComponentRuntime {
     protected void start() {
         Component component = getComponent();
         Resource resource = component.getResource();
-        if (!resource.getType().equals(LocalFile.TYPE)) {
-            throw new IllegalStateException(String.format("The resource must be of type %s",
-                    LocalFile.TYPE));
+        if (resource == null || !resource.getType().equals(LocalFile.TYPE)) {
+            throw new MisconfiguredException("A resource of type '%s' must be selected",
+                    LocalFile.TYPE);
         }
         TypedProperties properties = getTypedProperties();
 

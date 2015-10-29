@@ -21,14 +21,18 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -41,9 +45,9 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.runtime.resource.IStreamable;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.properties.TypedProperties;
+import org.jumpmind.util.FormatUtils;
 
 public class UnZip extends AbstractComponentRuntime {
     public static final String TYPE = "UnZip";
@@ -52,9 +56,13 @@ public class UnZip extends AbstractComponentRuntime {
 
     public final static String SETTING_TARGET_SUB_DIR = "target.sub.dir";
 
+    public final static String SETTING_TARGET_RELATIVE_PATH = "target.relative.path";
+
     public static final String SETTING_MUST_EXIST = "must.exist";
 
     public final static String SETTING_DELETE_ON_COMPLETE = "delete.on.complete";
+    
+    public final static String SETTING_EXTRACT_EMPTY_FILES = "extract.empty.files";
 
     public final static String SETTING_ENCODING = "encoding";
 
@@ -67,6 +75,8 @@ public class UnZip extends AbstractComponentRuntime {
     boolean deleteOnComplete = false;
 
     boolean targetSubDir = false;
+    
+    boolean extractEmptyFiles = true;
 
     @Override
     protected void start() {
@@ -82,70 +92,76 @@ public class UnZip extends AbstractComponentRuntime {
         if (isBlank(targetDirName)) {
             throw new MisconfiguredException("The target resource %s needs its path set", targetResource.getResource().getName());
         }
+
+        String targetRelativePath = properties.get(SETTING_TARGET_RELATIVE_PATH, "");
+        if (isNotBlank(targetRelativePath)) {
+            targetDirName = new File(targetDirName, targetRelativePath).getAbsolutePath();
+        }
+
         targetSubDir = properties.is(SETTING_TARGET_SUB_DIR, targetSubDir);
         mustExist = properties.is(SETTING_MUST_EXIST, mustExist);
+        extractEmptyFiles = properties.is(SETTING_EXTRACT_EMPTY_FILES, extractEmptyFiles);
         encoding = properties.get(SETTING_ENCODING, encoding);
+        
     }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         List<String> files = inputMessage.getPayload();
-        ArrayList<String> filePaths = new ArrayList<String>();
-
-        IStreamable streamable = getResourceReference();
-        String path = getResourceRuntime().getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
-
-        for (String fileName : files) {
-            log(LogLevel.INFO, "Preparing to extract file : %s", fileName);
-            File file = getNewFile(fileName);
-            if (mustExist && !file.exists()) {
-                throw new IoException(String.format("Could not find file to extract: %s", fileName));
-            }
-            if (file.exists()) {
-                try {
-                    ZipFile zipFile = getNewZipFile(file);
-                    InputStream in = null;
-                    OutputStream out = null;
-                    try {
-                        String finalPath = targetSubDir
-                                ? targetDirName + File.separator + FilenameUtils.removeExtension(file.getName()) + File.separator
-                                : targetDirName + File.separator;
-
-                        for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();) {
-                            ZipEntry entry = e.nextElement();
-                            log(LogLevel.INFO, entry.getName());
-
-                            if (!entry.isDirectory()) {
-                                out = streamable.getOutputStream(finalPath + entry.getName(), false);
-                                in = zipFile.getInputStream(entry);
-                                IOUtils.copy(in, out);
-                                filePaths.add(getNewFile(path + finalPath, entry.getName()).getAbsolutePath());
-                            }
-                        }
-                    } finally {
-                        IOUtils.closeQuietly(in);
-                        IOUtils.closeQuietly(out);
-                        zipFile.close();
-                    }
-                    if (deleteOnComplete) {
-                        FileUtils.deleteQuietly(file);
-                    }
-                } catch (IOException e) {
-                    throw new IoException(e);
+        if (files != null) {
+            ArrayList<String> filePaths = new ArrayList<String>();
+            for (String fileName : files) {
+                log(LogLevel.INFO, "Preparing to extract file : %s", fileName);
+                File file = getNewFile(fileName);
+                if (mustExist && !file.exists()) {
+                    throw new IoException(String.format("Could not find file to extract: %s", fileName));
                 }
-                log(LogLevel.INFO, "Extracted %s", fileName);
-                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                if (file.exists()) {
+                    try {
+                        ZipFile zipFile = getNewZipFile(file);
+                        InputStream in = null;
+                        OutputStream out = null;
+                        try {
+                            Map<String,String> parms = new HashMap<>(getComponentContext().getFlowParametersAsString());
+                            parms.putAll(inputMessage.getHeader().getAsStrings());
+                            String targetDirNameResolved = FormatUtils.replaceTokens(targetDirName, parms, true);
+                            File targetDir = targetSubDir ? new File(targetDirNameResolved, FilenameUtils.removeExtension(file.getName()))
+                                    : new File(targetDirNameResolved);
+                            targetDir.mkdirs();
+                            for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();) {
+                                ZipEntry entry = e.nextElement();
+                                log(LogLevel.INFO, entry.getName());
+
+                                if (!entry.isDirectory() && (extractEmptyFiles || entry.getSize() > 0)) {
+                                    File newFile = new File(targetDir, entry.getName());
+                                    newFile.getParentFile().mkdirs();
+                                    out = new FileOutputStream(newFile);
+                                    in = zipFile.getInputStream(entry);
+                                    IOUtils.copy(in, out);
+                                    filePaths.add(newFile.getAbsolutePath());
+                                }
+                            }
+                        } finally {
+                            IOUtils.closeQuietly(in);
+                            IOUtils.closeQuietly(out);
+                            zipFile.close();
+                        }
+                        if (deleteOnComplete) {
+                            FileUtils.deleteQuietly(file);
+                        }
+                    } catch (IOException e) {
+                        throw new IoException(e);
+                    }
+                    log(LogLevel.INFO, "Extracted %s", fileName);
+                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                }
             }
+            callback.sendMessage(null, filePaths, unitOfWorkBoundaryReached);
         }
-        callback.sendMessage(null, filePaths, unitOfWorkBoundaryReached);
     }
 
     protected File getNewFile(String file) {
         return new File(file);
-    }
-
-    protected File getNewFile(String path, String child) {
-        return new File(path, child);
     }
 
     protected ZipFile getNewZipFile(File file) throws IOException {

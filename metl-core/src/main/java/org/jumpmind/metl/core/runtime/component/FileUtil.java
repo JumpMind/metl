@@ -26,8 +26,11 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
@@ -39,6 +42,7 @@ import org.jumpmind.util.FormatUtils;
 import org.springframework.util.FileCopyUtils;
 
 public class FileUtil extends AbstractComponentRuntime {
+
     public static final String ACTION_COPY = "Copy";
     public static final String ACTION_RENAME = "Rename";
     public static final String ACTION_MOVE = "Move";
@@ -106,6 +110,7 @@ public class FileUtil extends AbstractComponentRuntime {
 
         }
 
+        action = typedProperties.get(SETTING_ACTION);
         mustExist = typedProperties.is(SETTING_MUST_EXIST, mustExist);
         String targetResourceId = typedProperties.get(SETTING_TARGET_RESOURCE);
         IResourceRuntime targetResource = context.getDeployedResources().get(targetResourceId);
@@ -129,10 +134,19 @@ public class FileUtil extends AbstractComponentRuntime {
         if (files != null) {
             for (String fileName : files) {
                 try {
-                    if (action.equals(ACTION_COPY)) {
-                        copyFile(fileName);
-                        getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                        filesProcessed.add(fileName);
+                    String targetFile = null;
+                    if (action.equals(ACTION_COPY) || action.equals(ACTION_MOVE)) {
+                        targetFile = copyFile(inputMessage, fileName);
+                        if (isNotBlank(targetFile)) {
+                            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                            filesProcessed.add(targetFile);
+                        }
+                    } 
+                    
+                    if (action.equals(ACTION_MOVE)) {
+                        if (isNotBlank(targetFile)) {
+                            FileUtils.deleteQuietly(new File(fileName));
+                        }
                     }
                 } catch (Exception e) {
                     throw new IoException("Error processing file " + e.getMessage());
@@ -142,19 +156,20 @@ public class FileUtil extends AbstractComponentRuntime {
         callback.sendMessage(null, filesProcessed, unitOfWorkBoundaryReached);
     }
 
-    protected void copyFile(String fileName) throws Exception {
-
+    protected String copyFile(Message inputMessage, String fileName) throws Exception {
         File sourceFile = new File(fileName);
         if (mustExist && !sourceFile.exists()) {
             throw new FileNotFoundException("Unable to locate file " + fileName);
-        } else {
-            if (isBlank(newName)) {
-                newName = sourceFile.getName();
+        } else if (sourceFile.exists()) {
+            String targetName = newName;
+            if (isBlank(targetName)) {
+                targetName = sourceFile.getName();
             }
 
-            String tokenResolvedName = FormatUtils.replaceTokens(newName, getComponentContext().getFlowParametersAsString(), true);
-            String tokenResolvedAppendToName = FormatUtils.replaceTokens(appendToName, getComponentContext().getFlowParametersAsString(),
-                    true);
+            Map<String, String> parms = new HashMap<>(getComponentContext().getFlowParametersAsString());
+            parms.putAll(inputMessage.getHeader().getAsStrings());
+            String tokenResolvedName = FormatUtils.replaceTokens(targetName, parms, true);
+            String tokenResolvedAppendToName = FormatUtils.replaceTokens(appendToName, parms, true);
 
             String targetFileWithouPart = getTargetFileName(tokenResolvedName, sourceFile, tokenResolvedAppendToName);
             String targetFileName = targetFileWithouPart + ".part";
@@ -170,9 +185,14 @@ public class FileUtil extends AbstractComponentRuntime {
             File targetFile = new File(targetDir, targetFileName);
             targetFile.getParentFile().mkdirs();
             FileCopyUtils.copy(sourceFile, targetFile);
-            if (!targetFile.renameTo(new File(targetDir, targetFileWithouPart))) {
+            File finalFile = new File(targetDir, targetFileWithouPart);
+            if (!targetFile.renameTo(finalFile)) {
                 throw new IoException(String.format("Rename of %s to %s failed", targetFile.getAbsolutePath(), targetFileWithouPart));
             }
+            
+            return finalFile.getAbsolutePath();
+        } else {
+            return null;
         }
     }
 

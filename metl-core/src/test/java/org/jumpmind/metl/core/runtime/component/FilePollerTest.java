@@ -34,6 +34,7 @@ import org.apache.tools.ant.DirectoryScanner;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
@@ -78,7 +79,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 			((FilePoller) spy).start();
 		}
 		catch (Exception e) {
-			Assert.assertTrue(e instanceof IllegalStateException);
+			Assert.assertTrue(e instanceof MisconfiguredException);
 		}
 	}
 

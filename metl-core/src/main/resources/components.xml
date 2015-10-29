@@ -162,7 +162,7 @@
             </setting>
             <setting id='action.on.success' type='choice' required='false'>
                 <name>Action on Success</name>
-                <defaultValue>NONE</defaultValue>
+                <defaultValue>None</defaultValue>
                 <description></description>
                 <choices>
                     <choice>None</choice>
@@ -176,7 +176,7 @@
             </setting>
             <setting id='action.on.error' type='choice' required='false'>
                 <name>Action on Error</name>
-                <defaultValue>NONE</defaultValue>
+                <defaultValue>None</defaultValue>
                 <description></description>
                 <choices>
                     <choice>None</choice>
@@ -870,6 +870,10 @@
                 <name>Target File Resource</name>
                 <description></description>
             </setting>
+            <setting id='target.relative.path' type='text' required='false'>
+                <name>Target Path</name>
+                <description></description>
+            </setting>            
             <setting id='target.sub.dir' type='boolean' required='false'>
                 <name>Create Sub Dir From File Name</name>
                 <description></description>
@@ -879,6 +883,11 @@
                 <defaultValue>true</defaultValue>
                 <description></description>
             </setting>
+            <setting id='extract.empty.files' type='boolean' required='false'>
+                <name>Extract Empty Files</name>
+                <defaultValue>true</defaultValue>
+                <description></description>
+            </setting>            
             <setting id='encoding' type='text' required='false'>
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>

@@ -22,8 +22,10 @@ package org.jumpmind.metl.core.runtime;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
-public class MessageHeader extends HashMap<String, Serializable> implements Serializable, Cloneable {
+public class MessageHeader extends HashMap<String, Serializable>implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
 
@@ -70,5 +72,18 @@ public class MessageHeader extends HashMap<String, Serializable> implements Seri
     public void setUnitOfWorkLastMessage(boolean lastMessage) {
         this.unitOfWorkLastMessage = lastMessage;
     }
-    
+
+    public Map<String, String> getAsStrings() {
+        Map<String, String> params = new HashMap<String, String>();
+        for (String key : new HashSet<>(keySet())) {
+            Serializable value = get(key);
+            if (value != null) {
+                params.put(key, value.toString());
+            } else {
+                params.put(key, null);
+            }
+        }
+        return params;
+    }
+
 }
