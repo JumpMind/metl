@@ -32,7 +32,7 @@ displays a row for every entity/attribute in the input model and allows the sele
 
 image:editors/joiner-editor.png[]
 
-======= Example 1. Sample Merge
+====== Example 1. Sample Merge
 Model with Entity DENORMALIZED_PERSON having the following attributes:
 
 ----

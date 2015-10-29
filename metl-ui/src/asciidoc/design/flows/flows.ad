@@ -30,11 +30,13 @@ The following table shows a list of available components.
 |<<format-fixed>>|image:metl-fixed-length-48x48-color.png[]|Model based data needs to be formatted into fixed length text
 |<<format-xml>>|image:metl-xml-formatter-48x48-color.png[]|Model based data needs to be formatted into xml text
 |<<joiner>>|image:metl-joiner-48x48-color.png[]|Different instances of model based records need to be merged into a single instance that combines the attributes from all instances.
+|<<lookup>>|metl-lookup-48x48-color.png[]|Reference data exists that needs to be looked up / retrieved by a specified key, and another attribute of the the resulting reference data passed to downstream components.
 3+|Writers
 |<<rdbms-writer>>|image:metl-writer-48x48-color.png[]|Data needs written to a relational database
 |<<sql-executor>>|image:metl-writer-48x48-color.png[]|Data needs written to or deleted from a database using a specific sql statement
 |<<text-file-writer>>|image:metl-text-writer-48x48-color.png[]|Data needs written to a text based file
 |<<zip>>|image:metl-zip-48x48-color.png[]|Data needs to be put in a compressed file 
+|<<lookup>>|metl-lookup-48x48-color.png[]|Reference data exists that needs to be looked up / retrieved by a specified key, and another attribute of the the resulting reference data passed to downstream components
 |===========================================
 
 include::readers/readers.ad[]

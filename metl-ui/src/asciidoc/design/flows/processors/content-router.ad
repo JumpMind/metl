@@ -27,15 +27,15 @@ include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===========================================
 
-======= Routing Criteria
+====== Routing Criteria
 
-======= Expression
+====== Expression
 
 A groovy script expression that returns true or false.  The groovy script is executed/evaluated for each record in an inbound message.  
 If the expression evaluates to true, the message is passed to the step at the right.  If the expression is evaluates to false, the message
 is NOT passed to the step at the right. 
 
-======= Target Step
+====== Target Step
 
 The target step is the connected downstream component that will receive the message if the groovy expression 
 evaluates to true.
@@ -44,14 +44,14 @@ TIP: The inbound message will go to ALL target steps where the expression evalua
 unless the "Only Route First Match" option is checked.
 
 [id="entity-router-example-1",reftext="Example 1"]
-======= Example 1.  Sample groovy expressions for an entity based message
+====== Example 1.  Sample groovy expressions for an entity based message
 ----
 if (ENTITY.ATTRIBUTE=='Value 1') return true;
 if (ENTITY.ATTRIBUTE=='Value 2') return true;
 ----
 
 [id="entity-router-example-2",reftext="Example 2"]
-======= Example 2.  Sample groovy expressions for a text based message
+====== Example 2.  Sample groovy expressions for a text based message
 ----
 if (text.indexOf("Some text string") > 0) return true;
 if (text.indexOf("Some other text string") > 0) return true;

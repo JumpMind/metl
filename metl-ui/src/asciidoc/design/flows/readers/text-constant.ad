@@ -26,7 +26,7 @@ include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===========================================
 
-======= Example 1.  Sample Text Constant Text
+====== Example 1.  Sample Text Constant Text
 ----
 4,Diane,Prince,F
 3,Clark,Kent,M

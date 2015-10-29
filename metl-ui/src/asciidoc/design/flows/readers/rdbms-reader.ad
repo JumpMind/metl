@@ -44,7 +44,7 @@ include::../common-properties/shared.ad[]
 |===========================================
 
 [id="rdbms-reader-example-1",reftext="Example 1"]
-======= Example 1.  Using Input Message Entity/Attribute as a parameter
+====== Example 1.  Using Input Message Entity/Attribute as a parameter
 ----
 select 
    field1, 
@@ -58,7 +58,7 @@ In the example above, the SQL Reader query will be run for each input record wit
 Each time the query is run, field3 will be restricted by the incoming row's INPUT_MODEL_ENTITY_NAME.INPUT_MODEL_ATTRIBUTE field. 
 
 [id="rdbms-reader-example-2",reftext="Example 2"]
-======= Example 2.  Using Hints to Map to the Output Model
+====== Example 2.  Using Hints to Map to the Output Model
 ----
 select 
    field1,
