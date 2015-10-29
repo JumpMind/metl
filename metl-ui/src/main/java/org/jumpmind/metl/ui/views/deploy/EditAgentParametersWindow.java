@@ -49,11 +49,11 @@ import com.vaadin.ui.themes.ValoTheme;
 class EditAgentParametersWindow extends ResizableWindow implements ValueChangeListener {
 
     ApplicationContext context;
-    
+
     Agent agent;
-    
+
     Table table;
-    
+
     Button removeButton;
 
     public EditAgentParametersWindow(final ApplicationContext context, final Agent agent) {
@@ -86,8 +86,10 @@ class EditAgentParametersWindow extends ResizableWindow implements ValueChangeLi
 
         addComponent(buildButtonFooter(closeButton));
 
-        for (AgentParameter parameter : agent.getAgentParameters()) {
-            table.addItem(parameter);
+        if (agent.getAgentParameters() != null) {
+            for (AgentParameter parameter : agent.getAgentParameters()) {
+                table.addItem(parameter);
+            }
         }
     }
 
@@ -96,8 +98,7 @@ class EditAgentParametersWindow extends ResizableWindow implements ValueChangeLi
     }
 
     class EditFieldFactory implements TableFieldFactory {
-        public Field<?> createField(final Container dataContainer, final Object itemId,
-                final Object propertyId, Component uiContext) {
+        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId, Component uiContext) {
             final AgentParameter parameter = (AgentParameter) itemId;
             final TextField textField = new ImmediateUpdateTextField(null) {
                 protected void save(String text) {
@@ -109,7 +110,7 @@ class EditAgentParametersWindow extends ResizableWindow implements ValueChangeLi
             textField.addFocusListener(new FocusListener() {
                 public void focus(FocusEvent event) {
                     table.select(itemId);
-                }                
+                }
             });
             return textField;
         }
