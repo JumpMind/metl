@@ -26,11 +26,14 @@ include::../common-properties/enabled.ad[]
 list.  Wildcards (*) can be used.  See examples below.
 |Search Recursively|Whether the directory specified by the File Resource and File Pattern path should be searched recursively
 include::../common-properties/cancel-on-no-files.ad[]
+|File Sort Order|Indicates the order files will be reported.
+|Files/Msg|The number of file paths that should be published per message.  The default value is 1.
+|Min Files to Poll|Files will not be reported unless at least this number of files are found
+|Max Files to Poll|No more than this number of files will be reported during on execution
 include::../common-properties/action-on-success.ad[]
 include::../common-properties/archive-on-success-path.ad[]
 include::../common-properties/action-on-error.ad[]
 include::../common-properties/archive-on-error-path.ad[]
-|Files/Msg|The number of file paths that should be published per message.  The default value is 1.
 |Use Trigger File|Many systems post a single trigger file to designate that other data files are ready to process.  The existence of the trigger
 file indicates the other files are ready to process.  If "Use Trigger File" is true, the File Poller will first check for the existence of a file
 named the same as the Relative Trigger File Path parameter.  If that file exists, the File Poller will then check for files matching the File Pattern
