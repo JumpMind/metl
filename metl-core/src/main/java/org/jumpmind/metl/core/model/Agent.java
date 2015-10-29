@@ -53,12 +53,13 @@ public class Agent extends AbstractObject {
     boolean deleted;
 
     public Agent() {
-        this.agentDeployments = new ArrayList<AgentDeployment>();
+        this.agentDeployments = new ArrayList<>();
+        this.agentParameters = new ArrayList<>();
     }
 
     public Agent(Folder folder) {
+        this();
         setFolder(folder);
-        this.agentDeployments = new ArrayList<AgentDeployment>();
     }
 
     public void setFolder(Folder folder) {
