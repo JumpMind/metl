@@ -89,7 +89,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                     status = ExecutionStatus.ERROR;
                 }
 
-                if (ExecutionStatus.CANCELLED.name().equals(executionStep.getStatus())) {
+                if (status != ExecutionStatus.ERROR && 
+                        ExecutionStatus.CANCELLED.name().equals(executionStep.getStatus())) {
                     status = ExecutionStatus.CANCELLED;
                 }
             }
