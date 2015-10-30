@@ -456,17 +456,13 @@ public class StepRuntime implements Runnable {
 
     protected void logOutput(Message message, String... targetFlowStepIds) {
 
-        Collection<String> targetStepIds = targetFlowStepIds != null ? Arrays.asList(targetFlowStepIds) : Collections.emptyList();
+        String targets = targetFlowStepIds != null && targetFlowStepIds.length > 0 ? Arrays.toString(targetFlowStepIds) : "[all]";
         int threadNumber = ThreadUtils.getThreadNumber();
 
-        for (StepRuntime targetRuntime : targetStepRuntimes) {
-            boolean forward = targetStepIds == null || targetStepIds.size() == 0
-                    || targetStepIds.contains(targetRuntime.getComponentContext().getFlowStep().getId());
-            if (forward) {
                 MessageHeader header = message.getHeader();
                 componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
-                        String.format("OUTPUT %s{sequenceNumber=%d,unitOfWorkLastMessage=%s,headers=%s}", message.getClass().getSimpleName(),
-                                header.getSequenceNumber(), header.isUnitOfWorkLastMessage(), header));
+                        String.format("OUTPUT %s{sequenceNumber=%d,unitOfWorkLastMessage=%s,headers=%s,targetsteps:%s}", message.getClass().getSimpleName(),
+                                header.getSequenceNumber(), header.isUnitOfWorkLastMessage(), header, targets));
 
                 Serializable payload = message.getPayload();
                 if (payload instanceof List) {
@@ -483,9 +479,6 @@ public class StepRuntime implements Runnable {
                         }
                     }
                 }
-
-            }
-        }
     }
 
     class SendMessageCallback implements ISendMessageCallback {
