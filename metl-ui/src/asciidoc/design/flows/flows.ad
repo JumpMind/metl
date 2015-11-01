@@ -38,6 +38,7 @@ The following table shows a list of available components.
 |<<zip>>|image:metl-zip-48x48-color.png[]|Data needs to be put in a compressed file 
 |<<lookup>>|metl-lookup-48x48-color.png[]|Reference data exists that needs to be looked up / retrieved by a specified key, and another attribute of the the resulting reference data passed to downstream components
 |<<mapping>>|image:metl-mapping-48x48-color.png[]|Data needs to be mapped from one set of entities/attributes (model structure) to another set of entities/attributes
+|<<message-logger>>|image:metl-message-logger-48x48-color.png[]|Messages need to be logged to the Metl console and log file.
 |===========================================
 
 include::readers/readers.ad[]
