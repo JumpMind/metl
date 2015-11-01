@@ -1,9 +1,27 @@
+[id="no-op",reftext="No Op"]
 ===== No-Op
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:entityrouter.png[]
-|Description|The entity router routes model based records within a message to one or more downstream components based on the routing criteria configured in the component.
+|Icon|image:metl-puzzle-48X48-color.png[]
+|Use When|A message needs to be passed through to another component without any action being taken on the message
+|Description|The No Op component passes messages to a downstream component without any modifications to the original message.
    
 |Inbound Message Type|Model Based Message
 |Output Message Type|Model Based Message
 |===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description
+include::../common-properties/input-model.ad[]
+include::../common-properties/output-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===========================================
+

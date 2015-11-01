@@ -33,6 +33,8 @@ include::message-logger.ad[]
 
 include::multiplier.ad[]
 
+include::no-op.ad[]
+
 include::parse-delimited.ad[]
 
 include::parse-fixed.ad[]
