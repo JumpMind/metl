@@ -20,10 +20,13 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -41,6 +44,41 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class RdbmsReaderUnitTest extends AbstractRdbmsComponentTest {
 
+    @Test
+    public void testFindWhereInParameters() {
+        RdbmsReader reader = new RdbmsReader();
+        Set<String> attributeNames = reader.findWhereInParameters("select * from test where id in (:ENTITY.ATTRIBUTE1) and id is not null");
+        assertEquals(1, attributeNames.size());
+        assertEquals("ENTITY.ATTRIBUTE1", attributeNames.iterator().next());
+        
+        attributeNames = reader.findWhereInParameters("select * from test where id IN (:ENTITY.ATTRIBUTE1) and id is not null");
+        assertEquals(1, attributeNames.size());
+        assertEquals("ENTITY.ATTRIBUTE1", attributeNames.iterator().next());
+        
+        attributeNames = reader.findWhereInParameters("select * from test where id in  (:ENTITY.ATTRIBUTE1) and id is not null");
+        assertEquals(1, attributeNames.size());
+        assertEquals("ENTITY.ATTRIBUTE1", attributeNames.iterator().next());
+        
+        attributeNames = reader.findWhereInParameters("select * from test where id in  \n(:ENTITY.ATTRIBUTE1) and id is not null");
+        assertEquals(1, attributeNames.size());
+        assertEquals("ENTITY.ATTRIBUTE1", attributeNames.iterator().next());
+
+        attributeNames = reader.findWhereInParameters("select * from test where id in  \n( :ENTITY.ATTRIBUTE1 ) and id is not null");
+        assertEquals(1, attributeNames.size());
+        assertEquals("ENTITY.ATTRIBUTE1", attributeNames.iterator().next());
+        
+        attributeNames = reader.findWhereInParameters("select * from test where id is not null");
+        assertEquals(0, attributeNames.size());
+        
+        attributeNames = reader.findWhereInParameters("select * from test where id in  \n( :ENTITY.ATTRIBUTE1 ) and id2 not in (:ENTITY.ATTRIBUTE2)");
+        assertEquals(2, attributeNames.size());
+        Iterator<?> i = attributeNames.iterator();
+        assertEquals("ENTITY.ATTRIBUTE1", i.next());
+        assertEquals("ENTITY.ATTRIBUTE2", i.next());
+
+
+    }
+    
 	@Test
 	@Override
 	public void testStartDefaults() {

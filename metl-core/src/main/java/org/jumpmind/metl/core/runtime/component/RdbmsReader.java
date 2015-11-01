@@ -26,13 +26,17 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jumpmind.db.sql.Row;
 import org.jumpmind.db.sql.SqlException;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
@@ -41,7 +45,6 @@ import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
@@ -54,12 +57,20 @@ import org.springframework.util.StringUtils;
 public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     public static final String TYPE = "RDBMS Reader";
+    
+    private static final String PER_MESSAGE = "PER MESSAGE";
+
+    private static final String PER_ENTITY = "PER ENTITY";    
 
     public final static String TRIM_COLUMNS = "trim.columns";
 
     public final static String MATCH_ON_COLUMN_NAME_ONLY = "match.on.column.name";
+    
+    public final static String RUN_WHEN = "run.when";
 
     List<String> sqls;
+    
+    String runWhen = PER_ENTITY;
 
     long rowsPerMessage = 10000;
 
@@ -78,6 +89,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         trimColumns = properties.is(TRIM_COLUMNS);
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
+        runWhen = properties.get(RUN_WHEN, runWhen);        
         messageSent = false;
     }
         
@@ -89,15 +101,12 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     @Override
     public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         NamedParameterJdbcTemplate template = getJdbcTemplate();
-        Map<String, Object> paramMap = new HashMap<String, Object>();
 
         int inboundRecordCount = 1;
-        ArrayList<EntityData> inboundPayload = null;
-        if (!(inputMessage instanceof ControlMessage)) {
-            inboundPayload = inputMessage.getPayload();
-            if (inboundPayload != null) {
-                inboundRecordCount = inboundPayload.size();
-            }
+        Iterator<?> inboundPayload = null;
+        if (PER_ENTITY.equals(runWhen) && inputMessage.getPayload() instanceof Collection) {
+            inboundPayload = ((Collection<?>)inputMessage.getPayload()).iterator();
+            inboundRecordCount = ((Collection<?>)inputMessage.getPayload()).size();
         }
 
         /*
@@ -107,17 +116,14 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
          * all records in the input message
          */
         ArrayList<EntityData> outboundPayload = null;
-        for (int i = 0; i < inboundRecordCount; i++) {
-            if (inboundPayload != null && inboundPayload.size() > i && inboundPayload.get(i) instanceof EntityData) {
-                setParamsFromInboundMsgAndRec(paramMap, inputMessage, inboundPayload.get(i));
-            } else {
-                setParamsFromInboundMsgAndRec(paramMap, inputMessage, null);
-            }
-
+        for (int i = 0; i < inboundRecordCount; i++) {            
+            Object entity = inboundPayload != null && inboundPayload.hasNext() ? inboundPayload.next() : null;
             ResultSetToEntityDataConverter resultSetToEntityDataConverter = new ResultSetToEntityDataConverter(inputMessage, callback, unitOfWorkBoundaryReached);
             for (String sql : getSqls()) {
-                String sqlToExecute = FormatUtils.replaceTokens(sql, getComponentContext().getFlowParametersAsString(), true);
-                log(LogLevel.INFO, "About to run: " + sqlToExecute);
+                String sqlToExecute = prepareSql(sql, inputMessage, entity);
+                Map<String, Object> paramMap = prepareParams(sqlToExecute, inputMessage, entity);
+                log(LogLevel.INFO, "About to run: %s", sqlToExecute);
+                log(LogLevel.INFO, "Passing params: %s", paramMap);
                 resultSetToEntityDataConverter.setSqlToExecute(sqlToExecute);
                 outboundPayload = template.query(sqlToExecute, paramMap, resultSetToEntityDataConverter);                        
             }
@@ -131,11 +137,83 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             callback.sendMessage(null, new ArrayList<>(), true);
         }
     }
+    
+    
+    protected String prepareSql(String sql, Message inputMessage, Object entity) {
+        sql = FormatUtils.replaceTokens(sql, getComponentContext().getFlowParametersAsString(), true);
+        sql = FormatUtils.replaceTokens(sql, inputMessage.getHeader().getAsStrings(), true);
+        return sql;
+    }
+    
+    protected Map<String, Object> prepareParams(String sql, Message inputMessage, Object entity) {
+        Map<String, Object> paramMap = new HashMap<>();
+        /*
+         * input parameters can come from the header and the record. header
+         * parms should be used for every record.
+         */
+        paramMap.putAll(context.getFlowParameters() == null ? Collections.emptyMap() : context.getFlowParameters());
+        paramMap.putAll(inputMessage.getHeader());
+        if (entity instanceof EntityData) {
+            EntityData entityData = (EntityData)entity;
+            paramMap.putAll(this.getComponent().toRow(entityData, true, true));
+        } else if (entity != null) {
+            paramMap.put("RECORD", entity.toString());
+        }
+        
+        if (PER_MESSAGE.equals(runWhen) && inputMessage.getPayload() instanceof Collection) {
+            Collection<?> payload = (Collection<?>)inputMessage.getPayload();
+            enhanceParamMapWithInValues(paramMap, payload, sql);
+        }
+        return paramMap;
+    }
+    
+    protected void enhanceParamMapWithInValues(Map<String, Object> paramMap, Collection<?> payload, String sql) {
+        Set<String> attributeNames = findWhereInParameters(sql);
+        for (String attributeName : attributeNames) {
+            List<Object> in = new ArrayList<>();
+            Iterator<?> i = payload.iterator();
+            while (i.hasNext()) {
+                Object next = i.next();
+                if (next instanceof EntityData) {
+                    EntityData entityData = (EntityData)next;
+                    Row row = this.getComponent().toRow(entityData, true, true);
+                    Object value = row.get(attributeName);
+                    if (value != null) {
+                        in.add(value);
+                    }
+                }
+            }
+            paramMap.put(attributeName, in);
+        }
+    }
+    
+    protected Set<String> findWhereInParameters(String sql) {
+        Set<String> inAttributeNames = new HashSet<>();
+        List<Integer> indexes = new ArrayList<>();
+        int currentIndex = -4;
+        do {
+          int index = sql.indexOf(" in ", currentIndex+4);
+          if (index < 0) {
+              index = sql.indexOf(" IN ", currentIndex+4);
+          }
+          currentIndex = index;
+          if (currentIndex > 0) {
+              indexes.add(currentIndex);
+              int left = sql.indexOf("(", currentIndex+4);
+              int right = sql.indexOf(")", currentIndex+4);
+              if (left > 0 && right > 0) {
+                  String attributeId = sql.substring(left+1, right).trim();
+                  attributeId = attributeId.substring(1);
+                  inAttributeNames.add(attributeId);
+              }              
+          }
+        } while (currentIndex > 0 && currentIndex < sql.length());
+        
+        return inAttributeNames;
+    }
 
     private ArrayList<String> getAttributeIds(ResultSetMetaData meta, Map<Integer, String> sqlEntityHints) throws SQLException {
-
         ArrayList<String> attributeIds = new ArrayList<String>();
-
         for (int i = 1; i <= meta.getColumnCount(); i++) {
             String columnName = meta.getColumnName(i);
             String tableName = meta.getTableName(i);
@@ -192,19 +270,6 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             }            
         } else {
             throw new SqlException("No output model was specified for the db reader component.  An output model is required.");
-        }
-    }
-
-    protected void setParamsFromInboundMsgAndRec(Map<String, Object> paramMap, final Message inputMessage, final EntityData entityData) {
-
-        /*
-         * input parameters can come from the header and the record. header
-         * parms should be used for every record.
-         */
-        paramMap.clear();
-        paramMap.putAll(context.getFlowParameters() == null ? Collections.emptyMap() : context.getFlowParameters());
-        if (entityData != null) {
-            paramMap.putAll(this.getComponent().toRow(entityData, true, true));
         }
     }
 
