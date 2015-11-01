@@ -25,6 +25,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -75,10 +76,36 @@ public class ModelAttributeScriptHelper {
         return null;
     }
 
+    @Deprecated
     public Integer integer() {
         String text = value != null ? value.toString() : "0";
         text = isNotBlank(text) ? text : "0";
         return Integer.parseInt(text);
+    }
+    
+    public Integer parseInt() {
+        String text = value != null ? value.toString() : "0";
+        text = isNotBlank(text) ? text : "0";
+        return Integer.parseInt(text);
+    }
+
+    
+    public Long parseLong() {
+        String text = value != null ? value.toString() : "0";
+        text = isNotBlank(text) ? text : "0";
+        return Long.parseLong(text);
+    }
+    
+    public Double parseDouble() {
+        String text = value != null ? value.toString() : "0";
+        text = isNotBlank(text) ? text : "0";
+        return Double.parseDouble(text);
+    }
+    
+    public BigDecimal parseBigDecimal() {
+        String text = value != null ? value.toString() : "0";
+        text = isNotBlank(text) ? text : "0";
+        return new BigDecimal(text);
     }
 
     public Serializable flowParameter(String parameterName) {
