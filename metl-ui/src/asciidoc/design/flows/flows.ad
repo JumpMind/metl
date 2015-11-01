@@ -30,15 +30,15 @@ The following table shows a list of available components.
 |<<format-fixed>>|image:metl-fixed-length-48x48-color.png[]|Model based data needs to be formatted into fixed length text
 |<<format-xml>>|image:metl-xml-formatter-48x48-color.png[]|Model based data needs to be formatted into xml text
 |<<joiner>>|image:metl-joiner-48x48-color.png[]|Different instances of model based records need to be merged into a single instance that combines the attributes from all instances.
-|<<lookup>>|metl-lookup-48x48-color.png[]|Reference data exists that needs to be looked up / retrieved by a specified key, and another attribute of the the resulting reference data passed to downstream components.
+|<<lookup>>|image:metl-lookup-48x48-color.png[]|Reference data exists that needs to be looked up / retrieved by a specified key, and another attribute of the the resulting reference data passed to downstream components.
+|<<mapping>>|image:metl-mapping-48x48-color.png[]|Data needs to be mapped from one set of entities/attributes (model structure) to another set of entities/attributes
+|<<message-logger>>|image:metl-message-logger-48x48-color.png[]|Messages need to be logged to the Metl console and log file
+|<<multiplier>>|image:metl-multiplier-48x48-color.png[]|Inbound messages need to be multiplied (duplicated n number of times) and the sent to downstream components.
 3+|Writers
 |<<rdbms-writer>>|image:metl-writer-48x48-color.png[]|Data needs written to a relational database
 |<<sql-executor>>|image:metl-writer-48x48-color.png[]|Data needs written to or deleted from a database using a specific sql statement
 |<<text-file-writer>>|image:metl-text-writer-48x48-color.png[]|Data needs written to a text based file
 |<<zip>>|image:metl-zip-48x48-color.png[]|Data needs to be put in a compressed file 
-|<<lookup>>|metl-lookup-48x48-color.png[]|Reference data exists that needs to be looked up / retrieved by a specified key, and another attribute of the the resulting reference data passed to downstream components
-|<<mapping>>|image:metl-mapping-48x48-color.png[]|Data needs to be mapped from one set of entities/attributes (model structure) to another set of entities/attributes
-|<<message-logger>>|image:metl-message-logger-48x48-color.png[]|Messages need to be logged to the Metl console and log file.
 |===========================================
 
 include::readers/readers.ad[]
