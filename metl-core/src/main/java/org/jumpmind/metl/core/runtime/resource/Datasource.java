@@ -86,6 +86,9 @@ public class Datasource extends AbstractResourceRuntime implements IResourceRunt
     @SettingDefinition(order = 180, type = Type.INTEGER, defaultValue = "300", label = "Query Timeout (seconds)")
     public final static String DB_QUERY_TIMEOUT = "db.query.timeout";
     
+    @SettingDefinition(order = 200, type = Type.TEXT, defaultValue = "", label = "Connection Properties")
+    public final static String DB_CONNECTION_PROPERTIES = "db.connection.properties";
+    
 //    @SettingDefinition(order = 170, type = Type.INTEGER, defaultValue = "" + Integer.MAX_VALUE, label = "Max Rows To Select")
 //    public final static String DB_MAX_ROWS = "db.max.rows.to.select";
 //    
