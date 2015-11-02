@@ -1,9 +1,48 @@
+[id="parse-fixed",reftext="Parse Fixed"]
 ===== Parse Fixed
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|fixedlengthformatter.png[]
+|Icon|image:metl-fixed-length-48x48-color.png[]
+|Use When|An inbound text message in a fixed length text format needs to be parsed into a model based message structure
+|Samples|
 |Description|The parse fixed length component takes an inbound text message in fixed length format and parses it into a model based outbound message.
    
 |Inbound Message Type|Text Based Message
 |Output Message Type|Model Based Message
 |===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description
+include::../common-properties/output-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Delimiter|The character that represents the delimiter in the inbound text message
+|Quote |The character that is used to quote string text in the inbound text message
+include::../common-properties/encoding.ad[]
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===========================================
+
+====== Component Editor
+Double clicking on the Parse Fixed component in the flow will result in the Parse Fixed editor being displayed as shown below.
+
+image:editors/parse-fixed-editor.png[]
+
+The editor displays a row for every entity and attribute in the output model, and allows setting the ordinal position and width of each attribute
+for the fixed length output.  Order the attributes in the order in which they should be displayed in the delimited result.  Attributes can be ordered
+by:
+
+.Attribute Ordering Options
+* Selecting an attribute and dragging it up or down in the list
+* Selecting an attribute clicking the "Move Up", "Move Down", "Move Top" or "Move Botton" buttons
+* Selecting an attribute or set of attributes, clicking "Cut" to remove them and then "Pasting them elsewhere in the list
+
+Set the width by typing the width in to the Width field.  Start and end positions are automatically calculated based on the order and width.  
+
+In addition to specifying the order and width of the attributes, transform functions can also be applied to each attribute.  These
+transform functions are good for applying formatting, etc.
