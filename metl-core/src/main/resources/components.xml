@@ -319,7 +319,7 @@
             </setting>
         </settings>
     </component>
-    <component id='Lookup' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
+    <component id='Lookup' category='PROCESSOR' inputMessageType='any' outputMessageType='entity' resourceCategory='none'
         inputOutputModelsMatch='true' shareable='false'>
         <name>Lookup</name>
         <className>org.jumpmind.metl.core.runtime.component.Lookup</className>

@@ -28,13 +28,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
 public class Lookup extends AbstractComponentRuntime {
-    
+
     public final static String TYPE = "Lookup";
 
     public final static String SOURCE_STEP = "lookup.data.source.step";
@@ -69,7 +70,7 @@ public class Lookup extends AbstractComponentRuntime {
             throw new IllegalStateException("The source step must be specified");
         }
     }
-    
+
     @Override
     public boolean supportsStartupMessages() {
         return false;
@@ -93,28 +94,27 @@ public class Lookup extends AbstractComponentRuntime {
             }
         } else if (!lookupInitialized) {
             queuedWhileWaitingForLookup.add(inputMessage);
-        } else if (lookupInitialized) {
+        } else if (lookupInitialized && !(inputMessage instanceof ControlMessage)) {
             enhanceAndSend(inputMessage, callback, unitOfWorkBoundaryReached);
         }
     }
 
     protected void enhanceAndSend(Message message, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-
-        debug("Using lookup table: {}", lookup);
-
-        ArrayList<EntityData> payload = new ArrayList<EntityData>();
-
         List<EntityData> datas = message.getPayload();
-        for (int j = 0; j < datas.size(); j++) {
-            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-            EntityData oldData = datas.get(j);
-            EntityData newData = new EntityData();
-            newData.putAll(oldData);
-            newData.put(replacementValueAttributeId, lookup.get(oldData.get(replacementKeyAttributeId)));
-            payload.add(newData);
-        }
+        if (datas != null) {
+            debug("Using lookup table: {}", lookup);
+            ArrayList<EntityData> payload = new ArrayList<EntityData>();
+            for (int j = 0; j < datas.size(); j++) {
+                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                EntityData oldData = datas.get(j);
+                EntityData newData = new EntityData();
+                newData.putAll(oldData);
+                newData.put(replacementValueAttributeId, lookup.get(oldData.get(replacementKeyAttributeId)));
+                payload.add(newData);
+            }
 
-        callback.sendMessage(null, payload, unitOfWorkLastMessage);
+            callback.sendMessage(null, payload, unitOfWorkLastMessage);
+        }
     }
 
 }

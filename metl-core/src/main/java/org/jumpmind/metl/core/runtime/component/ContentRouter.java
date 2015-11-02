@@ -96,7 +96,7 @@ public class ContentRouter extends AbstractComponentRuntime {
         
         for (EntityData entityData : inputDatas) {
             getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-            bindEntityData(scriptEngine, entityData);
+            bindEntityData(scriptEngine, inputMessage, entityData);
             if (routes != null) {
                 for (Route route : routes) {
                 	try {

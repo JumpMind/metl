@@ -181,13 +181,18 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return context.getManipulatedFlow();
     }
     
-    protected Bindings bindEntityData(ScriptEngine scriptEngine, EntityData entityData) {
+    protected Bindings bindEntityData(ScriptEngine scriptEngine, Message inputMessage, EntityData entityData) {
         Bindings bindings = scriptEngine.createBindings();
         Model model = context.getFlowStep().getComponent().getInputModel();
         List<ModelEntity> entities = model.getModelEntities();
         for (ModelEntity modelEntity : entities) {
-        	HashMap<String, Object> boundEntity = new HashMap<String, Object>();
+        	HashMap<String, Object> boundEntity = new HashMap<String, Object>(0);
         	bindings.put(modelEntity.getName(), boundEntity);
+        }
+        
+        Set<String> messageHeaderKeys = inputMessage.getHeader().keySet();
+        for (String messageHeaderKey : messageHeaderKeys) {
+            bindings.put(messageHeaderKey, inputMessage.getHeader().get(messageHeaderKey));
         }
         
         bindings.put("CHANGE_TYPE", entityData.getChangeType().name());
