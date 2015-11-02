@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.sql.ResultSet;
@@ -212,7 +213,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         return inAttributeNames;
     }
 
-    private ArrayList<String> getAttributeIds(ResultSetMetaData meta, Map<Integer, String> sqlEntityHints) throws SQLException {
+    private ArrayList<String> getAttributeIds(String sql, ResultSetMetaData meta, Map<Integer, String> sqlEntityHints) throws SQLException {
         ArrayList<String> attributeIds = new ArrayList<String>();
         for (int i = 1; i <= meta.getColumnCount(); i++) {
             String columnName = meta.getColumnName(i);
@@ -226,7 +227,18 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                     tableName = hint;
                 }
             }
-
+            
+            if (isBlank(tableName)) {
+                int fromIndex = sql.toLowerCase().indexOf(" from ")+6;
+                if (fromIndex > 0) {
+                    tableName = sql.substring(fromIndex).trim();
+                    int nextSpaceIndex = tableName.indexOf(" ");
+                    if (nextSpaceIndex > 0) {
+                        tableName = tableName.substring(0, nextSpaceIndex).trim();
+                    }
+                }
+            }
+            
             if (matchOnColumnNameOnly) {
                 attributeIds.addAll(getAttributeIds(columnName));
             } else {
@@ -427,7 +439,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         public ArrayList<EntityData> extractData(ResultSet rs) throws SQLException, DataAccessException {
             ResultSetMetaData meta = rs.getMetaData();
             Map<Integer, String> columnHints = getSqlColumnEntityHints(sqlToExecute);
-            ArrayList<String> attributeIds = getAttributeIds(meta, columnHints);
+            ArrayList<String> attributeIds = getAttributeIds(sqlToExecute, meta, columnHints);
             long ts = System.currentTimeMillis();
             while (rs.next()) {
                 if (outputRecCount++ % rowsPerMessage == 0 && payload != null) {
