@@ -233,6 +233,11 @@
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
+            <setting id='overwrite' type='boolean' required='false'>
+                <name>Overwrite</name>
+                <defaultValue>true</defaultValue>
+                <description></description>
+            </setting>            
             <setting id='must.exist' type='boolean' required='true'>
                 <name>Must Exist</name>
                 <defaultValue>false</defaultValue>

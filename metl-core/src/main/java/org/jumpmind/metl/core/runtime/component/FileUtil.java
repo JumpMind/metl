@@ -64,6 +64,8 @@ public class FileUtil extends AbstractComponentRuntime {
     public static final String SETTING_NEW_NAME = "new.name";
 
     public static final String SETTING_APPEND_TO_NAME = "append.to.name";
+    
+    public static final String SETTING_OVERWRITE = "overwrite";
 
     String action = ACTION_COPY;
 
@@ -81,6 +83,8 @@ public class FileUtil extends AbstractComponentRuntime {
 
     String appendToName;
 
+    boolean overwrite = true;
+    
     @Override
     public boolean supportsStartupMessages() {
         return true;
@@ -125,6 +129,7 @@ public class FileUtil extends AbstractComponentRuntime {
         targetRelativePath = typedProperties.get(SETTING_TARGET_RELATIVE_PATH);
         newName = typedProperties.get(SETTING_NEW_NAME, newName);
         appendToName = typedProperties.get(SETTING_APPEND_TO_NAME);
+        overwrite = typedProperties.is(SETTING_OVERWRITE, overwrite);
     }
 
     @Override
@@ -184,13 +189,17 @@ public class FileUtil extends AbstractComponentRuntime {
 
             File targetFile = new File(targetDir, targetFileName);
             targetFile.getParentFile().mkdirs();
-            FileCopyUtils.copy(sourceFile, targetFile);
-            File finalFile = new File(targetDir, targetFileWithouPart);
-            if (!targetFile.renameTo(finalFile)) {
-                throw new IoException(String.format("Rename of %s to %s failed", targetFile.getAbsolutePath(), targetFileWithouPart));
+            if ((targetFile.exists() && overwrite) || !targetFile.exists()) {
+                FileCopyUtils.copy(sourceFile, targetFile);
+                File finalFile = new File(targetDir, targetFileWithouPart);
+                if (!targetFile.renameTo(finalFile)) {
+                    throw new IoException(String.format("Rename of %s to %s failed", targetFile.getAbsolutePath(), targetFileWithouPart));
+                }
+
+                return finalFile.getAbsolutePath();
+            } else {
+                return null;
             }
-            
-            return finalFile.getAbsolutePath();
         } else {
             return null;
         }
