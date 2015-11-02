@@ -35,6 +35,7 @@ The following table shows a list of available components.
 |<<message-logger>>|image:metl-message-logger-48x48-color.png[]|Messages need to be logged to the Metl console and log file
 |<<multiplier>>|image:metl-multiplier-48x48-color.png[]|Inbound messages need to be multiplied (duplicated n number of times) and the sent to downstream components.
 |<<no-op>>|image:metl-puzzle-48X48-color.png[]|A message needs to be passed through to another component without any action being taken on the message
+|<<parse-delimited>>|image:metl-delimitedformatter-48x48-color.png[]|An inbound text message in some delimited text format needs to be parsed into a model based message structure
 3+|Writers
 |<<rdbms-writer>>|image:metl-writer-48x48-color.png[]|Data needs written to a relational database
 |<<sql-executor>>|image:metl-writer-48x48-color.png[]|Data needs written to or deleted from a database using a specific sql statement
