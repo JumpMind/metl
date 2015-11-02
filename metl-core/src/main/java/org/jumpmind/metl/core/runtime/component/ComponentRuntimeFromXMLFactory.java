@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -36,8 +37,8 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponents;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
-import org.jumpmind.metl.core.runtime.component.definition.XMLSettings;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
+import org.jumpmind.metl.core.runtime.component.definition.XMLSettings;
 import org.jumpmind.metl.core.util.AbstractXMLFactory;
 
 public class ComponentRuntimeFromXMLFactory extends AbstractXMLFactory implements IComponentRuntimeFactory {
@@ -62,8 +63,22 @@ public class ComponentRuntimeFromXMLFactory extends AbstractXMLFactory implement
             throw new RuntimeException(e);
         }
     }
+    
+    synchronized public Map<String, List<XMLComponent>> getComponentDefinitionsByCategory() {
+        Map<String, List<XMLComponent>> componentDefinitionsByCategory = new HashMap<>();
+        Set<String> categories = componentIdsByCategory.keySet();
+        for (String category : categories) {
+            List<XMLComponent> list = new ArrayList<>();
+            componentDefinitionsByCategory.put(category, list);
+            List<String> types = componentIdsByCategory.get(category);
+            for (String type : types) {
+                list.add(componentsById.get(type));
+            }
+        }
+        return componentDefinitionsByCategory;
+    }
 
-    synchronized public Map<String, List<String>> getComponentTypes() {
+    synchronized public Map<String, List<String>> getComponentTypesByCategory() {
         return componentIdsByCategory;
     }
 
