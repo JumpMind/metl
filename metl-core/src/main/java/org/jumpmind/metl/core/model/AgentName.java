@@ -29,6 +29,7 @@ public class AgentName extends AbstractName {
     public AgentName(Agent agent) {
         setId(agent.getId());
         setName(agent.getName());
+        setFolderId(agent.getFolderId());
     }
     
     public AgentName() {

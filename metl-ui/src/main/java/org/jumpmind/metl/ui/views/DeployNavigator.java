@@ -575,7 +575,7 @@ public class DeployNavigator extends VerticalLayout {
     }
 
     protected void deleteTreeItems(AbstractObject obj) {
-        if (obj instanceof Agent) {
+        if (obj instanceof AgentName) {
             AgentName agentName = (AgentName) obj;
             Agent agent = context.getConfigurationService().findAgent(agentName.getId());
             context.getConfigurationService().delete(agent);
