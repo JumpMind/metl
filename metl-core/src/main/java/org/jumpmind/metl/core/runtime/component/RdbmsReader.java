@@ -229,6 +229,10 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             }
             
             if (isBlank(tableName)) {
+                /*
+                 * Some database driver do not support returning the table name from the
+                 * metadata.  This code attempts to parse the entity name from the sql
+                 */
                 int fromIndex = sql.toLowerCase().indexOf(" from ")+6;
                 if (fromIndex > 0) {
                     tableName = sql.substring(fromIndex).trim();
