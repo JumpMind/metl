@@ -23,7 +23,7 @@ include::format-fixed.ad[]
 
 include::format-xml.ad[]
 
-include::joiner.ad[]
+include::merger.ad[]
 
 include::lookup.ad[]
 

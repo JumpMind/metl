@@ -31,7 +31,7 @@ import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.runtime.component.Joiner;
+import org.jumpmind.metl.core.runtime.component.Merger;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
 
@@ -49,7 +49,7 @@ import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
 
 @SuppressWarnings("serial")
-public class EditJoinerPanel extends AbstractComponentEditPanel {
+public class EditMergerPanel extends AbstractComponentEditPanel {
 
     Table table = new Table();
 
@@ -116,7 +116,7 @@ public class EditJoinerPanel extends AbstractComponentEditPanel {
 
             for (ModelEntity entity : component.getInputModel().getModelEntities()) {
                 for (ModelAttribute attr : entity.getModelAttributes()) {
-                    ComponentAttributeSetting joinOn = component.getSingleAttributeSetting(attr.getId(), Joiner.JOIN_ATTRIBUTE);
+                    ComponentAttributeSetting joinOn = component.getSingleAttributeSetting(attr.getId(), Merger.MERGE_ATTRIBUTE);
 
                     boolean join = joinOn != null ? Boolean.parseBoolean(joinOn.getValue()) : false;
                     attributeSettings.add(new AttributeSettings(attr.getId(), join));
@@ -165,7 +165,7 @@ public class EditJoinerPanel extends AbstractComponentEditPanel {
             final AttributeSettings settings = (AttributeSettings) itemId;
 
             if (propertyId.equals("joinOn")) {
-                return createCheckBox(settings, Joiner.JOIN_ATTRIBUTE);
+                return createCheckBox(settings, Merger.MERGE_ATTRIBUTE);
             } else {
                 return null;
             }

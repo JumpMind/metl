@@ -63,9 +63,9 @@
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-fixed-length-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
     </component-ui>
-    <component-ui id="Joiner UI" componentId="Joiner">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-joiner-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditJoinerPanel</className>
+    <component-ui id="Merger UI" componentId="Merger">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-merger-48x48-color.png</iconImage>
+        <className>org.jumpmind.metl.ui.views.design.EditMergerPanel</className>
     </component-ui>
     <component-ui id="Lookup UI" componentId="Lookup">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-lookup-48x48-color.png</iconImage>

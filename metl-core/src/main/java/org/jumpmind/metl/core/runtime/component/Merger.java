@@ -34,17 +34,17 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
-public class Joiner extends AbstractComponentRuntime {
+public class Merger extends AbstractComponentRuntime {
 
-    public static final String TYPE = "Joiner";
+    public static final String TYPE = "Merger";
 
-    public final static String JOIN_ATTRIBUTE = "join.attribute";
+    public final static String MERGE_ATTRIBUTE = "merge.attribute";
 
     int rowsPerMessage = 1000;
 
-    Map<Object, EntityData> joinedData = new LinkedHashMap<Object, EntityData>();
+    Map<Object, EntityData> mergedData = new LinkedHashMap<Object, EntityData>();
 
-    List<String> attributesToJoinOn = new ArrayList<String>();
+    List<String> attributesToMergeOn = new ArrayList<String>();
 
     @Override
     protected void start() {
@@ -57,9 +57,9 @@ public class Joiner extends AbstractComponentRuntime {
         List<ComponentAttributeSetting> settings = component.getAttributeSettings();
         if (settings != null) {
             for (ComponentAttributeSetting componentAttributeSetting : settings) {
-                if (componentAttributeSetting.getName().equals(JOIN_ATTRIBUTE)
+                if (componentAttributeSetting.getName().equals(MERGE_ATTRIBUTE)
                         && Boolean.parseBoolean(componentAttributeSetting.getValue())) {
-                    attributesToJoinOn.add(componentAttributeSetting.getAttributeId());
+                    attributesToMergeOn.add(componentAttributeSetting.getAttributeId());
                 }
             }
         }
@@ -79,7 +79,7 @@ public class Joiner extends AbstractComponentRuntime {
 
         if (unitOfWorkBoundaryReached) {
             ArrayList<EntityData> dataToSend = new ArrayList<EntityData>();
-            Iterator<EntityData> itr = joinedData.values().iterator();
+            Iterator<EntityData> itr = mergedData.values().iterator();
             while (itr.hasNext()) {
                 if (dataToSend.size() >= rowsPerMessage) {
                     callback.sendMessage(null, dataToSend, false);
@@ -97,7 +97,7 @@ public class Joiner extends AbstractComponentRuntime {
         for (EntityData entityData : records) {
             getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
             StringBuilder key = new StringBuilder();
-            for (String attributeId : attributesToJoinOn) {
+            for (String attributeId : attributesToMergeOn) {
                 if (key.length() > 0) {
                     key.append("&");
                 }
@@ -106,11 +106,11 @@ public class Joiner extends AbstractComponentRuntime {
                 key.append(entityData.get(attributeId));
             }
             Object keyValue = key.toString();
-            EntityData existingRecord = joinedData.get(keyValue);
+            EntityData existingRecord = mergedData.get(keyValue);
             if (existingRecord != null) {
                 mergeRecords(entityData, existingRecord);
             } else {
-                joinedData.put(keyValue, entityData.copy());
+                mergedData.put(keyValue, entityData.copy());
             }
         }
     }

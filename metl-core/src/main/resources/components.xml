@@ -312,9 +312,9 @@
             </setting>
         </settings>
     </component>
-    <component id='Joiner' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
+    <component id='Merger' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
         <name>Joiner</name>
-        <className>org.jumpmind.metl.core.runtime.component.Joiner</className>
+        <className>org.jumpmind.metl.core.runtime.component.Merger</className>
         <description></description>
         <settings>
             <setting id='rows.per.message' type='integer' required='false'>

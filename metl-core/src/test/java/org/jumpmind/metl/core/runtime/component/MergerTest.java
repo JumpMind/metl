@@ -38,13 +38,13 @@ import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class JoinerTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
+public class MergerTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
 
     @Test
     @Override
     public void testStartDefaults() {
         setupStart(new SettingsBuilder().build());        
-        ((Joiner) spy).start();
+        ((Merger) spy).start();
     }
 
     @Test
@@ -52,16 +52,16 @@ public class JoinerTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
     public void testStartWithValues() {
         setupStart(new SettingsBuilder().build());
 
-        ((Joiner) spy).getComponent().setInputModel(new Model());
-        ((Joiner) spy).getComponent().setAttributeSettings(
-                new ComponentAttributeSettingsBuilder().withSetting(MODEL_ATTR_ID_1, "1", Joiner.JOIN_ATTRIBUTE, "true").build());
+        ((Merger) spy).getComponent().setInputModel(new Model());
+        ((Merger) spy).getComponent().setAttributeSettings(
+                new ComponentAttributeSettingsBuilder().withSetting(MODEL_ATTR_ID_1, "1", Merger.MERGE_ATTRIBUTE, "true").build());
 
-        ((Joiner) spy).start();
+        ((Merger) spy).start();
 
         List<String> expectedList = new ArrayList<String>();
         expectedList.add(MODEL_ATTR_ID_1);
 
-        TestUtils.assertList(expectedList, ((Joiner) spy).attributesToJoinOn, false);
+        TestUtils.assertList(expectedList, ((Merger) spy).attributesToMergeOn, false);
     }
 
     @Test
@@ -92,7 +92,7 @@ public class JoinerTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 
         List<String> attributesToJoinOn = new ArrayList<String>();
         attributesToJoinOn.add(MODEL_ATTR_ID_1);
-        ((Joiner) spy).attributesToJoinOn = attributesToJoinOn;
+        ((Merger) spy).attributesToMergeOn = attributesToJoinOn;
 
         // Messages
         Message message1 = new MessageBuilder("step1").withPayload(new PayloadBuilder()
@@ -127,7 +127,7 @@ public class JoinerTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 
     @Override
     protected String getComponentId() {
-        return Joiner.TYPE;
+        return Merger.TYPE;
     }
 
 }
