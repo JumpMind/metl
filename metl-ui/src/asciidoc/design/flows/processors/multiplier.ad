@@ -3,7 +3,7 @@
 [cols="<25%h,<75%"]
 |===========================================
 |Icon|image:metl-multiplier-48x48-color.png[]
-|Use When|Inbound messages need to be multiplied (duplicated n number of times) and the sent to downstream components.
+|Use When|Inbound messages need to be multiplied (duplicated n number of times) and then sent to downstream components.
 |Samples|
 |Description|The multiplier component multiplies or duplicates an inbound message a number of times based on a second seed set of inbound messages.
    

@@ -1,0 +1,32 @@
+[id="union",reftext="Union"]
+===== Union
+[cols="<25%h,<75%"]
+|===========================================
+|Icon|image:metl-joiner-48x48-color.png[]
+|Use When|Inbound messages need to be combined into a single message and then sent to downstream components.
+|Samples|
+|Description|The union component combines one inbound message from each input link and then sends the combined message to the downstream 
+components.  The combination of messages continues until all messages have been processed.  If there is an uneven number of messages by
+input link the process will continue to send the uneven messages downstream one at a time until complete unless the Error on Mismatched 
+Messages option is selected.  In this case the flow will fail.
+   
+|Inbound Message Type|Model Based Message
+|Output Message Type|Model Based Message
+|===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description
+include::../common-properties/input-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Error on Mismatched Messages|Whether the flow should fail if there are a different number of inbound messages received from different 
+inbound links.  I.E. if there are two messages received from inbound link 1 and four messages received from inbound link 2 the flow will
+fail if selected.
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===========================================
