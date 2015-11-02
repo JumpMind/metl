@@ -117,20 +117,16 @@ public class EditFlowPalette extends VerticalLayout {
     }
 
     protected void populateComponentTypesInComponentPalette(String projectVersionId) {
-        Map<String, List<String>> componentTypesByCategory = context.getComponentFactory().getComponentTypes();
-        for (String category : componentTypesByCategory.keySet()) {
-            List<String> componentTypes = new ArrayList<String>(componentTypesByCategory.get(category));
-            Collections.sort(componentTypes);
-
+        Map<String, List<XMLComponent>> componentDefinitionsByCategory = context.getComponentFactory().getComponentDefinitionsByCategory();
+        for (String category : componentDefinitionsByCategory.keySet()) {
+            List<XMLComponent> componentDefinitions = new ArrayList<XMLComponent>(componentDefinitionsByCategory.get(category));
+            Collections.sort(componentDefinitions);
             VerticalLayout componentLayout = new VerticalLayout();
             componentAccordian.addTab(componentLayout, StringUtils.isAllUpperCase(category) ? category + "S" : category + "s");
-            if (componentTypes != null) {
-                for (String componentType : componentTypes) {
-                    XMLComponent definition = context.getComponentFactory().getComonentDefinition(componentType);
-                    ClassResource icon = getImageResourceForComponentType(componentType);
-                    addItemToFlowPanelSection(definition.getName(), componentType, componentLayout, icon, null);
+                for (XMLComponent definition : componentDefinitions) {
+                    ClassResource icon = getImageResourceForComponentType(definition.getId());
+                    addItemToFlowPanelSection(definition.getName(), definition.getId(), componentLayout, icon, null);
                 }
-            }
         }
     }
 

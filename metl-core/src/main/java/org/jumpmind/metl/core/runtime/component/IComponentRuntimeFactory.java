@@ -29,7 +29,9 @@ public interface IComponentRuntimeFactory {
 
     public IComponentRuntime create(String type);
     
-    public Map<String, List<String>> getComponentTypes();
+    public Map<String, List<String>> getComponentTypesByCategory();
+    
+    public Map<String, List<XMLComponent>> getComponentDefinitionsByCategory();
 
     public XMLComponent getComonentDefinition(String id);
     
