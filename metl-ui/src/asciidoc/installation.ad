@@ -18,7 +18,7 @@ java -jar metl.war
 ----
 
 In the simplest form shown above, Metl will choose a configuration direction based on the logged in user's home directory (i.e. /users/myusername/.metl)
-for linux based systems and (c:/users/myusername/.metl) on windows based systems.  In this form metl will use a file based H2 database for for the Metl
+for linux based systems and (c:/users/myusername/.metl) on windows based systems.  In this form metl will use a file-based H2 database for for the Metl
 data store.
 
 === Deployed to an existing servlet container 
@@ -36,7 +36,7 @@ java -Dorg.jumpmind.metl.ui.init.config.dir=/opt/metl -jar metl.war
 === Application properties file (metl.properties)
 
 Metl will create a default properties file in its configuration directory of one does not exist.  The property file is named metl.properties and
-had the following content.
+has the following content.
 
 ----
 db.driver=org.h2.Driver
@@ -96,7 +96,7 @@ java -jar metl.war start
 or, use the operating system tools to start and stop the service.  On linux:
 
 ----
-service Metl startl
+service Metl start
 ----
 
 For windows, use the local services control panel to start the Metl service.

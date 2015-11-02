@@ -302,7 +302,8 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         for (AgentDeploymentSummary summary : selectedIds) {
             if (summary.isFlow()) {
                 if (summary.getStatus().equals(DeploymentStatus.DEPLOYED.name()) || 
-                        summary.getStatus().equals(DeploymentStatus.DISABLED.name())) {
+                        summary.getStatus().equals(DeploymentStatus.DISABLED.name()) ||
+                        summary.getStatus().equals(DeploymentStatus.ERROR.name())) {
                     canRemove = true;
                 }
                 if (summary.getStatus().equals(DeploymentStatus.DEPLOYED.name())) {
@@ -311,7 +312,8 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
                        canRun = true;
                     }
                 }
-                if (summary.getStatus().equals(DeploymentStatus.DISABLED.name())) {
+                if (summary.getStatus().equals(DeploymentStatus.DISABLED.name()) ||
+                		summary.getStatus().equals(DeploymentStatus.ERROR.name())) {
                     canEnable = true;
                 }
             }

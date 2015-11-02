@@ -79,9 +79,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                 "inner join %1$s_flow f on f.id = d.flow_id " +
                 "inner join %1$s_project_version v on v.id = f.project_version_id " +
                 "inner join %1$s_project p on p.id = v.project_id " +
-                "inner join %1$s_flow_step s on s.flow_id = f.id " +
-                "inner join %1$s_component c on c.id = s.component_id " +
-                "inner join %1$s_resource r on r.id = c.resource_id " +
+                "inner join %1$s_resource r on r.project_version_id = v.id " +
                 "where d.agent_id = ?",
                 tablePrefix, AgentDeploymentSummary.TYPE_FLOW, AgentDeploymentSummary.TYPE_RESOURCE), 
                 new ISqlRowMapper<AgentDeploymentSummary>() {

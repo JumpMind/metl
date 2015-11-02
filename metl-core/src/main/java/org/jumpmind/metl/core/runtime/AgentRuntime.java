@@ -264,7 +264,8 @@ public class AgentRuntime {
         List<ResourceName> flowResourceNames = 
         configurationService.findResourcesInProject(flow.getProjectVersionId());
         for (ResourceName flowResourceName : flowResourceNames) {
-            Resource flowResource = configurationService.findResource(flowResourceName.getId());
+            
+        	Resource flowResource = configurationService.findResource(flowResourceName.getId());
             IResourceRuntime alreadyDeployed = deployedResources.get(flowResource.getId());
     
             Map<String, SettingDefinition> settings = resourceFactory
