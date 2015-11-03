@@ -65,7 +65,7 @@ public class Multiplier extends AbstractComponentRuntime {
 
     @Override
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
+    	if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
             List<EntityData> datas = inputMessage.getPayload();
             multipliers.addAll(datas);
             multipliersInitialized = inputMessage.getHeader().isUnitOfWorkLastMessage();
@@ -91,17 +91,19 @@ public class Multiplier extends AbstractComponentRuntime {
             EntityData multiplierData = multipliers.get(i);
 
             List<EntityData> datas = message.getPayload();
-            for (int j = 0; j < datas.size(); j++) {
-                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                EntityData oldData = datas.get(j);
-                EntityData newData = new EntityData();
-                newData.putAll(oldData);
-                newData.putAll(multiplierData);
-                multiplied.add(newData);
-                if (multiplied.size() >= rowsPerMessage) {
-                    callback.sendMessage(null, multiplied, false);                    
-                    multiplied = new ArrayList<EntityData>();
-                }
+            if (datas != null) {
+            	for (int j = 0; j < datas.size(); j++) {
+                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+	                EntityData oldData = datas.get(j);
+	                EntityData newData = new EntityData();
+	                newData.putAll(oldData);
+	                newData.putAll(multiplierData);
+	                multiplied.add(newData);
+	                if (multiplied.size() >= rowsPerMessage) {
+	                    callback.sendMessage(null, multiplied, false);                    
+	                    multiplied = new ArrayList<EntityData>();
+	               }
+            	}
             }
         }
 
