@@ -472,7 +472,7 @@ public class DeployNavigator extends VerticalLayout {
     protected boolean isDeleteButtonEnabled(Object selected) {
         Folder selectedFolder = getSelectedFolder();
         return (selectedFolder != null && !selectedFolder.getName().startsWith("<"))
-                || selected instanceof Agent;
+                || selected instanceof AgentName;
     }
 
     protected void handleDelete() {
