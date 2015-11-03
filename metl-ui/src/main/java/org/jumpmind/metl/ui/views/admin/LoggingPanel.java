@@ -32,6 +32,7 @@ import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.util.EnvConstants;
+import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
 import org.jumpmind.metl.ui.common.TabbedPanel;
@@ -89,7 +90,7 @@ public class LoggingPanel extends VerticalLayout implements IUiPanel, IBackgroun
                 EnvConstants.LOG_TO_FILE_ENABLED, "true"));
         if (fileEnabled) {
             logFile = new File(context.getEnvironment().getProperty(EnvConstants.LOG_FILE,
-                    "logs/application.log"));
+                    LogUtils.getLogFilePath()));
         }
         setSizeFull();
         setSpacing(true);

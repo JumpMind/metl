@@ -30,8 +30,14 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.context.ApplicationContext;
 
 public final class LogUtils {
+    
+    static String logFilePath;
 
     private LogUtils() {
+    }
+    
+    public static String getLogFilePath() {
+        return logFilePath;
     }
     
     public static String formatDuration(long timeInMs) {
@@ -67,8 +73,7 @@ public final class LogUtils {
         boolean fileEnabled = Boolean.parseBoolean(ctx.getEnvironment().getProperty(
                 EnvConstants.LOG_TO_FILE_ENABLED, "true"));
         if (fileEnabled) {
-
-            String logFilePath = ctx.getEnvironment().getProperty(EnvConstants.LOG_FILE,(String)null);
+            logFilePath = ctx.getEnvironment().getProperty(EnvConstants.LOG_FILE,(String)null);
             if (logFilePath == null) {
                 File logDir = new File(configDir, "logs");
                 logDir.mkdirs();
