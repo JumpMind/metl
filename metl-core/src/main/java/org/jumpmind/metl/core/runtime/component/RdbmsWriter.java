@@ -263,7 +263,17 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                         stats = new WriteStats();
                         statsMap.put(targetTableDefinition, stats);
                     }
-                    if (updateFirst || inputRow.getChangeType() == ChangeType.CHG) {
+                    if (inputRow.getChangeType() == ChangeType.DEL) {
+                        modelTable = targetTableDefinition.getDeleteTable();
+                        if (modelTable.shouldProcess(inputRow)) {
+                            data = getValues(false, modelTable, inputRow);
+                            int count = execute(transaction, modelTable.getStatement(), new Object(), data, !replaceRows && !continueOnError);
+                            results.add(new Result(modelTable.getStatement().getSql(), count));
+                            totalStatementCount++;
+                            stats.deleteCount += count;
+                            getComponentStatistics().incrementNumberEntitiesProcessed(count);
+                        }
+                    } else if (updateFirst || inputRow.getChangeType() == ChangeType.CHG) {
                         modelTable = targetTableDefinition.getUpdateTable();
                         if (modelTable.shouldProcess(inputRow)) {
                             data = getValues(true, modelTable, inputRow);
@@ -321,17 +331,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                                 stats.ignoredCount++;
                             }
                         }
-                    } else if (inputRow.getChangeType() == ChangeType.DEL) {
-                        modelTable = targetTableDefinition.getDeleteTable();
-                        if (modelTable.shouldProcess(inputRow)) {
-                            data = getValues(false, modelTable, inputRow);
-                            int count = execute(transaction, modelTable.getStatement(), new Object(), data, !replaceRows && !continueOnError);
-                            results.add(new Result(modelTable.getStatement().getSql(), count));
-                            totalStatementCount++;
-                            stats.deleteCount += count;
-                            getComponentStatistics().incrementNumberEntitiesProcessed(count);
-                        }
-                    }
+                    } 
                 }
             }
 
