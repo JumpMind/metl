@@ -116,7 +116,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                     if (matches.size() == 0) {
                         log(LogLevel.WARN, "XPath expression " + compEntitySetting.getValue() + " did not find any matches");
                     } else {
-                        Element templateElement = matches.get(0);
+                        Element templateElement = matches.get(0).clone();
                         entitySettings.put(compEntitySetting.getEntityId(),
                                 new XmlFormatterEntitySetting(compEntitySetting, expression, templateElement));
                     }
@@ -187,10 +187,10 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                 entitySetting.setFirstTimeApply(false);
             } else {
                 Map<Element, Namespace> namespaces = removeNamespaces(document);
+                Element clonedElement = entitySetting.getTemplateElement().clone();
+                entitySetting.getParentElement().addContent(0, clonedElement);
                 applyAttributeXpath(document, inputRow, entitySetting.getAttributeSettings());
                 restoreNamespaces(document, namespaces);
-                Element clonedElement = entitySetting.getTemplateElement().clone();
-                entitySetting.getParentElement().addContent(clonedElement);
             }
         }
     }
@@ -222,13 +222,12 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                 if (matches.size() == 0) {
                     log(LogLevel.WARN, "XPath expression " + setting.getExpression().getExpression() + " did not find any matches");
                 }
-                for (Object object : matches) {
+                Object object = matches.get(0);
                     if (object instanceof Element) {
                         ((Element) object).setText(value);
                     } else if (object instanceof Attribute) {
                         ((Attribute) object).setValue(value);
                     }
-                }
             }
         }
     }

@@ -21,6 +21,7 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
         header rootProject.file('HEADER')
         strictCheck true
         includes(["**/*.java", "**/*.properties", "**/*.xml"])
+        excludes(["**/AppWidgetSet.gwt.xml"])
     }
     
     repositories {
