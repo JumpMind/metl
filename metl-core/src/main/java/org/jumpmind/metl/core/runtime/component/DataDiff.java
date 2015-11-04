@@ -30,7 +30,9 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
@@ -133,15 +135,10 @@ public class DataDiff extends AbstractComponentRuntime {
     }
 
     protected void calculateDiff(ISendMessageCallback callback) {
+        Map<ModelEntity, String> changeSqls = new HashMap<>();
+        Map<ModelEntity, String> addSqls = new HashMap<>();
+        Map<ModelEntity, String> delSqls = new HashMap<>();
         for (ModelEntity entity : entities) {
-            Component component = context.getFlowStep().getComponent();
-            ComponentEntitySetting add = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_ADD_ENABLED);
-            ComponentEntitySetting chg = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_CHG_ENABLED);
-            ComponentEntitySetting del = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_DEL_ENABLED);
-            boolean addEnabled = add != null ? Boolean.parseBoolean(add.getValue()) : true;
-            boolean chgEnabled = chg != null ? Boolean.parseBoolean(chg.getValue()) : true;
-            boolean delEnabled = del != null ? Boolean.parseBoolean(del.getValue()) : true;
-
             StringBuilder addSql = new StringBuilder("select ");
             StringBuilder chgSql = new StringBuilder(addSql);
             StringBuilder delSql = new StringBuilder(addSql);
@@ -197,31 +194,52 @@ public class DataDiff extends AbstractComponentRuntime {
             log(LogLevel.INFO, "Generated diff sql for ADD: %s", addSql);
             log(LogLevel.INFO, "Generated diff sql for CHG: %s", chgSql);
             log(LogLevel.INFO, "Generated diff sql for DEL: %s", delSql);
+            addSqls.put(entity, addSql.toString());
+            delSqls.put(entity, delSql.toString());
+            changeSqls.put(entity, chgSql.toString());
+        }
+        
+        RdbmsReader reader = new RdbmsReader();
+        reader.setDataSource(databasePlatform.getDataSource());
+        reader.setContext(context);
+        reader.setComponentDefinition(componentDefinition);
+        reader.setRowsPerMessage(rowsPerMessage);
 
-            RdbmsReader reader = new RdbmsReader();
-            reader.setDataSource(databasePlatform.getDataSource());
-            reader.setContext(context);
-            reader.setComponentDefinition(componentDefinition);
-            reader.setRowsPerMessage(rowsPerMessage);
-
+        
+        for (ModelEntity entity : entities) {
+            Component component = context.getFlowStep().getComponent();
+            ComponentEntitySetting add = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_ADD_ENABLED);
+            ComponentEntitySetting chg = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_CHG_ENABLED);
+            boolean addEnabled = add != null ? Boolean.parseBoolean(add.getValue()) : true;
+            boolean chgEnabled = chg != null ? Boolean.parseBoolean(chg.getValue()) : true;
             if (addEnabled) {
-                reader.setSql(addSql.toString());
+                reader.setSql(addSqls.get(entity));
                 reader.setEntityChangeType(ChangeType.ADD);
                 reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
+                info("Sent %d ADD records for %s", reader.getRowReadDuringHandle(), entity.getName());
             }
 
             if (chgEnabled) {
-                reader.setSql(chgSql.toString());
+                reader.setSql(changeSqls.get(entity));
                 reader.setEntityChangeType(ChangeType.CHG);
                 reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
+                info("Sent %d CHG records for %s", reader.getRowReadDuringHandle(), entity.getName());
             }
+
+        }
+        
+        for(int i = entities.size()-1; i >= 0; i--) {
+            ModelEntity entity = entities.get(i);
+            Component component = context.getFlowStep().getComponent();
+            ComponentEntitySetting del = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_DEL_ENABLED);
+            boolean delEnabled = del != null ? Boolean.parseBoolean(del.getValue()) : true;
 
             if (delEnabled) {
-                reader.setSql(delSql.toString());
+                reader.setSql(delSqls.get(entity));
                 reader.setEntityChangeType(ChangeType.DEL);
                 reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
-            }
-
+                info("Sent %d DEL records for %s", reader.getRowReadDuringHandle(), entity.getName());
+            }            
         }
 
         ResettableBasicDataSource ds = databasePlatform.getDataSource();

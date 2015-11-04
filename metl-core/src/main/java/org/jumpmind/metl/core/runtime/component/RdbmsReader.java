@@ -83,6 +83,8 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     
     boolean messageSent = false;
     
+    int rowReadDuringHandle;
+    
     @Override
     protected void start() {
         TypedProperties properties = getTypedProperties();
@@ -101,6 +103,9 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     @Override
     public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        
+        rowReadDuringHandle = 0;
+        
         NamedParameterJdbcTemplate template = getJdbcTemplate();
 
         int inboundRecordCount = 1;
@@ -419,6 +424,10 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 	boolean isMatchOnColumnNameOnly() {
 		return matchOnColumnNameOnly;
 	}
+	
+	public int getRowReadDuringHandle() {
+        return rowReadDuringHandle;
+    }
 
 	class ResultSetToEntityDataConverter implements ResultSetExtractor<ArrayList<EntityData>> {
         Message inputMessage;
@@ -470,6 +479,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                         rowData.put(attributeId, value);
                     }
                 }
+                rowReadDuringHandle++;
                 payload.add(rowData);
                 if (context.getDeployment() != null && context.getDeployment().asLogLevel() == LogLevel.DEBUG) {
                     logEntityAttributes(rowData);
