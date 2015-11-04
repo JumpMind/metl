@@ -339,6 +339,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         Execution execution = (Execution) item;
         ExecutionLogPanel logPanel = new ExecutionLogPanel(execution.getId(), context, tabs, null);
         tabs.addCloseableTab(execution.getId(), "Log " + execution.getFlowName(), Icons.LOG, logPanel);
+        logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
     }
 
 }

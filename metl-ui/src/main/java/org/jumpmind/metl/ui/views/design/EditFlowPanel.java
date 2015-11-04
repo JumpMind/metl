@@ -393,6 +393,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         if (executionId != null) {
             ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context, tabs, this);
             tabs.addCloseableTab(executionId, "Run " + flow.getName(), Icons.LOG, logPanel);
+            logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
         }
     }
 
