@@ -80,7 +80,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                 "inner join %1$s_project_version v on v.id = f.project_version_id " +
                 "inner join %1$s_project p on p.id = v.project_id " +
                 "inner join %1$s_resource r on r.project_version_id = v.id " +
-                "where d.agent_id = ?",
+                "where d.agent_id = ? order by 5 ",
                 tablePrefix, AgentDeploymentSummary.TYPE_FLOW, AgentDeploymentSummary.TYPE_RESOURCE), 
                 new ISqlRowMapper<AgentDeploymentSummary>() {
                     public AgentDeploymentSummary mapRow(Row row) {

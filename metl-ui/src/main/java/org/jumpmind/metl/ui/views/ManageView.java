@@ -31,6 +31,8 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.AgentDeploymentSummary;
+import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.FlowName;
@@ -83,8 +85,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     private static final long serialVersionUID = 1L;
 
-	static final int DEFAULT_LIMIT = 100;
-    
+    static final int DEFAULT_LIMIT = 100;
+
     @Autowired
     ApplicationContext context;
 
@@ -92,42 +94,43 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     TabbedPanel tabs;
 
-	BeanItemContainer<Execution> executionContainer = new BeanItemContainer<Execution>(Execution.class);
-	
-	Table table;
-	
-	Button viewButton;
-	
-	AbstractSelect statusSelect;
-	
-	int limit = DEFAULT_LIMIT;
-		
+    BeanItemContainer<Execution> executionContainer = new BeanItemContainer<Execution>(Execution.class);
+
+    Table table;
+
+    Button viewButton;
+
+    AbstractSelect statusSelect;
+
+    int limit = DEFAULT_LIMIT;
+
     @SuppressWarnings("serial")
-	@PostConstruct
+    @PostConstruct
     protected void init() {
         viewButton = new Button("View Log");
         viewButton.setEnabled(false);
         viewButton.addClickListener(new ClickListener() {
-			public void buttonClick(ClickEvent event) {
-				viewLog(table.getValue());
-			}        	
+            public void buttonClick(ClickEvent event) {
+                viewLog(table.getValue());
+            }
         });
-        
+
         VerticalLayout mainTab = new VerticalLayout();
         mainTab.setSizeFull();
-		HorizontalLayout header = new HorizontalLayout();
-		header.addComponent(viewButton);
-		header.setComponentAlignment(viewButton, Alignment.BOTTOM_RIGHT);
-		
-		statusSelect = new ComboBox("Status");
-		statusSelect.setNewItemsAllowed(false);
-		statusSelect.setNullSelectionAllowed(false);
-		statusSelect.addItem(ANY);
-		statusSelect.setValue(ANY);
-		for (ExecutionStatus status : ExecutionStatus.values()) {
-		    statusSelect.addItem(status.toString());    
-        };
-        statusSelect.addValueChangeListener(new ValueChangeListener() {            
+        HorizontalLayout header = new HorizontalLayout();
+        header.addComponent(viewButton);
+        header.setComponentAlignment(viewButton, Alignment.BOTTOM_RIGHT);
+
+        statusSelect = new ComboBox("Status");
+        statusSelect.setNewItemsAllowed(false);
+        statusSelect.setNullSelectionAllowed(false);
+        statusSelect.addItem(ANY);
+        statusSelect.setValue(ANY);
+        for (ExecutionStatus status : ExecutionStatus.values()) {
+            statusSelect.addItem(status.toString());
+        }
+        ;
+        statusSelect.addValueChangeListener(new ValueChangeListener() {
             @Override
             public void valueChange(ValueChangeEvent event) {
                 refreshUI(getBackgroundData());
@@ -135,32 +138,32 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         });
         header.addComponent(statusSelect);
         header.setComponentAlignment(statusSelect, Alignment.BOTTOM_RIGHT);
-		
-		HorizontalLayout limitLayout = new HorizontalLayout();
-		limitLayout.setSpacing(true);
-		Label limitLabel = new Label("Limit:");
-		limitLayout.addComponent(limitLabel);
-		limitLayout.setComponentAlignment(limitLabel, Alignment.MIDDLE_CENTER);
-		TextField limitField = new TextField(null, String.valueOf(DEFAULT_LIMIT));
-		limitField.setWidth("5em");
-		limitField.setImmediate(true);
+
+        HorizontalLayout limitLayout = new HorizontalLayout();
+        limitLayout.setSpacing(true);
+        Label limitLabel = new Label("Limit:");
+        limitLayout.addComponent(limitLabel);
+        limitLayout.setComponentAlignment(limitLabel, Alignment.MIDDLE_CENTER);
+        TextField limitField = new TextField(null, String.valueOf(DEFAULT_LIMIT));
+        limitField.setWidth("5em");
+        limitField.setImmediate(true);
         limitField.setTextChangeEventMode(TextChangeEventMode.LAZY);
         limitField.setTextChangeTimeout(200);
-		limitField.addTextChangeListener(new TextChangeListener() {
-			public void textChange(TextChangeEvent event) {
-				try {
-					limit = Integer.parseInt(event.getText());
-				} catch (Exception e) {
-				}
-				refreshUI(getBackgroundData());
-			}		
-		});
-		limitLayout.addComponent(limitField);
-		limitLayout.setComponentAlignment(limitField, Alignment.BOTTOM_RIGHT);
-		header.addComponent(limitLayout);
-		header.setComponentAlignment(limitLayout, Alignment.BOTTOM_RIGHT);
-		header.setExpandRatio(limitLayout, 1.0f);
-		
+        limitField.addTextChangeListener(new TextChangeListener() {
+            public void textChange(TextChangeEvent event) {
+                try {
+                    limit = Integer.parseInt(event.getText());
+                } catch (Exception e) {
+                }
+                refreshUI(getBackgroundData());
+            }
+        });
+        limitLayout.addComponent(limitField);
+        limitLayout.setComponentAlignment(limitField, Alignment.BOTTOM_RIGHT);
+        header.addComponent(limitLayout);
+        header.setComponentAlignment(limitLayout, Alignment.BOTTOM_RIGHT);
+        header.setExpandRatio(limitLayout, 1.0f);
+
         TextField filterField = new TextField();
         filterField.setInputPrompt("Filter");
         filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
@@ -171,26 +174,26 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         filterField.addTextChangeListener(new TextChangeListener() {
             public void textChange(TextChangeEvent event) {
                 executionContainer.removeAllContainerFilters();
-                if (! StringUtils.isBlank(event.getText())) {
-	                executionContainer.addContainerFilter(new MultiPropertyFilter(event.getText(), 
-	                		new String[] { "agentName", "hostName", "flowName", "status", "startTime", "endTime" }));
+                if (!StringUtils.isBlank(event.getText())) {
+                    executionContainer.addContainerFilter(new MultiPropertyFilter(event.getText(),
+                            new String[] { "agentName", "hostName", "flowName", "status", "startTime", "endTime" }));
                 }
             }
         });
         header.addComponent(filterField);
         header.setComponentAlignment(filterField, Alignment.BOTTOM_RIGHT);
 
-		header.setSpacing(true);
-		header.setMargin(true);
-		header.setWidth("100%");		
-		mainTab.addComponent(header);
-		
-		table = new Table();
-		table.setContainerDataSource(executionContainer);
-		table.setSelectable(true);
-		table.setMultiSelect(false);
-		table.setSizeFull();
-		table.addItemClickListener(new ItemClickListener() {            
+        header.setSpacing(true);
+        header.setMargin(true);
+        header.setWidth("100%");
+        mainTab.addComponent(header);
+
+        table = new Table();
+        table.setContainerDataSource(executionContainer);
+        table.setSelectable(true);
+        table.setMultiSelect(false);
+        table.setSizeFull();
+        table.addItemClickListener(new ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent event) {
                 if (event.isDoubleClick()) {
@@ -198,30 +201,30 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                 }
             }
         });
-		table.setVisibleColumns(new Object[] { "agentName", "deploymentName", "hostName", "status", "startTime", "endTime" });
-		table.setColumnHeaders(new String[] { "Agent", "Deployment", "Host", "Status", "Start", "End"});
-		table.setSortContainerPropertyId("startTime");
-		table.setSortAscending(false);
-		table.addValueChangeListener(new ValueChangeListener() {
-			public void valueChange(ValueChangeEvent event) {
-				viewButton.setEnabled(table.getValue() != null);
-			}
-		});
-		mainTab.addComponent(table);
-		mainTab.setExpandRatio(table, 1.0f);
-		
-        tabs = new TabbedPanel();        
+        table.setVisibleColumns(new Object[] { "agentName", "deploymentName", "hostName", "status", "startTime", "endTime" });
+        table.setColumnHeaders(new String[] { "Agent", "Deployment", "Host", "Status", "Start", "End" });
+        table.setSortContainerPropertyId("startTime");
+        table.setSortAscending(false);
+        table.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(ValueChangeEvent event) {
+                viewButton.setEnabled(table.getValue() != null);
+            }
+        });
+        mainTab.addComponent(table);
+        mainTab.setExpandRatio(table, 1.0f);
+
+        tabs = new TabbedPanel();
         tabs.setMainTab("Executions", Icons.EXECUTION, mainTab);
 
         HorizontalSplitPanel split = new HorizontalSplitPanel();
         split.setSizeFull();
         split.setSplitPosition(AppConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS, false);
-        
+
         manageNavigator = new ManageNavigator(FolderType.AGENT, context.getConfigurationService());
         manageNavigator.addValueChangeListener(new ValueChangeListener() {
-			public void valueChange(ValueChangeEvent event) {
-				refreshUI(getBackgroundData());
-			}
+            public void valueChange(ValueChangeEvent event) {
+                refreshUI(getBackgroundData());
+            }
         });
         split.setFirstComponent(manageNavigator);
 
@@ -237,7 +240,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     @Override
     public void enter(ViewChangeEvent event) {
-    	manageNavigator.refresh();
+        manageNavigator.refresh();
     }
 
     @Override
@@ -249,7 +252,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     @Override
     public void selected() {
     }
-    
+
     @Override
     public void deselected() {
     }
@@ -262,35 +265,41 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     @Override
     public void onBackgroundUIRefresh(Object backgroundData) {
-    	refreshUI(backgroundData);
+        refreshUI(backgroundData);
     }
 
     public Object getBackgroundData() {
-    	Object currentSelection = manageNavigator.getCurrentSelection();
-    	Object currentSelectionParent = manageNavigator.getCurrentSelectionParent();
-    	if (currentSelection != null) {
-        	Map<String, Object> params = new HashMap<String, Object>();
-    		if (currentSelection instanceof Agent) {
-    			params.put("agentId", ((Agent) currentSelection).getId());
-    		} else if (currentSelection instanceof FlowName) {    		    
-    			params.put("flowId", ((FlowName) currentSelection).getId());    			
-    		} else if (currentSelection instanceof AgentDeployment) {
-    			params.put("deploymentId", ((AgentDeployment) currentSelection).getId());
-    		}
-    		
-    		if (currentSelectionParent instanceof Agent) {
-                params.put("agentId", ((Agent)currentSelectionParent).getId());
+        Object currentSelection = manageNavigator.getCurrentSelection();
+        Object currentSelectionParent = manageNavigator.getCurrentSelectionParent();
+        if (currentSelection != null) {
+            Map<String, Object> params = new HashMap<String, Object>();
+            if (currentSelection instanceof Agent) {
+                params.put("agentId", ((Agent) currentSelection).getId());
+            } else if (currentSelection instanceof AgentName) {
+                params.put("agentId", ((AgentName) currentSelection).getId());
+            } else if (currentSelection instanceof FlowName) {
+                params.put("flowId", ((FlowName) currentSelection).getId());
+            } else if (currentSelection instanceof AgentDeployment) {
+                params.put("deploymentId", ((AgentDeployment) currentSelection).getId());
+            } else if (currentSelection instanceof AgentDeploymentSummary) {
+                params.put("deploymentId", ((AgentDeploymentSummary) currentSelection).getId());
             }
-    		
-    		if (!statusSelect.getValue().equals("<Any>")) {
-    		    params.put("status", statusSelect.getValue());
-    		}
 
-    		if (params.size() > 0) {
-    			return context.getExecutionService().findExecutions(params, limit);		
-    		}
-    	}
-    	return null;
+            if (currentSelectionParent instanceof Agent) {
+                params.put("agentId", ((Agent) currentSelectionParent).getId());
+            } else if (currentSelectionParent instanceof AgentName) {
+                params.put("agentId", ((AgentName) currentSelectionParent).getId());
+            }
+
+            if (!statusSelect.getValue().equals("<Any>")) {
+                params.put("status", statusSelect.getValue());
+            }
+
+            if (params.size() > 0) {
+                return context.getExecutionService().findExecutions(params, limit);
+            }
+        }
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -308,12 +317,12 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
             viewButton.setEnabled(table.getValue() != null);
         }
     }
-    
-    protected boolean needsUpdated (List<Execution> data) {
+
+    protected boolean needsUpdated(List<Execution> data) {
         boolean needsUpdated = false;
         List<Execution> all = data != null ? new ArrayList<Execution>(data) : new ArrayList<Execution>(0);
         @SuppressWarnings("unchecked")
-        Collection<Execution> tableValues = (Collection<Execution>)table.getItemIds();
+        Collection<Execution> tableValues = (Collection<Execution>) table.getItemIds();
         for (Execution execution : tableValues) {
             if (!all.remove(execution)) {
                 needsUpdated = true;
@@ -327,8 +336,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     }
 
     protected void viewLog(Object item) {
-    	Execution execution = (Execution) item;
-        ExecutionLogPanel logPanel = new ExecutionLogPanel(execution.getId(),context, tabs, null);
+        Execution execution = (Execution) item;
+        ExecutionLogPanel logPanel = new ExecutionLogPanel(execution.getId(), context, tabs, null);
         tabs.addCloseableTab(execution.getId(), "Log " + execution.getFlowName(), Icons.LOG, logPanel);
     }
 

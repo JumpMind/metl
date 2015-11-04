@@ -68,6 +68,7 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserGroup;
 import org.jumpmind.metl.core.model.UserSetting;
+import org.jumpmind.metl.core.util.NameSorter;
 import org.jumpmind.metl.core.util.NameValue;
 import org.jumpmind.persist.IPersistenceManager;
 
@@ -210,7 +211,9 @@ abstract class AbstractConfigurationService extends AbstractService implements
     public List<FlowName> findFlows() {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("deleted", 0);
-        return find(FlowName.class, params);
+        List<FlowName> flows = find(FlowName.class, params);
+        Collections.sort(flows, new NameSorter());
+        return flows;
     }
 
     @Override

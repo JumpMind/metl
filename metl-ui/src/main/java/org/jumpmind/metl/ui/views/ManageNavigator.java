@@ -48,8 +48,6 @@ import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.ColumnHeaderMode;
 import com.vaadin.ui.Tree.CollapseEvent;
 import com.vaadin.ui.Tree.CollapseListener;
-import com.vaadin.ui.Tree.ExpandEvent;
-import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -69,13 +67,13 @@ public class ManageNavigator extends Panel {
         this.configurationService = configurationService;
 
         setSizeFull();
-        
+
         addStyleName(ValoTheme.MENU_ROOT);
-        
+
         VerticalLayout content = new VerticalLayout();
         content.setSizeFull();
         setContent(content);
-        
+
         MenuBar leftMenuBar = new MenuBar();
         leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
         leftMenuBar.setWidth(100, Unit.PERCENTAGE);
@@ -105,7 +103,6 @@ public class ManageNavigator extends Panel {
         treeTable.removeAllItems();
         treeTable.addItem(agentsFolder);
         treeTable.setItemIcon(agentsFolder, FontAwesome.FOLDER);
-        addAgentsToFolder(agentsFolder);
 
         List<Folder> folders = configurationService.findFolders(null, FolderType.AGENT);
         for (Folder folder : folders) {
@@ -114,6 +111,7 @@ public class ManageNavigator extends Panel {
 
         treeTable.addItem(flowsFolder);
         treeTable.setItemIcon(flowsFolder, FontAwesome.FOLDER);
+        addFlowsToFolder(flowsFolder);
 
         for (Object object : expandedItems) {
             treeTable.setCollapsed(object, false);
@@ -134,17 +132,15 @@ public class ManageNavigator extends Panel {
         } else {
             treeTable.setParent(folder, root);
         }
+
         List<Folder> children = folder.getChildren();
         for (Folder child : children) {
             addChildFolder(child, root);
         }
-    }
-
-    protected void folderExpanded(Folder folder) {
-        addAgentsToFolder(folder);
-        if (folder.getName().equals("Flows")) {
-            addFlowsToFolder(folder);
+        if (folder.getFolderType() == FolderType.AGENT) {
+            addAgentsToFolder(folder);
         }
+
     }
 
     @SuppressWarnings("unchecked")
@@ -184,8 +180,7 @@ public class ManageNavigator extends Panel {
                 if (event.getButton() == MouseButton.LEFT) {
                     if (event.isDoubleClick()) {
                         if (treeTable.hasChildren(event.getItemId())) {
-                            treeTable.setCollapsed(event.getItemId(),
-                                    !treeTable.isCollapsed(event.getItemId()));
+                            treeTable.setCollapsed(event.getItemId(), !treeTable.isCollapsed(event.getItemId()));
                         }
                     }
                 }
@@ -196,16 +191,6 @@ public class ManageNavigator extends Panel {
             public void nodeCollapse(CollapseEvent event) {
                 if (event.getItemId() instanceof Folder) {
                     table.setItemIcon(event.getItemId(), FontAwesome.FOLDER);
-                }
-            }
-        });
-
-        table.addExpandListener(new ExpandListener() {
-            public void nodeExpand(ExpandEvent event) {
-                if (event.getItemId() instanceof Folder) {
-                    Folder folder = (Folder) event.getItemId();
-                    table.setItemIcon(folder, FontAwesome.FOLDER_OPEN);
-                    folderExpanded(folder);
                 }
             }
         });
@@ -224,25 +209,25 @@ public class ManageNavigator extends Panel {
     }
 
     protected void addAgentsToFolder(Folder folder) {
-        List<AgentName> agents = configurationService.findAgentsInFolder(folder == agentsFolder ? null
-                : folder);
+        List<AgentName> agents = configurationService.findAgentsInFolder(folder);
         for (AgentName agent : agents) {
-            
-           List<AgentDeploymentSummary> deployments = configurationService.findAgentDeploymentSummary(agent.getId());
-            
+
+            List<AgentDeploymentSummary> deployments = configurationService.findAgentDeploymentSummary(agent.getId());
+
             treeTable.addItem(agent);
             treeTable.setItemIcon(agent, Icons.AGENT);
             treeTable.setChildrenAllowed(agent, deployments.size() > 0);
             treeTable.setParent(agent, folder);
 
             for (AgentDeploymentSummary agentDeployment : deployments) {
-                treeTable.addItem(agentDeployment);
-                treeTable.setItemIcon(agentDeployment, Icons.DEPLOYMENT);
-                treeTable.setParent(agentDeployment, agent);
-                treeTable.setChildrenAllowed(agentDeployment, false);
+                if (agentDeployment.getType().equals(AgentDeploymentSummary.TYPE_FLOW)) {
+                    treeTable.addItem(agentDeployment);
+                    treeTable.setItemIcon(agentDeployment, Icons.DEPLOYMENT);
+                    treeTable.setParent(agentDeployment, agent);
+                    treeTable.setChildrenAllowed(agentDeployment, false);
+                }
             }
         }
-
     }
 
     protected void addFlowsToFolder(Folder folder) {
