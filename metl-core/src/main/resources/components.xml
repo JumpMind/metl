@@ -313,7 +313,7 @@
         </settings>
     </component>
     <component id='Merger' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
-        <name>Joiner</name>
+        <name>Merger</name>
         <className>org.jumpmind.metl.core.runtime.component.Merger</className>
         <description></description>
         <settings>
