@@ -20,12 +20,14 @@
  */
 package org.jumpmind.metl.ui.mapping;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.common.ModelEntitySorter;
 
 import com.vaadin.annotations.JavaScript;
 import com.vaadin.annotations.StyleSheet;
@@ -60,12 +62,14 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
         state.inputModel = component.getInputModel();
         if (state.inputModel != null) {
             context.getConfigurationService().refresh(state.inputModel);
+            Collections.sort(state.inputModel.getModelEntities(), new ModelEntitySorter());
             state.inputModel.sortAttributes();
         }
         
         state.outputModel = component.getOutputModel();
-        if (state.outputModel != null) {
+        if (state.outputModel != null) {          
             context.getConfigurationService().refresh(state.outputModel);
+            Collections.sort(state.outputModel.getModelEntities(), new ModelEntitySorter());
             state.outputModel.sortAttributes();
         }
 

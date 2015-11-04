@@ -23,7 +23,6 @@ package org.jumpmind.metl.ui.views.design;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,6 +34,7 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.metl.ui.common.ModelEntitySorter;
 import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
@@ -337,11 +337,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             }
         }
 
-        Collections.sort(filteredModelEntityList, new Comparator<ModelEntity>() {
-            public int compare(ModelEntity entity1, ModelEntity entity2) {
-                return entity1.getName().toLowerCase().compareTo(entity2.getName().toLowerCase());
-            }
-        });
+        Collections.sort(filteredModelEntityList, new ModelEntitySorter());
         for (ModelEntity modelEntity : filteredModelEntityList) {
             add(modelEntity);
         }
