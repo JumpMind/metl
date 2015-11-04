@@ -74,18 +74,18 @@ public class Multiplier extends AbstractComponentRuntime {
                 Iterator<Message> messages = queuedWhileWaitingForMultiplier.iterator();
                 while (messages.hasNext()) {
                     Message message = messages.next();
-                    multiply(message, callback, message.getHeader().isUnitOfWorkLastMessage());
+                    multiply(message, callback);
                 }
             }
         } else if (!multipliersInitialized) {
             inputMessage.getHeader().setUnitOfWorkLastMessage(unitOfWorkBoundaryReached);
             queuedWhileWaitingForMultiplier.add(inputMessage);
         } else if (multipliersInitialized) {
-            multiply(inputMessage, callback, unitOfWorkBoundaryReached);
+            multiply(inputMessage, callback);
         }
     }
 
-    protected void multiply(Message message, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    protected void multiply(Message message, ISendMessageCallback callback) {
         ArrayList<EntityData> multiplied = new ArrayList<EntityData>();
         for (int i = 0; i < multipliers.size(); i++) {
             EntityData multiplierData = multipliers.get(i);
@@ -108,7 +108,7 @@ public class Multiplier extends AbstractComponentRuntime {
         }
 
         if (multiplied.size() > 0) {
-            callback.sendMessage(null, multiplied, true);               
+            callback.sendMessage(null, multiplied, false);               
         }
     }
 

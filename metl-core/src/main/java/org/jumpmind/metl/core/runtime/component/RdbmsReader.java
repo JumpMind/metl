@@ -81,8 +81,6 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     
     ChangeType entityChangeType = ChangeType.ADD;
     
-    boolean messageSent = false;
-    
     int rowReadDuringHandle;
     
     @Override
@@ -92,8 +90,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         trimColumns = properties.is(TRIM_COLUMNS);
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
-        runWhen = properties.get(RUN_WHEN, runWhen);        
-        messageSent = false;
+        runWhen = properties.get(RUN_WHEN, runWhen);
     }
         
     @Override
@@ -136,12 +133,8 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         }
         if (outboundPayload != null && outboundPayload.size() > 0) {
             callback.sendMessage(null, outboundPayload, unitOfWorkBoundaryReached);
-            messageSent = true;
         }
         
-        if (!messageSent && unitOfWorkBoundaryReached) {
-            callback.sendMessage(null, new ArrayList<>(), true);
-        }
     }
     
     
@@ -457,7 +450,6 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             while (rs.next()) {
                 if (outputRecCount++ % rowsPerMessage == 0 && payload != null) {
                     callback.sendMessage(null, payload, false);
-                    messageSent = true;
                     payload = null;
                 }
                 
