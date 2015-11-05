@@ -39,9 +39,10 @@ The following table shows a list of available components.
 |<<parse-fixed>>|image:metl-fixed-length-48x48-color.png[]|An inbound text message in a fixed length text format needs to be parsed into a model based message structure
 |<<parse-xml>>|image:metl-xml-formatter-48x48-color.png[]|An inbound text message in xml text format needs to be parsed into a model based message structure
 |<<script>>|image:metl-script-48x48-color.png[]|A custom action should be performed that can be written using Groovy
-|<<sequence>>|image:metl-sequencing-48x48-color.png[]|A sequence number needs to be created for a given attribute in a model based record, and the starting value of the sequence can
-|<<sorter>>|image:metl-sorter-48x48-color.png[]|Data within a model based message needs to be sorted by one of the attributes within the model 
-be derived by an sql statement.
+|<<sequence>>|image:metl-sequencing-48x48-color.png[]|A sequence number needs to be created for a given attribute in a model based record, and the starting value of the sequence can be derived by an sql statement.
+|<<sorter>>|image:metl-sorter-48x48-color.png[]|Data within a model based message needs to be sorted by one of the attributes within the model
+|<<text-replace>>|image:metl-regex-replace-48x48-color.png[]|A piece of text in a text based message needs replaced with alternate text
+|<<transformer>>|image:metl-transform-48x48-color.png[]|An attribute in a model based message needs transformed in one way or another (trim, substring, constants, etc.) 
 3+|Writers
 |<<rdbms-writer>>|image:metl-writer-48x48-color.png[]|Data needs written to a relational database
 |<<sql-executor>>|image:metl-writer-48x48-color.png[]|Data needs written to or deleted from a database using a specific sql statement

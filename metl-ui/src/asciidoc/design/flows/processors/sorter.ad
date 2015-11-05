@@ -22,6 +22,8 @@ include::../common-properties/enabled.ad[]
 |Sort Entity.Attribute|The model Entity and Attribute to sort the data by.  The entity and attribute must be 
 concatenated with a period (entity.attribute)
 include::../common-properties/rows-per-message.ad[]
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===========================================
