@@ -90,9 +90,8 @@ public class TextFileWriter extends AbstractComponentRuntime {
             throw new IllegalStateException("The msgTarget resource has not been configured.  Please choose a resource.");
         }
 
-        if (inputMessage.getHeader().getSequenceNumber() == 1) {
-            initStreamAndWriter();
-        }
+        initStreamAndWriter();
+        
         try {
             Object payload = inputMessage.getPayload();
             if (payload instanceof ArrayList) {
@@ -123,12 +122,14 @@ public class TextFileWriter extends AbstractComponentRuntime {
     }
 
     private void initStreamAndWriter() {
-        IStreamable streamable = (IStreamable) getResourceReference();
-        if (!append && streamable.supportsDelete()) {
-            streamable.delete(relativePathAndFile);
+        if (bufferedWriter == null) {
+            IStreamable streamable = (IStreamable) getResourceReference();
+            if (!append && streamable.supportsDelete()) {
+                streamable.delete(relativePathAndFile);
+            }
+            log(LogLevel.INFO, String.format("Writing text file to %s", streamable.toString()));
+            bufferedWriter = initializeWriter(streamable.getOutputStream(relativePathAndFile, mustExist));
         }
-        log(LogLevel.INFO, String.format("Writing text file to %s", streamable.toString()));
-        bufferedWriter = initializeWriter(streamable.getOutputStream(relativePathAndFile, mustExist));
     }
 
     private BufferedWriter initializeWriter(OutputStream stream) {
@@ -142,6 +143,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
 
     private void close() {
         IOUtils.closeQuietly(bufferedWriter);
+        bufferedWriter = null;
     }
 
 }
