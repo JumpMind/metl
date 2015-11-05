@@ -88,6 +88,9 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
+        if (inputRows == null) {
+            return;
+        }
 
         ArrayList<String> outputPayload = new ArrayList<String>();
 
@@ -115,7 +118,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                     List<Element> matches = expression.evaluate(document.getRootElement());
                     if (matches.size() == 0) {
                         log(LogLevel.WARN, "XPath expression " + compEntitySetting.getValue() + " did not find any matches");
-                    } else {
+                    } else {                        
                         Element templateElement = matches.get(0).clone();
                         entitySettings.put(compEntitySetting.getEntityId(),
                                 new XmlFormatterEntitySetting(compEntitySetting, expression, templateElement));
