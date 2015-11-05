@@ -44,10 +44,12 @@ import org.springframework.util.FileCopyUtils;
 public class FileUtil extends AbstractComponentRuntime {
 
     public static final String ACTION_COPY = "Copy";
-    public static final String ACTION_RENAME = "Rename";
     public static final String ACTION_MOVE = "Move";
+    /*
+    public static final String ACTION_RENAME = "Rename";    
     public static final String ACTION_DELETE = "Delete";
     public static final String ACTION_TOUCH = "Touch";
+    */
 
     public final static String SETTING_ACTION = "action";
 

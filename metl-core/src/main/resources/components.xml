@@ -211,9 +211,7 @@
                 <description></description>
                 <choices>
                     <choice>Copy</choice>
-                    <choice>Rename</choice>
                     <choice>Move</choice>
-                    <choice>Delete</choice>
                 </choices>
             </setting>        
             <setting id='target.resource' type='streamable_resource' required='true'>
