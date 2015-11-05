@@ -170,6 +170,10 @@ public class MessageScriptHelper {
         callback.sendMessage(null, inputMessage.getPayload(), unitOfWorkBoundaryReached);
     }
     
+    protected void sendControlMessage() {
+        callback.sendControlMessage();
+    }
+    
     protected void setSendMessageCallback(ISendMessageCallback callback) {
         this.messageTarget = callback;
         this.callback = callback;
