@@ -1,8 +1,9 @@
+[id="sorter",reftext="Sorter"]
 ===== Sorter
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:sorter.png[]
-|Use When|Data needs to be sorted
+|Icon|image:metl-sorter-48x48-color.png[]
+|Use When|Data within a model based message needs to be sorted by one of the attributes within the model
 |Samples| 
 |Description|The Sorter is used to sort data elements within a message that is being processed through a flow.
 
