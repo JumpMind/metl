@@ -1,9 +1,35 @@
+[id="sequence",reftext="Sequence"]
 ===== Sequence
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:sequence.png[]
-|Description|The sequence component generates a sequence number that can be placed into a record element in a given message.
+|Icon|image:metl-sequencing-48x48-color.png[]
+|Use When|A sequence number needs to be created for a given attribute in a model based record, and the starting value of the sequence can 
+be derived by an sql statement.
+|Samples|
+|Description|The sequence component allows an attribute in a model based message to be filled with a generated sequence number.  The initial 
+value for the sequence is derived based on an sql statement configured in the component.  From that point forward, every new message/record
+that comes into the component gets an incremented sequence number placed in the designated sequence number attribute field.
    
 |Inbound Message Type|Model Based Message
 |Output Message Type|Model Based Message
+|===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description
+|Resource|The Database Resource that will be used to execute the Starting Sequence Sql    
+include::../common-properties/input-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Sequence Attribute Name|The name of the attribute in form [entity].[attribute] that should be filled in with the sequence number generated
+|Select Starting Sequence Sql|The Sql statement that will be executed in order to retrieve the starting sequence value.  This sql will be run
+once on component start up to retrieve the sequence seed value
+|Is Sequence Shared|Whether the sequence is shared amongst multiple sequence generators
+|Shared Name|If the sequence is shared, this is the name that each of the sequence generators will use to reference the shared sequence
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
 |===========================================

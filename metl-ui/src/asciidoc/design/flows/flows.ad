@@ -38,7 +38,9 @@ The following table shows a list of available components.
 |<<parse-delimited>>|image:metl-delimitedformatter-48x48-color.png[]|An inbound text message in some delimited text format needs to be parsed into a model based message structure
 |<<parse-fixed>>|image:metl-fixed-length-48x48-color.png[]|An inbound text message in a fixed length text format needs to be parsed into a model based message structure
 |<<parse-xml>>|image:metl-xml-formatter-48x48-color.png[]|An inbound text message in xml text format needs to be parsed into a model based message structure
-|<<script>>|image:metl-script-48x48-color.png[]|An action needs to be taken that cannot be completed with an existing component
+|<<script>>|image:metl-script-48x48-color.png[]|A custom action should be performed that can be written using Groovy
+|<<sequence>>|image:metl-sequencing-48x48-color.png[]|A sequence number needs to be created for a given attribute in a model based record, and the starting value of the sequence can 
+be derived by an sql statement.
 3+|Writers
 |<<rdbms-writer>>|image:metl-writer-48x48-color.png[]|Data needs written to a relational database
 |<<sql-executor>>|image:metl-writer-48x48-color.png[]|Data needs written to or deleted from a database using a specific sql statement

@@ -39,14 +39,15 @@ public class Wrapper {
     	ProtectionDomain protectionDomain = Wrapper.class.getProtectionDomain();
     	String jarFileName=protectionDomain.getCodeSource().getLocation().getFile();
     	
-        String appHomeDir = getConfigDir(false);
+        String appHomeDir = getConfigDir(true);
     	
         File configFile = new File(appHomeDir, configFileName);
         if (!configFile.exists()) {   
             try {
                 String propContent = IOUtils.toString(Wrapper.class.getClassLoader().getResourceAsStream(configFileName));
                 propContent = propContent.replace("$(metl.war)", jarFileName);
-                propContent = propContent.replace("$(java.io.tmpdir)", appHomeDir + File.separator + "tmp");                
+                propContent = propContent.replace("$(java.io.tmpdir)", appHomeDir + File.separator + "tmp");     
+                propContent = propContent.replace("$(metl.home.dir)", appHomeDir);
                 FileUtils.write(configFile, propContent);
             } catch (Exception e) {
             	System.out.println("Unable to write config file for service wrapper." + e.getMessage());

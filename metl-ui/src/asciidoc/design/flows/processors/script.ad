@@ -3,7 +3,7 @@
 [cols="<25%h,<75%"]
 |===========================================
 |Icon|image:metl-script-48x48-color.png[]
-|Use When|An action needs to be taken that cannot be completed with an existing component.
+|Use When|A custom action should be performed that can be written using Groovy
 |Samples|
 |Description|The script component executes one or more configurable groovy script.  Groovy scripts can be configured to run at different
 points in the component lifecycle including Component Initialization (onInit), Inbound message arrival (onHandleMessage), 
