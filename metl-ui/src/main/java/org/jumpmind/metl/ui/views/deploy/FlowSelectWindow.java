@@ -39,7 +39,6 @@ import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
@@ -65,7 +64,6 @@ public class FlowSelectWindow extends ResizableWindow {
         super(caption);
         this.context = context;
         
-        tree.setSizeFull();
         tree.setMultiSelect(true);
         tree.addContainerProperty("name", String.class, "");
         tree.setItemCaptionPropertyId("name");
@@ -86,13 +84,8 @@ public class FlowSelectWindow extends ResizableWindow {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.setMargin(true);
-        layout.setSizeFull();
-        
-        HorizontalLayout hlayout = new HorizontalLayout();
-        hlayout.setStyleName(ValoTheme.WINDOW_TOP_TOOLBAR);
-        hlayout.setWidth(100f, Unit.PERCENTAGE);
-        hlayout.addComponent(new Label(introText));
-        layout.addComponent(hlayout);
+        layout.setSizeFull();        
+        layout.addComponent(new Label(introText));
         
         Panel scrollable = new Panel();
         scrollable.addStyleName(ValoTheme.PANEL_BORDERLESS);
