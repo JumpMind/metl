@@ -1,9 +1,27 @@
+[id="text-replace",reftext="Text Replace"]
 ===== Text Replace
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|regex_replace.png[]
+|Icon|image:metl-regex-replace-48x48-color.png[]
+|Use When|A piece of text in a text based message needs replaced with alternate text
+|Samples|
 |Description|The text replace component uses a regular expression to replace a piece of text with another piece of text within a text based message.
    
 |Inbound Message Type|Text Based Message
 |Output Message Type|Text Based Message
+|===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description 
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Search For (regex)|A regular expression that describes the text for which to search
+|Replace With|A text string that should be used to replace the text found by the Search For (regex) parameter
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
 |===========================================
