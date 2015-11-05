@@ -88,10 +88,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
-        if (inputRows == null) {
-            return;
-        }
-
+        boolean hasPayload = inputRows != null && inputRows.size() > 0;
         ArrayList<String> outputPayload = new ArrayList<String>();
 
         SAXBuilder builder = new SAXBuilder();
@@ -119,9 +116,12 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                     if (matches.size() == 0) {
                         log(LogLevel.WARN, "XPath expression " + compEntitySetting.getValue() + " did not find any matches");
                     } else {                        
-                        Element templateElement = matches.get(0).clone();
+                        Element templateElement = matches.get(0);
+                        if (!hasPayload) {
+                            templateElement.getParentElement().removeContent(templateElement);
+                        }
                         entitySettings.put(compEntitySetting.getEntityId(),
-                                new XmlFormatterEntitySetting(compEntitySetting, expression, templateElement));
+                                new XmlFormatterEntitySetting(compEntitySetting, expression, templateElement.clone()));
                     }
                 }
             }
@@ -153,8 +153,10 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
             }
         }
 
-        for (EntityData inputRow : inputRows) {
-            processInputRow(document, inputRow, entitySettings, attributeSettings);
+        if (hasPayload) {
+            for (EntityData inputRow : inputRows) {
+                processInputRow(document, inputRow, entitySettings, attributeSettings);
+            }
         }
 
         restoreNamespaces(document, namespaces);
