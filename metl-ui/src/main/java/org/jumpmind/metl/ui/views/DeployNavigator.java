@@ -40,6 +40,7 @@ import org.jumpmind.metl.ui.views.deploy.EditAgentPanel;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
+import org.jumpmind.util.AppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -533,6 +534,7 @@ public class DeployNavigator extends VerticalLayout {
             Agent agent = new Agent();
             agent.setName("New Agent");
             agent.setFolder(folder);
+            agent.setHost(AppUtils.getHostName());
             context.getConfigurationService().save(agent);
             AgentName name = new AgentName(agent);
             addAgent(folder, name);

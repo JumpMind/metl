@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.ui.views.deploy;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +49,7 @@ import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
 import org.jumpmind.metl.ui.views.manage.ExecutionLogPanel;
+import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.util.AppUtils;
 
@@ -67,6 +70,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -343,12 +347,16 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
 
     class AddDeploymentClickListener implements ClickListener, FlowSelectListener {
         public void buttonClick(ClickEvent event) {
-            if (flowSelectWindow == null) {
-                String introText = "Select one or more flows for deployment to this agent.";
-                flowSelectWindow = new FlowSelectWindow(context, "Add Deployment", introText);
-                flowSelectWindow.setFlowSelectListener(this);
+            if (isBlank(agent.getHost())) {
+                CommonUiUtils.notify("Before you can deploy to an agent.  You must select a hostname.", Type.ASSISTIVE_NOTIFICATION);
+            } else {
+                if (flowSelectWindow == null) {
+                    String introText = "Select one or more flows for deployment to this agent.";
+                    flowSelectWindow = new FlowSelectWindow(context, "Add Deployment", introText);
+                    flowSelectWindow.setFlowSelectListener(this);
+                }
+                UI.getCurrent().addWindow(flowSelectWindow);
             }
-            UI.getCurrent().addWindow(flowSelectWindow);
         }
         
         public void selected(Collection<FlowName> flowCollection) {
