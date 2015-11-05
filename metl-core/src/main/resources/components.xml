@@ -563,24 +563,24 @@
         <className>org.jumpmind.metl.core.runtime.component.Script</className>
         <description></description>
         <settings>
-            <setting id='imports' type='script' required='true'>
+            <setting id='imports' type='script' required='true' visible='false'>
                 <name>Import Statements</name>
                 <description></description>
             </setting>
-            <setting id='init.script' type='script' required='true'>
+            <setting id='init.script' type='script' required='true' visible='false'>
                 <name>Init Script</name>
                 <description></description>
             </setting>
-            <setting id='handle.msg.script' type='script' required='true'>
+            <setting id='handle.msg.script' type='script' required='true' visible='false'>
                 <name>Handle Msg Script</name>
-                <defaultValue>messageTarget.put(inputMessage);</defaultValue>
+                <defaultValue>forwardMessage()</defaultValue>
                 <description></description>
             </setting>
-            <setting id='on.flow.success.script' type='script' required='true'>
+            <setting id='on.flow.success.script' type='script' required='true' visible='false'>
                 <name>Ended with Success Script</name>
                 <description></description>
             </setting>
-            <setting id='on.flow.error.script' type='script' required='true'>
+            <setting id='on.flow.error.script' type='script' required='true' visible='false'>
                 <name>Ended with Error Script</name>
                 <description></description>
             </setting>

@@ -77,7 +77,8 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
         select.addValueChangeListener(new ValueChangeListener() {
             @Override
             public void valueChange(ValueChangeEvent event) {
-                editor.setValue(EditScriptPanel.this.component.get((String) select.getValue(), ""));
+                String key = (String) select.getValue();                
+                editor.setValue(EditScriptPanel.this.component.get(key, componentDefinition.findXMLSetting(key).getDefaultValue()));
             }
         });
         select.setValue(Script.HANDLE_SCRIPT);

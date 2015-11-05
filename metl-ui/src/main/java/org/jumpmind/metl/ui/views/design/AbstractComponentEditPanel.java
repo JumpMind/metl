@@ -21,6 +21,7 @@
 package org.jumpmind.metl.ui.views.design;
 
 import org.jumpmind.metl.core.model.Component;
+import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 
 import com.vaadin.ui.VerticalLayout;
@@ -34,11 +35,14 @@ public abstract class AbstractComponentEditPanel extends VerticalLayout implemen
     protected ApplicationContext context;
     
     protected PropertySheet propertySheet;
+    
+    protected XMLComponent componentDefinition;
 
     @Override
     public void init(Component component, ApplicationContext context, PropertySheet propertySheet) {
         this.component = component;
         this.context  = context;
+        this.componentDefinition = context.getComponentFactory().getComonentDefinition(component.getType());
         this.propertySheet = propertySheet;
         buildUI();
     }

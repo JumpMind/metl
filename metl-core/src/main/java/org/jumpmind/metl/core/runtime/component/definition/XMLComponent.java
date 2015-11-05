@@ -194,6 +194,17 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
         return settings;
     }
     
+    public XMLSetting findXMLSetting(String type) {
+        if (settings != null) {
+            for (XMLSetting setting :settings.getSetting()) {
+                if (setting.getId().equals(type)) {
+                    return setting;
+                }
+            }
+        }
+        return null;
+    }
+    
     public boolean isSupportsMultipleThreads() {
         return supportsMultipleThreads;
     }

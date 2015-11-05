@@ -33,7 +33,7 @@ public interface IComponentRuntimeFactory {
     
     public Map<String, List<XMLComponent>> getComponentDefinitionsByCategory();
 
-    public XMLComponent getComonentDefinition(String id);
+    public XMLComponent getComonentDefinition(String typeId);
     
     public void refresh();
 
