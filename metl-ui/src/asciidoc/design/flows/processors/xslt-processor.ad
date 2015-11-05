@@ -1,9 +1,28 @@
+[id="xslt-processor",reftext="XSLT Processor"]
 ===== XSLT Processor
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:entityrouter.png[]
-|Description|The entity router routes model based records within a message to one or more downstream components based on the routing criteria configured in the component.
+|Icon|image:metl-xslt-48x48-color.png[]
+|Use When|XSLT needs applied to a set of input data in order to transform it into a given output format
+|Samples|
+|Description|The XSLT Processor component applies XSLT to a set of input data and sends the output of the XSLT processing as text
+messgaes to downstream components.
    
 |Inbound Message Type|Model Based Message
-|Output Message Type|Model Based Message
+|Output Message Type|Text Based Message
+|===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+include::../common-properties/input-model.ad[]
+include::../common-properties/unit-of-work.ad[]
+include::../common-properties/enabled.ad[]
+|Output all attributes|
+|XML Format|
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
 |===========================================

@@ -1,8 +1,9 @@
+[id="web",reftext="Web"]
 ===== Web
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:web.png[]
-|Use When|A web service needs to be called to perform an action such as retrieving or writing data
+|Icon|image:metl-web-48x48-color.png[]
+|Use When|A web service (either REST or WSDL) needs to be called to perform an action such as retrieving or writing data
 |Samples|WSDL Service Call, DB Request to WSDL to DB results
 |Description|The web component allows REST or WSDL based web services to be called, sending the response
 data to downstream components.
@@ -30,6 +31,8 @@ the inbound message.  If 'Provided" the body of the web service request message 
 |Body Text|If the Body From parameter is 'Provided', this parameter is used to specify the body of the text message for the 
 web service request
 |Parameter replacement|
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
 include::../common-properties/inbound-queue-capacity.ad[]
 include::../common-properties/shared.ad[]
 |===========================================

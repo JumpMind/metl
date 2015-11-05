@@ -42,7 +42,10 @@ The following table shows a list of available components.
 |<<sequence>>|image:metl-sequencing-48x48-color.png[]|A sequence number needs to be created for a given attribute in a model based record, and the starting value of the sequence can be derived by an sql statement.
 |<<sorter>>|image:metl-sorter-48x48-color.png[]|Data within a model based message needs to be sorted by one of the attributes within the model
 |<<text-replace>>|image:metl-regex-replace-48x48-color.png[]|A piece of text in a text based message needs replaced with alternate text
-|<<transformer>>|image:metl-transform-48x48-color.png[]|An attribute in a model based message needs transformed in one way or another (trim, substring, constants, etc.) 
+|<<transformer>>|image:metl-transform-48x48-color.png[]|An attribute in a model based message needs transformed in one way or another (trim, substring, constants, etc.)
+|<<union>>|image:metl-merger-48x48-color.png[]|Inbound messages need to be combined into a single message and then sent to downstream components. 
+|<<web>>|image:metl-web-48x48-color.png[]|A web service (either REST or WSDL) needs to be called to perform an action such as retrieving or writing data
+|<<xslt-processor>>|image:metl-xslt-48x48-color.png[]|XSLT needs applied to a set of input data in order to transform it into a given output format
 3+|Writers
 |<<rdbms-writer>>|image:metl-writer-48x48-color.png[]|Data needs written to a relational database
 |<<sql-executor>>|image:metl-writer-48x48-color.png[]|Data needs written to or deleted from a database using a specific sql statement
