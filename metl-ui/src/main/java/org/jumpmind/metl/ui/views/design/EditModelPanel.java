@@ -90,6 +90,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     Button importButton;
     
     TextField filterField;
+    
+    ShortcutListener enterKeyListener;
 
     public EditModelPanel(ApplicationContext context, String modelId) {
         this.context = context;
@@ -233,13 +235,12 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
         treeTable.addItemClickListener(new TreeTableItemClickListener());
         treeTable.addValueChangeListener(new TreeTableValueChangeListener());
-        ShortcutListener enterKeyListener = new ShortcutListener("Enter", KeyCode.ENTER, null) {
+        enterKeyListener = new ShortcutListener("Enter", KeyCode.ENTER, null) {
             public void handleAction(Object sender, Object target) {
                 lastEditItemIds = Collections.emptySet();
                 treeTable.refreshRowCache();
             }
-        };
-        treeTable.addShortcutListener(enterKeyListener);
+        };        
         
         addComponent(treeTable);
         setExpandRatio(treeTable, 1.0f);
@@ -294,10 +295,12 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
     @Override
     public void selected() {
+        treeTable.addShortcutListener(enterKeyListener);
     }
 
     @Override
     public void deselected() {
+        treeTable.removeShortcutListener(enterKeyListener);
     }
 
     @SuppressWarnings("unchecked")
