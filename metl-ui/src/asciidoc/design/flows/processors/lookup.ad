@@ -2,7 +2,7 @@
 ===== Lookup
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|metl-lookup-48x48-color.png[]
+|Icon|image:icons/metl-lookup-48x48-color.png[]
 |Use When|Reference data exists that needs to be looked up / retrieved by a specified key, and another attribute of the the resulting reference data passed to downstream components.
 |Samples|
 |Description|The Lookup component receives reference data from a source component, and then uses that reference data as a lookup source for data coming from

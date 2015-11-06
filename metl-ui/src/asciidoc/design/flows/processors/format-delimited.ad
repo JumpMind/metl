@@ -2,7 +2,7 @@
 ===== Format Delimited
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-delimitedformatter-48x48-color.png[]
+|Icon|image:icons/metl-delimitedformatter-48x48-color.png[]
 |Use When|Model based data needs to be formatted into delimited text
 |Samples|Relational Database to Flat File
 |Description|The format delimited component takes a model based message and formats its content into a delimited text message

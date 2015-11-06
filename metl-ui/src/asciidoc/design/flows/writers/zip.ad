@@ -2,7 +2,7 @@
 ===== Zip
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-zip-48x48-color.png[]
+|Icon|image:icons/metl-zip-48x48-color.png[]
 |Use When|Data needs to be put in a compressed file 
 |Samples|
 |Description|The Zip component is used to generate a compressed file of data provided to it.

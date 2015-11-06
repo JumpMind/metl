@@ -2,7 +2,7 @@
 ===== Text File Writer
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-text-writer-48x48-color.png[]
+|Icon|image:icons/metl-text-writer-48x48-color.png[]
 |Use When|Data needs written to a text based file
 |Samples|
 |Description|The Text File Writer is used to write data to a text based file.

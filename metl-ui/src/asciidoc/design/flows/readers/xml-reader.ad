@@ -2,7 +2,7 @@
 ===== XML File Reader
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-xml-formatter-48X48-color.png[]
+|Icon|image:icons/metl-xml-formatter-48X48-color.png[]
 |Use When|An XML file needs to be read and element content of that file sent as individual messages
 |Samples|
 |Description|The XML Reader component allows XML data to be read from a file and data within tags to be sent as individual messages

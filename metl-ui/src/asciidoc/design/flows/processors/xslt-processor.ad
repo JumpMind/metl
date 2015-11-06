@@ -2,7 +2,7 @@
 ===== XSLT Processor
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-xslt-48x48-color.png[]
+|Icon|image:icons/metl-xslt-48x48-color.png[]
 |Use When|XSLT needs applied to a set of input data in order to transform it into a given output format
 |Samples|
 |Description|The XSLT Processor component applies XSLT to a set of input data and sends the output of the XSLT processing as text

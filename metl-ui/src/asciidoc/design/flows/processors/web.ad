@@ -2,7 +2,7 @@
 ===== Web
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-web-48x48-color.png[]
+|Icon|image:icons/metl-web-48x48-color.png[]
 |Use When|A web service (either REST or WSDL) needs to be called to perform an action such as retrieving or writing data
 |Samples|WSDL Service Call, DB Request to WSDL to DB results
 |Description|The web component allows REST or WSDL based web services to be called, sending the response

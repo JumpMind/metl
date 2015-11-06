@@ -2,7 +2,7 @@
 ===== File Util
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-file-util-48X48-color.png[]
+|Icon|image:icons/metl-file-util-48X48-color.png[]
 |Use When|Files need to be renamed, copied, moved or deleted
 |Samples|
 |Description|The File Util component provides a sets of file utilities that can be used to manipulate files at the operating system level including copying, reanmeing, moving or deleting.

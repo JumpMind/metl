@@ -2,7 +2,7 @@
 ===== Union
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-merger-48x48-color.png[]
+|Icon|image:icons/metl-merger-48x48-color.png[]
 |Use When|Inbound messages need to be combined into a single message and then sent to downstream components.
 |Samples|
 |Description|The union component combines one inbound message from each input link and then sends the combined message to the downstream 

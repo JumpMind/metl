@@ -2,7 +2,7 @@
 ===== Format XML
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-xml-formatter-48x48-color.png[]
+|Icon|image:icons/metl-xml-formatter-48x48-color.png[]
 |Use When|Model based data needs to be formatted into xml text
 |Samples|Relational Database to Flat File, DB request to WSDL to DB results
 |Description|The format xml component takes a model based message and formats its content into an xml text message

@@ -2,7 +2,7 @@
 ===== File Poller
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-file-poller-48x48-color.png[]
+|Icon|image:icons/metl-file-poller-48x48-color.png[]
 |Use When|A file based resource needs to be checked for the existence of a file or set of files
 |Samples|
 |Description|The File Poller is used to look at a file based directory structure and send a message to downstream components 

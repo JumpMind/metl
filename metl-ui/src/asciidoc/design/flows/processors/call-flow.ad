@@ -2,7 +2,7 @@
 ===== Text Constant
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-flow-48X48-color.png[]
+|Icon|image:icons/metl-flow-48X48-color.png[]
 |Use When|A flow needs to be called from another flow
 |Samples|
 |Description|The Call Flow component allows a flow to be called from another flow.   

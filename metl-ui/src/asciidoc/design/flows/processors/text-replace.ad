@@ -2,7 +2,7 @@
 ===== Text Replace
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-regex-replace-48x48-color.png[]
+|Icon|image:icons/metl-regex-replace-48x48-color.png[]
 |Use When|A piece of text in a text based message needs replaced with alternate text
 |Samples|
 |Description|The text replace component uses a regular expression to replace a piece of text with another piece of text within a text based message.

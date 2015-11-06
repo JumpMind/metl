@@ -2,7 +2,7 @@
 ===== Format Fixed
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-fixed-length-48x48-color.png[]
+|Icon|image:icons/metl-fixed-length-48x48-color.png[]
 |Use When|Model based data needs to be formatted into fixed length text
 |Samples|Relational Database to Flat File
 |Description|The format fixed component takes a model based message and formats its content into a fixed length text message

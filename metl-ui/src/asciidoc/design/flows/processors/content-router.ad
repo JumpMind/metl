@@ -2,7 +2,7 @@
 ===== Content Router
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-content-router-48x48-color.png[]
+|Icon|image:icons/metl-content-router-48x48-color.png[]
 |Use When|Content within a message needs to be routed to different downstream components in the existing flow
 |Samples|Partition By Gender
 |Description|The content router routes content within a message to one or more downstream components based on the routing criteria configured in the component.

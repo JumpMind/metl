@@ -2,7 +2,7 @@
 ===== Message Logger
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-message-logger-48x48-color.png[]
+|Icon|image:icons/metl-message-logger-48x48-color.png[]
 |Use When|Messages need to be logged to the Metl console and log file.
 |Samples|List Files in Temp Directory, Remove Duplicates, Sort Records, WSDL Service Call
 |Description|The message logger component takes inbound messages and logs them to the Metl console and log file.

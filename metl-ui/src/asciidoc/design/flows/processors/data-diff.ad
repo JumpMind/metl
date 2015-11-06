@@ -2,7 +2,7 @@
 ===== Model Data Diff
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-data-diff-48X48-color.png[]
+|Icon|image:icons/metl-data-diff-48X48-color.png[]
 |Use When|A set of model based data needs compared to another set of model based data in order to generate insert/update/delete instructions for a writer component
 |Samples|
 |Description|The Model Data Diff component compares two sets of model based data in order to generate insert/update/delete instructions for a writer component in order to get

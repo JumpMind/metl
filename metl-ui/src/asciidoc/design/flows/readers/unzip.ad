@@ -2,7 +2,7 @@
 ===== Unzip
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-zip-48X48-color.png[]
+|Icon|image:icons/metl-zip-48X48-color.png[]
 |Use When|A compressed zip file needs to be extracted in order to process its content
 |Samples|
 |Description|The Unzip component allows a compressed archive/zip file to be extracted so that its contents can be processed in the flow. 

@@ -124,3 +124,19 @@ To uninstall Metl as a service, run teh following from a command line.
 ----
 java -Dorg.jumpmind.metl.ui.init.config.dir=/opt/metl -jar metl.war uninstall
 ----
+
+Once Metl has been started, it can be accessed via a web browser as follows:
+
+----
+http://myservername:myport/metl
+----
+
+If Metl is running on the default port (42000) on the local machine, the url would be as follows:
+
+----
+http://localhost:43000/metl
+----
+
+The following home screen will be displayed:
+
+image:

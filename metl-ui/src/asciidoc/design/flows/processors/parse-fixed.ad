@@ -2,7 +2,7 @@
 ===== Parse Fixed
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-fixed-length-48x48-color.png[]
+|Icon|image:icons/metl-fixed-length-48x48-color.png[]
 |Use When|An inbound text message in a fixed length text format needs to be parsed into a model based message structure
 |Samples|
 |Description|The parse fixed length component takes an inbound text message in fixed length format and parses it into a model based outbound message.

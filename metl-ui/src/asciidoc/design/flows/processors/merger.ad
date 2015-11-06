@@ -2,7 +2,7 @@
 ===== Merger
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-merger-48x48-color.png[]
+|Icon|image:icons/metl-merger-48x48-color.png[]
 |Use When|Different instances of model based records need to be merged into a single instance that combines the attributes from all instances.
 |Samples|Normalized Table to Denormalized File
 |Description|The Joiner component takes different instances of entities (records) and merges them together based on a a set of join criteria.

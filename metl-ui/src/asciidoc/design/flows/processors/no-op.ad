@@ -2,7 +2,7 @@
 ===== No-Op
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-puzzle-48X48-color.png[]
+|Icon|image:icons/metl-puzzle-48X48-color.png[]
 |Use When|A message needs to be passed through to another component without any action being taken on the message
 |Samples|
 |Description|The No Op component passes messages to a downstream component without any modifications to the original message.

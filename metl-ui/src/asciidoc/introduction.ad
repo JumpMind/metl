@@ -37,7 +37,8 @@ Once installed, the web application (agent) is accessed via a web browser and is
 <<manage>> integrations.
 
 Integrations can be grouped or packaged into one or more projects.  Projects are a means to logically group integrations
-together in some logical way.  As an example, a project might contain all of the integrations in or out of a specific system.    
+together in some logical way.  As an example, a project might contain all of the integrations in or out of a specific system. 
+See <<projects>> for additional details.   
 
 Each project has a set of Resources, Models and Flows.  Resources represent connections to physical endpoints where data is 
 read from or written to.  The following resource types are available in Metl:

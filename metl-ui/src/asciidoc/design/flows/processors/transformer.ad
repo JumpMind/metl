@@ -2,7 +2,7 @@
 ===== Transformer
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-transform-48x48-color.png[]
+|Icon|image:icons/metl-transform-48x48-color.png[]
 |Use When|An attribute in a model based message needs transformed in one way or another (trim, substring, constants, etc.)
 |Samples|
 |Description|The transformer component allows transformation functions to be applied to record elements from inbound messages.

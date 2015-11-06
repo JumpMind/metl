@@ -2,7 +2,7 @@
 ===== Sequence
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-sequencing-48x48-color.png[]
+|Icon|image:icons/metl-sequencing-48x48-color.png[]
 |Use When|A sequence number needs to be created for a given attribute in a model based record, and the starting value of the sequence can 
 be derived by an sql statement.
 |Samples|

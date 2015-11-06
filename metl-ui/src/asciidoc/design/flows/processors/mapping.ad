@@ -2,7 +2,7 @@
 ===== Mapping
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-mapping-48x48-color.png[]
+|Icon|image:icons/metl-mapping-48x48-color.png[]
 |Use When|Data needs to be mapped from one set of entities/attributes (model structure) to another set of entities/attributes
 |Samples|Flat File to Relational Database, Normalized Table to Denormalized File, Partition by Gender
 |Description|The mapping component allows you to map messages from one model structure to another.

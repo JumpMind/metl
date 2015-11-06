@@ -2,7 +2,7 @@
 ===== Script
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-script-48x48-color.png[]
+|Icon|image:icons/metl-script-48x48-color.png[]
 |Use When|A custom action should be performed that can be written using Groovy
 |Samples|
 |Description|The script component executes one or more configurable groovy script.  Groovy scripts can be configured to run at different

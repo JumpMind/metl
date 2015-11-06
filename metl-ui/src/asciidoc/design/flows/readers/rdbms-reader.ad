@@ -2,7 +2,7 @@
 ===== RDBMS Reader
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-reader-48x48-color.png[]
+|Icon|image:icons/metl-reader-48x48-color.png[]
 |Use When|Data needs read from a relational database 
 |Samples|Relational Database to Flat File, Normalized Table to Denormalized File, Normalized Table to Denormalized File v2
 |Description|The RDBMS Reader is used to read data from a sql compliant relational database by specifying an SQL query.

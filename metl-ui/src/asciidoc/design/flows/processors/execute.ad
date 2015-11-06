@@ -2,7 +2,7 @@
 ===== Execute
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-execute-48x48-color.png[]
+|Icon|image:icons/metl-execute-48x48-color.png[]
 |Use When|There is a need to execute an operating system command as part of a flow
 |Samples|
 |Description|The execute component executes an operating system command on the host on which the agent is running.

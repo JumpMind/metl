@@ -2,7 +2,7 @@
 ===== Text File Reader
 [cols="<25%h,<75%"]
 |===========================================
-|Icon|image:metl-text-file-48X48-color.png[]
+|Icon|image:icons/metl-text-file-48X48-color.png[]
 |Use When|Data needs read from a text file
 |Samples|Flat File to Relational Database 
 |Description|The Text File Reader is used to read data from one or more text based files.
