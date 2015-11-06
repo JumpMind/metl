@@ -1,0 +1,41 @@
+
+== The Metl User Interface
+
+=== Accessing the Metl User Interface
+
+Once Metl has been started, it can be accessed via a web browser as follows:
+
+----
+http://myservername:myport/metl
+----
+
+If Metl is running on the default port (42000) on the local machine, the url would be as follows:
+
+----
+http://localhost:42000/metl
+----
+
+The following home screen will be displayed: 
+
+image:screenshots/home.png[]
+
+=== Navigation Menu
+
+The navigation menu shown below is the mechanism for traversing the system.  
+
+image:screenshots/navigation-menu.png[]
+
+The Metl UI is split into five 
+major areas:
+
+ * <<design>> - Design and Develop Integrations
+ * <<deploy>> - Deploy integrations to a Metl run time agent
+ * <<manage>> - Manage integrations that have been run on a given agent including looking at past executions, etc.
+ * <<explore>> - A SQL database explorer and query tool that can be used with all relational database resources
+ * <<admin>> - Administrative management of Metl including defining system users, managing logging levels, etc.
+ 
+ In addition to these five major navigation points, the navigation menu also allows for
+ 
+ * Help - Access this help documentation
+ * Logout - Log the current user out of the Metl UI
+ 

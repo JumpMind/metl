@@ -27,6 +27,7 @@ This version of the guide was generated on {docdate}.
 
 include::introduction.ad[]
 include::installation.ad[]
+include::ui.ad[]
 include::design/design.ad[]
 include::deploy.ad[]
 include::manage.ad[]
