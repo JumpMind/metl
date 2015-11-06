@@ -3,8 +3,8 @@
 
 Metl is provided as a web application archive (war) file.  The .war file can be deployed in two different ways.
 
-. Deployed stand-alone using Metl's embedded Jetty server
-. Deployed to an existing servlet container (i.e. Tomcat, JBoss, Websphere, Oracle Application Server, etc.)  
+* Deployed stand-alone using Metl's embedded Jetty server
+* Deployed to an existing servlet container (i.e. Tomcat, JBoss, Websphere, Oracle Application Server, etc.)  
 
 === Deployed stand-alone using Metl's embedded Jetty server
 
@@ -35,7 +35,7 @@ java -Dorg.jumpmind.metl.ui.init.config.dir=/opt/metl -jar metl.war
 
 === Application properties file (metl.properties)
 
-Metl will create a default properties file in its configuration directory of one does not exist.  The property file is named metl.properties and
+Metl will create a default properties file in its configuration directory if one does not exist.  The property file is named metl.properties and
 has the following content.
 
 ----
@@ -79,18 +79,18 @@ db.test.while.idle=
 Metl can be installed as a linux/unix or windows service.  To install Metl as a service, run the following from a command line.
 
 ----
-java -jar metl.war install
+java -Dorg.jumpmind.metl.ui.init.config.dir=/opt/metl -jar metl.war install
 ----
 
 By default, Metl will be installed as a service with service name Metl.  A service configuration file named metl_service.conf 
-will be written to the configuration directy and can be used to further configure the Metl service.  
+will be written to the configuration directory and can be used to further configure the Metl service.  
 
 === Starting the Metl service
 
 To start the Metl service, run the following from a command line
 
 ----
-java -jar metl.war start
+java -Dorg.jumpmind.metl.ui.init.config.dir=/opt/metl -jar metl.war start
 ----
 
 or, use the operating system tools to start and stop the service.  On linux:
@@ -106,7 +106,7 @@ For windows, use the local services control panel to start the Metl service.
 To stop the Metl service, run the following from a command line
 
 ----
-java -jar metl.war stop
+java -Dorg.jumpmind.metl.ui.init.config.dir=/opt/metl -jar metl.war stop
 ----
 
 or, use the operating system tools to start and stop the service.  On linux:
@@ -122,5 +122,5 @@ For windows, use the local services control panel to stop the Metl service.
 To uninstall Metl as a service, run teh following from a command line.
 
 ----
-java -jar metl.war uninstall
+java -Dorg.jumpmind.metl.ui.init.config.dir=/opt/metl -jar metl.war uninstall
 ----

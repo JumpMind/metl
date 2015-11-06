@@ -44,7 +44,7 @@ read from or written to.  The following resource types are available in Metl:
 
 * Database - A jdbc connection to a jdbc compliant relational database  
 * FTP - An FTP connection to a file system
-* Sftp - An SFtp connection to a file system
+* SFtp - An SFtp connection to a file system
 * Local File System - A connection to a local file system
 * Web Resource  - An HTTP connection to REST or SOAP based services
 
@@ -67,13 +67,13 @@ TODO
 
 === Why Metl?
 
-* You can configure integrations in hours vs coding them in days or weeks
+* Integrations can be configured in hours vs coding them in days or weeks
 * Metl is easy to install.  Simply download the .war file and run
-* Metl is web based.  No tools to install on each desktop.  Simply fire up a browser and begin integrating
+* Metl is web based.  No tools to install on each desktop.  Deploy locally, in your data center or in the cloud
 * Metl doesn't require heavy infrastructure.  Any windows or linux box will do
-* Metl is open.  No black box.  Download the source.  Write your own components
+* Metl is open.  No black box.  Download the source.  Write your own components if desired
 * Metl is proven in large integration scenarios
-* Metl is free.  The entire toolset is open sourced under the GPL license
+* Metl is free.  The entire toolset is open source under the GPL license
 * Metl is supported.  JumpMind, Inc. provides professional support and services for any need
 
 === License
