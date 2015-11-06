@@ -54,6 +54,10 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
             }
         }
     }
+    
+    dependencies {
+        deployerJars "org.apache.maven.wagon:wagon-ssh:2.2"
+    }
 
     task sourcesJar(type: Jar, dependsOn:classes) {
         classifier = 'sources'
@@ -70,9 +74,9 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
     jar {
         manifest {
             attributes("Implementation-Title": project.name,
-                       "Implementation-Version": appVersion,
+                       "Implementation-Version": version,
                        "Project-Artifact": project.name,                       
-                       "Build-Version": appVersion,
+                       "Build-Version": version,
                        "Build-Time": new SimpleDateFormat("yyyyMMdd-HHmm").format(new Date()),
                        "Build-Scm-Version": gitVersion)
         }    
@@ -121,5 +125,5 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
     }
     
     task wrapper(type: Wrapper) {
-        gradleVersion = '2.7'
+        gradleVersion = '2.8'
     }    

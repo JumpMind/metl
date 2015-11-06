@@ -10,7 +10,7 @@ which can be deployed to [Apache Tomcat](http://tomcat.apache.org).
 To build:
 ~~~~~
 cd metl-assemble
-./gradlew war
+./gradlew assemble
 ~~~~~
 
 To deploy standalone:
