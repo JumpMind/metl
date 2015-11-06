@@ -25,7 +25,9 @@ The content/editor pane is where flows, resources and models are edited.  The sc
 image:screenshots/design/content-editor-panel.png[]
 
 include::projects/projects.ad[]
-include::flows/flows.ad[]
-include::models/models.ad[]
 include::resources/resources.ad[]
+include::models/models.ad[]
+include::flows/flows.ad[]
+include::components/components.ad[]
+
 

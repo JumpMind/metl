@@ -1,0 +1,55 @@
+=== Components
+
+The following table shows a list of available components.
+
+[options="header" cols="<25%,<5%,<70%"]
+|===========================================
+|Name|Icon|Use When
+3+|Readers
+|<<file-poller>>|image:icons/metl-file-poller-48x48-color.png[]|A file based resource needs to be checked for the existence of a file or set of files
+|<<text-file-reader>>|image:icons/metl-text-file-48X48-color.png[]|Data needs read from a text file
+|<<xml-reader>>|image:icons/metl-xml-formatter-48X48-color.png[]|An XML file needs to be read and element content of that file sent as individual messages
+|<<unzip>>|image:icons/metl-zip-48X48-color.png[]|A compressed zip file needs to be extracted in order to process its content
+|<<rdbms-reader>>|image:icons/metl-reader-48x48-color.png[]|Data needs read from a relational database
+|<<text-constant>>|image:icons/metl-text-file-48X48-color.png[]|A text constant is needed in message content in the flow
+3+|Processors
+|<<call-flow>>|image:icons/metl-flow-48x48-color.png[]|A flow needs to be called from another flow
+|<<content-router>>|image:icons/metl-content-router-48x48-color.png[]|Content within a message needs to be routed to different downstream components in the existing flow
+|<<data-diff>>|image:icons/metl-data-diff-48X48-color.png[]|A set of model based data needs compared to another set of model based data in order to generate insert/update/delete instructions for a writer component
+|<<deduper>>|image:icons/metl-deduper-48x48-color.png[]|Input model based records must be deduplicated before being sent to downstream components
+|<<delay>>|image:icons/metl-delay-48x48-color.png[]|A delay is needed when sending data between components
+|<<execute>>|image:icons/metl-execute-48x48-color.png[]|There is a need to execute an operating system command as part of a flow
+|<<file-util>>|image:icons/metl-file-util-48X48-color.png[]|Files need to be renamed, copied, moved or deleted
+|<<format-delimited>>|image:icons/metl-delimitedformatter-48x48-color.png[]|Model based data needs to be formatted into delimited text
+|<<format-fixed>>|image:icons/metl-fixed-length-48x48-color.png[]|Model based data needs to be formatted into fixed length text
+|<<format-xml>>|image:icons/metl-xml-formatter-48x48-color.png[]|Model based data needs to be formatted into xml text
+|<<merger>>|image:icons/metl-merger-48x48-color.png[]|Different instances of model based records need to be merged into a single instance that combines the attributes from all instances.
+|<<lookup>>|image:icons/metl-lookup-48x48-color.png[]|Reference data exists that needs to be looked up / retrieved by a specified key, and another attribute of the the resulting reference data passed to downstream components.
+|<<mapping>>|image:icons/metl-mapping-48x48-color.png[]|Data needs to be mapped from one set of entities/attributes (model structure) to another set of entities/attributes
+|<<message-logger>>|image:icons/metl-message-logger-48x48-color.png[]|Messages need to be logged to the Metl console and log file
+|<<multiplier>>|image:icons/metl-multiplier-48x48-color.png[]|Inbound messages need to be multiplied (duplicated n number of times) and the sent to downstream components.
+|<<no-op>>|image:icons/metl-puzzle-48X48-color.png[]|A message needs to be passed through to another component without any action being taken on the message
+|<<parse-delimited>>|image:icons/metl-delimitedformatter-48x48-color.png[]|An inbound text message in some delimited text format needs to be parsed into a model based message structure
+|<<parse-fixed>>|image:icons/metl-fixed-length-48x48-color.png[]|An inbound text message in a fixed length text format needs to be parsed into a model based message structure
+|<<parse-xml>>|image:icons/metl-xml-formatter-48x48-color.png[]|An inbound text message in xml text format needs to be parsed into a model based message structure
+|<<script>>|image:icons/metl-script-48x48-color.png[]|A custom action should be performed that can be written using Groovy
+|<<sequence>>|image:icons/metl-sequencing-48x48-color.png[]|A sequence number needs to be created for a given attribute in a model based record, and the starting value of the sequence can be derived by an sql statement.
+|<<sorter>>|image:icons/metl-sorter-48x48-color.png[]|Data within a model based message needs to be sorted by one of the attributes within the model
+|<<text-replace>>|image:icons/metl-regex-replace-48x48-color.png[]|A piece of text in a text based message needs replaced with alternate text
+|<<transformer>>|image:icons/metl-transform-48x48-color.png[]|An attribute in a model based message needs transformed in one way or another (trim, substring, constants, etc.)
+|<<union>>|image:icons/metl-merger-48x48-color.png[]|Inbound messages need to be combined into a single message and then sent to downstream components. 
+|<<web>>|image:icons/metl-web-48x48-color.png[]|A web service (either REST or WSDL) needs to be called to perform an action such as retrieving or writing data
+|<<xslt-processor>>|image:icons/metl-xslt-48x48-color.png[]|XSLT needs applied to a set of input data in order to transform it into a given output format
+3+|Writers
+|<<rdbms-writer>>|image:icons/metl-writer-48x48-color.png[]|Data needs written to a relational database
+|<<sql-executor>>|image:icons/metl-writer-48x48-color.png[]|Data needs written to or deleted from a database using a specific sql statement
+|<<text-file-writer>>|image:icons/metl-text-writer-48x48-color.png[]|Data needs written to a text based file
+|<<zip>>|image:icons/metl-zip-48x48-color.png[]|Data needs to be put in a compressed file 
+|===========================================
+
+include::readers/readers.ad[]
+
+include::processors/processors.ad[]
+
+include::writers/writers.ad[]
+
