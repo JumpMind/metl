@@ -1,4 +1,4 @@
-
+[id="flows",reftext="Flows"]
 === Flows
 
 Each integration is written as a flow.  A flow defines the input to be read, the processing rules to be applied, and the output to be written.  Flows are a graphical

@@ -6,7 +6,7 @@ including messaging, file based Extract/Transform/Load (ETL), and remote procedu
 Metl was built to solve fairly simple day to day integration tasks without the need for custom coding, 
 heavy infrastructure or high costs.  It can be deployed in the cloud or in an internal data center, and was built to 
 allow developers to extend it to fit their needs by writing their own components that can be included and leveraged 
-by the existing METL infrastructure.
+by the existing Metl infrastructure.
 
 === System Requirements
 
@@ -36,27 +36,45 @@ See <<installation>> section for details.
 Once installed, the web application (agent) is accessed via a web browser and is used to <<design>>, <<deploy>> and 
 <<manage>> integrations.
 
-Projects
+Integrations can be grouped or packaged into one or more projects.  Projects are a means to logically group integrations
+together in some logical way.  As an example, a project might contain all of the integrations in or out of a specific system.    
 
-Resources
+Each project has a set of Resources, Models and Flows.  Resources represent connections to physical endpoints where data is 
+read from or written to.  The following resource types are available in Metl:
 
-Models
+* Database - A jdbc connection to a jdbc compliant relational database  
+* FTP - An FTP connection to a file system
+* Sftp - An SFtp connection to a file system
+* Local File System - A connection to a local file system
+* Web Resource  - An HTTP connection to REST or SOAP based services
 
-Flows
+See <<resources>> for additional details.
 
-Components
+Models - Data integrated with Metl can be structured or unstructured data.  When dealing with Structured data, the structured
+data can be defined by modeling the data.  Metl Models allow you to describe that structured data.  Models can either be relational
+or hierarchical in nature.  See <<models>> for additional details.
+
+Flows are the integrations themselves.  That is, flows allow the definition of data be retrieved from source systems, transformed, and 
+written to target systems.  Flows are graphical in nature and allow the developer to configure data movement.  See <<flows>> for additional
+details.
+
+Components - Flows are constructed of components connected by links that describe the path of data through the flow.  The are various 
+components available, and custom components can be built and integrated in to the existing Metl infrastructure.  
 
 === Architecture
 
 TODO
 
-=== Features
-
-TODO
-
 === Why Metl?
 
-TODO
+* You can configure integrations in hours vs coding them in days or weeks
+* Metl is easy to install.  Simply download the .war file and run
+* Metl is web based.  No tools to install on each desktop.  Simply fire up a browser and begin integrating
+* Metl doesn't require heavy infrastructure.  Any windows or linux box will do
+* Metl is open.  No black box.  Download the source.  Write your own components
+* Metl is proven in large integration scenarios
+* Metl is free.  The entire toolset is open sourced under the GPL license
+* Metl is supported.  JumpMind, Inc. provides professional support and services for any need
 
 === License
 
