@@ -1,7 +1,21 @@
 
 === Projects
 
-TODO
+Integrations can be grouped or packaged into one or more projects.  Projects are a means to logically group integrations
+together in some logical way.  As an example, a project might contain all of the integrations in or out of a specific system. 
+Configuration for a project can be exported and imported, and the exported file can be version controlled with your tool
+of choice.  In order to manage projects, click the "Project" - "Manage" menu item in the Navigation pane and the Project Maintenance
+dialog will be displayed in the content pane as shown below.
+
+image:screenshots/design-projects.png[]
+
+From the Project Maintenance dialog, the following actions can be completed:
+
+* *Open Project* - Opens the current project and displays it in the Navigation pane
+* *New Project* - Create a new, blank project
+* *New Version* - Create a new version of an existing project
+* *Edit* - Edit the name or description of a project
+* *Remove* - Delete a project
 
 include::versions.ad[]
-include::export.ad[]
+include::import-export.ad[]
