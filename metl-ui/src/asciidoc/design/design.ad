@@ -3,7 +3,7 @@
 
 The Design screens are used to design and develop integrations.  The main design screen is shown below.
 
-image:screenshots/design.png[]
+image:screenshots/design/design.png[]
 
 The design screen is split into two main panels, the navigation pane and the content/editor pane.  The navigation pane shown below allows
 for traversing projects, flows, models and resources.
@@ -11,7 +11,7 @@ for traversing projects, flows, models and resources.
 [.float-group]
 --
 [.left.text-center]
-image:screenshots/design-navigation-panel.png[role="left",width=300]
+image:screenshots/design/navigation-panel.png[role="left",width=300]
 
 When Metl is first installed, it comes installed with a sample project that includes sample flows, models and resources.  These
 samples allow the user to immediately see Metl in action.  In addition, these sample flows are referenced in the component documentation
@@ -22,7 +22,7 @@ in order to better understand how individual components work.
 
 The content/editor pane is where flows, resources and models are edited.  The screenshot below shows a database resource being edited.
 
-image:screenshots/design-content-editor-panel.png[]
+image:screenshots/design/content-editor-panel.png[]
 
 include::projects/projects.ad[]
 include::flows/flows.ad[]

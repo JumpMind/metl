@@ -8,4 +8,4 @@ Maintenance dialog will display the versions of a project as shown below.  Any v
 panel by selecting the version and clicking "Open".  If the high level project row is opened, the latest version of the project 
 will be opened.
 
-image:screenshots/design-projects-versions.png[]
+image:screenshots/design/projects-versions.png[]

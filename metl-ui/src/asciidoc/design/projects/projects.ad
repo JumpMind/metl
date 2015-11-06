@@ -7,7 +7,7 @@ Configuration for a project can be exported and imported, and the exported file 
 of choice.  In order to manage projects, click the "Project" - "Manage" menu item in the Navigation pane and the Project Maintenance
 dialog will be displayed in the content pane as shown below.
 
-image:screenshots/design-projects.png[]
+image:screenshots/design/projects.png[]
 
 From the Project Maintenance dialog, the following actions can be completed:
 

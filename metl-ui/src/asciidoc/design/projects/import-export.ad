@@ -1,4 +1,12 @@
 
-==== Export
+==== Import/Export
 
-TODO
+Project configuration can be exported and imported, and the exported file can be version controlled with your tool
+of choice.  To export a project configuration, click on the project in the navigation pane and then
+click "Project" = "Export".  An SQL script file will be generated and downloaded that contains all of the configuration 
+for the project.  
+
+In order to Import a project configuration, execute the downloaded SQL script in the Explorer tab against the configured
+Metl database.
+
+image:screenshots/design/projects-import-export.png[]
