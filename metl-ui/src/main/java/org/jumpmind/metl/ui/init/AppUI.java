@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.ui.init;
 
+import static org.jumpmind.metl.ui.common.AppConstants.DEFAULT_USER;
+
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Date;
@@ -167,12 +169,12 @@ public class AppUI extends UI implements LoginListener {
             LoginDialog login = new LoginDialog(appCtx, this);
             UI.getCurrent().addWindow(login);
         } else {
-            User user = appCtx.getConfigurationService().findUserByLoginId("admin");
+            User user = appCtx.getConfigurationService().findUserByLoginId(DEFAULT_USER);
             if (user == null) {
                 user = new User();
-                user.setLoginId("admin");
+                user.setLoginId(DEFAULT_USER);
                 appCtx.getConfigurationService().save(user);
-                Group group = new Group("admin");
+                Group group = new Group(DEFAULT_USER);
                 user.getGroups().add(group);
                 appCtx.getConfigurationService().save(group);
                 for (Privilege priv : Privilege.values()) {
