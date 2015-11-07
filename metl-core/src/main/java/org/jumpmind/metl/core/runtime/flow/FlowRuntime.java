@@ -48,9 +48,12 @@ import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.ExecutionTrackerLogger;
+import org.jumpmind.metl.core.runtime.ExecutionTrackerRecorder;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
@@ -99,15 +102,17 @@ public class FlowRuntime {
     
     IConfigurationService configurationService;
     
+    IExecutionService executionService;
+    
     public FlowRuntime(AgentDeployment deployment, IComponentRuntimeFactory componentFactory,
-            IResourceFactory resourceFactory, IExecutionTracker executionTracker,
-            ExecutorService threadService, IConfigurationService configurationService) {
-        this.executionTracker = executionTracker;
+            IResourceFactory resourceFactory, 
+            ExecutorService threadService, IConfigurationService configurationService, IExecutionService executionService) {
         this.deployment = deployment;
         this.componentFactory = componentFactory;
         this.resourceFactory = resourceFactory;
         this.threadService = threadService;
         this.configurationService = configurationService;
+        this.executionService = executionService;
     }
     
     public AgentDeployment getDeployment() {
@@ -116,7 +121,13 @@ public class FlowRuntime {
 
     @SuppressWarnings("unchecked")
     public void start(String executionId, Map<String, IResourceRuntime> deployedResources, Agent agent, List<Notification> notifications,
-            Map<String, String> globalSettings) throws InterruptedException {        
+            Map<String, String> globalSettings) throws InterruptedException {    
+                
+        if (threadService != null && executionService != null) {
+            this.executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService, executionService);
+        } else {
+            this.executionTracker = new ExecutionTrackerLogger(deployment);
+        }
         this.stepRuntimes = new HashMap<String, StepRuntime>();
         this.agent = agent;
         this.notifications = notifications;

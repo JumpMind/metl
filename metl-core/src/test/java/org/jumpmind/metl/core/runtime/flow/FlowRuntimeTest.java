@@ -32,10 +32,8 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.Notification;
-import org.jumpmind.metl.core.runtime.ExecutionTrackerLogger;
 import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFromXMLFactory;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
-import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
@@ -77,7 +75,7 @@ public class FlowRuntimeTest {
     	Flow flow = createSimpleTwoStepNoOpFlow(folder);
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);	
     	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
-    			new ExecutionTrackerLogger(deployment), threadService, null);
+    			 threadService, null, null);
     	flowRuntime.start("", new HashMap<String, IResourceRuntime>(), agent, new ArrayList<Notification>(), new HashMap<String, String>());
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step").getNumberInboundMessages(1));
@@ -89,7 +87,7 @@ public class FlowRuntimeTest {
     	Flow flow = createSrcToTwoTargetFlow(folder);
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
     	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
-    			new ExecutionTrackerLogger(deployment), threadService, null);
+    			 threadService, null, null);
     	flowRuntime.start("", new HashMap<String, IResourceRuntime>(), agent, new ArrayList<Notification>(), new HashMap<String, String>());
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step").getNumberInboundMessages(1));
@@ -101,8 +99,8 @@ public class FlowRuntimeTest {
     public void twoSrcOneTarget() throws Exception {
         Flow flow = createTwoSrcToOneTargetFlow(folder);
         AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
-        FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
-                new ExecutionTrackerLogger(deployment), threadService, null);
+        FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory
+                , threadService, null, null);
         flowRuntime.start("", new HashMap<String, IResourceRuntime>(), agent, new ArrayList<Notification>(), new HashMap<String, String>());
         flowRuntime.waitForFlowCompletion();
         Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step 1").getNumberInboundMessages(1));

@@ -23,6 +23,7 @@ package org.jumpmind.metl.core.runtime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
@@ -30,6 +31,7 @@ import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.ExecutionStep;
 import org.jumpmind.metl.core.model.ExecutionStepLog;
+import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
 import org.jumpmind.metl.core.runtime.flow.AsyncRecorder;
@@ -47,10 +49,11 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
 
     Date startTime;
 
-    public ExecutionTrackerRecorder(Agent agent, AgentDeployment agentDeployment, AsyncRecorder recorder) {
+    public ExecutionTrackerRecorder(Agent agent, AgentDeployment agentDeployment,  ExecutorService threadService, IExecutionService executionService) {
         super(agentDeployment);
-        this.recorder = recorder;
         this.agent = agent;
+        this.recorder = new AsyncRecorder(executionService);
+        threadService.execute(this.recorder);
     }
 
     @Override
@@ -97,6 +100,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         }
         execution.setStatus(status.name());
         this.recorder.record(execution);
+        this.recorder.shutdown();
     }
 
     @Override

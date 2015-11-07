@@ -29,9 +29,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
@@ -52,7 +52,6 @@ import org.jumpmind.metl.core.model.StartType;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
-import org.jumpmind.metl.core.runtime.flow.AsyncRecorder;
 import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -99,8 +98,6 @@ public class AgentRuntime {
     ThreadPoolTaskScheduler flowExecutionScheduler;
 
     ScheduledFuture<?> agentRequestHandler;
-
-    AsyncRecorder recorder;
 
     public AgentRuntime(Agent agent, IConfigurationService configurationService,
             IExecutionService executionService, IComponentRuntimeFactory componentFactory,
@@ -162,8 +159,6 @@ public class AgentRuntime {
             this.flowExecutionScheduler.initialize();
 
             this.globalSettings = configurationService.findGlobalSettingsAsMap();
-            this.recorder = new AsyncRecorder(executionService);
-            this.flowStepsExecutionThreads.execute(this.recorder);
 
             List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(
                     agent.getAgentDeployments());
@@ -193,8 +188,6 @@ public class AgentRuntime {
             for (AgentDeployment deployment : deployments) {
                 stop(deployment);
             }
-
-            this.recorder.shutdown();
 
             agent.setAgentStatus(AgentStatus.STOPPED);
             configurationService.save(agent);
@@ -329,8 +322,8 @@ public class AgentRuntime {
                 deployResources(deployment.getFlow());
     
                 FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory,
-                        resourceFactory, new ExecutionTrackerRecorder(agent, deployment, recorder),
-                        flowStepsExecutionThreads, configurationService);
+                        resourceFactory,
+                        flowStepsExecutionThreads, configurationService, executionService);
                 deployedFlows.put(deployment, flowRuntime);
     
                 if (deployment.asStartType() == StartType.ON_DEPLOY) {
