@@ -68,7 +68,7 @@ public class LoginDialog extends Window {
         layout.setMargin(true);
         layout.setSpacing(true);
         
-        userField = new TextField("Login");
+        userField = new TextField("User Id");
         userField.setWidth(100, Unit.PERCENTAGE);
         layout.addComponent(userField);
 
