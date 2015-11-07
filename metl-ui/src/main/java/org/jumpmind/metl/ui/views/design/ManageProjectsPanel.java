@@ -21,10 +21,8 @@
 package org.jumpmind.metl.ui.views.design;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Project;
@@ -34,6 +32,7 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.views.DesignNavigator;
+import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
@@ -42,12 +41,12 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.FieldEvents.FocusEvent;
 import com.vaadin.event.FieldEvents.FocusListener;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -56,6 +55,7 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Field;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
@@ -71,12 +71,6 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     TreeTable treeTable;
 
-    Set<Object> lastEditItemIds = Collections.emptySet();
-
-    Button saveButton;
-
-    Button cancelButton;
-
     Button openProjectButton;
 
     Button newProjectButton;
@@ -89,6 +83,8 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     AbstractObject currentlyEditing;
 
+    ShortcutListener enterKeyListener;
+
     public ManageProjectsPanel(ApplicationContext context, DesignNavigator projectNavigator) {
         this.setSizeFull();
         this.context = context;
@@ -97,14 +93,6 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        saveButton = buttonBar.addButton("Save", FontAwesome.CHECK);
-        saveButton.addClickListener(new SaveClickListener());
-        saveButton.setVisible(false);
-
-        cancelButton = buttonBar.addButton("Cancel", FontAwesome.TIMES);
-        cancelButton.addClickListener(new CancelClickListener());
-        cancelButton.setVisible(false);
-
         openProjectButton = buttonBar.addButton("Open Project", Icons.PROJECT);
         openProjectButton.addClickListener(new OpenProjectClickListener());
 
@@ -112,7 +100,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         newProjectButton.addClickListener(new NewProjectClickListener());
 
         newVersionButton = buttonBar.addButton("New Version", Icons.VERSION);
-        newVersionButton.addClickListener(new NewProjectVersionClickListener());
+        newVersionButton.addClickListener(event -> createNewVersion());
         newVersionButton.setEnabled(false);
         newVersionButton.setDescription("Not yet supported");
 
@@ -121,6 +109,16 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
         removeButton = buttonBar.addButton("Remove", Icons.DELETE);
         removeButton.addClickListener(new RemoveClickListener());
+
+        enterKeyListener = new ShortcutListener("Enter", KeyCode.ENTER, null) {
+            public void handleAction(Object sender, Object target) {
+                if (currentlyEditing != null) {
+                    save();
+                } else {
+                    openProject(treeTable.getValue());
+                }
+            }
+        };
 
         treeTable = new TreeTable();
         treeTable.setSizeFull();
@@ -138,7 +136,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         treeTable.setColumnCollapsingAllowed(true);
         treeTable.setColumnCollapsed("archived", true);
         treeTable.addItemClickListener(new TreeTableItemClickListener());
-        treeTable.addValueChangeListener(new TreeTableValueChangeListener());
+        treeTable.addValueChangeListener(event -> save());
         treeTable.setTableFieldFactory(new FieldFactory());
         treeTable.setSortContainerPropertyId("name");
         treeTable.setSortAscending(true);
@@ -147,7 +145,6 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         setExpandRatio(treeTable, 1);
 
         refresh();
-        
 
     }
 
@@ -156,16 +153,13 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         removeButton.setEnabled(obj != null);
         openProjectButton.setEnabled(obj != null);
         editButton.setEnabled(obj != null);
-        newVersionButton.setEnabled(obj instanceof Project);
+        newVersionButton.setEnabled(obj instanceof ProjectVersion);
 
-        saveButton.setVisible(currentlyEditing != null);
-        cancelButton.setVisible(currentlyEditing != null);
-
-        removeButton.setVisible(currentlyEditing == null);
-        openProjectButton.setVisible(currentlyEditing == null);
-        editButton.setVisible(currentlyEditing == null);
-        newProjectButton.setVisible(currentlyEditing == null);
-        newVersionButton.setVisible(currentlyEditing == null);
+        removeButton.setEnabled(currentlyEditing == null);
+        openProjectButton.setEnabled(currentlyEditing == null);
+        editButton.setEnabled(currentlyEditing == null);
+        newProjectButton.setEnabled(currentlyEditing == null);
+        newVersionButton.setEnabled(currentlyEditing == null);
     }
 
     @Override
@@ -175,10 +169,12 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     @Override
     public void selected() {
+        treeTable.addShortcutListener(enterKeyListener);
     }
 
     @Override
     public void deselected() {
+        treeTable.removeShortcutListener(enterKeyListener);
     }
 
     protected void openProject(Object source) {
@@ -194,7 +190,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     protected void refresh() {
         Object selected = treeTable.getValue();
-        
+
         IConfigurationService configurationService = context.getConfigurationService();
         addAll(configurationService.findProjects());
 
@@ -204,7 +200,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
             selected = treeTable.getItemIds().iterator().next();
         }
         treeTable.setValue(selected);
-        
+
         Object parent = treeTable.getParent(selected);
         if (parent != null) {
             treeTable.setCollapsed(parent, false);
@@ -222,8 +218,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
     }
 
     protected void add(Project project) {
-        treeTable.addItem(new Object[] { project.getName(), project.getDescription(), null, null,
-                project.getCreateTime() }, project);
+        treeTable.addItem(new Object[] { project.getName(), project.getDescription(), null, null, project.getCreateTime() }, project);
         treeTable.setItemIcon(project, Icons.PROJECT);
         List<ProjectVersion> versions = project.getProjectVersions();
         for (ProjectVersion projectVersion : versions) {
@@ -233,14 +228,13 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     protected void addToTable(Project project, ProjectVersion projectVersion) {
         treeTable.setChildrenAllowed(project, true);
-        treeTable.addItem(new Object[] { projectVersion.getVersionLabel(), null, projectVersion.isLocked(),
+        treeTable.addItem(new Object[] { projectVersion.getVersionLabel(), projectVersion.getDescription(), projectVersion.isLocked(),
                 projectVersion.isArchived(), project.getCreateTime() }, projectVersion);
         treeTable.setItemIcon(projectVersion, Icons.VERSION);
         treeTable.setParent(projectVersion, project);
         treeTable.setChildrenAllowed(projectVersion, false);
     }
-    
-    
+
     protected void edit(Object obj) {
         treeTable.setValue(obj);
         if (currentlyEditing == null) {
@@ -250,9 +244,58 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         treeTable.refreshRowCache();
     }
 
+    protected void selectPrevious() {
+        Object previous = null;
+        Object selected = treeTable.getValue();
+        Collection<?> items = treeTable.getItemIds();
+        for (Object object : items) {
+            if (object == selected) {
+                break;
+            }
+            previous = object;
+        }
+        treeTable.setValue(previous);
+    }
 
-    class NewProjectVersionClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
+    protected void createNewVersion() {
+        CommonUiUtils.notify("Not implemented.  Coming Soon.", Type.HUMANIZED_MESSAGE);
+    }
+
+    protected void save() {
+        Item item = treeTable.getItem(currentlyEditing);
+        if (item != null) {
+            IConfigurationService configurationService = context.getConfigurationService();
+
+            String name = (String) item.getItemProperty("name").getValue();
+            String desc = (String) item.getItemProperty("description").getValue();
+            if (currentlyEditing instanceof Project) {
+                Project project = (Project) currentlyEditing;
+                project.setName(name);
+                project.setDescription(desc);
+                configurationService.save(project);
+                projectNavigator.refresh();
+
+            } else if (currentlyEditing instanceof ProjectVersion) {
+                ProjectVersion version = (ProjectVersion) currentlyEditing;
+                version.setVersionLabel(name);
+                version.setDescription(desc);
+
+                Boolean locked = (Boolean) item.getItemProperty("locked").getValue();
+                locked = locked == null ? false : locked;
+                version.setLocked(locked);
+
+                Boolean archived = (Boolean) item.getItemProperty("archived").getValue();
+                archived = archived == null ? false : archived;
+                version.setArchived(archived);
+                configurationService.save(version);
+                projectNavigator.refresh();
+            }
+
+            currentlyEditing = null;
+            setButtonsEnabled();
+            treeTable.setSortContainerPropertyId(treeTable.getSortContainerPropertyId());
+            treeTable.refreshRowCache();
+            treeTable.focus();
         }
     }
 
@@ -272,51 +315,6 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         }
     }
 
-    class SaveClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            Item item = treeTable.getItem(currentlyEditing);
-            if (item != null) {
-                IConfigurationService configurationService = context.getConfigurationService();
-
-                String name = (String) item.getItemProperty("name").getValue();
-                String desc = (String) item.getItemProperty("description").getValue();
-                if (currentlyEditing instanceof Project) {
-                    Project project = (Project) currentlyEditing;
-                    project.setName(name);
-                    project.setDescription(desc);
-                    configurationService.save(project);
-                    projectNavigator.refresh();
-
-                } else if (currentlyEditing instanceof ProjectVersion) {
-                    ProjectVersion version = (ProjectVersion) currentlyEditing;
-                    version.setVersionLabel(name);
-                    version.setDescription(desc);
-
-                    Boolean locked = (Boolean) item.getItemProperty("locked").getValue();
-                    locked = locked == null ? false : locked;
-                    version.setLocked(locked);
-
-                    Boolean archived = (Boolean) item.getItemProperty("archived").getValue();
-                    archived = archived == null ? false : archived;
-                    version.setArchived(archived);
-                    configurationService.save(version);
-                    projectNavigator.refresh();                    
-                }
-
-                currentlyEditing = null;
-                setButtonsEnabled();
-                treeTable.setSortContainerPropertyId(treeTable.getSortContainerPropertyId());
-                treeTable.refreshRowCache();
-            }
-        }
-    }
-    class CancelClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            currentlyEditing = null;
-            refresh();
-        }
-    }
-
     class OpenProjectClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
             openProject(treeTable.getValue());
@@ -332,50 +330,33 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     class RemoveClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            ConfirmDialog.show("Delete Model?",
-                    "Are you sure you want to delete the selected project?",
-                    new IConfirmListener() {                        
-                        @Override
-                        public boolean onOk() {
-                            Object selected = treeTable.getValue();
-                            if (selected instanceof ProjectVersion) {
-                                ProjectVersion projectVersion = (ProjectVersion) selected;
-                                projectVersion.setDeleted(true);
-                                context.getConfigurationService().save(projectVersion);
+            ConfirmDialog.show("Delete Model?", "Are you sure you want to delete the selected project?", new IConfirmListener() {
+                @Override
+                public boolean onOk() {
+                    Object selected = treeTable.getValue();
+                    if (selected instanceof ProjectVersion) {
+                        ProjectVersion projectVersion = (ProjectVersion) selected;
+                        projectVersion.setDeleted(true);
+                        context.getConfigurationService().save(projectVersion);
 
-                                if (projectVersion.getProject().getProjectVersions().size() <= 1) {
-                                    selected = projectVersion.getProject();
-                                }
-                            }
-
-                            if (selected instanceof Project) {
-                                Project project = (Project) selected;
-                                project.setDeleted(true);
-                                context.getConfigurationService().save(project);
-                            }
-
-                            selectPrevious();
-                            refresh();
-                            projectNavigator.refresh();
-                            return true;                            
+                        if (projectVersion.getProject().getProjectVersions().size() <= 1) {
+                            selected = projectVersion.getProject();
                         }
-                    });
+                    }
 
+                    if (selected instanceof Project) {
+                        Project project = (Project) selected;
+                        project.setDeleted(true);
+                        context.getConfigurationService().save(project);
+                    }
 
+                    selectPrevious();
+                    refresh();
+                    projectNavigator.refresh();
+                    return true;
+                }
+            });
         }
-    }
-
-    protected void selectPrevious() {
-        Object previous = null;
-        Object selected = treeTable.getValue();
-        Collection<?> items = treeTable.getItemIds();
-        for (Object object : items) {
-            if (object == selected) {
-                break;
-            }
-            previous = object;
-        }
-        treeTable.setValue(previous);
     }
 
     class TreeTableItemClickListener implements ItemClickListener {
@@ -386,30 +367,19 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         }
     }
 
-    class TreeTableValueChangeListener implements ValueChangeListener {
-        public void valueChange(ValueChangeEvent event) {
-            setButtonsEnabled();
-            if (currentlyEditing != null) {
-                currentlyEditing = null;
-                refresh();
-            }
-        }
-    }
-
     class FieldFactory extends DefaultFieldFactory {
         @Override
-        public Field<?> createField(Container container, Object itemId, Object propertyId,
-                Component uiContext) {
+        public Field<?> createField(Container container, Object itemId, Object propertyId, Component uiContext) {
             boolean isVersion = itemId instanceof ProjectVersion;
-            if (itemId.equals(currentlyEditing) && !propertyId.equals("createTime") && 
-                    !(!isVersion && (propertyId.equals("locked") || propertyId.equals("archived")))) {
+            if (itemId.equals(currentlyEditing) && !propertyId.equals("createTime")
+                    && !(!isVersion && (propertyId.equals("locked") || propertyId.equals("archived")))) {
                 Field<?> field = super.createField(container, itemId, propertyId, uiContext);
                 if (field instanceof TextField) {
                     final TextField textField = (TextField) field;
                     textField.setNullRepresentation("");
                     textField.setWidth(100, Unit.PERCENTAGE);
                     textField.addFocusListener(new FocusListener() {
-                        
+
                         @Override
                         public void focus(FocusEvent event) {
                             textField.selectAll();
@@ -418,7 +388,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
                     if ("name".equals(propertyId)) {
                         textField.focus();
                     }
-                    
+
                 } else if (field instanceof CheckBox) {
                     CheckBox checkBox = (CheckBox) field;
                     checkBox.setCaption(null);
