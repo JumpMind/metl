@@ -49,8 +49,6 @@ import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DefaultFieldFactory;
@@ -94,10 +92,10 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         addComponent(buttonBar);
 
         openProjectButton = buttonBar.addButton("Open Project", Icons.PROJECT);
-        openProjectButton.addClickListener(new OpenProjectClickListener());
+        openProjectButton.addClickListener(event -> openProject(treeTable.getValue()));
 
         newProjectButton = buttonBar.addButton("New Project", Icons.PROJECT);
-        newProjectButton.addClickListener(new NewProjectClickListener());
+        newProjectButton.addClickListener(event -> createNewProject());
 
         newVersionButton = buttonBar.addButton("New Version", Icons.VERSION);
         newVersionButton.addClickListener(event -> createNewVersion());
@@ -105,10 +103,10 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         newVersionButton.setDescription("Not yet supported");
 
         editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
-        editButton.addClickListener(new EditClickListener());
+        editButton.addClickListener(event -> edit(treeTable.getValue()));
 
         removeButton = buttonBar.addButton("Remove", Icons.DELETE);
-        removeButton.addClickListener(new RemoveClickListener());
+        removeButton.addClickListener(event -> removeProject());
 
         enterKeyListener = new ShortcutListener("Enter", KeyCode.ENTER, null) {
             public void handleAction(Object sender, Object target) {
@@ -298,65 +296,48 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
             treeTable.focus();
         }
     }
-
-    class NewProjectClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            Project project = new Project();
-            project.setName("New Project");
-            ProjectVersion version = new ProjectVersion();
-            version.setVersionLabel("1.0");
-            version.setProject(project);
-            project.getProjectVersions().add(version);
-            IConfigurationService configurationService = context.getConfigurationService();
-            configurationService.save(project);
-            configurationService.save(version);
-            refresh();
-            edit(project);
-        }
+    
+    protected void createNewProject() {
+        Project project = new Project();
+        project.setName("New Project");
+        ProjectVersion version = new ProjectVersion();
+        version.setVersionLabel("1.0");
+        version.setProject(project);
+        project.getProjectVersions().add(version);
+        IConfigurationService configurationService = context.getConfigurationService();
+        configurationService.save(project);
+        configurationService.save(version);
+        refresh();
+        edit(project);
     }
+    
+    protected void removeProject () {
+        ConfirmDialog.show("Delete Project?", "Are you sure you want to delete the selected project?", new IConfirmListener() {
+            @Override
+            public boolean onOk() {
+                Object selected = treeTable.getValue();
+                if (selected instanceof ProjectVersion) {
+                    ProjectVersion projectVersion = (ProjectVersion) selected;
+                    projectVersion.setDeleted(true);
+                    context.getConfigurationService().save(projectVersion);
 
-    class OpenProjectClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            openProject(treeTable.getValue());
-        }
-
-    }
-
-    class EditClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            edit(treeTable.getValue());
-        }
-    }
-
-    class RemoveClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            ConfirmDialog.show("Delete Model?", "Are you sure you want to delete the selected project?", new IConfirmListener() {
-                @Override
-                public boolean onOk() {
-                    Object selected = treeTable.getValue();
-                    if (selected instanceof ProjectVersion) {
-                        ProjectVersion projectVersion = (ProjectVersion) selected;
-                        projectVersion.setDeleted(true);
-                        context.getConfigurationService().save(projectVersion);
-
-                        if (projectVersion.getProject().getProjectVersions().size() <= 1) {
-                            selected = projectVersion.getProject();
-                        }
+                    if (projectVersion.getProject().getProjectVersions().size() <= 1) {
+                        selected = projectVersion.getProject();
                     }
-
-                    if (selected instanceof Project) {
-                        Project project = (Project) selected;
-                        project.setDeleted(true);
-                        context.getConfigurationService().save(project);
-                    }
-
-                    selectPrevious();
-                    refresh();
-                    projectNavigator.refresh();
-                    return true;
                 }
-            });
-        }
+
+                if (selected instanceof Project) {
+                    Project project = (Project) selected;
+                    project.setDeleted(true);
+                    context.getConfigurationService().save(project);
+                }
+
+                selectPrevious();
+                refresh();
+                projectNavigator.refresh();
+                return true;
+            }
+        });
     }
 
     class TreeTableItemClickListener implements ItemClickListener {
