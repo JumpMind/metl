@@ -155,7 +155,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
                 Set<String> executionStepIds = (Set<String>) event.getProperty().getValue();
                 logContainer.removeAllItems();
                 List<ExecutionStepLog> logs = executionService
-                        .findExecutionStepLog(executionStepIds);
+                        .findExecutionStepLogs(executionStepIds);
                 logContainer.addAll(logs);
             }
         });
@@ -265,7 +265,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
         ExecutionData data = new ExecutionData();
         data.execution = executionService.findExecution(executionId);
         data.steps = executionService.findExecutionSteps(executionId);
-        data.logs = executionService.findExecutionStepLog((Set<String>) stepTable.getValue());
+        data.logs = executionService.findExecutionStepLogs((Set<String>) stepTable.getValue());
         return data;
     }
     

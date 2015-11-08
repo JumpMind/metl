@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.core.util;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.File;
@@ -32,12 +33,18 @@ import org.springframework.context.ApplicationContext;
 public final class LogUtils {
     
     static String logFilePath;
+    
+    static File logDir;
 
     private LogUtils() {
     }
     
     public static String getLogFilePath() {
         return logFilePath;
+    }
+    
+    public static File getLogDir() {
+        return logDir;
     }
     
     public static String formatDuration(long timeInMs) {
@@ -74,10 +81,12 @@ public final class LogUtils {
                 EnvConstants.LOG_TO_FILE_ENABLED, "true"));
         if (fileEnabled) {
             logFilePath = ctx.getEnvironment().getProperty(EnvConstants.LOG_FILE,(String)null);
-            if (logFilePath == null) {
-                File logDir = new File(configDir, "logs");
+            if (isBlank(logFilePath)) {
+                logDir = new File(configDir, "logs");
                 logDir.mkdirs();
                 logFilePath = logDir.getAbsolutePath() + "/metl.log";
+            } else {
+                logDir = new File(logFilePath).getParentFile();
             }
             try {
                 RollingFileAppender logFileAppender = new RollingFileAppender();

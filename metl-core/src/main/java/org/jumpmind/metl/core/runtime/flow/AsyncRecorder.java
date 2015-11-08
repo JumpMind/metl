@@ -20,27 +20,38 @@
  */
 package org.jumpmind.metl.core.runtime.flow;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.jumpmind.metl.core.model.AbstractObject;
+import org.jumpmind.metl.core.model.ExecutionStepLog;
 import org.jumpmind.metl.core.persist.IExecutionService;
+import org.jumpmind.metl.core.util.LogUtils;
+import org.jumpmind.symmetric.csv.CsvWriter;
 import org.jumpmind.util.AppUtils;
+import org.jumpmind.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AsyncRecorder implements Runnable {
 
     final Logger log = LoggerFactory.getLogger(getClass());
-        
+
     protected BlockingQueue<AbstractObject> inQueue;
 
     protected IExecutionService executionService;
 
     protected boolean running = false;
-    
+
     protected boolean stopping = false;
+
+    protected Map<String, CsvWriter> logWriters = new HashMap<>();
 
     public AsyncRecorder(IExecutionService executionService) {
         this.inQueue = new LinkedBlockingQueue<AbstractObject>();
@@ -62,7 +73,25 @@ public class AsyncRecorder implements Runnable {
         while (!stopping || inQueue.size() > 0) {
             try {
                 AbstractObject object = inQueue.poll(5, TimeUnit.SECONDS);
-                if (object != null) {
+                if (object instanceof ExecutionStepLog) {
+                    ExecutionStepLog stepLog = (ExecutionStepLog) object;
+                    String executionStepId = stepLog.getExecutionStepId();
+                    CsvWriter writer = logWriters.get(executionStepId);
+                    if (writer == null) {
+                        File logFile = new File(LogUtils.getLogDir(), executionStepId + ".log");
+                        writer = new CsvWriter(logFile.getAbsolutePath());
+                        logWriters.put(executionStepId, writer);
+                    }
+                    try {
+                        writer.writeRecord(new String[] { stepLog.getLevel(), FormatUtils.TIMESTAMP_FORMATTER.format(stepLog.getCreateTime()), stepLog.getLogText() });
+                    } catch (IOException e) {
+                        writer.close();
+                        logWriters.remove(executionStepId);
+                        log.error("", e);
+                    }
+
+                    // TODO log to file
+                } else if (object != null) {
                     executionService.save(object);
                 }
             } catch (InterruptedException e) {
@@ -71,12 +100,17 @@ public class AsyncRecorder implements Runnable {
 
         running = false;
     }
-    
+
     public void shutdown() {
         this.stopping = true;
-        
+
         while (this.running) {
             AppUtils.sleep(10);
+        }
+
+        Collection<CsvWriter> writers = logWriters.values();
+        for (CsvWriter csvWriter : writers) {
+            csvWriter.close();
         }
     }
 

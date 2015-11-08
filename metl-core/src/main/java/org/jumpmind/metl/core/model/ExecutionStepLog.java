@@ -25,7 +25,7 @@ import java.util.Date;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.runtime.LogLevel;
 
-public class ExecutionStepLog extends AbstractObject {
+public class ExecutionStepLog extends AbstractObject implements Comparable<ExecutionStepLog> {
 
     private static final long serialVersionUID = 1L;
 
@@ -80,6 +80,15 @@ public class ExecutionStepLog extends AbstractObject {
 
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
+	}
+	
+	@Override
+	public int compareTo(ExecutionStepLog o) {
+	    if (createTime != null && o.createTime != null) {
+	        return createTime.compareTo(o.createTime);
+	    } else {
+	        return 0;
+	    }
 	}
 
 }

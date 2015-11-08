@@ -20,17 +20,25 @@
  */
 package org.jumpmind.metl.core.persist;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.ExecutionStep;
 import org.jumpmind.metl.core.model.ExecutionStepLog;
+import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.persist.IPersistenceManager;
+import org.jumpmind.symmetric.csv.CsvReader;
+import org.jumpmind.util.FormatUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
@@ -74,14 +82,46 @@ abstract public class AbstractExecutionService extends AbstractService implement
         });
     	return steps;
     }
+    
+    public List<ExecutionStepLog> findExecutionStepLogs(Set<String> executionStepIds) {
+        List<ExecutionStepLog> executionStepLogs = new ArrayList<>();
+        for (String executionStepId : executionStepIds) {
+            File file = new File(LogUtils.getLogDir(), executionStepId + ".log");
+            if (file.exists()) {
+                CsvReader reader = null;
+                try {
+                    reader = new CsvReader(file.getAbsolutePath());
+                    while (reader.readRecord()) {
+                        String[] values = reader.getValues();
+                        ExecutionStepLog stepLog = new ExecutionStepLog();
+                        stepLog.setExecutionStepId(executionStepId);
+                        stepLog.setCreateTime(FormatUtils.parseDate(values[1], FormatUtils.TIMESTAMP_PATTERNS));
+                        stepLog.setLevel(values[0]);
+                        stepLog.setLogText(values[2]);
+                        executionStepLogs.add(stepLog);
+                    }
+                } catch (IOException e) {
+                    log.error("", e);
+                } finally {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                }
+            }
+        }
+        
+        Collections.sort(executionStepLogs);
+        return executionStepLogs;
+    }
 
-    public List<ExecutionStepLog> findExecutionStepLog(String executionStepId) {
-    	Map<String, Object> args = new HashMap<String, Object>();
-    	args.put("executionStepId", executionStepId);
-    	return persistenceManager.find(ExecutionStepLog.class, args, null, null, tableName(ExecutionStepLog.class));
+
+    public List<ExecutionStepLog> findExecutionStepLogs(String executionStepId) {
+    	Set<String> executionStepIds = new HashSet<>();
+    	executionStepIds.add(executionStepId);
+    	return findExecutionStepLogs(executionStepIds);
     }
     
-    abstract public void purgeExecutions(String status, int retentionTimeInMs);    
+    abstract protected void purgeExecutions(String status, int retentionTimeInMs);    
     
     class PurgeExecutionHandler implements Runnable {
         @Override

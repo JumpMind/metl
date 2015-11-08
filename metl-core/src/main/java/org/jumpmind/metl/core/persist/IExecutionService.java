@@ -39,9 +39,9 @@ public interface IExecutionService {
 
     public List<ExecutionStep> findExecutionSteps(String executionId);
 
-    public List<ExecutionStepLog> findExecutionStepLog(String executionStepId);
+    public List<ExecutionStepLog> findExecutionStepLogs(String executionStepId);
     
-    public List<ExecutionStepLog> findExecutionStepLog(Set<String> executionStepIds);
+    public List<ExecutionStepLog> findExecutionStepLogs(Set<String> executionStepIds);
     
     public void markAbandoned(String agentId);
     
