@@ -219,7 +219,6 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
 
     @Override
     public void log(int threadNumber, LogLevel level, ComponentContext context, String output, Object... args) {
-        super.log(threadNumber, level, context, output, args);
         if (deployment.asLogLevel().log(level)) {
             ExecutionStepLog log = new ExecutionStepLog();
             log.setExecutionStepId(getExecutionStep(threadNumber, context).getId());
