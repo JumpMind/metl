@@ -110,8 +110,8 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
     public void deleteExecution(String executionId) {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<String> executionStepIds = template.query(
-                String.format("select id from %1$s_execution_step where execution_id = ?)", tablePrefix),
-                new StringMapper(), new Object[] { executionId });
+                String.format("select id from %1$s_execution_step where execution_id = ?", tablePrefix),
+                new StringMapper(),  executionId );
         for (String executionStepId : executionStepIds) {
             File file = new File(LogUtils.getLogDir(), executionStepId + ".log");
             FileUtils.deleteQuietly(file);
