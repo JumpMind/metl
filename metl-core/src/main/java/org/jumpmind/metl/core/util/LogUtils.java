@@ -92,7 +92,7 @@ public final class LogUtils {
                 RollingFileAppender logFileAppender = new RollingFileAppender();
                 logFileAppender.setFile(logFilePath);
                 logFileAppender.setMaxBackupIndex(10);
-                logFileAppender.setMaxFileSize("10MB");
+                logFileAppender.setMaxFileSize("40MB");
                 logFileAppender.setAppend(true);
                 logFileAppender.setLayout(new PatternLayout("%d %-5p [%c{1}] [%t] %m%n"));
                 org.apache.log4j.Logger.getRootLogger().addAppender(logFileAppender);
