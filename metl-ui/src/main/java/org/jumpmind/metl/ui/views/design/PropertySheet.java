@@ -124,12 +124,12 @@ public class PropertySheet extends AbsoluteLayout {
     
     public void openAdvancedEditor() {
         if (value instanceof FlowStep) {
-            FlowStep flowStep = (FlowStep) value;
-            Flow flow = context.getConfigurationService().findFlow(flowStep.getFlowId());
+            FlowStep flowStep = (FlowStep) value;           
             String type = flowStep.getComponent().getType();
             IComponentEditPanel panel = context.getUiFactory().create(type);
             if (panel != null) {
                 if (panel instanceof IFlowStepAware) {
+                    Flow flow = context.getConfigurationService().findFlow(flowStep.getFlowId());
                     ((IFlowStepAware) panel).makeAwareOf(flowStep, flow);
                 }
                 panel.init(flowStep.getComponent(), context, this);
