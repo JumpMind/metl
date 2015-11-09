@@ -42,6 +42,7 @@ import org.jumpmind.db.sql.SqlException;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
 import org.jumpmind.metl.core.runtime.LogLevel;
@@ -107,7 +108,8 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
         int inboundRecordCount = 1;
         Iterator<?> inboundPayload = null;
-        if (PER_ENTITY.equals(runWhen) && inputMessage.getPayload() instanceof Collection) {
+        if (PER_ENTITY.equals(runWhen) && inputMessage.getPayload() instanceof Collection 
+                && !(inputMessage instanceof ControlMessage)) {
             inboundPayload = ((Collection<?>)inputMessage.getPayload()).iterator();
             inboundRecordCount = ((Collection<?>)inputMessage.getPayload()).size();
         }
