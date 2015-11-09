@@ -536,6 +536,7 @@ public class DeployNavigator extends VerticalLayout {
             agent.setFolder(folder);
             agent.setHost(AppUtils.getHostName());
             context.getConfigurationService().save(agent);
+            context.getAgentManager().refresh(agent);
             AgentName name = new AgentName(agent);
             addAgent(folder, name);
             expand(folder, name);
