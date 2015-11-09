@@ -31,12 +31,12 @@ public class PayloadBuilder {
 	public PayloadBuilder() {
 	}
 	
-	public PayloadBuilder addRow(EntityData data) {
+	public PayloadBuilder withRow(EntityData data) {
 		this.payload.add(data);
 		return this;
 	}
 	
-	public PayloadBuilder addRow(String data) {
+	public PayloadBuilder withRow(String data) {
 		this.payloadString.add(data);
 		return this;
 	}

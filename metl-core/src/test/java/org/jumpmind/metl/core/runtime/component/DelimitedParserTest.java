@@ -35,6 +35,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.DelimitedParser.AttributeFormat;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.junit.Test;
@@ -73,71 +74,58 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
 				
 		runHandle();
-		assertHandle(0, expectedMonitors);
+		assertHandle(0);
 	}
 
 	@Test
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
-		setUnitOfWorkLastMessage(true);
 		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		
-		// Expected
-		Message expectedMessage = new MessageBuilder().withPayload(
-				new PayloadBuilder().buildED()).build();
-				
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
-				
+		MessageTestHelper.addControlMessage(this, "test", true);
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		runHandle();
-		assertHandle(0, expectedMonitors);
+		assertHandle(0);
 	}
 
 	@Test
 	@Override
 	public void testHandleNormal() {
-		// Setup
 		setupHandle();
+		((DelimitedParser) spy).attributes = new ArrayList<AttributeFormat>();
 		
-		setUnitOfWorkLastMessage(true);
+		AttributeFormat mAttr = ((DelimitedParser) spy).new AttributeFormat(
+				ModelHelper.ATTR_ID + "0_0", null, null);
+		mAttr.setOrdinal(1);
 		
-		Message message1 = new MessageBuilder("step1")
-				.withPayloadString(new PayloadBuilder()
-					.addRow("red,yellow,green,blue,purple,orange")
-					.buildString()).build();
-		messages.clear();
-		messages.add(new HandleParams(message1, true));
+		((DelimitedParser) spy).attributes.add(mAttr);
 		
 		Model model = ModelHelper.createSimpleModel(2, 3);
 		this.outputModel = model;
 		when(component.getOutputModel()).thenReturn(model);
 		
-		((DelimitedParser) spy).attributes = new ArrayList<AttributeFormat>();
-		AttributeFormat mAttr = ((DelimitedParser) spy).new AttributeFormat(
-				ModelHelper.ATTR_ID + "0_0", null, null);
-		mAttr.setOrdinal(1);
-		((DelimitedParser) spy).attributes.add(mAttr);
+		MessageTestHelper.addInputMessage(this, true, true, "step1","red,yellow,green,blue,purple,orange");
+		MessageTestHelper.addOutputMonitor(this, ModelHelper.ATTR_ID + "0_0", "red");
 		
-		// Expected
-		Message expectedMessage = new MessageBuilder().withPayload(
-				new PayloadBuilder()
-				.addRow(new EntityDataBuilder()
-					.withKV(ModelHelper.ATTR_ID + "0_0", "red")
-				.build()).buildED()).build();
-				
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
-				
 		runHandle();
-		assertHandle(1, expectedMonitors);
+		assertHandle(1);
 	}
 	
 	@Test
 	public void testHandleWithScriptEval() {
 		// Setup
 		setupHandle();
+		
+		Model model = ModelHelper.createSimpleModel(2, 3);
+		when(component.getOutputModel()).thenReturn(model);
+		
+		((DelimitedParser) spy).attributes = new ArrayList<AttributeFormat>();
+		AttributeFormat mAttr = ((DelimitedParser) spy).new AttributeFormat(
+				ModelHelper.ATTR_ID + "0_0", null, null);
+		mAttr.setOrdinal(1);
+		mAttr.setFormatFunction("someFunction");
+		((DelimitedParser) spy).attributes.add(mAttr);
+		
 		
 		PowerMockito.mockStatic(ModelAttributeScriptHelper.class);
 		try {
@@ -156,123 +144,64 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 			e.printStackTrace();
 		}
 		
-		setUnitOfWorkLastMessage(true);
+		MessageTestHelper.addInputMessage(this, true, true, "step1","red,yellow,green,blue,purple,orange");
+		MessageTestHelper.addOutputMonitor(this, ModelHelper.ATTR_ID + "0_0", "maroon");
 		
-		Message message1 = new MessageBuilder("step1")
-				.withPayloadString(new PayloadBuilder()
-					.addRow("red,yellow,green,blue,purple,orange")
-					.buildString()).build();
-		messages.clear();
-		messages.add(new HandleParams(message1, true));
-		
-		Model model = ModelHelper.createSimpleModel(2, 3);
-		when(component.getOutputModel()).thenReturn(model);
-		
-		((DelimitedParser) spy).attributes = new ArrayList<AttributeFormat>();
-		AttributeFormat mAttr = ((DelimitedParser) spy).new AttributeFormat(
-				ModelHelper.ATTR_ID + "0_0", null, null);
-		mAttr.setOrdinal(1);
-		mAttr.setFormatFunction("someFunction");
-		((DelimitedParser) spy).attributes.add(mAttr);
-		
-		// Expected
-		Message expectedMessage = new MessageBuilder().withPayload(
-				new PayloadBuilder()
-				.addRow(new EntityDataBuilder()
-					.withKV(ModelHelper.ATTR_ID + "0_0", "maroon")
-				.build()).buildED()).build();
-				
-
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
-				
 		runHandle();
-		assertHandle(1, expectedMonitors);
+		assertHandle(1);
 	}
 	
 	@Test
 	public void testHandleWithoutAttributesSet() {
 		// Setup
 		setupHandle();
-		
-		setUnitOfWorkLastMessage(true);
-		
-		Message message1 = new MessageBuilder("step1")
-				.withPayloadString(new PayloadBuilder()
-					.addRow("red,yellow,green,blue,purple,orange")
-					.buildString()).build();
-		messages.clear();
-		messages.add(new HandleParams(message1, true));
-		
 		Model model = ModelHelper.createSimpleModel(2, 3);
 		
 		this.outputModel = model;
 		when(component.getOutputModel()).thenReturn(model);
 		
-		
-		// Expected
-		Message expectedMessage = new MessageBuilder().withPayload(
+		MessageTestHelper.addInputMessage(this, true, true, "step1","red,yellow,green,blue,purple,orange");
+		MessageTestHelper.addOutputMonitor(this, new MessageBuilder().withPayload(
 				new PayloadBuilder()
-				.addRow(new EntityDataBuilder()
+				.withRow(new EntityDataBuilder()
 					.withKV(ModelHelper.ATTR_ID + "0-0", "red")
 					.withKV(ModelHelper.ATTR_ID + "1-0", "yellow")
 					.withKV(ModelHelper.ATTR_ID + "2-0", "green")
 					.withKV(ModelHelper.ATTR_ID + "0-1", "blue")
 					.withKV(ModelHelper.ATTR_ID + "1-1", "purple")
 					.withKV(ModelHelper.ATTR_ID + "2-1", "orange")
-				.build()).buildED()).build();
-				
-
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
-			
-		// Execute and Assert
+				.build()).buildED()).build());
+		
 		runHandle();
-		assertHandle(1, expectedMonitors);
+		assertHandle(1);
 	}
 	
 	@Test
 	public void testHandleSkipHeaderAndFooterRows() {
-		// Setup
 		setupHandle();
-		
-		setUnitOfWorkLastMessage(true);
-		
-		Message message1 = new MessageBuilder("step1")
-				.withPayloadString(new PayloadBuilder()
-					.addRow("h1,h2,h3,h4,h5,h6")
-					.addRow("red,yellow,green,blue,purple,orange")
-					.addRow("f1,f2,f3,f4,f5,f6")
-					.buildString()).build();
-		messages.clear();
-		messages.add(new HandleParams(message1, true));
-		
 		((DelimitedParser) spy).numberOfHeaderLinesToSkip = 1;
 		((DelimitedParser) spy).numberOfFooterLinesToSkip = 1;
-		
 		Model model = ModelHelper.createSimpleModel(2, 3);
 		when(component.getOutputModel()).thenReturn(model);
 		
+		MessageTestHelper.addInputMessage(this, true, true, "step1",
+				"h1,h2,h3,h4,h5,h6",
+				"red,yellow,green,blue,purple,orange",
+				"f1,f2,f3,f4,f5,f6");
 		
-		// Expected
-		Message expectedMessage = new MessageBuilder().withPayload(
+		MessageTestHelper.addOutputMonitor(this, new MessageBuilder().withPayload(
 				new PayloadBuilder()
-				.addRow(new EntityDataBuilder()
+				.withRow(new EntityDataBuilder()
 					.withKV(ModelHelper.ATTR_ID + "0-0", "red")
 					.withKV(ModelHelper.ATTR_ID + "1-0", "yellow")
 					.withKV(ModelHelper.ATTR_ID + "2-0", "green")
 					.withKV(ModelHelper.ATTR_ID + "0-1", "blue")
 					.withKV(ModelHelper.ATTR_ID + "1-1", "purple")
 					.withKV(ModelHelper.ATTR_ID + "2-1", "orange")
-				.build()).buildED()).build();
-				
-
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
-			
-		// Execute and Assert
+				.build()).buildED()).build());
+		
 		runHandle();
-		assertHandle(1, expectedMonitors);
+		assertHandle(1);
 	}
 
 

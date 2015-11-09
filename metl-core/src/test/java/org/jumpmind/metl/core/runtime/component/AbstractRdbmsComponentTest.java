@@ -128,7 +128,9 @@ public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntim
 				}
 			});
 		} else {
-			when(mJdbcTemplate.query(anyString(), anyMap(), Mockito.any(ResultSetExtractor.class))).thenReturn(messages.get(0).getInputMessage());
+			if (messages != null && messages.size() > 0) {
+				when(mJdbcTemplate.query(anyString(), anyMap(), Mockito.any(ResultSetExtractor.class))).thenReturn(messages.get(0).getInputMessage());
+			}
 		}
 		doReturn(mJdbcTemplate).when((AbstractRdbmsComponentRuntime) spy).getJdbcTemplate();
 		

@@ -29,6 +29,7 @@ import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Assert;
@@ -64,54 +65,56 @@ public class DeduperTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		setInputMessage(new ControlMessage());
+		MessageTestHelper.addControlMessage(this, "test", false);
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0));
+		assertHandle(0);
 	}
 
 	@Test
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
-		setUnitOfWorkLastMessage(true);
 		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		
+		MessageTestHelper.addControlMessage(this, "test", true);
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0));
+		assertHandle(0);
 	}
 
 	@Test
 	@Override
 	public void testHandleNormal() {
 		setupHandle();
-		setUnitOfWorkLastMessage(true);
-		
-		Message message1 = new MessageBuilder("step1")
-				.withPayload(new PayloadBuilder()
-					.addRow(new EntityDataBuilder()
-						.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build())
-					.addRow(new EntityDataBuilder()
-						.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build())
-					.buildED()).build();
-		messages.clear();
-		messages.add(new HandleParams(message1, true));
-		
 		((Deduper) spy).deduped = new LinkedHashMap<String, EntityData>();
 		
-		// Expected
-		Message expectedMessage = new MessageBuilder().withPayload(new PayloadBuilder()
-				.addRow(new EntityDataBuilder()
-					.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
-				.build()).buildED()).build();
-
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
+		MessageTestHelper.addInputMessage(this, true, true, "step1",
+				new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build(),
+				new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build());
+		
+		MessageTestHelper.addOutputMonitor(this, MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1);
 		
 		// Execute and Assert
 		runHandle();
-		assertHandle(1, expectedMonitors);
+		assertHandle(1);
 	}
+	
+	@Test
+	public void testHandleLastMessageHeaderNotUnitOfWork() {
+		setupHandle();
+		((Deduper) spy).deduped = new LinkedHashMap<String, EntityData>();
+		
+		// Message header has last message set to true but unit of work passed into handle is false.
+		MessageTestHelper.addInputMessage(this, true, false, "step1",
+				new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build(),
+				new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build());
+		
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
+		
+		// Execute and Assert
+		runHandle();
+		assertHandle(1);
+	}
+
 
 	@Override
 	protected String getComponentId() {

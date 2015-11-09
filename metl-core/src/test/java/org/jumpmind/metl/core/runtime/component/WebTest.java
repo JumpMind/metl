@@ -24,6 +24,7 @@ import java.util.ArrayList;
 
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.jumpmind.metl.core.runtime.resource.Http;
 import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
@@ -46,23 +47,24 @@ public class WebTest extends AbstractComponentRuntimeTestSupport<ArrayList<Entit
 	public void testHandleStartupMessage() {
 		((Web) spy).bodyFrom = "Message";
 		
-		setInputMessage(new ControlMessage());
+		MessageTestHelper.addControlMessage(this, "test", false);
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0));
+		assertHandle(0);
 	}
 
 	@Test
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
-		setUnitOfWorkLastMessage(true);
 		((Web) spy).bodyFrom = "Message";
 		
 		
-		getInputMessage().setPayload(new ArrayList<String>());
+		setupHandle();
 		
+		MessageTestHelper.addControlMessage(this, "test", true);
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0));
+		assertHandle(0);
 	}
 
 	@Override

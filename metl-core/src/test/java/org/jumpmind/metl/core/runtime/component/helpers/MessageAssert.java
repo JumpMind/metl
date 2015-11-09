@@ -26,12 +26,12 @@ import org.junit.Assert;
 
 public class MessageAssert extends Assert {
 	
-	public static void assertMessage(int messageNumber, Message expected, Message actual, boolean isPayloadXML) {
+	public static void assertMessage(int callbackNumber, int messageNumber, Message expected, Message actual, boolean isPayloadXML) {
 		TestUtils.assertNullNotNull(expected, actual);
 		if (expected != null && actual != null) {
 			// TODO Assert Message Header
 			
-			PayloadAssert.assertPayload(messageNumber, expected.getPayload(), actual.getPayload(), isPayloadXML);
+			PayloadAssert.assertPayload(callbackNumber, messageNumber, expected.getPayload(), actual.getPayload(), isPayloadXML);
 		}
 	}
 }

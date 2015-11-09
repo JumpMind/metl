@@ -37,6 +37,7 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.IStreamable;
@@ -62,21 +63,19 @@ public class UnzipTest extends AbstractComponentRuntimeTestSupport<ArrayList<Str
 	
 	@Override
 	public void testHandleStartupMessage() {
-		setupHandle(true);
-		setInputMessage(new ControlMessage());
+		MessageTestHelper.addControlMessage(this, "test", false);
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0));
+		assertHandle(0);
 	}
 
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
-		setupHandle(true);
-		setUnitOfWorkLastMessage(true);
+		setupHandle();
 		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		
+		MessageTestHelper.addControlMessage(this, "test", true);
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0));
+		assertHandle(0);
 	}
 
 	@Override
@@ -84,22 +83,13 @@ public class UnzipTest extends AbstractComponentRuntimeTestSupport<ArrayList<Str
 		// Setup
 		setupHandle(true);
 		
-		Message message1 = new MessageBuilder("step1")
-				.withPayloadString(new PayloadBuilder()
-					.addRow("test.zip")
-					.buildString()).build();
-		messages.clear();
-		messages.add(new HandleParams(message1, true));
+		MessageTestHelper.addInputMessage(this, true, true, "step1", "test.zip");
 		
 		// Expected
-		Message expectedMessage = new MessageBuilder().withPayloadString(
-				new PayloadBuilder().addRow("").buildString()).build();
-				
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, expectedMessage));
-				
+		MessageTestHelper.addOutputMonitor(this, "");
+		
 		runHandle();
-		assertHandle(0, expectedMonitors);
+		assertHandle(0);
 	}
 
 	@Override

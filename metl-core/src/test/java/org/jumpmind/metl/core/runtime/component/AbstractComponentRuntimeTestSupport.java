@@ -58,13 +58,15 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 	public static String MODEL_ATTR_NAME_2 = "attr2Name";
 	public static String MODEL_ATTR_ID_3 = "attr3";
 	public static String MODEL_ATTR_NAME_3 = "attr3Name";
+	public static String MODEL_ATTR_ID_4 = "attr4";
+	public static String MODEL_ATTR_NAME_4 = "attr4Name";
 	
-	public static String MODEL_ENTITY_ID_1 = "entity1";
-	public static String MODEL_ENTITY_NAME_1 = "entity1Name";
-	public static String MODEL_ENTITY_ID_2 = "entity2";
-	public static String MODEL_ENTITY_NAME_2 = "entity2Name";
-	public static String MODEL_ENTITY_ID_3 = "entity3";
-	public static String MODEL_ENTITY_NAME_3 = "entity3Name";
+	public static String ENTITY_1_KEY_1 = "e1.col1";
+	public static String ENTITY_1_VALUE_1 = "val1";
+	public static String ENTITY_1_KEY_2 = "e1.col2";
+	public static String ENTITY_1_VALUE_2 = "val2";
+	public static String ENTITY_2_KEY_1 = "e2.col1";
+	public static String ENTITY_2_VALUE_1 = "val3";
 	
 	// Standard tests that should be implemented for all components
 	public abstract void testHandleStartupMessage();
@@ -84,7 +86,10 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 	IComponentRuntime spy;
 	
 	List<HandleParams> messages = new ArrayList<HandleParams>();
-		
+	List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+	
+
+
 	Model inputModel;
 	Model outputModel;
 	Component component;
@@ -146,6 +151,9 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 	}
 
 	public void setupHandle() {
+		messages.clear();
+		expectedMonitors.clear();
+		
 		doNothing().when((AbstractComponentRuntime) spy).start();
 		
 		componentStatistics = new ComponentStatistics();
@@ -206,18 +214,12 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 		return m;
 	}
 	
-	public void assertHandle(int numberEntitiesProcessed, HandleMessageMonitor expectedMonitors) {
-		List<HandleMessageMonitor> list = new ArrayList<HandleMessageMonitor>();
-		list.add(expectedMonitors);
-		assertHandle(numberEntitiesProcessed, list);
-	}
-	
-	public void assertHandle(int numberEntitiesProcessed, List<HandleMessageMonitor> expectedMonitors) {
+	public void assertHandle(int numberEntitiesProcessed) {
 		
 		TestUtils.assertNullNotNull(expectedMonitors, messages);
 		
 		if (messages != null) {
-			Assert.assertEquals("Expected monitor size should message the input messages", 
+			Assert.assertEquals("Expected monitors size should match the number of input messages.", 
 					expectedMonitors.size(), messages.size());
 			
 			// Loop through all input messages 
@@ -227,13 +229,13 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 			
 				assertEquals("Statistics entities processed are not equal", numberEntitiesProcessed, 
 						((AbstractComponentRuntime) spy).getComponentStatistics().getNumberEntitiesProcessed(0));
-				assertEquals("Send message counts do not match [message " + (i + 1) + "]", expected.getSendMessageCount(), actual.getSendMessageCount());
-				assertEquals("Start message counts do not match [message " + (i + 1) + "]", expected.getStartupMessageCount(), actual.getStartupMessageCount());
-				assertEquals("Shutdown message counts do not match [message " + (i + 1) + "]", expected.getShutdownMessageCount(), actual.getShutdownMessageCount());
+				//assertEquals("Send message counts do not match [message " + (i + 1) + "]", expected.getSendMessageCount(), actual.getSendMessageCount());
+				//assertEquals("Start message counts do not match [message " + (i + 1) + "]", expected.getStartupMessageCount(), actual.getStartupMessageCount());
+				//assertEquals("Shutdown message counts do not match [message " + (i + 1) + "]", expected.getShutdownMessageCount(), actual.getShutdownMessageCount());
 				TestUtils.assertList(expected.getTargetStepIds(), actual.getTargetStepIds(), expected.isXmlPayload());
 			
 				for (int m = 0; m < expected.getMessages().size(); m++) {
-					MessageAssert.assertMessage(m, expected.getMessages().get(m), actual.getMessages().get(m), expected.isXmlPayload());
+					MessageAssert.assertMessage(i + 1, m + 1, expected.getMessages().get(m), actual.getMessages().get(m), expected.isXmlPayload());
 				}
 			}
 		}
@@ -258,5 +260,12 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 		messages.add(params);
 	}
 	
+	public List<HandleParams> getMessages() {
+		return messages;
+	}
+	
+	public List<HandleMessageMonitor> getExpectedMonitors() {
+		return expectedMonitors;
+	}
 	
 }

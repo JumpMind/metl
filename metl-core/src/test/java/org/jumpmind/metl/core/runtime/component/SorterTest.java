@@ -28,6 +28,7 @@ import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelAttributeBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
@@ -92,22 +93,20 @@ public class SorterTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		setupHandle();
-		setInputMessage(new ControlMessage());
+		MessageTestHelper.addControlMessage(this, "test", false);
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0));
+		assertHandle(0);
 	}
 
 	@Test
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
-		setUnitOfWorkLastMessage(true);
 		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		
+		MessageTestHelper.addControlMessage(this, "test", true);
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0));
+		assertHandle(0);
 	}
 
 	@Test
@@ -117,56 +116,21 @@ public class SorterTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 		setupHandle();
 		((Sorter) spy).sortAttributeId = MODEL_ATTR_ID_1;
 		
-		Message message1 = new MessageBuilder("step1")
-				.withPayload(new PayloadBuilder()
-						.addRow(new EntityDataBuilder()
-							.withKV(MODEL_ATTR_ID_1, "superman")
-					.build()).buildED()).build();
-		
-		Message message2 = new MessageBuilder("step2")
-				.withPayload(new PayloadBuilder()
-						.addRow(new EntityDataBuilder()
-							.withKV(MODEL_ATTR_ID_1, "iron man")
-					.build()).buildED()).build();
-		
-		Message message3 = new MessageBuilder("step2")
-				.withPayload(new PayloadBuilder()
-						.addRow(new EntityDataBuilder()
-							.withKV(MODEL_ATTR_ID_1, "flash")
-					.build()).buildED()).build();
-		
-		messages.clear();
-		messages.add(new HandleParams(message1, false));
-		messages.add(new HandleParams(message2, false));
-		messages.add(new HandleParams(message3, true));
+		MessageTestHelper.addInputMessage(this, false, false, "step1", MODEL_ATTR_ID_1, "superman");
+		MessageTestHelper.addInputMessage(this, false, false, "step2", MODEL_ATTR_ID_1, "iron man");
+		MessageTestHelper.addInputMessage(this, false, true, "step2", MODEL_ATTR_ID_1, "flash");
 		
 		// Expected
-		Message expectedMessage1 = new MessageBuilder().withPayload(
-				new PayloadBuilder().buildED()).build();
-		
-		Message expectedMessage2 = new MessageBuilder().withPayload(new PayloadBuilder()
-				.addRow(new EntityDataBuilder()
-						.withKV(MODEL_ATTR_ID_1, "flash")
-					.build()).buildED()).build();
-		
-		Message expectedMessage3 = new MessageBuilder().withPayload(new PayloadBuilder()
-				.addRow(new EntityDataBuilder()
-						.withKV(MODEL_ATTR_ID_1, "iron man")
-					.build()).buildED()).build();
-		
-		Message expectedMessage4 = new MessageBuilder().withPayload(new PayloadBuilder()
-				.addRow(new EntityDataBuilder()
-					.withKV(MODEL_ATTR_ID_1, "superman")
-				.build()).buildED()).build();
-
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();		
-		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, null));
-		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, null));
-		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, 
-				expectedMessage1, expectedMessage2, expectedMessage3, expectedMessage4));
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
+		MessageTestHelper.addOutputMonitor(this, 
+				MessageTestHelper.nullMessage(),
+				new MessageBuilder().withKeyValue(MODEL_ATTR_ID_1, "flash").build(),
+				new MessageBuilder().withKeyValue(MODEL_ATTR_ID_1, "iron man").build(),
+				new MessageBuilder().withKeyValue(MODEL_ATTR_ID_1, "superman").build());
 		
 		runHandle();
-		assertHandle(3, expectedMonitors);
+		assertHandle(3);
 		
 	}
 

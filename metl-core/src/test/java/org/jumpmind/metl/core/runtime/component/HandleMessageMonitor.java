@@ -63,22 +63,22 @@ public class HandleMessageMonitor {
 		this.targetStepIds = targetStepIds;
 	}
 
-	boolean isXmlPayload() {
+	public boolean isXmlPayload() {
 		return xmlPayload;
 	}
 
-	void setXmlPayload(boolean xmlPayload) {
+	public void setXmlPayload(boolean xmlPayload) {
 		this.xmlPayload = xmlPayload;
 	}
 
-	List<Message> getMessages() {
+	public List<Message> getMessages() {
 		if (messages == null) {
 			messages = new ArrayList<Message>();
 		}
 		return messages;
 	}
 
-	void setMessages(List<Message> messages) {
+	public void setMessages(List<Message> messages) {
 		this.messages = messages;
 	}
 	

@@ -34,6 +34,7 @@ import org.jumpmind.metl.core.runtime.component.helpers.ComponentAttributeSettin
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.junit.Assert;
@@ -78,29 +79,20 @@ public class TransformerTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		setInputMessage(new ControlMessage());
-		// Expected
-		Message expectedMessage1 = new MessageBuilder().withPayload(
-				new PayloadBuilder().buildED()).build();
-		
+		MessageTestHelper.addControlMessage(this, "test", false);
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0, false, expectedMessage1));
+		assertHandle(0);
 	}
 
 	@Test 
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
-		setUnitOfWorkLastMessage(true);
 		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		
-		// Expected
-		Message expectedMessage1 = new MessageBuilder().withPayload(
-				new PayloadBuilder().buildED()).build();
-		
+		MessageTestHelper.addControlMessage(this, "test", true);
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0, false, expectedMessage1));
+		assertHandle(0);
 	}
 
 	@Test
@@ -129,46 +121,23 @@ public class TransformerTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 		((Transformer) spy).transformsByAttributeId = transformMap;
 		
 		ModelHelper.createMockModel(inputModel, MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1, 
-				MODEL_ATTR_ID_1, MODEL_ENTITY_NAME_1);
+				MODEL_ATTR_ID_1, ENTITY_1_KEY_1);
 		
 		// Messages
-		Message message1 = new MessageBuilder("step1")
-				.withPayload(new PayloadBuilder()
-					.addRow(new EntityDataBuilder()
-						.withKV(MODEL_ATTR_ID_1, TRANSFORM_SOURCE)
-				.build()).buildED()).build();
-		
-		messages.clear();
-		messages.add(new HandleParams(message1, true));
+		MessageTestHelper.addInputMessage(this, true, true, "step1",MODEL_ATTR_ID_1, TRANSFORM_SOURCE);
 		
 		// Expected
-		Message expectedMessage1 = new MessageBuilder().withPayload(
-				new PayloadBuilder()
-				.addRow(new EntityDataBuilder()
-							.withKV(MODEL_ATTR_ID_1, TRANSFORM_RESULT)
-						.build()).buildED()).build();
-		
-		
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, expectedMessage1));
+		MessageTestHelper.addOutputMonitor(this, MODEL_ATTR_ID_1, TRANSFORM_RESULT);
 		
 		// Execute and Assert
 		runHandle();
-		assertHandle(1, expectedMonitors);
+		assertHandle(1);
 	}
 
     @Override
     protected String getComponentId() {
         return Transformer.TYPE;
     }
-
-	@Override
-	public void setupHandle() {
-		super.setupHandle();
-		
-		ArrayList<EntityData> payload = new ArrayList<EntityData>(); 
-		getInputMessage().setPayload(payload);
-	}
 
 	
 }

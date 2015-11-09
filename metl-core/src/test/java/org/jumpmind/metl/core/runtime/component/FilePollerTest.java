@@ -37,6 +37,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
@@ -122,100 +123,49 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 	@Override
 	public void testHandleStartupMessage() {
 		setupHandle(true);
-		setInputMessage(new ControlMessage());
-		// Expected
-		Message expectedMessage = new MessageBuilder().withPayloadString(
-				new PayloadBuilder()
-						.addRow("fileAbsolutePath").buildString()).build();
-		
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
-				
-		// Execute and Assert
+		MessageTestHelper.addControlMessage(this, "test", false);
+		MessageTestHelper.addOutputMonitor(this, "fileAbsolutePath");
 		runHandle();
-		assertHandle(1, expectedMonitors);
+		assertHandle(1);
 	}
 
 	@Test
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle(true);
-		setUnitOfWorkLastMessage(true);
 		
-		// Expected
-		Message expectedMessage = new MessageBuilder().withPayloadString(
-				new PayloadBuilder()
-						.addRow("fileAbsolutePath").buildString()).build();
-		
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
-				
-		// Execute and Assert
+		MessageTestHelper.addControlMessage(this, "test", true);
+		MessageTestHelper.addOutputMonitor(this, "fileAbsolutePath");
 		runHandle();
-		assertHandle(1, expectedMonitors);
+		assertHandle(1);
 	}
 
 	@Test
 	@Override
 	public void testHandleNormal() {
-		// Setup
 		setupHandle(true);
 		
-		// Expected
-		Message expectedMessage = new MessageBuilder().withPayloadString(
-				new PayloadBuilder()
-						.addRow("fileAbsolutePath").buildString()).build();
+		MessageTestHelper.addInputMessage(this, true, true, "step1", "");
+		MessageTestHelper.addOutputMonitor(this, "fileAbsolutePath");
 		
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
-				
-		// Execute and Assert
 		runHandle();
-		assertHandle(1, expectedMonitors);
-	}
-	
-	@Test
-	public void testHandleCancelOnShutdown() {
-		// Setup
-		setupHandle(true);
-		
-		((FilePoller) spy).cancelOnNoFiles = true;
-		DirectoryScanner mockDirectoryScanner = mock(DirectoryScanner.class);
-		when(((FilePoller) spy).getDirectoryScanner()).thenReturn(mockDirectoryScanner);
-		when(mockDirectoryScanner.getIncludedFiles()).thenReturn(new String[] {});
-		
-		// Expected
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(0, 1));
-				
-		// Execute and Assert
-		runHandle();
-		assertHandle(0, expectedMonitors);
+		assertHandle(1);
 	}
 	
 	@Test
 	public void testHandleUseTriggerFile() {
-		// Setup
 		setupHandle(true);
-		
 		((FilePoller) spy).useTriggerFile = true;
 		
-		// Expected
-		Message expectedMessage = new MessageBuilder().withPayloadString(
-				new PayloadBuilder()
-				.addRow("fileAbsolutePath").buildString()).build();
-
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(expectedMessage));
+		MessageTestHelper.addInputMessage(this, true, true, "step1", "");
+		MessageTestHelper.addOutputMonitor(this, "fileAbsolutePath");
 				
-		// Execute and Assert
 		runHandle();
-		assertHandle(1, expectedMonitors);
+		assertHandle(1);
 	}
 	
 	@Test
 	public void testHandleCancelOnShutdownWithTriggerFile() {
-		// Setup
 		setupHandle(false);
 		
 		((FilePoller) spy).cancelOnNoFiles = true;
@@ -225,13 +175,11 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 		when(((FilePoller) spy).getDirectoryScanner()).thenReturn(mockDirectoryScanner);
 		when(mockDirectoryScanner.getIncludedFiles()).thenReturn(new String[] {});
 		
-		// Expected
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(0,1));
+		MessageTestHelper.addInputMessage(this, true, true, "step1", "");
+		MessageTestHelper.addOutputMonitor(this, 0, 1);
 				
-		// Execute and Assert
 		runHandle();
-		assertHandle(0, expectedMonitors);
+		assertHandle(0);
 	}
 
 	@Override

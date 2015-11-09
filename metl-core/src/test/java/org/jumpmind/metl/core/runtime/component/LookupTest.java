@@ -28,6 +28,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
@@ -75,10 +76,9 @@ public class LookupTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		setInputMessage(new ControlMessage());
-		((Lookup) spy).sourceStepId = "step1";
+		MessageTestHelper.addControlMessage(this, "test", false);
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0));
+		assertHandle(0);
 	}
 
 	@Test
@@ -86,12 +86,11 @@ public class LookupTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
 		((Lookup) spy).sourceStepId = "step1";
-		setUnitOfWorkLastMessage(true);
 		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		
+		MessageTestHelper.addControlMessage(this, "test", true);
+		MessageTestHelper.addOutputMonitor(this, 0,1);
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0));
+		assertHandle(0);
 	}
 
 	@Test
@@ -106,51 +105,36 @@ public class LookupTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 		((Lookup) spy).replacementKeyAttributeId = MODEL_ATTR_ID_1;
 		((Lookup) spy).replacementValueAttributeId = MODEL_ATTR_ID_3;
 		
-		// Messages
-		Message message1 = new MessageBuilder("step1")
-				.withPayload(new PayloadBuilder()
-						.addRow(new EntityDataBuilder()
-							.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
-					.build()).buildED()).build();
-			
-		Message message2 = new MessageBuilder("step2")
-				.withPayload(new PayloadBuilder()
-						.addRow(new EntityDataBuilder()
-							.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
-							.withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
-							.withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
-					.build()).buildED()).build();
+		MessageTestHelper.addInputMessage(this, false, false, "step1", 
+				MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1);
 		
-		Message message3 = new MessageBuilder("step1")
-				.withPayload(new PayloadBuilder()
-						.addRow(new EntityDataBuilder()
-							.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
-							.withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
-							.withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
-					.build()).buildED()).build();
-		message3.getHeader().setUnitOfWorkLastMessage(true);
-		
-		messages.clear();
-		messages.add(new HandleParams(message1, false));
-		messages.add(new HandleParams(message2, false));
-		messages.add(new HandleParams(message3, true));
+		MessageTestHelper.addInputMessage(this, false, false, "step2", 
+				new EntityDataBuilder()
+					.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+					.withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
+					.withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
+				.build());
+					
+		MessageTestHelper.addInputMessage(this, true, true, "step1", 
+				new EntityDataBuilder()
+					.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+					.withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
+					.withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
+				.build());
 		
 		// Expected
-		Message expectedMessage = new MessageBuilder().withPayload(
-				PayloadTestHelper.createPayload(1, 
-				MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1, 
-				MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2, 
-				MODEL_ATTR_ID_3, MODEL_ATTR_NAME_2)).build();
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
+		MessageTestHelper.addOutputMonitor(this, 
+				new MessageBuilder().withPayload(
+					PayloadTestHelper.createPayload(1, 
+					MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1, 
+					MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2, 
+					MODEL_ATTR_ID_3, MODEL_ATTR_NAME_2)).build());
 		
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(0, 0));
-		expectedMonitors.add(getExpectedMessageMonitor(0, 0));
-		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, expectedMessage));
-		
-			
 		// Execute and Assert
 		runHandle();
-		assertHandle(1, expectedMonitors);
+		assertHandle(1);
 	}
 	
     @Override

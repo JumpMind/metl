@@ -34,6 +34,7 @@ import org.jumpmind.metl.core.runtime.component.helpers.ComponentAttributeSettin
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
@@ -82,27 +83,20 @@ public class MappingTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		setInputMessage(new ControlMessage());
+		MessageTestHelper.addControlMessage(this, "test", false);
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0));
+		assertHandle(0);
 	}
 
 	@Test 
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
-		setUnitOfWorkLastMessage(true);
 		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		
-		Message expectedMessage = new MessageBuilder().withPayload(new PayloadBuilder()
-				.buildED()).build();
-		
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(0,0, false, expectedMessage));
-		
+		MessageTestHelper.addControlMessage(this, "test", true);
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0, false, expectedMessage));
+		assertHandle(0);
 	}
 	
 	@Test 
@@ -117,27 +111,14 @@ public class MappingTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 		((Mapping) spy).attrToAttrMap.put(MODEL_ATTR_ID_1, mappings);
 		
 		// Messages
-		Message message1 = new MessageBuilder("step1")
-				.withPayload(new PayloadBuilder()
-					.addRow(new EntityDataBuilder()
-						.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
-				.build()).buildED()).build();
-		
-		messages.clear();
-		messages.add(new HandleParams(message1, true));
+		MessageTestHelper.addInputMessage(this, true, true, "step1", MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1);
 		
 		// Expected
-		Message expectedMessage = new MessageBuilder().withPayload(new PayloadBuilder()
-						.addRow(new EntityDataBuilder()
-							.withKV(MAPPING_TARGET_1, MODEL_ATTR_NAME_1)
-						.build()).buildED()).build();
-		
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(0,0, false, expectedMessage));
+		MessageTestHelper.addOutputMonitor(this, MAPPING_TARGET_1, MODEL_ATTR_NAME_1);
 		
 		// Execute and Assert
 		runHandle();
-		assertHandle(1, expectedMonitors);
+		assertHandle(1);
 	}
 	
 	@Test 
@@ -152,30 +133,16 @@ public class MappingTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 		((Mapping) spy).setUnmappedAttributesToNull = true;
 		
 		// Messages
-		Message message1 = new MessageBuilder("step1")
-				.withPayload(new PayloadBuilder()
-					.addRow(new EntityDataBuilder()
-						.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
-				.build()).buildED()).build();
-		
-		messages.clear();
-		messages.add(new HandleParams(message1, true));
-		
+		MessageTestHelper.addInputMessage(this, true, true, "step1", MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1);
 		
 		// Expected
-		Message expectedMessage = new MessageBuilder().withPayload(new PayloadBuilder()
-						.addRow(new EntityDataBuilder()
-							.withKV(MODEL_ATTR_ID_1, null)
-						.build()).buildED()).build();
+		MessageTestHelper.addOutputMonitor(this, MODEL_ATTR_ID_1, null);
 		
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, expectedMessage));
-		
-		ModelHelper.createMockModel(outputModel, MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1, MODEL_ENTITY_ID_1, MODEL_ENTITY_NAME_1);
+		ModelHelper.createMockModel(outputModel, MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1, ENTITY_1_KEY_1, ENTITY_1_VALUE_1);
 		
 		// Execute and Assert
 		runHandle();
-		assertHandle(1, expectedMonitors); 
+		assertHandle(1); 
 	}
 	
 	@Test 
@@ -188,25 +155,14 @@ public class MappingTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 		((Mapping) spy).attrToAttrMap.put("X", mappings);
 		
 		// Messages
-		Message message1 = new MessageBuilder("step1")
-				.withPayload(new PayloadBuilder()
-					.addRow(new EntityDataBuilder()
-						.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
-				.build()).buildED()).build();
-				
-		messages.clear();
-		messages.add(new HandleParams(message1, true));
+		MessageTestHelper.addInputMessage(this, true, true, "step1", MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1);
 		
 		// Expected
-		Message expectedMessage = new MessageBuilder().withPayload(new PayloadBuilder()
-				.buildED()).build();
-		
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-		expectedMonitors.add(getExpectedMessageMonitor(0,0, false, expectedMessage));
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		
 		// Execute and Assert
 		runHandle();
-		assertHandle(0, expectedMonitors);
+		assertHandle(0);
 	}
 	
     @Override

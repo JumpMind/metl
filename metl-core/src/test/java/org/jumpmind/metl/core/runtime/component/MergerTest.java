@@ -30,6 +30,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentAttributeSettingsBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.jumpmind.metl.core.utils.TestUtils;
@@ -67,21 +68,20 @@ public class MergerTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
     @Test
     @Override
     public void testHandleStartupMessage() {
-        setInputMessage(new ControlMessage());
-        runHandle();
-        assertHandle(0, getExpectedMessageMonitor(0, 0));
+    	MessageTestHelper.addControlMessage(this, "test", false);
+		runHandle();
+		assertHandle(0);
     }
 
     @Test
     @Override
     public void testHandleUnitOfWorkLastMessage() {
-        setupHandle();
-        setUnitOfWorkLastMessage(true);
-
-        getInputMessage().setPayload(new ArrayList<EntityData>());
-
-        runHandle();
-        assertHandle(0, getExpectedMessageMonitor(0, 0));
+    	setupHandle();
+		
+		MessageTestHelper.addControlMessage(this, "test", true);
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
+		runHandle();
+		assertHandle(0);
     }
 
     @Test
@@ -95,34 +95,24 @@ public class MergerTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
         ((Merger) spy).attributesToMergeOn = attributesToJoinOn;
 
         // Messages
-        Message message1 = new MessageBuilder("step1").withPayload(new PayloadBuilder()
-                .addRow(new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2).build())
-                .buildED()).build();
-
-        Message message2 = new MessageBuilder("step1").withPayload(new PayloadBuilder()
-                .addRow(new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3).build())
-                .buildED()).build();
-
-        messages.clear();
-        messages.add(new HandleParams(message1, false));
-        messages.add(new HandleParams(message2, true));
-
+        MessageTestHelper.addInputMessage(this, false, false, "step1", 
+        		new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2).build());
+        
+        MessageTestHelper.addInputMessage(this, false, true, "step1", 
+                new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3).build());
+        
         // Expected
-        Message expectedMessage = new MessageBuilder("step1")
-                .withPayload(
-                        new PayloadBuilder()
-                                .addRow(new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
-                                        .withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2).withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3).build())
-                                .buildED())
-                .build();
-
-        List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
-        expectedMonitors.add(getExpectedMessageMonitor(0, 0));
-        expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, expectedMessage));
+        MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
+        MessageTestHelper.addOutputMonitor(this, new MessageBuilder("step1").withPayload(
+                       	new PayloadBuilder()
+                       		.withRow(new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+                                 .withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
+                                 .withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3).build())
+                        .buildED()).build());
 
         // Execute and Assert
         runHandle();
-        assertHandle(2, expectedMonitors);
+        assertHandle(2);
     }
 
     @Override

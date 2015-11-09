@@ -36,6 +36,11 @@ public class MessageBuilder {
 		message = new Message(originatingStepId);
 	}
 	
+	public MessageBuilder withUnitOfWorkLastMessage(boolean lastMessage) { 
+		this.message.getHeader().setUnitOfWorkLastMessage(lastMessage);
+		return this;
+	}
+	
 	public MessageBuilder withPayload(ArrayList<EntityData> payload) {
 		this.message.setPayload(payload);
 		return this;
@@ -46,8 +51,40 @@ public class MessageBuilder {
 		return this;
 	}
 	
+	public MessageBuilder withKeyValue(String key, Object value, int entityPosition) {
+		if (this.message.getPayload() == null) {
+			this.message.setPayload(new ArrayList<EntityData>());
+		}
+		for (int i =  ((ArrayList<EntityData>) this.message.getPayload()).size(); i < entityPosition; i++) {
+			((ArrayList<EntityData>) this.message.getPayload()).add(new EntityDataBuilder().build());
+		}
+		((ArrayList<EntityData>) this.message.getPayload()).get(entityPosition - 1).put(key, value);
+		
+		return this;
+	}
+	
+	public MessageBuilder withKeyValue(String key, Object value) {
+		return withKeyValue(key, value, 1);
+	}
+	
+	public MessageBuilder withValue(String value) {
+		if (this.message.getPayload() == null) {
+			this.message.setPayload(new ArrayList<String>());
+		}
+		((ArrayList<String>) this.message.getPayload()).add(value);
+		
+		return this;
+	}
+	
 	public Message build() {
 		return this.message;
 	}
 
+	public static Message buildKV(String key, Object value) {
+		return new MessageBuilder()
+			.withPayload(new PayloadBuilder()
+					.withRow(new EntityDataBuilder()
+							.withKV(key, value)
+			.build()).buildED()).build();
+	}
 }

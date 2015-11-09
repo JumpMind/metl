@@ -32,6 +32,7 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Test;
@@ -90,31 +91,20 @@ public class TextReplaceTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		setupHandle();
-		setInputMessage(new ControlMessage());
-		
-		// Expected
-		Message expectedMessage = new MessageBuilder().withPayloadString(
-				new PayloadBuilder().buildString()).build();
-				
+		MessageTestHelper.addControlMessage(this, "test", false);
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0, false, expectedMessage));
+		assertHandle(0);
 	}
 
 	@Test
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
-		setUnitOfWorkLastMessage(true);
 		
-		getInputMessage().setPayload(new ArrayList<EntityData>());
-		
-		// Expected
-		Message expectedMessage = new MessageBuilder().withPayloadString(
-				new PayloadBuilder().buildString()).build();
-				
+		MessageTestHelper.addControlMessage(this, "test", true);
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		runHandle();
-		assertHandle(0, getExpectedMessageMonitor(0, 0, false, expectedMessage));
+		assertHandle(0);
 	}
 
 	@Test
@@ -125,23 +115,13 @@ public class TextReplaceTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 		((TextReplace) spy).searchFor = "replaceMe";
 		((TextReplace) spy).replaceWith = "replaced";
 		
-		Message message1 = new MessageBuilder("step1")
-				.withPayloadString(new PayloadBuilder()
-						.addRow("Someone please replaceMe").buildString()).build();
-		
-		messages.clear();
-		messages.add(new HandleParams(message1, false));
+		MessageTestHelper.addInputMessage(this, false, false, "step1", "Someone please replaceMe");
 		
 		// Expected
-		Message expectedMessage1 = new MessageBuilder().withPayloadString(
-				new PayloadBuilder().addRow("Someone please replaced").buildString())
-				.build();
-		
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();		
-		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, expectedMessage1));
+		MessageTestHelper.addOutputMonitor(this, "Someone please replaced");
 		
 		runHandle();
-		assertHandle(1, expectedMonitors);
+		assertHandle(1);
 	}
 	
 	@Test
@@ -151,23 +131,14 @@ public class TextReplaceTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 		((TextReplace) spy).searchFor = "replaceMe";
 		((TextReplace) spy).replaceWith = "replaced";
 		
-		Message message1 = new MessageBuilder("step1")
-				.withPayloadString(new PayloadBuilder()
-						.addRow("Someone please replace me").buildString()).build();
+		MessageTestHelper.addInputMessage(this, false, false, "step1", "Someone please replace me");
 		
-		messages.clear();
-		messages.add(new HandleParams(message1, false));
 		
 		// Expected
-		Message expectedMessage1 = new MessageBuilder().withPayloadString(
-				new PayloadBuilder().addRow("Someone please replace me").buildString())
-				.build();
-		
-		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();		
-		expectedMonitors.add(getExpectedMessageMonitor(0, 0, false, expectedMessage1));
+		MessageTestHelper.addOutputMonitor(this, "Someone please replace me");
 		
 		runHandle();
-		assertHandle(1, expectedMonitors);
+		assertHandle(1);
 	}
 
 	@Override

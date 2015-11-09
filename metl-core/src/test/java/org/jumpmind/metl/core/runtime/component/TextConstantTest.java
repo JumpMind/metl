@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Test;
@@ -66,31 +67,20 @@ public class TextConstantTest extends AbstractComponentRuntimeTestSupport<ArrayL
 	@Test
 	@Override
 	public void testHandleStartupMessage() {
-		setupHandle();
-		setInputMessage(new ControlMessage());
-		((TextConstant) spy).constantText = "";
-		
-		// Expected
-		Message expectedMessage = new MessageBuilder().withPayloadString(
-				new PayloadBuilder().addRow(new String("")).buildString()).build();
-				
+		MessageTestHelper.addControlMessage(this, "test", false);
 		runHandle();
-		assertHandle(1, getExpectedMessageMonitor(0, 0, false, expectedMessage));
+		assertHandle(0);
 	}
 
 	@Test
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
-		setUnitOfWorkLastMessage(true);
-		((TextConstant) spy).constantText = "";
 		
-		// Expected
-		Message expectedMessage = new MessageBuilder().withPayloadString(
-				new PayloadBuilder().addRow(new String("")).buildString()).build();
-				
+		MessageTestHelper.addControlMessage(this, "test", true);
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		runHandle();
-		assertHandle(1, getExpectedMessageMonitor(0, 0, false, expectedMessage));
+		assertHandle(1);
 	}
 
 	@Test
@@ -101,16 +91,13 @@ public class TextConstantTest extends AbstractComponentRuntimeTestSupport<ArrayL
 		((TextConstant) spy).constantText = "GO BUCKS";
 		((TextConstant) spy).splitOnLineFeed = false;
 		
-		Message message1 = new MessageBuilder("step1")
-				.withPayloadString(new PayloadBuilder()
-						.addRow("Ohio State").buildString()).build();
+		MessageTestHelper.addInputMessage(this, true, true, "step1", "Ohio State");
 		
 		// Expected
-		Message expectedMessage = new MessageBuilder().withPayloadString(
-				new PayloadBuilder().addRow("GO BUCKS").buildString()).build();
+		MessageTestHelper.addOutputMonitor(this, "GO BUCKS");
 				
 		runHandle();
-		assertHandle(1, getExpectedMessageMonitor(0, 0, false, expectedMessage));
+		assertHandle(1);
 	}
 	
 	@Test
@@ -121,16 +108,13 @@ public class TextConstantTest extends AbstractComponentRuntimeTestSupport<ArrayL
 		((TextConstant) spy).splitOnLineFeed = true;
 		((TextConstant) spy).textRowsPerMessage = 2;
 		
-		Message message1 = new MessageBuilder("step1")
-				.withPayloadString(new PayloadBuilder()
-						.addRow("Ohio State\nBuckeyes").buildString()).build();
+		MessageTestHelper.addInputMessage(this, true, true, "step1", "Ohio State\nBuckeyes");
 		
 		// Expected
-		Message expectedMessage = new MessageBuilder().withPayloadString(
-				new PayloadBuilder().addRow("GO BUCKS").buildString()).build();
+		MessageTestHelper.addOutputMonitor(this, "GO BUCKS");
 				
 		runHandle();
-		assertHandle(1, getExpectedMessageMonitor(0, 0, false, expectedMessage));
+		assertHandle(1);
 	}
 	
 	@Test
@@ -141,18 +125,14 @@ public class TextConstantTest extends AbstractComponentRuntimeTestSupport<ArrayL
 		((TextConstant) spy).splitOnLineFeed = true;
 		((TextConstant) spy).textRowsPerMessage = 2;
 		
-		Message message1 = new MessageBuilder("step1")
-				.withPayloadString(new PayloadBuilder()
-						.addRow("Ohio State\nBuckeyes").buildString()).build();
+		MessageTestHelper.addInputMessage(this, true, true, "step1", "Ohio State\nBuckeyes");
 		
 		// Expected
-		Message expectedMessage = new MessageBuilder().withPayloadString(
-				new PayloadBuilder()
-					.addRow("GO")
-					.addRow("BUCKS").buildString()).build();
+		MessageTestHelper.addOutputMonitor(this, new MessageBuilder()
+				.withValue("GO").withValue("BUCKS").build());
 				
 		runHandle();
-		assertHandle(2, getExpectedMessageMonitor(0, 0, false, expectedMessage));
+		assertHandle(2);
 	}
 	
 	@Test
@@ -163,22 +143,15 @@ public class TextConstantTest extends AbstractComponentRuntimeTestSupport<ArrayL
 		((TextConstant) spy).splitOnLineFeed = true;
 		((TextConstant) spy).textRowsPerMessage = 1;
 		
-		Message message1 = new MessageBuilder("step1")
-				.withPayloadString(new PayloadBuilder()
-						.addRow("Ohio State\nBuckeyes").buildString()).build();
+		MessageTestHelper.addInputMessage(this, true, true, "step1", "Ohio State\nBuckeyes");
 		
 		// Expected
-		Message expectedMessage1 = new MessageBuilder().withPayloadString(
-				new PayloadBuilder()
-					.addRow("GO")
-					.buildString()).build();
-				
-		Message expectedMessage2 = new MessageBuilder().withPayloadString(
-				new PayloadBuilder()
-					.addRow("BUCKS").buildString()).build();
+		MessageTestHelper.addOutputMonitor(this, 
+				new MessageBuilder().withValue("GO").build(),
+				new MessageBuilder().withValue("BUCKS").build());
 		
 		runHandle();
-		assertHandle(2, getExpectedMessageMonitor(0, 0, false, expectedMessage1, expectedMessage2));
+		assertHandle(2);
 	}
 
 	@Override
