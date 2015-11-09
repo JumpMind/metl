@@ -13,5 +13,25 @@ buildscript {
         classpath 'io.spring.gradle:docbook-reference-plugin:0.3.0'  
         classpath 'com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2'
         classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'      
+        classpath 'co.riiid:gradle-github-plugin:0.3.1'
     }
+}
+
+apply plugin: 'co.riiid.gradle'
+
+github {
+    owner = 'JumpMind'
+    repo = 'metl'
+    token = githubToken
+    tagName = version
+    targetCommitish = 'master'
+    name = version
+    prerelease = true
+    body = """# Metl Release
+    ${version}
+"""
+    assets = [
+            '../metl-ui/build/libs/metl.war',
+            '../metl-ui/src/main/webapp/doc/html/user-guide.html'
+    ]
 }
