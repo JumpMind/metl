@@ -204,7 +204,7 @@ public class DataDiff extends AbstractComponentRuntime {
         reader.setContext(context);
         reader.setComponentDefinition(componentDefinition);
         reader.setRowsPerMessage(rowsPerMessage);
-
+        reader.setThreadNumber(threadNumber);
         
         for (ModelEntity entity : entities) {
             Component component = context.getFlowStep().getComponent();
