@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.metl.core.model.AbstractObject;
+import org.jumpmind.metl.core.model.AbstractObjectLastUpdateTimeDescSorter;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
@@ -68,7 +69,6 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserGroup;
 import org.jumpmind.metl.core.model.UserSetting;
-import org.jumpmind.metl.core.util.NameSorter;
 import org.jumpmind.metl.core.util.NameValue;
 import org.jumpmind.persist.IPersistenceManager;
 
@@ -212,7 +212,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("deleted", 0);
         List<FlowName> flows = find(FlowName.class, params);
-        Collections.sort(flows, new NameSorter());
+        AbstractObjectNameBasedSorter.sort(flows);
         return flows;
     }
 
@@ -339,6 +339,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         settingParams.put("agentId", agent.getId());
         List<AgentResourceSetting> settings = persistenceManager.find(AgentResourceSetting.class,
                 settingParams, null, null, tableName(AgentResourceSetting.class));
+        AbstractObjectLastUpdateTimeDescSorter.sort(settings);
         agent.setAgentResourceSettings(settings);
     }
 
@@ -458,14 +459,17 @@ abstract class AbstractConfigurationService extends AbstractService implements
 
         List<ComponentSetting> settings = find(ComponentSetting.class, new NameValue("componentId",
                 component.getId()));
+        AbstractObjectLastUpdateTimeDescSorter.sort(settings);
         component.setSettings(settings);
 
         List<ComponentEntitySetting> entitySettings = find(ComponentEntitySetting.class,
                 new NameValue("componentId", component.getId()));
+        AbstractObjectLastUpdateTimeDescSorter.sort(entitySettings);
         component.setEntitySettings(entitySettings);
 
         List<ComponentAttributeSetting> attributeSettings = find(ComponentAttributeSetting.class,
                 new NameValue("componentId", component.getId()));
+        AbstractObjectLastUpdateTimeDescSorter.sort(attributeSettings);
         component.setAttributeSettings(attributeSettings);
 
         component.setResource(findResource(component.getResourceId()));

@@ -1,4 +1,91 @@
 [id="sql-database",reftext="SQL Database"]
 ==== Database
 
-TODO
+The following settings are available for the Database resource
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Setting|Description
+|Driver|The fully qualified Java class name of the JDBC driver to be used
+|Url|The connection URL to be passed to the JDBC driver to establish a connection
+|User|The connection username to be passed to the JDBC driver to establish a connection
+|Password|The connection password to be passed to our JDBC driver to establish a connection
+|Validation Query|The SQL query that will be used to validate connections from this pool before returning them to the caller. 
+If specified, this query MUST be an SQL SELECT statement that returns at least one row. If not specified, connections will be 
+validated by calling the isValid() method
+|Initial Size|The initial number of connections that are created when the pool is started
+|Max Active|The maximum number of active connections that can be allocated from this pool at the same time, or negative for no limit
+|Max Idle|The maximum number of connections that can remain idle in the pool, without extra ones being released, or negative for no limit
+|Min Idle|The minimum number of connections that can remain idle in the pool, without extra ones being created, or zero to create none
+|Wait Time (ms)|The maximum number of milliseconds that the pool will wait (when there are no available connections) for a connection to be 
+returned before throwing an exception, or -1 to wait indefinitely
+|Evict Time (ms)|The minimum amount of time an object may sit idle in the pool before it is eligable for eviction by the idle object evictor (if any)
+|Test on Borrow|The indication of whether objects will be validated before being borrowed from the pool. If the object fails to validate, it will be 
+dropped from the pool, and we will attempt to borrow another
+|Test on Return|The indication of whether objects will be validated before being returned to the pool
+|Test while Idle|The indication of whether objects will be validated by the idle object evictor (if any). If an object fails to validate, it will be 
+dropped from the pool
+|Init Sql|An SQL statement that will be sent to the jdbc driver upon each connection to the database.  Can be used for custom initialization
+|Fetch Size|The number of rows to fetch at a time for a sql select statement
+Query timeout (seconds)|The allowable time a query can run without completing before being cancelled
+Connection Properties|The connection properties that will be sent to our JDBC driver when establishing new connections. 
+Format of the string must be [propertyName=property;]
+|===========================================
+
+Example database drivers and urls
+
+==== In Memory H2 Database
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|parameter|value
+|Driver|org.h2.Driver
+|Url|jdbc:h2:mem:mydatabasename
+|===========================================
+
+==== File based H2 Database (linux, osx)
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|parameter|value
+|Driver|org.h2.Driver
+|Url|jdbc:h2:~/foldername/databasename
+|===========================================
+
+==== File based H2 Database (windows)
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|parameter|value
+|Driver|org.h2.Driver
+|Url|jdbc:h2:C:/foldername/databasename
+|===========================================
+
+==== SQL Server Using JTDS driver
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|parameter|value
+|Driver|net.sourceforge.jtds.jdbc.Driver
+|Url|jdbc:jtds:sqlserver:/servername.domainname:1433;databaseName=databasename;
+|===========================================
+
+==== Oracle 
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|parameter|value
+|Driver|oracle.jdbc.OracleDriver
+|Url|jdbc:oracle:thin:@//servername.domainname:1521/servicename
+|===========================================
+
+==== Postgres
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|parameter|value
+|Driver|org.postgresql.Driver
+|Url|jdbc:postgresql://servername:5432/databasename
+|===========================================
+
+==== MySql

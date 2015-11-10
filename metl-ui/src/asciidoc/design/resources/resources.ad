@@ -30,5 +30,5 @@ in the content pane.
 include::sql-database.ad[]
 include::ftp.ad[]
 include::localfilesystem.ad[]
-include::scp.ad[]
+include::sftp.ad[]
 include::webresources.ad[]
