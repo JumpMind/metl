@@ -77,7 +77,7 @@ public class ContentRouter extends AbstractComponentRuntime {
     
     @Override
     public boolean supportsStartupMessages() {
-        return false;
+        return true;
     }
 
     @Override
