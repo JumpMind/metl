@@ -18,11 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.core.util;
+package org.jumpmind.metl.core.model;
 
 import java.util.Comparator;
-
-import org.jumpmind.metl.core.model.ModelEntity;
 
 public class ModelEntitySorter implements Comparator<ModelEntity> {
 

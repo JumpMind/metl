@@ -18,19 +18,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.core.util;
+package org.jumpmind.metl.core.model;
 
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
-import org.jumpmind.metl.core.model.AbstractName;
+public class AbstractObjectLastUpdateTimeDescSorter implements Comparator<AbstractObject> {
 
-public class NameSorter implements Comparator<AbstractName> {
-
-    public NameSorter() {
+    @Override
+    public int compare(AbstractObject o1, AbstractObject o2) {
+        if (o2.getLastUpdateTime() != null && o1.getLastUpdateTime() != null) {
+            return o2.getLastUpdateTime().compareTo(o1.getLastUpdateTime());
+        } else {
+            return 0;
+        }
     }
-    
-    public int compare(AbstractName entity1, AbstractName entity2) {
-        return entity1.getName().toLowerCase().compareTo(entity2.getName().toLowerCase());
+
+    public static void sort(List<? extends AbstractObject> list) {
+        Collections.sort(list, new AbstractObjectLastUpdateTimeDescSorter());
     }
 
 }
