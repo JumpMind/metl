@@ -385,7 +385,7 @@ public class FlowRuntime {
     }
     
     public String getExecutionId() {
-        return executionTracker.getExecutionId();
+        return executionTracker != null ? executionTracker.getExecutionId() : null;
     }
     
     public Agent getAgent() {
