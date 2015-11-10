@@ -80,15 +80,12 @@ public class XmlReader extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (!(inputMessage instanceof ControlMessage)) {
-            List<String> files = getFilesToRead(inputMessage);
-            try {
-                processFiles(files, callback, unitOfWorkBoundaryReached);
-            } catch (Exception e) {
-                throw new IoException(e);
-            }
+        List<String> files = getFilesToRead(inputMessage);
+        try {
+            processFiles(files, callback, unitOfWorkBoundaryReached);
+        } catch (Exception e) {
+            throw new IoException(e);
         }
-
     }
 
     List<String> getFilesToRead(Message inputMessage) {
