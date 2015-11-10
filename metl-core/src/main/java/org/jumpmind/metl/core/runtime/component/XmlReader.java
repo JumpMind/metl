@@ -224,7 +224,7 @@ public class XmlReader extends AbstractComponentRuntime {
 
     @Override
     public boolean supportsStartupMessages() {
-        return false;
+        return true;
     }
 
 }
