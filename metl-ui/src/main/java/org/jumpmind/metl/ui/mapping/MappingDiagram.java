@@ -25,8 +25,8 @@ import java.util.List;
 
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.ModelEntitySorter;
 import org.jumpmind.metl.core.runtime.component.Mapping;
-import org.jumpmind.metl.core.util.ModelEntitySorter;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 
 import com.vaadin.annotations.JavaScript;
