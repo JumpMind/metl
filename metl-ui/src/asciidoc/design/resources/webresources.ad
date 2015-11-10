@@ -1,4 +1,16 @@
 
 ==== Web Resources
 
-TODO
+The following settings are available for Web Resources
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Setting|Description
+|Url|The URL of the web resource to be utilized
+|Http Method|The Http method t be sent for requests sent to this resource, either GET, PUT or POST
+|Http Timeout|The max time to wait for a response from the request before canceling the request
+|Content Type|The content type for the body for requests sent to this resource
+|Security|Either None or Basic Auth
+|User|If Security is set to Basic Auth, the user name to be used to authenticate requests sent to this resource
+|Password|If Security is set to Basic Auth, the password to be used to authenticate requests sent to this resource
+|===========================================
