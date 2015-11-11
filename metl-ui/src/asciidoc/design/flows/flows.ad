@@ -1,8 +1,35 @@
 [id="flows",reftext="Flows"]
 === Flows
 
-Each integration is written as a flow.  A flow defines the input to be read, the processing rules to be applied, and the output to be written.  Flows are a graphical
-set of instructions for how data is integrated from a source system to a target system.  
+Each integration is written as a flow.  A flow defines the input to be read, the processing rules to be applied, and the output to be written.  
+Flows are a graphical set of instructions for how data is integrated (flows) from a source system to a target system.  
 
-Flows consist of a set of components (readers, processors or writers) connected together to form the flow.
+Flows consist of a set of <<components>> (readers, processors or writers) connected together with component links.  Data flows between 
+components over the component links in a series of messages that are generated and consumed by each component.  There are four different
+type of messages.
+
+* *Model based message* - A message that contains records in model format.  I.E. data parsed and stored according to a given Metl Model
+* *Text based message* - A message that contains text based records.  I.E. data in string format
+* *Binary based message* - A message that contains binary based data.  I.E. A binary object
+
+A typical component (the rdbms-reader) component is shown below.
+
+image:screenshots/design/flows-component.png[width=150]
+
+Each component has an input port and an output port (blue circles in the image above).  The input and output ports are used to connect the 
+component to other components with component links.  Each port has a designation that dictates the type of message that can be sent into
+the component and the type of message that the component generates.  The designations are:
+
+* *E* - A model based message
+* *T* - A text based message
+* *B* - A binary based message
+* *** - Any message type 
+
+Each component completes some action when an input message is received and sends one or more resultant messages when it is complete.  The 
+RDBMS-Reader as an example takes any input message type and produces model based message types.  When an input message is received, the
+RDBMS-Reader executes a configured sql script and returns the resultant rows from execution of the script out as model based messages. 
+
+components run in parallel
+components with no inbound link are automatically sent a start message
+ 
 
