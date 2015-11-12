@@ -101,7 +101,7 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
             sqlCount += processSql(inputMessage, template, params, sqlToExecute);
         }
 
-        if (callback != null) {
+        if (callback != null && sqlCount > 0) {
             callback.sendMessage(null, convertResultsToTextPayload(results));
         }
         
