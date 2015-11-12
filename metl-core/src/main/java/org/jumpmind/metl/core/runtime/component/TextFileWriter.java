@@ -117,7 +117,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
         
         if (unitOfWorkBoundaryReached && callback != null) {
             close();
-            callback.sendMessage(null, "{\"status\":\"success\"}", unitOfWorkBoundaryReached);
+            callback.sendMessage(null, "{\"status\":\"success\"}");
         }
     }
 

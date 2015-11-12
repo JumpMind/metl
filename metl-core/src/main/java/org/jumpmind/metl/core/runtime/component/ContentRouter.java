@@ -110,7 +110,7 @@ public class ContentRouter extends AbstractComponentRuntime {
                             }
                             if (outboundPayload.size() >= rowsPerMessage) {
                                 outboundMessages.remove(route.getTargetStepId());
-                                callback.sendMessage(null, outboundPayload, false, route.getTargetStepId());
+                                callback.sendMessage(null, outboundPayload, route.getTargetStepId());
                             }
                             outboundPayload.add(entityData.copy());
                             if (onlyRouteFirstMatch) {
@@ -125,7 +125,7 @@ public class ContentRouter extends AbstractComponentRuntime {
         }
 
         for (String targetFlowStepId : outboundMessages.keySet()) {
-            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), unitOfWorkBoundaryReached, targetFlowStepId);
+            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), targetFlowStepId);
         }
     }
     
@@ -147,7 +147,7 @@ public class ContentRouter extends AbstractComponentRuntime {
                             }
                             if (outboundPayload.size() >= rowsPerMessage) {
                                 outboundMessages.remove(route.getTargetStepId());
-                                callback.sendMessage(null, outboundPayload, false, route.getTargetStepId());
+                                callback.sendMessage(null, outboundPayload, route.getTargetStepId());
                             }
                             outboundPayload.add(data);
                         }
@@ -159,7 +159,7 @@ public class ContentRouter extends AbstractComponentRuntime {
         }
 
         for (String targetFlowStepId : outboundMessages.keySet()) {
-            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), unitOfWorkBoundaryReached, targetFlowStepId);
+            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), targetFlowStepId);
         }
 
     }

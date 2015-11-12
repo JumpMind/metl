@@ -159,19 +159,19 @@ public class MessageScriptHelper {
     protected void forwardMessageWithParameter(String parameterName, Serializable value) {
         Map<String, Serializable> headers = new HashMap<>();
         headers.put(parameterName, value);
-        callback.sendMessage(headers, inputMessage.getPayload(), unitOfWorkBoundaryReached);
+        callback.sendMessage(headers, inputMessage.getPayload());
     }
     
     protected void forwardMessageWithParameters(Map<String,Serializable> params) {
-        callback.sendMessage(params, inputMessage.getPayload(), unitOfWorkBoundaryReached);
+        callback.sendMessage(params, inputMessage.getPayload());
     }
     
     protected void forwardMessage() {
-        callback.sendMessage(null, inputMessage.getPayload(), unitOfWorkBoundaryReached);
+        callback.sendMessage(null, inputMessage.getPayload());
     }
     
     protected void sendControlMessage() {
-        callback.sendControlMessage();
+        callback.sendControlMessage(inputMessage.getHeader());
     }
     
     protected void setSendMessageCallback(ISendMessageCallback callback) {

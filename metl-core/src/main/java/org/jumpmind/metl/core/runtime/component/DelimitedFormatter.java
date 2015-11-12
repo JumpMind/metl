@@ -114,7 +114,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
             outputPayload.add(outputRec);
         }
         
-        callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, outputPayload);
     }
 
     private String processInputRow(Message inputMessage, EntityData inputRow) {

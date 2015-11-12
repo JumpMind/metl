@@ -120,7 +120,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
             throw new IoException(e);
         }
 
-        callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, outputPayload);
     }
 
     private EntityData processInputRow(Message inputMessage, String inputRow) throws IOException {

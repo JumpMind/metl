@@ -195,13 +195,6 @@ public class PropertySheet extends AbsoluteLayout {
         addResourceCombo(componentDefintion, formLayout, component);
         addInputModelCombo(componentDefintion, formLayout, component);
         addOutputModelCombo(componentDefintion, formLayout, component);
-        addUnitOfWorkCombo(componentDefintion, formLayout, component);
-    }
-    
-    protected void addUnitOfWorkCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
-        XMLSetting setting = new XMLSetting(StepRuntime.UNIT_OF_WORK, "Unit Of Work", StepRuntime.UNIT_OF_WORK_FLOW, Type.CHOICE, true);
-        setting.setChoices(new XMLSettingChoices(StepRuntime.UNIT_OF_WORK_FLOW, StepRuntime.UNIT_OF_WORK_INPUT_MESSAGE));
-        addSettingField(setting, component, formLayout);
     }
     
     protected void addThreadCount(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {

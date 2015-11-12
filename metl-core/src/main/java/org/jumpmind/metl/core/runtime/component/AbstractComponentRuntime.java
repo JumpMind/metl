@@ -60,6 +60,14 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     public final static String LOG_OUTPUT = "logOutput";
     
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
+    
+    public final static String RUN_WHEN = "run.when";
+    
+    public static final String PER_UNIT_OF_WORK = "PER UNIT OF WORK";
+
+    public static final String PER_MESSAGE = "PER MESSAGE";
+
+    public static final String PER_ENTITY = "PER ENTITY";    
 
     protected ComponentContext context;
     

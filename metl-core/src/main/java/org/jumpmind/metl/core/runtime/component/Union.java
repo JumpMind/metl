@@ -31,6 +31,7 @@ import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 
 public class Union extends AbstractComponentRuntime {
@@ -101,7 +102,7 @@ public class Union extends AbstractComponentRuntime {
         for (List<Message> unhandledMessages : messagesByFlowStep.values()) {
         	isLastUnitOfWorkMessage &= unhandledMessages.size() > 0;
         	for (Message unhandledMessage : unhandledMessages) {
-    			isLastUnitOfWorkMessage &= unhandledMessage.getHeader().isUnitOfWorkLastMessage();
+    			isLastUnitOfWorkMessage &= unhandledMessage instanceof ControlMessage;
         	}
         	 
             readyToProcess &= unhandledMessages.size() > 0;
@@ -109,13 +110,12 @@ public class Union extends AbstractComponentRuntime {
 
         if (readyToProcess && !isLastUnitOfWorkMessage) {
             Message outputMessage = new Message(getFlowStepId());
-            outputMessage.getHeader().setUnitOfWorkLastMessage(inputMessage.getHeader().isUnitOfWorkLastMessage());
             outputMessage.getHeader().setSequenceNumber(inputMessage.getHeader().getSequenceNumber());
             ArrayList<EntityData> rowData = new ArrayList<EntityData>();
             outputMessage.setPayload(rowData);
             for (List<Message> unhandledMessages : messagesByFlowStep.values()) {
             	Message unhandledMessage = unhandledMessages.get(0);
-            	if (unhandledMessage != null && !unhandledMessage.getHeader().isUnitOfWorkLastMessage()) {
+            	if (unhandledMessage != null && !(unhandledMessage instanceof ControlMessage)) {
                     Message message = unhandledMessages.remove(0);
                     ArrayList<EntityData> inputRowData = message.getPayload();
                     rowData.addAll(inputRowData);
@@ -123,11 +123,11 @@ public class Union extends AbstractComponentRuntime {
             	}
             }
 
-            callback.sendMessage(null, outputMessage.getPayload(), unitOfWorkBoundaryReached);
+            callback.sendMessage(null, outputMessage.getPayload());
         }
 
         if (isLastUnitOfWorkMessage) {
-            callback.sendMessage(null, inputMessage.getPayload(), unitOfWorkBoundaryReached);
+            callback.sendMessage(null, inputMessage.getPayload());
         }
        
     }

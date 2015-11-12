@@ -60,10 +60,6 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     public static final String TYPE = "RDBMS Reader";
     
-    private static final String PER_MESSAGE = "PER MESSAGE";
-
-    private static final String PER_ENTITY = "PER ENTITY";    
-
     public final static String TRIM_COLUMNS = "trim.columns";
 
     public final static String MATCH_ON_COLUMN_NAME_ONLY = "match.on.column.name";
@@ -72,7 +68,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     List<String> sqls;
     
-    String runWhen = PER_ENTITY;
+    String runWhen = PER_UNIT_OF_WORK;
 
     long rowsPerMessage = 10000;
 
@@ -106,13 +102,20 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         
         NamedParameterJdbcTemplate template = getJdbcTemplate();
 
-        int inboundRecordCount = 1;
+        int inboundRecordCount = 0;
         Iterator<?> inboundPayload = null;
-        if (PER_ENTITY.equals(runWhen) && inputMessage.getPayload() instanceof Collection 
+        if (PER_ENTITY.equals(runWhen) 
                 && !(inputMessage instanceof ControlMessage)) {
             inboundPayload = ((Collection<?>)inputMessage.getPayload()).iterator();
             inboundRecordCount = ((Collection<?>)inputMessage.getPayload()).size();
+        } else if (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage)) {
+            inboundPayload = null;
+            inboundRecordCount = 1;            
+        } else if (PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage) {
+            inboundPayload = null;
+            inboundRecordCount = 1;            
         }
+
 
         /*
          * A reader can be started by a startup message (if it has no input
@@ -134,7 +137,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             }
         }
         if (outboundPayload != null && outboundPayload.size() > 0) {
-            callback.sendMessage(null, outboundPayload, unitOfWorkBoundaryReached);
+            callback.sendMessage(null, outboundPayload);
         }
         
     }
@@ -451,7 +454,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             long ts = System.currentTimeMillis();
             while (rs.next()) {
                 if (outputRecCount++ % rowsPerMessage == 0 && payload != null) {
-                    callback.sendMessage(null, payload, false);
+                    callback.sendMessage(null, payload);
                     payload = null;
                 }
                 

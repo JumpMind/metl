@@ -78,7 +78,8 @@ public class FixedLengthParser extends AbstractComponentRuntime {
             int rowCount = 0;
             for (String inputRow : inputRows) {
                 if (headerRowsToSkip == 0) {
-                    if (!inputMessage.getHeader().isUnitOfWorkLastMessage() || (rowCount + numberOfFooterLinesToSkip < inputRows.size())) {
+                    // TODO what if the file is split across messages?  this logic would not work
+                    if (rowCount + numberOfFooterLinesToSkip < inputRows.size()) {
                         EntityData data = processInputRow(inputMessage, inputRow);
                         if (data != null) {
                             getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
@@ -94,7 +95,7 @@ public class FixedLengthParser extends AbstractComponentRuntime {
             throw new IoException(e);
         }
 
-        callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, outputPayload);
     }
 
     private EntityData processInputRow(Message inputMessage, String inputRow) throws IOException {

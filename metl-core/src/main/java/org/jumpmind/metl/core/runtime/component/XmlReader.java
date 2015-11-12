@@ -35,7 +35,6 @@ import java.util.Map;
 
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
@@ -178,7 +177,7 @@ public class XmlReader extends AbstractComponentRuntime {
                             getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                             outboundPayload.add(xml.toString());
                             if (outboundPayload.size() == readTagsPerMessage) {
-                                callback.sendMessage(headers, outboundPayload, false);
+                                callback.sendMessage(headers, outboundPayload);
                                 outboundPayload = new ArrayList<String>();
                             }
                             startCol = 0;
@@ -191,7 +190,7 @@ public class XmlReader extends AbstractComponentRuntime {
             closeQuietly(lineNumberReader);
 
             if (outboundPayload.size() > 0) {
-                callback.sendMessage(headers, outboundPayload, filesProcessed == files.size() && unitOfWorkLastMessage);
+                callback.sendMessage(headers, outboundPayload);
             }
         }
 

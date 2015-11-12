@@ -74,7 +74,7 @@ public class HandleParams {
 		HandleMessageMonitor monitor = new HandleMessageMonitor();
 		
 		@Override
-		public void sendMessage(Map<String, Serializable> additionalHeaders, Serializable payload, boolean lastMessage, String... targetStepIds) {
+		public void sendMessage(Map<String, Serializable> additionalHeaders, Serializable payload, String... targetStepIds) {
 			if (payload instanceof List) {
 				Message message = new Message("unitTest");
 				message.setPayload(payload);
@@ -90,7 +90,7 @@ public class HandleParams {
 		}
 
 		@Override
-		public void sendControlMessage() {
+		public void sendControlMessage(Map<String, Serializable> messageHeaders) {
 			monitor.incrementStartupMessageCount();
 		}
 

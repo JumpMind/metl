@@ -113,7 +113,7 @@ public class Web extends AbstractComponentRuntime {
 	            }
 	            
 	            if (outputPayload.size() > 0) {
-	                callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
+	                callback.sendMessage(null, outputPayload);
 	            }
 	        } catch (IOException e) {
 	            throw new IoException(String.format("Error writing to %s ", streamable), e);

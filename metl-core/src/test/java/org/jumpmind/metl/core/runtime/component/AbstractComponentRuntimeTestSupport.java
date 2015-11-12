@@ -48,7 +48,6 @@ import org.jumpmind.properties.TypedProperties;
 import org.junit.Assert;
 import org.junit.Before;
 import org.mockito.Mockito;
-import org.omg.CORBA.portable.Streamable;
 
 public abstract class AbstractComponentRuntimeTestSupport<T> {
 

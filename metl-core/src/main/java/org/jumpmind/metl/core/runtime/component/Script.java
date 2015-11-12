@@ -28,6 +28,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
 import org.jumpmind.metl.core.runtime.LogLevel;
@@ -51,9 +52,12 @@ public class Script extends AbstractComponentRuntime {
     public static String TRANSFORM_EXPRESSION = "transform.expression";
 
     ScriptEngine engine;
+    
+    String runWhen = PER_MESSAGE;
 
     @Override
     protected void start() {
+        runWhen = getComponent().get(RUN_WHEN, PER_MESSAGE);
         String importStatements = getComponent().get(IMPORTS);
         String initScript = getComponent().get(INIT_SCRIPT);
         String handleMessageScript = getComponent().get(HANDLE_SCRIPT);
@@ -125,10 +129,22 @@ public class Script extends AbstractComponentRuntime {
     
     @Override
     public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {
-        invoke("setInputMessage", inputMessage);
-        invoke("setSendMessageCallback", messageTarget);
-        invoke("setUnitOfWorkBoundaryReached", unitOfWorkBoundaryReached);
-        invoke("onHandle");
+        boolean runScript = false;
+        if (PER_ENTITY.equals(runWhen) 
+                && !(inputMessage instanceof ControlMessage)) {
+            runScript = true;
+        } else if (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage)) {
+            runScript = true;            
+        } else if (PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage) {
+            runScript = true;            
+        }
+
+        if (runScript) {
+            invoke("setInputMessage", inputMessage);
+            invoke("setSendMessageCallback", messageTarget);
+            invoke("setUnitOfWorkBoundaryReached", unitOfWorkBoundaryReached);
+            invoke("onHandle");
+        }
     }
 
     @Override

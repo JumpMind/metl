@@ -82,13 +82,13 @@ public class Merger extends AbstractComponentRuntime {
             Iterator<EntityData> itr = mergedData.values().iterator();
             while (itr.hasNext()) {
                 if (dataToSend.size() >= rowsPerMessage) {
-                    callback.sendMessage(null, dataToSend, false);
+                    callback.sendMessage(null, dataToSend);
                     dataToSend = new ArrayList<EntityData>();
                 }
                 dataToSend.add(itr.next());
             }
             if (dataToSend != null && dataToSend.size() > 0) {
-                callback.sendMessage(null, dataToSend, true);
+                callback.sendMessage(null, dataToSend);
             }
         }
     }

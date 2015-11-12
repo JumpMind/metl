@@ -134,6 +134,6 @@ public class Mapping extends AbstractComponentRuntime {
             }
         }
 
-        callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, outputPayload);
     }
 }

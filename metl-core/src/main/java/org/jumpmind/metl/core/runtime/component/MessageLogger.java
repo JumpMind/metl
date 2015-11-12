@@ -48,8 +48,8 @@ public class MessageLogger extends AbstractComponentRuntime {
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         MessageHeader header = inputMessage.getHeader();
         log(LogLevel.INFO,
-                String.format("%s{sequenceNumber=%d,unitOfWorkLastMessage=%s,unitOfWorkBoundaryReached=%s,source='%s',headers=%s}",
-                        inputMessage.getClass().getSimpleName(), header.getSequenceNumber(), header.isUnitOfWorkLastMessage(),
+                String.format("%s{sequenceNumber=%d,unitOfWorkBoundaryReached=%s,source='%s',headers=%s}",
+                        inputMessage.getClass().getSimpleName(), header.getSequenceNumber(), 
                         unitOfWorkBoundaryReached, getFlow().findFlowStepWithId(header.getOriginatingStepId()).getName(), header.toString()));
         Serializable payload = inputMessage.getPayload();
         if (payload instanceof List) {
@@ -67,7 +67,7 @@ public class MessageLogger extends AbstractComponentRuntime {
             }
         }
 
-        callback.sendMessage(null, payload, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, payload);
     }
 
 }

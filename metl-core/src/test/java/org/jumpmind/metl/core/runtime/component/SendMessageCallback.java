@@ -40,7 +40,7 @@ class SendMessageCallback<T> implements ISendMessageCallback {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void sendMessage(Map<String, Serializable> additionalHeaders, Serializable payload, boolean lastMessage, String... targetStepIds) {
+    public void sendMessage(Map<String, Serializable> additionalHeaders, Serializable payload, String... targetStepIds) {
         payloadList.add((T)payload);
         this.targetStepIds.add(Arrays.asList(targetStepIds));
     }
@@ -51,7 +51,7 @@ class SendMessageCallback<T> implements ISendMessageCallback {
     }
     
     @Override
-    public void sendControlMessage() {
+    public void sendControlMessage(Map<String, Serializable> messageHeaders) {
         sentStartup = true;
     }
 

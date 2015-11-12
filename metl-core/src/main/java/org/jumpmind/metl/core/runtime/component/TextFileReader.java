@@ -212,7 +212,7 @@ public class TextFileReader extends AbstractComponentRuntime {
                 while ((currentLine = reader.readLine()) != null) {
                     currentFileLinesRead++;
                     if (linesInMessage == textRowsPerMessage) {
-                        callback.sendMessage(headers, payload, false);
+                        callback.sendMessage(headers, payload);
                         linesInMessage = 0;
                         payload = new ArrayList<String>();
                     }
@@ -222,7 +222,7 @@ public class TextFileReader extends AbstractComponentRuntime {
                         linesInMessage++;
                     }
                 }
-                callback.sendMessage(headers, payload, unitOfWorkLastMessage);
+                callback.sendMessage(headers, payload);
                 linesInMessage = 0;
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());

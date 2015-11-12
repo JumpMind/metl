@@ -109,7 +109,7 @@ public class Execute extends AbstractComponentRuntime {
 
                 ArrayList<String> payload = new ArrayList<String>();
                 payload.add(output);
-                callback.sendMessage(null, payload, true);
+                callback.sendMessage(null, payload);
             } else {
                 info("The output of the command was: %s", output);
                 throw new IoException("%s failed with an error code of %d", ArrayUtils.toString(commands), code);

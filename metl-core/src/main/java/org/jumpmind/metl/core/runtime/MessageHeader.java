@@ -33,8 +33,6 @@ public class MessageHeader extends HashMap<String, Serializable>implements Seria
 
     int sequenceNumber;
 
-    boolean unitOfWorkLastMessage;
-
     String originatingStepId;
 
     public MessageHeader(String originatingStepId) {
@@ -63,14 +61,6 @@ public class MessageHeader extends HashMap<String, Serializable>implements Seria
 
     public void setSequenceNumber(int sequenceNumber) {
         this.sequenceNumber = sequenceNumber;
-    }
-
-    public boolean isUnitOfWorkLastMessage() {
-        return unitOfWorkLastMessage;
-    }
-
-    public void setUnitOfWorkLastMessage(boolean lastMessage) {
-        this.unitOfWorkLastMessage = lastMessage;
     }
 
     public Map<String, String> getAsStrings() {

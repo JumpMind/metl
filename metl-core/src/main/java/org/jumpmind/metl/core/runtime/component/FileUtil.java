@@ -160,7 +160,7 @@ public class FileUtil extends AbstractComponentRuntime {
                 }
             }
         }
-        callback.sendMessage(null, filesProcessed, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, filesProcessed);
     }
 
     protected String copyFile(Message inputMessage, String fileName) throws Exception {

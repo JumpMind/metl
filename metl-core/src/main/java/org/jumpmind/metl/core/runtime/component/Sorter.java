@@ -96,7 +96,7 @@ public class Sorter extends AbstractComponentRuntime {
             
             for (EntityData record : sortedRecords) {
                 if (dataToSend.size() >= rowsPerMessage) {
-                    callback.sendMessage(null, dataToSend, false);
+                    callback.sendMessage(null, dataToSend);
                     dataToSend = new ArrayList<EntityData>();
                 }
                 dataToSend.add(record);
@@ -105,7 +105,7 @@ public class Sorter extends AbstractComponentRuntime {
             sortedRecords.clear();
             
             if (dataToSend != null && dataToSend.size() > 0) {
-                callback.sendMessage(null, dataToSend, true);
+                callback.sendMessage(null, dataToSend);
             }
         }
     }

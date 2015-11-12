@@ -83,7 +83,7 @@ public class Lookup extends AbstractComponentRuntime {
             for (EntityData entityData : datas) {
                 lookup.put(entityData.get(keyAttributeId), entityData.get(valueAttributeId));
             }
-            lookupInitialized = inputMessage.getHeader().isUnitOfWorkLastMessage();
+            lookupInitialized = inputMessage instanceof ControlMessage;
 
             if (lookupInitialized) {
                 Iterator<Message> messages = queuedWhileWaitingForLookup.iterator();
@@ -113,7 +113,7 @@ public class Lookup extends AbstractComponentRuntime {
                 payload.add(newData);
             }
 
-            callback.sendMessage(null, payload, unitOfWorkLastMessage);
+            callback.sendMessage(null, payload);
         }
     }
 

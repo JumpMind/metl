@@ -154,7 +154,7 @@ public class XmlParser extends AbstractXMLComponentRuntime {
 	        }
         }
 
-        callback.sendMessage(null, payload, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, payload);
 
     }
 
