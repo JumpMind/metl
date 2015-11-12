@@ -698,8 +698,17 @@
             <extraUnitOfWorkOption>File</extraUnitOfWorkOption>
         </extraUnitOfWorkOptions>        
         <settings>
+            <setting id='run.when' type='choice' required='false'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>                    
+                </choices>
+            </setting>                              
             <setting id='get.file.name.from.message' type='boolean' required='false'>
-                <name>Get File Name From Message</name>
+                <name>Expect fully qualified file names in incoming messages</name>
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
@@ -923,6 +932,15 @@
         <className>org.jumpmind.metl.core.runtime.component.XmlReader</className>
         <description></description>
         <settings>
+            <setting id='run.when' type='choice' required='false'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>                    
+                </choices>
+            </setting>                              
             <setting id='get.file.name.from.message' type='boolean' required='false'>
                 <name>Expect fully qualified file names in incoming messages</name>
                 <description></description>

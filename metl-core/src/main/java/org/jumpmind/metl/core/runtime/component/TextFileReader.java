@@ -35,6 +35,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IStreamable;
@@ -90,6 +91,8 @@ public class TextFileReader extends AbstractComponentRuntime {
     int textHeaderLinesToSkip;
 
     String encoding = "UTF-8";
+    
+    String runWhen = PER_UNIT_OF_WORK;
 
     List<String> filesRead;
 
@@ -110,6 +113,7 @@ public class TextFileReader extends AbstractComponentRuntime {
         archiveOnSuccessPath = FormatUtils.replaceTokens(component.get(SETTING_ARCHIVE_ON_SUCCESS_PATH), context.getFlowParametersAsString(),
                 true);
         encoding = component.get(SETTING_ENCODING, encoding);
+        runWhen = component.get(RUN_WHEN, runWhen);
     }
 
     @Override
@@ -119,8 +123,13 @@ public class TextFileReader extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        List<String> files = getFilesToRead(inputMessage);
-        processFiles(files, callback, unitOfWorkBoundaryReached);
+    	
+		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
+				|| (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
+
+			List<String> files = getFilesToRead(inputMessage);
+    		processFiles(files, callback, unitOfWorkBoundaryReached);
+    	}
     }
 
     @Override

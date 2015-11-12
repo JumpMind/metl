@@ -35,6 +35,7 @@ import java.util.Map;
 
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
@@ -55,6 +56,8 @@ public class XmlReader extends AbstractComponentRuntime {
     public final static String SETTING_READ_TAG = "read.tag";
 
     public final static String SETTING_READ_TAGS_PER_MESSAGE = "read.tags.per.message";
+    
+    String runWhen = PER_UNIT_OF_WORK;
 
     boolean getFileNameFromMessage = false;
 
@@ -71,6 +74,7 @@ public class XmlReader extends AbstractComponentRuntime {
         relativePathAndFile = component.get(SETTING_RELATIVE_PATH, relativePathAndFile);
         readTagsPerMessage = component.getInt(SETTING_READ_TAGS_PER_MESSAGE, readTagsPerMessage);
         readTag = component.get(SETTING_READ_TAG, readTag);
+        runWhen = component.get(RUN_WHEN, runWhen);
         
         if (!getFileNameFromMessage && component.getResource() == null) {
             throw new MisconfiguredException("A resource has not been selected.  The resource is required if not configured to get the file name from the inbound message");
@@ -80,12 +84,16 @@ public class XmlReader extends AbstractComponentRuntime {
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         List<String> files = getFilesToRead(inputMessage);
-        try {
-            processFiles(files, callback, unitOfWorkBoundaryReached);
-        } catch (Exception e) {
-            throw new IoException(e);
-        }
-    }
+        
+		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
+				|| (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
+			try {
+				processFiles(files, callback, unitOfWorkBoundaryReached);
+			} catch (Exception e) {
+				throw new IoException(e);
+			}
+		}
+	}
 
     List<String> getFilesToRead(Message inputMessage) {
         ArrayList<String> files = new ArrayList<String>();
