@@ -216,7 +216,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                 }
             }
 
-            if (callback != null) {
+            if (callback != null && results.size() > 0) {
                 callback.sendMessage(null, convertResultsToTextPayload(results));
             }
         }
