@@ -94,7 +94,7 @@ public class ExecutionApi {
                     if (agentDeployment.getName().equals(deploymentName)) {
                         foundDeployment = true;
                         AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent);
-                        String executionId = agentRuntime.scheduleNow(agentDeployment);
+                        String executionId = agentRuntime.scheduleNow(agentDeployment, toObjectMap(req));
                         boolean done = false;
                         do {
                             execution = executionService.findExecution(executionId);

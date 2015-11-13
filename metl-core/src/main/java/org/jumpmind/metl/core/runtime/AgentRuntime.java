@@ -350,9 +350,13 @@ public class AgentRuntime {
             }
             configurationService.save(deployment);
         }
-    }    
+    }
 
     public String scheduleNow(AgentDeployment deployment) {
+    	return scheduleNow(deployment, null);
+    }
+
+    public String scheduleNow(AgentDeployment deployment, Map<String, String> runtimeParameters) {
         ScheduledFuture<?> future = scheduledDeployments.get(deployment);
         if (future == null || future.isDone()) {
             log.info("Scheduling '{}' on '{}' for now", new Object[] {
@@ -360,7 +364,7 @@ public class AgentRuntime {
 
             FlowRuntime flowRuntime = deployedFlows.get(deployment);
             String executionId = UUID.randomUUID().toString();
-            future = this.flowExecutionScheduler.schedule(new FlowRunner(executionId, flowRuntime),
+            future = this.flowExecutionScheduler.schedule(new FlowRunner(executionId, flowRuntime, runtimeParameters),
                     new Date());
             scheduledDeployments.put(deployment, future);
             return executionId;
@@ -407,10 +411,17 @@ public class AgentRuntime {
         FlowRuntime flowRuntime;
 
         String executionId;
+        
+        Map<String, String> runtimeParameters;
 
         public FlowRunner(String executionId, FlowRuntime flowRuntime) {
+        	this(executionId, flowRuntime, null);
+        }
+
+        public FlowRunner(String executionId, FlowRuntime flowRuntime, Map<String, String> runtimeParameters) {
             this.flowRuntime = flowRuntime;
             this.executionId = executionId;
+            this.runtimeParameters = runtimeParameters;
         }
 
         @Override
@@ -424,7 +435,7 @@ public class AgentRuntime {
                         agent.getName());
                 configurationService.refresh(deployment.getFlow());
                 List<Notification> notifications = configurationService.findNotificationsForDeployment(deployment);
-                flowRuntime.start(executionId, deployedResources, agent, notifications, globalSettings);
+                flowRuntime.start(executionId, deployedResources, agent, notifications, globalSettings, runtimeParameters);
             } catch (Exception e) {
                 log.error("Error while waiting for the manipulatedFlow to complete", e);
                 //flowRuntime.stop(true);
