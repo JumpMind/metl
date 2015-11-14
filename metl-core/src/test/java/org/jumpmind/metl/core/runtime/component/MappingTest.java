@@ -20,24 +20,16 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import org.jumpmind.metl.core.runtime.ControlMessage;
-import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentAttributeSettingsBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelHelper;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -47,7 +39,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 
 @RunWith(PowerMockRunner.class)
-public class MappingTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
+public class MappingTest extends AbstractComponentRuntimeTestSupport {
 
 	public static String MAPPING_TARGET_1 = "mapping1";
 	
@@ -111,7 +103,7 @@ public class MappingTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 		((Mapping) spy).attrToAttrMap.put(MODEL_ATTR_ID_1, mappings);
 		
 		// Messages
-		MessageTestHelper.addInputMessage(this, true, true, "step1", MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1);
+		MessageTestHelper.addInputMessage(this, true, "step1", MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1);
 		
 		// Expected
 		MessageTestHelper.addOutputMonitor(this, MAPPING_TARGET_1, MODEL_ATTR_NAME_1);
@@ -133,7 +125,7 @@ public class MappingTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 		((Mapping) spy).setUnmappedAttributesToNull = true;
 		
 		// Messages
-		MessageTestHelper.addInputMessage(this, true, true, "step1", MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1);
+		MessageTestHelper.addInputMessage(this, true, "step1", MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1);
 		
 		// Expected
 		MessageTestHelper.addOutputMonitor(this, MODEL_ATTR_ID_1, null);
@@ -155,7 +147,7 @@ public class MappingTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 		((Mapping) spy).attrToAttrMap.put("X", mappings);
 		
 		// Messages
-		MessageTestHelper.addInputMessage(this, true, true, "step1", MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1);
+		MessageTestHelper.addInputMessage(this, true, "step1", MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1);
 		
 		// Expected
 		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());

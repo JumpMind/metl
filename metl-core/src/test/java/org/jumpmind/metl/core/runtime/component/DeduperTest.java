@@ -20,17 +20,11 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,7 +34,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 
 @RunWith(PowerMockRunner.class)
-public class DeduperTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
+public class DeduperTest extends AbstractComponentRuntimeTestSupport {
 
 	@Test
 	@Override
@@ -87,8 +81,7 @@ public class DeduperTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 		setupHandle();
 		((Deduper) spy).deduped = new LinkedHashMap<String, EntityData>();
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1",
-				new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build(),
+		MessageTestHelper.addInputMessage(this, true, "step1", new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build(),
 				new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build());
 		
 		MessageTestHelper.addOutputMonitor(this, MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1);
@@ -104,8 +97,7 @@ public class DeduperTest extends AbstractComponentRuntimeTestSupport<ArrayList<E
 		((Deduper) spy).deduped = new LinkedHashMap<String, EntityData>();
 		
 		// Message header has last message set to true but unit of work passed into handle is false.
-		MessageTestHelper.addInputMessage(this, true, false, "step1",
-				new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build(),
+		MessageTestHelper.addInputMessage(this, false, "step1", new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build(),
 				new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).build());
 		
 		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());

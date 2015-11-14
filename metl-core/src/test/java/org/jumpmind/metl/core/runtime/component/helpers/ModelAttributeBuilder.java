@@ -20,7 +20,6 @@
  */
 package org.jumpmind.metl.core.runtime.component.helpers;
 
-import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.ModelAttribute;
 
 public class ModelAttributeBuilder {

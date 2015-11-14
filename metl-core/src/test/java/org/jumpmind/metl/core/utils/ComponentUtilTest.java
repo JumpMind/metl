@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.utils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,7 +32,6 @@ import org.jumpmind.metl.core.util.ComponentUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.junit.Assert;
 
 @RunWith(PowerMockRunner.class)
 public class ComponentUtilTest {

@@ -22,25 +22,15 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jumpmind.metl.core.model.Setting;
-import org.jumpmind.metl.core.runtime.ControlMessage;
-import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class TextReplaceTest extends AbstractComponentRuntimeTestSupport<ArrayList<String>> {
+public class TextReplaceTest extends AbstractComponentRuntimeTestSupport {
 	
 
 	@Test
@@ -115,7 +105,7 @@ public class TextReplaceTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 		((TextReplace) spy).searchFor = "replaceMe";
 		((TextReplace) spy).replaceWith = "replaced";
 		
-		MessageTestHelper.addInputMessage(this, false, false, "step1", "Someone please replaceMe");
+		MessageTestHelper.addInputMessage(this, false, "step1", "Someone please replaceMe");
 		
 		// Expected
 		MessageTestHelper.addOutputMonitor(this, "Someone please replaced");
@@ -131,7 +121,7 @@ public class TextReplaceTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 		((TextReplace) spy).searchFor = "replaceMe";
 		((TextReplace) spy).replaceWith = "replaced";
 		
-		MessageTestHelper.addInputMessage(this, false, false, "step1", "Someone please replace me");
+		MessageTestHelper.addInputMessage(this, false, "step1", "Someone please replace me");
 		
 		
 		// Expected

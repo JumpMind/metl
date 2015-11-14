@@ -24,7 +24,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 
 import org.apache.tools.ant.taskdefs.PumpStreamHandler;
 import org.jumpmind.exception.IoException;
@@ -39,7 +38,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ModelAttributeScriptHelper.class)
-public class ExecuteTest extends AbstractComponentRuntimeTestSupport<ArrayList<String>> {
+public class ExecuteTest extends AbstractComponentRuntimeTestSupport {
 
 	public static final String COMMAND_OUTPUT = "command output";
 	
@@ -107,7 +106,7 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport<ArrayList<S
 	public void testHandleNormal() {
 		setupHandle(0);
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1", COMMAND_OUTPUT);
+		MessageTestHelper.addInputMessage(this, true, "step1", COMMAND_OUTPUT);
 		MessageTestHelper.addOutputMonitor(this, COMMAND_OUTPUT);
 				
 		runHandle();
@@ -118,7 +117,7 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport<ArrayList<S
 	public void testHandleError() {
 		setupHandle(1);
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1", COMMAND_OUTPUT);
+		MessageTestHelper.addInputMessage(this, true, "step1", COMMAND_OUTPUT);
 		MessageTestHelper.addOutputMonitor(this, COMMAND_OUTPUT);
 				
 		try {
@@ -135,7 +134,7 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport<ArrayList<S
 		setupHandle(1);
 		((Execute) spy).continueOnError = true;
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1", COMMAND_OUTPUT);
+		MessageTestHelper.addInputMessage(this, true, "step1", COMMAND_OUTPUT);
 		MessageTestHelper.addOutputMonitor(this, COMMAND_OUTPUT);
 				
 		runHandle();

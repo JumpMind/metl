@@ -20,23 +20,17 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentAttributeSettingsBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelHelper;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +41,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ModelAttributeScriptHelper.class)
-public class TransformerTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
+public class TransformerTest extends AbstractComponentRuntimeTestSupport {
 	
 	public static String TRANSFORM_SOURCE = "transform me";
 	public static String TRANSFORM_EXP = "transform logic";
@@ -124,7 +118,7 @@ public class TransformerTest extends AbstractComponentRuntimeTestSupport<ArrayLi
 				MODEL_ATTR_ID_1, ENTITY_1_KEY_1);
 		
 		// Messages
-		MessageTestHelper.addInputMessage(this, true, true, "step1",MODEL_ATTR_ID_1, TRANSFORM_SOURCE);
+		MessageTestHelper.addInputMessage(this, true, "step1", MODEL_ATTR_ID_1,TRANSFORM_SOURCE);
 		
 		// Expected
 		MessageTestHelper.addOutputMonitor(this, MODEL_ATTR_ID_1, TRANSFORM_RESULT);

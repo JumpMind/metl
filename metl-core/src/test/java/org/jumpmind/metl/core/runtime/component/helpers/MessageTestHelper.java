@@ -29,7 +29,6 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntimeTestSupport;
 import org.jumpmind.metl.core.runtime.component.HandleMessageMonitor;
 import org.jumpmind.metl.core.runtime.component.HandleParams;
-import org.jumpmind.metl.core.util.NameValue;
 
 public class MessageTestHelper {
 
@@ -39,15 +38,12 @@ public class MessageTestHelper {
 
     public static void addControlMessage(AbstractComponentRuntimeTestSupport testComponent, String originatinStepId,
             boolean unitOfWorkBoundaryReached) {
-
         ControlMessage message = new ControlMessage(originatinStepId);
-        message.setPayload(new ArrayList<>());
         testComponent.getMessages().add(new HandleParams(message, unitOfWorkBoundaryReached));
     }
 
-    public static void addInputMessage(AbstractComponentRuntimeTestSupport testComponent, boolean unitOfWorkLastMessage,
-            boolean unitOfWorkBoundaryReached, String originatinStepId, EntityData... entities) {
-
+    public static void addInputMessage(AbstractComponentRuntimeTestSupport testComponent, boolean unitOfWorkBoundaryReached,
+            String originatinStepId, EntityData... entities) {
         ArrayList<EntityData> payload = new ArrayList<EntityData>();
 
         for (EntityData d : entities) {
@@ -56,15 +52,11 @@ public class MessageTestHelper {
 
         Message message = new MessageBuilder(originatinStepId).withPayload(payload).build();
         testComponent.getMessages().add(new HandleParams(message, unitOfWorkBoundaryReached));
-        if (unitOfWorkLastMessage) {
-            testComponent.getMessages().add(new ControlMessage(originatinStepId));
-        }
 
     }
 
-    public static void addInputMessage(AbstractComponentRuntimeTestSupport testComponent, boolean unitOfWorkLastMessage,
-            boolean unitOfWorkBoundaryReached, String originatinStepId, String... values) {
-
+    public static void addInputMessage(AbstractComponentRuntimeTestSupport testComponent, boolean unitOfWorkBoundaryReached,
+            String originatinStepId, String... values) {
         ArrayList<String> payload = new ArrayList<String>();
 
         for (String s : values) {
@@ -74,23 +66,15 @@ public class MessageTestHelper {
         Message message = new MessageBuilder(originatinStepId).withPayloadString(payload).build();
 
         testComponent.getMessages().add(new HandleParams(message, unitOfWorkBoundaryReached));
-        if (unitOfWorkLastMessage) {
-            testComponent.getMessages().add(new ControlMessage(originatinStepId));
-        }
 
     }
 
-    public static void addInputMessage(AbstractComponentRuntimeTestSupport testComponent, boolean unitOfWorkLastMessage,
-            boolean unitOfWorkBoundaryReached, String originatinStepId, String key, Object value) {
-
+    public static void addInputMessage(AbstractComponentRuntimeTestSupport testComponent, boolean unitOfWorkBoundaryReached,
+            String originatinStepId, String key, Object value) {
         Message message = new MessageBuilder(originatinStepId)
                 .withPayload(new PayloadBuilder().withRow(new EntityDataBuilder().withKV(key, value).build()).buildED()).build();
 
         testComponent.getMessages().add(new HandleParams(message, unitOfWorkBoundaryReached));
-        if (unitOfWorkLastMessage) {
-            testComponent.getMessages().add(new ControlMessage(originatinStepId));
-        }
-
     }
 
     public static void addOutputMonitor(AbstractComponentRuntimeTestSupport testComponent, Message... messages) {
@@ -117,7 +101,6 @@ public class MessageTestHelper {
     }
 
     public static void addOutputMonitor(AbstractComponentRuntimeTestSupport testComponent, int startMessageCount, int shutdownMessageCount) {
-
         testComponent.getExpectedMonitors().add(getMessageMonitor(startMessageCount, shutdownMessageCount));
     }
 

@@ -24,9 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.runtime.ControlMessage;
-import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentAttributeSettingsBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
@@ -39,7 +36,7 @@ import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class MergerTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
+public class MergerTest extends AbstractComponentRuntimeTestSupport {
 
     @Test
     @Override
@@ -95,11 +92,9 @@ public class MergerTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
         ((Merger) spy).attributesToMergeOn = attributesToJoinOn;
 
         // Messages
-        MessageTestHelper.addInputMessage(this, false, false, "step1", 
-        		new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2).build());
+        MessageTestHelper.addInputMessage(this, false, "step1", new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2).build());
         
-        MessageTestHelper.addInputMessage(this, false, true, "step1", 
-                new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3).build());
+        MessageTestHelper.addInputMessage(this, true, "step1", new EntityDataBuilder().withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1).withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3).build());
         
         // Expected
         MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());

@@ -49,7 +49,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.mockito.Mockito;
 
-public abstract class AbstractComponentRuntimeTestSupport<T> {
+public abstract class AbstractComponentRuntimeTestSupport {
 
 	public static String MODEL_ATTR_ID_1 = "attr1";
 	public static String MODEL_ATTR_NAME_1 = "attr1Name";

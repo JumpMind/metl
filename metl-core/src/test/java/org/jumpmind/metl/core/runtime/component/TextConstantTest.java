@@ -22,20 +22,15 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
-
-import org.jumpmind.metl.core.runtime.ControlMessage;
-import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class TextConstantTest extends AbstractComponentRuntimeTestSupport<ArrayList<String>> {
+public class TextConstantTest extends AbstractComponentRuntimeTestSupport {
 
 	@Test
 	@Override
@@ -91,7 +86,7 @@ public class TextConstantTest extends AbstractComponentRuntimeTestSupport<ArrayL
 		((TextConstant) spy).constantText = "GO BUCKS";
 		((TextConstant) spy).splitOnLineFeed = false;
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1", "Ohio State");
+		MessageTestHelper.addInputMessage(this, true, "step1", "Ohio State");
 		
 		// Expected
 		MessageTestHelper.addOutputMonitor(this, "GO BUCKS");
@@ -108,7 +103,7 @@ public class TextConstantTest extends AbstractComponentRuntimeTestSupport<ArrayL
 		((TextConstant) spy).splitOnLineFeed = true;
 		((TextConstant) spy).textRowsPerMessage = 2;
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1", "Ohio State\nBuckeyes");
+		MessageTestHelper.addInputMessage(this, true, "step1", "Ohio State\nBuckeyes");
 		
 		// Expected
 		MessageTestHelper.addOutputMonitor(this, "GO BUCKS");
@@ -125,7 +120,7 @@ public class TextConstantTest extends AbstractComponentRuntimeTestSupport<ArrayL
 		((TextConstant) spy).splitOnLineFeed = true;
 		((TextConstant) spy).textRowsPerMessage = 2;
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1", "Ohio State\nBuckeyes");
+		MessageTestHelper.addInputMessage(this, true, "step1", "Ohio State\nBuckeyes");
 		
 		// Expected
 		MessageTestHelper.addOutputMonitor(this, new MessageBuilder()
@@ -143,7 +138,7 @@ public class TextConstantTest extends AbstractComponentRuntimeTestSupport<ArrayL
 		((TextConstant) spy).splitOnLineFeed = true;
 		((TextConstant) spy).textRowsPerMessage = 1;
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1", "Ohio State\nBuckeyes");
+		MessageTestHelper.addInputMessage(this, true, "step1", "Ohio State\nBuckeyes");
 		
 		// Expected
 		MessageTestHelper.addOutputMonitor(this, 

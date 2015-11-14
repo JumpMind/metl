@@ -33,12 +33,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.jumpmind.metl.core.runtime.ControlMessage;
-import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.IStreamable;
 import org.jumpmind.properties.TypedProperties;
@@ -47,7 +42,7 @@ import org.mockito.Mockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class UnzipTest extends AbstractComponentRuntimeTestSupport<ArrayList<String>> {
+public class UnzipTest extends AbstractComponentRuntimeTestSupport {
 
 	@Override
 	public void testStartDefaults() {
@@ -83,7 +78,7 @@ public class UnzipTest extends AbstractComponentRuntimeTestSupport<ArrayList<Str
 		// Setup
 		setupHandle(true);
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1", "test.zip");
+		MessageTestHelper.addInputMessage(this, true, "step1", "test.zip");
 		
 		// Expected
 		MessageTestHelper.addOutputMonitor(this, "");

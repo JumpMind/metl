@@ -29,9 +29,9 @@ import java.util.Map;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Merger extends AbstractComponentRuntime {

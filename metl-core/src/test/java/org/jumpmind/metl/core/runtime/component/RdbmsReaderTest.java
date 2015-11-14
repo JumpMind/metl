@@ -45,10 +45,10 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
@@ -110,6 +110,7 @@ public class RdbmsReaderTest {
         ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
         inboundPayload.add(new EntityData());
         message.setPayload(inboundPayload);
+        reader.setRunWhen(RdbmsReader.PER_MESSAGE);
 
         SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
         reader.handle(message, msgTarget, true);
@@ -131,6 +132,7 @@ public class RdbmsReaderTest {
     public void testReaderFlowFromMultipleContentMsgs() throws Exception {
 
         RdbmsReader reader = new RdbmsReader();
+        reader.setRunWhen(RdbmsReader.PER_MESSAGE);
         reader.start(0,
                 new ComponentContext(null, readerFlowStepMultiQuery, null, new ExecutionTrackerNoOp(), deployedResources, null, null));
         Message message = new Message("fake step id");

@@ -25,14 +25,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
+import org.jumpmind.properties.TypedProperties;
 
 public class Union extends AbstractComponentRuntime {
 

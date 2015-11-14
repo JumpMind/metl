@@ -495,4 +495,8 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             this.sqlToExecute = sqlToExecute;
         }
     }
+	
+	public void setRunWhen(String runWhen) {
+        this.runWhen = runWhen;
+    }
 }

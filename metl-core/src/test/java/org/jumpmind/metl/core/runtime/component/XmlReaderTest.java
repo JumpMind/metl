@@ -25,23 +25,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.metl.core.model.Resource;
-import org.jumpmind.metl.core.runtime.ControlMessage;
-import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.utils.TestUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.junit.Test;
 
-public class XmlReaderTest extends AbstractComponentRuntimeTestSupport<ArrayList<String>> {
+public class XmlReaderTest extends AbstractComponentRuntimeTestSupport {
 
     @Override
     public void testStartDefaults() {
@@ -80,7 +75,7 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport<ArrayList
         setupHandle(TestUtils.XML_BASIC);
         ((XmlReader) spy).getFileNameFromMessage = true;
 
-        MessageTestHelper.addInputMessage(this, true, true, "step1", "/text.xml");
+        MessageTestHelper.addInputMessage(this, true, "step1", "/text.xml");
 
         // Expected
         MessageTestHelper.addOutputMonitor(this, TestUtils.getTestXMLFileContent(TestUtils.XML_BASIC));
@@ -95,7 +90,7 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport<ArrayList
         ((XmlReader) spy).getFileNameFromMessage = true;
         ((XmlReader) spy).readTag = "Header";
 
-        MessageTestHelper.addInputMessage(this, true, true, "step1", "/text.xml");
+        MessageTestHelper.addInputMessage(this, true, "step1", "/text.xml");
 
         // Expected
         MessageTestHelper.addOutputMonitor(this, true, "<Header>" + "<Title>Title</Title>" + "</Header>");
@@ -111,7 +106,7 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport<ArrayList
         ((XmlReader) spy).getFileNameFromMessage = true;
         ((XmlReader) spy).readTag = "Item";
 
-        MessageTestHelper.addInputMessage(this, true, true, "step1", "/text.xml");
+        MessageTestHelper.addInputMessage(this, true, "step1", "/text.xml");
 
         // Expected
         MessageTestHelper.addOutputMonitor(this, true,
@@ -128,7 +123,7 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport<ArrayList
         setupHandle(TestUtils.XML_SINGLE_LINE);
         ((XmlReader) spy).getFileNameFromMessage = true;
 
-        MessageTestHelper.addInputMessage(this, true, true, "step1", "/text.xml");
+        MessageTestHelper.addInputMessage(this, true, "step1", "/text.xml");
 
         // Expected
         MessageTestHelper.addOutputMonitor(this, true, TestUtils.getTestXMLFileContent(TestUtils.XML_SINGLE_LINE));
@@ -163,6 +158,8 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport<ArrayList
 
         when(((XmlReader) spy).getFile(anyString())).thenReturn(xmlFile);
         when(((XmlReader) spy).getFile(anyString(), anyString())).thenReturn(xmlFile);
+        
+        ((XmlReader) spy).runWhen = XmlReader.PER_MESSAGE;
 
     }
 }

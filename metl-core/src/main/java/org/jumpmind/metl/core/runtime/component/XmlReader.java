@@ -111,10 +111,8 @@ public class XmlReader extends AbstractComponentRuntime {
         XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
         ArrayList<String> outboundPayload = new ArrayList<String>();
 
-        int filesProcessed = 0;
         for (String file : files) {            
             log(LogLevel.INFO, "Reading %s", file);
-            filesProcessed++;
             Map<String, Serializable> headers = new HashMap<>();
             headers.put("source.file.path", file);
             File xmlFile = null;
@@ -231,4 +229,7 @@ public class XmlReader extends AbstractComponentRuntime {
         return true;
     }
 
+    public void setRunWhen(String runWhen) {
+        this.runWhen = runWhen;
+    }
 }

@@ -27,9 +27,9 @@ import java.util.List;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 

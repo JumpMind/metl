@@ -21,15 +21,10 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -37,7 +32,7 @@ import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class MultiplierTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
+public class MultiplierTest extends AbstractComponentRuntimeTestSupport {
 
 	@Test
 	@Override
@@ -91,11 +86,13 @@ public class MultiplierTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 		setupHandle();
 		((Multiplier) spy).sourceStepId = "step1";
 		
-		MessageTestHelper.addInputMessage(this, true, false, "step1", ENTITY_1_KEY_1, ENTITY_1_VALUE_1);
-		MessageTestHelper.addInputMessage(this, true, false, "step1", ENTITY_1_KEY_2, ENTITY_1_VALUE_2);
+		MessageTestHelper.addInputMessage(this, false, "step1", ENTITY_1_KEY_1, ENTITY_1_VALUE_1);
+		MessageTestHelper.addInputMessage(this, false, "step1", ENTITY_1_KEY_2, ENTITY_1_VALUE_2);
+		MessageTestHelper.addControlMessage(this, "step1", true);
 		
-		MessageTestHelper.addInputMessage(this, false, false, "step2", ENTITY_2_KEY_1, ENTITY_2_VALUE_1);
+		MessageTestHelper.addInputMessage(this, false, "step2", ENTITY_2_KEY_1, ENTITY_2_VALUE_1);
 		
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		MessageTestHelper.addOutputMonitor(
@@ -117,7 +114,7 @@ public class MultiplierTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 		setupHandle();
 		((Multiplier) spy).sourceStepId = "step1";
 		
-		MessageTestHelper.addInputMessage(this, false, false, "step2", ENTITY_2_KEY_1, ENTITY_2_VALUE_1);
+		MessageTestHelper.addInputMessage(this, false, "step2", ENTITY_2_KEY_1, ENTITY_2_VALUE_1);
 		
 		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		
@@ -131,7 +128,7 @@ public class MultiplierTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 		setupHandle();
 		((Multiplier) spy).sourceStepId = "step1";
 		
-		MessageTestHelper.addInputMessage(this, true, false, "step1", ENTITY_1_KEY_1, ENTITY_1_VALUE_1);
+		MessageTestHelper.addInputMessage(this, false, "step1", ENTITY_1_KEY_1, ENTITY_1_VALUE_1);
 		
 		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		

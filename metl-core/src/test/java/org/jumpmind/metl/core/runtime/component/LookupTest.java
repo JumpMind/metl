@@ -20,9 +20,6 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.util.ArrayList;
-
-import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
@@ -34,7 +31,7 @@ import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class LookupTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
+public class LookupTest extends AbstractComponentRuntimeTestSupport {
 
 	@Test
 	@Override
@@ -101,24 +98,25 @@ public class LookupTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 		((Lookup) spy).replacementKeyAttributeId = MODEL_ATTR_ID_1;
 		((Lookup) spy).replacementValueAttributeId = MODEL_ATTR_ID_3;
 		
-		MessageTestHelper.addInputMessage(this, false, false, "step1", 
-				MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1);
+		MessageTestHelper.addInputMessage(this, false, "step1", MODEL_ATTR_ID_1, 
+				MODEL_ATTR_NAME_1);
 		
-		MessageTestHelper.addInputMessage(this, false, false, "step2", 
-				new EntityDataBuilder()
-					.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
-					.withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
-					.withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
-				.build());
+		MessageTestHelper.addInputMessage(this, false, "step2", new EntityDataBuilder()
+        	.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+        	.withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
+        	.withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
+        .build());
 					
-		MessageTestHelper.addInputMessage(this, true, true, "step1", 
-				new EntityDataBuilder()
-					.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
-					.withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
-					.withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
-				.build());
+		MessageTestHelper.addInputMessage(this, true, "step1", new EntityDataBuilder()
+        	.withKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+        	.withKV(MODEL_ATTR_ID_2, MODEL_ATTR_NAME_2)
+        	.withKV(MODEL_ATTR_ID_3, MODEL_ATTR_NAME_3)
+        .build());
+		
+		MessageTestHelper.addControlMessage(this, "step1", true);
 		
 		// Expected
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		MessageTestHelper.addOutputMonitor(this, 
