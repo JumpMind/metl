@@ -40,6 +40,7 @@ java -jar metl.war install
 ### Develop
 To develop in [Eclipse](http://eclipse.org) run the following and import the projects:
 ~~~~~
+cd metl-assemble
 ./gradlew develop
 ~~~~~
 
