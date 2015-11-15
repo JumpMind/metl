@@ -25,77 +25,92 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class HandleParams {
-	Message inputMessage;
-	TestingSendMessageCallback callback;
-	Boolean unitOfWorkLastMessage;
-	
-	public HandleParams() {
-		this.inputMessage = new Message("inputMessage");
-		this.callback = new TestingSendMessageCallback();
-		this.unitOfWorkLastMessage = false;
-	}
-	
-	public HandleParams(Message inputMessage) {
-		this.inputMessage = inputMessage;
-		this.callback = new TestingSendMessageCallback();
-		this.unitOfWorkLastMessage = false;
-	}
-	
-	public HandleParams(Message inputMessage, boolean unitOfWorkLastMessage) {
-		this.inputMessage = inputMessage;
-		this.callback = new TestingSendMessageCallback();
-		this.unitOfWorkLastMessage = unitOfWorkLastMessage;
-	}
-	
-	Message getInputMessage() {
-		return inputMessage;
-	}
-	void setInputMessage(Message inputMessage) {
-		this.inputMessage = inputMessage;
-	}
-	TestingSendMessageCallback getCallback() {
-		return callback;
-	}
-	void setTarget(TestingSendMessageCallback callback) {
-		this.callback = callback;
-	}
-	Boolean getUnitOfWorkLastMessage() {
-		return unitOfWorkLastMessage;
-	}
-	void setUnitOfWorkLastMessage(Boolean unitOfWorkLastMessage) {
-		this.unitOfWorkLastMessage = unitOfWorkLastMessage;
-	}
-	
-	public class TestingSendMessageCallback implements ISendMessageCallback {
-		HandleMessageMonitor monitor = new HandleMessageMonitor();
-		
-		@Override
-		public void sendMessage(Map<String, Serializable> additionalHeaders, Serializable payload, String... targetStepIds) {
-			if (payload instanceof List) {
-				Message message = new Message("unitTest");
-				message.setPayload(payload);
-				monitor.getMessages().add(message);
-			}
-			
-			Collections.addAll(monitor.getTargetStepIds(), targetStepIds);
-		}
+    Message inputMessage;
+    TestingSendMessageCallback callback;
+    Boolean unitOfWorkLastMessage;
 
-		@Override
-		public void sendShutdownMessage(boolean cancel) {
-			monitor.incrementShutdownMessageCount();
-		}
+    public HandleParams() {
+        this.inputMessage = new Message("inputMessage");
+        this.callback = new TestingSendMessageCallback();
+        this.unitOfWorkLastMessage = false;
+    }
 
-		@Override
-		public void sendControlMessage(Map<String, Serializable> messageHeaders) {
-			monitor.incrementStartupMessageCount();
-		}
+    public HandleParams(Message inputMessage) {
+        this.inputMessage = inputMessage;
+        this.callback = new TestingSendMessageCallback();
+        this.unitOfWorkLastMessage = false;
+    }
 
-		HandleMessageMonitor getMonitor() {
-			return monitor;
-		}
-	}
+    public HandleParams(Message inputMessage, boolean unitOfWorkLastMessage) {
+        this.inputMessage = inputMessage;
+        this.callback = new TestingSendMessageCallback();
+        this.unitOfWorkLastMessage = unitOfWorkLastMessage;
+    }
+
+    Message getInputMessage() {
+        return inputMessage;
+    }
+
+    void setInputMessage(Message inputMessage) {
+        this.inputMessage = inputMessage;
+    }
+
+    TestingSendMessageCallback getCallback() {
+        return callback;
+    }
+
+    void setTarget(TestingSendMessageCallback callback) {
+        this.callback = callback;
+    }
+
+    Boolean getUnitOfWorkLastMessage() {
+        return unitOfWorkLastMessage;
+    }
+
+    void setUnitOfWorkLastMessage(Boolean unitOfWorkLastMessage) {
+        this.unitOfWorkLastMessage = unitOfWorkLastMessage;
+    }
+
+    public class TestingSendMessageCallback implements ISendMessageCallback {
+        HandleMessageMonitor monitor = new HandleMessageMonitor();
+
+        @Override
+        public void sendMessage(Map<String, Serializable> additionalHeaders, Serializable payload, String... targetStepIds) {
+            if (payload instanceof List) {
+                Message message = new Message("unitTest");
+                message.setPayload(payload);
+                monitor.getMessages().add(message);
+            }
+
+            Collections.addAll(monitor.getTargetStepIds(), targetStepIds);
+        }
+
+        @Override
+        public void sendShutdownMessage(boolean cancel) {
+            monitor.incrementShutdownMessageCount();
+        }
+
+        @Override
+        public void sendControlMessage(Map<String, Serializable> messageHeaders) {
+            monitor.incrementStartupMessageCount();
+        }
+
+        @Override
+        public void forward(Message message) {
+            if (message instanceof ControlMessage) {
+                sendControlMessage(message.getHeader());
+            } else {
+                sendMessage(message.getHeader(), message.getPayload());
+            }
+        };
+
+        HandleMessageMonitor getMonitor() {
+            return monitor;
+        }
+    }
 }

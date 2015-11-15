@@ -23,6 +23,8 @@ package org.jumpmind.metl.core.runtime.flow;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.jumpmind.metl.core.runtime.Message;
+
 public interface ISendMessageCallback {
 
     public void sendMessage(Map<String, Serializable> messageHeaders, Serializable payload, String... targetStepIds);
@@ -30,5 +32,7 @@ public interface ISendMessageCallback {
     public void sendShutdownMessage(boolean cancel);
     
     public void sendControlMessage(Map<String, Serializable> messageHeaders);
+    
+    public void forward(Message message);
     
 }

@@ -35,6 +35,7 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
@@ -159,15 +160,27 @@ public class MessageScriptHelper {
     protected void forwardMessageWithParameter(String parameterName, Serializable value) {
         Map<String, Serializable> headers = new HashMap<>();
         headers.put(parameterName, value);
-        callback.sendMessage(headers, inputMessage.getPayload());
+        if (inputMessage instanceof ControlMessage) {
+            callback.sendControlMessage(headers);
+        } else {
+            callback.sendMessage(headers, inputMessage.getPayload());
+        }
     }
     
     protected void forwardMessageWithParameters(Map<String,Serializable> params) {
-        callback.sendMessage(params, inputMessage.getPayload());
+        if (inputMessage instanceof ControlMessage) {
+            callback.sendControlMessage(params);
+        } else {
+            callback.sendMessage(params, inputMessage.getPayload());
+        }
     }
     
     protected void forwardMessage() {
-        callback.sendMessage(null, inputMessage.getPayload());
+        if (inputMessage instanceof ControlMessage) {
+            callback.sendControlMessage(inputMessage.getHeader());
+        } else {
+            callback.sendMessage(inputMessage.getHeader(), inputMessage.getPayload());
+        }
     }
     
     protected void sendControlMessage() {

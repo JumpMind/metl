@@ -32,6 +32,11 @@ public class Message implements Serializable {
 
     Serializable payload;
     
+    public Message(String originatingStepId, Serializable payload) {
+        this(originatingStepId);
+        this.payload = payload;
+    }
+    
     public Message(String originatingStepId) {
         this.header = new MessageHeader(originatingStepId);
     }

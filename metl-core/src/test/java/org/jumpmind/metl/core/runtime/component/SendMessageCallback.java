@@ -26,30 +26,32 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 class SendMessageCallback<T> implements ISendMessageCallback {
 
     List<T> payloadList = new ArrayList<T>();
-    
+
     List<List<String>> targetStepIds = new ArrayList<List<String>>();
-    
+
     boolean sentStartup = false;
-    
+
     boolean sentShutdown = false;
 
     @SuppressWarnings("unchecked")
     @Override
     public void sendMessage(Map<String, Serializable> additionalHeaders, Serializable payload, String... targetStepIds) {
-        payloadList.add((T)payload);
+        payloadList.add((T) payload);
         this.targetStepIds.add(Arrays.asList(targetStepIds));
     }
-    
+
     @Override
     public void sendShutdownMessage(boolean cancel) {
         sentShutdown = true;
     }
-    
+
     @Override
     public void sendControlMessage(Map<String, Serializable> messageHeaders) {
         sentStartup = true;
@@ -58,17 +60,26 @@ class SendMessageCallback<T> implements ISendMessageCallback {
     public List<T> getPayloadList() {
         return payloadList;
     }
-    
+
     public List<List<String>> getTargetStepIds() {
         return targetStepIds;
     }
- 
+
     public boolean isSentShutdown() {
         return sentShutdown;
     }
-    
+
     public boolean isSentStartup() {
         return sentStartup;
     }
-    
+
+    @Override
+    public void forward(Message message) {
+        if (message instanceof ControlMessage) {
+            sendControlMessage(message.getHeader());
+        } else {
+            sendMessage(message.getHeader(), message.getPayload());
+        }
+    }
+
 }

@@ -248,9 +248,9 @@ public class StepRuntime implements Runnable {
             componentRuntime.handle(inputMessage, target, unitOfWorkBoundaryReached);
 
             if (unitOfWorkBoundaryReached) {
-            	verifyAndSendLastMessageToTargets(target, inputMessage);
+                verifyAndSendLastMessageToTargets(target, inputMessage);
             }
-            
+
             /*
              * Detect shutdown condition
              */
@@ -287,17 +287,17 @@ public class StepRuntime implements Runnable {
     }
 
     private void verifyAndSendLastMessageToTargets(ISendMessageCallback target, Message inputMessage) {
-    	for (StepRuntime targetRuntime : targetStepRuntimes) {
-    		if (!targetStepRuntimeUnitOfWorkSent.contains(targetRuntime.getComponentContext().getFlowStep().getId())) {
-    			log.info("Automatically sending a last unit of work message from " + componentContext.getFlowStep().getComponent().getName() + 
-    					" to " + targetRuntime.getComponentContext().getFlowStep().getComponent().getName() + 
-    					" because one was received but not sent forward." );
-    			target.sendControlMessage(inputMessage.getHeader());
-    		}
-    		
-    	}
+        for (StepRuntime targetRuntime : targetStepRuntimes) {
+            if (!targetStepRuntimeUnitOfWorkSent.contains(targetRuntime.getComponentContext().getFlowStep().getId())) {
+                log.info("Automatically sending a last unit of work message from " + componentContext.getFlowStep().getComponent().getName()
+                        + " to " + targetRuntime.getComponentContext().getFlowStep().getComponent().getName()
+                        + " because one was received but not sent forward.");
+                target.sendControlMessage(inputMessage.getHeader());
+            }
+
+        }
     }
-    
+
     private boolean calculateUnitOfWorkLastMessage(Message inputMessage) {
         boolean lastMessage = true;
         if (inputMessage instanceof ControlMessage) {
@@ -425,24 +425,23 @@ public class StepRuntime implements Runnable {
 
         String source = "ENTRY";
         try {
-        	source = componentContext.getManipulatedFlow().findFlowStepWithId(header.getOriginatingStepId()).getName();
-        }
-        catch (NullPointerException e) {
-        	// Do nothing allow "ENTRY" as the source. 
+            source = componentContext.getManipulatedFlow().findFlowStepWithId(header.getOriginatingStepId()).getName();
+        } catch (NullPointerException e) {
+            // Do nothing allow "ENTRY" as the source.
         }
 
         componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
                 String.format("INPUT %s{sequenceNumber=%d,unitOfWorkBoundaryReached=%s,source='%s',headers=%s}",
-                        inputMessage.getClass().getSimpleName(), header.getSequenceNumber(), 
-                        unitOfWorkBoundaryReached, source, header));
+                        inputMessage.getClass().getSimpleName(), header.getSequenceNumber(), unitOfWorkBoundaryReached, source, header));
         Serializable payload = inputMessage.getPayload();
         if (payload instanceof List) {
             @SuppressWarnings("unchecked")
             List<Object> list = (List<Object>) payload;
             for (Object object : list) {
                 if (object instanceof EntityData && componentContext.getFlowStep().getComponent().getInputModel() != null) {
-                    componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext, String.format(
-                            "INPUT Message Payload: %s", componentContext.getFlowStep().getComponent().toRow((EntityData) object, true, true)));
+                    componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
+                            String.format("INPUT Message Payload: %s",
+                                    componentContext.getFlowStep().getComponent().toRow((EntityData) object, true, true)));
                 } else {
                     componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
                             String.format("INPUT Message Payload: %s", object));
@@ -457,26 +456,26 @@ public class StepRuntime implements Runnable {
         String targets = targetFlowStepIds != null && targetFlowStepIds.length > 0 ? Arrays.toString(targetFlowStepIds) : "[all]";
         int threadNumber = ThreadUtils.getThreadNumber();
 
-                MessageHeader header = message.getHeader();
-                componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
-                        String.format("OUTPUT %s{sequenceNumber=%d,headers=%s,targetsteps:%s}", message.getClass().getSimpleName(),
-                                header.getSequenceNumber(), header, targets));
+        MessageHeader header = message.getHeader();
+        componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
+                String.format("OUTPUT %s{sequenceNumber=%d,headers=%s,targetsteps:%s}", message.getClass().getSimpleName(),
+                        header.getSequenceNumber(), header, targets));
 
-                Serializable payload = message.getPayload();
-                if (payload instanceof List) {
-                    @SuppressWarnings("unchecked")
-                    List<Object> list = (List<Object>) payload;
-                    for (Object object : list) {
-                        if (object instanceof EntityData) {
-                            componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
-                                    String.format("OUTPUT Message Payload: %s",
-                                            componentContext.getFlowStep().getComponent().toRow((EntityData) object, true, false)));
-                        } else {
-                            componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
-                                    String.format("OUTPUT Message Payload: %s", object));
-                        }
-                    }
+        Serializable payload = message.getPayload();
+        if (payload instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<Object> list = (List<Object>) payload;
+            for (Object object : list) {
+                if (object instanceof EntityData) {
+                    componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
+                            String.format("OUTPUT Message Payload: %s",
+                                    componentContext.getFlowStep().getComponent().toRow((EntityData) object, true, false)));
+                } else {
+                    componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
+                            String.format("OUTPUT Message Payload: %s", object));
                 }
+            }
+        }
     }
 
     class SendMessageCallback implements ISendMessageCallback {
@@ -492,7 +491,7 @@ public class StepRuntime implements Runnable {
             newMessage.setPayload(payload);
             return newMessage;
         }
-        
+
         private Message createMessage(Message newMessage, Map<String, Serializable> headerSettings) {
             ComponentStatistics statistics = componentContext.getComponentStatistics();
             MessageHeader header = newMessage.getHeader();
@@ -506,7 +505,6 @@ public class StepRuntime implements Runnable {
             header.setSequenceNumber(statistics.getNumberOutboundMessages(ThreadUtils.getThreadNumber()) + 1);
             return newMessage;
         }
-
 
         private Serializable copy(Serializable payload) {
             if (payload instanceof ArrayList) {
@@ -548,7 +546,7 @@ public class StepRuntime implements Runnable {
                         }
                         targetRuntime.queue(message);
                         if (message instanceof ControlMessage) {
-                        	targetStepRuntimeUnitOfWorkSent.add(targetRuntime.getComponentContext().getFlowStep().getId());
+                            targetStepRuntimeUnitOfWorkSent.add(targetRuntime.getComponentContext().getFlowStep().getId());
                         }
                     } catch (Exception e) {
                         if (e instanceof RuntimeException) {
@@ -574,11 +572,20 @@ public class StepRuntime implements Runnable {
         }
 
         @Override
-        public void sendMessage(Map<String, Serializable> additionalHeaders, Serializable payload,
-                String... targetFlowStepIds) {
+        public void sendMessage(Map<String, Serializable> additionalHeaders, Serializable payload, String... targetFlowStepIds) {
             payload = copy(payload);
             FlowStep flowStep = componentContext.getFlowStep();
             sendMessage(createMessage(new Message(flowStep.getId()), additionalHeaders, payload), targetFlowStepIds);
+
+        }
+
+        @Override
+        public void forward(Message message) {
+            if (message instanceof ControlMessage) {
+                sendControlMessage(message.getHeader());
+            } else {
+                sendMessage(message.getHeader(), message.getPayload());
+            }
 
         }
     }
