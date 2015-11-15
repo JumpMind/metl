@@ -79,7 +79,7 @@ public class FlowRuntimeTest {
     	flowRuntime.start("", new HashMap<String, IResourceRuntime>(), agent, new ArrayList<Notification>(), new HashMap<String, String>());
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step").getNumberInboundMessages(1));
-    	Assert.assertEquals(2, flowRuntime.getComponentStatistics("Target Step").getNumberInboundMessages(1));
+    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Step").getNumberInboundMessages(1));
     }
     
     @Test
@@ -91,8 +91,8 @@ public class FlowRuntimeTest {
     	flowRuntime.start("", new HashMap<String, IResourceRuntime>(), agent, new ArrayList<Notification>(), new HashMap<String, String>());
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step").getNumberInboundMessages(1));
-    	Assert.assertEquals(2, flowRuntime.getComponentStatistics("Target Step 1").getNumberInboundMessages(1));
-    	Assert.assertEquals(2, flowRuntime.getComponentStatistics("Target Step 2").getNumberInboundMessages(1));    	
+    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Step 1").getNumberInboundMessages(1));
+    	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Step 2").getNumberInboundMessages(1));    	
     }
     
     @Test
@@ -105,7 +105,7 @@ public class FlowRuntimeTest {
         flowRuntime.waitForFlowCompletion();
         Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step 1").getNumberInboundMessages(1));
         Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step 2").getNumberInboundMessages(1));
-        Assert.assertEquals(4, flowRuntime.getComponentStatistics("Target Step").getNumberInboundMessages(1));     
+        Assert.assertEquals(2, flowRuntime.getComponentStatistics("Target Step").getNumberInboundMessages(1));     
     }
     
     private Flow createSimpleTwoStepNoOpFlow(Folder folder) {
