@@ -524,7 +524,7 @@ public class PropertySheet extends AbsoluteLayout {
                     if (value instanceof FlowStep) {
                         FlowStep step = (FlowStep) value;
                         String projectVersionId = step.getComponent().getProjectVersionId();
-                        List<FlowName> flows = context.getConfigurationService().findFlowsInProject(projectVersionId);
+                        List<FlowName> flows = context.getConfigurationService().findFlowsInProject(projectVersionId, false);
                         final AbstractSelect combo = new ComboBox(definition.getName());
                         combo.setImmediate(true);
                         for (FlowName name : flows) {

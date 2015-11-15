@@ -65,7 +65,7 @@ public interface IConfigurationService {
     
     public List<ComponentName> findSharedComponentsInProject(String projectVersionId);
     
-    public List<FlowName> findFlowsInProject(String projectVersionId);
+    public List<FlowName> findFlowsInProject(String projectVersionId, boolean testFlows);
 
     public List<Folder> findFolders(String projectVersionId, FolderType type);
     

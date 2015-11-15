@@ -24,4 +24,14 @@ public class FlowName extends AbstractName {
 
     private static final long serialVersionUID = 1L;
     
+    private boolean test;
+    
+    public void setTest(boolean test) {
+        this.test = test;
+    }
+    
+    public boolean isTest() {
+        return test;
+    }
+    
 }

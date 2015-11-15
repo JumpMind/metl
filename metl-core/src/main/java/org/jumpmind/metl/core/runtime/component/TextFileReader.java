@@ -126,7 +126,6 @@ public class TextFileReader extends AbstractComponentRuntime {
     	
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
-
 			List<String> files = getFilesToRead(inputMessage);
     		processFiles(files, callback, unitOfWorkBoundaryReached);
     	}
@@ -231,7 +230,9 @@ public class TextFileReader extends AbstractComponentRuntime {
                         linesInMessage++;
                     }
                 }
-                callback.sendMessage(headers, payload);
+                if (payload.size() > 0) {
+                    callback.sendMessage(headers, payload);
+                }
                 linesInMessage = 0;
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());

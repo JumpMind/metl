@@ -80,12 +80,13 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
     
     @Override
-    public List<FlowName> findFlowsInProject(String projectVersionId) {
+    public List<FlowName> findFlowsInProject(String projectVersionId, boolean test) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("projectVersionId", projectVersionId);
         params.put("deleted", 0);
+        params.put("test", test ? 1 : 0);
         return find(FlowName.class, params, Flow.class);
-    }
+    }   
 
     @Override
     public List<ModelName> findModelsInProject(String projectVersionId) {
