@@ -67,7 +67,7 @@ public class MessageLogger extends AbstractComponentRuntime {
             }
         }
 
-        callback.sendMessage(null, payload);
+        callback.forward(inputMessage);
     }
 
 }
