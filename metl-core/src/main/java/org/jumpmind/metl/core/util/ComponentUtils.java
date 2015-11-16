@@ -29,11 +29,14 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 
-public class ComponentUtil {
+final public class ComponentUtils {
 
     public static final int PAYLOAD_TYPE_UNKNOWN = 0;
     public static final int PAYLOAD_TYPE_LIST_STRING = 1;
     public static final int PAYLOAD_TYPE_LIST_ENTITY = 2;
+    
+    private ComponentUtils() {
+    }
 
     public static Object getAttributeValue(Model model, List<EntityData> rows, String entityName, String attributeName) {
         List<Object> values = getAttributeValues(model, rows, entityName, attributeName);

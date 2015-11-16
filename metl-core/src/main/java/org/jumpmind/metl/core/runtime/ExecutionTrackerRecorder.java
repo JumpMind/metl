@@ -208,7 +208,10 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     @Override
     public void flowStepFailedOnComplete(ComponentContext context, Throwable error) {
         super.flowStepFailedOnComplete(context, error);
-        steps.values().forEach(step -> setToErrorStatus(step));
+        ExecutionStep step = getExecutionStep(1, context);
+        if (step != null) {
+            setToErrorStatus(step);
+        }
     }
 
     private void setToErrorStatus(ExecutionStep step) {

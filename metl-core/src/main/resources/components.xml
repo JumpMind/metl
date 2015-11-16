@@ -21,6 +21,29 @@
 
 -->
 <components>
+    <component id='Assert' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none'>
+        <name>Assert</name>
+        <className>org.jumpmind.metl.core.runtime.component.Assert</className>
+        <settings>
+            <setting id='expected.entity.messages.count' type='integer' required='false'>
+                <name>Expected Number of Entity Messages</name>
+                <defaultValue>1</defaultValue>
+            </setting>
+            <setting id='expected.text.messages.count' type='integer' required='false'>
+                <name>Expected Number of Text Messages</name>
+                <defaultValue>1</defaultValue>
+            </setting>
+            <setting id='expected.control.messages.count' type='integer' required='false'>
+                <name>Expected Number of Control Messages</name>
+                <defaultValue>1</defaultValue>
+            </setting>
+            <setting id='expected.empty.payload.messages.count' type='integer' required='false'>
+                <name>Expected Number of Empty Payload Messages</name>
+                <defaultValue>0</defaultValue>
+            </setting>
+            
+        </settings>
+    </component>   
     <component id='Call Flow' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none'>
         <name>Call Flow</name>
         <className>org.jumpmind.metl.core.runtime.component.CallFlow</className>

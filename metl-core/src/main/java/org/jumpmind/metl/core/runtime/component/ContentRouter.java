@@ -35,7 +35,7 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.util.ComponentUtil;
+import org.jumpmind.metl.core.util.ComponentUtils;
 import org.jumpmind.properties.TypedProperties;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -82,10 +82,10 @@ public class ContentRouter extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-    	if (ComponentUtil.getPayloadType(inputMessage.getPayload()) == ComponentUtil.PAYLOAD_TYPE_LIST_ENTITY) {
+    	if (ComponentUtils.getPayloadType(inputMessage.getPayload()) == ComponentUtils.PAYLOAD_TYPE_LIST_ENTITY) {
     		handleEntityListPayload(inputMessage, callback, unitOfWorkBoundaryReached);
     	}
-    	else if (ComponentUtil.getPayloadType(inputMessage.getPayload()) == ComponentUtil.PAYLOAD_TYPE_LIST_STRING) {
+    	else if (ComponentUtils.getPayloadType(inputMessage.getPayload()) == ComponentUtils.PAYLOAD_TYPE_LIST_STRING) {
     		handleStringListPayload(inputMessage, callback, unitOfWorkBoundaryReached);
     	}
     }

@@ -21,6 +21,9 @@
 
 -->
 <ui>
+    <component-ui id="Assert UI" componentId="Assert">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-assert-48x48-color.png</iconImage>
+    </component-ui>
     <component-ui id="Call Flow UI" componentId="Call Flow">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-flow-48x48-color.png</iconImage>
     </component-ui>

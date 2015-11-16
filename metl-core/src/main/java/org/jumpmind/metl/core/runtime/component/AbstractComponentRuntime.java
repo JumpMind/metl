@@ -46,7 +46,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.util.ComponentUtil;
+import org.jumpmind.metl.core.util.ComponentUtils;
 import org.jumpmind.properties.TypedProperties;
 
 abstract public class AbstractComponentRuntime extends AbstractRuntimeObject implements IComponentRuntime {
@@ -236,12 +236,12 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
 
     protected Object getAttributeValue(Message inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
-        return ComponentUtil.getAttributeValue(getInputModel(), rows, entityName, attributeName);
+        return ComponentUtils.getAttributeValue(getInputModel(), rows, entityName, attributeName);
     }
 
     protected List<Object> getAttributeValues(Message inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
-        return ComponentUtil.getAttributeValues(getInputModel(), rows, entityName, attributeName);
+        return ComponentUtils.getAttributeValues(getInputModel(), rows, entityName, attributeName);
     }
     
     public void setComponentDefinition(XMLComponent componentDefinition) {
