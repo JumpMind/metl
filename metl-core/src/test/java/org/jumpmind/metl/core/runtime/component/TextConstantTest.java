@@ -71,7 +71,7 @@ public class TextConstantTest extends AbstractComponentRuntimeTestSupport {
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle();
-		
+		((TextConstant) spy).setRunWhen(Execute.PER_UNIT_OF_WORK);
 		MessageTestHelper.addControlMessage(this, "test", true);
 		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
 		runHandle();
@@ -154,6 +154,11 @@ public class TextConstantTest extends AbstractComponentRuntimeTestSupport {
 		return TextConstant.TYPE;
 	}
 	
+	@Override
+	public void setupHandle() {
+	    super.setupHandle();
+	    ((TextConstant) spy).setRunWhen(Execute.PER_MESSAGE);
+	}
 	
 
 }

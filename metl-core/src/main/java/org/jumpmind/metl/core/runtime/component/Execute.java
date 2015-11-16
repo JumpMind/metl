@@ -134,5 +134,9 @@ public class Execute extends AbstractComponentRuntime {
     ByteArrayOutputStream getByteArrayOutputStream() {
     	return new ByteArrayOutputStream();
     }
+    
+    public void setRunWhen(String runWhen) {
+        this.runWhen = runWhen;
+    }
 
 }

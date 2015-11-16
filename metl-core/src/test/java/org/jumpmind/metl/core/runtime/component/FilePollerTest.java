@@ -117,6 +117,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport {
 	@Override
 	public void testHandleStartupMessage() {
 		setupHandle(true);
+		((FilePoller) spy).setRunWhen(Execute.PER_UNIT_OF_WORK);
 		MessageTestHelper.addControlMessage(this, "test", false);
 		MessageTestHelper.addOutputMonitor(this, "fileAbsolutePath");
 		runHandle();
@@ -127,7 +128,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport {
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle(true);
-		
+		((FilePoller) spy).setRunWhen(Execute.PER_UNIT_OF_WORK);
 		MessageTestHelper.addControlMessage(this, "test", true);
 		MessageTestHelper.addOutputMonitor(this, "fileAbsolutePath");
 		runHandle();
@@ -208,6 +209,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport {
 		when(mockFile.getAbsolutePath()).thenReturn("fileAbsolutePath");
 		when(mockFile.lastModified()).thenReturn(1L);
 		when(mockFile.exists()).thenReturn(fileExists);
+        ((FilePoller) spy).setRunWhen(Execute.PER_MESSAGE);
 	}
 
 }

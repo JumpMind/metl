@@ -276,4 +276,8 @@ public class FilePoller extends AbstractComponentRuntime {
             }
         }
     }
+    
+    public void setRunWhen(String runWhen) {
+        this.runWhen = runWhen;
+    }
 }

@@ -94,4 +94,8 @@ public class TextConstant extends AbstractComponentRuntime {
 			callback.sendMessage(null, payload);
 		}
 	}
+	
+	public void setRunWhen(String runWhen) {
+        this.runWhen = runWhen;
+    }
 }

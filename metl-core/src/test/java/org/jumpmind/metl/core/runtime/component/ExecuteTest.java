@@ -47,7 +47,7 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport {
 	public void testStartDefaults() {
 		setupStart(new SettingsBuilder().build());
 		try {
-			((Execute) spy).start();
+			((Execute) spy).start();			
 		}
 		catch (Exception e) {
 			Assert.assertTrue(e instanceof IllegalStateException);
@@ -158,6 +158,7 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport {
 			when(((Execute) spy).getByteArrayOutputStream()).thenReturn(mockOutputStream);
 			when(mockExecute.execute()).thenReturn(outputError);
 			when(mockOutputStream.toByteArray()).thenReturn(COMMAND_OUTPUT.getBytes());
+			((Execute) spy).setRunWhen(Execute.PER_MESSAGE);
 		}
 		catch (Exception e) {
 			Assert.fail("Unable to execute " + e.getMessage());
