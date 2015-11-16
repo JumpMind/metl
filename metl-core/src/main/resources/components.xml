@@ -71,6 +71,15 @@
         <className>org.jumpmind.metl.core.runtime.component.Delay</className>
         <description></description>
         <settings>
+            <setting id='run.when' type='choice' required='false'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>                   
+                </choices>
+            </setting>  
             <setting id='delay.in.ms' type='integer' required='true'>
                 <name>Delay (ms)</name>
                 <defaultValue>1000</defaultValue>
@@ -101,6 +110,15 @@
         <className>org.jumpmind.metl.core.runtime.component.Execute</className>
         <description></description>
         <settings>
+            <setting id='run.when' type='choice' required='false'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>                   
+                </choices>
+            </setting>                              
             <setting id='command' type='text' required='true'>
                 <name>Command</name>
                 <description></description>
@@ -123,6 +141,15 @@
         <className>org.jumpmind.metl.core.runtime.component.FilePoller</className>
         <description></description>
         <settings>
+            <setting id='run.when' type='choice' required='false'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>                   
+                </choices>
+            </setting>          
             <setting id='file.pattern' type='text' required='true'>
                 <name>File Pattern</name>
                 <description></description>
@@ -205,6 +232,15 @@
         <className>org.jumpmind.metl.core.runtime.component.FileUtil</className>
         <description></description>
         <settings>
+            <setting id='run.when' type='choice' required='false'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>               
+                </choices>
+            </setting>                              
             <setting id='action' type='choice' required='false'>
                 <name>Action</name>
                 <defaultValue>Copy</defaultValue>
@@ -673,6 +709,15 @@
         <className>org.jumpmind.metl.core.runtime.component.TextConstant</className>
         <description></description>      
         <settings>
+            <setting id='run.when' type='choice' required='false'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>                   
+                </choices>
+            </setting>          
             <setting id='text' type='multiline_text' required='false'>
                 <name>Text</name>
                 <description></description>
@@ -820,6 +865,15 @@
         <className>org.jumpmind.metl.core.runtime.component.Web</className>
         <description></description>
         <settings>
+            <setting id='run.when' type='choice' required='false'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                <description></description>
+                <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>                   
+                </choices>
+            </setting>                              
             <setting id='relative.path' type='text' required='false'>
                 <name>Append To Url</name>
                 <description></description>
