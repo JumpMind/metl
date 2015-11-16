@@ -37,6 +37,7 @@ import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
@@ -94,67 +95,69 @@ public class XmlParser extends AbstractXMLComponentRuntime {
     @SuppressWarnings("unchecked")
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        ArrayList<String> inputRows = inputMessage.getPayload();
-        ArrayList<EntityData> payload = new ArrayList<EntityData>();
-        if (inputRows != null) {
-	        for (String xml : inputRows) {
-	            SAXBuilder builder = new SAXBuilder();
-	            builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
-	            builder.setFeature("http://xml.org/sax/features/validation", false);
-	            try {
-	                Document document = builder.build(new StringReader(xml));
-	                removeNamespaces(document);
-	                for (XmlFormatterEntitySetting entitySetting : entitySettings) {
-	                    List<XmlFormatterAttributeSetting> attributeSettings = entitySetting
-	                            .getAttributeSettings();
-	                    List<Element> entityMatches = (List<Element>) entitySetting.getExpression()
-	                            .evaluate(document.getRootElement());
-	                    for (Element element : entityMatches) {
-	                        String text = toXML(element);
-	                        Document childDocument = builder.build(new ByteArrayInputStream(text.getBytes()));
-	                        getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-	                        EntityData data = new EntityData();
-	                        for (XmlFormatterAttributeSetting attributeSetting : attributeSettings) {
-	                            boolean resultsFound = false;
-	                            Element targetElement = element;
-	                            Document targetDocument = childDocument;
-	                            do {
-	                                List<Object> attributeMatches = (List<Object>) attributeSetting.getExpression().evaluate(targetDocument);
-	                                for (Object object : attributeMatches) {
-	                                    resultsFound = true;
-	                                    if (object instanceof Attribute) {
-	                                        data.put(attributeSetting.getSetting().getAttributeId(), ((Attribute) object).getValue());
-	                                    } else if (object instanceof Content) {
-	                                        data.put(attributeSetting.getSetting().getAttributeId(), ((Content) object).getValue());
-	                                    } else if (object instanceof Element) {
-	                                        data.put(attributeSetting.getSetting().getAttributeId(), ((Element) object).getTextTrim());
-	                                    }
-	                                }
-	                                
-	                                if (!resultsFound && targetElement.getParentElement() != null) {
-	                                    targetElement = targetElement.getParentElement();
-	                                    targetDocument = builder.build(new ByteArrayInputStream(toXML(targetElement).getBytes()));
-	                                } else {
-	                                    targetDocument = null;
-	                                    targetElement = null;
-	                                }
-	                            } while (!resultsFound && targetElement != null);
-	                        }
-	                        if (data.size() > 0) {
-	                            payload.add(data);
-	                        } else {
-	                            log(LogLevel.WARN, "Found entity element: <%s/> with no matching attributes.  Please make sure your xpath expressions match",
-	                                    element.getName());
-	                        }
-	                    }
-	                }
-		        } catch (Exception e) {
-	                throw new RuntimeException(e);
-	            }
-	        }
-        }
+        if (!(inputMessage instanceof ControlMessage)) {
+            ArrayList<String> inputRows = inputMessage.getPayload();
+            ArrayList<EntityData> payload = new ArrayList<EntityData>();
+            if (inputRows != null) {
+                for (String xml : inputRows) {
+                    SAXBuilder builder = new SAXBuilder();
+                    builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
+                    builder.setFeature("http://xml.org/sax/features/validation", false);
+                    try {
+                        Document document = builder.build(new StringReader(xml));
+                        removeNamespaces(document);
+                        for (XmlFormatterEntitySetting entitySetting : entitySettings) {
+                            List<XmlFormatterAttributeSetting> attributeSettings = entitySetting.getAttributeSettings();
+                            List<Element> entityMatches = (List<Element>) entitySetting.getExpression().evaluate(document.getRootElement());
+                            for (Element element : entityMatches) {
+                                String text = toXML(element);
+                                Document childDocument = builder.build(new ByteArrayInputStream(text.getBytes()));
+                                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                                EntityData data = new EntityData();
+                                for (XmlFormatterAttributeSetting attributeSetting : attributeSettings) {
+                                    boolean resultsFound = false;
+                                    Element targetElement = element;
+                                    Document targetDocument = childDocument;
+                                    do {
+                                        List<Object> attributeMatches = (List<Object>) attributeSetting.getExpression()
+                                                .evaluate(targetDocument);
+                                        for (Object object : attributeMatches) {
+                                            resultsFound = true;
+                                            if (object instanceof Attribute) {
+                                                data.put(attributeSetting.getSetting().getAttributeId(), ((Attribute) object).getValue());
+                                            } else if (object instanceof Content) {
+                                                data.put(attributeSetting.getSetting().getAttributeId(), ((Content) object).getValue());
+                                            } else if (object instanceof Element) {
+                                                data.put(attributeSetting.getSetting().getAttributeId(), ((Element) object).getTextTrim());
+                                            }
+                                        }
 
-        callback.sendMessage(null, payload);
+                                        if (!resultsFound && targetElement.getParentElement() != null) {
+                                            targetElement = targetElement.getParentElement();
+                                            targetDocument = builder.build(new ByteArrayInputStream(toXML(targetElement).getBytes()));
+                                        } else {
+                                            targetDocument = null;
+                                            targetElement = null;
+                                        }
+                                    } while (!resultsFound && targetElement != null);
+                                }
+                                if (data.size() > 0) {
+                                    payload.add(data);
+                                } else {
+                                    log(LogLevel.WARN,
+                                            "Found entity element: <%s/> with no matching attributes.  Please make sure your xpath expressions match",
+                                            element.getName());
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+
+            callback.sendMessage(null, payload);
+        }
 
     }
 
