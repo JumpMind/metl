@@ -33,6 +33,7 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.SettingDefinition;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
@@ -78,6 +79,8 @@ public class FilePoller extends AbstractComponentRuntime {
 
     @SettingDefinition(order = 70, type = Type.TEXT, label = "Relative Trigger File Path")
     public final static String SETTING_TRIGGER_FILE_PATH = "trigger.file.path";
+    
+    String runWhen = PER_UNIT_OF_WORK;
 
     String filePattern;
 
@@ -136,6 +139,7 @@ public class FilePoller extends AbstractComponentRuntime {
         maxFilesToPoll = properties.getInt(SETTING_MAX_FILES_TO_POLL);
         minFilesToPoll = properties.getInt(SETTING_MIN_FILES_TO_POLL);
         fileSortOption = properties.get(SETTING_FILE_SORT_ORDER, fileSortOption);
+        runWhen = properties.get(RUN_WHEN, PER_UNIT_OF_WORK);
 
     }
         
@@ -144,22 +148,26 @@ public class FilePoller extends AbstractComponentRuntime {
         return true;
     }
 
-    @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        IResourceRuntime resourceRuntime = getResourceRuntime();
-        String path = resourceRuntime.getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
-        if (useTriggerFile) {
-            File triggerFile = getNewFile(path, triggerFilePath);
-            if (triggerFile.exists()) {
-                pollForFiles(path, inputMessage, callback, unitOfWorkBoundaryReached);
-                FileUtils.deleteQuietly(triggerFile);
-            } else if (cancelOnNoFiles) {
-                callback.sendShutdownMessage(true);
-            }
-        } else {
-            pollForFiles(path, inputMessage, callback, unitOfWorkBoundaryReached);
-        }
-    }
+	@Override
+	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+
+		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
+				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
+			IResourceRuntime resourceRuntime = getResourceRuntime();
+			String path = resourceRuntime.getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
+			if (useTriggerFile) {
+				File triggerFile = getNewFile(path, triggerFilePath);
+				if (triggerFile.exists()) {
+					pollForFiles(path, inputMessage, callback, unitOfWorkBoundaryReached);
+					FileUtils.deleteQuietly(triggerFile);
+				} else if (cancelOnNoFiles) {
+					callback.sendShutdownMessage(true);
+				}
+			} else {
+				pollForFiles(path, inputMessage, callback, unitOfWorkBoundaryReached);
+			}
+		}
+	}
 
     protected void pollForFiles(String path, Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         File pathDir = getNewFile(path);

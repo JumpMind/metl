@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.util.AppUtils;
@@ -30,11 +31,14 @@ public class Delay extends AbstractComponentRuntime {
     
     public final static String DELAY_TIME = "delay.in.ms";
     
+    String runWhen = PER_UNIT_OF_WORK;
+    
     long delay = 1000;
 
     @Override
     protected void start() {        
         delay = getComponent().getLong(DELAY_TIME, 1000l);
+        runWhen = getComponent().get(RUN_WHEN, PER_UNIT_OF_WORK);
     }
     
     @Override
@@ -42,10 +46,13 @@ public class Delay extends AbstractComponentRuntime {
         return true;
     }
     
-    @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        AppUtils.sleep(delay);
-        callback.forward(inputMessage);
-    }
+	@Override
+	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
 
+		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
+				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
+			AppUtils.sleep(delay);
+			callback.forward(inputMessage);
+		}
+	}
 }

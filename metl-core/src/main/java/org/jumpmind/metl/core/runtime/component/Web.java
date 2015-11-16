@@ -27,6 +27,7 @@ import java.util.ArrayList;
 
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.Http;
@@ -48,6 +49,8 @@ public class Web extends AbstractComponentRuntime {
     public static final String BODY_TEXT = "body.text";
     
     public static final String PARAMETER_REPLACEMENT = "parameter.replacement";
+    
+    String runWhen = PER_UNIT_OF_WORK;
 
     String relativePath;
     
@@ -71,6 +74,7 @@ public class Web extends AbstractComponentRuntime {
         bodyFrom = component.get(BODY_FROM, "Message");
         bodyText = component.get(BODY_TEXT);
         parameterReplacement = component.getBoolean(PARAMETER_REPLACEMENT, false);
+        runWhen = getComponent().get(RUN_WHEN, PER_UNIT_OF_WORK);
     }
         
     @Override
@@ -78,47 +82,49 @@ public class Web extends AbstractComponentRuntime {
         return true;
     }
 
-    @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        IStreamable streamable = getResourceReference();
+	@Override
+	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
 
-        ArrayList<String> outputPayload = new ArrayList<String>();
-        ArrayList<String> inputPayload = new ArrayList<String>();
-        if (bodyFrom.equals("Message")) {
-            inputPayload = inputMessage.getPayload();
-        } else {
-            inputPayload.add(bodyText);
-        }
-        
-        if (inputPayload != null) {
-	        try {
-	            for (String requestContent : inputPayload) {
-	                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-	                if (parameterReplacement) {
-	                    requestContent = FormatUtils.replaceTokens(requestContent, context.getFlowParametersAsString(), true);
-	                }
-	                HttpOutputStream os = (HttpOutputStream) streamable.getOutputStream(relativePath,
-	                        false);
-	                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os,
-	                        DEFAULT_CHARSET));
-	                try {
-	                    writer.write(requestContent);
-	                } finally {
-	                    writer.close();
-	                    String response = os.getResponse();
-	                    if (response != null) {
-	                        outputPayload.add(response);
-	                    }
-	                }
-	            }
-	            
-	            if (outputPayload.size() > 0) {
-	                callback.sendMessage(null, outputPayload);
-	            }
-	        } catch (IOException e) {
-	            throw new IoException(String.format("Error writing to %s ", streamable), e);
-	        }
-        }
-    }
+		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
+				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
+			IStreamable streamable = getResourceReference();
 
+			ArrayList<String> outputPayload = new ArrayList<String>();
+			ArrayList<String> inputPayload = new ArrayList<String>();
+			if (bodyFrom.equals("Message")) {
+				inputPayload = inputMessage.getPayload();
+			} else {
+				inputPayload.add(bodyText);
+			}
+
+			if (inputPayload != null) {
+				try {
+					for (String requestContent : inputPayload) {
+						getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+						if (parameterReplacement) {
+							requestContent = FormatUtils.replaceTokens(requestContent,
+									context.getFlowParametersAsString(), true);
+						}
+						HttpOutputStream os = (HttpOutputStream) streamable.getOutputStream(relativePath, false);
+						BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, DEFAULT_CHARSET));
+						try {
+							writer.write(requestContent);
+						} finally {
+							writer.close();
+							String response = os.getResponse();
+							if (response != null) {
+								outputPayload.add(response);
+							}
+						}
+					}
+
+					if (outputPayload.size() > 0) {
+						callback.sendMessage(null, outputPayload);
+					}
+				} catch (IOException e) {
+					throw new IoException(String.format("Error writing to %s ", streamable), e);
+				}
+			}
+		}
+	}
 }
