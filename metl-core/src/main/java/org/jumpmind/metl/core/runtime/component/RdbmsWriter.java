@@ -215,7 +215,6 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 
 		TargetTable modelTable = null;
 		boolean processedRow = false;
-		Object[] data = null;
 		for (EntityData inputRow : inputRows) {
 			for (TargetTableDefintion targetTableDefinition : targetTables) {
 				if (inputRow.getChangeType() == ChangeType.DEL) {
@@ -227,8 +226,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 				}
 				if (modelTable.shouldProcess(inputRow)) {
 					processedRow = true;
-					data = getValues(false, modelTable, inputRow);
-					modelTable.getRowValues().add(data);
+					modelTable.getRowValues().add(inputRow);
 				}
 			} // end each target table option
 			if (!processedRow) {
@@ -261,7 +259,8 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 	}
 	
 	private void executeSqlDeletes(TargetTable targetTable, ISqlTransaction transaction, WriteStats stats) {
-		for (Object[] rowData : targetTable.getRowValues()) {
+		for (EntityData inputRow : targetTable.getRowValues()) {
+			Object[] rowData = getValues(false, targetTable, inputRow);
 			int count = executeSql(targetTable, transaction, rowData);
 			stats.deleteCount += count;
 		}
@@ -273,11 +272,13 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 		TargetTable targetUpdateTable = targetTableDefinition.getUpdateTable();
 		TargetTable targetInsertTable = targetTableDefinition.getInsertTable();
 		
-		for (Object[] rowData : targetUpdateTable.getRowValues()) {
+		for (EntityData inputRow : targetUpdateTable.getRowValues()) {
+			Object[] rowData = getValues(false, targetUpdateTable, inputRow);
 			int count = executeSql(targetUpdateTable, transaction, rowData);
 			stats.updateCount += count;
 			if (insertFallback && count == 0) {
 				log.debug("Falling back to insert");
+				rowData = getValues(false, targetInsertTable, inputRow);
 				count = executeSql(targetInsertTable, transaction, rowData);
 				stats.fallbackInsertCount += count;
 			} else if (count == 0 && !continueOnError) {
@@ -297,13 +298,15 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 		TargetTable targetUpdateTable = targetTableDefinition.getUpdateTable();
 		TargetTable targetInsertTable = targetTableDefinition.getInsertTable();
 
-		for (Object[] rowData : targetInsertTable.getRowValues()) {
+		for (EntityData inputRow : targetInsertTable.getRowValues()) {
 			try {
+				Object[] rowData = getValues(false, targetInsertTable, inputRow);
 				int count = executeSql(targetInsertTable, transaction, rowData);
 				stats.insertCount += count;
 			} catch (UniqueKeyException e) {
 				if (replaceRows) {
 					log.debug("Falling back to update");
+					Object[] rowData = getValues(false, targetUpdateTable, inputRow);
 					int count = execute(transaction, targetUpdateTable.getStatement(), new Object(), rowData, true);
 					stats.fallbackUpdateCount += count;
 				} else if (!continueOnError) {
@@ -514,7 +517,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 		DmlStatement statement;
 		List<TargetColumn> keyTargetColumns = new ArrayList<TargetColumn>();
 		List<TargetColumn> targetColumns = new ArrayList<TargetColumn>();
-		List<Object[]> rowValues = new ArrayList<Object[]>();
+		List<EntityData> rowValues = new ArrayList<EntityData>();
 
 		public TargetTable(DmlType dmlType, ModelEntity entity, Table table) {
 			this.table = table;
@@ -583,7 +586,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 			return keyTargetColumns;
 		}
 
-		public List<Object[]> getRowValues() {
+		public List<EntityData> getRowValues() {
 			return this.rowValues;
 		}
 
