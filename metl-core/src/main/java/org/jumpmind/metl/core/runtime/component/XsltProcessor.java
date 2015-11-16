@@ -43,6 +43,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
@@ -97,21 +98,23 @@ public class XsltProcessor extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        ArrayList<EntityData> inputRows = inputMessage.getPayload();
-      
-        ArrayList<String> outputPayload = new ArrayList<String>();
-        
-        String batchXml = getBatchXml(getComponent().getInputModel(), inputRows, outputAllAttributes);
-        String stylesheetXml = stylesheet.getValue();
-        if (useParameterReplacement) {
-            stylesheetXml = FormatUtils.replaceTokens(stylesheetXml, context.getFlowParametersAsString(), true);
-        }
-        String outputXml = getTransformedXml(batchXml, stylesheetXml, xmlFormat);
-        outputPayload.add(outputXml);
+        if (!(inputMessage instanceof ControlMessage)) {
+            ArrayList<EntityData> inputRows = inputMessage.getPayload();
 
-        log(LogLevel.DEBUG, outputPayload.toString());
-        
-        callback.sendMessage(null, outputPayload);
+            ArrayList<String> outputPayload = new ArrayList<String>();
+
+            String batchXml = getBatchXml(getComponent().getInputModel(), inputRows, outputAllAttributes);
+            String stylesheetXml = stylesheet.getValue();
+            if (useParameterReplacement) {
+                stylesheetXml = FormatUtils.replaceTokens(stylesheetXml, context.getFlowParametersAsString(), true);
+            }
+            String outputXml = getTransformedXml(batchXml, stylesheetXml, xmlFormat);
+            outputPayload.add(outputXml);
+
+            log(LogLevel.DEBUG, outputPayload.toString());
+
+            callback.sendMessage(null, outputPayload);
+        }
     }
 
     public static String getBatchXml(Model model, ArrayList<EntityData> inputRows, boolean outputAllAttributes) {
