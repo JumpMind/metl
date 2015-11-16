@@ -39,6 +39,7 @@ import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
@@ -74,47 +75,48 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
         delimiter = properties.get(DELIMITED_FORMATTER_DELIMITER);
         quoteCharacter = properties.get(DELIMITED_FORMATTER_QUOTE_CHARACTER);
         useHeader = properties.is(DELIMITED_FORMATTER_WRITE_HEADER);
-        convertAttributeSettingsToAttributeFormat();    
+        convertAttributeSettingsToAttributeFormat();
     }
-    
+
     @Override
     public boolean supportsStartupMessages() {
         return false;
     }
 
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-
-        if (attributes.size() == 0) {
-            log(LogLevel.INFO, "There are no format attributes configured.  Writing all entity fields to the output");
-        }
-
-        ArrayList<EntityData> inputRows = inputMessage.getPayload();
-
-        ArrayList<String> outputPayload = new ArrayList<String>();
-        
-        if (useHeader) {
-            Writer writer = new StringWriter();
-            CsvWriter csvWriter = getCsvWriter(writer);
-            try {
-                for (AttributeFormat attr : attributes) {
-                    if (attr.getAttribute() != null) {
-                        csvWriter.write(attr.getAttribute().getName());
-                    }
-                }
-            } catch (IOException e) {
-                throw new IoException("Error writing to stream for formatted output. " + e.getMessage());    
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        if (!(inputMessage instanceof ControlMessage)) {
+            if (attributes.size() == 0) {
+                log(LogLevel.INFO, "There are no format attributes configured.  Writing all entity fields to the output");
             }
-            outputPayload.add(writer.toString());
-        }
 
-        String outputRec;
-        for (EntityData inputRow : inputRows) {
-            outputRec = processInputRow(inputMessage, inputRow);
-            outputPayload.add(outputRec);
+            ArrayList<EntityData> inputRows = inputMessage.getPayload();
+
+            ArrayList<String> outputPayload = new ArrayList<String>();
+
+            if (useHeader) {
+                Writer writer = new StringWriter();
+                CsvWriter csvWriter = getCsvWriter(writer);
+                try {
+                    for (AttributeFormat attr : attributes) {
+                        if (attr.getAttribute() != null) {
+                            csvWriter.write(attr.getAttribute().getName());
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new IoException("Error writing to stream for formatted output. " + e.getMessage());
+                }
+                outputPayload.add(writer.toString());
+            }
+
+            String outputRec;
+            for (EntityData inputRow : inputRows) {
+                outputRec = processInputRow(inputMessage, inputRow);
+                outputPayload.add(outputRec);
+            }
+
+            callback.sendMessage(null, outputPayload);
         }
-        
-        callback.sendMessage(null, outputPayload);
     }
 
     private String processInputRow(Message inputMessage, EntityData inputRow) {
