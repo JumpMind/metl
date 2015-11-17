@@ -58,12 +58,16 @@ public class XsltProcessor extends AbstractComponentRuntime {
     public static final String COMPACT_FORMAT = "Compact";
     
     public static final String RAW_FORMAT = "Raw";
+    
+    public static final String OMIT_XML_DECLARATION_FORMAT = "Omit Declaration";
 
     public final static String OUTPUT_ALL_ATTRIBUTES = "xslt.processor.output.all.attributes";
 
     public final static String PARAMETER_REPLACEMENT = "xslt.processor.parameter.replacement";
 
     public final static String XML_FORMAT = "xslt.processor.xml.format";
+    
+    public final static String OMIT_XML_DECLARATION = "xslt.processor.xml.omit.declaration";
 
     public static final String TYPE = "XSLT Processor";
 
@@ -77,6 +81,8 @@ public class XsltProcessor extends AbstractComponentRuntime {
     
     boolean useParameterReplacement = true;
     
+    boolean omitXmlDeclaration = false;
+    
     String xmlFormat;
     
     @Override
@@ -85,6 +91,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
         outputAllAttributes = properties.is(OUTPUT_ALL_ATTRIBUTES);
         useParameterReplacement = properties.is(PARAMETER_REPLACEMENT);
         xmlFormat = properties.get(XML_FORMAT);
+        omitXmlDeclaration = properties.is(OMIT_XML_DECLARATION, false);
         stylesheet = getComponent().findSetting(XSLT_PROCESSOR_STYLESHEET);
         if (StringUtils.isBlank(stylesheet.getValue())) {
             throw new RuntimeException("The XSLT stylesheet is blank.  Edit the component and set a stylesheet.");
@@ -108,7 +115,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
             if (useParameterReplacement) {
                 stylesheetXml = FormatUtils.replaceTokens(stylesheetXml, context.getFlowParametersAsString(), true);
             }
-            String outputXml = getTransformedXml(batchXml, stylesheetXml, xmlFormat);
+            String outputXml = getTransformedXml(batchXml, stylesheetXml, xmlFormat, omitXmlDeclaration);
             outputPayload.add(outputXml);
 
             log(LogLevel.DEBUG, outputPayload.toString());
@@ -201,7 +208,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
         return attributes;
     }
 
-    public static String getTransformedXml(String inputXml, String stylesheetXml, String xmlFormat) {
+    public static String getTransformedXml(String inputXml, String stylesheetXml, String xmlFormat, boolean omitXmlDeclaration) {
         StringWriter writer = new StringWriter();
         SAXBuilder builder = new SAXBuilder();
         builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
@@ -220,6 +227,8 @@ public class XsltProcessor extends AbstractComponentRuntime {
             } else {
                 format = Format.getPrettyFormat();
             }
+            
+            format.setOmitDeclaration(omitXmlDeclaration);
             xmlOutput.setFormat(format);
             xmlOutput.output(outputDoc, writer);
             writer.close();
