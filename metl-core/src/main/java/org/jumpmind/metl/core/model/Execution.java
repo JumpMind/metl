@@ -52,6 +52,18 @@ public class Execution extends AbstractObject {
     public Execution(ExecutionStatus status) {
         setExecutionStatus(status);
     }
+    
+    public boolean isDone() {
+        ExecutionStatus status = getExecutionStatus();
+        return (status == ExecutionStatus.ABANDONED || status == ExecutionStatus.CANCELLED
+                || status == ExecutionStatus.ERROR || status == ExecutionStatus.DONE);
+    }
+    
+    public boolean isNotSuccess() {
+        ExecutionStatus status = getExecutionStatus();
+        return (status == ExecutionStatus.ABANDONED || status == ExecutionStatus.CANCELLED
+                || status == ExecutionStatus.ERROR);
+    }
 
     public void setExecutionStatus(ExecutionStatus status) {
         setStatus(status.name());
