@@ -1050,12 +1050,5 @@
         <name>Union</name>
         <className>org.jumpmind.metl.core.runtime.component.Union</className>
         <description></description>
-        <settings>
-            <setting id='error.on.mismatch.messages' type='boolean' required='false'>
-                <name>Error On Mismatched Messages</name>
-                <defaultValue>false</defaultValue>
-                <description></description>
-            </setting>
-        </settings>
     </component>   
 </components>
