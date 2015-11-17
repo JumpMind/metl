@@ -937,6 +937,11 @@
                 <defaultValue>true</defaultValue>
                 <description></description>
             </setting>
+            <setting id='xslt.processor.xml.omit.declaration' type='boolean' required='false'>
+                <name>Omit XML Declaration</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
             <setting id='xslt.processor.xml.format' type='choice' required='false'>
                 <name>XML Format</name>
                 <defaultValue>Pretty</defaultValue>
