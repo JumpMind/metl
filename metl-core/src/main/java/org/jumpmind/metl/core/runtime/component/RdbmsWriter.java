@@ -24,6 +24,7 @@ package org.jumpmind.metl.core.runtime.component;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -212,9 +213,9 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 	}
 
 	private void sortAndStoreRowsByTableAndOperation(List<EntityData> inputRows) {
-
 		TargetTable modelTable = null;
 		boolean processedRow = false;
+		int order = 0;
 		for (EntityData inputRow : inputRows) {
 			for (TargetTableDefintion targetTableDefinition : targetTables) {
 				if (inputRow.getChangeType() == ChangeType.DEL) {
@@ -227,6 +228,9 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 				if (modelTable.shouldProcess(inputRow)) {
 					processedRow = true;
 					modelTable.getRowValues().add(inputRow);
+					if (targetTableDefinition.getOrder() == null) {
+					    targetTableDefinition.setOrder(order++);
+					}
 				}
 			} // end each target table option
 			if (!processedRow) {
@@ -234,11 +238,12 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 			}
 			processedRow = false;
 		} // end for each row
+		
+		Collections.sort(targetTables);
 	}
 
 	private void executeSqlByTableAndOperation(ISqlTransaction transaction,
-			Map<TargetTableDefintion, WriteStats> statsMap) {
-		
+			Map<TargetTableDefintion, WriteStats> statsMap) {		
 		for (TargetTableDefintion targetTableDefinition : targetTables) {
 			WriteStats stats = getStats(targetTableDefinition, statsMap);
 			executeSqlDeletes(targetTableDefinition.getDeleteTable(), transaction, stats);
@@ -479,11 +484,12 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 		this.updateFirst = updateFirst;
 	}
 
-	class TargetTableDefintion {
+	class TargetTableDefintion implements Comparable<TargetTableDefintion> {
 		ModelEntity modelEntity;
 		TargetTable updateTable;
 		TargetTable insertTable;
 		TargetTable deleteTable;
+		Integer order;
 
 		public TargetTableDefintion(ModelEntity modelEntity, TargetTable updateTable, TargetTable insertTable,
 				TargetTable deleteTable) {
@@ -510,6 +516,29 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 		public TargetTable getUpdateTable() {
 			return updateTable;
 		}
+		
+		public Integer getOrder() {
+            return order;
+        }
+		
+		public void setOrder(Integer order) {
+            this.order = order;
+        }
+		
+		@Override
+		public int compareTo(TargetTableDefintion o) {
+		    if (o.order == null && order != null) {
+		        return 1;
+		    } else if (order == null && o.order != null) {
+		        return -1;
+		    } else if (order == null && o.order == null) {
+		        return 0;
+		    } else {
+		        return order.compareTo(o.order);
+		    }
+		}
+		
+		
 	}
 
 	class TargetTable {
