@@ -581,12 +581,9 @@ public class StepRuntime implements Runnable {
 
         @Override
         public void forward(Message message) {
-            if (message instanceof ControlMessage) {
-                sendControlMessage(message.getHeader());
-            } else {
+            if (!(message instanceof ControlMessage)) {
                 sendMessage(message.getHeader(), message.getPayload());
             }
-
         }
     }
 
