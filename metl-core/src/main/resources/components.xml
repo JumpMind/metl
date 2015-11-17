@@ -937,6 +937,11 @@
                 <defaultValue>true</defaultValue>
                 <description></description>
             </setting>
+            <setting id='xslt.processor.xml.omit.declaration' type='boolean' required='false'>
+                <name>Omit XML Declaration</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>
             <setting id='xslt.processor.xml.format' type='choice' required='false'>
                 <name>XML Format</name>
                 <defaultValue>Pretty</defaultValue>
@@ -1040,6 +1045,17 @@
         <name>Last Unit of Work</name>
         <className>org.jumpmind.metl.core.runtime.component.LastUnitOfWork</className>
         <description></description>
+    </component>    
+    <component id='Gate' category='CONTROL' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='false'>
+        <name>Gate</name>
+        <className>org.jumpmind.metl.core.runtime.component.Gate</className>
+        <description></description>
+        <settings>
+            <setting id='gate.control.source.step' type='source_step' required='true'>
+                <name>Gate Control Source</name>
+                <description></description>
+            </setting>
+        </settings>
     </component>    
     <component id='Union' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
         <name>Union</name>

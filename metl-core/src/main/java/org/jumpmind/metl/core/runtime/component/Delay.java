@@ -48,11 +48,10 @@ public class Delay extends AbstractComponentRuntime {
     
 	@Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
 			AppUtils.sleep(delay);
-			callback.forward(inputMessage);
 		}
+		callback.forward(inputMessage);
 	}
 }
