@@ -26,6 +26,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -52,6 +54,11 @@ public class LocalFileStreamable implements IStreamable {
     @Override
     public boolean supportsInputStream() {
         return true;
+    }
+    
+    @Override
+    public List<FileInfo> listFiles(String relativePath) {
+        return new ArrayList<>();
     }
 
     protected File toFile(String relativePath, boolean mustExist) {

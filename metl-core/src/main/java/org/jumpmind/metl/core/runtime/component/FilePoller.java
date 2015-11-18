@@ -28,7 +28,6 @@ import java.util.Comparator;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.tools.ant.DirectoryScanner;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Resource;
@@ -39,7 +38,9 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
+import org.jumpmind.metl.core.runtime.resource.DirectoryScanner;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
+import org.jumpmind.metl.core.runtime.resource.IStreamable;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
@@ -228,7 +229,11 @@ public class FilePoller extends AbstractComponentRuntime {
     }
     
     DirectoryScanner getDirectoryScanner() {
-    	return new DirectoryScanner();
+        IResourceRuntime resourceRuntime = getResourceRuntime();
+        IStreamable streamable = resourceRuntime.reference();
+    	DirectoryScanner scanner = new DirectoryScanner();
+    	//scanner.setBasedir(streamable);
+    	return scanner;
     }
     
     @Override

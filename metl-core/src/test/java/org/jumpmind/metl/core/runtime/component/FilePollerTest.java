@@ -28,11 +28,11 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.tools.ant.DirectoryScanner;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
+import org.jumpmind.metl.core.runtime.resource.DirectoryScanner;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.properties.TypedProperties;

@@ -25,6 +25,9 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Resource;
@@ -37,6 +40,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
+import com.jcraft.jsch.ChannelSftp.LsEntry;
 
 public class SftpStreamable implements IStreamable {
 
@@ -121,7 +125,32 @@ public class SftpStreamable implements IStreamable {
         } catch (JSchException e) {
             throw new IoException(e);
 		}   
-    }    
+    }
+    
+    @Override
+    public List<FileInfo> listFiles(String relativePath) {
+        Session session = null;
+        ChannelSftp sftp = null;
+        try {
+            List<FileInfo> fileInfoList =  new ArrayList<>();
+            session = connect();
+            sftp = (ChannelSftp) session.openChannel("sftp");
+            sftp.connect();
+            sftp.cd(basePath);
+            @SuppressWarnings("rawtypes")
+            Vector list = sftp.ls(relativePath);
+            for (Object object : list) {
+                LsEntry entry = (LsEntry)object;
+                fileInfoList.add(new FileInfo(entry.getFilename(), entry.getAttrs().isDir()));
+                
+            }
+            return fileInfoList;
+        } catch (Exception e) {
+            throw new IoException("Error getting the input stream for ssh endpoint.  Error %s", e.getMessage());
+        } finally {
+            SftpStreamable.this.close(session, sftp);
+        }
+    }
 
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist) {
