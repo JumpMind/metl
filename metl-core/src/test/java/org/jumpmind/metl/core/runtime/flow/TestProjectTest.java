@@ -25,6 +25,7 @@ import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFromXMLFactory;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
+import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.utils.DbTestUtils;
 import org.jumpmind.util.AppUtils;
 import org.junit.Test;
@@ -80,8 +81,11 @@ public class TestProjectTest {
 
     @Parameters(name = "{0}")
     public static Collection<Object[]> getFlows() throws Exception {
-        new File("build/logs").delete();
-        System.setProperty("log.file", "build/logs/metl.log");
+        File logDir = new File("work/logs");
+        logDir.delete();
+        logDir.mkdirs();
+        LogUtils.setLogDir(logDir);
+        System.setProperty("log.file", "work/logs/metl.log");
         databasePlatform = DbTestUtils.createDatabasePlatform();
         new ConfigDatabaseUpgrader("/schema-v1.xml", databasePlatform, true, "METL").upgrade();
         persistenceManager = new SqlPersistenceManager(databasePlatform);

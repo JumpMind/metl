@@ -20,11 +20,17 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
+import javax.sql.DataSource;
+
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
+import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.util.ComponentUtils;
 import org.jumpmind.properties.TypedProperties;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 public class Assert extends AbstractComponentRuntime {
     
@@ -32,11 +38,18 @@ public class Assert extends AbstractComponentRuntime {
     public static final String  EXPECTED_TEXT_MESSAGE_COUNT = "expected.text.messages.count";
     public static final String  EXPECTED_CONTROL_MESSAGE_COUNT = "expected.control.messages.count";
     public static final String  EXPECTED_EMPTY_PAYLOAD_MESSAGE_COUNT = "expected.empty.payload.messages.count";
+    public static final String  EXPECTED_SQL_COUNT = "expected.sql.count";
+    public static final String  ASSERT_SQL = "sql";
+    public static final String  ASSERT_SQL_DATASOURCE = "sql.datasource";
     
     int expectedEntityMessageCount = 0;
     int expectedTextMessageCount = 0;
-    int expectedControlMessageCount = 1;
+    int expectedControlMessageCount = 0;
     int expectedEmptyPayloadMessageCount = 0;
+    int expectedSqlCount = 0;
+    
+    String sql;
+    String dataSourceId;
     
     int entityMessageCount = 0;
     int textMessageCount = 0;
@@ -51,6 +64,9 @@ public class Assert extends AbstractComponentRuntime {
         expectedTextMessageCount = properties.getInt(EXPECTED_TEXT_MESSAGE_COUNT, expectedTextMessageCount);
         expectedEntityMessageCount = properties.getInt(EXPECTED_ENTITY_MESSAGE_COUNT, expectedControlMessageCount);
         expectedEmptyPayloadMessageCount = properties.getInt(EXPECTED_EMPTY_PAYLOAD_MESSAGE_COUNT, expectedEmptyPayloadMessageCount);
+        expectedSqlCount = properties.getInt(EXPECTED_SQL_COUNT, expectedSqlCount);
+        sql = properties.get(ASSERT_SQL);
+        dataSourceId = properties.get(ASSERT_SQL_DATASOURCE);
     }
 
     @Override
@@ -91,6 +107,16 @@ public class Assert extends AbstractComponentRuntime {
         
         if (expectedTextMessageCount != textMessageCount) {
             assertFailed.append(String.format("\nExpected %d text messages but received %s.", expectedTextMessageCount, textMessageCount));
+        }
+        
+        if (isNotBlank(sql)) {
+            IResourceRuntime targetResource = context.getDeployedResources().get(dataSourceId);
+            DataSource ds = targetResource.reference();
+            JdbcTemplate template = new JdbcTemplate(ds);
+            int sqlCount = template.queryForObject(sql, Integer.class);
+            if (expectedSqlCount != sqlCount) {
+                assertFailed.append(String.format("\nExpected %d sql count but received %s.", expectedSqlCount, sqlCount));
+            }
         }
         
         if (assertFailed.length() > 0) {

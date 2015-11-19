@@ -131,6 +131,7 @@ public class FileUtil extends AbstractComponentRuntime {
         if (isBlank(targetDirName)) {
             throw new MisconfiguredException("The target resource %s needs its path set", targetResource.getResource().getName());
         }
+        
         targetRelativePath = typedProperties.get(SETTING_TARGET_RELATIVE_PATH);
         newName = typedProperties.get(SETTING_NEW_NAME, newName);
         appendToName = typedProperties.get(SETTING_APPEND_TO_NAME);
@@ -140,7 +141,6 @@ public class FileUtil extends AbstractComponentRuntime {
 
 	@Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
 			List<String> files = getFilesToRead(inputMessage);

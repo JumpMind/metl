@@ -25,7 +25,6 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,7 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
 
     @Override
     public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        List<Result> results = new ArrayList<Result>();
+        results.clear();
         NamedParameterJdbcTemplate template = getJdbcTemplate();
         Map<String, Object> params = getParameters(inputMessage);
         int sqlCount = 0;
