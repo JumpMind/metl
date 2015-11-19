@@ -186,6 +186,14 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 				callback.sendMessage(null, convertResultsToTextPayload(results));
 			}
 		}
+		
+		if (targetTables != null) {
+		    for (TargetTableDefintion targetTable : targetTables) {
+		        targetTable.getDeleteTable().getRowValues().clear();
+		        targetTable.getInsertTable().getRowValues().clear();
+		        targetTable.getUpdateTable().getRowValues().clear();
+            }
+		}
 	}
 
 	private Object[] getValues(boolean isUpdate, TargetTable modelTable, EntityData inputRow) {
