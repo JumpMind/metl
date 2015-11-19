@@ -866,7 +866,7 @@
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
                 <description></description>
-            </setting>
+            </setting>          
         </settings>
     </component>
     <component id='Text Replace' category='PROCESSOR' inputMessageType='text' outputMessageType='text' resourceCategory='none'
