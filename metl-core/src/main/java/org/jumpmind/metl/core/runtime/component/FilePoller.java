@@ -40,7 +40,6 @@ import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.DirectoryScanner;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.runtime.resource.IStreamable;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
@@ -229,10 +228,7 @@ public class FilePoller extends AbstractComponentRuntime {
     }
     
     DirectoryScanner getDirectoryScanner() {
-        IResourceRuntime resourceRuntime = getResourceRuntime();
-        IStreamable streamable = resourceRuntime.reference();
     	DirectoryScanner scanner = new DirectoryScanner();
-    	//scanner.setBasedir(streamable);
     	return scanner;
     }
     

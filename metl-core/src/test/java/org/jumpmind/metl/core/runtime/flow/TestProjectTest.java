@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
@@ -49,7 +50,7 @@ public class TestProjectTest {
 
     @Test
     public void testFlow() throws Exception {
-        AgentDeployment deployment = agentRuntime.deploy(configurationService.findFlow(flow.getId()), null);
+        AgentDeployment deployment = agentRuntime.deploy(configurationService.findFlow(flow.getId()), new HashMap<>());
         String executionId = agentRuntime.scheduleNow(deployment);
         Execution execution = executionService.findExecution(executionId);
         while (execution != null

@@ -190,6 +190,8 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     }
     
     protected void bindHeadersAndFlowParameters(Bindings bindings, Message inputMessage) {
+        bindModelEntities(bindings);        
+        
         Set<String> messageHeaderKeys = inputMessage.getHeader().keySet();
         for (String messageHeaderKey : messageHeaderKeys) {
             bindings.put(messageHeaderKey, inputMessage.getHeader().get(messageHeaderKey));
@@ -197,22 +199,30 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         
         Map<String, String> flowParameters = context.getFlowParametersAsString();
         for (String key : flowParameters.keySet()) {
-            bindings.put(key, flowParameters.get(key));
-            
+            bindings.put(key, flowParameters.get(key));            
+        }
+    }
+    
+    protected void bindModelEntities(Bindings bindings) {
+        Model model = context.getFlowStep().getComponent().getInputModel();
+        if (model != null) {
+            List<ModelEntity> entities = model.getModelEntities();
+            for (ModelEntity modelEntity : entities) {
+                HashMap<String, Object> boundEntity = new HashMap<String, Object>(0);
+                bindings.put(modelEntity.getName(), boundEntity);
+                
+                List<ModelAttribute> attributes = modelEntity.getModelAttributes();
+                for (ModelAttribute modelAttribute : attributes) {
+                    boundEntity.put(modelAttribute.getName(), null);
+                }
+            }
         }
     }
     
     protected Bindings bindEntityData(ScriptEngine scriptEngine, Message inputMessage, EntityData entityData) {
-        Bindings bindings = scriptEngine.createBindings();
-        Model model = context.getFlowStep().getComponent().getInputModel();
-        List<ModelEntity> entities = model.getModelEntities();
-        for (ModelEntity modelEntity : entities) {
-        	HashMap<String, Object> boundEntity = new HashMap<String, Object>(0);
-        	bindings.put(modelEntity.getName(), boundEntity);
-        }
-        
+        Bindings bindings = scriptEngine.createBindings();       
         bindHeadersAndFlowParameters(bindings, inputMessage);
-        
+        Model model = getInputModel();
         bindings.put("CHANGE_TYPE", entityData.getChangeType().name());
         bindings.put("ENTITY_NAMES", context.getFlowStep().getComponent().getEntityNames(entityData, true));                
         Set<String> attributeIds = entityData.keySet();
