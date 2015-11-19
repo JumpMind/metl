@@ -130,8 +130,6 @@ public class DesignNavigator extends VerticalLayout {
 
     MenuItem newModel;
 
-    MenuItem newComponent;
-
     MenuItem newFileResource;
     
     MenuItem newSSHResource;
@@ -193,7 +191,6 @@ public class DesignNavigator extends VerticalLayout {
         editMenu.setEnabled(false);
         newMenu.setEnabled(true);
         blank.setVisible(false);
-        newComponent.setVisible(false);
         newFlow.setVisible(false);
         newModel.setVisible(false);
         newDataSource.setVisible(false);
@@ -203,7 +200,7 @@ public class DesignNavigator extends VerticalLayout {
         newFileResource.setVisible(false);
         if (selected instanceof FolderName) {
             FolderName folder = (FolderName) selected;
-            if (folder.getName().equals("Flows")) {
+            if (folder.getName().equals("Flows") || folder.getName().equals("Tests")) {
                 newFlow.setVisible(true);
             } else if (folder.getName().equals("Models")) {
                 newModel.setVisible(true);
@@ -247,126 +244,27 @@ public class DesignNavigator extends VerticalLayout {
 
         editMenu = leftMenuBar.addItem("Edit", null);
 
-        editMenu.addItem("Open", new Command() {
+        editMenu.addItem("Open", selectedItem -> open(treeTable.getValue()));
 
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                open(treeTable.getValue());
-            }
-        });
-
-        editMenu.addItem("Rename", new Command() {
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                startEditingItem((AbstractObject) treeTable.getValue());
-            }
-        });
+        editMenu.addItem("Rename", selectedItem -> startEditingItem((AbstractObject) treeTable.getValue()));
         
-        editMenu.addItem("Copy", new Command() {
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                copySelected();
-            }
-        });
+        editMenu.addItem("Copy", selectedItem ->  copySelected());
         
-        delete = editMenu.addItem("Remove", new Command() {
-
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                handleDelete();
-            }
-        });
+        delete = editMenu.addItem("Remove", selectedItem -> handleDelete());
 
         MenuItem projectMenu = leftMenuBar.addItem("Project", null);
-        projectMenu.addItem("Manage", new Command() {
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                viewProjects();
-            }
-        });
+        projectMenu.addItem("Manage", selectedItem -> viewProjects());
 
-        exportProject = projectMenu.addItem("Export", new Command() {
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                exportProject();
-            }
-        });
-
-        closeProject = projectMenu.addItem("Close", new Command() {
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                closeProject();
-            }
-        });
-
+        exportProject = projectMenu.addItem("Export", selectedItem ->  exportProject());
+        closeProject = projectMenu.addItem("Close", selectedItem -> closeProject());
         blank = newMenu.addItem("", null);
-
-        newFlow = newMenu.addItem("Flow", new Command() {
-
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                addNewFlow();
-            }
-        });
-
-        newModel = newMenu.addItem("Model", new Command() {
-
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                addNewModel();
-            }
-        });
-
-        newComponent = newMenu.addItem("Component", new Command() {
-
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-            }
-        });
-
-        newDataSource = newMenu.addItem("Database", new Command() {
-
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                addNewDatabase();
-            }
-        });
-        
-        newFtpResource = newMenu.addItem("FTP", new Command() {
-
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                addNewFtpResource();
-            }
-
-        });
-
-        newFileResource = newMenu.addItem("Local File System", new Command() {
-
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                addNewLocalFileSystem();
-            }
-
-        });
-        
-        newSSHResource = newMenu.addItem("Sftp", new Command() {
-            
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                addNewSSHFileSystem();
-            }
-            
-        });
-        
-        newWebResource = newMenu.addItem("Web Resource", new Command() {
-            
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                addNewHttpResource();
-            }
-            
-        });
+        newFlow = newMenu.addItem("Flow", selectedItem -> addNewFlow());
+        newModel = newMenu.addItem("Model", selectedItem -> addNewModel());
+        newDataSource = newMenu.addItem("Database", selectedItem -> addNewDatabase());       
+        newFtpResource = newMenu.addItem("FTP", selectedItem -> addNewFtpResource());
+        newFileResource = newMenu.addItem("Local File System", selectedItem -> addNewLocalFileSystem());        
+        newSSHResource = newMenu.addItem("Sftp", selectedItem -> addNewSSHFileSystem());        
+        newWebResource = newMenu.addItem("Web Resource", selectedItem -> addNewHttpResource());
 
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
@@ -649,7 +547,8 @@ public class DesignNavigator extends VerticalLayout {
             treeTable.setItemIcon(projectVersion, Icons.PROJECT);
             treeTable.setItemCaption(projectVersion, projectVersion.getProject().getName());
             treeTable.setChildrenAllowed(projectVersion, true);            
-            addFlowsToFolder(addVirtualFolder("Flows", projectVersion), projectVersion);
+            addFlowsToFolder(addVirtualFolder("Flows", projectVersion), projectVersion, false);
+            addFlowsToFolder(addVirtualFolder("Tests", projectVersion), projectVersion, true);
             addModelsToFolder(addVirtualFolder("Models", projectVersion), projectVersion);
             addResourcesToFolder(addVirtualFolder("Resources", projectVersion), projectVersion);
             //TODO: determine if we want to show shared components here too...
@@ -704,9 +603,9 @@ public class DesignNavigator extends VerticalLayout {
         }
     }
     
-    protected void addFlowsToFolder(FolderName folder, ProjectVersion projectVersion) {
+    protected void addFlowsToFolder(FolderName folder, ProjectVersion projectVersion, boolean test) {
         IConfigurationService configurationService = context.getConfigurationService();
-        List<FlowName> flows = configurationService.findFlowsInProject(projectVersion.getId());
+        List<FlowName> flows = configurationService.findFlowsInProject(projectVersion.getId(), test);
         Collections.sort(flows, new Comparator<FlowName>() {
             @Override
             public int compare(FlowName o1, FlowName o2) {
@@ -838,6 +737,7 @@ public class DesignNavigator extends VerticalLayout {
             flow.setName(newFlow.getName());
             flow.setProjectVersionId(newFlow.getProjectVersionId());
             flow.setId(newFlow.getId());
+            flow.setTest(newFlow.isTest());
 
             treeTable.addItem(flow);
             treeTable.setItemIcon(flow, Icons.FLOW);
@@ -907,14 +807,16 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void addNewFlow() {
-        FolderName folder = findFolderWithName("Flows");
-        if (folder != null) {
+        Object selected = treeTable.getValue();
+        if (selected instanceof FolderName) {
+            FolderName folder = (FolderName)selected;
             treeTable.setChildrenAllowed(folder, true);
 
             ProjectVersion projectVersion = findProjectVersion();
             FlowName flow = new FlowName();
             flow.setProjectVersionId(projectVersion.getId());
             flow.setName("New Flow");
+            flow.setTest(folder.getName().equals("Tests"));
             context.getConfigurationService().save(flow);
                         
             treeTable.addItem(flow);

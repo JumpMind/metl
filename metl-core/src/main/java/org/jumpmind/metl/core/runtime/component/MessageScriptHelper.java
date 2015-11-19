@@ -35,12 +35,13 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.util.ComponentUtil;
+import org.jumpmind.metl.core.util.ComponentUtils;
 import org.jumpmind.metl.core.util.ThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,42 +137,54 @@ public class MessageScriptHelper {
     
     protected Object getAttributeValue(String entityName, String attributeName, EntityData data) {
         Model model = flowStep.getComponent().getInputModel();
-        return ComponentUtil.getAttributeValue(model, data, entityName, attributeName);
+        return ComponentUtils.getAttributeValue(model, data, entityName, attributeName);
     }
 
     protected Object getAttributeValue(String entityName, String attributeName) {
         Model model = flowStep.getComponent().getInputModel();
         ArrayList<EntityData> rows = inputMessage.getPayload();
-        return ComponentUtil.getAttributeValue(model, rows, entityName, attributeName);
+        return ComponentUtils.getAttributeValue(model, rows, entityName, attributeName);
     }
     
     protected Object getAttributeValue(String attributeName, EntityData data) {
         Model model = flowStep.getComponent().getInputModel();
-        return ComponentUtil.getAttributeValue(model, data, attributeName);
+        return ComponentUtils.getAttributeValue(model, data, attributeName);
     }
 
     protected List<Object> getAttributeValues(String entityName, String attributeName) {
         Model model = flowStep.getComponent().getInputModel();
         ArrayList<EntityData> rows = inputMessage.getPayload();
-        return ComponentUtil.getAttributeValues(model, rows, entityName, attributeName);
+        return ComponentUtils.getAttributeValues(model, rows, entityName, attributeName);
     }
     
     protected void forwardMessageWithParameter(String parameterName, Serializable value) {
         Map<String, Serializable> headers = new HashMap<>();
         headers.put(parameterName, value);
-        callback.sendMessage(headers, inputMessage.getPayload(), unitOfWorkBoundaryReached);
+        if (inputMessage instanceof ControlMessage) {
+            callback.sendControlMessage(headers);
+        } else {
+            callback.sendMessage(headers, inputMessage.getPayload());
+        }
     }
     
     protected void forwardMessageWithParameters(Map<String,Serializable> params) {
-        callback.sendMessage(params, inputMessage.getPayload(), unitOfWorkBoundaryReached);
+        if (inputMessage instanceof ControlMessage) {
+            callback.sendControlMessage(params);
+        } else {
+            callback.sendMessage(params, inputMessage.getPayload());
+        }
     }
     
     protected void forwardMessage() {
-        callback.sendMessage(null, inputMessage.getPayload(), unitOfWorkBoundaryReached);
+        if (inputMessage instanceof ControlMessage) {
+            callback.sendControlMessage(inputMessage.getHeader());
+        } else {
+            callback.sendMessage(inputMessage.getHeader(), inputMessage.getPayload());
+        }
     }
     
     protected void sendControlMessage() {
-        callback.sendControlMessage();
+        callback.sendControlMessage(inputMessage.getHeader());
     }
     
     protected void setSendMessageCallback(ISendMessageCallback callback) {

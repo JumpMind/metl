@@ -22,9 +22,9 @@ package org.jumpmind.metl.core.persist;
 
 import java.io.File;
 
-import net.sourceforge.schemaspy.Main;
-
 import org.apache.commons.io.FileUtils;
+
+import net.sourceforge.schemaspy.Main;
 
 public class SchemaSpy {
 

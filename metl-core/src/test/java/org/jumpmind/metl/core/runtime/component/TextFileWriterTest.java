@@ -38,6 +38,7 @@ import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -99,9 +100,8 @@ public class TextFileWriterTest {
     }
 
     private static Message createMultipleRowTextMessageToWrite() {
-        Message msg = new Message("originating step id");
+        Message msg = new ControlMessage("originating step id");
         msg.getHeader().setSequenceNumber(1);
-        msg.getHeader().setUnitOfWorkLastMessage(true);
         ArrayList<String> payload = new ArrayList<String>();
         payload.add("Line 1");
         payload.add("Line 2");
@@ -112,9 +112,8 @@ public class TextFileWriterTest {
     }
 
     private static Message createSingleRowTextMessageToWrite(int lineNumber, boolean lastMsg) {
-        Message msg = new Message("originating step id");
+        Message msg = new ControlMessage("originating step id");
         msg.getHeader().setSequenceNumber(lineNumber);
-        msg.getHeader().setUnitOfWorkLastMessage(lastMsg);
         ArrayList<String> payload = new ArrayList<String>();
         payload.add("Line " + lineNumber);
         msg.setPayload(payload);

@@ -30,7 +30,7 @@ public interface IComponentRuntime {
     
     public void start(int threadNumber, ComponentContext context);
 
-    public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached);
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached);
     
     public void flowCompleted(boolean cancelled);
     
@@ -43,4 +43,5 @@ public interface IComponentRuntime {
     public XMLComponent getComponentDefintion();
     
     public boolean supportsStartupMessages();   
+    
 }

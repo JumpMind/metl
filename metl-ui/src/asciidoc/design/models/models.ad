@@ -1,9 +1,39 @@
 [id="models",reftext="Models"]
 === Models
 
-TODO
+Data integrated with Metl can be structured or unstructured data. When dealing with Structured data, the structured data 
+can be defined by modeling the data. Metl Models allow you to describe that structured data. Models can either be relational or 
+hierarchical in nature.  All structured data must be modeled in Metl.  For example, a delimited file may exist that looks as follows:
 
+----
+Smith,John,male,10/19/2000
+Smith,Sally,female,5/4/2004
+Smith,Sarah,female,2/1/2015
+----
 
-include::entities.ad[]
-include::attributes.ad[]
-include::import.ad[]
+This file represents people including their last name, first name, gender and date of birth.  In order to use this file in a structured
+way, you must model the data contents of the file.  I.E. define an entity named something like Person, and then define attributes for that person 
+(lastName, firstName, gender, dateOfBirth).
+
+image:screenshots/design/models-person-model.png[]
+
+To create a new model, click on the "Models" folder in the navigation pane, and then click "New" - "Model" as shown below.  
+
+image:screenshots/design/models-new-model.png[width=300]
+
+Once the model has been created, double click the model in the navigation pane in order to edit the model.  From the content editor pane, 
+there are buttons for adding and entities and attributes.  Highlighting an entity and clicking the "Add Attribute" button will add an attribute
+to the given entity.  
+
+image:screenshots/design/models-edit-model.png[]
+
+==== Importing Models from a Relational Database
+
+Similarly when dealing with data in a relational database, there is an inherent model defined in the relational database itself.  I.E. 
+tables and columns equate to entities and attributes.  Metl models for relational databases can be automatically imported from the database
+structure itself, or they can be maintained manually.  In order to import a model from a relational database, click the "Import..." button.  The
+following screen will be displayed which displays all database resources.  Drilling into a database resource allows the user to multi-select 
+one or more tables in order for those tables to be imported into the model.
+
+image:screenshots/design/models-import-model.png[width=400]
+

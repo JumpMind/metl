@@ -27,6 +27,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
@@ -37,6 +38,8 @@ public class TextConstant extends AbstractComponentRuntime {
     public static final String SETTING_SPLIT_ON_LINE_FEED = "split.on.line.feed";
 
     public static final String SETTING_TEXT = "text";
+    
+    String runWhen = PER_UNIT_OF_WORK;
 
     int textRowsPerMessage;
     boolean splitOnLineFeed;
@@ -47,6 +50,7 @@ public class TextConstant extends AbstractComponentRuntime {
     	textRowsPerMessage = context.getFlowStep().getComponent().getInt(ROWS_PER_MESSAGE, 1000);
         splitOnLineFeed = context.getFlowStep().getComponent().getBoolean(SETTING_SPLIT_ON_LINE_FEED, false);
         constantText = context.getFlowStep().getComponent().get(SETTING_TEXT, "");
+        runWhen = getComponent().get(RUN_WHEN, PER_UNIT_OF_WORK);
     }
 
     @Override
@@ -54,37 +58,44 @@ public class TextConstant extends AbstractComponentRuntime {
         return true;
     }
 
-    @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        int linesInMessage = 0;
-        ArrayList<String> payload = new ArrayList<String>();
+	@Override
+	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
 
-        if (!splitOnLineFeed) {
-        	getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-            payload.add(constantText);
-        } else {
-            BufferedReader reader = null;
-            String currentLine;
-            try {
-                reader = new BufferedReader(new StringReader(constantText));
-                while ((currentLine = reader.readLine()) != null) {
-                    if (linesInMessage == textRowsPerMessage) {
-                        callback.sendMessage(null, payload, false);
-                        linesInMessage = 0;
-                        payload = new ArrayList<String>();
-                    }
-                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                    payload.add(currentLine);
-                    linesInMessage++;
-                }
-            } catch (IOException e) {
-                throw new IoException("Error reading from file " + e.getMessage());
-            } finally {
-                IOUtils.closeQuietly(reader);
-            }
-        }
+		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
+				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
+			int linesInMessage = 0;
+			ArrayList<String> payload = new ArrayList<String>();
 
-        callback.sendMessage(null, payload, unitOfWorkBoundaryReached);
+			if (!splitOnLineFeed) {
+				getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+				payload.add(constantText);
+			} else {
+				BufferedReader reader = null;
+				String currentLine;
+				try {
+					reader = new BufferedReader(new StringReader(constantText));
+					while ((currentLine = reader.readLine()) != null) {
+						if (linesInMessage == textRowsPerMessage) {
+							callback.sendMessage(null, payload);
+							linesInMessage = 0;
+							payload = new ArrayList<String>();
+						}
+						getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+						payload.add(currentLine);
+						linesInMessage++;
+					}
+				} catch (IOException e) {
+					throw new IoException("Error reading from file " + e.getMessage());
+				} finally {
+					IOUtils.closeQuietly(reader);
+				}
+			}
+
+			callback.sendMessage(null, payload);
+		}
+	}
+	
+	public void setRunWhen(String runWhen) {
+        this.runWhen = runWhen;
     }
-
 }

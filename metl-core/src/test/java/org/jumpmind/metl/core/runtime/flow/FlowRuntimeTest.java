@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.Flow;
@@ -45,7 +44,6 @@ import org.junit.Test;
 
 public class FlowRuntimeTest {
 
-    IDatabasePlatform platform;
     IComponentRuntimeFactory componentFactory;
     IResourceFactory resourceFactory;
     ExecutorService threadService;

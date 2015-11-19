@@ -1,3 +1,4 @@
+[id="components",reftext="Components"]
 === Components
 
 The following table shows a list of available components.
@@ -45,6 +46,9 @@ The following table shows a list of available components.
 |<<sql-executor>>|image:icons/metl-writer-48x48-color.png[]|Data needs written to or deleted from a database using a specific sql statement
 |<<text-file-writer>>|image:icons/metl-text-writer-48x48-color.png[]|Data needs written to a text based file
 |<<zip>>|image:icons/metl-zip-48x48-color.png[]|Data needs to be put in a compressed file 
+3+|Controls
+|<<gate>>|image:icons/metl-puzzle-48x48-color.png[]|Flow needs controlled by one input before remaining process continues
+|<<last-unit-of-work>>|image:icons/metl-delay-48x48-color.png[]|Flow needs to be held at this point until all inputs complete before continuing
 |===========================================
 
 include::readers/readers.ad[]
@@ -52,4 +56,6 @@ include::readers/readers.ad[]
 include::processors/processors.ad[]
 
 include::writers/writers.ad[]
+
+include::controls/controls.ad[]
 

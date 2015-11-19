@@ -29,9 +29,9 @@ import java.util.Map;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Merger extends AbstractComponentRuntime {
@@ -82,13 +82,13 @@ public class Merger extends AbstractComponentRuntime {
             Iterator<EntityData> itr = mergedData.values().iterator();
             while (itr.hasNext()) {
                 if (dataToSend.size() >= rowsPerMessage) {
-                    callback.sendMessage(null, dataToSend, false);
+                    callback.sendMessage(null, dataToSend);
                     dataToSend = new ArrayList<EntityData>();
                 }
                 dataToSend.add(itr.next());
             }
             if (dataToSend != null && dataToSend.size() > 0) {
-                callback.sendMessage(null, dataToSend, true);
+                callback.sendMessage(null, dataToSend);
             }
         }
     }

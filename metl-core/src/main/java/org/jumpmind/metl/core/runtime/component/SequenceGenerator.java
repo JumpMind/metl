@@ -26,10 +26,10 @@ import java.util.Map;
 
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.util.FormatUtils;
 
@@ -137,7 +137,7 @@ public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 outgoingPayload.add(entityData);
             }
-            callback.sendMessage(null, outgoingPayload, unitOfWorkBoundaryReached);
+            callback.sendMessage(null, outgoingPayload);
         }
     }
 

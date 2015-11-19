@@ -27,6 +27,8 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -55,6 +57,11 @@ public class FtpStreamable implements IStreamable {
         this.password = password;
         this.basePath = basePath;
         this.connectTimeout = connectTimeout;
+    }
+    
+    @Override
+    public List<FileInfo> listFiles(String relativePath) {
+        return new ArrayList<>();
     }
 
     protected FTPClient createClient() {

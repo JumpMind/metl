@@ -33,6 +33,7 @@ import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -66,51 +67,54 @@ public class Transformer extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        Model inputModel = getComponent().getInputModel();
-        List<EntityData> inDatas = inputMessage.getPayload();
-        ArrayList<EntityData> outDatas = new ArrayList<EntityData>(inDatas != null ? inDatas.size() : 0);        
-        
-        if (inDatas != null) {
-	        for (EntityData inData : inDatas) {
-	            EntityData outData = new EntityData();
-	            outData.setChangeType(inData.getChangeType());
-	            outDatas.add(outData);
-	            
-	            Set<String> attributeIds = new HashSet<String>();
-	            Set<ModelEntity> processedEntities = new HashSet<ModelEntity>();
-	            for (String attributeId : inData.keySet()) {
-	                ModelAttribute attribute = inputModel.getAttributeById(attributeId);
-	                if (attribute != null) {
-	                    ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
-	                    if (entity != null && !processedEntities.contains(entity)) {
-	                        List<ModelAttribute> attributes = entity.getModelAttributes();
-	                        for (ModelAttribute modelAttribute : attributes) {
-	                            attributeIds.add(modelAttribute.getId());
-	                        }
-	                        processedEntities.add(entity);
-	                    }
-	                }
-	            }
-	            
-	            for (String attributeId : attributeIds) {
-	                String transform = transformsByAttributeId.get(attributeId);
-	                Object value = inData.get(attributeId);
-	                if (isNotBlank(transform)) {
-	                    ModelAttribute attribute = inputModel.getAttributeById(attributeId);
-	                    ModelEntity entity = inputModel.getEntityById(attribute.getEntityId()); 
-	                    
-	                    // Transform
-	                    value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute, value, entity, inData, transform);
-	                }
-	                if (value != ModelAttributeScriptHelper.REMOVE_ATTRIBUTE) {
-	                    outData.put(attributeId, value);
-	                }
-	            }            
-	            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-	        }
-        }
-        callback.sendMessage(null, outDatas, unitOfWorkBoundaryReached);
-    }    
+	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
 
+		if (!(inputMessage instanceof ControlMessage)) {
+			Model inputModel = getComponent().getInputModel();
+			List<EntityData> inDatas = inputMessage.getPayload();
+			ArrayList<EntityData> outDatas = new ArrayList<EntityData>(inDatas != null ? inDatas.size() : 0);
+
+			if (inDatas != null) {
+				for (EntityData inData : inDatas) {
+					EntityData outData = new EntityData();
+					outData.setChangeType(inData.getChangeType());
+					outDatas.add(outData);
+
+					Set<String> attributeIds = new HashSet<String>();
+					Set<ModelEntity> processedEntities = new HashSet<ModelEntity>();
+					for (String attributeId : inData.keySet()) {
+						ModelAttribute attribute = inputModel.getAttributeById(attributeId);
+						if (attribute != null) {
+							ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+							if (entity != null && !processedEntities.contains(entity)) {
+								List<ModelAttribute> attributes = entity.getModelAttributes();
+								for (ModelAttribute modelAttribute : attributes) {
+									attributeIds.add(modelAttribute.getId());
+								}
+								processedEntities.add(entity);
+							}
+						}
+					}
+
+					for (String attributeId : attributeIds) {
+						String transform = transformsByAttributeId.get(attributeId);
+						Object value = inData.get(attributeId);
+						if (isNotBlank(transform)) {
+							ModelAttribute attribute = inputModel.getAttributeById(attributeId);
+							ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+
+							// Transform
+							value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute, value, entity,
+									inData, transform);
+						}
+						if (value != ModelAttributeScriptHelper.REMOVE_ATTRIBUTE) {
+							outData.put(attributeId, value);
+						}
+					}
+					getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+				}
+			}
+			callback.sendMessage(null, outDatas);
+		}
+	}
 }

@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
@@ -46,7 +45,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
+public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntimeTestSupport {
 
 	List<String> sqls;
 	String expectedFlowReplacementSql;

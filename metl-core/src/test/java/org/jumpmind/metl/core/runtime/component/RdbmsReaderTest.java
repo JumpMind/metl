@@ -21,142 +21,72 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
 
-import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.jumpmind.db.model.Column;
-import org.jumpmind.db.model.Database;
-import org.jumpmind.db.model.Table;
-import org.jumpmind.db.platform.IDatabasePlatform;
-import org.jumpmind.db.sql.DmlStatement;
-import org.jumpmind.db.sql.DmlStatement.DmlType;
-import org.jumpmind.db.sql.ISqlTemplate;
-import org.jumpmind.metl.core.model.Component;
-import org.jumpmind.metl.core.model.Flow;
-import org.jumpmind.metl.core.model.FlowStep;
-import org.jumpmind.metl.core.model.Folder;
-import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
-import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.model.Resource;
-import org.jumpmind.metl.core.model.Setting;
-import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
-import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.ControlMessage;
-import org.jumpmind.metl.core.runtime.resource.Datasource;
-import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
-import org.jumpmind.metl.core.utils.DbTestUtils;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
+import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.jumpmind.metl.core.utils.TestUtils;
-import org.junit.After;
-import org.junit.BeforeClass;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+
 @RunWith(PowerMockRunner.class)
-public class RdbmsReaderTest {
-
-    private static IResourceRuntime resourceRuntime;
-    private static IDatabasePlatform platform;
-    private static FlowStep readerFlowStep;
-    private static FlowStep readerFlowStepMultiQuery;
-    private static Map<String, IResourceRuntime> deployedResources;
-    private static Resource resource;
-
-    @BeforeClass
-    public static void setup() throws Exception {
-        resource = createResource(createResourceSettings());
-        platform = createPlatformAndTestDatabase();
-        readerFlowStep = createReaderFlowStep();
-        readerFlowStepMultiQuery = createReaderFlowStepMultiQuery();
-        Resource resource = readerFlowStep.getComponent().getResource();
-        deployedResources = new HashMap<>();
-        resourceRuntime = new ResourceFactory().create(resource, null);
-        deployedResources.put(resource.getId(), resourceRuntime);
-
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
+public class RdbmsReaderTest extends AbstractRdbmsComponentTest {
 
     @Test
-    public void testReaderFlowFromStartupMsg() throws Exception {
+    public void testFindWhereInParameters() {
         RdbmsReader reader = new RdbmsReader();
-        reader.start(0, new ComponentContext(null, readerFlowStep, null, new ExecutionTrackerNoOp(), deployedResources, null, null));
-        Message msg = new ControlMessage();
-        SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
-        reader.handle(msg, msgTarget, true);
+        Set<String> attributeNames = reader.findWhereInParameters("select * from test where id in (:ENTITY.ATTRIBUTE1) and id is not null");
+        assertEquals(1, attributeNames.size());
+        assertEquals("ENTITY.ATTRIBUTE1", attributeNames.iterator().next());
+        
+        attributeNames = reader.findWhereInParameters("select * from test where id IN (:ENTITY.ATTRIBUTE1) and id is not null");
+        assertEquals(1, attributeNames.size());
+        assertEquals("ENTITY.ATTRIBUTE1", attributeNames.iterator().next());
+        
+        attributeNames = reader.findWhereInParameters("select * from test where id in  (:ENTITY.ATTRIBUTE1) and id is not null");
+        assertEquals(1, attributeNames.size());
+        assertEquals("ENTITY.ATTRIBUTE1", attributeNames.iterator().next());
+        
+        attributeNames = reader.findWhereInParameters("select * from test where id in  \n(:ENTITY.ATTRIBUTE1) and id is not null");
+        assertEquals(1, attributeNames.size());
+        assertEquals("ENTITY.ATTRIBUTE1", attributeNames.iterator().next());
 
-        assertEquals(2, msgTarget.getPayloadList().size());
-        ArrayList<EntityData> payload = msgTarget.getPayloadList().get(0);
-        assertEquals("test row 1", payload.get(0).get("tt1col2"));
-        assertEquals("test row x", payload.get(0).get("tt2coly"));
+        attributeNames = reader.findWhereInParameters("select * from test where id in  \n( :ENTITY.ATTRIBUTE1 ) and id is not null");
+        assertEquals(1, attributeNames.size());
+        assertEquals("ENTITY.ATTRIBUTE1", attributeNames.iterator().next());
+        
+        attributeNames = reader.findWhereInParameters("select * from test where id is not null");
+        assertEquals(0, attributeNames.size());
+        
+        attributeNames = reader.findWhereInParameters("select * from test where id in  \n( :ENTITY.ATTRIBUTE1 ) and id2 not in (:ENTITY.ATTRIBUTE2)");
+        assertEquals(2, attributeNames.size());
+        Iterator<?> i = attributeNames.iterator();
+        assertEquals("ENTITY.ATTRIBUTE1", i.next());
+        assertEquals("ENTITY.ATTRIBUTE2", i.next());
     }
-
+    
     @Test
-    public void testReaderFlowFromSingleContentMsg() throws Exception {
-
+    public void testGetTableNameFromSql() {
         RdbmsReader reader = new RdbmsReader();
-        reader.start(0, new ComponentContext(null, readerFlowStep, null, new ExecutionTrackerNoOp(), deployedResources, null, null));
-        Message message = new Message("fake step id");
-        ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
-        inboundPayload.add(new EntityData());
-        message.setPayload(inboundPayload);
-
-        SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
-        reader.handle(message, msgTarget, true);
-
-        assertEquals(2, msgTarget.getPayloadList().size());
-        ArrayList<EntityData> payload = msgTarget.getPayloadList().get(0);
-        assertEquals("test row 1", payload.get(0).get("tt1col2"));
-        assertEquals("test row x", payload.get(0).get("tt2coly"));
-        // TODO: can't test these like this anymore. Need manipulatedFlow and
-        // startup message
-        // as this is calculated at the runtime level based on incoming messages
-        // assertEquals(false,
-        // msgTarget.getMessage(0).getHeader().isUnitOfWorkLastMessage());
-        // assertEquals(true,
-        // msgTarget.getMessage(1).getHeader().isUnitOfWorkLastMessage());
+        assertEquals("test", reader.getTableNameFromSql("select * from test where nobody='knows'"));
+        assertEquals("test", reader.getTableNameFromSql("select * from \"test\" where nobody='knows'"));
+        assertEquals("test", reader.getTableNameFromSql("select * from `test` where nobody='knows'"));
+        assertEquals("test", reader.getTableNameFromSql("select * from test"));
+        assertEquals("test", reader.getTableNameFromSql("select * from\n test"));
     }
-
-    @Test
-    public void testReaderFlowFromMultipleContentMsgs() throws Exception {
-
-        RdbmsReader reader = new RdbmsReader();
-        reader.start(0,
-                new ComponentContext(null, readerFlowStepMultiQuery, null, new ExecutionTrackerNoOp(), deployedResources, null, null));
-        Message message = new Message("fake step id");
-        ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
-        inboundPayload.add(new EntityData());
-        message.setPayload(inboundPayload);
-
-        SendMessageCallback<ArrayList<EntityData>> msgTarget = new SendMessageCallback<ArrayList<EntityData>>();
-        reader.handle(message, msgTarget, true);
-
-        assertEquals(2, msgTarget.getPayloadList().size());
-        ArrayList<EntityData> payload = msgTarget.getPayloadList().get(0);
-        assertEquals("test row 1", payload.get(0).get("tt1col2"));
-        assertEquals("test row x", payload.get(0).get("tt2coly"));
-        // TODO: can't test these like this anymore. Need manipulatedFlow and
-        // startup message
-        // as this is calculated at the runtime level based on incoming messages
-        // assertEquals(false,
-        // msgTarget.getMessage(0).getHeader().isUnitOfWorkLastMessage());
-        // assertEquals(true,
-        // msgTarget.getMessage(1).getHeader().isUnitOfWorkLastMessage());
-    }
-
+    
     @Test
     public void testCountColumnSeparatingCommas() {
-
         RdbmsReader reader = new RdbmsReader();
 
         int count = reader.countColumnSeparatingCommas("ISNULL(a,''), b, *");
@@ -167,7 +97,6 @@ public class RdbmsReaderTest {
 
     @Test
     public void testGetSqlColumnEntityHints() throws Exception {
-
         RdbmsReader reader = new RdbmsReader();
         String sql = "select\r\n ISNULL(a,ISNULL(z,'')) /*COLA*/, b/*COLB*/, c/*  COLC */ from test;";
         Map<Integer, String> hints = reader.getSqlColumnEntityHints(sql);
@@ -175,163 +104,212 @@ public class RdbmsReaderTest {
         assertEquals(hints.get(2), "COLB");
         assertEquals(hints.get(3), "COLC");
 
+    }    
+    
+	@Test
+	@Override
+	public void testStartDefaults() {
+		setupStart(new SettingsBuilder().build());
+		try {
+			((RdbmsReader) spy).start();
+		}
+		catch (Exception e) {
+			Assert.assertTrue(e instanceof MisconfiguredException);
+		}
+	}
+
+	@Test
+	public void testStartDefaultsNoException() {
+		setupStart(new SettingsBuilder().build());
+		properties.setProperty(RdbmsReader.SQL, "select * from dual");
+		
+		((RdbmsReader) spy).start();
+		
+		List<String> expected = new ArrayList<String>();
+		expected.add("select * from dual");
+		
+		TestUtils.assertList(expected, ((RdbmsReader) spy).sqls, false);
+		Assert.assertEquals(-1, ((RdbmsReader) spy).rowsPerMessage);
+		Assert.assertEquals(false, ((RdbmsReader) spy).trimColumns);
+		Assert.assertEquals(false, ((RdbmsReader) spy).matchOnColumnNameOnly);
+	}
+
+	
+	@Test
+	@Override
+	public void testStartWithValues() {
+		setupStart(new SettingsBuilder().build());
+		
+		properties.setProperty(RdbmsReader.SQL, "select * from dual");
+		properties.setProperty(RdbmsReader.ROWS_PER_MESSAGE, "5");
+		properties.setProperty(RdbmsReader.TRIM_COLUMNS, "true");
+		properties.setProperty(RdbmsReader.MATCH_ON_COLUMN_NAME_ONLY, "true");
+		
+		((RdbmsReader) spy).start();
+		
+		Assert.assertEquals(5, ((RdbmsReader) spy).rowsPerMessage);
+		Assert.assertEquals(true, ((RdbmsReader) spy).trimColumns);
+		Assert.assertEquals(true, ((RdbmsReader) spy).matchOnColumnNameOnly);
+	}
+	
+	@Test
+	@Override
+	public void testHandleStartupMessage() {
+		MessageTestHelper.addControlMessage(this, "test", false);
+		runHandle();
+		assertHandle(0);
+	}
+	
+	@Override
+	protected boolean sqlRequired() {
+	    return true;
+	}
+
+	@Test
+	@Override
+	public void testHandleUnitOfWorkLastMessage() {
+		setupHandle();
+		
+		MessageTestHelper.addControlMessage(this, "test", true);
+		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());
+		runHandle();
+		assertHandle(0);
+	}
+	
+	@Test
+	@Override
+	public void testHandleNormal() {
+		
+	}
+	/*
+	@Test
+	@Override
+	public void testHandleNormal() {
+		// Setup
+		List<String> sqls = new ArrayList<String>();
+		sqls.add("select * from $(UNIT_TEST)");
+		this.sqls = sqls;
+		
+		// Messages
+		Message message1 = new MessageBuilder("step1")
+				.setPayload(new PayloadBuilder()
+					.addRow(new EntityDataBuilder()
+						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+				.build()).buildED()).build();
+		
+		messages.clear();
+		messages.add(new HandleParams(message1, true));
+		
+		// Expected
+		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+						.addRow(new EntityDataBuilder()
+							.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+						.build()).buildED();
+		
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		
+		// Execute and Assert
+		runHandle();
+		assertHandle(1, expectedMonitors);
+	}
+	
+	@Test
+	public void testHandleWithFlowParameters() {
+		// Setup
+		List<String> sqls = new ArrayList<String>();
+		sqls.add("select * from $(UNIT_TEST)");
+		
+		Map<String, String> flowParameters = new HashMap<String, String>();
+		flowParameters.put("UNIT_TEST", "GOES_BOOM");
+		
+		this.sqls = sqls;
+		this.flowParametersAsString = flowParameters;
+		expectedFlowReplacementSql = "select * from GOES_BOOM";
+		
+		// Messages
+		Message message1 = new MessageBuilder("step1")
+				.setPayload(new PayloadBuilder()
+					.addRow(new EntityDataBuilder()
+						.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+				.build()).buildED()).build();
+		
+		messages.clear();
+		messages.add(new HandleParams(message1, true));
+		
+		// Expected
+		ArrayList<EntityData> expectedPayload = new PayloadBuilder()
+						.addRow(new EntityDataBuilder()
+							.addKV(MODEL_ATTR_ID_1, MODEL_ATTR_NAME_1)
+						.build()).buildED();
+		
+		List<HandleMessageMonitor> expectedMonitors = new ArrayList<HandleMessageMonitor>();
+		expectedMonitors.add(getExpectedMessageMonitor(1, 0, 0, 1, expectedPayload));
+		
+		// Execute and Assert
+		runHandle();
+		assertHandle(1, expectedMonitors);
+	}
+	
+	@Test
+	public void testHandleSettingParamsFromHeaderNoPayload() {
+		Map<String, Serializable> flowParameters = new HashMap<String, Serializable>();
+		flowParameters.put("key", "value");
+		
+		List<String> sqls = new ArrayList<String>();
+		sqls.add("select * from test");
+		
+		Map<String, Object> expectedParams = new HashMap<String, Object>();
+		expectedParams.putAll(flowParameters);
+		
+		this.sqls = sqls;
+		this.flowParameters = flowParameters;
+		expectedParamMap = expectedParams;
+		
+		runHandle();
+		assertHandle(1, 1, 0, 0);
+	}
+	
+	@Test
+	public void testApplySettings() {
+		// setup
+		RdbmsReader reader = spy(new RdbmsReader());
+		
+		String eSql = "select * from test";
+		long eRowsPerMessage = 5l;
+		String eTrimColumns = "true";
+		String eMatchOnColumnNameOnly = "true";
+		
+		TypedProperties eProperties = new TypedProperties();
+		eProperties.setProperty(RdbmsReader.SQL, eSql);
+		eProperties.setProperty(RdbmsReader.ROWS_PER_MESSAGE, eRowsPerMessage);
+		eProperties.setProperty(RdbmsReader.TRIM_COLUMNS, eTrimColumns);
+		eProperties.setProperty(RdbmsReader.MATCH_ON_COLUMN_NAME_ONLY, eMatchOnColumnNameOnly);
+				
+		doReturn(eProperties).when(reader).getTypedProperties();
+		
+		// actual
+		reader.start();
+		assertTrue(reader.isMatchOnColumnNameOnly());
+		assertTrue(reader.isTrimColumns());
+		assertEquals(eRowsPerMessage, reader.getRowsPerMessage());
+		assertEquals(1, reader.getSqls().size());
+		assertEquals(eSql, reader.getSqls().get(0));
+	}
+	*/
+	
+    @Override
+    protected String getComponentId() {
+        return RdbmsReader.TYPE;
     }
 
-    private static FlowStep createReaderFlowStep() {
-
-        Folder folder = TestUtils.createFolder("Test Folder");
-        Flow flow = TestUtils.createFlow("TestFlow", folder);
-        Setting[] settingData = createReaderSettings();
-        Component componentVersion = TestUtils.createComponent(RdbmsReader.TYPE, false, resource, null, createOutputModel(), null, null,
-                settingData);
-        FlowStep readerComponent = new FlowStep();
-        readerComponent.setFlowId(flow.getId());
-        readerComponent.setComponentId(componentVersion.getId());
-        readerComponent.setCreateBy("Test");
-        readerComponent.setCreateTime(new Date());
-        readerComponent.setLastUpdateBy("Test");
-        readerComponent.setLastUpdateTime(new Date());
-        readerComponent.setComponent(componentVersion);
-        return readerComponent;
-    }
-
-    private static FlowStep createReaderFlowStepMultiQuery() {
-
-        Folder folder = TestUtils.createFolder("Test Folder");
-        Flow flow = TestUtils.createFlow("TestFlow", folder);
-        Setting[] settingData = createReaderSettingsMultiQuery();
-        Component component = TestUtils.createComponent(RdbmsReader.TYPE, false, resource, null,
-                createOutputModel(), null, null, settingData);
-        FlowStep step = new FlowStep();
-        step.setFlowId(flow.getId());
-        step.setCreateBy("Test");
-        step.setCreateTime(new Date());
-        step.setLastUpdateBy("Test");
-        step.setLastUpdateTime(new Date());
-        step.setComponent(component);
-        return step;
-    }
-
-    private static Model createOutputModel() {
-
-        ModelEntity tt1 = new ModelEntity("tt1", "TEST_TABLE_1");
-        tt1.addModelAttribute(new ModelAttribute("tt1col1", tt1.getId(), "COL1"));
-        tt1.addModelAttribute(new ModelAttribute("tt1col2", tt1.getId(), "COL2"));
-        tt1.addModelAttribute(new ModelAttribute("tt1col3", tt1.getId(), "COL3"));
-
-        ModelEntity tt2 = new ModelEntity("tt2", "TEST_TABLE_2");
-        tt2.addModelAttribute(new ModelAttribute("tt2colx", tt1.getId(), "COLX"));
-        tt2.addModelAttribute(new ModelAttribute("tt2coly", tt1.getId(), "COLY"));
-        tt2.addModelAttribute(new ModelAttribute("tt2colz", tt1.getId(), "COLZ"));
-
-        Model modelVersion = new Model();
-        modelVersion.getModelEntities().add(tt1);
-        modelVersion.getModelEntities().add(tt2);
-
-        return modelVersion;
-    }
-
-    private static Resource createResource(List<Setting> settings) {
-        Resource resource = new Resource();
-        Folder folder = TestUtils.createFolder("Test Folder Resource");
-        resource.setName("Test Resource");
-        resource.setFolderId("Test Folder Resource");
-        resource.setType(Datasource.TYPE);
-        resource.setFolder(folder);
-        resource.setSettings(settings);
-
-        return resource;
-    }
-
-    private static Setting[] createReaderSettings() {
-
-        Setting[] settingData = new Setting[2];
-        settingData[0] = new Setting(RdbmsReader.SQL,
-                "select * From test_table_1 tt1 inner join test_table_2 tt2" + " on tt1.col1 = tt2.colx order by tt1.col1");
-        settingData[1] = new Setting(RdbmsReader.ROWS_PER_MESSAGE, "2");
-
-        return settingData;
-    }
-
-    private static Setting[] createReaderSettingsMultiQuery() {
-
-        Setting[] settingData = new Setting[2];
-        settingData[0] = new Setting(RdbmsReader.SQL, "select * From test_table_1 tt1 inner join test_table_2 tt2"
-                + " on tt1.col1 = tt2.colx order by tt1.col1;\n\n" + "select * from test_table_2 where colx = 4;");
-        settingData[1] = new Setting(RdbmsReader.ROWS_PER_MESSAGE, "2");
-
-        return settingData;
-    }
-
-    private static List<Setting> createResourceSettings() {
-        List<Setting> settings = new ArrayList<Setting>(4);
-        settings.add(new Setting(Datasource.DB_POOL_DRIVER, "org.h2.Driver"));
-        settings.add(new Setting(Datasource.DB_POOL_URL, "jdbc:h2:file:./build/dbs/testdb"));
-        settings.add(new Setting(Datasource.DB_POOL_USER, "jumpmind"));
-        settings.add(new Setting(Datasource.DB_POOL_PASSWORD, "jumpmind"));
-        return settings;
-    }
-
-    private static IDatabasePlatform createPlatformAndTestDatabase() throws Exception {
-
-        platform = DbTestUtils.createDatabasePlatform();
-        Database database = createTestDatabase();
-        platform.createDatabase(database, true, false);
-        populateTestDatabase(platform, database);
-
-        return platform;
-    }
-
-    private static Database createTestDatabase() {
-
-        Table testTable1 = createTestTable1();
-        Table testTable2 = createTestTable2();
-        Database database = new Database();
-        database.addTable(testTable1);
-        database.addTable(testTable2);
-        return database;
-    }
-
-    private static Table createTestTable1() {
-
-        Table table = new Table("test_table_1");
-
-        List<Column> columns = new ArrayList<Column>();
-        columns.add(new Column("col1", true, Types.INTEGER, 4, 1));
-        columns.add(new Column("col2", false, Types.VARCHAR, 50, 50));
-        columns.add(new Column("col3", false, Types.DECIMAL, 9, 2));
-
-        table.addColumns(columns);
-        return table;
-    }
-
-    private static Table createTestTable2() {
-
-        Table table = new Table("test_table_2");
-
-        List<Column> columns = new ArrayList<Column>();
-        columns.add(new Column("colx", true, Types.INTEGER, 4, 1));
-        columns.add(new Column("coly", false, Types.VARCHAR, 50, 50));
-        columns.add(new Column("colz", false, Types.DECIMAL, 9, 2));
-
-        table.addColumns(columns);
-        return table;
-    }
-
-    private static void populateTestDatabase(IDatabasePlatform platform, Database database) {
-
-        ISqlTemplate template = platform.getSqlTemplate();
-        DmlStatement statement = platform.createDmlStatement(DmlType.INSERT, database.findTable("test_table_1"), null);
-        template.update(statement.getSql(), statement.getValueArray(new Object[] { 1, "test row 1", 7.7 }, new Object[] { 1 }));
-        template.update(statement.getSql(), statement.getValueArray(new Object[] { 2, "test row 2", 8.8 }, new Object[] { 1 }));
-        template.update(statement.getSql(), statement.getValueArray(new Object[] { 3, "test row 3", 9.9 }, new Object[] { 1 }));
-
-        statement = platform.createDmlStatement(DmlType.INSERT, database.findTable("test_table_2"), null);
-        template.update(statement.getSql(), statement.getValueArray(new Object[] { 1, "test row x", 7.7 }, new Object[] { 1 }));
-        template.update(statement.getSql(), statement.getValueArray(new Object[] { 2, "test row y", 8.8 }, new Object[] { 1 }));
-        template.update(statement.getSql(), statement.getValueArray(new Object[] { 3, "test row z", 9.9 }, new Object[] { 1 }));
-        template.update(statement.getSql(), statement.getValueArray(new Object[] { 4, "test row zz", 4.9 }, new Object[] { 1 }));
-
-    }
-
+	@Override
+	public void setupHandle() {
+		super.setupHandle();
+		
+		doReturn(this.sqls).when((RdbmsReader) spy).getSqls();
+		
+	}
+	
+	
 }

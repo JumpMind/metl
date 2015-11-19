@@ -35,6 +35,7 @@ import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -70,31 +71,35 @@ public class FixedLengthParser extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        ArrayList<String> inputRows = inputMessage.getPayload();
+        if (!(inputMessage instanceof ControlMessage)) {
+            ArrayList<String> inputRows = inputMessage.getPayload();
 
-        ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
-        int headerRowsToSkip = inputMessage.getHeader().getSequenceNumber() == 0 ? numberOfHeaderLinesToSkip : 0;
-        try {
-            int rowCount = 0;
-            for (String inputRow : inputRows) {
-                if (headerRowsToSkip == 0) {
-                    if (!inputMessage.getHeader().isUnitOfWorkLastMessage() || (rowCount + numberOfFooterLinesToSkip < inputRows.size())) {
-                        EntityData data = processInputRow(inputMessage, inputRow);
-                        if (data != null) {
-                            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                            outputPayload.add(data);
+            ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
+            int headerRowsToSkip = inputMessage.getHeader().getSequenceNumber() == 0 ? numberOfHeaderLinesToSkip : 0;
+            try {
+                int rowCount = 0;
+                for (String inputRow : inputRows) {
+                    if (headerRowsToSkip == 0) {
+                        // TODO what if the file is split across messages? this
+                        // logic would not work
+                        if (rowCount + numberOfFooterLinesToSkip < inputRows.size()) {
+                            EntityData data = processInputRow(inputMessage, inputRow);
+                            if (data != null) {
+                                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                                outputPayload.add(data);
+                            }
                         }
+                    } else {
+                        headerRowsToSkip--;
                     }
-                } else {
-                    headerRowsToSkip--;
+                    rowCount++;
                 }
-                rowCount++;
+            } catch (IOException e) {
+                throw new IoException(e);
             }
-        } catch (IOException e) {
-            throw new IoException(e);
-        }
 
-        callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
+            callback.sendMessage(null, outputPayload);
+        }
     }
 
     private EntityData processInputRow(Message inputMessage, String inputRow) throws IOException {

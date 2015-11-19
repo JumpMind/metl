@@ -46,7 +46,7 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.util.ComponentUtil;
+import org.jumpmind.metl.core.util.ComponentUtils;
 import org.jumpmind.properties.TypedProperties;
 
 abstract public class AbstractComponentRuntime extends AbstractRuntimeObject implements IComponentRuntime {
@@ -60,6 +60,14 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     public final static String LOG_OUTPUT = "logOutput";
     
     public final static String ROWS_PER_MESSAGE = "rows.per.message";
+    
+    public final static String RUN_WHEN = "run.when";
+    
+    public static final String PER_UNIT_OF_WORK = "PER UNIT OF WORK";
+
+    public static final String PER_MESSAGE = "PER MESSAGE";
+
+    public static final String PER_ENTITY = "PER ENTITY";    
 
     protected ComponentContext context;
     
@@ -181,20 +189,40 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return context.getManipulatedFlow();
     }
     
-    protected Bindings bindEntityData(ScriptEngine scriptEngine, Message inputMessage, EntityData entityData) {
-        Bindings bindings = scriptEngine.createBindings();
-        Model model = context.getFlowStep().getComponent().getInputModel();
-        List<ModelEntity> entities = model.getModelEntities();
-        for (ModelEntity modelEntity : entities) {
-        	HashMap<String, Object> boundEntity = new HashMap<String, Object>(0);
-        	bindings.put(modelEntity.getName(), boundEntity);
-        }
+    protected void bindHeadersAndFlowParameters(Bindings bindings, Message inputMessage) {
+        bindModelEntities(bindings);        
         
         Set<String> messageHeaderKeys = inputMessage.getHeader().keySet();
         for (String messageHeaderKey : messageHeaderKeys) {
             bindings.put(messageHeaderKey, inputMessage.getHeader().get(messageHeaderKey));
         }
         
+        Map<String, String> flowParameters = context.getFlowParametersAsString();
+        for (String key : flowParameters.keySet()) {
+            bindings.put(key, flowParameters.get(key));            
+        }
+    }
+    
+    protected void bindModelEntities(Bindings bindings) {
+        Model model = context.getFlowStep().getComponent().getInputModel();
+        if (model != null) {
+            List<ModelEntity> entities = model.getModelEntities();
+            for (ModelEntity modelEntity : entities) {
+                HashMap<String, Object> boundEntity = new HashMap<String, Object>(0);
+                bindings.put(modelEntity.getName(), boundEntity);
+                
+                List<ModelAttribute> attributes = modelEntity.getModelAttributes();
+                for (ModelAttribute modelAttribute : attributes) {
+                    boundEntity.put(modelAttribute.getName(), null);
+                }
+            }
+        }
+    }
+    
+    protected Bindings bindEntityData(ScriptEngine scriptEngine, Message inputMessage, EntityData entityData) {
+        Bindings bindings = scriptEngine.createBindings();       
+        bindHeadersAndFlowParameters(bindings, inputMessage);
+        Model model = getInputModel();
         bindings.put("CHANGE_TYPE", entityData.getChangeType().name());
         bindings.put("ENTITY_NAMES", context.getFlowStep().getComponent().getEntityNames(entityData, true));                
         Set<String> attributeIds = entityData.keySet();
@@ -215,8 +243,9 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return bindings;
     }
 
-    protected Bindings bindStringData(ScriptEngine scriptEngine, String value) {
+    protected Bindings bindStringData(ScriptEngine scriptEngine, Message inputMessage, String value) {
         Bindings bindings = scriptEngine.createBindings();
+        bindHeadersAndFlowParameters(bindings, inputMessage);
         if (value != null) {
         	bindings.put("text", value);
         } else {
@@ -228,12 +257,12 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
 
     protected Object getAttributeValue(Message inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
-        return ComponentUtil.getAttributeValue(getInputModel(), rows, entityName, attributeName);
+        return ComponentUtils.getAttributeValue(getInputModel(), rows, entityName, attributeName);
     }
 
     protected List<Object> getAttributeValues(Message inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
-        return ComponentUtil.getAttributeValues(getInputModel(), rows, entityName, attributeName);
+        return ComponentUtils.getAttributeValues(getInputModel(), rows, entityName, attributeName);
     }
     
     public void setComponentDefinition(XMLComponent componentDefinition) {

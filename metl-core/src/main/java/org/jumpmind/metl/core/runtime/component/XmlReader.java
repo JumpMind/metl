@@ -56,6 +56,8 @@ public class XmlReader extends AbstractComponentRuntime {
     public final static String SETTING_READ_TAG = "read.tag";
 
     public final static String SETTING_READ_TAGS_PER_MESSAGE = "read.tags.per.message";
+    
+    String runWhen = PER_UNIT_OF_WORK;
 
     boolean getFileNameFromMessage = false;
 
@@ -72,6 +74,7 @@ public class XmlReader extends AbstractComponentRuntime {
         relativePathAndFile = component.get(SETTING_RELATIVE_PATH, relativePathAndFile);
         readTagsPerMessage = component.getInt(SETTING_READ_TAGS_PER_MESSAGE, readTagsPerMessage);
         readTag = component.get(SETTING_READ_TAG, readTag);
+        runWhen = component.get(RUN_WHEN, runWhen);
         
         if (!getFileNameFromMessage && component.getResource() == null) {
             throw new MisconfiguredException("A resource has not been selected.  The resource is required if not configured to get the file name from the inbound message");
@@ -81,12 +84,16 @@ public class XmlReader extends AbstractComponentRuntime {
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         List<String> files = getFilesToRead(inputMessage);
-        try {
-            processFiles(files, callback, unitOfWorkBoundaryReached);
-        } catch (Exception e) {
-            throw new IoException(e);
-        }
-    }
+        
+		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
+				|| (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
+			try {
+				processFiles(files, callback, unitOfWorkBoundaryReached);
+			} catch (Exception e) {
+				throw new IoException(e);
+			}
+		}
+	}
 
     List<String> getFilesToRead(Message inputMessage) {
         ArrayList<String> files = new ArrayList<String>();
@@ -104,10 +111,8 @@ public class XmlReader extends AbstractComponentRuntime {
         XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
         ArrayList<String> outboundPayload = new ArrayList<String>();
 
-        int filesProcessed = 0;
         for (String file : files) {            
             log(LogLevel.INFO, "Reading %s", file);
-            filesProcessed++;
             Map<String, Serializable> headers = new HashMap<>();
             headers.put("source.file.path", file);
             File xmlFile = null;
@@ -178,7 +183,7 @@ public class XmlReader extends AbstractComponentRuntime {
                             getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                             outboundPayload.add(xml.toString());
                             if (outboundPayload.size() == readTagsPerMessage) {
-                                callback.sendMessage(headers, outboundPayload, false);
+                                callback.sendMessage(headers, outboundPayload);
                                 outboundPayload = new ArrayList<String>();
                             }
                             startCol = 0;
@@ -191,7 +196,7 @@ public class XmlReader extends AbstractComponentRuntime {
             closeQuietly(lineNumberReader);
 
             if (outboundPayload.size() > 0) {
-                callback.sendMessage(headers, outboundPayload, filesProcessed == files.size() && unitOfWorkLastMessage);
+                callback.sendMessage(headers, outboundPayload);
             }
         }
 
@@ -224,4 +229,7 @@ public class XmlReader extends AbstractComponentRuntime {
         return true;
     }
 
+    public void setRunWhen(String runWhen) {
+        this.runWhen = runWhen;
+    }
 }

@@ -243,6 +243,7 @@ public class DataDiff extends AbstractComponentRuntime {
         }
 
         ResettableBasicDataSource ds = databasePlatform.getDataSource();
+        
         ds.close();
 
         if (!inMemoryCompare) {
@@ -301,6 +302,10 @@ public class DataDiff extends AbstractComponentRuntime {
         if (databasePlatform == null) {
             ResettableBasicDataSource ds = new ResettableBasicDataSource();
             ds.setDriverClassName(Driver.class.getName());
+            ds.setMaxActive(1);
+            ds.setInitialSize(1);
+            ds.setMinIdle(1);
+            ds.setMaxIdle(1);
             databaseName = UUID.randomUUID().toString();
             if (inMemoryCompare) {
                 ds.setUrl("jdbc:h2:mem:" + databaseName);

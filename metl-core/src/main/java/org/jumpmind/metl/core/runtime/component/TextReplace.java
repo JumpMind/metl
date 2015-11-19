@@ -70,7 +70,7 @@ public class TextReplace extends AbstractComponentRuntime {
             }            
         }
         
-        callback.sendMessage(null, out, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, out);
     }
 
 }

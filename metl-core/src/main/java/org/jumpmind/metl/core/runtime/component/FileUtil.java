@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -70,6 +71,8 @@ public class FileUtil extends AbstractComponentRuntime {
     public static final String SETTING_OVERWRITE = "overwrite";
 
     String action = ACTION_COPY;
+    
+    String runWhen = PER_UNIT_OF_WORK;
 
     boolean getFileNameFromMessage = false;
 
@@ -132,36 +135,41 @@ public class FileUtil extends AbstractComponentRuntime {
         newName = typedProperties.get(SETTING_NEW_NAME, newName);
         appendToName = typedProperties.get(SETTING_APPEND_TO_NAME);
         overwrite = typedProperties.is(SETTING_OVERWRITE, overwrite);
+        runWhen = typedProperties.get(RUN_WHEN, PER_UNIT_OF_WORK);
     }
 
-    @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        List<String> files = getFilesToRead(inputMessage);
-        ArrayList<String> filesProcessed = new ArrayList<>();
-        if (files != null) {
-            for (String fileName : files) {
-                try {
-                    String targetFile = null;
-                    if (action.equals(ACTION_COPY) || action.equals(ACTION_MOVE)) {
-                        targetFile = copyFile(inputMessage, fileName);
-                        if (isNotBlank(targetFile)) {
-                            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                            filesProcessed.add(targetFile);
-                        }
-                    } 
-                    
-                    if (action.equals(ACTION_MOVE)) {
-                        if (isNotBlank(targetFile)) {
-                            FileUtils.deleteQuietly(new File(fileName));
-                        }
-                    }
-                } catch (Exception e) {
-                    throw new IoException("Error processing file " + e.getMessage());
-                }
-            }
-        }
-        callback.sendMessage(null, filesProcessed, unitOfWorkBoundaryReached);
-    }
+	@Override
+	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+
+		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
+				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
+			List<String> files = getFilesToRead(inputMessage);
+			ArrayList<String> filesProcessed = new ArrayList<>();
+			if (files != null) {
+				for (String fileName : files) {
+					try {
+						String targetFile = null;
+						if (action.equals(ACTION_COPY) || action.equals(ACTION_MOVE)) {
+							targetFile = copyFile(inputMessage, fileName);
+							if (isNotBlank(targetFile)) {
+								getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+								filesProcessed.add(targetFile);
+							}
+						}
+
+						if (action.equals(ACTION_MOVE)) {
+							if (isNotBlank(targetFile)) {
+								FileUtils.deleteQuietly(new File(fileName));
+							}
+						}
+					} catch (Exception e) {
+						throw new IoException("Error processing file " + e.getMessage());
+					}
+				}
+			}
+			callback.sendMessage(null, filesProcessed);
+		}
+	}
 
     protected String copyFile(Message inputMessage, String fileName) throws Exception {
         File sourceFile = new File(fileName);

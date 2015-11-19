@@ -47,7 +47,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ModelAttributeScriptHelper.class)
-public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<ArrayList<String>> {
+public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport {
 
 	@Override
 	public void testStartDefaults() {
@@ -104,7 +104,7 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		this.outputModel = model;
 		when(component.getOutputModel()).thenReturn(model);
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1","red,yellow,green,blue,purple,orange");
+		MessageTestHelper.addInputMessage(this, true, "step1", "red,yellow,green,blue,purple,orange");
 		MessageTestHelper.addOutputMonitor(this, ModelHelper.ATTR_ID + "0_0", "red");
 		
 		runHandle();
@@ -144,7 +144,7 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 			e.printStackTrace();
 		}
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1","red,yellow,green,blue,purple,orange");
+		MessageTestHelper.addInputMessage(this, true, "step1", "red,yellow,green,blue,purple,orange");
 		MessageTestHelper.addOutputMonitor(this, ModelHelper.ATTR_ID + "0_0", "maroon");
 		
 		runHandle();
@@ -160,7 +160,7 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		this.outputModel = model;
 		when(component.getOutputModel()).thenReturn(model);
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1","red,yellow,green,blue,purple,orange");
+		MessageTestHelper.addInputMessage(this, true, "step1", "red,yellow,green,blue,purple,orange");
 		MessageTestHelper.addOutputMonitor(this, new MessageBuilder().withPayload(
 				new PayloadBuilder()
 				.withRow(new EntityDataBuilder()
@@ -184,8 +184,7 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport<Arr
 		Model model = ModelHelper.createSimpleModel(2, 3);
 		when(component.getOutputModel()).thenReturn(model);
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1",
-				"h1,h2,h3,h4,h5,h6",
+		MessageTestHelper.addInputMessage(this, true, "step1", "h1,h2,h3,h4,h5,h6",
 				"red,yellow,green,blue,purple,orange",
 				"f1,f2,f3,f4,f5,f6");
 		

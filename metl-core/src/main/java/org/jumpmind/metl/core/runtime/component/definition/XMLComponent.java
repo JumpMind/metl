@@ -89,6 +89,9 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
     protected boolean shareable;
     
     @XmlAttribute(required = false)
+    protected boolean autoSendControlMessages = true;
+    
+    @XmlAttribute(required = false)
     protected boolean supportsMultipleThreads;
 
     @XmlAttribute(required = false)
@@ -176,6 +179,14 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
 
     public void setOutputMessageType(MessageType outputMessageType) {
         this.outputMessageType = outputMessageType;
+    }
+    
+    public void setAutoSendControlMessages(boolean autoSendControlMessages) {
+        this.autoSendControlMessages = autoSendControlMessages;
+    }
+    
+    public boolean isAutoSendControlMessages() {
+        return autoSendControlMessages;
     }
 
     public ResourceCategory getResourceCategory() {

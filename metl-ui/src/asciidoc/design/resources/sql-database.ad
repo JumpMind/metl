@@ -32,9 +32,37 @@ Connection Properties|The connection properties that will be sent to our JDBC dr
 Format of the string must be [propertyName=property;]
 |===========================================
 
-Example database drivers and urls
+==== Adding a JDBC Driver .jar file
 
-==== In Memory H2 Database
+Metl comes pre-packaged with the following jdbc drivers:
+
+* SQL Server jTDS jdbc driver
+* H2 jdbc driver
+* Postgres jdbc driver
+
+For other databases such as Oracle, jdbc drivers can be downloaded from the respective vendor and added to the classpath
+of Metl.  Adding the jdbc driver to the classpath depends on whether Metl is being run as a service.
+
+If Metl is being run as a service:
+
+* Download the jdbc driver and place it on the local file system
+* Edit the Metl metl_service.conf file and change the wrapper.java.classpath line in the file.
+
+---- 
+wrapper.java.classpath.1=/path/to/metl/metl.war:/path/to/oracle/jdbc/driver/ojdbc6.jar
+----
+
+TIP: The separator for the classpath shown above depends on the operating system.  For OSX and Linux, use ":", for Windows use ";"
+
+If Metl is NOT being run as a service, simply set the java -cp parameter to include the jdbc jar file
+
+----
+java -cp /path/to/oracle/jdbc/driver/ojdb6.jar -jar /path/to/metl/metl.war
+----
+
+==== Example database drivers and urls
+
+===== In Memory H2 Database
 
 [options="header" cols="<25%,<75%"]
 |===========================================
@@ -43,7 +71,7 @@ Example database drivers and urls
 |Url|jdbc:h2:mem:mydatabasename
 |===========================================
 
-==== File based H2 Database (linux, osx)
+===== File based H2 Database (linux, osx)
 
 [options="header" cols="<25%,<75%"]
 |===========================================
@@ -52,7 +80,7 @@ Example database drivers and urls
 |Url|jdbc:h2:~/foldername/databasename
 |===========================================
 
-==== File based H2 Database (windows)
+===== File based H2 Database (windows)
 
 [options="header" cols="<25%,<75%"]
 |===========================================
@@ -61,7 +89,7 @@ Example database drivers and urls
 |Url|jdbc:h2:C:/foldername/databasename
 |===========================================
 
-==== SQL Server Using JTDS driver
+===== SQL Server Using JTDS driver
 
 [options="header" cols="<25%,<75%"]
 |===========================================
@@ -70,7 +98,7 @@ Example database drivers and urls
 |Url|jdbc:jtds:sqlserver:/servername.domainname:1433;databaseName=databasename;
 |===========================================
 
-==== Oracle 
+===== Oracle 
 
 [options="header" cols="<25%,<75%"]
 |===========================================
@@ -79,7 +107,7 @@ Example database drivers and urls
 |Url|jdbc:oracle:thin:@//servername.domainname:1521/servicename
 |===========================================
 
-==== Postgres
+===== Postgres
 
 [options="header" cols="<25%,<75%"]
 |===========================================
@@ -88,4 +116,4 @@ Example database drivers and urls
 |Url|jdbc:postgresql://servername:5432/databasename
 |===========================================
 
-==== MySql
+===== MySql

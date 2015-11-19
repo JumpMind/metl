@@ -20,17 +20,9 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jumpmind.metl.core.runtime.ControlMessage;
-import org.jumpmind.metl.core.runtime.EntityData;
-import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.runtime.component.helpers.EntityDataBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.ModelAttributeBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -39,7 +31,7 @@ import org.mockito.Mockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class SorterTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
+public class SorterTest extends AbstractComponentRuntimeTestSupport {
 
 	@Test
 	@Override
@@ -116,9 +108,9 @@ public class SorterTest extends AbstractComponentRuntimeTestSupport<ArrayList<En
 		setupHandle();
 		((Sorter) spy).sortAttributeId = MODEL_ATTR_ID_1;
 		
-		MessageTestHelper.addInputMessage(this, false, false, "step1", MODEL_ATTR_ID_1, "superman");
-		MessageTestHelper.addInputMessage(this, false, false, "step2", MODEL_ATTR_ID_1, "iron man");
-		MessageTestHelper.addInputMessage(this, false, true, "step2", MODEL_ATTR_ID_1, "flash");
+		MessageTestHelper.addInputMessage(this, false, "step1", MODEL_ATTR_ID_1, "superman");
+		MessageTestHelper.addInputMessage(this, false, "step2", MODEL_ATTR_ID_1, "iron man");
+		MessageTestHelper.addInputMessage(this, true, "step2", MODEL_ATTR_ID_1, "flash");
 		
 		// Expected
 		MessageTestHelper.addOutputMonitor(this, MessageTestHelper.nullMessage());

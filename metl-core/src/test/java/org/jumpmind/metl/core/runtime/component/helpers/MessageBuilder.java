@@ -36,11 +36,6 @@ public class MessageBuilder {
 		message = new Message(originatingStepId);
 	}
 	
-	public MessageBuilder withUnitOfWorkLastMessage(boolean lastMessage) { 
-		this.message.getHeader().setUnitOfWorkLastMessage(lastMessage);
-		return this;
-	}
-	
 	public MessageBuilder withPayload(ArrayList<EntityData> payload) {
 		this.message.setPayload(payload);
 		return this;

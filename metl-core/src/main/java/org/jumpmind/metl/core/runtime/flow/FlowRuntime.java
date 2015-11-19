@@ -49,17 +49,17 @@ import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
-import org.jumpmind.metl.core.runtime.IExecutionTracker;
-import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerLogger;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerRecorder;
+import org.jumpmind.metl.core.runtime.IExecutionTracker;
+import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
+import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
-import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.util.MailSession;
@@ -118,11 +118,17 @@ public class FlowRuntime {
     public AgentDeployment getDeployment() {
         return deployment;
     }
+    
+
+    public void start(String executionId, Map<String, IResourceRuntime> deployedResources, Agent agent, List<Notification> notifications,
+            Map<String, String> globalSettings) throws InterruptedException {    
+    	start(executionId, deployedResources, agent, notifications, globalSettings, null);
+    }
 
     @SuppressWarnings("unchecked")
     public void start(String executionId, Map<String, IResourceRuntime> deployedResources, Agent agent, List<Notification> notifications,
-            Map<String, String> globalSettings) throws InterruptedException {    
-                
+            Map<String, String> globalSettings, Map<String, String> runtimeParameters) throws InterruptedException {    
+        
         if (threadService != null && executionService != null) {
             this.executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService, executionService);
         } else {
@@ -134,7 +140,14 @@ public class FlowRuntime {
         this.mailSession = new MailSession(globalSettings);
         
         Map<String, Serializable> parameters = getFlowParameters(deployment.getAgentDeploymentParameters(), agent.getAgentParameters());
-        this.flowParameters = MapUtils.typedMap(parameters, String.class, String.class);        
+        
+        Map<String, Serializable> mergedParameters = new HashMap<String, Serializable>();
+        mergedParameters.putAll(parameters);
+        if (runtimeParameters != null) {
+        	mergedParameters.putAll(runtimeParameters);
+        }
+        
+        this.flowParameters = MapUtils.typedMap(mergedParameters, String.class, String.class);        
         
         Flow manipulatedFlow = manipulateFlow(deployment.getFlow());
 
@@ -146,7 +159,7 @@ public class FlowRuntime {
             boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true);
             if (enabled) {
                 ComponentContext context = new ComponentContext(deployment, flowStep, manipulatedFlow, executionTracker, 
-                        deployedResources, parameters, globalSettings);
+                        deployedResources, mergedParameters, globalSettings);
                 StepRuntime stepRuntime = new StepRuntime(componentFactory, context, this);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
@@ -385,7 +398,7 @@ public class FlowRuntime {
     }
     
     public String getExecutionId() {
-        return executionTracker.getExecutionId();
+        return executionTracker != null ? executionTracker.getExecutionId() : null;
     }
     
     public Agent getAgent() {

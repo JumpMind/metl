@@ -24,18 +24,23 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import javax.script.Bindings;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.util.ComponentUtil;
+import org.jumpmind.metl.core.util.ComponentUtils;
 import org.jumpmind.properties.TypedProperties;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -54,8 +59,10 @@ public class ContentRouter extends AbstractComponentRuntime {
     ScriptEngine scriptEngine;
 
     boolean onlyRouteFirstMatch;
-    
+
     long rowsPerMessage = 10000;
+    
+    Set<String> targetStepsThatNeedControlMessages = new HashSet<>();
 
     @Override
     protected void start() {
@@ -74,48 +81,56 @@ public class ContentRouter extends AbstractComponentRuntime {
             }
         }
     }
-    
+
     @Override
     public boolean supportsStartupMessages() {
-        return false;
+        return true;
     }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-    	if (ComponentUtil.getPayloadType(inputMessage.getPayload()) == ComponentUtil.PAYLOAD_TYPE_LIST_ENTITY) {
-    		handleEntityListPayload(inputMessage, callback, unitOfWorkBoundaryReached);
-    	}
-    	else if (ComponentUtil.getPayloadType(inputMessage.getPayload()) == ComponentUtil.PAYLOAD_TYPE_LIST_STRING) {
-    		handleStringListPayload(inputMessage, callback, unitOfWorkBoundaryReached);
-    	}
+        if (ComponentUtils.getPayloadType(inputMessage.getPayload()) == ComponentUtils.PAYLOAD_TYPE_LIST_ENTITY) {
+            handleEntityListPayload(inputMessage, callback, unitOfWorkBoundaryReached);
+        } else if (ComponentUtils.getPayloadType(inputMessage.getPayload()) == ComponentUtils.PAYLOAD_TYPE_LIST_STRING) {
+            handleStringListPayload(inputMessage, callback, unitOfWorkBoundaryReached);
+        } else if (inputMessage instanceof ControlMessage) {
+            handleControlMessages(inputMessage, callback, unitOfWorkBoundaryReached);
+        }
+        
+        if (unitOfWorkBoundaryReached) {
+            for (String targetStepId : targetStepsThatNeedControlMessages) {
+                callback.sendControlMessage(null, targetStepId);
+            }
+        }
     }
 
     void handleEntityListPayload(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-    	Map<String, ArrayList<EntityData>> outboundMessages = new HashMap<String, ArrayList<EntityData>>();
+        Map<String, ArrayList<EntityData>> outboundMessages = new HashMap<String, ArrayList<EntityData>>();
         ArrayList<EntityData> inputDatas = inputMessage.getPayload();
-        
+
         for (EntityData entityData : inputDatas) {
             getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
             bindEntityData(scriptEngine, inputMessage, entityData);
             if (routes != null) {
                 for (Route route : routes) {
-                	try {
-                    	if (Boolean.TRUE.equals(scriptEngine.eval(route.getMatchExpression()))) {
-                        	getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                        	
-                        	ArrayList<EntityData> outboundPayload = outboundMessages.get(route.getTargetStepId());
+                    try {
+                        if (Boolean.TRUE.equals(scriptEngine.eval(route.getMatchExpression()))) {
+                            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+
+                            ArrayList<EntityData> outboundPayload = outboundMessages.get(route.getTargetStepId());
                             if (outboundPayload == null) {
                                 outboundPayload = new ArrayList<EntityData>();
                                 outboundMessages.put(route.getTargetStepId(), outboundPayload);
                             }
                             if (outboundPayload.size() >= rowsPerMessage) {
                                 outboundMessages.remove(route.getTargetStepId());
-                                callback.sendMessage(null, outboundPayload, false, route.getTargetStepId());
+                                callback.sendMessage(null, outboundPayload, route.getTargetStepId());
+                                targetStepsThatNeedControlMessages.add(route.getTargetStepId());
                             }
                             outboundPayload.add(entityData.copy());
                             if (onlyRouteFirstMatch) {
-                        		break;
-                        	}
+                                break;
+                            }
                         }
                     } catch (ScriptException e) {
                         throw new RuntimeException(e);
@@ -125,17 +140,39 @@ public class ContentRouter extends AbstractComponentRuntime {
         }
 
         for (String targetFlowStepId : outboundMessages.keySet()) {
-            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), unitOfWorkBoundaryReached, targetFlowStepId);
+            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), targetFlowStepId);
+            targetStepsThatNeedControlMessages.add(targetFlowStepId);
         }
     }
-    
+
+    protected void handleControlMessages(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        Bindings bindings = scriptEngine.createBindings();
+        bindHeadersAndFlowParameters(bindings, inputMessage);
+        scriptEngine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
+        if (routes != null) {
+            for (Route route : routes) {
+                try {
+                    if (Boolean.TRUE.equals(scriptEngine.eval(route.getMatchExpression()))) {
+                        callback.sendControlMessage(inputMessage.getHeader(), route.getTargetStepId());
+                        targetStepsThatNeedControlMessages.remove(route.getTargetStepId());
+                        if (onlyRouteFirstMatch) {
+                            break;
+                        }
+                    }
+                } catch (ScriptException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
     protected void handleStringListPayload(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-    	Map<String, ArrayList<String>> outboundMessages = new HashMap<String, ArrayList<String>>();
+        Map<String, ArrayList<String>> outboundMessages = new HashMap<String, ArrayList<String>>();
         ArrayList<String> inputDatas = (ArrayList<String>) inputMessage.getPayload();
         for (String data : inputDatas) {
             getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-            bindStringData(scriptEngine, data);
+            bindStringData(scriptEngine, inputMessage, data);
             if (routes != null) {
                 for (Route route : routes) {
                     try {
@@ -147,9 +184,13 @@ public class ContentRouter extends AbstractComponentRuntime {
                             }
                             if (outboundPayload.size() >= rowsPerMessage) {
                                 outboundMessages.remove(route.getTargetStepId());
-                                callback.sendMessage(null, outboundPayload, false, route.getTargetStepId());
+                                callback.sendMessage(null, outboundPayload, route.getTargetStepId());
+                                targetStepsThatNeedControlMessages.add(route.getTargetStepId());
                             }
                             outboundPayload.add(data);
+                            if (onlyRouteFirstMatch) {
+                                break;
+                            }
                         }
                     } catch (ScriptException e) {
                         throw new RuntimeException(e);
@@ -159,11 +200,12 @@ public class ContentRouter extends AbstractComponentRuntime {
         }
 
         for (String targetFlowStepId : outboundMessages.keySet()) {
-            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), unitOfWorkBoundaryReached, targetFlowStepId);
+            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), targetFlowStepId);
+            targetStepsThatNeedControlMessages.add(targetFlowStepId);
         }
 
     }
-    
+
     static public class Route {
         String matchExpression;
         String targetStepId;

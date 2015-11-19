@@ -34,6 +34,7 @@ import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
@@ -70,6 +71,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
 
     @Override
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        if (!(inputMessage instanceof ControlMessage)) {
         if (attributesList == null || attributesList.size() == 0) {
             throw new IllegalStateException(
                     "There are no format attributes configured.  Writing all entity fields to the output.");
@@ -98,7 +100,8 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
             outputPayload.add(outputRec);
         }
 
-        callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, outputPayload);
+        }
     }
 
     private String processInputRow(Message inputMessage, EntityData inputRow) {

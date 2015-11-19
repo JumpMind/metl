@@ -50,6 +50,8 @@ public class Flow extends AbstractObject {
     List<FlowParameter> flowParameters;
 
     boolean deleted = false;
+    
+    boolean test = false;
 
     public Flow() {
         this.flowSteps = new ArrayList<FlowStep>();
@@ -264,6 +266,14 @@ public class Flow extends AbstractObject {
 
     public void setFlowParameters(List<FlowParameter> flowParameters) {
         this.flowParameters = flowParameters;
+    }
+    
+    public void setTest(boolean test) {
+        this.test = test;
+    }
+    
+    public boolean isTest() {
+        return test;
     }
 
     public void calculateApproximateOrder() {

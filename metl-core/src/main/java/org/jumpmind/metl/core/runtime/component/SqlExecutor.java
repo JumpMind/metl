@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.db.sql.SqlScriptReader;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
@@ -43,17 +44,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 public class SqlExecutor extends AbstractRdbmsComponentRuntime {
 
-    private static final String ON_SUCCESS = "ON SUCCESS";
-
-    private static final String PER_MESSAGE = "PER MESSAGE";
-
-    private static final String PER_ENTITY = "PER ENTITY";
-
     private static final String FILE = "sql.file";
 
-    public static final String TYPE = "Sql Executor";
-
-    public final static String RUN_WHEN = "run.when";
+    public static final String TYPE = "Sql Executor";    
 
     List<String> sqls;
 
@@ -108,8 +101,8 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
             sqlCount += processSql(inputMessage, template, params, sqlToExecute);
         }
 
-        if (callback != null) {
-            callback.sendMessage(null, convertResultsToTextPayload(results), unitOfWorkBoundaryReached);
+        if (callback != null && sqlCount > 0) {
+            callback.sendMessage(null, convertResultsToTextPayload(results));
         }
         
         log(LogLevel.INFO, "Ran %d sql statements", sqlCount);
@@ -117,12 +110,17 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
 
     private int processSql(Message inputMessage, NamedParameterJdbcTemplate template, Map<String, Object> params, String sqlToExecute) {
         int sqlCount = 0;
-        if (runWhen.equals(PER_MESSAGE)) {
+        if (runWhen.equals(PER_UNIT_OF_WORK) && inputMessage instanceof ControlMessage) {
+            int count = template.update(sqlToExecute, params);
+            results.add(new Result(sqlToExecute, count));
+            getComponentStatistics().incrementNumberEntitiesProcessed(count);
+            sqlCount++;            
+        } else if (runWhen.equals(PER_MESSAGE) && !(inputMessage instanceof ControlMessage)) {
             int count = template.update(sqlToExecute, params);
             results.add(new Result(sqlToExecute, count));
             getComponentStatistics().incrementNumberEntitiesProcessed(count);
             sqlCount++;
-        } else if (runWhen.equals(PER_ENTITY)) {
+        } else if (runWhen.equals(PER_ENTITY) && !(inputMessage instanceof ControlMessage)) {
             List<EntityData> datas = inputMessage.getPayload();
             for (EntityData entityData : datas) {
                 params.putAll(getComponent().toRow(entityData, false, true));
@@ -139,22 +137,6 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
         HashMap<String, Object> params = new HashMap<String, Object>(context.getFlowParametersAsString());
         params.putAll(inputMessage.getHeader());
         return params;
-    }
-
-    @Override
-    public void flowCompleted(boolean cancelled) {
-        if (runWhen.equals(ON_SUCCESS) && !cancelled) {
-            NamedParameterJdbcTemplate template = getJdbcTemplate();
-            for (String sql : this.sqls) {
-                String sqlToExecute = sql;
-                Map<String, Object> params = new HashMap<String, Object>();
-                sqlToExecute = FormatUtils.replaceTokens(sql, context.getFlowParametersAsString(), true);
-                params.putAll(context.getFlowParameters());
-                log(LogLevel.INFO, "Executing the following sql after a successful completion: " + sqlToExecute);
-                int count = template.update(sqlToExecute, params);
-                getComponentStatistics().incrementNumberEntitiesProcessed(count);
-            }
-        }
     }
 
 }

@@ -156,7 +156,7 @@ public class UnZip extends AbstractComponentRuntime {
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 }
             }
-            callback.sendMessage(null, filePaths, unitOfWorkBoundaryReached);
+            callback.sendMessage(null, filePaths);
         }
     }
 

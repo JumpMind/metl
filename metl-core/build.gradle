@@ -41,6 +41,7 @@ dependencies {
     compile "com.jcraft:jsch:0.1.52"
     compile "oauth.signpost:oauth-signpost:1.2.1.2"    
     compile "ant:ant:$antVersion"
+    compile "sshtools:j2ssh-ant:0.2.9"    
     compile "com.googlecode.json-simple:json-simple:1.1.1"
     compile "kxml2:kxml2:$kxmlVersion"  
     testCompile "org.mockito:mockito-all:$mockitoVersion"

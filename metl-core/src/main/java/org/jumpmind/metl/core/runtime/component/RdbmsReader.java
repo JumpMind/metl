@@ -60,10 +60,6 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     public static final String TYPE = "RDBMS Reader";
     
-    private static final String PER_MESSAGE = "PER MESSAGE";
-
-    private static final String PER_ENTITY = "PER ENTITY";    
-
     public final static String TRIM_COLUMNS = "trim.columns";
 
     public final static String MATCH_ON_COLUMN_NAME_ONLY = "match.on.column.name";
@@ -72,7 +68,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     List<String> sqls;
     
-    String runWhen = PER_ENTITY;
+    String runWhen = PER_UNIT_OF_WORK;
 
     long rowsPerMessage = 10000;
 
@@ -106,13 +102,20 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         
         NamedParameterJdbcTemplate template = getJdbcTemplate();
 
-        int inboundRecordCount = 1;
+        int inboundRecordCount = 0;
         Iterator<?> inboundPayload = null;
-        if (PER_ENTITY.equals(runWhen) && inputMessage.getPayload() instanceof Collection 
+        if (PER_ENTITY.equals(runWhen) 
                 && !(inputMessage instanceof ControlMessage)) {
             inboundPayload = ((Collection<?>)inputMessage.getPayload()).iterator();
             inboundRecordCount = ((Collection<?>)inputMessage.getPayload()).size();
+        } else if (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage)) {
+            inboundPayload = null;
+            inboundRecordCount = 1;            
+        } else if (PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage) {
+            inboundPayload = null;
+            inboundRecordCount = 1;            
         }
+
 
         /*
          * A reader can be started by a startup message (if it has no input
@@ -134,7 +137,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             }
         }
         if (outboundPayload != null && outboundPayload.size() > 0) {
-            callback.sendMessage(null, outboundPayload, unitOfWorkBoundaryReached);
+            callback.sendMessage(null, outboundPayload);
         }
         
     }
@@ -233,14 +236,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                  * Some database driver do not support returning the table name from the
                  * metadata.  This code attempts to parse the entity name from the sql
                  */
-                int fromIndex = sql.toLowerCase().indexOf(" from ")+6;
-                if (fromIndex > 0) {
-                    tableName = sql.substring(fromIndex).trim();
-                    int nextSpaceIndex = tableName.indexOf(" ");
-                    if (nextSpaceIndex > 0) {
-                        tableName = tableName.substring(0, nextSpaceIndex).trim();
-                    }
-                }
+                tableName = getTableNameFromSql(sql);
             }
             
             if (matchOnColumnNameOnly) {
@@ -257,6 +253,51 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         }
 
         return attributeIds;
+    }
+    
+    protected String getTableNameFromSql(String sql) {
+        String tableName = getTableNameFromSql(sql, ' ', ' ');
+        if (isBlank(tableName)) {
+            tableName = getTableNameFromSql(sql, ' ', '\n');
+        }
+        if (isBlank(tableName)) {
+            tableName = getTableNameFromSql(sql, '\n', ' ');
+        }
+        if (isBlank(tableName)) {
+            tableName = getTableNameFromSql(sql, '\n', '\n');
+        }
+        if (isBlank(tableName)) {
+            tableName = getTableNameFromSql(sql, ' ', '\r');
+        }
+        if (isBlank(tableName)) {
+            tableName = getTableNameFromSql(sql, '\r', ' ');
+        }
+        if (isBlank(tableName)) {
+            tableName = getTableNameFromSql(sql, '\r', '\r');
+        }
+        return tableName;
+    }
+    
+    protected String getTableNameFromSql(String sql, char beforeFrom, char afterFrom) {
+        String tableName = null;
+        int fromIndex = sql.toLowerCase().indexOf(beforeFrom+"from"+afterFrom)+6;
+        if (fromIndex > 5) {
+            tableName = sql.substring(fromIndex).trim();
+            int nextSpaceIndex = tableName.indexOf(" ");
+            if (nextSpaceIndex > 0) {
+                tableName = tableName.substring(0, nextSpaceIndex).trim();
+            }
+            
+            if (tableName.startsWith("\"") || tableName.startsWith("`")) {
+                tableName = tableName.substring(1);
+            } 
+            
+            if (tableName.endsWith("\"") || tableName.endsWith("`")) {
+                tableName = tableName.substring(0, tableName.length()-1);
+            }
+        }
+        return tableName;
+        
     }
 
     private List<String> getAttributeIds(String columnName) {
@@ -451,7 +492,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             long ts = System.currentTimeMillis();
             while (rs.next()) {
                 if (outputRecCount++ % rowsPerMessage == 0 && payload != null) {
-                    callback.sendMessage(null, payload, false);
+                    callback.sendMessage(null, payload);
                     payload = null;
                 }
                 
@@ -491,5 +532,9 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         public void setSqlToExecute(String sqlToExecute) {
             this.sqlToExecute = sqlToExecute;
         }
+    }
+	
+	public void setRunWhen(String runWhen) {
+        this.runWhen = runWhen;
     }
 }

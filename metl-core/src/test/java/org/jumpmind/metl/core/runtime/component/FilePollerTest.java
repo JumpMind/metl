@@ -25,20 +25,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.tools.ant.DirectoryScanner;
 import org.jumpmind.metl.core.model.Resource;
-import org.jumpmind.metl.core.runtime.ControlMessage;
-import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.component.helpers.ComponentBuilder;
-import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
-import org.jumpmind.metl.core.runtime.component.helpers.PayloadBuilder;
+import org.jumpmind.metl.core.runtime.resource.DirectoryScanner;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.properties.TypedProperties;
@@ -51,7 +45,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 
 @RunWith(PowerMockRunner.class)
-public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayList<String>> {
+public class FilePollerTest extends AbstractComponentRuntimeTestSupport {
 
 	@Test
 	@Override
@@ -123,6 +117,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 	@Override
 	public void testHandleStartupMessage() {
 		setupHandle(true);
+		((FilePoller) spy).setRunWhen(Execute.PER_UNIT_OF_WORK);
 		MessageTestHelper.addControlMessage(this, "test", false);
 		MessageTestHelper.addOutputMonitor(this, "fileAbsolutePath");
 		runHandle();
@@ -133,7 +128,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 	@Override
 	public void testHandleUnitOfWorkLastMessage() {
 		setupHandle(true);
-		
+		((FilePoller) spy).setRunWhen(Execute.PER_UNIT_OF_WORK);
 		MessageTestHelper.addControlMessage(this, "test", true);
 		MessageTestHelper.addOutputMonitor(this, "fileAbsolutePath");
 		runHandle();
@@ -145,7 +140,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 	public void testHandleNormal() {
 		setupHandle(true);
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1", "");
+		MessageTestHelper.addInputMessage(this, true, "step1", "");
 		MessageTestHelper.addOutputMonitor(this, "fileAbsolutePath");
 		
 		runHandle();
@@ -157,7 +152,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 		setupHandle(true);
 		((FilePoller) spy).useTriggerFile = true;
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1", "");
+		MessageTestHelper.addInputMessage(this, true, "step1", "");
 		MessageTestHelper.addOutputMonitor(this, "fileAbsolutePath");
 				
 		runHandle();
@@ -175,7 +170,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 		when(((FilePoller) spy).getDirectoryScanner()).thenReturn(mockDirectoryScanner);
 		when(mockDirectoryScanner.getIncludedFiles()).thenReturn(new String[] {});
 		
-		MessageTestHelper.addInputMessage(this, true, true, "step1", "");
+		MessageTestHelper.addInputMessage(this, true, "step1", "");
 		MessageTestHelper.addOutputMonitor(this, 0, 1);
 				
 		runHandle();
@@ -214,6 +209,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport<ArrayLis
 		when(mockFile.getAbsolutePath()).thenReturn("fileAbsolutePath");
 		when(mockFile.lastModified()).thenReturn(1L);
 		when(mockFile.exists()).thenReturn(fileExists);
+        ((FilePoller) spy).setRunWhen(Execute.PER_MESSAGE);
 	}
 
 }

@@ -23,7 +23,6 @@ package org.jumpmind.metl.core.runtime.component;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;
 import org.junit.Test;
 
 public class ModelAttributeScriptHelperTest {

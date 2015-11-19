@@ -1,0 +1,29 @@
+[id="gate",reftext="Gate"]
+===== Gate
+[cols="<25%h,<75%"]
+|===========================================
+|Icon|image:icons/metl-puzzle-48X48-color.png[]
+|Use When|A component(s) needs to wait until another component has completely finished 
+|Samples|
+|Description|The Gate component passes all incoming messages except for messages from the control source component to a downstream component once the gate component
+receives the final unit of work control message from the control source.
+   
+|Inbound Message Type|Model Based Message
+|Output Message Type|Model Based Message
+|===========================================
+
+====== Parameters
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Name|Description
+include::../common-properties/input-model.ad[]
+include::../common-properties/output-model.ad[]
+include::../common-properties/enabled.ad[]
+|Gate Control Source|The source component that controls the opening of the gate
+include::../common-properties/log-input.ad[]
+include::../common-properties/log-output.ad[]
+include::../common-properties/inbound-queue-capacity.ad[]
+include::../common-properties/shared.ad[]
+|===========================================
+

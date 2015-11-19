@@ -88,9 +88,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (inputMessage instanceof ControlMessage) {
-            return;
-        }
+        if (!(inputMessage instanceof ControlMessage)) {
         ArrayList<EntityData> inputRows = inputMessage.getPayload();
         boolean hasPayload = inputRows != null && inputRows.size() > 0;
         ArrayList<String> outputPayload = new ArrayList<String>();
@@ -179,7 +177,8 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
         log(LogLevel.DEBUG, outputPayload.toString());
 
-        callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
+        callback.sendMessage(null, outputPayload);
+        }
     }
 
     private void processInputRow(Document document, EntityData inputRow, Map<String, XmlFormatterEntitySetting> entitySettings,

@@ -33,6 +33,7 @@ import java.util.Set;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
@@ -95,45 +96,47 @@ public class Mapping extends AbstractComponentRuntime {
         }
     }
 
-    @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        ArrayList<EntityData> inputRows = inputMessage.getPayload();
-        if (inputRows == null) {
-            return;
-        }
+	@Override
+	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
 
-        ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
+		if (!(inputMessage instanceof ControlMessage)) {
+			ArrayList<EntityData> inputRows = inputMessage.getPayload();
+			if (inputRows == null) {
+				return;
+			}
 
-        for (EntityData inputRow : inputRows) {
-            EntityData outputRow = new EntityData();    
-            outputRow.setChangeType(inputRow.getChangeType());
-            
-            for (Entry<String, Object> attrEntry : inputRow.entrySet()) {
-                Set<String> newAttrIds = attrToAttrMap.get(attrEntry.getKey());
-                if (newAttrIds != null) {
-                    for (String newAttrId : newAttrIds) {
-                        outputRow.put(newAttrId, attrEntry.getValue());    
-                    }                    
-                }
-            }
+			ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
 
-            if (setUnmappedAttributesToNull) {
-                for (ModelEntity entity : getComponent().getOutputModel()
-                        .getModelEntities()) {
-                    for (ModelAttribute attr : entity.getModelAttributes()) {
-                        if (!outputRow.containsKey(attr.getId())) {
-                            outputRow.put(attr.getId(), null);
-                        }
-                    }
-                }
-            }
-            
-            if (outputRow.size() > 0) {
-                outputPayload.add(outputRow);
-                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-            }
-        }
+			for (EntityData inputRow : inputRows) {
+				EntityData outputRow = new EntityData();
+				outputRow.setChangeType(inputRow.getChangeType());
 
-        callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
-    }
+				for (Entry<String, Object> attrEntry : inputRow.entrySet()) {
+					Set<String> newAttrIds = attrToAttrMap.get(attrEntry.getKey());
+					if (newAttrIds != null) {
+						for (String newAttrId : newAttrIds) {
+							outputRow.put(newAttrId, attrEntry.getValue());
+						}
+					}
+				}
+
+				if (setUnmappedAttributesToNull) {
+					for (ModelEntity entity : getComponent().getOutputModel().getModelEntities()) {
+						for (ModelAttribute attr : entity.getModelAttributes()) {
+							if (!outputRow.containsKey(attr.getId())) {
+								outputRow.put(attr.getId(), null);
+							}
+						}
+					}
+				}
+
+				if (outputRow.size() > 0) {
+					outputPayload.add(outputRow);
+					getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+				}
+			}
+
+			callback.sendMessage(null, outputPayload);
+		}
+	}
 }

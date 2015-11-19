@@ -48,9 +48,8 @@ import org.jumpmind.properties.TypedProperties;
 import org.junit.Assert;
 import org.junit.Before;
 import org.mockito.Mockito;
-import org.omg.CORBA.portable.Streamable;
 
-public abstract class AbstractComponentRuntimeTestSupport<T> {
+public abstract class AbstractComponentRuntimeTestSupport {
 
 	public static String MODEL_ATTR_ID_1 = "attr1";
 	public static String MODEL_ATTR_NAME_1 = "attr1Name";
@@ -235,7 +234,7 @@ public abstract class AbstractComponentRuntimeTestSupport<T> {
 				TestUtils.assertList(expected.getTargetStepIds(), actual.getTargetStepIds(), expected.isXmlPayload());
 			
 				for (int m = 0; m < expected.getMessages().size(); m++) {
-					MessageAssert.assertMessage(i + 1, m + 1, expected.getMessages().get(m), actual.getMessages().get(m), expected.isXmlPayload());
+					MessageAssert.assertMessage(i + 1, m + 1, expected.getMessages().get(m), actual.getMessages().size() > m ? actual.getMessages().get(m) : null, expected.isXmlPayload());
 				}
 			}
 		}

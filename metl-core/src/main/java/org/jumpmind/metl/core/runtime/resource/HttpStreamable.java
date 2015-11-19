@@ -28,6 +28,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.codec.binary.Base64;
@@ -65,6 +67,12 @@ public class HttpStreamable implements IStreamable {
         this.username = username;
         this.password = password;
     }
+    
+    @Override
+    public List<FileInfo> listFiles(String relativePath) {
+        return new ArrayList<>();
+    }
+
 
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist) {

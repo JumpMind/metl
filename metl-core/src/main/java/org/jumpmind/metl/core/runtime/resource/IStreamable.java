@@ -22,6 +22,7 @@ package org.jumpmind.metl.core.runtime.resource;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 public interface IStreamable {
 
@@ -42,5 +43,7 @@ public interface IStreamable {
     public boolean delete(String relativePath);
     
     public boolean supportsDelete();
+    
+    public List<FileInfo> listFiles(String relativePath);
         
 }

@@ -37,6 +37,7 @@ import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -81,11 +82,10 @@ public class DelimitedParser extends AbstractComponentRuntime {
         numberOfHeaderLinesToSkip = getComponent().getInt(SETTING_HEADER_LINES_TO_SKIP, 0);
         convertAttributeSettingsToAttributeFormat();
         if (getComponent().getOutputModel() == null) {
-            throw new IllegalStateException(
-                    "This component requires an output model.  Please select one.");
+            throw new IllegalStateException("This component requires an output model.  Please select one.");
         }
     }
-    
+
     @Override
     public boolean supportsStartupMessages() {
         return false;
@@ -93,40 +93,40 @@ public class DelimitedParser extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        if (!(inputMessage instanceof ControlMessage)) {
+            ArrayList<String> inputRows = inputMessage.getPayload();
 
-        ArrayList<String> inputRows = inputMessage.getPayload();
-
-        ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
-        int headerRowsToSkip = inputMessage.getHeader().getSequenceNumber() == 0 ? numberOfHeaderLinesToSkip : 0;
-        try {
-            int rowCount = 0;
-            if (inputRows != null) {
-	            for (String inputRow : inputRows) {
-	                if (headerRowsToSkip == 0) {
-	                    if (rowCount + numberOfFooterLinesToSkip < inputRows.size()) {
-	                        EntityData data = processInputRow(inputMessage, inputRow);
-	                        if (data != null) {
-	                            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-	                            outputPayload.add(data);
-	                        }
-	                    }
-	                } else {
-	                    headerRowsToSkip--;
-	                }
-	                rowCount++;
-	            }
+            ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
+            int headerRowsToSkip = inputMessage.getHeader().getSequenceNumber() == 0 ? numberOfHeaderLinesToSkip : 0;
+            try {
+                int rowCount = 0;
+                if (inputRows != null) {
+                    for (String inputRow : inputRows) {
+                        if (headerRowsToSkip == 0) {
+                            if (rowCount + numberOfFooterLinesToSkip < inputRows.size()) {
+                                EntityData data = processInputRow(inputMessage, inputRow);
+                                if (data != null) {
+                                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                                    outputPayload.add(data);
+                                }
+                            }
+                        } else {
+                            headerRowsToSkip--;
+                        }
+                        rowCount++;
+                    }
+                }
+            } catch (IOException e) {
+                throw new IoException(e);
             }
-        } catch (IOException e) {
-            throw new IoException(e);
-        }
 
-        callback.sendMessage(null, outputPayload, unitOfWorkBoundaryReached);
+            callback.sendMessage(null, outputPayload);
+        }
     }
 
     private EntityData processInputRow(Message inputMessage, String inputRow) throws IOException {
 
-        CsvReader csvReader = new CsvReader(new ByteArrayInputStream(inputRow.getBytes()),
-                Charset.forName(encoding));
+        CsvReader csvReader = new CsvReader(new ByteArrayInputStream(inputRow.getBytes()), Charset.forName(encoding));
         csvReader.setDelimiter(delimiter.charAt(0));
         if (isNotBlank(quoteCharacter)) {
             csvReader.setTextQualifier(quoteCharacter.charAt(0));
@@ -140,8 +140,8 @@ public class DelimitedParser extends AbstractComponentRuntime {
                 for (AttributeFormat attribute : attributes) {
                     Object value = csvReader.get(attribute.getOrdinal() - 1);
                     if (isNotBlank(attribute.getFormatFunction())) {
-                        value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value,
-                                attribute.getEntity(), data, attribute.getFormatFunction());
+                        value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, attribute.getEntity(),
+                                data, attribute.getFormatFunction());
                     }
 
                     data.put(attribute.getAttributeId(), value);
@@ -151,7 +151,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
                 List<ModelEntity> entities = model.getModelEntities();
                 int index = 0;
                 for (ModelEntity modelEntity : entities) {
-                	List<ModelAttribute> attributes = modelEntity.getModelAttributes();
+                    List<ModelAttribute> attributes = modelEntity.getModelAttributes();
                     for (ModelAttribute modelAttribute : attributes) {
                         data.put(modelAttribute.getId(), csvReader.get(index));
                         index++;
@@ -172,22 +172,18 @@ public class DelimitedParser extends AbstractComponentRuntime {
             AttributeFormat format = formats.get(attributeSetting.getAttributeId());
             if (format == null) {
                 Model inputModel = getComponent().getOutputModel();
-                ModelAttribute attribute = inputModel.getAttributeById(attributeSetting
-                        .getAttributeId());
+                ModelAttribute attribute = inputModel.getAttributeById(attributeSetting.getAttributeId());
                 if (attribute != null) {
                     ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
-                    format = new AttributeFormat(attributeSetting.getAttributeId(), entity,
-                            attribute);
+                    format = new AttributeFormat(attributeSetting.getAttributeId(), entity, attribute);
                     formats.put(attributeSetting.getAttributeId(), format);
                 }
             }
 
             if (format != null) {
-                if (attributeSetting.getName().equalsIgnoreCase(
-                        DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL)) {
+                if (attributeSetting.getName().equalsIgnoreCase(DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL)) {
                     format.setOrdinal(Integer.parseInt(attributeSetting.getValue()));
-                } else if (attributeSetting.getName().equalsIgnoreCase(
-                        DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION)) {
+                } else if (attributeSetting.getName().equalsIgnoreCase(DELIMITED_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION)) {
                     format.setFormatFunction(attributeSetting.getValue());
                 }
             }

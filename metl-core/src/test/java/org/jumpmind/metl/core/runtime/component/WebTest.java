@@ -20,27 +20,21 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.util.ArrayList;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
-import org.jumpmind.metl.core.runtime.ControlMessage;
-import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.jumpmind.metl.core.runtime.resource.Http;
 import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
-
 @RunWith(PowerMockRunner.class)
-public class WebTest extends AbstractComponentRuntimeTestSupport<ArrayList<EntityData>> {
+public class WebTest extends AbstractComponentRuntimeTestSupport {
 
 	@Test
 	@Override

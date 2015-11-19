@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -68,7 +69,7 @@ public class Multiplier extends AbstractComponentRuntime {
     	if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
             List<EntityData> datas = inputMessage.getPayload();
             multipliers.addAll(datas);
-            multipliersInitialized = inputMessage.getHeader().isUnitOfWorkLastMessage();
+            multipliersInitialized = inputMessage instanceof ControlMessage;
             
             if (multipliersInitialized) {
                 Iterator<Message> messages = queuedWhileWaitingForMultiplier.iterator();
@@ -78,7 +79,6 @@ public class Multiplier extends AbstractComponentRuntime {
                 }
             }
         } else if (!multipliersInitialized) {
-            inputMessage.getHeader().setUnitOfWorkLastMessage(unitOfWorkBoundaryReached);
             queuedWhileWaitingForMultiplier.add(inputMessage);
         } else if (multipliersInitialized) {
             multiply(inputMessage, callback);
@@ -100,7 +100,7 @@ public class Multiplier extends AbstractComponentRuntime {
 	                newData.putAll(multiplierData);
 	                multiplied.add(newData);
 	                if (multiplied.size() >= rowsPerMessage) {
-	                    callback.sendMessage(null, multiplied, false);                    
+	                    callback.sendMessage(null, multiplied);                    
 	                    multiplied = new ArrayList<EntityData>();
 	               }
             	}
@@ -108,7 +108,7 @@ public class Multiplier extends AbstractComponentRuntime {
         }
 
         if (multiplied.size() > 0) {
-            callback.sendMessage(null, multiplied, false);               
+            callback.sendMessage(null, multiplied);               
         }
     }
 

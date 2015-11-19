@@ -52,6 +52,12 @@ public class Agent extends AbstractObject {
     
     boolean deleted;
 
+    public Agent(String name, String host) {
+        this();
+        this.name = name;
+        this.host = host;
+    }
+    
     public Agent() {
         this.agentDeployments = new ArrayList<>();
         this.agentParameters = new ArrayList<>();

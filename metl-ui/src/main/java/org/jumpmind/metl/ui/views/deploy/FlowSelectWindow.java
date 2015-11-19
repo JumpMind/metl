@@ -150,7 +150,7 @@ public class FlowSelectWindow extends ResizableWindow {
     }
 
     protected void addFlowsToVersion(ProjectVersion version) {
-        List<FlowName> flows = context.getConfigurationService().findFlowsInProject(version.getId());
+        List<FlowName> flows = context.getConfigurationService().findFlowsInProject(version.getId(), false);
         for (FlowName flow : flows) {
             addItem(flow, flow.getName(), Icons.FLOW, version, false);
         }

@@ -21,7 +21,6 @@
 package org.jumpmind.metl.core.runtime.component.helpers;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntimeTestSupport;
