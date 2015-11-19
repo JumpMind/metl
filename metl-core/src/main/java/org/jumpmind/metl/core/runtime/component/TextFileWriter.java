@@ -31,6 +31,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -85,6 +86,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
         lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
         encoding = properties.get(TEXTFILEWRITER_ENCODING, DEFAULT_ENCODING);
         getFileNameFromMessage = component.getBoolean(TEXTFILEWRITER_GET_FILE_FROM_MESSAGE, getFileNameFromMessage);
+        fileNameFromMessageProperty = component.get(TEXTFILEWRITER_FILENAME_PROPERTY, fileNameFromMessageProperty);
         
         if (lineTerminator != null) {
             lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
@@ -136,19 +138,19 @@ public class TextFileWriter extends AbstractComponentRuntime {
     private void initStreamAndWriter(Message inputMessage) {
     	String messageHeaderFileName = null;
     	
-    	if (getFileNameFromMessage) {
+    	if (getFileNameFromMessage && !(inputMessage instanceof ControlMessage)) {
     		Object fileName = inputMessage.getHeader().get(fileNameFromMessageProperty);
 			if (fileName == null || ((String) fileName).length() == 0) {
 				throw new RuntimeException("Configuration determines that the file name should be in "
 						+ "the message header but was not.  Verify the property " + 
 						fileNameFromMessageProperty + " is being passed into the message header");
     		}
-    		messageHeaderFileName = (String) messageHeaderFileName;
+    		messageHeaderFileName = (String) fileName;
     	}
     
         if (bufferedWriter == null) {
             IStreamable streamable = (IStreamable) getResourceReference();
-            if (!append && streamable.supportsDelete()) {
+            if (!append && streamable.supportsDelete() && !(inputMessage instanceof ControlMessage)) {
                 if (getFileNameFromMessage) {
                 	streamable.delete(messageHeaderFileName);
                 }
@@ -157,7 +159,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
                 }
             }
             log(LogLevel.INFO, String.format("Writing text file to %s", streamable.toString()));
-            if (getFileNameFromMessage) {
+            if (getFileNameFromMessage && !(inputMessage instanceof ControlMessage)) {
             	bufferedWriter = initializeWriter(streamable.getOutputStream(messageHeaderFileName, mustExist));
             }
             else {

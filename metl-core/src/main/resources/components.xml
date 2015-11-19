@@ -61,11 +61,11 @@
         <className>org.jumpmind.metl.core.runtime.component.DataDiff</className>
         <settings>
             <setting id='source.1' type='source_step' required='true'>
-                <name>Store</name>
+                <name>Source of Old Version</name>
             </setting>
             <setting id='source.2' type='source_step' required='true'>
-                <name>Business Date</name>
-            </setting>                            
+                <name>Source of New Version</name>
+            </setting>                             
             <setting id='rows.per.message' type='integer' required='false'>
                 <name>Rows/Msg</name>
                 <defaultValue>10000</defaultValue>
