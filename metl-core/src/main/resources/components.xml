@@ -27,21 +27,31 @@
         <settings>
             <setting id='expected.entity.messages.count' type='integer' required='false'>
                 <name>Expected Number of Entity Messages</name>
-                <defaultValue>1</defaultValue>
+                <defaultValue>0</defaultValue>
             </setting>
             <setting id='expected.text.messages.count' type='integer' required='false'>
                 <name>Expected Number of Text Messages</name>
-                <defaultValue>1</defaultValue>
+                <defaultValue>0</defaultValue>
             </setting>
             <setting id='expected.control.messages.count' type='integer' required='false'>
                 <name>Expected Number of Control Messages</name>
-                <defaultValue>1</defaultValue>
+                <defaultValue>0</defaultValue>
             </setting>
             <setting id='expected.empty.payload.messages.count' type='integer' required='false'>
                 <name>Expected Number of Empty Payload Messages</name>
                 <defaultValue>0</defaultValue>
+            </setting>            
+            <setting id='sql.datasource' type='datasource_resource' required='false'>
+                <name>Assert DataSource</name>
+                <defaultValue>0</defaultValue>
+            </setting>            
+            <setting id='sql' type='multiline_text' required='true'>
+                <name>Assert Sql</name>
             </setting>
-            
+            <setting id='expected.sql.count' type='integer' required='false'>
+                <name>Expected Count from Assert Sql</name>
+                <defaultValue>0</defaultValue>
+            </setting>                        
         </settings>
     </component>   
     <component id='Call Flow' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none'>
@@ -65,7 +75,7 @@
             </setting>
             <setting id='source.2' type='source_step' required='true'>
                 <name>Source of New Version</name>
-            </setting>                             
+            </setting>                            
             <setting id='rows.per.message' type='integer' required='false'>
                 <name>Rows/Msg</name>
                 <defaultValue>10000</defaultValue>
@@ -856,16 +866,7 @@
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
                 <description></description>
-            </setting> 
-           <setting id='textfilewriter.get.file.name.from.message' type='boolean' required='false'>
-                <name>Get File Name From Message</name>
-                <defaultValue>false</defaultValue>
-                <description></description>
-            </setting>  
-            <setting id='textfilewriter.filename.property' type='text' required='false'>
-                <name>File Name Message Property</name>
-                <description></description>
-            </setting>          
+            </setting>
         </settings>
     </component>
     <component id='Text Replace' category='PROCESSOR' inputMessageType='text' outputMessageType='text' resourceCategory='none'
