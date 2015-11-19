@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -53,6 +54,10 @@ public class TextFileWriter extends AbstractComponentRuntime {
 
     public static final String TEXTFILEWRITER_TEXT_LINE_TERMINATOR = "textfilewriter.text.line.terminator";
 
+    public static final String TEXTFILEWRITER_GET_FILE_FROM_MESSAGE = "textfilewriter.get.file.name.from.message";
+
+    public static final String TEXTFILEWRITER_FILENAME_PROPERTY = "textfilewriter.filename.property";
+
     String encoding;
 
     String relativePathAndFile;
@@ -63,17 +68,24 @@ public class TextFileWriter extends AbstractComponentRuntime {
 
     String lineTerminator;
 
+    boolean getFileNameFromMessage;
+    
+    String fileNameFromMessageProperty;
+    
     BufferedWriter bufferedWriter = null;
 
     @Override
     protected void start() {
         TypedProperties properties = getTypedProperties();
+        Component component = getComponent();
         relativePathAndFile = FormatUtils.replaceTokens(properties.get(TEXTFILEWRITER_RELATIVE_PATH), context.getFlowParametersAsString(),
                 true);
         mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
         append = properties.is(TEXTFILEWRITER_APPEND);
         lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
         encoding = properties.get(TEXTFILEWRITER_ENCODING, DEFAULT_ENCODING);
+        getFileNameFromMessage = component.getBoolean(TEXTFILEWRITER_GET_FILE_FROM_MESSAGE, getFileNameFromMessage);
+        
         if (lineTerminator != null) {
             lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
         }
@@ -90,7 +102,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
             throw new IllegalStateException("The msgTarget resource has not been configured.  Please choose a resource.");
         }
 
-        initStreamAndWriter();
+        initStreamAndWriter(inputMessage);
         
         try {
             Object payload = inputMessage.getPayload();
@@ -121,14 +133,36 @@ public class TextFileWriter extends AbstractComponentRuntime {
         }
     }
 
-    private void initStreamAndWriter() {
+    private void initStreamAndWriter(Message inputMessage) {
+    	String messageHeaderFileName = null;
+    	
+    	if (getFileNameFromMessage) {
+    		Object fileName = inputMessage.getHeader().get(fileNameFromMessageProperty);
+			if (fileName == null || ((String) fileName).length() == 0) {
+				throw new RuntimeException("Configuration determines that the file name should be in "
+						+ "the message header but was not.  Verify the property " + 
+						fileNameFromMessageProperty + " is being passed into the message header");
+    		}
+    		messageHeaderFileName = (String) messageHeaderFileName;
+    	}
+    
         if (bufferedWriter == null) {
             IStreamable streamable = (IStreamable) getResourceReference();
             if (!append && streamable.supportsDelete()) {
-                streamable.delete(relativePathAndFile);
+                if (getFileNameFromMessage) {
+                	streamable.delete(messageHeaderFileName);
+                }
+                else {
+                	streamable.delete(relativePathAndFile);
+                }
             }
             log(LogLevel.INFO, String.format("Writing text file to %s", streamable.toString()));
-            bufferedWriter = initializeWriter(streamable.getOutputStream(relativePathAndFile, mustExist));
+            if (getFileNameFromMessage) {
+            	bufferedWriter = initializeWriter(streamable.getOutputStream(messageHeaderFileName, mustExist));
+            }
+            else {
+            	bufferedWriter = initializeWriter(streamable.getOutputStream(relativePathAndFile, mustExist));
+            }
         }
     }
 

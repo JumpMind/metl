@@ -38,10 +38,10 @@
         <className>org.jumpmind.metl.core.runtime.component.DataDiff</className>
         <settings>
             <setting id='source.1' type='source_step' required='true'>
-                <name>Source of Old Version</name>
+                <name>Store</name>
             </setting>
             <setting id='source.2' type='source_step' required='true'>
-                <name>Source of New Version</name>
+                <name>Business Date</name>
             </setting>                            
             <setting id='rows.per.message' type='integer' required='false'>
                 <name>Rows/Msg</name>
@@ -767,6 +767,15 @@
             <setting id='textfilewriter.encoding' type='text' required='false'>
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
+                <description></description>
+            </setting> 
+           <setting id='textfilewriter.get.file.name.from.message' type='boolean' required='false'>
+                <name>Get File Name From Message</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>  
+            <setting id='textfilewriter.filename.property' type='text' required='false'>
+                <name>File Name Message Property</name>
                 <description></description>
             </setting>          
         </settings>
