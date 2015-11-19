@@ -136,8 +136,9 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 	@Override
 	public void handle(final Message inputMessage, final ISendMessageCallback callback,
 			boolean unitOfWorkBoundaryReached) {
-
+	    results.clear();	    
 		lastPreparedDml = null;
+		
 		if (error == null) {
 			if (databasePlatform == null) {
 				if (getResourceRuntime() == null) {

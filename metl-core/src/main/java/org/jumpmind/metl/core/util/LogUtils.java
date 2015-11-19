@@ -43,6 +43,10 @@ public final class LogUtils {
         return logFilePath;
     }
     
+    public static void setLogDir(File logDir) {
+        LogUtils.logDir = logDir;
+    }
+    
     public static File getLogDir() {
         return logDir;
     }
