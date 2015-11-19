@@ -96,7 +96,7 @@ public class HandleParams {
         }
 
         @Override
-        public void sendControlMessage(Map<String, Serializable> messageHeaders) {
+        public void sendControlMessage(Map<String, Serializable> messageHeaders, String ... targetStepIds) {
             monitor.incrementStartupMessageCount();
         }
 

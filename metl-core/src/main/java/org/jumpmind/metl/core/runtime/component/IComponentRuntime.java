@@ -43,4 +43,5 @@ public interface IComponentRuntime {
     public XMLComponent getComponentDefintion();
     
     public boolean supportsStartupMessages();   
+    
 }

@@ -115,7 +115,7 @@ import org.apache.tools.ant.util.FileUtils;
  *
  *   System.out.println("FILES:");
  *   String[] files = ds.getIncludedFiles();
- *   for (int i = 0; i < files.length; i++) {
+ *   for (int i = 0; i &lt; files.length; i++) {
  *     System.out.println(files[i]);
  *   }
  * </pre>

@@ -31,7 +31,7 @@ public interface ISendMessageCallback {
     
     public void sendShutdownMessage(boolean cancel);
     
-    public void sendControlMessage(Map<String, Serializable> messageHeaders);
+    public void sendControlMessage(Map<String, Serializable> messageHeaders, String... targetStepIds);
     
     public void forward(Message message);
     

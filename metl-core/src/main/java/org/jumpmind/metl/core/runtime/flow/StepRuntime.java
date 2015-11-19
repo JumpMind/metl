@@ -247,8 +247,8 @@ public class StepRuntime implements Runnable {
             target.setCurrentInputMessage(threadNumber, inputMessage);
             componentRuntime.handle(inputMessage, target, unitOfWorkBoundaryReached);
 
-            if (unitOfWorkBoundaryReached) {
-                verifyAndSendLastMessageToTargets(target, inputMessage);
+            if (unitOfWorkBoundaryReached && componentRuntime.getComponentDefintion().isAutoSendControlMessages()) {
+                verifyAndSendControlMessageToTargets(target, inputMessage);
             }
 
             /*
@@ -286,7 +286,7 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    private void verifyAndSendLastMessageToTargets(ISendMessageCallback target, Message inputMessage) {
+    private void verifyAndSendControlMessageToTargets(ISendMessageCallback target, Message inputMessage) {
         for (StepRuntime targetRuntime : targetStepRuntimes) {
             if (!targetStepRuntimeUnitOfWorkSent.contains(targetRuntime.getComponentContext().getFlowStep().getId())) {
                 log.info("Automatically sending a last unit of work message from " + componentContext.getFlowStep().getComponent().getName()
@@ -566,9 +566,9 @@ public class StepRuntime implements Runnable {
         }
 
         @Override
-        public void sendControlMessage(Map<String, Serializable> messageHeaders) {
+        public void sendControlMessage(Map<String, Serializable> messageHeaders, String ... targetStepIds) {
             FlowStep flowStep = componentContext.getFlowStep();
-            sendMessage(createMessage(new ControlMessage(flowStep.getId()), null));
+            sendMessage(createMessage(new ControlMessage(flowStep.getId()), null), targetStepIds);
         }
 
         @Override

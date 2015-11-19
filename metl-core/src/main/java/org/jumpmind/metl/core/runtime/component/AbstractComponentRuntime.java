@@ -189,6 +189,19 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return context.getManipulatedFlow();
     }
     
+    protected void bindHeadersAndFlowParameters(Bindings bindings, Message inputMessage) {
+        Set<String> messageHeaderKeys = inputMessage.getHeader().keySet();
+        for (String messageHeaderKey : messageHeaderKeys) {
+            bindings.put(messageHeaderKey, inputMessage.getHeader().get(messageHeaderKey));
+        }
+        
+        Map<String, String> flowParameters = context.getFlowParametersAsString();
+        for (String key : flowParameters.keySet()) {
+            bindings.put(key, flowParameters.get(key));
+            
+        }
+    }
+    
     protected Bindings bindEntityData(ScriptEngine scriptEngine, Message inputMessage, EntityData entityData) {
         Bindings bindings = scriptEngine.createBindings();
         Model model = context.getFlowStep().getComponent().getInputModel();
@@ -198,10 +211,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         	bindings.put(modelEntity.getName(), boundEntity);
         }
         
-        Set<String> messageHeaderKeys = inputMessage.getHeader().keySet();
-        for (String messageHeaderKey : messageHeaderKeys) {
-            bindings.put(messageHeaderKey, inputMessage.getHeader().get(messageHeaderKey));
-        }
+        bindHeadersAndFlowParameters(bindings, inputMessage);
         
         bindings.put("CHANGE_TYPE", entityData.getChangeType().name());
         bindings.put("ENTITY_NAMES", context.getFlowStep().getComponent().getEntityNames(entityData, true));                
@@ -223,8 +233,9 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return bindings;
     }
 
-    protected Bindings bindStringData(ScriptEngine scriptEngine, String value) {
+    protected Bindings bindStringData(ScriptEngine scriptEngine, Message inputMessage, String value) {
         Bindings bindings = scriptEngine.createBindings();
+        bindHeadersAndFlowParameters(bindings, inputMessage);
         if (value != null) {
         	bindings.put("text", value);
         } else {
