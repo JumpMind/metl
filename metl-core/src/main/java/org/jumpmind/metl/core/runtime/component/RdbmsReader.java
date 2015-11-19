@@ -236,14 +236,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                  * Some database driver do not support returning the table name from the
                  * metadata.  This code attempts to parse the entity name from the sql
                  */
-                int fromIndex = sql.toLowerCase().indexOf(" from ")+6;
-                if (fromIndex > 0) {
-                    tableName = sql.substring(fromIndex).trim();
-                    int nextSpaceIndex = tableName.indexOf(" ");
-                    if (nextSpaceIndex > 0) {
-                        tableName = tableName.substring(0, nextSpaceIndex).trim();
-                    }
-                }
+                tableName = getTableNameFromSql(sql);
             }
             
             if (matchOnColumnNameOnly) {
@@ -260,6 +253,51 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         }
 
         return attributeIds;
+    }
+    
+    protected String getTableNameFromSql(String sql) {
+        String tableName = getTableNameFromSql(sql, ' ', ' ');
+        if (isBlank(tableName)) {
+            tableName = getTableNameFromSql(sql, ' ', '\n');
+        }
+        if (isBlank(tableName)) {
+            tableName = getTableNameFromSql(sql, '\n', ' ');
+        }
+        if (isBlank(tableName)) {
+            tableName = getTableNameFromSql(sql, '\n', '\n');
+        }
+        if (isBlank(tableName)) {
+            tableName = getTableNameFromSql(sql, ' ', '\r');
+        }
+        if (isBlank(tableName)) {
+            tableName = getTableNameFromSql(sql, '\r', ' ');
+        }
+        if (isBlank(tableName)) {
+            tableName = getTableNameFromSql(sql, '\r', '\r');
+        }
+        return tableName;
+    }
+    
+    protected String getTableNameFromSql(String sql, char beforeFrom, char afterFrom) {
+        String tableName = null;
+        int fromIndex = sql.toLowerCase().indexOf(beforeFrom+"from"+afterFrom)+6;
+        if (fromIndex > 5) {
+            tableName = sql.substring(fromIndex).trim();
+            int nextSpaceIndex = tableName.indexOf(" ");
+            if (nextSpaceIndex > 0) {
+                tableName = tableName.substring(0, nextSpaceIndex).trim();
+            }
+            
+            if (tableName.startsWith("\"") || tableName.startsWith("`")) {
+                tableName = tableName.substring(1);
+            } 
+            
+            if (tableName.endsWith("\"") || tableName.endsWith("`")) {
+                tableName = tableName.substring(0, tableName.length()-1);
+            }
+        }
+        return tableName;
+        
     }
 
     private List<String> getAttributeIds(String columnName) {

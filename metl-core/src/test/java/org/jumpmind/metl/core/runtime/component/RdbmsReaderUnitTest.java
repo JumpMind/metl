@@ -26,6 +26,7 @@ import static org.mockito.Mockito.doReturn;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
@@ -72,9 +73,38 @@ public class RdbmsReaderUnitTest extends AbstractRdbmsComponentTest {
         Iterator<?> i = attributeNames.iterator();
         assertEquals("ENTITY.ATTRIBUTE1", i.next());
         assertEquals("ENTITY.ATTRIBUTE2", i.next());
-
-
     }
+    
+    @Test
+    public void testGetTableNameFromSql() {
+        RdbmsReader reader = new RdbmsReader();
+        assertEquals("test", reader.getTableNameFromSql("select * from test where nobody='knows'"));
+        assertEquals("test", reader.getTableNameFromSql("select * from \"test\" where nobody='knows'"));
+        assertEquals("test", reader.getTableNameFromSql("select * from `test` where nobody='knows'"));
+        assertEquals("test", reader.getTableNameFromSql("select * from test"));
+        assertEquals("test", reader.getTableNameFromSql("select * from\n test"));
+    }
+    
+    @Test
+    public void testCountColumnSeparatingCommas() {
+        RdbmsReader reader = new RdbmsReader();
+
+        int count = reader.countColumnSeparatingCommas("ISNULL(a,''), b, *");
+        assertEquals(count, 2);
+        count = reader.countColumnSeparatingCommas("ISNULL(a,('')), b, *");
+        assertEquals(count, 2);
+    }
+
+    @Test
+    public void testGetSqlColumnEntityHints() throws Exception {
+        RdbmsReader reader = new RdbmsReader();
+        String sql = "select\r\n ISNULL(a,ISNULL(z,'')) /*COLA*/, b/*COLB*/, c/*  COLC */ from test;";
+        Map<Integer, String> hints = reader.getSqlColumnEntityHints(sql);
+        assertEquals(hints.get(1), "COLA");
+        assertEquals(hints.get(2), "COLB");
+        assertEquals(hints.get(3), "COLC");
+
+    }    
     
 	@Test
 	@Override
