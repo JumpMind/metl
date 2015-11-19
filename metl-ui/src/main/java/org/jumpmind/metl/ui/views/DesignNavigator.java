@@ -737,6 +737,7 @@ public class DesignNavigator extends VerticalLayout {
             flow.setName(newFlow.getName());
             flow.setProjectVersionId(newFlow.getProjectVersionId());
             flow.setId(newFlow.getId());
+            flow.setTest(newFlow.isTest());
 
             treeTable.addItem(flow);
             treeTable.setItemIcon(flow, Icons.FLOW);
