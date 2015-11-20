@@ -48,6 +48,7 @@ public class Union extends AbstractComponentRuntime {
         if (!(inputMessage instanceof ControlMessage)) {
             ArrayList<EntityData> payload = inputMessage.getPayload();
             dataToSend.addAll(payload);
+            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber, payload.size());
         }
 
         if (unitOfWorkBoundaryReached) {
