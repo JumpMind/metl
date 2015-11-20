@@ -87,7 +87,7 @@
     color: #fff;
   }
   
-  .v-table-header {
+  .v-table-header, .v-grid-header tr:first-child th {
     background-image: -webkit-linear-gradient(#DEDEDE, #E0E0E0);
     background-image: -moz-linear-gradient(#DEDEDE, #E0E0E0);
     background-image: linear-gradient(#DEDEDE, #E0E0E0);
@@ -112,14 +112,14 @@
         transition-delay: 100ms;
     }
   
-    .v-table-body {
+    .v-table-body, .v-grid {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
      user-select: none;
-  }
+   }
   
      .v-panel-noborder, .v-panel-noborder > .v-panel-captionwrap, .v-panel-caption-noborder {
         border-radius: 0px;

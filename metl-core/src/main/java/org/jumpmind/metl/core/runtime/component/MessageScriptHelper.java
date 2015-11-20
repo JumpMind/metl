@@ -117,6 +117,10 @@ public class MessageScriptHelper {
     protected void info(String message, Object... args) {        
         context.getExecutionTracker().log(ThreadUtils.getThreadNumber(), LogLevel.INFO, context, message, args);
     }
+    
+    protected void error(String message, Object... args) {        
+        context.getExecutionTracker().log(ThreadUtils.getThreadNumber(), LogLevel.ERROR, context, message, args);
+    }
 
     protected void setInputMessage(Message inputMessage) {
         this.inputMessage = inputMessage;

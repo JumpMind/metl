@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.ui.views.manage;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,6 +33,7 @@ import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.ExecutionStep;
 import org.jumpmind.metl.core.model.ExecutionStepLog;
 import org.jumpmind.metl.core.persist.IExecutionService;
+import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
@@ -49,17 +52,24 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.HeaderCell;
+import com.vaadin.ui.Grid.HeaderRow;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table.ColumnGenerator;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
+import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable {
@@ -160,34 +170,55 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
             }
         });
 
-        final Table logTable = new Table();
+        final Grid logTable = new Grid();
+        logTable.addColumn("level", String.class).setHeaderCaption("Level").setWidth(110).setMaximumWidth(200);
+        logTable.addColumn("createTime", Date.class).setHeaderCaption("Time").setWidth(120).setMaximumWidth(200).setRenderer(
+                new DateRenderer("%1$tk:%1$tM:%1$tS:%1$tL"));
+        logTable.addColumn("logText", String.class).setHeaderCaption("Message").setExpandRatio(1);        
         logTable.setContainerDataSource(logContainer);
-        logTable.setSelectable(true);
-        logTable.setMultiSelect(true);
         logTable.setSizeFull();
-        logTable.addGeneratedColumn("componentName", new ComponentNameColumnGenerator());
-        logTable.setVisibleColumns(new Object[] { "componentName", "level", "createTime", "logText" });
-        logTable.setColumnHeaders(new String[] { "Component Name", "Level", "Time", "Description" });
-        logTable.addItemClickListener(new ItemClickListener() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void itemClick(ItemClickEvent event) {
-                if (event.isDoubleClick()) {
-                    Object object = event.getPropertyId();
-                    if (!object.toString().equals("")) {
-                        Object prop = event.getPropertyId();
-                        String header = logTable.getColumnHeader(prop);
-                        Property<?> p = event.getItem().getItemProperty(prop);
-                        if (p != null) {
-                            String data = String.valueOf(p.getValue());
-                            new ReadOnlyTextAreaDialog(header, data, false).showAtSize(.5);
-                        }
-                    }
-                }
+        logTable.addItemClickListener(event -> logTableCellClicked(logTable, event));
+        
+        HeaderRow filteringHeader = logTable.appendHeaderRow();        
+        HeaderCell logTextFilterCell = filteringHeader.getCell("logText");
+        TextField filterField = new TextField();
+        filterField.setInputPrompt("Filter");
+        filterField.addStyleName(ValoTheme.TEXTFIELD_TINY);
+        filterField.setWidth("100%");
+        
+        // Update filter When the filter input is changed
+        filterField.addTextChangeListener(change -> {
+            // Can't modify filters so need to replace
+            logContainer.removeContainerFilters("logText");
+            
+            // (Re)create the filter if necessary
+            if (! change.getText().isEmpty())
+                logContainer.addContainerFilter(
+                    new SimpleStringFilter("logText",
+                        change.getText(), true, false));
+        });
+        logTextFilterCell.setComponent(filterField);
+        
+        HeaderCell levelFilterCell = filteringHeader.getCell("level");
+        ComboBox levelFilter = new ComboBox();
+        levelFilter.setWidth(8, Unit.EM);
+        levelFilter.setNullSelectionAllowed(true);
+        LogLevel[] levels = LogLevel.values();
+        for (LogLevel logLevel : levels) {
+            levelFilter.addItem(logLevel.name());   
+        }
+        levelFilter.addValueChangeListener(change -> {
+            logContainer.removeContainerFilters("level");
+            String text = (String)levelFilter.getValue();
+            if (isNotBlank(text)) {
+                logContainer.addContainerFilter(
+                    new SimpleStringFilter("level",
+                        text, true, false));
             }
         });
+        levelFilterCell.setComponent(levelFilter);
+        
+        levelFilter.addStyleName(ValoTheme.COMBOBOX_TINY);
 
         VerticalSplitPanel splitPanel = new VerticalSplitPanel();
         splitPanel.setFirstComponent(stepTable);
@@ -199,6 +230,22 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
 
         context.getBackgroundRefresherService().register(this);        
     }
+    
+    protected void logTableCellClicked(Grid logTable, ItemClickEvent event) {
+        if (event.isDoubleClick()) {
+            Object object = event.getPropertyId();
+            if (!object.toString().equals("")) {
+                Object prop = event.getPropertyId();
+                String header = logTable.getColumn(prop).getHeaderCaption();
+                Property<?> p = event.getItem().getItemProperty(prop);
+                if (p != null) {
+                    String data = String.valueOf(p.getValue());
+                    new ReadOnlyTextAreaDialog(header, data, false).showAtSize(.5);
+                }
+            }
+        }
+    }
+
 
     @Override
     public boolean closing() {
