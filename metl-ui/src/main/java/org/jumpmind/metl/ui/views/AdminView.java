@@ -25,7 +25,6 @@ import javax.annotation.PostConstruct;
 import org.jumpmind.metl.ui.common.AppConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
-import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
@@ -61,7 +60,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @UiComponent
 @Scope(value = "ui")
 @TopBarLink(category = Category.ADMIN, name = "Admin", id = "admin", icon = FontAwesome.GEARS, menuOrder = 10)
-public class AdminView extends HorizontalLayout implements View, IUiPanel, IBackgroundRefreshable, ItemClickListener {
+public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemClickListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -126,7 +125,6 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, IBack
         
         addComponent(leftSplit);
         
-        context.getBackgroundRefresherService().register(this);
     }
 
     @SuppressWarnings("unchecked")
@@ -166,15 +164,6 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, IBack
 
     @Override
     public void enter(ViewChangeEvent event) {
-    }
-
-    @Override
-    public <T> T onBackgroundDataRefresh() {
-        return null;
-    }
-
-    @Override
-    public <T> void onBackgroundUIRefresh(T backgroundData) {
     }
 
     @Override
