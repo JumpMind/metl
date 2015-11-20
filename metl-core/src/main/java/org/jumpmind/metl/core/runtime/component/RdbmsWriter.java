@@ -136,8 +136,9 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 	@Override
 	public void handle(final Message inputMessage, final ISendMessageCallback callback,
 			boolean unitOfWorkBoundaryReached) {
-
+	    results.clear();	    
 		lastPreparedDml = null;
+		
 		if (error == null) {
 			if (databasePlatform == null) {
 				if (getResourceRuntime() == null) {
@@ -185,6 +186,14 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 			if (callback != null && results.size() > 0) {
 				callback.sendMessage(null, convertResultsToTextPayload(results));
 			}
+		}
+		
+		if (targetTables != null) {
+		    for (TargetTableDefintion targetTable : targetTables) {
+		        targetTable.getDeleteTable().getRowValues().clear();
+		        targetTable.getInsertTable().getRowValues().clear();
+		        targetTable.getUpdateTable().getRowValues().clear();
+            }
 		}
 	}
 

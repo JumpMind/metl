@@ -27,21 +27,31 @@
         <settings>
             <setting id='expected.entity.messages.count' type='integer' required='false'>
                 <name>Expected Number of Entity Messages</name>
-                <defaultValue>1</defaultValue>
+                <defaultValue>0</defaultValue>
             </setting>
             <setting id='expected.text.messages.count' type='integer' required='false'>
                 <name>Expected Number of Text Messages</name>
-                <defaultValue>1</defaultValue>
+                <defaultValue>0</defaultValue>
             </setting>
             <setting id='expected.control.messages.count' type='integer' required='false'>
                 <name>Expected Number of Control Messages</name>
-                <defaultValue>1</defaultValue>
+                <defaultValue>0</defaultValue>
             </setting>
             <setting id='expected.empty.payload.messages.count' type='integer' required='false'>
                 <name>Expected Number of Empty Payload Messages</name>
                 <defaultValue>0</defaultValue>
+            </setting>            
+            <setting id='sql.datasource' type='datasource_resource' required='false'>
+                <name>Assert DataSource</name>
+                <defaultValue>0</defaultValue>
+            </setting>            
+            <setting id='sql' type='multiline_text' required='true'>
+                <name>Assert Sql</name>
             </setting>
-            
+            <setting id='expected.sql.count' type='integer' required='false'>
+                <name>Expected Count from Assert Sql</name>
+                <defaultValue>0</defaultValue>
+            </setting>                        
         </settings>
     </component>   
     <component id='Call Flow' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none'>

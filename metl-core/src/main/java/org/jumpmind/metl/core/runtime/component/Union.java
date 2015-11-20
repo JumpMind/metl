@@ -53,6 +53,7 @@ public class Union extends AbstractComponentRuntime {
 
         if (unitOfWorkBoundaryReached) {
             callback.sendMessage(null, dataToSend);
+            dataToSend.clear();
         }
     }
 
