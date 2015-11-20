@@ -53,6 +53,11 @@ class SendMessageCallback<T> implements ISendMessageCallback {
     }
 
     @Override
+    public void sendControlMessage() {
+    	sendControlMessage(null);
+    }
+
+    @Override
     public void sendControlMessage(Map<String, Serializable> messageHeaders, String... targetStepIds) {
         sentStartup = true;
     }
