@@ -33,6 +33,8 @@ public interface ISendMessageCallback {
     
     public void sendControlMessage(Map<String, Serializable> messageHeaders, String... targetStepIds);
     
+    public void sendControlMessage();
+    
     public void forward(Message message);
     
 }

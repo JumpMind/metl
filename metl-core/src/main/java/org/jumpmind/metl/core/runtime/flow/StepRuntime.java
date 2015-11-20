@@ -521,7 +521,7 @@ public class StepRuntime implements Runnable {
             }
             return payload;
         }
-
+        
         private void sendMessage(Message message, String... targetFlowStepIds) {
             ComponentStatistics statistics = componentContext.getComponentStatistics();
             statistics.incrementOutboundMessages(ThreadUtils.getThreadNumber());
@@ -563,6 +563,11 @@ public class StepRuntime implements Runnable {
         public void sendShutdownMessage(boolean cancel) {
             FlowStep flowStep = componentContext.getFlowStep();
             sendMessage(createMessage(new ShutdownMessage(flowStep.getId(), cancel), null, new ArrayList<>()));
+        }
+
+        @Override
+        public void sendControlMessage() {
+        	sendControlMessage(null);
         }
 
         @Override
