@@ -22,7 +22,11 @@ package org.jumpmind.metl.ui.views.deploy;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +56,8 @@ import org.jumpmind.metl.ui.views.manage.ExecutionLogPanel;
 import org.jumpmind.symmetric.ui.common.CommonUiUtils;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.util.AppUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.data.Container.Sortable;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -62,6 +68,10 @@ import com.vaadin.data.util.DefaultItemSorter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.server.ResourceReference;
+import com.vaadin.server.StreamResource;
+import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
@@ -79,6 +89,8 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable, AgentDeploymentChangeListener {
+
+    final Logger log = LoggerFactory.getLogger(getClass());
 
     ApplicationContext context;
 
@@ -174,6 +186,10 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         editAgentLayout.setComponentAlignment(buttonGroup, Alignment.BOTTOM_LEFT);
         
 
+        Button exportButton = new Button("Export Agent Config", event -> exportConfiguration());
+        editAgentLayout.addComponent(exportButton);
+        editAgentLayout.setComponentAlignment(exportButton, Alignment.BOTTOM_LEFT);
+        
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
@@ -219,6 +235,30 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         refresh();
         setButtonsEnabled();
         backgroundRefresherService.register(this);
+    }
+    
+    protected void exportConfiguration() {
+        final String export = context.getConfigurationService().export(agent);
+        StreamSource ss = new StreamSource() {
+            private static final long serialVersionUID = 1L;
+
+            public InputStream getStream() {
+                try {
+                    return new ByteArrayInputStream(export.getBytes());
+                } catch (Exception e) {
+                    log.error("Failed to export configuration", e);
+                    CommonUiUtils.notify("Failed to export configuration.", Type.ERROR_MESSAGE);
+                    return null;
+                }
+
+            }
+        };
+        String datetime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        StreamResource resource = new StreamResource(ss,
+                String.format("%s-config-%s.sql", agent.getName().toLowerCase().replaceAll(" ", "-"), datetime));
+        final String KEY = "export";
+        setResource(KEY, resource);
+        Page.getCurrent().open(ResourceReference.create(resource, this, KEY).getURL(), null);
     }
 
     @Override

@@ -28,6 +28,7 @@ import org.jumpmind.db.sql.ISqlRowMapper;
 import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
@@ -111,6 +112,39 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
     }
 
     @Override
+    public String export(Agent agent) {
+        try {
+            StringBuilder out = new StringBuilder();
+            
+            /* @formatter:off */
+            String[][] CONFIG = {
+                    {"AGENT", "WHERE ID='%2$s' AND DELETED=0"," ORDER BY ID",                                                                                                                                                                              },
+                    {"AGENT_DEPLOYMENT", "WHERE AGENT_ID='%2$s'"," ORDER BY ID",                                                                                                                                                                                                                                },
+                    {"AGENT_DEPLOYMENT_PARAMETER", "WHERE AGENT_DEPLOYMENT_ID in (SELECT ID FROM %1$s_AGENT_DEPLOYMENT WHERE AGENT_ID='%2$s')"," ORDER BY ID",                                                                                                                                                                                                                         },
+                    {"AGENT_PARAMETER", "WHERE AGENT_ID='%2$s'"," ORDER BY ID",                                                                                                                                                                                                            },
+                    {"AGENT_RESOURCE_SETTING", "WHERE AGENT_ID='%2$s'"," ORDER BY RESOURCE_ID, NAME",                                                                                                                                                       },
+            };
+            /* @formatter:on */
+
+            for (int i = CONFIG.length-1; i >= 0; i--) {
+                String[] entry = CONFIG[i];
+                out.append(String.format("DELETE FROM %s_%s %s;\n", tablePrefix, entry[0], String.format(
+                        entry[1],
+                        tablePrefix, agent.getId()).replace("AND DELETED=0", "")));
+            }
+
+            for (int i = 0; i < CONFIG.length; i++) {
+                String[] entry = CONFIG[i];
+                out.append(export(entry[0], entry[1], entry[2], agent));
+            }
+            
+            return out.toString();   
+        } catch (IOException e) {
+            throw new IoException(e);
+        }
+    }
+    
+    @Override
     public String export(ProjectVersion projectVersion) {
         try {
             StringBuilder out = new StringBuilder();
@@ -152,6 +186,18 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
         } catch (IOException e) {
             throw new IoException(e);
         }
+    }
+    
+    protected String export (String table, String where, String orderBy, Agent agent) throws IOException {
+        DbExport export = new DbExport(databasePlatform);        
+        export.setWhereClause(String.format(
+                where + orderBy,
+                tablePrefix, agent.getId()));
+        export.setFormat(Format.SQL);
+        export.setUseQuotedIdentifiers(false);
+        export.setNoCreateInfo(true);
+        return export.exportTables(new String[] { String
+                .format("%s_%s", tablePrefix, table) });
     }
     
     protected String export (String table, String where, String orderBy, ProjectVersion projectVersion) throws IOException {

@@ -183,6 +183,8 @@ public interface IConfigurationService {
     
     public String export(ProjectVersion projectVersion);
     
+    public String export(Agent agent);
+    
     public boolean isUserLoginEnabled();
     
     public List<Notification> findNotifications();
