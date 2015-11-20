@@ -1,5 +1,38 @@
 [id="deploy",reftext="Deploy"]
 == Deploy
 
-include::deploy/folders.ad[]
-include::deploy/agents.ad[]
+Once flows have been designed and configured, they can be deployed to a Metl agent to be run.  When a flow is deployed to an
+agent, its associated resources are also deployed to that agent and can be configured differently for each agent deployment.
+In a typical scenario, a company might have application environments for development, system test, user acceptance test and 
+production.  Similarly with Metl, you can have a development, system test, user acceptance test and production Metl agents.
+After a flow has been designed and configured, it can be deployed to the development agent for dev testing.  The resources 
+that are deployed on the Metl development agent can point to the external systems development resources.  When the flow is ready
+for system testing, it can be deployed to a Metl system test agent, and the associated resources on that agent can point to
+the external systems system test resources, etc.     
+    
+Each running instance of the Metl application can have one or more Metl agents running underneath it.  As an example,
+development, test and production agents could all be run under a single running instance of the Metl application.  More commonly
+each agent is deployed on a different physical server or virtual machine.
+
+When a flow is run from the design screen, Metl uses a pre-configured agent on the current running instance of Metl called
+the design-time agent.  This agent is like any other Metl agent except that it is created automatically.  
+
+Similar to the design screen, the deploy screen is split into different panels.  The navigation panel show below,
+allows viewing of the Metl agents that are configured and running for the current instance of the Metl application.
+
+image:screenshots/deploy/navigation-panel.png[width=270]
+
+Agents are organized within folders.  To create a new folder, click "New" - "Folder", and type the new name of the folder.
+
+image:screenshots/deploy/new-folder.png[width=270]
+
+Similarly, to create a new Metl Agnet, click on the folder under which you would like the agent organized, click "New" - "Agent",
+and type the name of the new agent.
+
+image:screenshots/deploy/new-folder.png[width=270]
+
+Double clicking on an agent in the navigation panel, or selecting an agent and clicking "Edit" - "Open" will open the agent 
+details in the content editor panel as shown below.
+
+image:screenshots/deploy/agent-details.png[]
+
