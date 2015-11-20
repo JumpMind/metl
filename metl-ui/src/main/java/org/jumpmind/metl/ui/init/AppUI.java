@@ -46,6 +46,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.vaadin.annotations.PreserveOnRefresh;
+import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.data.util.converter.Converter;
@@ -73,6 +74,7 @@ import com.vaadin.ui.VerticalLayout;
 @Theme("apptheme")
 @Title("Metl")
 @PreserveOnRefresh
+@Push
 public class AppUI extends UI implements LoginListener {
 
     private static final long serialVersionUID = 1L;
@@ -85,10 +87,7 @@ public class AppUI extends UI implements LoginListener {
 
     @SuppressWarnings("serial")
 	@Override
-    protected void init(VaadinRequest request) {
-        
-        setPollInterval(1500);
-        
+    protected void init(VaadinRequest request) {       
         WebApplicationContext ctx = getWebApplicationContext();
         
         backgroundRefresherService = ctx.getBean(BackgroundRefresherService.class);

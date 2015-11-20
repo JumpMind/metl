@@ -56,6 +56,7 @@ dependencies {
     }
     compile "jlibs:jlibs-xml:1.0"
     compile "com.vaadin:vaadin-server:$vaadinVersion"    
+    compile "com.vaadin:vaadin-push:$vaadinVersion"    
     compile "com.vaadin:vaadin-themes:$vaadinVersion"    
     provided "com.vaadin:vaadin-client-compiler:$vaadinVersion"   
     compile "javax.servlet:javax.servlet-api:$servletVersion"    

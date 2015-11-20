@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.persist;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -93,12 +95,16 @@ abstract public class AbstractExecutionService extends AbstractService implement
                     reader = new CsvReader(file.getAbsolutePath());
                     while (reader.readRecord()) {
                         String[] values = reader.getValues();
-                        ExecutionStepLog stepLog = new ExecutionStepLog();
-                        stepLog.setExecutionStepId(executionStepId);
-                        stepLog.setCreateTime(FormatUtils.parseDate(values[1], FormatUtils.TIMESTAMP_PATTERNS));
-                        stepLog.setLevel(values[0]);
-                        stepLog.setLogText(values[2]);
-                        executionStepLogs.add(stepLog);
+                        if (values != null && values.length > 2 && isNotBlank(values[0]) && 
+                                isNotBlank(values[1]) && 
+                                isNotBlank(values[2])) {
+                            ExecutionStepLog stepLog = new ExecutionStepLog();
+                            stepLog.setExecutionStepId(executionStepId);
+                            stepLog.setCreateTime(FormatUtils.parseDate(values[1], FormatUtils.TIMESTAMP_PATTERNS));
+                            stepLog.setLevel(values[0]);
+                            stepLog.setLogText(values[2]);
+                            executionStepLogs.add(stepLog);
+                        }
                     }
                 } catch (IOException e) {
                     log.error("", e);

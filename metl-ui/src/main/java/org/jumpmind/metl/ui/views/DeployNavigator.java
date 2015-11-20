@@ -464,8 +464,8 @@ public class DeployNavigator extends VerticalLayout {
         Folder selectedFolder = getSelectedFolder();
         boolean showNewFolder = itemBeingEdited == null
                 && (selected == null || selectedFolder != null);
-        newFolder.setVisible(showNewFolder);
-        newAgent.setVisible(selectedFolder != null && !selectedFolder.getName().startsWith("<"));
+        newFolder.setEnabled(showNewFolder);
+        newAgent.setEnabled(selectedFolder != null && !selectedFolder.getName().startsWith("<"));
 
         delete.setEnabled(isDeleteButtonEnabled(selected));
     }

@@ -58,36 +58,29 @@ public class BackgroundRefresherService implements Serializable {
         this.taskScheduler.setPoolSize(1);
         this.taskScheduler.setDaemon(true);
         this.taskScheduler.initialize();   
-        setPollingInterval(5000);
+        setPollingInterval(2500);
     }
 
     protected void setPollingInterval(int interval) {
         if (future != null) {
             future.cancel(false);
         }
-        this.future = this.taskScheduler.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (currentlyRefreshing) {
-                    for (final IBackgroundRefreshable refreshing : currentlyRefreshing) {
-                        try {
-                            log.debug("refreshing background data " + refreshing.getClass().getSimpleName());
-                            final Object data = refreshing.onBackgroundDataRefresh();
-                            appUi.access(new Runnable() {
-                                @Override
-                                public void run() {
-                                    refreshing.onBackgroundUIRefresh(data);
-                                }
-                            });
-                        } catch (Exception e) {
-                            log.error(e.getMessage(), e);
-                        }
-
-                    }
+        this.future = this.taskScheduler.scheduleWithFixedDelay(() -> refresh(), new Date(), interval);
+    }    
+    
+    protected void refresh() {
+        synchronized (currentlyRefreshing) {
+            for (final IBackgroundRefreshable refreshing : currentlyRefreshing) {
+                try {
+                    log.debug("refreshing background data " + refreshing.getClass().getSimpleName());
+                    final Object data = refreshing.onBackgroundDataRefresh();
+                    appUi.access(() -> refreshing.onBackgroundUIRefresh(data));
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
                 }
             }
-        }, new Date(), interval);
-    }    
+        }
+    }
 
     public void register(IBackgroundRefreshable refreshing) {
         log.debug("registered background refresher " + refreshing.getClass().getSimpleName());
