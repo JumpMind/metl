@@ -68,3 +68,34 @@ run on a scheduled cron basis that can be maintained by double clicking the flow
 |Start Expression|If Start Type is set to "SCHEDULED_CRON", this is the cron expression that will determine the run time of the job
 |===========================================
 
+To deploy a flow to an agent, click on the "Add Deployment" button and the Add deployment screen will be displayed as show below:
+
+image:screenshots/deploy/agent-deploy-flow.png[width=520]
+
+All projects and flows will be displayed.  Selecting a flow, and clicking the "select" button will deploy the flow to the Metl agent.
+When a flow is first deployed to an agent, its status will be "Disabled."  To enable the flow for the agent, select the flow, and 
+click the "Enable" button.  The flow status will be changed to "REQUEST_DEPLOY" and once deployed will be changed to "DEPLOYED."
+
+Once a flow has been deployed to an agent and enabled, the flow can be run from the deploy screen.  Select the flow to be run, and 
+click the "RUN" button.  After the flow has run, the flow's run statistics will be displayed as follows.
+
+image:screenshots/deploy/agent-run.png[]
+
+In the top pane, each component that is part of the flow will be listed.  The following data is available:
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Column Name|Description
+|Component Name|The name of the component in the flow
+|Thread|The number of threads that were used when running the component
+|Status|The completion status of the component.  Either "DONE", "ERROR", or "CANCEL".  If "DONE", the component completed all of its
+work successfully.  If "ERROR", the component finished in error.  If "CANCEL" the component was cancelled before it could complete its work
+|Msgs Rcvd|The number of messages this component received during the run of the flow.
+|Msgs Sent|The number of messages this component sent during the run of the flow
+|Entities Prcd|The number of entities processed (if the component takes a model based inbound message)
+|Start|The start run time of the component
+|End|The end run time of the component
+|===========================================
+
+Selecting the component in the top pane will result in run information for that component being display in the bottom pane.  Run information
+for the component can be filtered by typing a filter expression in the Filter box. 
