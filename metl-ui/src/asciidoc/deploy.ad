@@ -36,3 +36,35 @@ details in the content editor panel as shown below.
 
 image:screenshots/deploy/agent-details.png[]
 
+The Start Mode for each agent can be "AUTO" or "MANUAL".  When in "AUTO" mode, all agents defined in this instance of the Metl application
+will be started automatically when the Metl software is run.  The Hostname lists the computer's hostname on which the agent is being run.
+
+Agent specific parameters can be set on the Agent screen.  Clicking the "Parameters" button displays a dialog box where these parameters 
+can be maintained.  These parameters are available to flow components and can be used when things (in addition to resources) need to be 
+specified on an environment by enironment basis.
+
+image:screenshots/deploy/agent-parameters.png[width=570]
+
+The main list on the content editor panel of the deploy screen displays the flows and resources that have been deployed
+to a given agent.
+
+image:screenshots/deploy/agent-deploys.png[]
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Column Name|Description
+|Project Name|The name of the project to which the deployed item belongs
+|Deployment|The name of the item that has been deployed to this agent.  This can be a resource name or a flow name
+|Type|The type of the item that has been deployed.  Either "Resource" or "Flow"
+|Status|The status of the deployed item.  Either "DISABLED" or "ENABLED".  If "ENABLED" the flow will can be run on a 
+scheduled or manual basis from the agent.  If "DISABLED" the job must be enabled before it can be run.  This column is only
+applicable for a flow.
+|Log Level|The log level for the deployed item.  Either "DEBUG", "INFO", "WARN", or "ERROR".  Determines the log level that will 
+be output for the flow when the flow is run on the agent.  This column is only appicable for a flow. 
+|Start Type|Determines how the flow will be started or run on the agent.  Either "MANUAL", "ON_DEPLOY", or "SCHEDULED_CRON".  If
+"MANUAL" the flow will not be invoked automatically by the system, but can be run manually by a user from the deploy screen.  If 
+"ON_DEPLOY", the flow will be run immediately after the flow has been deployed and enabled.  If "SCHEDULED_CRON", the flow will be
+run on a scheduled cron basis that can be maintained by double clicking the flow in the list.
+|Start Expression|If Start Type is set to "SCHEDULED_CRON", this is the cron expression that will determine the run time of the job
+|===========================================
+
