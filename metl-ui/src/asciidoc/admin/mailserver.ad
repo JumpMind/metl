@@ -2,10 +2,10 @@
 === Mail Server
 
 Metl allows notifications to be sent to an email address or distribution list for certain flow run statuses.  See <<notifications>>
-for details.  In order for notifications to be set, the mail server must be configured.  Selecting "Mail Server" in the Admin 
+for details.  In order for notifications to be sent, the mail server must be configured.  Selecting "Mail Server" in the Admin 
 navigation panel allows the mail server to be configured in the content panel as shown below. 
 
-image:screenshots/admin/admin-configure-mail.png[width=550]
+image:screenshots/admin/admin-mail-server.png[width=550]
 
 [options="header" cols="<25%,<75%"]
 |===========================================
