@@ -8,7 +8,7 @@ image:screenshots/admin/admin-users.png[]
 Clicking on the "New" button allows creation of a new user, while clicking on the "Edit" button allows editing of an existing
 user.  In either case the edit user dialog will be display as folows:
 
-image:screenshots/admin/admin-edit-user.png[width=550]
+image:screenshots/admin/admin-edit-users.png[width=550]
 
 [options="header" cols="<25%,<75%"]
 |===========================================

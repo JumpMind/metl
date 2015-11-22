@@ -1,4 +1,21 @@
 
 === Mail Server
 
-TODO
+Metl allows notifications to be sent to an email address or distribution list for certain flow run statuses.  See <<notifications>>
+for details.  In order for notifications to be set, the mail server must be configured.  Selecting "Mail Server" in the Admin 
+navigation panel allows the mail server to be configured in the content panel as shown below. 
+
+image:screenshots/admin/admin-configure-mail.png[width=550]
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Field|Description
+|Host Name|The server name on which the mail server resides
+|Transport|The transport over which to connect to the mail server.  Either "SMTP" or "SMTPS".  SMTPS is secure.
+|Port|The port on which to connect to the mail server
+|From Address|The email address notification emails should be sent FROM
+|Use TLS|Whether to use transport layer security protocol over SMTP to provide certificate based authentication.
+|Use Authentication|Whether the mail server requires authentication
+|Username|The username to be used to connect to the mail server if authentication is required
+|Password|The password to be used to connect to the mail server if authentication is required
+|===========================================

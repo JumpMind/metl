@@ -85,4 +85,16 @@ click the "RUN" button.  After the flow has run, the flow's run statistics will 
 
 include::deploy/agent-run.ad[]
 
+[id="enterprise-scheduler",reftext="Running a flow from an enterprise scheduler"]
 === Running a flow from an enterprise scheduler
+
+Metl has a REST API that can be used to call a deployed flow from an external enterprise scheduler.  Information about the Rest
+API can be found here <<rest-api>>.  The Rest service allows an HTTP GET request to run a flow and get a response back
+that provides the status of the flow run.  
+
+One way to initiate the REST API is to create a .bat file using cURL as shown in the example below.
+
+----
+Example from Austin
+----
+
