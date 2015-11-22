@@ -1,4 +1,10 @@
 
 ==== Local File System
 
-TODO
+The following settings are available for the Local File Resource
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Setting|Description
+|Path|The base path that should be used when accessing files from this resource
+|===========================================
