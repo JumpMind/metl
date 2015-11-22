@@ -38,7 +38,7 @@ import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.IStreamable;
+import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.util.FormatUtils;
 
@@ -150,7 +150,7 @@ public class TextFileReader extends AbstractComponentRuntime {
     }
 
     protected void deleteFiles() {
-        IStreamable streamable = getResourceReference();
+        IDirectory streamable = getResourceReference();
         for (String srcFile : filesRead) {
             if (streamable.delete(srcFile)) {
                 warn("Deleted %s", srcFile);
@@ -212,7 +212,7 @@ public class TextFileReader extends AbstractComponentRuntime {
             String currentLine;
             try {
                 info("Reading file: %s", file);
-                IStreamable resource = (IStreamable) getResourceReference();
+                IDirectory resource = (IDirectory) getResourceReference();
                 String filePath = FormatUtils.replaceTokens(file, context.getFlowParametersAsString(), true);
                 inStream = resource.getInputStream(filePath, mustExist);
                 reader = new BufferedReader(new InputStreamReader(inStream, encoding));

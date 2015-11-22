@@ -27,7 +27,6 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.net.ftp.FTP;
@@ -39,9 +38,9 @@ import org.jumpmind.symmetric.transport.AuthenticationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FtpStreamable implements IStreamable {
+public class FtpDirectory implements IDirectory {
 
-    protected static final Logger log = LoggerFactory.getLogger(FtpStreamable.class);
+    protected static final Logger log = LoggerFactory.getLogger(FtpDirectory.class);
 
     String hostname;
     Integer port;
@@ -50,7 +49,7 @@ public class FtpStreamable implements IStreamable {
     String basePath;
     Integer connectTimeout;
 
-    public FtpStreamable(String hostname, Integer port, String username, String password, String basePath, Integer connectTimeout) {
+    public FtpDirectory(String hostname, Integer port, String username, String password, String basePath, Integer connectTimeout) {
         this.hostname = hostname;
         this.port = port;
         this.username = username;
@@ -59,9 +58,20 @@ public class FtpStreamable implements IStreamable {
         this.connectTimeout = connectTimeout;
     }
     
+
     @Override
-    public List<FileInfo> listFiles(String relativePath) {
-        return new ArrayList<>();
+    public List<FileInfo> listFiles(String... relativePaths) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public void copy(String fromFilePath, String toDirPath) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public void move(String fromFilePath, String toDirPath) {
+        throw new UnsupportedOperationException();
     }
 
     protected FTPClient createClient() {
@@ -187,7 +197,7 @@ public class FtpStreamable implements IStreamable {
         } catch (Exception e) {
             throw new IoException(e);
         } finally {
-            FtpStreamable.this.close(ftpClient);
+            FtpDirectory.this.close(ftpClient);
 
         }
     }
@@ -213,7 +223,7 @@ public class FtpStreamable implements IStreamable {
         @Override
         public void close() throws IOException {
             super.close();
-            FtpStreamable.this.close(ftpClient);
+            FtpDirectory.this.close(ftpClient);
         }
     }
 
@@ -228,7 +238,7 @@ public class FtpStreamable implements IStreamable {
         @Override
         public void close() throws IOException {
             super.close();
-            FtpStreamable.this.close(ftpClient);
+            FtpDirectory.this.close(ftpClient);
         }
     }
 }

@@ -20,15 +20,11 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.SettingDefinition;
@@ -38,11 +34,11 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.DirectoryScanner;
-import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.runtime.resource.LocalFile;
+import org.jumpmind.metl.core.runtime.resource.FileInfo;
+import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
+import org.springframework.util.AntPathMatcher;
 
 public class FilePoller extends AbstractComponentRuntime {
 
@@ -108,15 +104,14 @@ public class FilePoller extends AbstractComponentRuntime {
     
     int filesPerMessage = 1000;
 
-    ArrayList<File> filesSent = new ArrayList<File>();
+    ArrayList<FileInfo> filesSent = new ArrayList<FileInfo>();
 
     @Override
     protected void start() {
         Component component = getComponent();
         Resource resource = component.getResource();
-        if (resource == null || !resource.getType().equals(LocalFile.TYPE)) {
-            throw new MisconfiguredException("A resource of type '%s' must be selected",
-                    LocalFile.TYPE);
+        if (resource == null) {
+            throw new MisconfiguredException("A resource is required");
         }
         TypedProperties properties = getTypedProperties();
 
@@ -150,61 +145,91 @@ public class FilePoller extends AbstractComponentRuntime {
 
 	@Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
-			IResourceRuntime resourceRuntime = getResourceRuntime();
-			String path = resourceRuntime.getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
+		    IDirectory directory = getResourceReference();
 			if (useTriggerFile) {
-				File triggerFile = getNewFile(path, triggerFilePath);
-				if (triggerFile.exists()) {
-					pollForFiles(path, inputMessage, callback, unitOfWorkBoundaryReached);
-					FileUtils.deleteQuietly(triggerFile);
+				List<FileInfo> triggerFiles = directory.listFiles(triggerFilePath);
+				if (triggerFiles != null && triggerFiles.size() > 0) {
+					pollForFiles(inputMessage, callback, unitOfWorkBoundaryReached);
+					directory.delete(triggerFilePath);
 				} else if (cancelOnNoFiles) {
 					callback.sendShutdownMessage(true);
 				}
 			} else {
-				pollForFiles(path, inputMessage, callback, unitOfWorkBoundaryReached);
+				pollForFiles(inputMessage, callback, unitOfWorkBoundaryReached);
 			}
 		}
 	}
+	
+	protected List<FileInfo> matchFiles (String pattern, IDirectory directory, AntPathMatcher pathMatcher) {
+        List<FileInfo> matches = new ArrayList<>();
+	    if (pathMatcher.isPattern(pattern)) {
+	        String[] parts = pattern.split("/");
+	        StringBuilder path = new StringBuilder();
+	        for (String part : parts) {
+                if (!pathMatcher.isPattern(part)) {
+                    path.append(part).append("/");
+                } else {
+                    break;
+                }
+            }	        
+	        matches.addAll(matchFiles(path.toString(), pattern, directory, pathMatcher));
+	    } else {
+            matches.addAll(directory.listFiles(pattern));	        
+	    }
+	    return matches;
+	}
+	
+	protected List<FileInfo> matchFiles (String relativePath, String pattern, IDirectory directory, AntPathMatcher pathMatcher) {
+	    List<FileInfo> matches = new ArrayList<>();
+	    List<FileInfo> fileInfos = directory.listFiles(relativePath);
+        for (FileInfo fileInfo : fileInfos) {
+            if (matches.size() < maxFilesToPoll) {
+                if (!fileInfo.isDirectory() && pathMatcher.match(pattern, fileInfo.getRelativePath()) 
+                        && !matches.contains(fileInfo)) {
+                    matches.add(fileInfo);
+                } else if (fileInfo.isDirectory()) {
+                    matches.addAll(matchFiles(fileInfo.getRelativePath(), pattern, directory, pathMatcher));
+                }
+            }
+        }
+	    return matches;
+	}
 
-    protected void pollForFiles(String path, Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        File pathDir = getNewFile(path);
-        ArrayList<File> fileReferences = new ArrayList<File>();
+    protected void pollForFiles(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         String[] includes = StringUtils.isNotBlank(filePattern) ? filePattern.split(",")
                 : new String[] { "*" };
-        DirectoryScanner scanner = getDirectoryScanner();
-        scanner.setIncludes(includes);
-        scanner.setBasedir(pathDir);
-        scanner.setCaseSensitive(false);
-        scanner.scan();
-        String[] files = scanner.getIncludedFiles();
-        if (files.length >= minFilesToPoll) {
-            for(int i = 0; i < files.length && i < maxFilesToPoll; i++) {
-                File file = getNewFile(path, files[i]);
-                filesSent.add(file);
-                fileReferences.add(file);
+        
+        AntPathMatcher pathMatcher = new AntPathMatcher();
+        
+        IDirectory directory = getResourceReference();
+        
+        List<FileInfo> matches = new ArrayList<>();
+        for (String pattern : includes) {
+            matches.addAll(matchFiles(pattern, directory, pathMatcher));
+        }
+        
+        if (matches.size() >= minFilesToPoll) {
+            for(int i = 0; i < matches.size() && i < maxFilesToPoll; i++) {
+                filesSent.add(matches.get(i));
             }
             
-            Collections.sort(fileReferences, new Comparator<File>() {
-                @Override
-                public int compare(File o1, File o2) {
+            Collections.sort(filesSent, (o1,o2) -> {
                 	int cmpr = 0;
                 	if (SORT_NAME.equals(fileSortOption)) {
-                		cmpr = new String(o1.getName()).compareTo(new String(o2.getName()));
+                		cmpr = new String(o1.getRelativePath()).compareTo(new String(o2.getRelativePath()));
                     } else if (SORT_MODIFIED.equals(fileSortOption)) {
-                    	cmpr = new Long(o1.lastModified()).compareTo(new Long(o2.lastModified()));
+                    	cmpr = new Long(o1.getLastUpdated()).compareTo(new Long(o2.getLastUpdated()));
                     }
                 	return cmpr;
-                }
             });
             
             ArrayList<String> filePaths = new ArrayList<>();
-            for (File file : fileReferences) {
-                log(LogLevel.INFO, "File polled: " + file.getAbsolutePath());
+            for (FileInfo file : filesSent) {
+                log(LogLevel.INFO, "File polled: " + file.getRelativePath());
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                filePaths.add(file.getAbsolutePath());
+                filePaths.add(file.getRelativePath());
                 if (filePaths.size() <= filesPerMessage) {
                     callback.sendMessage(null, filePaths);
                     filePaths = new ArrayList<>();
@@ -217,19 +242,6 @@ public class FilePoller extends AbstractComponentRuntime {
         } else if (cancelOnNoFiles) {
             callback.sendShutdownMessage(true);
         }
-    }
-
-    File getNewFile(String path) {
-    	return new File(path);
-    }
-    
-    File getNewFile(String path, String child) {
-    	return new File(path, child);
-    }
-    
-    DirectoryScanner getDirectoryScanner() {
-    	DirectoryScanner scanner = new DirectoryScanner();
-    	return scanner;
     }
     
     @Override
@@ -251,30 +263,20 @@ public class FilePoller extends AbstractComponentRuntime {
     }
 
     protected void deleteFiles() {
-        for (File srcFile : filesSent) {
-            if(FileUtils.deleteQuietly(srcFile)) {
-                log(LogLevel.INFO, "Deleted %s", srcFile.getAbsolutePath());
+        IDirectory directory = getResourceReference();
+        for (FileInfo srcFile : filesSent) {
+            if(directory.delete(srcFile.getRelativePath())) {
+                log(LogLevel.INFO, "Deleted %s", srcFile.getRelativePath());
             } else {
-                log(LogLevel.WARN, "Failed to delete %s", srcFile.getAbsolutePath());
+                log(LogLevel.WARN, "Failed to delete %s", srcFile.getRelativePath());
             }            
         }
     }
 
     protected void archive(String archivePath) {
-        String path = getResourceRuntime().getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
-        File destDir = new File(path, archivePath);
-        for (File srcFile : filesSent) {
-            try {
-                File targetFile = new File(destDir, srcFile.getName());
-                if (targetFile.exists()) {
-                    info("The msgTarget file already exists.   Deleting it in order to archive a new file.");
-                    FileUtils.deleteQuietly(targetFile);
-                }
-                log(LogLevel.INFO, "Archiving %s tp %s", srcFile.getAbsolutePath(), destDir.getAbsolutePath());
-                FileUtils.moveFileToDirectory(srcFile, destDir, true);
-            } catch (IOException e) {
-                throw new IoException(e);
-            }
+        IDirectory directory = getResourceReference();
+        for (FileInfo srcFile : filesSent) {
+            directory.move(srcFile.getRelativePath(), archivePath);
         }
     }
     

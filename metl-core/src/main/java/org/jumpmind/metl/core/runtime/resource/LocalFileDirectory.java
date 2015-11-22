@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -34,11 +35,11 @@ import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Resource;
 
-public class LocalFileStreamable implements IStreamable {
+public class LocalFileDirectory implements IDirectory {
 
     String basePath;
 
-    public LocalFileStreamable(Resource resource, String basePath, boolean mustExist) {
+    public LocalFileDirectory(Resource resource, String basePath, boolean mustExist) {
         this.basePath = basePath;
     }
 
@@ -57,8 +58,44 @@ public class LocalFileStreamable implements IStreamable {
     }
     
     @Override
-    public List<FileInfo> listFiles(String relativePath) {
-        return new ArrayList<>();
+    public List<FileInfo> listFiles(String... relativePaths) {
+        List<FileInfo> list = new ArrayList<>();
+        if (relativePaths != null && relativePaths.length > 0) {
+            for (String relativePath : relativePaths) {
+                list.addAll(listFiles(new File(basePath, relativePath)));
+            }
+        } else {
+            list.addAll(listFiles(new File(basePath)));
+        }
+        return list;
+    }
+    
+    
+    @Override
+    public void copy(String fromFilePath, String toDirPath) {
+        try {
+            FileUtils.copyFileToDirectory(new File(basePath, fromFilePath), new File(basePath, toDirPath));
+        } catch (IOException e) {
+            throw new IoException(e);
+        }
+    }
+    
+    @Override
+    public void move(String fromFilePath, String toDirPath) {
+        try {
+            FileUtils.moveFileToDirectory(new File(basePath, fromFilePath), new File(basePath, toDirPath), true);
+        } catch (IOException e) {
+            throw new IoException(e);
+        }
+    }    
+    
+    protected List<FileInfo> listFiles(File dir) {
+        List<FileInfo> list = new ArrayList<>();
+        File[] files = dir.listFiles();
+        for (File file : files) {
+            list.add(new FileInfo(file.getAbsolutePath(), file.isDirectory(), file.lastModified()));
+        }
+        return list;
     }
 
     protected File toFile(String relativePath, boolean mustExist) {

@@ -28,7 +28,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -37,7 +36,7 @@ import org.jumpmind.exception.IoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HttpStreamable implements IStreamable {
+public class HttpDirectory implements IDirectory {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -57,7 +56,7 @@ public class HttpStreamable implements IStreamable {
     int timeout;
     int contentLength;
 
-    public HttpStreamable(String url, String httpMethod, String contentType, int timeout, String security,
+    public HttpDirectory(String url, String httpMethod, String contentType, int timeout, String security,
             String username, String password) {
         this.url = url;
         this.httpMethod = httpMethod;
@@ -69,11 +68,20 @@ public class HttpStreamable implements IStreamable {
     }
     
     @Override
-    public List<FileInfo> listFiles(String relativePath) {
-        return new ArrayList<>();
+    public List<FileInfo> listFiles(String... relativePaths) {
+        throw new UnsupportedOperationException();
     }
-
-
+    
+    @Override
+    public void copy(String fromFilePath, String toDirPath) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public void move(String fromFilePath, String toDirPath) {
+        throw new UnsupportedOperationException();
+    }
+    
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist) {
         try {

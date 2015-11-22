@@ -20,11 +20,11 @@
  */
 package org.jumpmind.metl.core.runtime.resource;
 
-import static org.jumpmind.metl.core.runtime.resource.HttpStreamable.HTTP_METHOD_GET;
-import static org.jumpmind.metl.core.runtime.resource.HttpStreamable.HTTP_METHOD_POST;
-import static org.jumpmind.metl.core.runtime.resource.HttpStreamable.HTTP_METHOD_PUT;
-import static org.jumpmind.metl.core.runtime.resource.HttpStreamable.SECURITY_BASIC;
-import static org.jumpmind.metl.core.runtime.resource.HttpStreamable.SECURITY_NONE;
+import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.HTTP_METHOD_GET;
+import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.HTTP_METHOD_POST;
+import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.HTTP_METHOD_PUT;
+import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.SECURITY_BASIC;
+import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.SECURITY_NONE;
 
 import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.ResourceCategory;
@@ -79,11 +79,11 @@ public class Http extends AbstractResourceRuntime {
     @SettingDefinition(type = Type.PASSWORD, order = 50, required = false, label = "Password")
     public static final String SECURITY_PASSWORD = "security.usertoken.password";
 
-    HttpStreamable streamable;
+    HttpDirectory streamable;
 
     @Override
     protected void start(TypedProperties properties) {
-        streamable = new HttpStreamable(properties.get(URL), properties.get(HTTP_METHOD,
+        streamable = new HttpDirectory(properties.get(URL), properties.get(HTTP_METHOD,
                 HTTP_METHOD_GET),
                 properties.get(CONTENT_TYPE),
                 properties.getInt(HTTP_TIMEOUT), properties.get(SECURITY),

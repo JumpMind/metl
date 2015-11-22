@@ -42,7 +42,7 @@ import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageAssert;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
-import org.jumpmind.metl.core.runtime.resource.IStreamable;
+import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.utils.TestUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.junit.Assert;
@@ -100,7 +100,7 @@ public abstract class AbstractComponentRuntimeTestSupport {
 	Flow flow;
 	ExecutionTrackerNoOp eExecutionTracker;
 	TypedProperties properties;
-	IStreamable resource;
+	IDirectory resource;
 	
 	// internal testing variable so setupHandle and runHandle can be called independently
 	boolean setupCalled;
@@ -122,7 +122,7 @@ public abstract class AbstractComponentRuntimeTestSupport {
 		flowParameters = new HashMap<String, Serializable>();
 		flowStep = mock(FlowStep.class);
 		flow = mock(Flow.class);
-		resource = mock(IStreamable.class);
+		resource = mock(IDirectory.class);
 		
 		eExecutionTracker = new ExecutionTrackerNoOp();
 		properties = new TypedProperties();
@@ -226,7 +226,7 @@ public abstract class AbstractComponentRuntimeTestSupport {
 				HandleMessageMonitor expected = expectedMonitors.get(i);
 				HandleMessageMonitor actual = messages.get(i).getCallback().getMonitor();
 			
-				assertEquals("Statistics entities processed are not equal", numberEntitiesProcessed, 
+				assertEquals("The number of entities processed are not equal.  ", numberEntitiesProcessed, 
 						((AbstractComponentRuntime) spy).getComponentStatistics().getNumberEntitiesProcessed(0));
 				//assertEquals("Send message counts do not match [message " + (i + 1) + "]", expected.getSendMessageCount(), actual.getSendMessageCount());
 				//assertEquals("Start message counts do not match [message " + (i + 1) + "]", expected.getStartupMessageCount(), actual.getStartupMessageCount());
