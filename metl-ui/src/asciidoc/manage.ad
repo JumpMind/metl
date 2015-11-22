@@ -1,2 +1,8 @@
 [id="manage",reftext="Manage"]
 == Manage
+The Manage screen allows viewing of past runs of flows.  The main manage screen is shown below:  
+
+image:screenshots/deploy/navigation-panel.png[]
+
+The Manage screen is split into two panels, the navigation panel and the main panel.  The navigation panel allows you to 
+select an Agent or a Flow to display run information.  
