@@ -62,3 +62,4 @@ sample flow, and then sends an output message to the Person Table Reader compone
 person records from the database.  The output of the RDMBS reader is messages that contain rows which are sent to the Formatters,
 and so forth down the chain until all components are complete, and then the flow ends.  
 
+include::flows-unit-of-work.ad[]

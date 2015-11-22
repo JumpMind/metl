@@ -1,0 +1,11 @@
+==== Unit of Work
+
+Several components can deal with multiple units of work in the execution of a given flow.  As an example, the Text File Reader
+can take one or more inbound messages that specify the path and name of a file to read.  In this instance, the text file reader
+receives three messages, and will read data from the three files specified in each input message.  When the text file reader completes
+reading of a given file and sends all data in output messages, it will send a control message that indicates it is complete with
+the given "unit of work" (i.e. reading the file that was specified by the input message).  Downstream components can utilize that
+control message in different ways depending on the implementation and configuration of the downstream component.  As an example,
+many components have a "Run When" configuration option which can be set to "Per Message" or "Per Unit of Work".  Setting the 
+"Run When" option to "Per Unit of Work" will enable the component to run when a unit of work control message is received".  Setting
+the "Run When" option to "Per Message" will enable the component to run each time any data message is received. 

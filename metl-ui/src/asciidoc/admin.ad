@@ -1,7 +1,13 @@
 
 == Admin
 
-TODO
+The administration screens allow setup of admin data including:
+
+* Managing users and user groups
+* Displaying information about the REST API
+* Configuring the SMTP mail server
+* Configuring notifications 
+* Displaying Metl log information
 
 include::admin/users.ad[]
 include::admin/groups.ad[]

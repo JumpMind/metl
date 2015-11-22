@@ -68,3 +68,33 @@ run on a scheduled cron basis that can be maintained by double clicking the flow
 |Start Expression|If Start Type is set to "SCHEDULED_CRON", this is the cron expression that will determine the run time of the job
 |===========================================
 
+=== Deploying a flow
+
+To deploy a flow to an agent, click on the "Add Deployment" button and the Add deployment screen will be displayed as show below:
+
+image:screenshots/deploy/agent-deploy-flow.png[width=520]
+
+All projects and flows will be displayed.  Selecting a flow, and clicking the "select" button will deploy the flow to the Metl agent.
+When a flow is first deployed to an agent, its status will be "Disabled."  To enable the flow for the agent, select the flow, and 
+click the "Enable" button.  The flow status will be changed to "REQUEST_DEPLOY" and once deployed will be changed to "DEPLOYED."
+
+=== Running a flow
+
+Once a flow has been deployed to an agent and enabled, the flow can be run from the deploy screen.  Select the flow to be run, and 
+click the "RUN" button.  After the flow has run, the flow's run statistics will be displayed as follows.
+
+include::deploy/agent-run.ad[]
+
+[id="enterprise-scheduler",reftext="Running a flow from an enterprise scheduler"]
+=== Running a flow from an enterprise scheduler
+
+Metl has a REST API that can be used to call a deployed flow from an external enterprise scheduler.  Information about the Rest
+API can be found here <<rest-api>>.  The Rest service allows an HTTP GET request to run a flow and get a response back
+that provides the status of the flow run.  
+
+One way to initiate the REST API is to create a .bat file using cURL as shown in the example below.
+
+----
+Example from Austin
+----
+

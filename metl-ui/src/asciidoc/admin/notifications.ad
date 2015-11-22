@@ -1,4 +1,44 @@
-
+[id="notifications",reftext="Notifications"]
 === Notifications
 
-TODO
+Metl allows notifications to be sent to an email address or distribution list for certain flow run statuses.  In order for 
+notifications to be sent, the notifications must be configured.  Selecting "Notifications" in the Admin 
+navigation panel shows a list of configured notifications in the content panel as shown below. 
+
+image:screenshots/admin/admin-notifications.png[]
+
+Clicking on the "New" button allows creation of a new notification, while clicking on the "Edit" button allows editing of an existing
+notification.  In either case the edit notification dialog will be display as follows:
+
+image:screenshots/admin/admin-edit-notification.png[width=550]
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Field|Description
+|Level|The level at which this notification applies.  Either "GLOBAL", "AGENT", or "DEPLOYMENT".  If "GLOBAL" the notification
+will be sent for all flows and all agents in this instance of Metl.  If "AGENT", the notification will be sent for the agent
+specified by the "Linked To" field, and if "DEPLOYMENT", the notification will be sent for the flow and specified agent in the
+"Linked To" field.
+|Linked To|If "AGENT" or "DEPLOYMENT" is specified for the "Level" field, this field specifies for which agent or deployment (agent and
+flow) the notification should fire
+|Event|The event for which the flow should fire.  Either "FLOW_START", "FLOW_END" or "FLOW_ERROR".  This field is used in conjunction
+with the "Level" and "Linked To" fields to determine when to fire events.  "FLOW_START" indicates a notification should be fired 
+when the flow begins, "FLOW_END" when the flow finishes (either successfully or on error), and "FLOW_ERROR" when the flow finishes
+with an error condition.
+|Name|The name of the notification
+|Recipients|The recipient list.  One or more email addresses may be entered
+|Subject|The subject message that should be displayed for the email notification
+|Message|The message body for the email notification
+|Enabled|Whether this notification is enabled or not.  If not enabled, the notification will not be sent
+|===========================================
+
+==== Notification variables that can be used in Subject or Message
+
+There are several variables that can be used in the notification subject and message.  These are specifically helpful when the
+notification Level is at the Agent or Global level as details can be added that specify which flow fired the notification.
+
+* $(_flowName) - The name of the flow that fired the notification message
+* $(_agentName) - The name of the agent that fired the notification message
+* $(_date) - The date the notification message was fired
+* $(_time) - The time the notification message was fired
+

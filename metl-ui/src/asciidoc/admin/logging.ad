@@ -1,4 +1,8 @@
 
 === Logging
 
-TODO
+Selecting "Logging" in the Admin navigation panel shows Metl's log file as shown below.
+
+image:screenshots/admin/admin-logging.png[]
+
+The log file can be filtered or downloaded by using the appropriate fields on the logging screen.
