@@ -1,4 +1,23 @@
 
 === Groups
 
-TODO
+Selecting "Groups" in the Admin navigation panel displays a list of Metl groups in the content panel as shown below. 
+
+image:screenshots/admin/admin-groups.png[]
+
+Clicking on the "New" button allows creation of a new group, while clicking on the "Edit" button allows editing of an existing
+group.  In either case the edit user dialog will be display as folows:
+
+image:screenshots/admin/admin-edit-group.png[width=550]
+
+[options="header" cols="<25%,<75%"]
+|===========================================
+|Field|Description
+|Group Name|The name of the group that will be availble to assign to users
+|Available Privileges|The available privileges in the system.  The available privileges are "DESIGN", "DEPLOY", "MANAGE", "EXPLORE", 
+and "ADMIN".  Each of these privileges allows the user to access the the corresponding high level screens in Metl and perform the
+actions on those screens.  For example, design privileges allow the user to design new flows.  Deploy allws users to deploy existing
+flows to Metl agents.  "Manage" allows users to look at run time data for flows running on the given agent, etc.
+|Selected Privileges|The selected privileges the user group will have.  The default user group has access to all privileges.
+|===========================================
+

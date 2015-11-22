@@ -84,3 +84,5 @@ Once a flow has been deployed to an agent and enabled, the flow can be run from 
 click the "RUN" button.  After the flow has run, the flow's run statistics will be displayed as follows.
 
 include::deploy/agent-run.ad[]
+
+=== Running a flow from an enterprise scheduler
