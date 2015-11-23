@@ -790,6 +790,11 @@
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
+            <setting id='textfilereader.must.exist' type='boolean' required='false'>
+                <name>Must Exist</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>            
             <setting id='textfilereader.relative.path' type='text' required='false'>
                 <name>File Path</name>
                 <description></description>
@@ -1034,7 +1039,7 @@
                 </choices>
             </setting>                              
             <setting id='get.file.name.from.message' type='boolean' required='false'>
-                <name>Expect fully qualified file names in incoming messages</name>
+                <name>Get file names from incoming messages</name>
                 <description></description>
             </setting>
             <setting id='relative.path' type='text' required='false'>

@@ -122,8 +122,7 @@ public class TextFileReader extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-    	
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {    	
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
 			List<String> files = getFilesToRead(inputMessage);
@@ -180,18 +179,11 @@ public class TextFileReader extends AbstractComponentRuntime {
     }
 
     private List<String> getFilesToRead(Message inputMessage) {
-        ArrayList<String> files = new ArrayList<String>();
+        ArrayList<String> files = null;
         if (getFileNameFromMessage) {
-            List<String> fullyQualifiedFiles = inputMessage.getPayload();
-            String path = getResourceRuntime().getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
-            for (String fullyQualifiedFile : fullyQualifiedFiles) {
-                if (fullyQualifiedFile.startsWith(path)) {
-                    files.add(fullyQualifiedFile.substring(path.length()));
-                } else {
-                    files.add(fullyQualifiedFile);
-                }
-            }
+            files = inputMessage.getPayload();
         } else {
+            files = new ArrayList<String>(1);
             files.add(relativePathAndFile);
         }
         return files;
