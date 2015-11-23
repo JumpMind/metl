@@ -56,7 +56,7 @@ public class LocalFileDirectory implements IDirectory {
     public boolean supportsInputStream() {
         return true;
     }
-    
+
     @Override
     public List<FileInfo> listFiles(String... relativePaths) {
         List<FileInfo> list = new ArrayList<>();
@@ -69,8 +69,7 @@ public class LocalFileDirectory implements IDirectory {
         }
         return list;
     }
-    
-    
+
     @Override
     public void copy(String fromFilePath, String toDirPath) {
         try {
@@ -79,7 +78,7 @@ public class LocalFileDirectory implements IDirectory {
             throw new IoException(e);
         }
     }
-    
+
     @Override
     public void move(String fromFilePath, String toDirPath) {
         try {
@@ -87,29 +86,37 @@ public class LocalFileDirectory implements IDirectory {
         } catch (IOException e) {
             throw new IoException(e);
         }
-    }    
-    
+    }
+
     protected List<FileInfo> listFiles(File dir) {
         List<FileInfo> list = new ArrayList<>();
         File[] files = dir.listFiles();
-        for (File file : files) {
-            list.add(new FileInfo(file.getAbsolutePath(), file.isDirectory(), file.lastModified()));
+        if (files != null) {
+            for (File file : files) {
+                String path = file.getAbsolutePath();
+                path = path.replaceAll("\\\\", "/");
+                int index = path.indexOf(basePath);
+                if (index >= 0) {
+                    path = path.substring(index + basePath.length() + 1);
+                }
+                list.add(new FileInfo(path, file.isDirectory(), file.lastModified()));
+            }
         }
         return list;
     }
 
     protected File toFile(String relativePath, boolean mustExist) {
         File file;
-    	if (StringUtils.isEmpty(basePath)) {
-    		file = new File(relativePath);
-    	} else {
-    		file = new File(basePath, relativePath);
-    	}
+        if (StringUtils.isEmpty(basePath)) {
+            file = new File(relativePath);
+        } else {
+            file = new File(basePath, relativePath);
+        }
         if (!file.exists()) {
             if (!mustExist) {
-            	if (file.getParentFile() != null) {
-            		file.getParentFile().mkdirs();
-            	} 
+                if (file.getParentFile() != null) {
+                    file.getParentFile().mkdirs();
+                }
             } else {
                 throw new IoException("Could not find " + file.getAbsolutePath());
             }

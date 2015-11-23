@@ -22,11 +22,14 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.io.File;
+
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -71,6 +74,9 @@ public class Script extends AbstractComponentRuntime {
         StringBuilder script = new StringBuilder();
         try {
             script.append(String.format("import %s;\n", ISendMessageCallback.class.getName()));
+            script.append(String.format("import %s;\n", File.class.getName()));
+            script.append(String.format("import %s;\n", FileUtils.class.getName()));
+            script.append(String.format("import static %s.*;\n", FileUtils.class.getName()));
             script.append(String.format("import %s.*;\n", Message.class.getPackage().getName()));
             script.append(String.format("import %s;\n", MessageScriptHelper.class.getName()));
             script.append(String.format("import %s.%s;\n", EntityData.class.getName(), ChangeType.class.getSimpleName()));

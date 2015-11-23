@@ -168,7 +168,7 @@
             </setting>
         </settings>
     </component>
-    <component id='File Poller' category='READER' inputMessageType='none' outputMessageType='text' resourceCategory='streamable'
+    <component id='File Poller' category='READER' inputMessageType='any' outputMessageType='text' resourceCategory='streamable'
         inputOutputModelsMatch='false'>
         <name>File Poller</name>
         <className>org.jumpmind.metl.core.runtime.component.FilePoller</className>
@@ -786,7 +786,7 @@
                 </choices>
             </setting>                              
             <setting id='get.file.name.from.message' type='boolean' required='false'>
-                <name>Expect fully qualified file names in incoming messages</name>
+                <name>Get file names from incoming messages</name>
                 <defaultValue>false</defaultValue>
                 <description></description>
             </setting>
