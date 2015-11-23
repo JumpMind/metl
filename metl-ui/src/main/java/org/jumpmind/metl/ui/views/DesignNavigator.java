@@ -403,15 +403,7 @@ public class DesignNavigator extends VerticalLayout {
                     abortEditingItem();
                 }
             });
-            field.addShortcutListener(new ShortcutListener("Enter", KeyCode.ENTER, null) {
-
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public void handleAction(Object sender, Object target) {
-                    finishEditingItem();
-                }
-            });
+            field.addValueChangeListener(event -> finishEditingItem());
             field.addBlurListener(new BlurListener() {
                 @Override
                 public void blur(BlurEvent event) {
