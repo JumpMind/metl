@@ -46,8 +46,16 @@ public interface IDirectory {
     
     public List<FileInfo> listFiles(String... relativePaths);    
     
-    public void copy(String fromFilePath, String toDirPath);
+    public FileInfo listFile (String relativePath);
     
-    public void move(String fromFilePath, String toDirPath);
+    public void copyFile(String fromFilePath, String toFilePath);
+    
+    public void moveFile(String fromFilePath, String toFilePath);
+    
+    public void copyToDir(String fromFilePath, String toDirPath);
+    
+    public void moveToDir(String fromFilePath, String toDirPath);
+    
+    public boolean renameFile(String fileFilePath, String toFilePath);
             
 }

@@ -68,6 +68,26 @@ public class SftpDirectory implements IDirectory {
         this.connectionTimeout = connectionTimeout;
         this.mustExist = mustExist;
     }
+    
+    @Override
+    public FileInfo listFile(String relativePath) {
+        throw new UnsupportedOperationException();
+    }
+        
+    @Override
+    public void copyFile(String fromFilePath, String toFilePath) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public void moveFile(String fromFilePath, String toFilePath) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public boolean renameFile(String fileFilePath, String toFilePath) {
+        throw new UnsupportedOperationException();
+    }    
 
     private boolean fileExists(ChannelSftp sftp, String filePath) {
         try {
@@ -151,12 +171,12 @@ public class SftpDirectory implements IDirectory {
     }
     
     @Override
-    public void copy(String fromFilePath, String toDirPath) {
+    public void copyToDir(String fromFilePath, String toDirPath) {
         throw new UnsupportedOperationException();
     }
     
     @Override
-    public void move(String fromFilePath, String toDirPath) {
+    public void moveToDir(String fromFilePath, String toDirPath) {
         throw new UnsupportedOperationException();
     }
 

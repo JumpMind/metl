@@ -12,6 +12,15 @@ public class FileInfo {
         this.lastUpdated = lastUpdated;
     }
     
+    public String getName() {
+        int index = relativePath.lastIndexOf("/");
+        if (index > 0) {
+            return relativePath.substring(index + 1, relativePath.length());
+        } else {
+            return relativePath;
+        }
+    }
+    
     public String getRelativePath() {
         return relativePath;
     }

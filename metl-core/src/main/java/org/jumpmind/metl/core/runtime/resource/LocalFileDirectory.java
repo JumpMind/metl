@@ -56,6 +56,16 @@ public class LocalFileDirectory implements IDirectory {
     public boolean supportsInputStream() {
         return true;
     }
+    
+    @Override
+    public FileInfo listFile(String relativePath) {
+        List<FileInfo> list = listFiles(new File(basePath, relativePath));
+        if (list.size() > 0) {
+            return list.get(0);
+        } else {
+            return null;
+        }
+    }    
 
     @Override
     public List<FileInfo> listFiles(String... relativePaths) {
@@ -69,9 +79,46 @@ public class LocalFileDirectory implements IDirectory {
         }
         return list;
     }
+    
+    
+    @Override
+    public void copyFile(String fromFilePath, String toFilePath) {
+        try {
+            File fromFile = new File(basePath, fromFilePath);
+            File toFile = new File(basePath, toFilePath);
+            toFile.getParentFile().mkdirs();
+            toFile.delete();
+            FileUtils.copyFile(fromFile, toFile);
+        } catch (IOException e) {
+            throw new IoException(e);
+        }
+    }
+    
+    @Override
+    public void moveFile(String fromFilePath, String toFilePath) {
+        try {
+            File fromFile = new File(basePath, fromFilePath);
+            File toFile = new File(basePath, toFilePath);
+            toFile.getParentFile().mkdirs();
+            toFile.delete();
+            FileUtils.copyFile(fromFile, toFile);
+            fromFile.delete();
+        } catch (IOException e) {
+            throw new IoException(e);
+        }
+    }
+    
+    @Override
+    public boolean renameFile(String fromFilePath, String toFilePath) {
+        File fromFile = new File(basePath, fromFilePath);
+        File toFile = new File(basePath, toFilePath);
+        toFile.getParentFile().mkdirs();
+        toFile.delete();
+        return fromFile.renameTo(toFile);
+    } 
 
     @Override
-    public void copy(String fromFilePath, String toDirPath) {
+    public void copyToDir(String fromFilePath, String toDirPath) {
         try {
             File fromFile = new File(basePath, fromFilePath);
             File toDir = new File(basePath, toDirPath);
@@ -84,7 +131,7 @@ public class LocalFileDirectory implements IDirectory {
     }
 
     @Override
-    public void move(String fromFilePath, String toDirPath) {
+    public void moveToDir(String fromFilePath, String toDirPath) {
         try {
             File fromFile = new File(basePath, fromFilePath);
             File toDir = new File(basePath, toDirPath);

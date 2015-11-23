@@ -36,11 +36,10 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.runtime.resource.LocalFile;
+import org.jumpmind.metl.core.runtime.resource.FileInfo;
+import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
-import org.springframework.util.FileCopyUtils;
 
 public class FileUtil extends AbstractComponentRuntime {
 
@@ -60,11 +59,7 @@ public class FileUtil extends AbstractComponentRuntime {
 
     public static final String SETTING_MUST_EXIST = "must.exist";
 
-    public static final String SETTING_TARGET_RESOURCE = "target.resource";
-
     public static final String SETTING_TARGET_RELATIVE_PATH = "target.relative.path";
-
-    public static final String SETTING_NEW_NAME = "new.name";
 
     public static final String SETTING_APPEND_TO_NAME = "append.to.name";
     
@@ -76,15 +71,13 @@ public class FileUtil extends AbstractComponentRuntime {
 
     boolean getFileNameFromMessage = false;
 
-    File sourcePathAndFile;
+    String sourceRelativePath;
 
     boolean mustExist = false;
-
-    String targetDirName;
+    
+    IDirectory directory;
 
     String targetRelativePath;
-
-    String newName;
 
     String appendToName;
 
@@ -100,40 +93,15 @@ public class FileUtil extends AbstractComponentRuntime {
         TypedProperties typedProperties = getTypedProperties();
         getFileNameFromMessage = typedProperties.is(SETTING_GET_FILE_FROM_MESSAGE, getFileNameFromMessage);
         if (!getFileNameFromMessage) {
-            IResourceRuntime resource = getResourceRuntime();
-            if (!(resource instanceof LocalFile)) {
-                throw new MisconfiguredException("This component only supports local file resources");
+            sourceRelativePath = typedProperties.get(SETTING_RELATIVE_PATH);
+            if (isBlank(sourceRelativePath)) {
+                throw new MisconfiguredException("The relative path to find the source file has not been set.  It is required.");
             }
-
-            String baseDir = resource.getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
-            if (isBlank(baseDir)) {
-                throw new MisconfiguredException("The %s resource needs its path set", resource.getResource().getName());
-            }
-
-            String relativePath = typedProperties.get(SETTING_RELATIVE_PATH);
-            if (isBlank(relativePath)) {
-                throw new MisconfiguredException("The %s resource needs its path set", resource.getResource().getName());
-            }
-
-            sourcePathAndFile = new File(baseDir, relativePath);
-
         }
 
         action = typedProperties.get(SETTING_ACTION);
         mustExist = typedProperties.is(SETTING_MUST_EXIST, mustExist);
-        String targetResourceId = typedProperties.get(SETTING_TARGET_RESOURCE);
-        IResourceRuntime targetResource = context.getDeployedResources().get(targetResourceId);
-        if (!(targetResource instanceof LocalFile)) {
-            throw new MisconfiguredException("The target resource must be a local file resource");
-        }
-
-        targetDirName = targetResource.getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
-        if (isBlank(targetDirName)) {
-            throw new MisconfiguredException("The target resource %s needs its path set", targetResource.getResource().getName());
-        }
-        
         targetRelativePath = typedProperties.get(SETTING_TARGET_RELATIVE_PATH);
-        newName = typedProperties.get(SETTING_NEW_NAME, newName);
         appendToName = typedProperties.get(SETTING_APPEND_TO_NAME);
         overwrite = typedProperties.is(SETTING_OVERWRITE, overwrite);
         runWhen = typedProperties.get(RUN_WHEN, PER_UNIT_OF_WORK);
@@ -171,42 +139,26 @@ public class FileUtil extends AbstractComponentRuntime {
 		}
 	}
 
-    protected String copyFile(Message inputMessage, String fileName) throws Exception {
-        File sourceFile = new File(fileName);
-        if (mustExist && !sourceFile.exists()) {
-            throw new FileNotFoundException("Unable to locate file " + fileName);
-        } else if (sourceFile.exists()) {
-            String targetName = newName;
-            if (isBlank(targetName)) {
-                targetName = sourceFile.getName();
-            }
-
+    protected String copyFile(Message inputMessage, String sourceFileName) throws Exception {
+        IDirectory directory = getResourceReference();
+        FileInfo sourceFileInfo = directory.listFile(sourceFileName);
+        if (mustExist && sourceFileInfo == null) {
+            throw new FileNotFoundException("Unable to locate file " + sourceFileName);
+        } else if (sourceFileInfo != null) {
             Map<String, String> parms = new HashMap<>(getComponentContext().getFlowParametersAsString());
             parms.putAll(inputMessage.getHeader().getAsStrings());
-            String tokenResolvedName = FormatUtils.replaceTokens(targetName, parms, true);
+            String tokenResolvedName = FormatUtils.replaceTokens(targetRelativePath, parms, true);
             String tokenResolvedAppendToName = FormatUtils.replaceTokens(appendToName, parms, true);
-
-            String targetFileWithouPart = getTargetFileName(tokenResolvedName, sourceFile, tokenResolvedAppendToName);
+            String targetFileWithouPart = getTargetFileName(tokenResolvedName, sourceFileInfo, tokenResolvedAppendToName);
             String targetFileName = targetFileWithouPart + ".part";
 
-            File targetDir = new File(targetDirName);
-
-            if (isNotBlank(targetRelativePath)) {
-                targetDir = new File(targetDir, targetRelativePath);
-            }
-
-            targetDir.mkdirs();
-
-            File targetFile = new File(targetDir, targetFileName);
-            targetFile.getParentFile().mkdirs();
-            if ((targetFile.exists() && overwrite) || !targetFile.exists()) {
-                FileCopyUtils.copy(sourceFile, targetFile);
-                File finalFile = new File(targetDir, targetFileWithouPart);
-                if (!targetFile.renameTo(finalFile)) {
-                    throw new IoException(String.format("Rename of %s to %s failed", targetFile.getAbsolutePath(), targetFileWithouPart));
+            FileInfo targetFile = directory.listFile(targetFileName);
+            if ((targetFile != null && overwrite) || targetFile == null) {
+                directory.copyFile(sourceFileName, targetFileName);
+                if (!directory.renameFile(targetFileName, targetFileWithouPart)) {
+                    throw new IoException(String.format("Rename of %s to %s failed", targetFileName, targetFileWithouPart));
                 }
-
-                return finalFile.getAbsolutePath();
+                return targetFileWithouPart;
             } else {
                 return null;
             }
@@ -215,7 +167,7 @@ public class FileUtil extends AbstractComponentRuntime {
         }
     }
 
-    protected String getTargetFileName(String tokenResolvedName, File sourceFile, String tokenResolvedAppendToName) {
+    protected String getTargetFileName(String tokenResolvedName, FileInfo sourceFile, String tokenResolvedAppendToName) {
         String fileName = (tokenResolvedName != null ? tokenResolvedName : sourceFile.getName());
         if (tokenResolvedAppendToName != null && tokenResolvedAppendToName.length() > 0) {
             String[] parts = fileName.split("\\.");
@@ -232,7 +184,7 @@ public class FileUtil extends AbstractComponentRuntime {
         if (getFileNameFromMessage) {
             files = inputMessage.getPayload();
         } else {
-            files.add(sourcePathAndFile.getAbsolutePath());
+            files.add(sourceRelativePath);
         }
         return files;
     }

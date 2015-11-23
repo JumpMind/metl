@@ -66,6 +66,8 @@ public abstract class AbstractComponentRuntimeTestSupport {
 	public static String ENTITY_2_KEY_1 = "e2.col1";
 	public static String ENTITY_2_VALUE_1 = "val3";
 	
+	private ComponentRuntimeFromXMLFactory componentRuntimeFromXMLFactory;
+	
 	// Standard tests that should be implemented for all components
 	public abstract void testHandleStartupMessage();
 	public abstract void testHandleUnitOfWorkLastMessage();
@@ -75,10 +77,15 @@ public abstract class AbstractComponentRuntimeTestSupport {
 	
 	abstract protected String getComponentId();
 	
+	protected ComponentRuntimeFromXMLFactory getComponentRuntimeFromXMLFactory() {
+	    if (componentRuntimeFromXMLFactory == null) {
+	        componentRuntimeFromXMLFactory = new ComponentRuntimeFromXMLFactory();
+	    }
+	    return componentRuntimeFromXMLFactory;
+	}
+	
 	public IComponentRuntime getComponentSpy() {
-	    ComponentRuntimeFromXMLFactory factory = new ComponentRuntimeFromXMLFactory();
-	    factory.refresh();
-	    return Mockito.spy(factory.create(getComponentId()));
+	    return Mockito.spy(getComponentRuntimeFromXMLFactory().create(getComponentId()));
 	}
 	
 	IComponentRuntime spy;

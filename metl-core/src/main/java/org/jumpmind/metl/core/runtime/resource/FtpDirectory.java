@@ -58,6 +58,10 @@ public class FtpDirectory implements IDirectory {
         this.connectTimeout = connectTimeout;
     }
     
+    @Override
+    public FileInfo listFile(String relativePath) {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public List<FileInfo> listFiles(String... relativePaths) {
@@ -65,12 +69,27 @@ public class FtpDirectory implements IDirectory {
     }
     
     @Override
-    public void copy(String fromFilePath, String toDirPath) {
+    public void copyToDir(String fromFilePath, String toDirPath) {
         throw new UnsupportedOperationException();
     }
     
     @Override
-    public void move(String fromFilePath, String toDirPath) {
+    public void moveToDir(String fromFilePath, String toDirPath) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public void copyFile(String fromFilePath, String toFilePath) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public void moveFile(String fromFilePath, String toFilePath) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public boolean renameFile(String fileFilePath, String toFilePath) {
         throw new UnsupportedOperationException();
     }
 

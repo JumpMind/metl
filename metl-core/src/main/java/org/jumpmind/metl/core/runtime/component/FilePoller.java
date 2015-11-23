@@ -276,7 +276,7 @@ public class FilePoller extends AbstractComponentRuntime {
     protected void archive(String archivePath) {
         IDirectory directory = getResourceReference();
         for (FileInfo srcFile : filesSent) {
-            directory.move(srcFile.getRelativePath(), archivePath);
+            directory.moveToDir(srcFile.getRelativePath(), archivePath);
         }
     }
     
