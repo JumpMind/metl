@@ -137,11 +137,12 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport {
     public void setupHandle(String xmlFileName) throws IOException {
         super.setupHandle();
 
-        FileUtils.writeStringToFile(new File("work", TestUtils.XML_BASIC), TestUtils.getTestXMLFileContent(TestUtils.XML_BASIC));
-        FileUtils.writeStringToFile(new File("work", TestUtils.XML_SINGLE_LINE), TestUtils.getTestXMLFileContent(TestUtils.XML_SINGLE_LINE));
+        FileUtils.writeStringToFile(new File("working", TestUtils.XML_BASIC), TestUtils.getTestXMLFileContent(TestUtils.XML_BASIC));
+        FileUtils.writeStringToFile(new File("working", TestUtils.XML_SINGLE_LINE), TestUtils.getTestXMLFileContent(TestUtils.XML_SINGLE_LINE));
+        
         Resource resource = new Resource();
         resource.setType(LocalFile.TYPE);
-        resource.put(LocalFile.LOCALFILE_PATH, "work");
+        resource.put(LocalFile.LOCALFILE_PATH, "working");
         
         LocalFile localFile = new LocalFile();
         localFile.start(new ResourceFactory(), resource, null);
