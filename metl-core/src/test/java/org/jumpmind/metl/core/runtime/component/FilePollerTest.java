@@ -21,6 +21,7 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -130,7 +131,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport {
 
     @Test
     @Override
-    public void testHandleNormal() {
+    public void testHandleNormal() throws Exception {
         setupHandle(true);
 
         MessageTestHelper.addInputMessage(this, true, "step1", "");
@@ -177,6 +178,8 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport {
 
     public void setupHandle(boolean fileExists) {
         super.setupHandle();
+        IDirectory resource = mock(IDirectory.class);
+        doReturn(resource).when((AbstractComponentRuntime) spy).getResourceReference();
 
         ((FilePoller) spy).maxFilesToPoll = 5;
 

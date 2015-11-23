@@ -22,8 +22,6 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -126,11 +124,12 @@ public class XmlReader extends AbstractComponentRuntime {
             Map<String, Serializable> headers = new HashMap<>();
             headers.put("source.file.path", file);
             LineNumberReader lineNumberReader = null;
+            InputStream parserIs = null;
             try {
                 String filePath = FormatUtils.replaceTokens(file, context.getFlowParametersAsString(), true);
-                InputStream is = directory.getInputStream(filePath, mustExist);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, encoding));
-                parser.setInput(reader);
+                InputStreamReader reader = new InputStreamReader(directory.getInputStream(filePath, mustExist), encoding);
+                parserIs = directory.getInputStream(filePath, mustExist);
+                parser.setInput(parserIs, encoding);
                 lineNumberReader = new LineNumberReader(reader);
                 lineNumberReader.setLineNumber(1);
                 int startCol = 0;
@@ -202,6 +201,7 @@ public class XmlReader extends AbstractComponentRuntime {
                 }
             } finally {
                 closeQuietly(lineNumberReader);
+                closeQuietly(parserIs);
             }
 
             if (outboundPayload.size() > 0) {
@@ -211,17 +211,12 @@ public class XmlReader extends AbstractComponentRuntime {
 
     }
 
-    File getFile(String p) {
-        return new File(p);
-    }
-
-    File getFile(String p, String f) {
-        return new File(p, f);
-    }
-
     protected static void forward(int toLine, LineNumberReader lineNumberReader) throws IOException {
         while (lineNumberReader.getLineNumber() < toLine) {
-            lineNumberReader.readLine();
+            String output = lineNumberReader.readLine();
+            if (output == null) {
+                break;
+            }
         }
     }
 

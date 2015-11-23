@@ -88,7 +88,7 @@ public class LookupTest extends AbstractComponentRuntimeTestSupport {
 
 	@Test
 	@Override
-	public void testHandleNormal() {
+	public void testHandleNormal() throws Exception {
 		// Lookup setup
 		setupHandle();
 		

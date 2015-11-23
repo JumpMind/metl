@@ -73,7 +73,11 @@ public class LocalFileDirectory implements IDirectory {
     @Override
     public void copy(String fromFilePath, String toDirPath) {
         try {
-            FileUtils.copyFileToDirectory(new File(basePath, fromFilePath), new File(basePath, toDirPath));
+            File fromFile = new File(basePath, fromFilePath);
+            File toDir = new File(basePath, toDirPath);
+            File toFile = new File(toDir, fromFile.getName());
+            toFile.delete();
+            FileUtils.copyFileToDirectory(fromFile, toDir, true);
         } catch (IOException e) {
             throw new IoException(e);
         }
@@ -82,7 +86,11 @@ public class LocalFileDirectory implements IDirectory {
     @Override
     public void move(String fromFilePath, String toDirPath) {
         try {
-            FileUtils.moveFileToDirectory(new File(basePath, fromFilePath), new File(basePath, toDirPath), true);
+            File fromFile = new File(basePath, fromFilePath);
+            File toDir = new File(basePath, toDirPath);
+            File toFile = new File(toDir, fromFile.getName());
+            toFile.delete();
+            FileUtils.moveFileToDirectory(fromFile, toDir, true);
         } catch (IOException e) {
             throw new IoException(e);
         }

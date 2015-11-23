@@ -93,7 +93,7 @@ public class MappingTest extends AbstractComponentRuntimeTestSupport {
 	
 	@Test 
 	@Override
-	public void testHandleNormal() {
+	public void testHandleNormal() throws Exception {
 		// Setup
 		setupHandle();
 		Set<String> mappings = new HashSet<String>();

@@ -77,7 +77,7 @@ public class DeduperTest extends AbstractComponentRuntimeTestSupport {
 
 	@Test
 	@Override
-	public void testHandleNormal() {
+	public void testHandleNormal() throws Exception {
 		setupHandle();
 		((Deduper) spy).deduped = new LinkedHashMap<String, EntityData>();
 		

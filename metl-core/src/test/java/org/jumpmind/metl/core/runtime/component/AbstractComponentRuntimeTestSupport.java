@@ -42,7 +42,6 @@ import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageAssert;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
-import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.utils.TestUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.junit.Assert;
@@ -70,7 +69,7 @@ public abstract class AbstractComponentRuntimeTestSupport {
 	// Standard tests that should be implemented for all components
 	public abstract void testHandleStartupMessage();
 	public abstract void testHandleUnitOfWorkLastMessage();
-	public abstract void testHandleNormal();
+	public abstract void testHandleNormal() throws Exception;
 	public abstract void testStartDefaults();
 	public abstract void testStartWithValues();
 	
@@ -100,7 +99,6 @@ public abstract class AbstractComponentRuntimeTestSupport {
 	Flow flow;
 	ExecutionTrackerNoOp eExecutionTracker;
 	TypedProperties properties;
-	IDirectory resource;
 	
 	// internal testing variable so setupHandle and runHandle can be called independently
 	boolean setupCalled;
@@ -122,7 +120,6 @@ public abstract class AbstractComponentRuntimeTestSupport {
 		flowParameters = new HashMap<String, Serializable>();
 		flowStep = mock(FlowStep.class);
 		flow = mock(Flow.class);
-		resource = mock(IDirectory.class);
 		
 		eExecutionTracker = new ExecutionTrackerNoOp();
 		properties = new TypedProperties();
@@ -169,7 +166,6 @@ public abstract class AbstractComponentRuntimeTestSupport {
 		when(flowStep.getComponent()).thenReturn(component);
 		
 		doReturn(eExecutionTracker).when((AbstractComponentRuntime) spy).getExecutionTracker();
-		doReturn(resource).when((AbstractComponentRuntime) spy).getResourceReference();
 		
 		spy.start(0, context);
 		setupCalled = true;

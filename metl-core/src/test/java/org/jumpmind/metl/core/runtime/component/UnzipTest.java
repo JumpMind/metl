@@ -74,7 +74,7 @@ public class UnzipTest extends AbstractComponentRuntimeTestSupport {
 	}
 
 	@Override
-	public void testHandleNormal() {
+	public void testHandleNormal() throws Exception {
 		// Setup
 		setupHandle(true);
 		
