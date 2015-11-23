@@ -178,26 +178,12 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport {
 
     public void setupHandle(boolean fileExists) {
         super.setupHandle();
-        IDirectory resource = mock(IDirectory.class);
-        doReturn(resource).when((AbstractComponentRuntime) spy).getResourceReference();
 
         ((FilePoller) spy).maxFilesToPoll = 5;
 
-//        IResourceRuntime mockResourceRuntime = Mockito.spy(new LocalFile());
-//        Resource resource = new Resource();
-//        when(component.getResource()).thenReturn(resource);
-//        when(component.getResourceId()).thenReturn(resource.getId());
-//        Map<String, IResourceRuntime> deployedResources = new HashMap<>();
-//        deployedResources.put(component.getResourceId(), mockResourceRuntime);
-//        when(context.getDeployedResources()).thenReturn(deployedResources);
-
-//        TypedProperties mockTypedProperties = mock(TypedProperties.class);
-//
-//        when(mockResourceRuntime.getResourceRuntimeSettings()).thenReturn(mockTypedProperties);
-//        when(mockTypedProperties.get(anyString())).thenReturn("localFilePath");
-
         IDirectory mockDirectory = mock(IDirectory.class);
-        when(((FilePoller) spy).getResourceReference()).thenReturn(mockDirectory);
+        doReturn(mockDirectory).when((AbstractComponentRuntime) spy).getResourceReference();
+
         List<FileInfo> fileInfos = new ArrayList<>();
         fileInfos.add(new FileInfo("file.txt", false, System.currentTimeMillis()));
         when(mockDirectory.listFiles(any())).thenReturn(fileInfos);
