@@ -272,10 +272,6 @@
                 <name>Overwrite</name>
                 <defaultValue>true</defaultValue>
                 </setting>            
-            <setting id='must.exist' type='boolean' required='true'>
-                <name>Must Exist</name>
-                <defaultValue>false</defaultValue>
-                </setting>
             <setting id='append.to.name' type='text' required='false'>
                 <name>Append To Name</name>
                 </setting>

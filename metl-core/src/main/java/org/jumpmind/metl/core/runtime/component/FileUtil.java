@@ -23,14 +23,12 @@ package org.jumpmind.metl.core.runtime.component;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
@@ -74,8 +72,6 @@ public class FileUtil extends AbstractComponentRuntime {
     String sourceRelativePath;
 
     boolean mustExist = false;
-    
-    IDirectory directory;
 
     String targetRelativePath;
 
@@ -100,7 +96,6 @@ public class FileUtil extends AbstractComponentRuntime {
         }
 
         action = typedProperties.get(SETTING_ACTION);
-        mustExist = typedProperties.is(SETTING_MUST_EXIST, mustExist);
         targetRelativePath = typedProperties.get(SETTING_TARGET_RELATIVE_PATH);
         appendToName = typedProperties.get(SETTING_APPEND_TO_NAME);
         overwrite = typedProperties.is(SETTING_OVERWRITE, overwrite);
@@ -127,11 +122,12 @@ public class FileUtil extends AbstractComponentRuntime {
 
 						if (action.equals(ACTION_MOVE)) {
 							if (isNotBlank(targetFile)) {
-								FileUtils.deleteQuietly(new File(fileName));
+							    IDirectory directory = getResourceReference();
+								directory.delete(fileName);
 							}
 						}
 					} catch (Exception e) {
-						throw new IoException("Error processing file " + e.getMessage());
+						throw new IoException(e);
 					}
 				}
 			}
@@ -148,6 +144,9 @@ public class FileUtil extends AbstractComponentRuntime {
             Map<String, String> parms = new HashMap<>(getComponentContext().getFlowParametersAsString());
             parms.putAll(inputMessage.getHeader().getAsStrings());
             String tokenResolvedName = FormatUtils.replaceTokens(targetRelativePath, parms, true);
+            if (getFileNameFromMessage || targetRelativePath.endsWith("/")) {
+                tokenResolvedName = tokenResolvedName + "/" + sourceFileInfo.getName();
+            }
             String tokenResolvedAppendToName = FormatUtils.replaceTokens(appendToName, parms, true);
             String targetFileWithouPart = getTargetFileName(tokenResolvedName, sourceFileInfo, tokenResolvedAppendToName);
             String targetFileName = targetFileWithouPart + ".part";

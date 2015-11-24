@@ -56,16 +56,16 @@ public class LocalFileDirectory implements IDirectory {
     public boolean supportsInputStream() {
         return true;
     }
-    
+
     @Override
     public FileInfo listFile(String relativePath) {
-        List<FileInfo> list = listFiles(new File(basePath, relativePath));
-        if (list.size() > 0) {
-            return list.get(0);
+        File file = new File(basePath, relativePath);
+        if (file.exists()) {
+            return new FileInfo(relativePath, file.isDirectory(), file.lastModified());
         } else {
             return null;
         }
-    }    
+    }
 
     @Override
     public List<FileInfo> listFiles(String... relativePaths) {
@@ -79,8 +79,7 @@ public class LocalFileDirectory implements IDirectory {
         }
         return list;
     }
-    
-    
+
     @Override
     public void copyFile(String fromFilePath, String toFilePath) {
         try {
@@ -93,7 +92,7 @@ public class LocalFileDirectory implements IDirectory {
             throw new IoException(e);
         }
     }
-    
+
     @Override
     public void moveFile(String fromFilePath, String toFilePath) {
         try {
@@ -107,7 +106,7 @@ public class LocalFileDirectory implements IDirectory {
             throw new IoException(e);
         }
     }
-    
+
     @Override
     public boolean renameFile(String fromFilePath, String toFilePath) {
         File fromFile = new File(basePath, fromFilePath);
@@ -115,7 +114,7 @@ public class LocalFileDirectory implements IDirectory {
         toFile.getParentFile().mkdirs();
         toFile.delete();
         return fromFile.renameTo(toFile);
-    } 
+    }
 
     @Override
     public void copyToDir(String fromFilePath, String toDirPath) {
