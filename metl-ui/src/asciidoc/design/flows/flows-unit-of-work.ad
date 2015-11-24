@@ -1,3 +1,4 @@
+[id="unit-of-work",reftext="Unit Of Work"]
 ==== Unit of Work
 
 Several components can deal with multiple units of work in the execution of a given flow.  As an example, the Text File Reader
