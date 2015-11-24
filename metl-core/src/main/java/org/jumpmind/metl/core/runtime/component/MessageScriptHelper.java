@@ -20,6 +20,9 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +33,9 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.io.IOUtils;
 import org.jumpmind.db.sql.Row;
+import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Model;
@@ -39,7 +44,9 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
+import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.util.ComponentUtils;
 import org.jumpmind.metl.core.util.ThreadUtils;
@@ -85,10 +92,42 @@ public class MessageScriptHelper {
 
     protected JdbcTemplate getJdbcTemplate() {
         if (resource == null) {
-            throw new IllegalStateException("In order to create a jdbc template, a datasource resource must be defined");
+            throw new MisconfiguredException("In order to create a jdbc template, a datasource resource must be defined");
         }
         DataSource ds = resource.reference();
         return new JdbcTemplate(ds);
+    }
+    
+    protected IDirectory getDirectory() {
+        if (resource == null) {
+            throw new MisconfiguredException("In order to access a directory you must configure a directory resource");
+        }
+        
+        Object directory = resource.reference();
+        if (directory instanceof IDirectory) {
+            return (IDirectory)directory;
+        } else {
+            throw new MisconfiguredException("A directory resource is required");
+        }
+    }
+    
+    /*
+     * This is mainly to support unit tests or components that need to copy a classpath resource to a directory resource in a script
+     */
+    protected void classpathToDirectory(String fileName) {
+        InputStream is = getClass().getResourceAsStream(fileName);
+        if (fileName.startsWith("/")) {
+            fileName = fileName.substring(1);
+        }
+        OutputStream os = getDirectory().getOutputStream(fileName, false);
+        try {
+            IOUtils.copy(is, os);
+        } catch (IOException e) {
+            throw new IoException(e);
+        } finally {
+            IOUtils.closeQuietly(is);
+            IOUtils.closeQuietly(os);
+        }
     }
 
     protected BasicDataSource getBasicDataSource() {

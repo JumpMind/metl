@@ -72,7 +72,12 @@ public class LocalFileDirectory implements IDirectory {
         List<FileInfo> list = new ArrayList<>();
         if (relativePaths != null && relativePaths.length > 0) {
             for (String relativePath : relativePaths) {
-                list.addAll(listFiles(new File(basePath, relativePath)));
+                File file = new File(basePath, relativePath);
+                if (file.isFile() && file.exists()) {
+                    list.add(new FileInfo(relativePath, false, file.lastModified()));
+                } else {
+                    list.addAll(listFiles(new File(basePath, relativePath)));
+                }
             }
         } else {
             list.addAll(listFiles(new File(basePath)));

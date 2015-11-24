@@ -170,8 +170,13 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    protected void recordError(int threadNumber, Throwable ex) {
-        String msg = ExceptionUtils.getFullStackTrace(ex);
+    protected void recordError(int threadNumber, Throwable ex) {        
+        String msg = null;
+        if (ex instanceof MisconfiguredException) {
+            msg = ex.getMessage();
+        } else {
+            msg = ExceptionUtils.getFullStackTrace(ex);
+        }
 
         componentContext.getExecutionTracker().log(threadNumber, LogLevel.ERROR, componentContext, msg);
 

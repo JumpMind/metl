@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.security.ProtectionDomain;
@@ -31,6 +32,8 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AllowSymLinkAliasChecker;
+import org.eclipse.jetty.server.session.HashSessionManager;
+import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.util.log.JavaUtilLog;
 import org.eclipse.jetty.webapp.Configuration;
@@ -71,8 +74,19 @@ public class StartWebServer {
         server.addBean(mbContainer);
  
         ProtectionDomain protectionDomain = StartWebServer.class.getProtectionDomain();
-        URL location = protectionDomain.getCodeSource().getLocation();       
+        URL location = protectionDomain.getCodeSource().getLocation();    
+        File locationDir = new File(location.getFile()).getParentFile();
+        
         WebAppContext webapp = new WebAppContext();
+        
+        HashSessionManager sessionManager = new HashSessionManager();
+        File storeDir = new File(locationDir, "sessions");
+        storeDir.mkdirs();
+        sessionManager.setStoreDirectory(storeDir);
+        sessionManager.setLazyLoad(true);
+        SessionHandler sessionHandler = new SessionHandler(sessionManager);
+        webapp.setSessionHandler(sessionHandler);
+        
         webapp.setContextPath("/metl");
         webapp.setWar(location.toExternalForm());
         webapp.addAliasCheck(new AllowSymLinkAliasChecker());

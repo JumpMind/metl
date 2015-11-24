@@ -24,7 +24,6 @@ include::../common-properties/unit-of-work.ad[]
 include::../common-properties/enabled.ad[]
 |File Pattern|The File Pattern specifies the pattern(s) of files to look for.  Multiple patterns can be specified in a comma delimited
 list.  Wildcards (*) can be used.  See examples below.
-|Search Recursively|Whether the directory specified by the File Resource and File Pattern path should be searched recursively
 include::../common-properties/cancel-on-no-files.ad[]
 |File Sort Order|Indicates the order files will be reported.
 |Files/Msg|The number of file paths that should be published per message.  The default value is 1.

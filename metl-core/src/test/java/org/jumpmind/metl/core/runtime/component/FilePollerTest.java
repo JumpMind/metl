@@ -53,7 +53,6 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport {
         ((FilePoller) spy).start();
 
         Assert.assertEquals(false, ((FilePoller) spy).useTriggerFile);
-        Assert.assertEquals(false, ((FilePoller) spy).recurse);
         Assert.assertEquals(true, ((FilePoller) spy).cancelOnNoFiles);
         Assert.assertEquals(FilePoller.ACTION_NONE, ((FilePoller) spy).actionOnSuccess);
         Assert.assertEquals(FilePoller.ACTION_NONE, ((FilePoller) spy).actionOnError);
@@ -83,7 +82,6 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport {
         properties.put(FilePoller.SETTING_FILE_PATTERN, "*.jar");
         properties.put(FilePoller.SETTING_TRIGGER_FILE_PATH, "/trigger");
         properties.put(FilePoller.SETTING_USE_TRIGGER_FILE, "true");
-        properties.put(FilePoller.SETTING_RECURSE, "true");
         properties.put(FilePoller.SETTING_CANCEL_ON_NO_FILES, "true");
         properties.put(FilePoller.SETTING_ACTION_ON_SUCCESS, FilePoller.ACTION_DELETE);
         properties.put(FilePoller.SETTING_ACTION_ON_ERROR, FilePoller.ACTION_DELETE);
@@ -97,7 +95,6 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport {
         Assert.assertEquals("*.jar", ((FilePoller) spy).filePattern);
         Assert.assertEquals("/trigger", ((FilePoller) spy).triggerFilePath);
         Assert.assertEquals(true, ((FilePoller) spy).useTriggerFile);
-        Assert.assertEquals(true, ((FilePoller) spy).recurse);
         Assert.assertEquals(true, ((FilePoller) spy).cancelOnNoFiles);
         Assert.assertEquals(FilePoller.ACTION_DELETE, ((FilePoller) spy).actionOnSuccess);
         Assert.assertEquals(FilePoller.ACTION_DELETE, ((FilePoller) spy).actionOnError);

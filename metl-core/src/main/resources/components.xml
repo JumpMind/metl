@@ -61,7 +61,7 @@
         <settings>
             <setting id='flow.id' type='flow' required='true'>
                 <name>Flow</name>
-                </setting>
+            </setting>
         </settings>        
     </component>    
     <component id='DataDiff' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
@@ -94,7 +94,7 @@
             <setting id='rows.per.message' type='integer' required='false'>
                 <name>Rows/Msg</name>
                 <defaultValue>10000</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='Delay' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='false'>
@@ -113,7 +113,7 @@
             <setting id='delay.in.ms' type='integer' required='true'>
                 <name>Delay (ms)</name>
                 <defaultValue>1000</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='Content Router' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none'
@@ -125,11 +125,11 @@
             <setting id='rows.per.message' type='integer' required='true'>
                 <name>Rows/Msg</name>
                 <defaultValue>10000</defaultValue>
-                </setting>
+            </setting>
             <setting id='only.route.first.match' type='boolean' required='false'>
                 <name>Only Route First Match</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='Execute' category='PROCESSOR' inputMessageType='any' outputMessageType='text' resourceCategory='none' inputOutputModelsMatch='false'>
@@ -147,15 +147,15 @@
             </setting>                              
             <setting id='command' type='text' required='true'>
                 <name>Command</name>
-                </setting>
+            </setting>
             <setting id='continue.on.error' type='boolean' required='false'>
                 <name>Continue On Error</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='success.code' type='integer' required='false'>
                 <name>Success Code</name>
                 <defaultValue>0</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='File Poller' category='READER' inputMessageType='any' outputMessageType='text' resourceCategory='streamable'
@@ -174,15 +174,11 @@
             </setting>          
             <setting id='file.pattern' type='text' required='true'>
                 <name>File Pattern</name>
-                </setting>
-            <setting id='recurse' type='boolean' required='false'>
-                <name>Search Recursively</name>
-                <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='cancel.on.no.files' type='boolean' required='false'>
                 <name>Cancel On No Files</name>
                 <defaultValue>true</defaultValue>
-                </setting>
+            </setting>
             <setting id='file.sort.order' type='choice' required='false'>
                 <name>File Sort Order</name>
                 <defaultValue>Last Modified</defaultValue>
@@ -198,11 +194,11 @@
             <setting id='min.files.to.poll' type='integer' required='true'>
                 <name>Min Files To Poll</name>
                 <defaultValue>1</defaultValue>
-                </setting>                                 
+            </setting>                                 
             <setting id='max.files.to.poll' type='integer' required='true'>
                 <name>Max Files To Poll</name>
                 <defaultValue>1000</defaultValue>
-                </setting>
+            </setting>
             <setting id='action.on.success' type='choice' required='false'>
                 <name>Action on Success</name>
                 <defaultValue>None</defaultValue>
@@ -214,7 +210,7 @@
             </setting>
             <setting id='archive.on.success.path' type='text' required='false'>
                 <name>Archive On Success Path</name>
-                </setting>
+            </setting>
             <setting id='action.on.error' type='choice' required='false'>
                 <name>Action on Error</name>
                 <defaultValue>None</defaultValue>
@@ -226,14 +222,14 @@
             </setting>
             <setting id='archive.on.error.path' type='text' required='false'>
                 <name>Archive On Error Path</name>
-                </setting>
+            </setting>
             <setting id='use.trigger.file' type='boolean' required='false'>
                 <name>Use Trigger File</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='trigger.file.path' type='text' required='false'>
                 <name>Relative Trigger File Path</name>
-                </setting>
+            </setting>
         </settings>
     </component>
      <component id='File Util' category='PROCESSOR' inputMessageType='any' outputMessageType='text'
@@ -260,7 +256,7 @@
             </setting>                              
             <setting id='relative.path' type='text' required='false'>
                 <name>Source Relative Path</name>
-                </setting>
+            </setting>
             <setting id='target.relative.path' type='text' required='true'>
                 <name>Target Relative Path</name>
             </setting>
@@ -271,14 +267,14 @@
             <setting id='get.file.name.from.message' type='boolean' required='false'>
                 <name>Get File Name From Message</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='overwrite' type='boolean' required='false'>
                 <name>Overwrite</name>
                 <defaultValue>true</defaultValue>
-                </setting>            
+            </setting>            
             <setting id='append.to.name' type='text' required='false'>
                 <name>Append To Name</name>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='Format Delimited' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none'
@@ -290,15 +286,15 @@
             <setting id='delimited.formatter.delimiter' type='text' required='true'>
                 <name>Delimiter</name>
                 <defaultValue>,</defaultValue>
-                </setting>
+            </setting>
             <setting id='delimited.formatter.quote.character' type='text' required='false'>
                 <name>Quote Character</name>
                 <defaultValue>"</defaultValue>
-                </setting>
+            </setting>
             <setting id='delimited.formatter.header' type='boolean' required='false'>
                 <name>Header line</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='Format Fixed' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none'
@@ -310,7 +306,7 @@
             <setting id='fixed.length.formatter.header' type='boolean' required='false'>
                 <name>Header line</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='Format XML' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none'
@@ -322,7 +318,7 @@
             <setting id='xml.formatter.ignore.namespace' type='boolean' required='false'>
                 <name>Ignore namespaces for XPath matching</name>
                 <defaultValue>true</defaultValue>
-                </setting>
+            </setting>
             <setting id='xml.formatter.xml.format' type='choice' required='false'>
                 <name>XML Format</name>
                 <defaultValue>Pretty</defaultValue>
@@ -342,7 +338,7 @@
             <setting id='rows.per.message' type='integer' required='false'>
                 <name>Rows/Msg</name>
                 <defaultValue>10</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='Lookup' category='PROCESSOR' inputMessageType='any' outputMessageType='entity' resourceCategory='none'
@@ -353,19 +349,19 @@
         <settings>
             <setting id='lookup.data.source.step' type='source_step' required='true'>
                 <name>Lookup Data Source</name>
-                </setting>
+            </setting>
             <setting id='lookup.key.attribute' type='entity_column' required='true'>
                 <name>Lookup Key Attribute</name>
-                </setting>
+            </setting>
             <setting id='lookup.value.attribute' type='entity_column' required='true'>
                 <name>Lookup Value Attribute</name>
-                </setting>
+            </setting>
             <setting id='replacement.key.attribute' type='entity_column' required='true'>
                 <name>Replacement Key Attribute</name>
-                </setting>
+            </setting>
              <setting id='replacement.value.attribute' type='entity_column' required='true'>
                 <name>Replacement Value Attribute</name>
-                </setting>
+            </setting>
         </settings>
     </component>   
     <component id='Mapping' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
@@ -377,7 +373,7 @@
             <setting id='set.unmapped.attributes.to.null' type='boolean' required='false'>
                 <name>Set Unmapped Attributes To Null</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='Message Logger' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='true'>
@@ -388,7 +384,7 @@
             <setting id='qualify.with.entity.name' type='boolean' required='false'>
                 <name>Qualify Entity Attributes with Entity Name</name>
                 <defaultValue>false</defaultValue>
-                </setting>        
+            </setting>        
         </settings>
     </component>
     <component id='Multiplier' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
@@ -399,11 +395,11 @@
         <settings>
             <setting id='multiplier.source.step' type='source_step' required='true'>
                 <name>Multiplier Source</name>
-                </setting>
+            </setting>
             <setting id='rows.per.message' type='integer' required='false'>
                 <name>Rows/Msg</name>
                 <defaultValue>10</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='No Op' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='false'>
@@ -422,23 +418,23 @@
             <setting id='delimiter' type='text' required='true'>
                 <name>Delimiter</name>
                 <defaultValue>,</defaultValue>
-                </setting>
+            </setting>
             <setting id='quote.character' type='text' required='false'>
                 <name>Quote Character</name>
                 <defaultValue>"</defaultValue>
-                </setting>
+            </setting>
             <setting id='header.lines.to.skip' type='integer' required='false'>
                 <name>Number of Header Lines to Skip</name>
                 <defaultValue>0</defaultValue>
-                </setting>
+            </setting>
             <setting id='footer.lines.to.skip' type='integer' required='false'>
                 <name>Number of Footer Lines to Skip</name>
                 <defaultValue>0</defaultValue>
-                </setting>
+            </setting>
             <setting id='encoding' type='text' required='false'>
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='Parse Fixed' category='PROCESSOR' inputMessageType='text' outputMessageType='entity'>
@@ -449,11 +445,11 @@
             <setting id='header.lines.to.skip' type='integer' required='false'>
                 <name>Number of Header Lines to Skip</name>
                 <defaultValue>0</defaultValue>
-                </setting>
+            </setting>
             <setting id='footer.lines.to.skip' type='integer' required='false'>
                 <name>Number of Footer Lines to Skip</name>
                 <defaultValue>0</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>    
     <component id='Parse XML' category='PROCESSOR' inputMessageType='text' outputMessageType='entity' resourceCategory='none'
@@ -465,7 +461,7 @@
             <setting id='xml.formatter.ignore.namespace' type='boolean' required='false'>
                 <name>Ignore namespaces for XPath matching</name>
                 <defaultValue>true</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='RDBMS Reader' category='READER' inputMessageType='any' outputMessageType='entity' resourceCategory='datasource'
@@ -479,7 +475,7 @@
         <settings>
             <setting id='sql' type='multiline_text' required='true'>
                 <name>Sql</name>
-                </setting>
+            </setting>
             <setting id='run.when' type='choice' required='false'>
                 <name>Run When</name>
                 <defaultValue>PER UNIT OF WORK</defaultValue>
@@ -492,15 +488,15 @@
             <setting id='rows.per.message' type='integer' required='true'>
                 <name>Rows/Msg</name>
                 <defaultValue>1000</defaultValue>
-                </setting>
+            </setting>
             <setting id='trim.columns' type='boolean' required='true'>
                 <name>Trim Columns</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='match.on.column.name' type='boolean' required='true'>
                 <name>Match On Column Name</name>
                 <defaultValue>false</defaultValue>
-                </setting>                    
+            </setting>                    
         </settings>
     </component>
     <component id='RDBMS Writer' category='WRITER' inputMessageType='entity' outputMessageType='text' resourceCategory='datasource' 
@@ -511,38 +507,38 @@
         <settings>
             <setting id='catalog' type='text' required='false'>
                 <name>Catalog</name>
-                </setting>
+            </setting>
             <setting id='schema' type='text' required='false'>
                 <name>Schema</name>
-                </setting>
+            </setting>
             <setting id='replace' type='boolean' required='false'>
                 <name>Replace rows if they exist</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='update.first' type='boolean' required='false'>
                 <name>Update rows first instead of insert</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='insert.fallback' type='boolean' required='false'>
                 <name>Fallback to insert if no rows updated</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='quote.identifiers' type='boolean' required='false'>
                 <name>Quote table and column names</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='fit.to.column' type='boolean' required='false'>
                 <name>Trim character data to fit within column</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='continue.on.error' type='boolean' required='false'>
                 <name>Continue on Error</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='batch.mode' type='boolean' required='false'>
                 <name>Batch Mode</name>
                 <defaultValue>false</defaultValue>
-                </setting>   
+            </setting>   
             <setting id='table.prefix' type='text' required='false'>
                 <name>Table Prefix</name>
             </setting>
@@ -567,20 +563,20 @@
             </setting>                              
             <setting id='imports' type='script' required='true' visible='false'>
                 <name>Import Statements</name>
-                </setting>
+            </setting>
             <setting id='init.script' type='script' required='true' visible='false'>
                 <name>Init Script</name>
-                </setting>
+            </setting>
             <setting id='handle.msg.script' type='script' required='true' visible='false'>
                 <name>Handle Msg Script</name>
                 <defaultValue>forwardMessage()</defaultValue>
-                </setting>
+            </setting>
             <setting id='on.flow.success.script' type='script' required='true' visible='false'>
                 <name>Ended with Success Script</name>
-                </setting>
+            </setting>
             <setting id='on.flow.error.script' type='script' required='true' visible='false'>
                 <name>Ended with Error Script</name>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='Sequence' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='datasource'
@@ -591,17 +587,17 @@
         <settings>
             <setting id='sequence.attribute' type='text' required='true'>
                 <name>Sequence Attribute Name</name>
-                </setting>
+            </setting>
             <setting id='sequence.sql' type='multiline_text' required='true'>
                 <name>Select Starting Sequence Sql</name>
-                </setting>
+            </setting>
             <setting id='shared' type='boolean' required='true'>
                 <defaultValue>false</defaultValue>
                 <name>Is Sequence Shared?</name>
-                </setting>            
+            </setting>            
             <setting id='shared.name' type='text' required='false'>
                 <name>Shared Name</name>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='Sorter' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>
@@ -611,11 +607,11 @@
         <settings>
             <setting id='sort.attribute' type='text' required='true'>
                 <name>Sort Entity.Attribute</name>
-                </setting>
+            </setting>
             <setting id='rows.per.message' type='integer' required='false'>
                 <name>Rows/Msg</name>
                 <defaultValue>10</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='Sql Executor' category='WRITER' inputMessageType='any' outputMessageType='text' resourceCategory='datasource'
@@ -638,10 +634,10 @@
             </setting>
             <setting id='sql.file' type='text'>
                 <name>File</name>
-                </setting>                                               
+            </setting>                                               
             <setting id='sql' type='multiline_text'>
                 <name>Sql</name>
-                </setting>                                   
+            </setting>                                   
         </settings>
     </component>
     <component id='Text Constant' category='READER' inputMessageType='text' outputMessageType='text'
@@ -660,15 +656,15 @@
             </setting>          
             <setting id='text' type='multiline_text' required='false'>
                 <name>Text</name>
-                </setting>
+            </setting>
             <setting id='split.on.line.feed' type='boolean' required='false'>
                 <name>Split On Line Feed</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='rows.per.message' type='integer' required='false'>
                 <name>Rows / Msg</name>
                 <defaultValue>10000</defaultValue>
-                </setting>                                    
+            </setting>                                    
         </settings>
     </component>    
     <component id='Text File Reader' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable'
@@ -691,18 +687,18 @@
             <setting id='get.file.name.from.message' type='boolean' required='false'>
                 <name>Get File Name From Message</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='textfilereader.must.exist' type='boolean' required='false'>
                 <name>Must Exist</name>
                 <defaultValue>false</defaultValue>
-                </setting>            
+            </setting>            
             <setting id='textfilereader.relative.path' type='text' required='false'>
                 <name>File Path</name>
-                </setting>
+            </setting>
             <setting id='textfilereader.text.rows.per.message' type='integer' required='false'>
                 <name>Rows / Msg</name>
                 <defaultValue>10000</defaultValue>
-                </setting>
+            </setting>
             <setting id='action.on.success' type='choice' required='false'>
                 <name>Action on Success</name>
                 <defaultValue>NONE</defaultValue>
@@ -714,7 +710,7 @@
             </setting>
             <setting id='archive.on.success.path' type='text' required='false'>
                 <name>Archive On Success Path</name>
-                </setting>
+            </setting>
             <setting id='action.on.error' type='choice' required='false'>
                 <name>Action on Error</name>
                 <defaultValue>NONE</defaultValue>
@@ -726,14 +722,14 @@
             </setting>
             <setting id='archive.on.error.path' type='text' required='false'>
                 <name>Archive On Error Path</name>
-                </setting>
+            </setting>
             <setting id='textfilereader.encoding' type='text' required='false'>
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
-                </setting>
+            </setting>
             <setting id='textfilereader.text.header.lines.to.skip' type='integer' required='false'>
                 <name>Header Lines to Skip</name>
-                </setting>          
+            </setting>          
         </settings>
     </component>
     <component id='Text File Writer' category='WRITER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable'
@@ -744,22 +740,22 @@
         <settings>
             <setting id='textfilewriter.relative.path' type='text' required='true'>
                 <name>Path and File</name>
-                </setting>
+            </setting>
             <setting id='textfilewriter.must.exist' type='boolean' required='true'>
                 <name>Must Exist</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='textfilewriter.append' type='boolean' required='true'>
                 <name>Append</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='textfilewriter.text.line.terminator' type='text' required='false'>
                 <name>Line Terminator</name>
-                </setting>
+            </setting>
             <setting id='textfilewriter.encoding' type='text' required='false'>
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
-                </setting>          
+            </setting>          
         </settings>
     </component>
     <component id='Text Replace' category='PROCESSOR' inputMessageType='text' outputMessageType='text' resourceCategory='none'
@@ -770,10 +766,10 @@
         <settings>
             <setting id='search.for' type='text' required='true'>
                 <name>Search For (regex)</name>
-                </setting>
+            </setting>
             <setting id='replace.with' type='text' required='false'>
                 <name>Replace With</name>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='Transformer' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none'
@@ -799,7 +795,7 @@
             </setting>                              
             <setting id='relative.path' type='text' required='false'>
                 <name>Append To Url</name>
-                </setting>
+            </setting>
             <setting id='body.from' type='choice' required='true'>
                 <name>Body From</name>
                 <defaultValue>Message</defaultValue>
@@ -810,11 +806,11 @@
             </setting>
             <setting id='body.text' type='multiline_text' required='false'>
                 <name>Body Text</name>
-                </setting>
+            </setting>
             <setting id='parameter.replacement' type='boolean' required='false'>
                 <name>Parameter replacement</name>
                 <defaultValue>false</defaultValue>
-                </setting>                                   
+            </setting>                                   
         </settings>
     </component>
     <component id='XSLT Processor' category='PROCESSOR' inputMessageType='entity' outputMessageType='text' resourceCategory='none'
@@ -826,15 +822,15 @@
             <setting id='xslt.processor.output.all.attributes' type='boolean' required='false'>
                 <name>Output all attributes</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='xslt.processor.parameter.replacement' type='boolean' required='false'>
                 <name>Parameter replacement</name>
                 <defaultValue>true</defaultValue>
-                </setting>
+            </setting>
             <setting id='xslt.processor.xml.omit.declaration' type='boolean' required='false'>
                 <name>Omit XML Declaration</name>
                 <defaultValue>false</defaultValue>
-                </setting>
+            </setting>
             <setting id='xslt.processor.xml.format' type='choice' required='false'>
                 <name>XML Format</name>
                 <defaultValue>Pretty</defaultValue>
@@ -853,15 +849,15 @@
         <settings>
             <setting id='relative.path' type='text' required='false'>
                 <name>File Path</name>
-                </setting>
+            </setting>
             <setting id='delete.on.complete' type='boolean' required='false'>
                 <name>Delete Source Files</name>
                 <defaultValue>true</defaultValue>
-                </setting>
+            </setting>
             <setting id='encoding' type='text' required='false'>
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='UnZip' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='none' inputOutputModelsMatch='false'>
@@ -871,25 +867,25 @@
         <settings>
             <setting id='target.resource' type='streamable_resource' required='true'>
                 <name>Target File Resource</name>
-                </setting>
+            </setting>
             <setting id='target.relative.path' type='text' required='false'>
                 <name>Target Path</name>
-                </setting>            
+            </setting>            
             <setting id='target.sub.dir' type='boolean' required='false'>
                 <name>Create Sub Dir From File Name</name>
-                </setting>
+            </setting>
             <setting id='delete.on.complete' type='boolean' required='false'>
                 <name>Delete Source File</name>
                 <defaultValue>true</defaultValue>
-                </setting>
+            </setting>
             <setting id='extract.empty.files' type='boolean' required='false'>
                 <name>Extract Empty Files</name>
                 <defaultValue>true</defaultValue>
-                </setting>            
+            </setting>            
             <setting id='encoding' type='text' required='false'>
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='XmlReader' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>
@@ -907,16 +903,16 @@
             </setting>                              
             <setting id='get.file.name.from.message' type='boolean' required='false'>
                 <name>Get File Name From Message</name>
-                </setting>
+            </setting>
             <setting id='relative.path' type='text' required='false'>
                 <name>File Path</name>
-                </setting>
+            </setting>
             <setting id='read.tag' type='text' required='false'>
                 <name>Tag to find and send, defaults to root</name>
-                </setting>
+            </setting>
             <setting id='read.tags.per.message' type='integer' required='false'>
                 <name>Number of read tags to send together</name>
-                </setting>
+            </setting>
         </settings>
     </component>
     <component id='Last Unit of Work' category='CONTROL' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='false'>
@@ -931,7 +927,7 @@
         <settings>
             <setting id='gate.control.source.step' type='source_step' required='true'>
                 <name>Gate Control Source</name>
-                </setting>
+            </setting>
         </settings>
     </component>    
     <component id='Union' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>

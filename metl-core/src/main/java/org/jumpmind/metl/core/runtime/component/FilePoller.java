@@ -50,8 +50,6 @@ public class FilePoller extends AbstractComponentRuntime {
 
     public final static String SETTING_FILE_PATTERN = "file.pattern";
 
-    public final static String SETTING_RECURSE = "recurse";
-
     public final static String SETTING_CANCEL_ON_NO_FILES = "cancel.on.no.files";
 
     public final static String SETTING_ACTION_ON_SUCCESS = "action.on.success";
@@ -83,8 +81,6 @@ public class FilePoller extends AbstractComponentRuntime {
     String triggerFilePath;
 
     boolean useTriggerFile = false;
-
-    boolean recurse = false;
 
     boolean cancelOnNoFiles = true;
     
@@ -121,7 +117,6 @@ public class FilePoller extends AbstractComponentRuntime {
         triggerFilePath = FormatUtils.replaceTokens(properties.get(SETTING_TRIGGER_FILE_PATH),
                 context.getFlowParametersAsString(), true);
         useTriggerFile = properties.is(SETTING_USE_TRIGGER_FILE, useTriggerFile);
-        recurse = properties.is(SETTING_RECURSE, recurse);
         cancelOnNoFiles = properties.is(SETTING_CANCEL_ON_NO_FILES, cancelOnNoFiles);
         actionOnSuccess = properties.get(SETTING_ACTION_ON_SUCCESS, actionOnSuccess);
         actionOnError = properties.get(SETTING_ACTION_ON_ERROR, actionOnError);
@@ -167,7 +162,8 @@ public class FilePoller extends AbstractComponentRuntime {
 	    if (pathMatcher.isPattern(pattern)) {
 	        String[] parts = pattern.split("/");
 	        StringBuilder path = new StringBuilder();
-	        for (String part : parts) {
+	        for(int i = 0; i < parts.length; i++) {
+	            String part = parts[0];
                 if (!pathMatcher.isPattern(part)) {
                     path.append(part).append("/");
                 } else {
