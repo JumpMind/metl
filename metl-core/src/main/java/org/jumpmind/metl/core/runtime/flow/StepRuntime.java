@@ -48,6 +48,7 @@ import org.jumpmind.metl.core.runtime.MessageHeader;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
+import org.jumpmind.metl.core.runtime.component.AssertException;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
@@ -172,7 +173,7 @@ public class StepRuntime implements Runnable {
 
     protected void recordError(int threadNumber, Throwable ex) {        
         String msg = null;
-        if (ex instanceof MisconfiguredException) {
+        if (ex instanceof MisconfiguredException || ex instanceof AssertException) {
             msg = ex.getMessage();
         } else {
             msg = ExceptionUtils.getFullStackTrace(ex);

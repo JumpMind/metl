@@ -161,16 +161,27 @@ public class FilePoller extends AbstractComponentRuntime {
         List<FileInfo> matches = new ArrayList<>();
 	    if (pathMatcher.isPattern(pattern)) {
 	        String[] parts = pattern.split("/");
-	        StringBuilder path = new StringBuilder();
+	        StringBuilder pathPart = new StringBuilder();
+	        StringBuilder patternPart = new StringBuilder();
+	        boolean switchToPattern = false;
 	        for(int i = 0; i < parts.length; i++) {
-	            String part = parts[0];
-                if (!pathMatcher.isPattern(part)) {
-                    path.append(part).append("/");
+	            String part = parts[i];
+                if (!pathMatcher.isPattern(part) && !switchToPattern) {
+                    pathPart.append(part);
+                    if (i < parts.length-1) {
+                        pathPart.append("/");                        
+                    }
                 } else {
-                    break;
+                    switchToPattern = true;
+                    patternPart.append(part);
+                    if (i < parts.length-1) {
+                        patternPart.append("/");                        
+                    }
+
                 }
+                
             }	        
-	        matches.addAll(matchFiles(path.toString(), pattern, directory, pathMatcher));
+	        matches.addAll(matchFiles(pathPart.toString(), patternPart.toString(), directory, pathMatcher));
 	    } else {
             matches.addAll(directory.listFiles(pattern));	        
 	    }
@@ -182,7 +193,7 @@ public class FilePoller extends AbstractComponentRuntime {
 	    List<FileInfo> fileInfos = directory.listFiles(relativePath);
         for (FileInfo fileInfo : fileInfos) {
             if (matches.size() < maxFilesToPoll) {
-                if (!fileInfo.isDirectory() && pathMatcher.match(pattern, fileInfo.getRelativePath()) 
+                if (!fileInfo.isDirectory() && pathMatcher.match(pattern, fileInfo.getName()) 
                         && !matches.contains(fileInfo)) {
                     matches.add(fileInfo);
                 } else if (fileInfo.isDirectory()) {

@@ -32,5 +32,10 @@ public class FileInfo {
     public long getLastUpdated() {
         return lastUpdated;
     }
+    
+    @Override
+    public String toString() {
+        return relativePath;
+    }
 
 }

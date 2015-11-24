@@ -36,6 +36,7 @@ import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Script extends AbstractComponentRuntime {
@@ -79,6 +80,8 @@ public class Script extends AbstractComponentRuntime {
             script.append(String.format("import static %s.*;\n", FileUtils.class.getName()));
             script.append(String.format("import %s.*;\n", Message.class.getPackage().getName()));
             script.append(String.format("import %s;\n", MessageScriptHelper.class.getName()));
+            script.append(String.format("import %s;\n", MisconfiguredException.class.getName()));
+            script.append(String.format("import %s;\n", AssertException.class.getName()));
             script.append(String.format("import %s.%s;\n", EntityData.class.getName(), ChangeType.class.getSimpleName()));
             script.append("import org.jumpmind.db.sql.*;\n");
             if (isNotBlank(importStatements)) {

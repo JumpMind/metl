@@ -58,7 +58,6 @@ public class Assert extends AbstractComponentRuntime {
     int binaryMessageCount = 0;
     int controlMessageCount = 0;
     int emptyPayloadMessageCount = 0;
-
     
     @Override
     protected void start() {
