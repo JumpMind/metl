@@ -48,6 +48,7 @@ import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.util.ComponentUtils;
 import org.jumpmind.properties.TypedProperties;
+import org.jumpmind.util.FormatUtils;
 
 abstract public class AbstractComponentRuntime extends AbstractRuntimeObject implements IComponentRuntime {
 
@@ -142,6 +143,12 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         } else {
             return null;
         }
+    }
+    
+    protected String resolveParamsAndHeaders(String text, Message inputMessage) {
+        Map<String,String> parms = new HashMap<>(getComponentContext().getFlowParametersAsString());
+        parms.putAll(inputMessage.getHeader().getAsStrings());
+        return FormatUtils.replaceTokens(text, parms, true);
     }
     
     protected <T> T getResourceReference() {

@@ -18,7 +18,8 @@
 |Name|Description
 include::../common-properties/unit-of-work.ad[]
 include::../common-properties/enabled.ad[]
-|Target File Resource|The target file resource where extracted files will be written
+|Zip Source Directory Resource|The directory where the zip file will be polled at
+|Unzip Target Directory Resource|The target file resource where extracted files will be written
 |Create Sub Dir From File Name|Whether to create a root sub-directory for the extracted files that will match the zip file name
 |Delete Source File|Whether the source zip file should be deleted after its contents have been extracted
 include::../common-properties/encoding.ad[]

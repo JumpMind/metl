@@ -20,9 +20,6 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,9 +27,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -44,15 +40,18 @@ import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
+import org.jumpmind.metl.core.runtime.resource.FileInfo;
+import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.runtime.resource.LocalFile;
+import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.util.FormatUtils;
 
 public class UnZip extends AbstractComponentRuntime {
     public static final String TYPE = "UnZip";
 
     public final static String SETTING_TARGET_RESOURCE = "target.resource";
+    
+    public final static String SETTING_SOURCE_RESOURCE = "source.resource";
 
     public final static String SETTING_TARGET_SUB_DIR = "target.sub.dir";
 
@@ -66,38 +65,45 @@ public class UnZip extends AbstractComponentRuntime {
 
     public final static String SETTING_ENCODING = "encoding";
 
-    String targetDirName;
-
     boolean mustExist;
 
     String encoding = "UTF-8";
 
-    boolean deleteOnComplete = false;
+    boolean deleteOnComplete = true;
 
     boolean targetSubDir = false;
     
     boolean extractEmptyFiles = true;
+    
+    IDirectory sourceDir;
+    
+    IDirectory targetDir;
+    
+    String targetRelativePath;
 
     @Override
     protected void start() {
         TypedProperties properties = getTypedProperties();
+        
         deleteOnComplete = properties.is(SETTING_DELETE_ON_COMPLETE, deleteOnComplete);
-        String targetResourceId = properties.get(SETTING_TARGET_RESOURCE);
+        
+        String sourceResourceId = properties.get(SETTING_TARGET_RESOURCE);        
+        IResourceRuntime sourceResource = context.getDeployedResources().get(sourceResourceId);
+        if (sourceResource == null) {
+            throw new MisconfiguredException("The source resource must be defined");
+        } else {
+            sourceDir = sourceResource.reference();
+        }
+        
+        String targetResourceId = properties.get(SETTING_TARGET_RESOURCE);        
         IResourceRuntime targetResource = context.getDeployedResources().get(targetResourceId);
-        if (!(targetResource instanceof LocalFile)) {
-            throw new MisconfiguredException("The target resource must be a local file resource");
+        if (targetResource == null) {
+            throw new MisconfiguredException("The target resource must be defined");
+        } else {
+            targetDir = targetResource.reference();
         }
 
-        targetDirName = targetResource.getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
-        if (isBlank(targetDirName)) {
-            throw new MisconfiguredException("The target resource %s needs its path set", targetResource.getResource().getName());
-        }
-
-        String targetRelativePath = properties.get(SETTING_TARGET_RELATIVE_PATH, "");
-        if (isNotBlank(targetRelativePath)) {
-            targetDirName = new File(targetDirName, targetRelativePath).getAbsolutePath();
-        }
-
+        targetRelativePath = properties.get(SETTING_TARGET_RELATIVE_PATH, "");
         targetSubDir = properties.is(SETTING_TARGET_SUB_DIR, targetSubDir);
         mustExist = properties.is(SETTING_MUST_EXIST, mustExist);
         extractEmptyFiles = properties.is(SETTING_EXTRACT_EMPTY_FILES, extractEmptyFiles);
@@ -112,46 +118,46 @@ public class UnZip extends AbstractComponentRuntime {
             ArrayList<String> filePaths = new ArrayList<String>();
             for (String fileName : files) {
                 log(LogLevel.INFO, "Preparing to extract file : %s", fileName);
-                File file = getNewFile(fileName);
-                if (mustExist && !file.exists()) {
+                FileInfo sourceZipFile = sourceDir.listFile(fileName);
+                if (mustExist && sourceZipFile == null) {
                     throw new IoException(String.format("Could not find file to extract: %s", fileName));
                 }
-                if (file.exists()) {
-                    try {
-                        ZipFile zipFile = getNewZipFile(file);
+                if (sourceZipFile != null) {
+                        File unzipDir = new File(LogUtils.getLogDir(), "unzip");
+                        unzipDir.mkdirs();
+                        
+                        File localZipFile = copyZipLocally(fileName, unzipDir);
+                        ZipFile zipFile = getNewZipFile(localZipFile);
                         InputStream in = null;
                         OutputStream out = null;
                         try {
-                            Map<String,String> parms = new HashMap<>(getComponentContext().getFlowParametersAsString());
-                            parms.putAll(inputMessage.getHeader().getAsStrings());
-                            String targetDirNameResolved = FormatUtils.replaceTokens(targetDirName, parms, true);
-                            File targetDir = targetSubDir ? new File(targetDirNameResolved, FilenameUtils.removeExtension(file.getName()))
-                                    : new File(targetDirNameResolved);
-                            targetDir.mkdirs();
+                            String targetDirNameResolved = resolveParamsAndHeaders(targetRelativePath, inputMessage);
+                            if (targetSubDir) {
+                                targetDirNameResolved = targetDirNameResolved + "/" + FilenameUtils.removeExtension(localZipFile.getName());
+                            }
                             for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();) {
                                 ZipEntry entry = e.nextElement();
-                                log(LogLevel.INFO, entry.getName());
+                                info("Unzipping %s", entry.getName());
 
                                 if (!entry.isDirectory() && (extractEmptyFiles || entry.getSize() > 0)) {
-                                    File newFile = new File(targetDir, entry.getName());
-                                    newFile.getParentFile().mkdirs();
-                                    out = new FileOutputStream(newFile);
+                                    out = targetDir.getOutputStream(targetDirNameResolved, false);
                                     in = zipFile.getInputStream(entry);
                                     IOUtils.copy(in, out);
-                                    filePaths.add(newFile.getAbsolutePath());
+                                    filePaths.add(targetDirNameResolved);
                                 }
                             }
+                        } catch (IOException e) {
+                            throw new IoException(e);
                         } finally {
                             IOUtils.closeQuietly(in);
                             IOUtils.closeQuietly(out);
-                            zipFile.close();
+                            IOUtils.closeQuietly(zipFile);
+                            FileUtils.deleteQuietly(localZipFile);
                         }
                         if (deleteOnComplete) {
-                            FileUtils.deleteQuietly(file);
+                            sourceDir.delete(fileName);
                         }
-                    } catch (IOException e) {
-                        throw new IoException(e);
-                    }
+
                     log(LogLevel.INFO, "Extracted %s", fileName);
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 }
@@ -159,13 +165,31 @@ public class UnZip extends AbstractComponentRuntime {
             callback.sendMessage(null, filePaths);
         }
     }
-
-    protected File getNewFile(String file) {
-        return new File(file);
+    
+    protected File copyZipLocally(String fileName, File unzipDir) {
+        InputStream is = null;
+        FileOutputStream os = null;                        
+        try {
+            is = sourceDir.getInputStream(fileName, true);
+            File localZipFile = new File(unzipDir, UUID.randomUUID().toString() + ".zip");
+            os = new FileOutputStream(localZipFile);
+            IOUtils.copy(is, os);
+            return localZipFile;
+        } catch (IOException e) {
+            throw new IoException(e);
+        } finally {
+            IOUtils.closeQuietly(is);
+            IOUtils.closeQuietly(os);
+        }
     }
 
-    protected ZipFile getNewZipFile(File file) throws IOException {
-        return new ZipFile(file);
+
+    protected ZipFile getNewZipFile(File file) {        
+        try {
+            return new ZipFile(file);
+        } catch (IOException e) {
+            throw new IoException(e);
+        }
     }
 
     @Override

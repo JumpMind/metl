@@ -935,9 +935,12 @@
         <name>UnZip</name>
         <className>org.jumpmind.metl.core.runtime.component.UnZip</className>
         <description></description>
-        <settings>
+        <settings>        
+            <setting id='source.resource' type='streamable_resource' required='true'>
+                <name>Zip Source Directory Resource</name>
+            </setting>        
             <setting id='target.resource' type='streamable_resource' required='true'>
-                <name>Target File Resource</name>
+                <name>Unzip Target Directory Resource</name>
             </setting>
             <setting id='target.relative.path' type='text' required='false'>
                 <name>Target Path</name>
@@ -945,18 +948,18 @@
             <setting id='target.sub.dir' type='boolean' required='false'>
                 <name>Create Sub Dir From File Name</name>
             </setting>
-            <setting id='delete.on.complete' type='boolean' required='false'>
-                <name>Delete Source File</name>
-                <defaultValue>true</defaultValue>
-            </setting>
             <setting id='extract.empty.files' type='boolean' required='false'>
                 <name>Extract Empty Files</name>
                 <defaultValue>true</defaultValue>
-            </setting>            
+            </setting>
             <setting id='encoding' type='text' required='false'>
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
             </setting>
+            <setting id='delete.on.complete' type='boolean' required='false'>
+                <name>Delete Source File</name>
+                <defaultValue>true</defaultValue>
+            </setting>            
         </settings>
     </component>
     <component id='XmlReader' category='READER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable' inputOutputModelsMatch='false'>

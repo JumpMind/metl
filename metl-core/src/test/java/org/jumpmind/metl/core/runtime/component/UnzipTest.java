@@ -25,7 +25,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -34,8 +33,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
-import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
+import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.properties.TypedProperties;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -114,12 +113,7 @@ public class UnzipTest extends AbstractComponentRuntimeTestSupport {
 		when(mockTypedProperties.get(anyString())).thenReturn("localFilePath");
 		
 		when(((UnZip) spy).getResourceReference()).thenReturn(mockStreamable);
-		when(((UnZip) spy).getNewFile(anyString())).thenReturn(mockFile);
-		try {
-			when(((UnZip) spy).getNewZipFile(Mockito.any(File.class))).thenReturn(mockZipFile);
-		}
-		catch(IOException ioe) {
-		}
+    	when(((UnZip) spy).getNewZipFile(Mockito.any(File.class))).thenReturn(mockZipFile);
 		when(mockFile.getAbsolutePath()).thenReturn("fileAbsolutePath");
 		when(mockFile.exists()).thenReturn(fileExists);
 		
