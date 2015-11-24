@@ -80,7 +80,7 @@ public class TextConstantTest extends AbstractComponentRuntimeTestSupport {
 
 	@Test
 	@Override
-	public void testHandleNormal() {
+	public void testHandleNormal() throws Exception {
 		// Setup
 		setupHandle();
 		((TextConstant) spy).constantText = "GO BUCKS";

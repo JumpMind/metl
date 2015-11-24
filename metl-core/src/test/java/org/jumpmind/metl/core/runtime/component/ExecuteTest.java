@@ -103,7 +103,7 @@ public class ExecuteTest extends AbstractComponentRuntimeTestSupport {
 
 	@Test
 	@Override
-	public void testHandleNormal() {
+	public void testHandleNormal() throws Exception {
 		setupHandle(0);
 		
 		MessageTestHelper.addInputMessage(this, true, "step1", COMMAND_OUTPUT);

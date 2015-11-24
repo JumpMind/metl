@@ -82,7 +82,7 @@ public class MultiplierTest extends AbstractComponentRuntimeTestSupport {
 	
 	@Test
 	@Override
-	public void testHandleNormal() {
+	public void testHandleNormal() throws Exception {
 		setupHandle();
 		((Multiplier) spy).sourceStepId = "step1";
 		

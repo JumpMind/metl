@@ -201,6 +201,8 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         for (String key : flowParameters.keySet()) {
             bindings.put(key, flowParameters.get(key));            
         }
+        
+        bindings.put("text", null);
     }
     
     protected void bindModelEntities(Bindings bindings) {

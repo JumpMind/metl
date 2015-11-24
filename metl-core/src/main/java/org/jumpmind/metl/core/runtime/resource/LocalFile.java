@@ -36,11 +36,11 @@ public class LocalFile extends AbstractResourceRuntime {
 	@SettingDefinition(type = Type.BOOLEAN, order = 20, required = true, provided = true, defaultValue = "false", label = "Must Exist")
 	public static final String LOCALFILE_MUST_EXIST = "localfile.must.exist";
 
-	IStreamable streamableResource;
+	IDirectory streamableResource;
 
 	@Override
 	protected void start(TypedProperties properties) {
-		streamableResource = new LocalFileStreamable(resource,
+		streamableResource = new LocalFileDirectory(resource,
 				properties.getProperty(LOCALFILE_PATH), 
 				properties.is(LOCALFILE_MUST_EXIST));
 	}

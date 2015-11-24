@@ -24,7 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
-public interface IStreamable {
+public interface IDirectory {
 
     public boolean requiresContentLength();
     
@@ -44,6 +44,18 @@ public interface IStreamable {
     
     public boolean supportsDelete();
     
-    public List<FileInfo> listFiles(String relativePath);
-        
+    public List<FileInfo> listFiles(String... relativePaths);    
+    
+    public FileInfo listFile (String relativePath);
+    
+    public void copyFile(String fromFilePath, String toFilePath);
+    
+    public void moveFile(String fromFilePath, String toFilePath);
+    
+    public void copyToDir(String fromFilePath, String toDirPath);
+    
+    public void moveToDir(String fromFilePath, String toDirPath);
+    
+    public boolean renameFile(String fileFilePath, String toFilePath);
+            
 }

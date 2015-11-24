@@ -45,8 +45,6 @@ import com.vaadin.event.FieldEvents.FocusEvent;
 import com.vaadin.event.FieldEvents.FocusListener;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
-import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -81,8 +79,6 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     AbstractObject currentlyEditing;
 
-    ShortcutListener enterKeyListener;
-
     public ManageProjectsPanel(ApplicationContext context, DesignNavigator projectNavigator) {
         this.setSizeFull();
         this.context = context;
@@ -107,16 +103,6 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
         removeButton = buttonBar.addButton("Remove", Icons.DELETE);
         removeButton.addClickListener(event -> removeProject());
-
-        enterKeyListener = new ShortcutListener("Enter", KeyCode.ENTER, null) {
-            public void handleAction(Object sender, Object target) {
-                if (currentlyEditing != null) {
-                    save();
-                } else {
-                    openProject(treeTable.getValue());
-                }
-            }
-        };
 
         treeTable = new TreeTable();
         treeTable.setSizeFull();
@@ -164,15 +150,13 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
     public boolean closing() {
         return true;
     }
-
+    
     @Override
     public void selected() {
-        treeTable.addShortcutListener(enterKeyListener);
     }
-
+    
     @Override
     public void deselected() {
-        treeTable.removeShortcutListener(enterKeyListener);
     }
 
     protected void openProject(Object source) {

@@ -83,7 +83,7 @@ public class MergerTest extends AbstractComponentRuntimeTestSupport {
 
     @Test
     @Override
-    public void testHandleNormal() {
+    public void testHandleNormal() throws Exception {
         // Join setup
         setupHandle();
 

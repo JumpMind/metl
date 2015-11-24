@@ -20,34 +20,31 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
+import org.jumpmind.metl.core.runtime.resource.LocalFile;
+import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
 import org.jumpmind.metl.core.utils.TestUtils;
-import org.jumpmind.properties.TypedProperties;
 import org.junit.Test;
 
 public class XmlReaderTest extends AbstractComponentRuntimeTestSupport {
 
     @Override
     public void testStartDefaults() {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void testStartWithValues() {
-        // TODO Auto-generated method stub
-
     }
 
     @Test
@@ -70,12 +67,12 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport {
 
     @Test
     @Override
-    public void testHandleNormal() {
+    public void testHandleNormal() throws Exception {
         // Setup
         setupHandle(TestUtils.XML_BASIC);
         ((XmlReader) spy).getFileNameFromMessage = true;
 
-        MessageTestHelper.addInputMessage(this, true, "step1", "/text.xml");
+        MessageTestHelper.addInputMessage(this, true, "step1", TestUtils.XML_BASIC);
 
         // Expected
         MessageTestHelper.addOutputMonitor(this, TestUtils.getTestXMLFileContent(TestUtils.XML_BASIC));
@@ -84,13 +81,13 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport {
     }
 
     @Test
-    public void testHandleForReadTag() {
+    public void testHandleForReadTag() throws Exception {
         // Setup
         setupHandle(TestUtils.XML_BASIC);
         ((XmlReader) spy).getFileNameFromMessage = true;
         ((XmlReader) spy).readTag = "Header";
 
-        MessageTestHelper.addInputMessage(this, true, "step1", "/text.xml");
+        MessageTestHelper.addInputMessage(this, true, "step1", TestUtils.XML_BASIC);
 
         // Expected
         MessageTestHelper.addOutputMonitor(this, true, "<Header>" + "<Title>Title</Title>" + "</Header>");
@@ -100,13 +97,13 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport {
     }
 
     @Test
-    public void testHandleForReadTagMultiple() {
+    public void testHandleForReadTagMultiple() throws Exception {
         // Setup
         setupHandle(TestUtils.XML_BASIC);
         ((XmlReader) spy).getFileNameFromMessage = true;
         ((XmlReader) spy).readTag = "Item";
 
-        MessageTestHelper.addInputMessage(this, true, "step1", "/text.xml");
+        MessageTestHelper.addInputMessage(this, true, "step1", TestUtils.XML_BASIC);
 
         // Expected
         MessageTestHelper.addOutputMonitor(this, true,
@@ -118,12 +115,12 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport {
     }
 
     @Test
-    public void testHandleForSingleLineXML() {
+    public void testHandleForSingleLineXML() throws Exception {
         // Setup
         setupHandle(TestUtils.XML_SINGLE_LINE);
         ((XmlReader) spy).getFileNameFromMessage = true;
 
-        MessageTestHelper.addInputMessage(this, true, "step1", "/text.xml");
+        MessageTestHelper.addInputMessage(this, true, "step1", TestUtils.XML_SINGLE_LINE);
 
         // Expected
         MessageTestHelper.addOutputMonitor(this, true, TestUtils.getTestXMLFileContent(TestUtils.XML_SINGLE_LINE));
@@ -137,27 +134,24 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport {
         return XmlReader.TYPE;
     }
 
-    public void setupHandle(String xmlFileName) {
+    public void setupHandle(String xmlFileName) throws IOException {
         super.setupHandle();
 
-        IResourceRuntime mockResourceRuntime = mock(IResourceRuntime.class);
-        TypedProperties mockTypedProperties = mock(TypedProperties.class);
-
+        FileUtils.writeStringToFile(new File("working", TestUtils.XML_BASIC), TestUtils.getTestXMLFileContent(TestUtils.XML_BASIC));
+        FileUtils.writeStringToFile(new File("working", TestUtils.XML_SINGLE_LINE), TestUtils.getTestXMLFileContent(TestUtils.XML_SINGLE_LINE));
+        
         Resource resource = new Resource();
-        when(component.getResource()).thenReturn(resource);
+        resource.setType(LocalFile.TYPE);
+        resource.put(LocalFile.LOCALFILE_PATH, "working");
+        
+        LocalFile localFile = new LocalFile();
+        localFile.start(new ResourceFactory(), resource, null);
+
+        when(component.getResource()).thenReturn(resource);        
         when(component.getResourceId()).thenReturn(resource.getId());
         Map<String, IResourceRuntime> deployedResources = new HashMap<>();
-        deployedResources.put(component.getResourceId(), mockResourceRuntime);
-        when(context.getDeployedResources()).thenReturn(deployedResources);
-        
-        File xmlFile = TestUtils.getTestXMLFile(xmlFileName);
-
-        when(mockResourceRuntime.getResourceRuntimeSettings()).thenReturn(mockTypedProperties);
-
-        when(mockTypedProperties.get(anyString())).thenReturn("localFilePath");
-
-        when(((XmlReader) spy).getFile(anyString())).thenReturn(xmlFile);
-        when(((XmlReader) spy).getFile(anyString(), anyString())).thenReturn(xmlFile);
+        deployedResources.put(component.getResourceId(), localFile);
+        when(context.getDeployedResources()).thenReturn(deployedResources);        
         
         ((XmlReader) spy).runWhen = XmlReader.PER_MESSAGE;
 

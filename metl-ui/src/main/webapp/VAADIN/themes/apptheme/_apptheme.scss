@@ -1,24 +1,3 @@
-@mixin valo-loading-bar {  
-    
-  .v-loading-indicator {
-       width: 100%;  
-       height: 100%;  
-       margin: 0;  
-  }
-    
-  .v-loading-indicator-delay, .v-loading-indicator-wait {  
-       width: 100%;  
-       height: 100%;  
-       margin: 0;  
-       background-attachment: fixed;   
-       opacity: .6;  
-       -ms-filter: alpha(opacity=80);  
-       filter: alpha(opacity=80);  
-       z-index: 99999;
-       background: #fff url(../valo/shared/img/spinner.gif) no-repeat 50%;
-  }
-}
-  
 @mixin apptheme {
 	
   @include valo;

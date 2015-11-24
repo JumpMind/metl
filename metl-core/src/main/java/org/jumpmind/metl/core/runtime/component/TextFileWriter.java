@@ -35,7 +35,7 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.IStreamable;
+import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
@@ -149,7 +149,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
     	}
     
         if (bufferedWriter == null) {
-            IStreamable streamable = (IStreamable) getResourceReference();
+            IDirectory streamable = (IDirectory) getResourceReference();
             if (!append && streamable.supportsDelete() && !(inputMessage instanceof ControlMessage)) {
                 if (getFileNameFromMessage) {
                 	streamable.delete(messageHeaderFileName);

@@ -20,8 +20,6 @@
  */
 package org.jumpmind.metl.core.runtime.flow;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -173,12 +171,8 @@ public class StepRuntime implements Runnable {
     }
 
     protected void recordError(int threadNumber, Throwable ex) {
-        String msg = ex.getMessage();
-        if (isBlank(msg)) {
-            msg = ExceptionUtils.getFullStackTrace(ex);
-        } else {
-            log.error("", ex);
-        }
+        String msg = ExceptionUtils.getFullStackTrace(ex);
+
         componentContext.getExecutionTracker().log(threadNumber, LogLevel.ERROR, componentContext, msg);
 
         /*

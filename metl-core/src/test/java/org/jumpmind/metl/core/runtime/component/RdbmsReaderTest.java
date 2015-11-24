@@ -178,7 +178,7 @@ public class RdbmsReaderTest extends AbstractRdbmsComponentTest {
 	
 	@Test
 	@Override
-	public void testHandleNormal() {
+	public void testHandleNormal() throws Exception {
 		
 	}
 	/*
