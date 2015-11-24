@@ -80,6 +80,7 @@ public class AsyncRecorder implements Runnable {
                     if (writer == null) {
                         File logFile = new File(LogUtils.getLogDir(), executionStepId + ".log");
                         writer = new CsvWriter(logFile.getAbsolutePath());
+                        writer.setTextQualifier('"');
                         logWriters.put(executionStepId, writer);
                     }
                     try {

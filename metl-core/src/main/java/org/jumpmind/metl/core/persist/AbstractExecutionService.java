@@ -93,6 +93,7 @@ abstract public class AbstractExecutionService extends AbstractService implement
                 CsvReader reader = null;
                 try {
                     reader = new CsvReader(file.getAbsolutePath());
+                    reader.setTextQualifier('"');
                     while (reader.readRecord()) {
                         String[] values = reader.getValues();
                         if (values != null && values.length > 2 && isNotBlank(values[0]) && 
