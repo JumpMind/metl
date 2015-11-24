@@ -62,11 +62,14 @@ public class BinaryFileReader extends AbstractFileReader {
                 	payload = new byte[sizePerMessage*1024*1024];
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 }
-                
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
             } finally {
                 IOUtils.closeQuietly(inStream);
+            }
+            
+            if (controlMessageOnEof) {
+            	callback.sendControlMessage(headers);
             }
         }
     }

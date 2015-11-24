@@ -692,14 +692,14 @@
                 <name>Get File Name From Message</name>
                 <defaultValue>false</defaultValue>
                 </setting>
-            <setting id='textfilereader.must.exist' type='boolean' required='false'>
+            <setting id='must.exist' type='boolean' required='false'>
                 <name>Must Exist</name>
                 <defaultValue>false</defaultValue>
                 </setting>            
-            <setting id='textfilereader.relative.path' type='text' required='false'>
+            <setting id='relative.path' type='text' required='false'>
                 <name>File Path</name>
                 </setting>
-            <setting id='textfilereader.text.rows.per.message' type='integer' required='false'>
+            <setting id='text.rows.per.message' type='integer' required='false'>
                 <name>Rows / Msg</name>
                 <defaultValue>10000</defaultValue>
                 </setting>
@@ -727,15 +727,86 @@
             <setting id='archive.on.error.path' type='text' required='false'>
                 <name>Archive On Error Path</name>
                 </setting>
-            <setting id='textfilereader.encoding' type='text' required='false'>
+            <setting id='encoding' type='text' required='false'>
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
                 </setting>
-            <setting id='textfilereader.text.header.lines.to.skip' type='integer' required='false'>
+            <setting id='text.header.lines.to.skip' type='integer' required='false'>
                 <name>Header Lines to Skip</name>
-                </setting>          
-        </settings>
+            </setting>  
+            <setting id='control.message.on.eof' type='boolean' required='false'>
+                <name>Send Control Message on EOF</name>
+            </setting>  
+       	</settings>
     </component>
+    <component id='Binary File Reader' category='READER' inputMessageType='binary' outputMessageType='binary' resourceCategory='streamable'
+        inputOutputModelsMatch='false'>
+        <name>Binary File Reader</name>
+        <className>org.jumpmind.metl.core.runtime.component.BinaryFileReader</className>
+        <description></description>
+        <extraUnitOfWorkOptions>
+            <extraUnitOfWorkOption>File</extraUnitOfWorkOption>
+        </extraUnitOfWorkOptions>        
+        <settings>
+            <setting id='run.when' type='choice' required='false'>
+                <name>Run When</name>
+                <defaultValue>PER UNIT OF WORK</defaultValue>
+                    <choices>
+                    <choice>PER UNIT OF WORK</choice>
+                    <choice>PER MESSAGE</choice>                    
+                </choices>
+            </setting>                              
+            <setting id='get.file.name.from.message' type='boolean' required='false'>
+                <name>Get File Name From Message</name>
+                <defaultValue>false</defaultValue>
+                </setting>
+            <setting id='must.exist' type='boolean' required='false'>
+                <name>Must Exist</name>
+                <defaultValue>false</defaultValue>
+                </setting>            
+            <setting id='relative.path' type='text' required='false'>
+                <name>File Path</name>
+                </setting>
+            <setting id='text.rows.per.message' type='integer' required='false'>
+                <name>Rows / Msg</name>
+                <defaultValue>10000</defaultValue>
+                </setting>
+            <setting id='action.on.success' type='choice' required='false'>
+                <name>Action on Success</name>
+                <defaultValue>NONE</defaultValue>
+                    <choices>
+                    <choice>None</choice>
+                    <choice>Archive</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='archive.on.success.path' type='text' required='false'>
+                <name>Archive On Success Path</name>
+                </setting>
+            <setting id='action.on.error' type='choice' required='false'>
+                <name>Action on Error</name>
+                <defaultValue>NONE</defaultValue>
+                    <choices>
+                    <choice>None</choice>
+                    <choice>Archive</choice>
+                    <choice>Delete</choice>
+                </choices>
+            </setting>
+            <setting id='archive.on.error.path' type='text' required='false'>
+                <name>Archive On Error Path</name>
+                </setting>
+            <setting id='encoding' type='text' required='false'>
+                <name>Encoding</name>
+                <defaultValue>UTF-8</defaultValue>
+                </setting>
+            <setting id='text.header.lines.to.skip' type='integer' required='false'>
+                <name>Header Lines to Skip</name>
+            </setting>  
+            <setting id='control.message.on.eof' type='boolean' required='false'>
+                <name>Send Control Message on EOF</name>
+            </setting>  
+       	</settings>
+    </component>    
     <component id='Text File Writer' category='WRITER' inputMessageType='text' outputMessageType='text' resourceCategory='streamable'
         inputOutputModelsMatch='false'>
         <name>Text File Writer</name>

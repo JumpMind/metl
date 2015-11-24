@@ -20,17 +20,19 @@ public abstract class AbstractFileReader extends AbstractComponentRuntime {
     public static final String ACTION_ARCHIVE = "Archive";
 
     public final static String SETTING_GET_FILE_FROM_MESSAGE = "get.file.name.from.message";
-    public final static String SETTING_RELATIVE_PATH = "textfilereader.relative.path";
-    public static final String SETTING_MUST_EXIST = "textfilereader.must.exist";
+    public final static String SETTING_RELATIVE_PATH = "relative.path";
+    public static final String SETTING_MUST_EXIST = "must.exist";
     public final static String SETTING_ACTION_ON_SUCCESS = "action.on.success";
     public final static String SETTING_ARCHIVE_ON_SUCCESS_PATH = "archive.on.success.path";
     public final static String SETTING_ACTION_ON_ERROR = "action.on.error";
     public final static String SETTING_ARCHIVE_ON_ERROR_PATH = "archive.on.error.path";
+    public final static String SETTING_CNTRL_MSG_ON_EOF = "control.message.on.eof";
 
     String relativePathAndFile;
     boolean mustExist;
     boolean getFileNameFromMessage = false;
     boolean unitOfWorkLastMessage = false;
+    boolean controlMessageOnEof = false;
     String actionOnSuccess = ACTION_NONE;
     String archiveOnSuccessPath;
     String actionOnError = ACTION_NONE;
@@ -51,6 +53,7 @@ public abstract class AbstractFileReader extends AbstractComponentRuntime {
         archiveOnSuccessPath = FormatUtils.replaceTokens(component.get(SETTING_ARCHIVE_ON_SUCCESS_PATH), context.getFlowParametersAsString(),
                 true);
         runWhen = component.get(RUN_WHEN, runWhen);
+        controlMessageOnEof = component.getBoolean(SETTING_CNTRL_MSG_ON_EOF, controlMessageOnEof);
 	}
 	
     @Override
@@ -107,7 +110,7 @@ public abstract class AbstractFileReader extends AbstractComponentRuntime {
     }
 
 
-    private List<String> getFilesToRead(Message inputMessage) {
+    protected List<String> getFilesToRead(Message inputMessage) {
         ArrayList<String> files = null;
         if (getFileNameFromMessage) {
             files = inputMessage.getPayload();
