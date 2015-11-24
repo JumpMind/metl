@@ -28,11 +28,15 @@
             <setting id='expected.entity.messages.count' type='integer' required='false'>
                 <name>Expected Number of Entity Messages</name>
                 <defaultValue>0</defaultValue>
-            </setting>
+            </setting>            
             <setting id='expected.text.messages.count' type='integer' required='false'>
                 <name>Expected Number of Text Messages</name>
                 <defaultValue>0</defaultValue>
             </setting>
+            <setting id='expected.binary.messages.count' type='integer' required='false'>
+                <name>Expected Number of Binary Messages</name>
+                <defaultValue>0</defaultValue>
+            </setting>            
             <setting id='expected.control.messages.count' type='integer' required='false'>
                 <name>Expected Number of Control Messages</name>
                 <defaultValue>0</defaultValue>
@@ -676,9 +680,6 @@
         <name>Text File Reader</name>
         <className>org.jumpmind.metl.core.runtime.component.TextFileReader</className>
         <description></description>
-        <extraUnitOfWorkOptions>
-            <extraUnitOfWorkOption>File</extraUnitOfWorkOption>
-        </extraUnitOfWorkOptions>        
         <settings>
             <setting id='run.when' type='choice' required='false'>
                 <name>Run When</name>
@@ -744,9 +745,6 @@
         <name>Binary File Reader</name>
         <className>org.jumpmind.metl.core.runtime.component.BinaryFileReader</className>
         <description></description>
-        <extraUnitOfWorkOptions>
-            <extraUnitOfWorkOption>File</extraUnitOfWorkOption>
-        </extraUnitOfWorkOptions>        
         <settings>
             <setting id='run.when' type='choice' required='false'>
                 <name>Run When</name>
@@ -766,10 +764,6 @@
                 </setting>            
             <setting id='relative.path' type='text' required='false'>
                 <name>File Path</name>
-                </setting>
-            <setting id='text.rows.per.message' type='integer' required='false'>
-                <name>Rows / Msg</name>
-                <defaultValue>10000</defaultValue>
                 </setting>
             <setting id='action.on.success' type='choice' required='false'>
                 <name>Action on Success</name>
@@ -795,12 +789,8 @@
             <setting id='archive.on.error.path' type='text' required='false'>
                 <name>Archive On Error Path</name>
                 </setting>
-            <setting id='encoding' type='text' required='false'>
-                <name>Encoding</name>
-                <defaultValue>UTF-8</defaultValue>
-                </setting>
-            <setting id='text.header.lines.to.skip' type='integer' required='false'>
-                <name>Header Lines to Skip</name>
+            <setting id='size.per.message' type='integer' required='false'>
+                <name>Size / Message (MB)</name>
             </setting>  
             <setting id='control.message.on.eof' type='boolean' required='false'>
                 <name>Send Control Message on EOF</name>

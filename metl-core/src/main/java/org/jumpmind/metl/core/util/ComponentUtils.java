@@ -34,6 +34,7 @@ final public class ComponentUtils {
     public static final int PAYLOAD_TYPE_UNKNOWN = 0;
     public static final int PAYLOAD_TYPE_LIST_STRING = 1;
     public static final int PAYLOAD_TYPE_LIST_ENTITY = 2;
+    public static final int PAYLOAD_BYTE_ARRAY = 3;
     
     private ComponentUtils() {
     }
@@ -83,16 +84,18 @@ final public class ComponentUtils {
         return values;
     }
 
-    public static int getPayloadType(Serializable payload) {
-        if (payload != null && payload instanceof List) {
-            if (((List<?>) payload).size() > 0) {
-                if (((List<?>) payload).get(0) instanceof EntityData) {
-                    return PAYLOAD_TYPE_LIST_ENTITY;
-                } else if (((List<?>) payload).get(0) instanceof String) {
-                    return PAYLOAD_TYPE_LIST_STRING;
-                }
-            }
-        }
-        return PAYLOAD_TYPE_UNKNOWN;
-    }
+	public static int getPayloadType(Serializable payload) {
+		if (payload != null && payload instanceof List) {
+			if (((List<?>) payload).size() > 0) {
+				if (((List<?>) payload).get(0) instanceof EntityData) {
+					return PAYLOAD_TYPE_LIST_ENTITY;
+				} else if (((List<?>) payload).get(0) instanceof String) {
+					return PAYLOAD_TYPE_LIST_STRING;
+				}
+			}
+		} else if (payload instanceof byte[]) {
+			return PAYLOAD_BYTE_ARRAY;
+		}
+		return PAYLOAD_TYPE_UNKNOWN;
+	}
 }
