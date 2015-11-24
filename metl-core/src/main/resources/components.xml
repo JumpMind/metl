@@ -866,7 +866,16 @@
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
                 <description></description>
-            </setting>          
+            </setting>   
+            <setting id='textfilewriter.filename.message.header' type='boolean' required='false'>
+                <name>Read File Name From Header</name>
+                <defaultValue>false</defaultValue>
+                <description></description>
+            </setting>  
+            <setting id='textfilewriter.filename.property' type='text' required='false'>
+                <name>Read File Name From Header Property</name>
+                <description></description>     
+            </setting>     
         </settings>
     </component>
     <component id='Text Replace' category='PROCESSOR' inputMessageType='text' outputMessageType='text' resourceCategory='none'
