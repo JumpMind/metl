@@ -23,6 +23,7 @@ include::../common-properties/enabled.ad[]
 |Target Path|The target path used to write files if the Action is Copy, Move, or Rename.  This path will be appended to the path of specified Resource
 be specified as a path only, and the target file names will be derived from the source file names. 
 |Get Input File Name From Message|Whether to get input file name from the payload of inbound messages or from the Source Path parameter.  If selected, source file names come from the payload of inbound messages
+|Target File Name|The name to use for the target file.  If not set, the original name will be used.
 |Append To Name|A text string that will be appended to the end of each target file name (before the extension).
 include::../common-properties/log-input.ad[]
 include::../common-properties/log-output.ad[]

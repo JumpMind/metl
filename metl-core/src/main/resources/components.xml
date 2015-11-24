@@ -263,7 +263,11 @@
                 </setting>
             <setting id='target.relative.path' type='text' required='true'>
                 <name>Target Relative Path</name>
-                </setting>
+            </setting>
+            <setting id='new.name' type='text' required='false'>
+                <name>Target File Name</name>
+                <description></description>
+            </setting>        
             <setting id='get.file.name.from.message' type='boolean' required='false'>
                 <name>Get File Name From Message</name>
                 <defaultValue>false</defaultValue>

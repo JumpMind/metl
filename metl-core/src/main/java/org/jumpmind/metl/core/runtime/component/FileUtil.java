@@ -43,11 +43,6 @@ public class FileUtil extends AbstractComponentRuntime {
 
     public static final String ACTION_COPY = "Copy";
     public static final String ACTION_MOVE = "Move";
-    /*
-    public static final String ACTION_RENAME = "Rename";    
-    public static final String ACTION_DELETE = "Delete";
-    public static final String ACTION_TOUCH = "Touch";
-    */
 
     public final static String SETTING_ACTION = "action";
 
@@ -62,6 +57,8 @@ public class FileUtil extends AbstractComponentRuntime {
     public static final String SETTING_APPEND_TO_NAME = "append.to.name";
     
     public static final String SETTING_OVERWRITE = "overwrite";
+    
+    public static final String SETTING_TARGET_NAME = "new.name";
 
     String action = ACTION_COPY;
     
@@ -76,6 +73,8 @@ public class FileUtil extends AbstractComponentRuntime {
     String targetRelativePath;
 
     String appendToName;
+    
+    String newName;
 
     boolean overwrite = true;
     
@@ -100,6 +99,7 @@ public class FileUtil extends AbstractComponentRuntime {
         appendToName = typedProperties.get(SETTING_APPEND_TO_NAME);
         overwrite = typedProperties.is(SETTING_OVERWRITE, overwrite);
         runWhen = typedProperties.get(RUN_WHEN, PER_UNIT_OF_WORK);
+        newName = typedProperties.get(SETTING_TARGET_NAME);
     }
 
 	@Override
@@ -143,12 +143,20 @@ public class FileUtil extends AbstractComponentRuntime {
         } else if (sourceFileInfo != null) {
             Map<String, String> parms = new HashMap<>(getComponentContext().getFlowParametersAsString());
             parms.putAll(inputMessage.getHeader().getAsStrings());
-            String tokenResolvedName = FormatUtils.replaceTokens(targetRelativePath, parms, true);
-            if (getFileNameFromMessage || targetRelativePath.endsWith("/")) {
-                tokenResolvedName = tokenResolvedName + "/" + sourceFileInfo.getName();
+            
+            String targetPath = targetRelativePath;
+            if (getFileNameFromMessage || targetRelativePath.endsWith("/") || isNotBlank(newName)) {
+                String fileName = null;
+                if (isNotBlank(newName)) {
+                    fileName = newName;
+                } else {
+                    fileName = sourceFileInfo.getName();
+                }
+                targetPath = targetPath + "/" + fileName;
             }
+            targetPath = FormatUtils.replaceTokens(targetPath, parms, true);
             String tokenResolvedAppendToName = FormatUtils.replaceTokens(appendToName, parms, true);
-            String targetFileWithouPart = getTargetFileName(tokenResolvedName, sourceFileInfo, tokenResolvedAppendToName);
+            String targetFileWithouPart = getTargetFileName(targetPath, sourceFileInfo, tokenResolvedAppendToName);
             String targetFileName = targetFileWithouPart + ".part";
 
             FileInfo targetFile = directory.listFile(targetFileName);
