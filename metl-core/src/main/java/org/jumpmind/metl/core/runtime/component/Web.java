@@ -33,7 +33,7 @@ import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.Http;
 import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.runtime.resource.IStreamable;
+import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.util.FormatUtils;
 
 public class Web extends AbstractComponentRuntime {
@@ -87,7 +87,7 @@ public class Web extends AbstractComponentRuntime {
 
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
-			IStreamable streamable = getResourceReference();
+			IDirectory streamable = getResourceReference();
 
 			ArrayList<String> outputPayload = new ArrayList<String>();
 			ArrayList<String> inputPayload = new ArrayList<String>();

@@ -37,6 +37,10 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
+<<<<<<< HEAD
+=======
+import org.jumpmind.metl.core.runtime.resource.LocalFile;
+>>>>>>> branch 'master' of https://github.com/JumpMind/metl.git
 import org.jumpmind.util.FormatUtils;
 
 public class TextFileReader extends AbstractFileReader {
@@ -66,13 +70,74 @@ public class TextFileReader extends AbstractFileReader {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-    	
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {    	
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
 			List<String> files = getFilesToRead(inputMessage);
     		processFiles(files, callback, unitOfWorkBoundaryReached);
     	}
+<<<<<<< HEAD
+=======
+    }
+
+    @Override
+    public void flowCompletedWithErrors(Throwable myError) {
+        if (ACTION_ARCHIVE.equals(actionOnError)) {
+            archive(archiveOnErrorPath);
+        } else if (ACTION_DELETE.equals(actionOnError)) {
+            deleteFiles();
+        }
+    }
+
+    @Override
+    public void flowCompleted(boolean cancelled) {
+        if (ACTION_ARCHIVE.equals(actionOnSuccess)) {
+            archive(archiveOnSuccessPath);
+        } else if (ACTION_DELETE.equals(actionOnSuccess)) {
+            deleteFiles();
+        }
+    }
+
+    protected void deleteFiles() {
+        IDirectory streamable = getResourceReference();
+        for (String srcFile : filesRead) {
+            if (streamable.delete(srcFile)) {
+                warn("Deleted %s", srcFile);
+            } else {
+                warn("Failed to delete %s", srcFile);
+            }
+        }
+    }
+
+    protected void archive(String archivePath) {
+        String path = getResourceRuntime().getResourceRuntimeSettings().get(LocalFile.LOCALFILE_PATH);
+        File destDir = new File(path, archivePath);
+        for (String srcFileName : filesRead) {
+            try {
+                File srcFile = new File(path, srcFileName);
+                File targetFile = new File(destDir, srcFile.getName());
+                if (targetFile.exists()) {
+                    info("The msgTarget file already exists.   Deleting it in order to archive a new file.");
+                    FileUtils.deleteQuietly(targetFile);
+                }
+                info("Archiving %s tp %s", srcFile, destDir.getAbsolutePath());
+                FileUtils.moveFileToDirectory(srcFile, destDir, true);
+            } catch (IOException e) {
+                throw new IoException(e);
+            }
+        }
+    }
+
+    private List<String> getFilesToRead(Message inputMessage) {
+        ArrayList<String> files = null;
+        if (getFileNameFromMessage) {
+            files = inputMessage.getPayload();
+        } else {
+            files = new ArrayList<String>(1);
+            files.add(relativePathAndFile);
+        }
+        return files;
+>>>>>>> branch 'master' of https://github.com/JumpMind/metl.git
     }
 
     private void processFiles(List<String> files, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {

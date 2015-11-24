@@ -52,11 +52,11 @@ public class Ftp extends AbstractResourceRuntime {
     @SettingDefinition(type = Type.INTEGER, order = 70, required = false, label = "Connection Timeout", defaultValue = "30000")
     public static final String CONNECTION_TIMEOUT = "connection.timeout";
 
-    FtpStreamable streamableResource;
+    FtpDirectory streamableResource;
 
     @Override
     protected void start(TypedProperties properties) {
-        streamableResource = new FtpStreamable(properties.getProperty(SERVER),
+        streamableResource = new FtpDirectory(properties.getProperty(SERVER),
                 isNotBlank(properties.getProperty(PORT)) ? properties.getInt(PORT) : null, properties.getProperty(USER),
                 properties.getProperty(PASSWORD), properties.getProperty(BASE_PATH), properties.getInt(CONNECTION_TIMEOUT));
     }

@@ -19,13 +19,11 @@
 include::../common-properties/unit-of-work.ad[]
 include::../common-properties/enabled.ad[]
 |Action|Either Copy, Rename, Move, Delete or Touch.  Copy will copy the file, move will move the file, delete will delete the file, and touch will update the files last updated date/time.
-|Target Resource|The target resource to which target files will be written if the Action is Copy or Move
 |Source Path|The path and file name of the source file(s) to be manipulated.  Wildcard character (*) can be used.
 |Target Path|The target path used to write files if the Action is Copy, Move, or Rename.  This path will be appended to the path of specified Resource
 be specified as a path only, and the target file names will be derived from the source file names. 
 |Get Input File Name From Message|Whether to get input file name from the payload of inbound messages or from the Source Path parameter.  If selected, source file names come from the payload of inbound messages
-|Must Exist|Whether source files must exist.  If selected and a source file does not exist, an error will be triggered and the flow terminated
-|Target File Name|The name to be used for the target file on a Copy, Move or Rename Action.  If left blank, the source name will be used as the target name
+|Target File Name|The name to use for the target file.  If not set, the original name will be used.
 |Append To Name|A text string that will be appended to the end of each target file name (before the extension).
 include::../common-properties/log-input.ad[]
 include::../common-properties/log-output.ad[]

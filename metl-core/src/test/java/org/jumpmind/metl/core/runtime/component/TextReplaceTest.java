@@ -99,7 +99,7 @@ public class TextReplaceTest extends AbstractComponentRuntimeTestSupport {
 
 	@Test
 	@Override
-	public void testHandleNormal() {
+	public void testHandleNormal() throws Exception {
 		// Setup
 		setupHandle();
 		((TextReplace) spy).searchFor = "replaceMe";

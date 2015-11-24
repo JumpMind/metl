@@ -103,7 +103,7 @@ public class SorterTest extends AbstractComponentRuntimeTestSupport {
 
 	@Test
 	@Override
-	public void testHandleNormal() {
+	public void testHandleNormal() throws Exception {
 		// Setup
 		setupHandle();
 		((Sorter) spy).sortAttributeId = MODEL_ATTR_ID_1;

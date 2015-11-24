@@ -35,7 +35,7 @@ public class GateTest extends AbstractComponentRuntimeTestSupport{
 
 	@Test
 	@Override
-	public void testHandleNormal() {
+	public void testHandleNormal() throws Exception {
 		setupHandle();
 		((Gate) spy).gateControlSourceStepId = "step1";
 		

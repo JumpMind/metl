@@ -25,7 +25,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jumpmind.exception.IoException;
 import org.slf4j.Logger;
@@ -51,11 +53,16 @@ abstract public class AbstractXMLFactory {
     
     protected List<InputStream> loadResources(final String name, final ClassLoader classLoader) {
         try {
+            Set<URL> urls = new HashSet<>();
             final List<InputStream> list = new ArrayList<InputStream>();
             final Enumeration<URL> systemResources = (classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader)
                     .getResources(name);
             while (systemResources.hasMoreElements()) {
-                list.add(systemResources.nextElement().openStream());
+                URL url  = systemResources.nextElement();
+                if (!urls.contains(url)) {
+                    list.add(url.openStream());
+                    urls.add(url);
+                }
             }
             return list;
         } catch (IOException e) {

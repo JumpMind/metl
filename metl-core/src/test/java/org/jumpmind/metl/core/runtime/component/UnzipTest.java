@@ -35,7 +35,7 @@ import java.util.zip.ZipFile;
 
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.runtime.resource.IStreamable;
+import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.properties.TypedProperties;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -74,7 +74,7 @@ public class UnzipTest extends AbstractComponentRuntimeTestSupport {
 	}
 
 	@Override
-	public void testHandleNormal() {
+	public void testHandleNormal() throws Exception {
 		// Setup
 		setupHandle(true);
 		
@@ -96,7 +96,7 @@ public class UnzipTest extends AbstractComponentRuntimeTestSupport {
 		super.setupHandle();
 		
 		IResourceRuntime mockResourceRuntime = mock(IResourceRuntime.class);
-		IStreamable mockStreamable = mock(IStreamable.class);
+		IDirectory mockStreamable = mock(IDirectory.class);
 		TypedProperties mockTypedProperties = mock(TypedProperties.class);
 		File mockFile = mock(File.class);
 		ZipFile mockZipFile = mock(ZipFile.class);

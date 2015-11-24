@@ -81,11 +81,11 @@ public class TestProjectTest {
 
     @Parameters(name = "{0}")
     public static Collection<Object[]> getFlows() throws Exception {
-        File logDir = new File("work/logs");
+        File logDir = new File("working/logs");
         logDir.delete();
         logDir.mkdirs();
         LogUtils.setLogDir(logDir);
-        System.setProperty("log.file", "work/logs/metl.log");
+        System.setProperty("log.file", "working/logs/metl.log");
         databasePlatform = DbTestUtils.createDatabasePlatform();
         new ConfigDatabaseUpgrader("/schema-v1.xml", databasePlatform, true, "METL").upgrade();
         persistenceManager = new SqlPersistenceManager(databasePlatform);

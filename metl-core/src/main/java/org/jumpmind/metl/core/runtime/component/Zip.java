@@ -36,7 +36,7 @@ import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.runtime.resource.IStreamable;
+import org.jumpmind.metl.core.runtime.resource.IDirectory;
 
 public class Zip extends AbstractComponentRuntime {
 
@@ -84,7 +84,7 @@ public class Zip extends AbstractComponentRuntime {
         }
         
         if (unitOfWorkBoundaryReached) {
-            IStreamable streamable = getResourceReference();
+            IDirectory streamable = getResourceReference();
             ZipOutputStream zos = null;
             try {
                 streamable.delete(relativePathAndFile);

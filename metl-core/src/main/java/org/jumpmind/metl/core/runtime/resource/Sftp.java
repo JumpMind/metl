@@ -54,11 +54,11 @@ public class Sftp extends AbstractResourceRuntime {
     @SettingDefinition(type = Type.INTEGER, order = 70, required = false, defaultValue="30000", label = "Connection Timeout")
     public static final String SFTP_CONNECTION_TIMEOUT = "sftp.connection.timeout";
     
-    IStreamable streamableResource;
+    IDirectory streamableResource;
 
     @Override
     protected void start(TypedProperties properties) {
-        streamableResource = new SftpStreamable(resource,
+        streamableResource = new SftpDirectory(resource,
                 properties.getProperty(SFTP_SERVER), 
                 properties.getInt(SFTP_PORT),
                 properties.getProperty(SFTP_USER),

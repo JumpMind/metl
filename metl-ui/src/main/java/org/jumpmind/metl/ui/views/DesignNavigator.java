@@ -68,8 +68,6 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.FieldEvents.BlurEvent;
-import com.vaadin.event.FieldEvents.BlurListener;
 import com.vaadin.event.FieldEvents.FocusEvent;
 import com.vaadin.event.FieldEvents.FocusListener;
 import com.vaadin.event.ItemClickEvent;
@@ -403,21 +401,8 @@ public class DesignNavigator extends VerticalLayout {
                     abortEditingItem();
                 }
             });
-            field.addShortcutListener(new ShortcutListener("Enter", KeyCode.ENTER, null) {
-
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public void handleAction(Object sender, Object target) {
-                    finishEditingItem();
-                }
-            });
-            field.addBlurListener(new BlurListener() {
-                @Override
-                public void blur(BlurEvent event) {
-                    finishEditingItem();
-                }
-            });
+            field.addValueChangeListener(event -> finishEditingItem());
+            field.addBlurListener(event -> finishEditingItem());
             return field;
         } else {
             return null;

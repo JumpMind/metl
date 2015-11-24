@@ -90,7 +90,7 @@ public class DelimitedParserTest extends AbstractComponentRuntimeTestSupport {
 
 	@Test
 	@Override
-	public void testHandleNormal() {
+	public void testHandleNormal() throws Exception {
 		setupHandle();
 		((DelimitedParser) spy).attributes = new ArrayList<AttributeFormat>();
 		

@@ -42,7 +42,6 @@ import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageAssert;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
-import org.jumpmind.metl.core.runtime.resource.IStreamable;
 import org.jumpmind.metl.core.utils.TestUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.junit.Assert;
@@ -67,19 +66,26 @@ public abstract class AbstractComponentRuntimeTestSupport {
 	public static String ENTITY_2_KEY_1 = "e2.col1";
 	public static String ENTITY_2_VALUE_1 = "val3";
 	
+	private ComponentRuntimeFromXMLFactory componentRuntimeFromXMLFactory;
+	
 	// Standard tests that should be implemented for all components
 	public abstract void testHandleStartupMessage();
 	public abstract void testHandleUnitOfWorkLastMessage();
-	public abstract void testHandleNormal();
+	public abstract void testHandleNormal() throws Exception;
 	public abstract void testStartDefaults();
 	public abstract void testStartWithValues();
 	
 	abstract protected String getComponentId();
 	
+	protected ComponentRuntimeFromXMLFactory getComponentRuntimeFromXMLFactory() {
+	    if (componentRuntimeFromXMLFactory == null) {
+	        componentRuntimeFromXMLFactory = new ComponentRuntimeFromXMLFactory();
+	    }
+	    return componentRuntimeFromXMLFactory;
+	}
+	
 	public IComponentRuntime getComponentSpy() {
-	    ComponentRuntimeFromXMLFactory factory = new ComponentRuntimeFromXMLFactory();
-	    factory.refresh();
-	    return Mockito.spy(factory.create(getComponentId()));
+	    return Mockito.spy(getComponentRuntimeFromXMLFactory().create(getComponentId()));
 	}
 	
 	IComponentRuntime spy;
@@ -100,7 +106,6 @@ public abstract class AbstractComponentRuntimeTestSupport {
 	Flow flow;
 	ExecutionTrackerNoOp eExecutionTracker;
 	TypedProperties properties;
-	IStreamable resource;
 	
 	// internal testing variable so setupHandle and runHandle can be called independently
 	boolean setupCalled;
@@ -122,7 +127,6 @@ public abstract class AbstractComponentRuntimeTestSupport {
 		flowParameters = new HashMap<String, Serializable>();
 		flowStep = mock(FlowStep.class);
 		flow = mock(Flow.class);
-		resource = mock(IStreamable.class);
 		
 		eExecutionTracker = new ExecutionTrackerNoOp();
 		properties = new TypedProperties();
@@ -169,7 +173,6 @@ public abstract class AbstractComponentRuntimeTestSupport {
 		when(flowStep.getComponent()).thenReturn(component);
 		
 		doReturn(eExecutionTracker).when((AbstractComponentRuntime) spy).getExecutionTracker();
-		doReturn(resource).when((AbstractComponentRuntime) spy).getResourceReference();
 		
 		spy.start(0, context);
 		setupCalled = true;
@@ -226,7 +229,7 @@ public abstract class AbstractComponentRuntimeTestSupport {
 				HandleMessageMonitor expected = expectedMonitors.get(i);
 				HandleMessageMonitor actual = messages.get(i).getCallback().getMonitor();
 			
-				assertEquals("Statistics entities processed are not equal", numberEntitiesProcessed, 
+				assertEquals("The number of entities processed are not equal.  ", numberEntitiesProcessed, 
 						((AbstractComponentRuntime) spy).getComponentStatistics().getNumberEntitiesProcessed(0));
 				//assertEquals("Send message counts do not match [message " + (i + 1) + "]", expected.getSendMessageCount(), actual.getSendMessageCount());
 				//assertEquals("Start message counts do not match [message " + (i + 1) + "]", expected.getStartupMessageCount(), actual.getStartupMessageCount());
