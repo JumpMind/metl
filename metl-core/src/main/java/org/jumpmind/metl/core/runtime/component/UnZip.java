@@ -141,10 +141,11 @@ public class UnZip extends AbstractComponentRuntime {
                             info("Unzipping %s", entry.getName());
 
                             if (!entry.isDirectory() && (extractEmptyFiles || entry.getSize() > 0)) {
-                                out = targetDir.getOutputStream(targetDirNameResolved + "/" + entry.getName(), false);
+                                String relativePathToEntry = targetDirNameResolved + "/" + entry.getName();
+                                out = targetDir.getOutputStream(relativePathToEntry, false);
                                 in = zipFile.getInputStream(entry);
                                 IOUtils.copy(in, out);
-                                filePaths.add(targetDirNameResolved);
+                                filePaths.add(relativePathToEntry);
                             }
                         }
                     } catch (IOException e) {
