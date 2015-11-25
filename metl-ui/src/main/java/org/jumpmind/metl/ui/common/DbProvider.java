@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.ui.common;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,17 +36,27 @@ import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.symmetric.ui.sqlexplorer.IDb;
 import org.jumpmind.symmetric.ui.sqlexplorer.IDbProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DbProvider implements IDbProvider, Serializable {
 
     private static final long serialVersionUID = 1L;
+    
+    final protected Logger log = LoggerFactory.getLogger(getClass());
 
-    List<IDb> dbs = new ArrayList<IDb>();
+    transient List<IDb> dbs = new ArrayList<>();
 
     ApplicationContext context;
 
     public DbProvider(ApplicationContext context) {
         this.context = context;
+    }
+    
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        dbs = new ArrayList<>();
+        refresh();
     }
 
     public void refresh() {
@@ -78,22 +89,27 @@ public class DbProvider implements IDbProvider, Serializable {
             }
         });
 
-        dbs.add(0, new IDb() {
-            @Override
-            public IDatabasePlatform getPlatform() {
-                return context.getConfigDatabasePlatform();
-            }
-
-            @Override
-            public String getName() {
-                return "Metl DB";
-            }
-        });
+        dbs.add(0, new MetlDb());
 
     }
 
     @Override
     public List<IDb> getDatabases() {
         return dbs;
+    }
+    
+    class MetlDb implements IDb, Serializable {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public IDatabasePlatform getPlatform() {
+            return context.getConfigDatabasePlatform();
+        }
+
+        @Override
+        public String getName() {
+            return "Metl DB";
+        }
+
     }
 }

@@ -37,7 +37,6 @@ import org.jumpmind.metl.ui.views.IUIFactory;
 import org.jumpmind.symmetric.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.core.env.Environment;
 
 @UiComponent
 @Scope(value = "ui")
@@ -70,7 +69,13 @@ public class ApplicationContext implements Serializable {
     IDatabasePlatform configDatabasePlatform;
     
     @Autowired
-    Environment environment;
+    String configDir;
+    
+    @Autowired
+    String logFile;
+    
+    @Autowired
+    boolean logToFileEnabled;
 
     User user = new User();
     
@@ -81,7 +86,7 @@ public class ApplicationContext implements Serializable {
     }
     
     public String getConfigDir() {
-        return environment.getProperty("config.dir");
+        return configDir;
     }
 
     public IExecutionService getExecutionService() {
@@ -115,15 +120,19 @@ public class ApplicationContext implements Serializable {
     public List<ProjectVersion> getOpenProjects() {
         return openProjects;
     }
+    
+    public String getLogFile() {
+        return logFile;
+    }
+    
+    public boolean isLogToFileEnabled() {
+        return logToFileEnabled;
+    }
 
     public IDatabasePlatform getConfigDatabasePlatform() {
         return configDatabasePlatform;
     }
-    
-    public Environment getEnvironment() {
-        return environment;
-    }
-    
+        
     public IUIFactory getUiFactory() {
         return uiFactory;
     }

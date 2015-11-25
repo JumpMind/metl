@@ -53,6 +53,8 @@ public class Develop {
         storeDir.mkdirs();
         sessionManager.setStoreDirectory(storeDir);
         sessionManager.setLazyLoad(true);
+        sessionManager.setSavePeriod(5);
+        sessionManager.setDeleteUnrestorableSessions(true);
         SessionHandler sessionHandler = new SessionHandler(sessionManager);
         webapp.setSessionHandler(sessionHandler);
         
