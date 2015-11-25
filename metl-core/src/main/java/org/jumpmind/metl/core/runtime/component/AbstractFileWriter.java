@@ -22,7 +22,7 @@ public abstract class AbstractFileWriter extends AbstractComponentRuntime {
     protected void init() {
     	
         TypedProperties properties = getTypedProperties();
-        relativePathAndFile = FormatUtils.replaceTokens(properties.get(SETTING_RELATIVE_PATH), context.getFlowParametersAsString(),
+        relativePathAndFile = FormatUtils.replaceTokens(properties.get(SETTING_RELATIVE_PATH), context.getFlowParameters(),
                 true);
         mustExist = properties.is(SETTING_MUST_EXIST);
         append = properties.is(SETTING_APPEND);

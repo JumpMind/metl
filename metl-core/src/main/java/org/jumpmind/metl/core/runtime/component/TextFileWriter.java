@@ -57,21 +57,8 @@ public class TextFileWriter extends AbstractFileWriter {
     protected void start() {
     	init();
         TypedProperties properties = getTypedProperties();
-<<<<<<< HEAD
         lineTerminator = properties.get(SETTING_TEXT_LINE_TERMINATOR);
         encoding = properties.get(SETTING_ENCODING, DEFAULT_ENCODING);        
-=======
-        Component component = getComponent();
-        relativePathAndFile = FormatUtils.replaceTokens(properties.get(TEXTFILEWRITER_RELATIVE_PATH), context.getFlowParameters(),
-                true);
-        mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
-        append = properties.is(TEXTFILEWRITER_APPEND);
-        lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
-        encoding = properties.get(TEXTFILEWRITER_ENCODING, DEFAULT_ENCODING);
-        getFileNameFromMessage = component.getBoolean(TEXTFILEWRITER_GET_FILE_FROM_MESSAGE, getFileNameFromMessage);
-        fileNameFromMessageProperty = component.get(TEXTFILEWRITER_FILENAME_PROPERTY, fileNameFromMessageProperty);
-        
->>>>>>> branch 'master' of https://github.com/JumpMind/metl.git
         if (lineTerminator != null) {
             lineTerminator = StringEscapeUtils.unescapeJava(properties.get(SETTING_TEXT_LINE_TERMINATOR));
         }
