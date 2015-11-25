@@ -86,6 +86,12 @@ public class FileUtil extends AbstractComponentRuntime {
     @Override
     protected void start() {
         TypedProperties typedProperties = getTypedProperties();
+        
+        IDirectory directory = getResourceReference();
+        if (directory == null) {
+            throw new MisconfiguredException("A directory resource must be configured.  It is required.");
+        }
+
         getFileNameFromMessage = typedProperties.is(SETTING_GET_FILE_FROM_MESSAGE, getFileNameFromMessage);
         if (!getFileNameFromMessage) {
             sourceRelativePath = typedProperties.get(SETTING_RELATIVE_PATH);
@@ -93,7 +99,7 @@ public class FileUtil extends AbstractComponentRuntime {
                 throw new MisconfiguredException("The relative path to find the source file has not been set.  It is required.");
             }
         }
-
+        
         action = typedProperties.get(SETTING_ACTION);
         targetRelativePath = typedProperties.get(SETTING_TARGET_RELATIVE_PATH);
         appendToName = typedProperties.get(SETTING_APPEND_TO_NAME);
