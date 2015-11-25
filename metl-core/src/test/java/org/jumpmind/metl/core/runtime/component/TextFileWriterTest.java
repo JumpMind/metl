@@ -151,7 +151,7 @@ public class TextFileWriterTest {
 
     private static Setting[] createWriterSettings() {
         Setting[] settingData = new Setting[1];
-        settingData[0] = new Setting(TextFileWriter.TEXTFILEWRITER_RELATIVE_PATH, FILE_NAME);
+        settingData[0] = new Setting(TextFileWriter.SETTING_RELATIVE_PATH, FILE_NAME);
 
         return settingData;
     }

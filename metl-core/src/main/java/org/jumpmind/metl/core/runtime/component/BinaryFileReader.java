@@ -40,10 +40,6 @@ public class BinaryFileReader extends AbstractFileReader {
     }
 
     private void processFiles(List<String> files, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-    	//parameter is in MB
-        byte[] payload = new byte[sizePerMessage*1024*1024];
-        int bytesRead;
-        int totalBytesRead=0;
 
         filesRead.addAll(files);
 
@@ -56,12 +52,13 @@ public class BinaryFileReader extends AbstractFileReader {
                 IDirectory resource = (IDirectory) getResourceReference();
                 String filePath = FormatUtils.replaceTokens(file, context.getFlowParametersAsString(), true);
                 inStream = resource.getInputStream(filePath, mustExist);
-                while ((bytesRead = inStream.read(payload)) != -1) {
-                	totalBytesRead += bytesRead;
-                	callback.sendMessage(headers, payload);
-                	payload = new byte[sizePerMessage*1024*1024];
-                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                }
+
+                //TODO: if the file is bigger than the allowable message size, this doesn't work
+                
+                byte[] payload = IOUtils.toByteArray(inStream);
+                callback.sendMessage(headers, payload);
+                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);               
+                
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
             } finally {
