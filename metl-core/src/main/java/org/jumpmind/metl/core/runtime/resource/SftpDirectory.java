@@ -25,7 +25,9 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Resource;
@@ -33,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.ChannelSftp.LsEntry;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -81,12 +84,37 @@ public class SftpDirectory implements IDirectory {
     
     @Override
     public void moveFile(String fromFilePath, String toFilePath) {
-        throw new UnsupportedOperationException();
+        Session session = null;
+        ChannelSftp sftp = null;
+        try {
+            session = connect();
+            sftp = (ChannelSftp) session.openChannel("sftp");
+            sftp.connect();
+            sftp.cd(basePath);
+            sftp.rename(fromFilePath, toFilePath);
+        } catch (Exception e) {
+            throw new IoException("Error moving (renaming) file.  Error %s", e.getMessage());
+        } finally {
+            SftpDirectory.this.close(session, sftp);
+        }
     }
     
     @Override
-    public boolean renameFile(String fileFilePath, String toFilePath) {
-        throw new UnsupportedOperationException();
+    public boolean renameFile(String fromFilePath, String toFilePath) {
+        Session session = null;
+        ChannelSftp sftp = null;
+        try {
+            session = connect();
+            sftp = (ChannelSftp) session.openChannel("sftp");
+            sftp.connect();
+            sftp.cd(basePath);
+            sftp.rename(fromFilePath, toFilePath);
+            return true;
+        } catch (Exception e) {
+            return false;
+        } finally {
+            SftpDirectory.this.close(session, sftp);
+        }
     }    
 
     private boolean fileExists(ChannelSftp sftp, String filePath) {
@@ -146,28 +174,32 @@ public class SftpDirectory implements IDirectory {
     
     @Override
     public List<FileInfo> listFiles(String... relativePaths) {
-//        Session session = null;
-//        ChannelSftp sftp = null;
-//        try {
-//            List<FileInfo> fileInfoList =  new ArrayList<>();
-//            session = connect();
-//            sftp = (ChannelSftp) session.openChannel("sftp");
-//            sftp.connect();
-//            sftp.cd(basePath);
-//            @SuppressWarnings("rawtypes")
-//            Vector list = sftp.ls(relativePath);
-//            for (Object object : list) {
-//                LsEntry entry = (LsEntry)object;
-//                fileInfoList.add(new FileInfo(entry.getFilename(), entry.getAttrs().isDir()));
-//                
-//            }
-//            return fileInfoList;
-//        } catch (Exception e) {
-//            throw new IoException("Error getting the input stream for ssh endpoint.  Error %s", e.getMessage());
-//        } finally {
-//            SftpDirectory.this.close(session, sftp);
-//        }
-        throw new UnsupportedOperationException();        
+        Session session = null;
+        ChannelSftp sftp = null;
+        try {
+            List<FileInfo> fileInfoList =  new ArrayList<>();
+            session = connect();
+            sftp = (ChannelSftp) session.openChannel("sftp");
+            sftp.connect();
+            sftp.cd(basePath);
+            for (String relativePath : relativePaths) {
+            	if (!relativePath.equals(".") && !relativePath.equals("..")) {
+	            	@SuppressWarnings("rawtypes")
+					Vector list = sftp.ls(relativePath);
+		            for (Object object : list) {
+		                LsEntry entry = (LsEntry)object;
+		                if (!entry.getFilename().equals(".") && !entry.getFilename().equals("..")) {
+		                	fileInfoList.add(new FileInfo(relativePath + entry.getFilename(), entry.getAttrs().isDir(), entry.getAttrs().getMTime()));
+		                }
+		            }
+            	}
+            }
+            return fileInfoList;
+        } catch (Exception e) {
+            throw new IoException("Error getting the input stream for ssh endpoint.  Error %s", e.getMessage());
+        } finally {
+            SftpDirectory.this.close(session, sftp);
+        }
     }
     
     @Override
@@ -177,7 +209,23 @@ public class SftpDirectory implements IDirectory {
     
     @Override
     public void moveToDir(String fromFilePath, String toDirPath) {
-        throw new UnsupportedOperationException();
+        Session session = null;
+        ChannelSftp sftp = null;
+        FileInfo fileInfo = new FileInfo(fromFilePath, false, new java.util.Date().getTime());
+        try {
+            session = connect();
+            sftp = (ChannelSftp) session.openChannel("sftp");
+            sftp.connect();
+            sftp.cd(basePath);
+            if (!toDirPath.endsWith("/")) {
+            	toDirPath += "/";
+            }
+            sftp.rename(fromFilePath, toDirPath + fileInfo.getName());
+        } catch (Exception e) {
+            throw new IoException("Error moving (renaming) directory.  Error %s", e.getMessage());
+        } finally {
+            SftpDirectory.this.close(session, sftp);
+        }
     }
 
     @Override
