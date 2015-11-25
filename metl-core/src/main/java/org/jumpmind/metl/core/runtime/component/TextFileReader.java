@@ -32,11 +32,11 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
+import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
 public class TextFileReader extends AbstractFileReader {
@@ -58,11 +58,10 @@ public class TextFileReader extends AbstractFileReader {
     @Override
     protected void start() {
     	init();
-    	//TODO: getTypedProperties
-        Component component = getComponent();
-        textHeaderLinesToSkip = component.getInt(SETTING_HEADER_LINES_TO_SKIP, textHeaderLinesToSkip);
-        textRowsPerMessage = component.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
-        encoding = component.get(SETTING_ENCODING, encoding);
+        TypedProperties properties = getTypedProperties();
+        textHeaderLinesToSkip = properties.getInt(SETTING_HEADER_LINES_TO_SKIP, textHeaderLinesToSkip);
+        textRowsPerMessage = properties.getInt(SETTING_ROWS_PER_MESSAGE, textRowsPerMessage);
+        encoding = properties.get(SETTING_ENCODING, encoding);
     }
 
     @Override

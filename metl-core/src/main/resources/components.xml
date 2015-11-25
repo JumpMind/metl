@@ -727,7 +727,7 @@
             </setting>  
        	</settings>
     </component>
-    <component id='Binary File Reader' category='READER' inputMessageType='binary' outputMessageType='binary' resourceCategory='streamable'
+    <component id='Binary File Reader' category='READER' inputMessageType='text' outputMessageType='binary' resourceCategory='streamable'
         inputOutputModelsMatch='false'>
         <name>Binary File Reader</name>
         <className>org.jumpmind.metl.core.runtime.component.BinaryFileReader</className>
@@ -790,33 +790,59 @@
         <className>org.jumpmind.metl.core.runtime.component.TextFileWriter</className>
         <description></description>
         <settings>
-            <setting id='textfilewriter.relative.path' type='text' required='true'>
+            <setting id='relative.path' type='text' required='false'>
                 <name>Path and File</name>
             </setting>
-            <setting id='textfilewriter.must.exist' type='boolean' required='true'>
+            <setting id='must.exist' type='boolean' required='true'>
                 <name>Must Exist</name>
                 <defaultValue>false</defaultValue>
             </setting>
-            <setting id='textfilewriter.append' type='boolean' required='true'>
+            <setting id='append' type='boolean' required='true'>
                 <name>Append</name>
                 <defaultValue>false</defaultValue>
             </setting>
-            <setting id='textfilewriter.text.line.terminator' type='text' required='false'>
+            <setting id='text.line.terminator' type='text' required='false'>
                 <name>Line Terminator</name>
             </setting>
-            <setting id='textfilewriter.encoding' type='text' required='false'>
+            <setting id='encoding' type='text' required='false'>
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
             </setting>          
-            <setting id='textfilewriter.filename.message.header' type='boolean' required='false'>
-                <name>Read File Name From Header</name>
+            <setting id='get.file.name.from.message' type='boolean' required='false'>
+                <name>Get File Name From Message</name>
                 <defaultValue>false</defaultValue>
             </setting>  
-            <setting id='textfilewriter.filename.property' type='text' required='false'>
-                <name>Read File Name From Header Property</name>
+            <setting id='filename.property' type='text' required='false'>
+                <name>Param Name For Msg Based File Name</name>
             </setting>     
         </settings>
     </component>
+    <component id='Binary File Writer' category='WRITER' inputMessageType='binary' outputMessageType='text' resourceCategory='streamable'
+        inputOutputModelsMatch='false'>
+        <name>Binary File Writer</name>
+        <className>org.jumpmind.metl.core.runtime.component.BinaryFileWriter</className>
+        <description></description>
+        <settings>
+            <setting id='relative.path' type='text' required='false'>
+                <name>Path and File</name>
+            </setting>
+            <setting id='must.exist' type='boolean' required='true'>
+                <name>Must Exist</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='append' type='boolean' required='true'>
+                <name>Append</name>
+                <defaultValue>false</defaultValue>
+            </setting>
+            <setting id='get.file.name.from.message' type='boolean' required='false'>
+                <name>Get File Name From Message</name>
+                <defaultValue>false</defaultValue>
+            </setting>  
+            <setting id='filename.property' type='text' required='false'>
+                <name>Param Name For Msg Based File Name</name>
+            </setting>     
+        </settings>
+    </component>    
     <component id='Text Replace' category='PROCESSOR' inputMessageType='text' outputMessageType='text' resourceCategory='none'
         inputOutputModelsMatch='false'>
         <name>Text Replace</name>
