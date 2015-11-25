@@ -60,6 +60,7 @@ public class ComponentContext {
         if (this.flowParameters == null) {
             this.flowParameters = new HashMap<>();
         }
+        this.flowParameters = Collections.synchronizedMap(this.flowParameters);
         this.globalSettings = globalSettings;
     }
 
