@@ -112,10 +112,12 @@ public class TextFileWriter extends AbstractFileWriter {
 
     private void initStreamAndWriter(Message inputMessage) {
 
-    	String fileName = getFileName(inputMessage);
-    	IDirectory streamable = initStream(fileName);
-        log(LogLevel.INFO, String.format("Writing text file to %s", streamable.toString()));
-       	bufferedWriter = initializeWriter(streamable.getOutputStream(fileName, mustExist));
+    	if (bufferedWriter == null) {
+	    	String fileName = getFileName(inputMessage);
+	    	IDirectory streamable = initStream(fileName);
+	        log(LogLevel.INFO, String.format("Writing text file to %s", streamable.toString()));
+	       	bufferedWriter = initializeWriter(streamable.getOutputStream(fileName, mustExist));
+    	}
     }
 
     private BufferedWriter initializeWriter(OutputStream stream) {

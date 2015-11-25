@@ -42,6 +42,8 @@ public abstract class AbstractFileWriter extends AbstractComponentRuntime {
 						fileNameFromMessageProperty + " is being passed into the message header");
     		}
 	    	fileName = (String) objFileName;
+    	} else {
+    		fileName = relativePathAndFile;
     	}
     	return fileName;
     }

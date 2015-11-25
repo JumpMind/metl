@@ -33,7 +33,10 @@ public class BinaryFileWriter extends AbstractFileWriter {
 			} catch(IOException e) {
 				throw new IoException(e);
 			}
-		} else {
+		} 
+		
+        if ((inputMessage instanceof ControlMessage ||
+        		unitOfWorkBoundaryReached) && callback != null) {
         	IOUtils.closeQuietly(fos);
             callback.sendMessage(null, "{\"status\":\"success\"}");			
 		}
