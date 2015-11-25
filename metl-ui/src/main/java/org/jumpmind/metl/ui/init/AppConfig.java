@@ -60,6 +60,7 @@ import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
 import org.jumpmind.metl.core.util.EnvConstants;
+import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.ui.views.IUIFactory;
 import org.jumpmind.metl.ui.views.UIXMLFactory;
 import org.jumpmind.persist.IPersistenceManager;
@@ -187,6 +188,26 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         String tablePrefix = env.getProperty(EnvConstants.TABLE_PREFIX, "METL");
         return configDatabasePlatform().alterCaseToMatchDatabaseDefaultCase(tablePrefix);
     }
+    
+    @Bean
+    @Scope(value = "singleton")
+    public String configDir() {
+        return env.getProperty(EnvConstants.CONFIG_DIR);
+    }
+    
+    @Bean
+    @Scope(value = "singleton")
+    public boolean logToFileEnabled() {
+        return Boolean.parseBoolean(env.getProperty(
+                EnvConstants.LOG_TO_FILE_ENABLED, "true"));
+    }
+
+    @Bean
+    @Scope(value = "singleton")
+    public String logFile() {
+        return env.getProperty(EnvConstants.LOG_FILE, LogUtils.getLogFilePath());
+    }
+
 
     @Bean
     @Scope(value = "singleton")

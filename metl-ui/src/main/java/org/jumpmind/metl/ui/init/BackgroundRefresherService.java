@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.ui.init;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
@@ -35,30 +36,38 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 @Component
-@Scope(value="ui")
+@Scope(value = "ui")
 public class BackgroundRefresherService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     final protected Logger log = LoggerFactory.getLogger(getClass());
 
-    protected Future<?> future;
+    protected transient Future<?> future;
 
     protected transient ThreadPoolTaskScheduler taskScheduler;
-    
+
     protected AppUI appUi;
 
-    protected Set<IBackgroundRefreshable> currentlyRefreshing = Collections
-            .synchronizedSet(new HashSet<IBackgroundRefreshable>());
+    protected Set<IBackgroundRefreshable> currentlyRefreshing = Collections.synchronizedSet(new HashSet<IBackgroundRefreshable>());
 
     protected void init(AppUI ui) {
         this.appUi = ui;
+        initBackgroundThread();
+    }
+
+    private void initBackgroundThread() {
         this.taskScheduler = new ThreadPoolTaskScheduler();
         this.taskScheduler.setThreadNamePrefix("ui-refresher-");
         this.taskScheduler.setPoolSize(1);
         this.taskScheduler.setDaemon(true);
-        this.taskScheduler.initialize();   
+        this.taskScheduler.initialize();
         setPollingInterval(2500);
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        initBackgroundThread();
     }
 
     protected void setPollingInterval(int interval) {
@@ -66,17 +75,19 @@ public class BackgroundRefresherService implements Serializable {
             future.cancel(false);
         }
         this.future = this.taskScheduler.scheduleWithFixedDelay(() -> refresh(), new Date(), interval);
-    }    
-    
+    }
+
     protected void refresh() {
         synchronized (currentlyRefreshing) {
-            for (final IBackgroundRefreshable refreshing : currentlyRefreshing) {
-                try {
-                    log.debug("refreshing background data " + refreshing.getClass().getSimpleName());
-                    final Object data = refreshing.onBackgroundDataRefresh();
-                    appUi.access(() -> refreshing.onBackgroundUIRefresh(data));
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
+            if (appUi.isAttached()) {
+                for (final IBackgroundRefreshable refreshing : currentlyRefreshing) {
+                    try {
+                        log.debug("refreshing background data " + refreshing.getClass().getSimpleName());
+                        final Object data = refreshing.onBackgroundDataRefresh();
+                        appUi.access(() -> refreshing.onBackgroundUIRefresh(data));
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
                 }
             }
         }

@@ -33,4 +33,6 @@ public final class EnvConstants {
     
     public final static String TABLE_PREFIX = "table.prefix";
     
+    public final static String CONFIG_DIR = "config.dir";
+    
 }
