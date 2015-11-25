@@ -492,7 +492,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             ArrayList<String> attributeIds = getAttributeIds(sqlToExecute, meta, columnHints);
             long ts = System.currentTimeMillis();
             while (rs.next()) {
-                if (outputRecCount++ % rowsPerMessage == 0 && payload != null) {
+                if (outputRecCount++ % rowsPerMessage == 0 && payload != null && !payload.isEmpty()) {
                     callback.sendMessage(null, payload);
                     payload.clear();
                 }
