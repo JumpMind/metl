@@ -556,15 +556,6 @@
         <className>org.jumpmind.metl.core.runtime.component.Script</className>
         <description></description>
         <settings>
-            <setting id='run.when' type='choice' required='false'>
-                <name>Run When</name>
-                <defaultValue>PER MESSAGE</defaultValue>
-                    <choices>
-                    <choice>PER UNIT OF WORK</choice>
-                    <choice>PER MESSAGE</choice>
-                    <choice>PER ENTITY</choice>                    
-                </choices>
-            </setting>                              
             <setting id='imports' type='script' required='true' visible='false'>
                 <name>Import Statements</name>
             </setting>

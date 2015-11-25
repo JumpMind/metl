@@ -22,7 +22,6 @@ package org.jumpmind.metl.core.runtime.flow;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -36,7 +35,6 @@ import javax.mail.MessagingException;
 import javax.mail.Transport;
 import javax.mail.internet.MimeMessage;
 
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.jumpmind.metl.core.model.Agent;
@@ -125,7 +123,6 @@ public class FlowRuntime {
     	start(executionId, deployedResources, agent, notifications, globalSettings, null);
     }
 
-    @SuppressWarnings("unchecked")
     public void start(String executionId, Map<String, IResourceRuntime> deployedResources, Agent agent, List<Notification> notifications,
             Map<String, String> globalSettings, Map<String, String> runtimeParameters) throws InterruptedException {    
         
@@ -139,15 +136,13 @@ public class FlowRuntime {
         this.notifications = notifications;
         this.mailSession = new MailSession(globalSettings);
         
-        Map<String, Serializable> parameters = getFlowParameters(deployment.getAgentDeploymentParameters(), agent.getAgentParameters());
+        Map<String, String> parameters = getFlowParameters(deployment.getAgentDeploymentParameters(), agent.getAgentParameters());
         
-        Map<String, Serializable> mergedParameters = new HashMap<String, Serializable>();
-        mergedParameters.putAll(parameters);
+        flowParameters = new HashMap<String, String>();
+        flowParameters.putAll(parameters);
         if (runtimeParameters != null) {
-        	mergedParameters.putAll(runtimeParameters);
+            flowParameters.putAll(runtimeParameters);
         }
-        
-        this.flowParameters = MapUtils.typedMap(mergedParameters, String.class, String.class);        
         
         Flow manipulatedFlow = manipulateFlow(deployment.getFlow());
 
@@ -159,7 +154,7 @@ public class FlowRuntime {
             boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true);
             if (enabled) {
                 ComponentContext context = new ComponentContext(deployment, flowStep, manipulatedFlow, executionTracker, 
-                        deployedResources, mergedParameters, globalSettings);
+                        deployedResources, flowParameters, globalSettings);
                 StepRuntime stepRuntime = new StepRuntime(componentFactory, context, this);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
@@ -244,8 +239,8 @@ public class FlowRuntime {
         return flow;
     }
 
-    protected Map<String, Serializable> getFlowParameters(List<AgentDeploymentParameter> deployParameters, List<AgentParameter> agentParameters) {
-        Map<String, Serializable> params = new HashMap<String, Serializable>();
+    protected Map<String, String> getFlowParameters(List<AgentDeploymentParameter> deployParameters, List<AgentParameter> agentParameters) {
+        Map<String, String> params = new HashMap<String, String>();
         if (agentParameters != null) {
             for (AgentParameter agentParameter : agentParameters) {
                 params.put(agentParameter.getName(), agentParameter.getValue());

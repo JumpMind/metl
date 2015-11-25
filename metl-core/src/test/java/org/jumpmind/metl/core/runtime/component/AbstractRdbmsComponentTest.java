@@ -91,7 +91,7 @@ public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntim
 		NamedParameterJdbcTemplate mJdbcTemplate = mock(NamedParameterJdbcTemplate.class);
 		
 		// Verify manipulatedFlow parameters as a string map were replaced
-		if (flowParametersAsString != null && flowParametersAsString.size() > 0) {
+		if (flowParameters != null && flowParameters.size() > 0) {
 			when(mJdbcTemplate.query(anyString(), anyMap(), Mockito.any(ResultSetExtractor.class))).thenAnswer(new Answer() {
 				public Object answer(InvocationOnMock invocation) {
 					Object[] args = invocation.getArguments();

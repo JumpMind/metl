@@ -113,19 +113,19 @@ public class FilePoller extends AbstractComponentRuntime {
 
         filesPerMessage = properties.getInt(ROWS_PER_MESSAGE);
         filePattern = FormatUtils.replaceTokens(properties.get(SETTING_FILE_PATTERN),
-                context.getFlowParametersAsString(), true);
+                context.getFlowParameters(), true);
         triggerFilePath = FormatUtils.replaceTokens(properties.get(SETTING_TRIGGER_FILE_PATH),
-                context.getFlowParametersAsString(), true);
+                context.getFlowParameters(), true);
         useTriggerFile = properties.is(SETTING_USE_TRIGGER_FILE, useTriggerFile);
         cancelOnNoFiles = properties.is(SETTING_CANCEL_ON_NO_FILES, cancelOnNoFiles);
         actionOnSuccess = properties.get(SETTING_ACTION_ON_SUCCESS, actionOnSuccess);
         actionOnError = properties.get(SETTING_ACTION_ON_ERROR, actionOnError);
         archiveOnErrorPath = FormatUtils.replaceTokens(
-                properties.get(SETTING_ARCHIVE_ON_ERROR_PATH), context.getFlowParametersAsString(),
+                properties.get(SETTING_ARCHIVE_ON_ERROR_PATH), context.getFlowParameters(),
                 true);
         archiveOnSuccessPath = FormatUtils.replaceTokens(
                 properties.get(SETTING_ARCHIVE_ON_SUCCESS_PATH),
-                context.getFlowParametersAsString(), true);
+                context.getFlowParameters(), true);
         maxFilesToPoll = properties.getInt(SETTING_MAX_FILES_TO_POLL);
         minFilesToPoll = properties.getInt(SETTING_MIN_FILES_TO_POLL);
         fileSortOption = properties.get(SETTING_FILE_SORT_ORDER, fileSortOption);

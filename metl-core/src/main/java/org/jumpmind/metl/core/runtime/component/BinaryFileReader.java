@@ -50,7 +50,7 @@ public class BinaryFileReader extends AbstractFileReader {
             try {
                 info("Reading file: %s", file);
                 IDirectory resource = (IDirectory) getResourceReference();
-                String filePath = FormatUtils.replaceTokens(file, context.getFlowParametersAsString(), true);
+                String filePath = FormatUtils.replaceTokens(file, context.getFlowParameters(), true);
                 inStream = resource.getInputStream(filePath, mustExist);
 
                 //TODO: if the file is bigger than the allowable message size, this doesn't work

@@ -141,7 +141,7 @@ public class FileUtil extends AbstractComponentRuntime {
         if (mustExist && sourceFileInfo == null) {
             throw new FileNotFoundException("Unable to locate file " + sourceFileName);
         } else if (sourceFileInfo != null) {
-            Map<String, String> parms = new HashMap<>(getComponentContext().getFlowParametersAsString());
+            Map<String, String> parms = new HashMap<>(getComponentContext().getFlowParameters());
             parms.putAll(inputMessage.getHeader().getAsStrings());
             
             String targetPath = targetRelativePath;

@@ -56,6 +56,6 @@ public interface IDirectory {
     
     public void moveToDir(String fromFilePath, String toDirPath);
     
-    public boolean renameFile(String fileFilePath, String toFilePath);
+    public boolean renameFile(String fromFilePath, String toFilePath);
             
 }
