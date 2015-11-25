@@ -123,7 +123,6 @@ public class FlowRuntime {
     	start(executionId, deployedResources, agent, notifications, globalSettings, null);
     }
 
-    @SuppressWarnings("unchecked")
     public void start(String executionId, Map<String, IResourceRuntime> deployedResources, Agent agent, List<Notification> notifications,
             Map<String, String> globalSettings, Map<String, String> runtimeParameters) throws InterruptedException {    
         
