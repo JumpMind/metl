@@ -20,10 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import org.jumpmind.metl.core.model.AgentDeployment;
@@ -44,14 +42,14 @@ public class ComponentContext {
 
     Map<String, IResourceRuntime> deployedResources;
 
-    Map<String, Serializable> flowParameters;
+    Map<String, String> flowParameters;
 
     Map<String, String> globalSettings;
 
     ComponentStatistics componentStatistics = new ComponentStatistics();
 
     public ComponentContext(AgentDeployment deployment, FlowStep flowStep, Flow manipulatedFlow, IExecutionTracker executionTracker,
-            Map<String, IResourceRuntime> deployedResources, Map<String, Serializable> flowParameters, Map<String, String> globalSettings) {
+            Map<String, IResourceRuntime> deployedResources, Map<String, String> flowParameters, Map<String, String> globalSettings) {
         this.deployment = deployment;
         this.flowParameters = Collections.synchronizedMap(flowParameters == null ? new HashMap<>() : new HashMap<>(flowParameters));
         this.flowStep = flowStep;
@@ -59,6 +57,9 @@ public class ComponentContext {
         this.executionTracker = executionTracker;
         this.deployedResources = deployedResources;
         this.flowParameters = flowParameters;
+        if (this.flowParameters == null) {
+            this.flowParameters = new HashMap<>();
+        }
         this.globalSettings = globalSettings;
     }
 
@@ -86,23 +87,8 @@ public class ComponentContext {
         return deployedResources.get(flowStep.getComponent().getResourceId());
     }
 
-    public Map<String, Serializable> getFlowParameters() {
+    public Map<String, String> getFlowParameters() {
         return flowParameters;
-    }
-
-    public Map<String, String> getFlowParametersAsString() {
-        Map<String, String> params = new HashMap<String, String>();
-        if (flowParameters != null) {
-            for (String key : new HashSet<>(flowParameters.keySet())) {
-                Serializable value = flowParameters.get(key);
-                if (value != null) {
-                    params.put(key, value.toString());
-                } else {
-                    params.put(key, null);
-                }
-            }
-        }
-        return params;
     }
 
     public void setComponentStatistics(ComponentStatistics componentStatistics) {

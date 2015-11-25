@@ -64,7 +64,7 @@ public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
 
         shared = getComponent().getBoolean(SHARED, shared);
         if (shared) {
-            sharedName = FormatUtils.replaceTokens(getComponent().get(SHARED_NAME), context.getFlowParametersAsString(), true);
+            sharedName = FormatUtils.replaceTokens(getComponent().get(SHARED_NAME), context.getFlowParameters(), true);
             if (sharedName == null) {
                 throw new IllegalStateException("The 'Shared Name' must be set when this sequence is shared");
             } else {
@@ -94,7 +94,7 @@ public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
         }
 
         synchronized (SequenceGenerator.class) {
-            final String sqlToExecute = FormatUtils.replaceTokens(this.sql, context.getFlowParametersAsString(), true);
+            final String sqlToExecute = FormatUtils.replaceTokens(this.sql, context.getFlowParameters(), true);
             log(LogLevel.DEBUG, "About to run: " + sqlToExecute);
             nonSharedSequenceNumber = getJdbcTemplate().queryForObject(sqlToExecute, context.getFlowParameters(), Long.class);
             if (nonSharedSequenceNumber == null) {

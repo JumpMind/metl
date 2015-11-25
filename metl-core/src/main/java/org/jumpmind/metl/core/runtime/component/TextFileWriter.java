@@ -79,7 +79,7 @@ public class TextFileWriter extends AbstractComponentRuntime {
     protected void start() {
         TypedProperties properties = getTypedProperties();
         Component component = getComponent();
-        relativePathAndFile = FormatUtils.replaceTokens(properties.get(TEXTFILEWRITER_RELATIVE_PATH), context.getFlowParametersAsString(),
+        relativePathAndFile = FormatUtils.replaceTokens(properties.get(TEXTFILEWRITER_RELATIVE_PATH), context.getFlowParameters(),
                 true);
         mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
         append = properties.is(TEXTFILEWRITER_APPEND);

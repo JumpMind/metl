@@ -54,7 +54,7 @@ public class BinaryFileReader extends AbstractFileReader {
             try {
                 info("Reading file: %s", file);
                 IDirectory resource = (IDirectory) getResourceReference();
-                String filePath = FormatUtils.replaceTokens(file, context.getFlowParametersAsString(), true);
+                String filePath = FormatUtils.replaceTokens(file, context.getFlowParameters(), true);
                 inStream = resource.getInputStream(filePath, mustExist);
                 while ((bytesRead = inStream.read(payload)) != -1) {
                 	totalBytesRead += bytesRead;

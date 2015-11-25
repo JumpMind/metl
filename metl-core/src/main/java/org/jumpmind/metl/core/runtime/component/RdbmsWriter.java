@@ -118,11 +118,11 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 		if (tablePrefix == null) {
 			tablePrefix = "";
 		}
-		catalogName = FormatUtils.replaceTokens(properties.get(CATALOG), context.getFlowParametersAsString(), true);
+		catalogName = FormatUtils.replaceTokens(properties.get(CATALOG), context.getFlowParameters(), true);
 		if (isBlank(catalogName)) {
 			catalogName = null;
 		}
-		schemaName = FormatUtils.replaceTokens(properties.get(SCHEMA), context.getFlowParametersAsString(), true);
+		schemaName = FormatUtils.replaceTokens(properties.get(SCHEMA), context.getFlowParameters(), true);
 		if (isBlank(schemaName)) {
 			schemaName = null;
 		}

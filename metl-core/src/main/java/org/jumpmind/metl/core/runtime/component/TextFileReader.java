@@ -90,7 +90,7 @@ public class TextFileReader extends AbstractFileReader {
             try {
                 info("Reading file: %s", file);
                 IDirectory resource = (IDirectory) getResourceReference();
-                String filePath = FormatUtils.replaceTokens(file, context.getFlowParametersAsString(), true);
+                String filePath = FormatUtils.replaceTokens(file, context.getFlowParameters(), true);
                 inStream = resource.getInputStream(filePath, mustExist);
                 reader = new BufferedReader(new InputStreamReader(inStream, encoding));
 

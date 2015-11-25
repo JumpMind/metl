@@ -26,7 +26,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -100,8 +99,7 @@ public abstract class AbstractComponentRuntimeTestSupport {
 	Component component;
 	ComponentContext context;
 	ComponentStatistics componentStatistics;
-	Map<String, String> flowParametersAsString;
-	Map<String, Serializable> flowParameters;
+	Map<String, String> flowParameters;
 	FlowStep flowStep;
 	Flow flow;
 	ExecutionTrackerNoOp eExecutionTracker;
@@ -123,8 +121,7 @@ public abstract class AbstractComponentRuntimeTestSupport {
 		component = mock(Component.class);
 		
 		componentStatistics = new ComponentStatistics();
-		flowParametersAsString = new HashMap<String, String>();
-		flowParameters = new HashMap<String, Serializable>();
+		flowParameters = new HashMap<>();
 		flowStep = mock(FlowStep.class);
 		flow = mock(Flow.class);
 		
@@ -163,7 +160,6 @@ public abstract class AbstractComponentRuntimeTestSupport {
 		ExecutionTrackerNoOp eExecutionTracker = new ExecutionTrackerNoOp();
 		
 		when(context.getComponentStatistics()).thenReturn(componentStatistics);
-		when(context.getFlowParametersAsString()).thenReturn(flowParametersAsString);
 		when(context.getFlowParameters()).thenReturn(flowParameters);
 		when(context.getFlowStep()).thenReturn(flowStep);
 		

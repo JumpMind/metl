@@ -96,7 +96,7 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
         }
 
         for (String sql : this.sqls) {
-            final String sqlToExecute = FormatUtils.replaceTokens(sql, context.getFlowParametersAsString(), true);
+            final String sqlToExecute = FormatUtils.replaceTokens(sql, context.getFlowParameters(), true);
             sqlCount += processSql(inputMessage, template, params, sqlToExecute);
         }
 
@@ -133,7 +133,7 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
     }
 
     private HashMap<String, Object> getParameters(Message inputMessage) {
-        HashMap<String, Object> params = new HashMap<String, Object>(context.getFlowParametersAsString());
+        HashMap<String, Object> params = new HashMap<String, Object>(context.getFlowParameters());
         params.putAll(inputMessage.getHeader());
         return params;
     }

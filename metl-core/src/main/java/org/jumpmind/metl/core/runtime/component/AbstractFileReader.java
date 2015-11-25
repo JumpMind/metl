@@ -48,9 +48,9 @@ public abstract class AbstractFileReader extends AbstractComponentRuntime {
         getFileNameFromMessage = component.getBoolean(SETTING_GET_FILE_FROM_MESSAGE, getFileNameFromMessage);
         actionOnSuccess = component.get(SETTING_ACTION_ON_SUCCESS, actionOnSuccess);
         actionOnError = component.get(SETTING_ACTION_ON_ERROR, actionOnError);
-        archiveOnErrorPath = FormatUtils.replaceTokens(component.get(SETTING_ARCHIVE_ON_ERROR_PATH), context.getFlowParametersAsString(),
+        archiveOnErrorPath = FormatUtils.replaceTokens(component.get(SETTING_ARCHIVE_ON_ERROR_PATH), context.getFlowParameters(),
                 true);
-        archiveOnSuccessPath = FormatUtils.replaceTokens(component.get(SETTING_ARCHIVE_ON_SUCCESS_PATH), context.getFlowParametersAsString(),
+        archiveOnSuccessPath = FormatUtils.replaceTokens(component.get(SETTING_ARCHIVE_ON_SUCCESS_PATH), context.getFlowParameters(),
                 true);
         runWhen = component.get(RUN_WHEN, runWhen);
         controlMessageOnEof = component.getBoolean(SETTING_CNTRL_MSG_ON_EOF, controlMessageOnEof);

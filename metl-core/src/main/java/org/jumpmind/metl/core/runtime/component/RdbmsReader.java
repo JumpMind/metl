@@ -144,7 +144,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     
     
     protected String prepareSql(String sql, Message inputMessage, Object entity) {
-        sql = FormatUtils.replaceTokens(sql, getComponentContext().getFlowParametersAsString(), true);
+        sql = FormatUtils.replaceTokens(sql, getComponentContext().getFlowParameters(), true);
         sql = FormatUtils.replaceTokens(sql, inputMessage.getHeader().getAsStrings(), true);
         return sql;
     }
