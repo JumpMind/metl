@@ -65,6 +65,8 @@ public class UnZip extends AbstractComponentRuntime {
     public final static String SETTING_EXTRACT_EMPTY_FILES = "extract.empty.files";
 
     public final static String SETTING_ENCODING = "encoding";
+    
+    public final static String SETTING_OVERWRITE = "overwrite";
 
     boolean mustExist;
 
@@ -75,6 +77,8 @@ public class UnZip extends AbstractComponentRuntime {
     boolean targetSubDir = false;
 
     boolean extractEmptyFiles = true;
+    
+    boolean overwrite = true;
 
     IDirectory sourceDir;
 
@@ -105,6 +109,7 @@ public class UnZip extends AbstractComponentRuntime {
         }
 
         targetRelativePath = properties.get(SETTING_TARGET_RELATIVE_PATH, "");
+        overwrite = properties.is(SETTING_OVERWRITE, overwrite);
         targetSubDir = properties.is(SETTING_TARGET_SUB_DIR, targetSubDir);
         mustExist = properties.is(SETTING_MUST_EXIST, mustExist);
         extractEmptyFiles = properties.is(SETTING_EXTRACT_EMPTY_FILES, extractEmptyFiles);
@@ -142,10 +147,12 @@ public class UnZip extends AbstractComponentRuntime {
 
                             if (!entry.isDirectory() && (extractEmptyFiles || entry.getSize() > 0)) {
                                 String relativePathToEntry = targetDirNameResolved + "/" + entry.getName();
-                                out = targetDir.getOutputStream(relativePathToEntry, false);
-                                in = zipFile.getInputStream(entry);
-                                IOUtils.copy(in, out);
-                                filePaths.add(relativePathToEntry);
+                                if (overwrite || targetDir.listFile(relativePathToEntry) == null) {
+                                    out = targetDir.getOutputStream(relativePathToEntry, false);
+                                    in = zipFile.getInputStream(entry);
+                                    IOUtils.copy(in, out);
+                                    filePaths.add(relativePathToEntry);
+                                }
                             }
                         }
                     } catch (IOException e) {

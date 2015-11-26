@@ -22,6 +22,7 @@ include::../common-properties/enabled.ad[]
 |Unzip Target Directory Resource|The target file resource where extracted files will be written
 |Create Sub Dir From File Name|Whether to create a root sub-directory for the extracted files that will match the zip file name
 |Delete Source File|Whether the source zip file should be deleted after its contents have been extracted
+|Overwrite|Whether to overwrite the target file if it already exists
 include::../common-properties/encoding.ad[]
 include::../common-properties/log-input.ad[]
 include::../common-properties/log-output.ad[]

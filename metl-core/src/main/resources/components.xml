@@ -966,6 +966,10 @@
                 <name>Extract Empty Files</name>
                 <defaultValue>true</defaultValue>
             </setting>
+            <setting id='overwrite' type='boolean' required='false'>
+                <name>Overwrite</name>
+                <defaultValue>true</defaultValue>
+            </setting>            
             <setting id='encoding' type='text' required='false'>
                 <name>Encoding</name>
                 <defaultValue>UTF-8</defaultValue>
