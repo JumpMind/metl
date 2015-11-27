@@ -21,7 +21,6 @@ Successfull flow completeion (onSuccess), and Flow completion with error (onErro
 |Resource|A resource that can be accessed and utilized by the script.    
 include::../common-properties/input-model.ad[]
 include::../common-properties/output-model.ad[]
-include::../common-properties/unit-of-work.ad[]
 include::../common-properties/enabled.ad[]
 |Import Statements|Import statements for external dependencies
 |Init Script|The script to be executed upon component initialization

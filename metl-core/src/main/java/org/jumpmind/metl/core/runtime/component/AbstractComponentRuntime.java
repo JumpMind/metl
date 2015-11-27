@@ -146,7 +146,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     }
     
     protected String resolveParamsAndHeaders(String text, Message inputMessage) {
-        Map<String,String> parms = new HashMap<>(getComponentContext().getFlowParametersAsString());
+        Map<String,String> parms = new HashMap<>(getComponentContext().getFlowParameters());
         parms.putAll(inputMessage.getHeader().getAsStrings());
         return FormatUtils.replaceTokens(text, parms, true);
     }
@@ -204,7 +204,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
             bindings.put(messageHeaderKey, inputMessage.getHeader().get(messageHeaderKey));
         }
         
-        Map<String, String> flowParameters = context.getFlowParametersAsString();
+        Map<String, String> flowParameters = context.getFlowParameters();
         for (String key : flowParameters.keySet()) {
             bindings.put(key, flowParameters.get(key));            
         }

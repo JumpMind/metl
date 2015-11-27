@@ -123,17 +123,17 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
          * to it. If the reader is started by another component, then loop for
          * all records in the input message
          */
-        ArrayList<EntityData> outboundPayload = null;
+        ArrayList<EntityData> outboundPayload = new ArrayList<EntityData>(); // = null;
         for (int i = 0; i < inboundRecordCount; i++) {            
             Object entity = inboundPayload != null && inboundPayload.hasNext() ? inboundPayload.next() : null;
-            ResultSetToEntityDataConverter resultSetToEntityDataConverter = new ResultSetToEntityDataConverter(inputMessage, callback, unitOfWorkBoundaryReached);
+            ResultSetToEntityDataConverter resultSetToEntityDataConverter = new ResultSetToEntityDataConverter(inputMessage, callback, unitOfWorkBoundaryReached, outboundPayload);
             for (String sql : getSqls()) {
                 String sqlToExecute = prepareSql(sql, inputMessage, entity);
                 Map<String, Object> paramMap = prepareParams(sqlToExecute, inputMessage, entity);
                 log(LogLevel.INFO, "About to run: %s", sqlToExecute);
                 log(LogLevel.INFO, "Passing params: %s", paramMap);
                 resultSetToEntityDataConverter.setSqlToExecute(sqlToExecute);
-                outboundPayload = template.query(sqlToExecute, paramMap, resultSetToEntityDataConverter);                        
+                template.query(sqlToExecute, paramMap, resultSetToEntityDataConverter);
             }
         }
         if (outboundPayload != null && outboundPayload.size() > 0) {
@@ -144,7 +144,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     
     
     protected String prepareSql(String sql, Message inputMessage, Object entity) {
-        sql = FormatUtils.replaceTokens(sql, getComponentContext().getFlowParametersAsString(), true);
+        sql = FormatUtils.replaceTokens(sql, getComponentContext().getFlowParameters(), true);
         sql = FormatUtils.replaceTokens(sql, inputMessage.getHeader().getAsStrings(), true);
         return sql;
     }
@@ -478,10 +478,11 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         
         ArrayList<EntityData> payload;
 
-        public ResultSetToEntityDataConverter(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+        public ResultSetToEntityDataConverter(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage, ArrayList<EntityData> payload) {
             this.inputMessage = inputMessage;
             this.callback = callback;
             this.unitOfWorkLastMessage = unitOfWorkLastMessage;
+            this.payload = payload;
         }
 
         @Override
@@ -491,13 +492,9 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             ArrayList<String> attributeIds = getAttributeIds(sqlToExecute, meta, columnHints);
             long ts = System.currentTimeMillis();
             while (rs.next()) {
-                if (outputRecCount++ % rowsPerMessage == 0 && payload != null) {
+                if (outputRecCount++ % rowsPerMessage == 0 && payload != null && !payload.isEmpty()) {
                     callback.sendMessage(null, payload);
-                    payload = null;
-                }
-                
-                if (payload == null) {
-                    payload = new ArrayList<>();
+                    payload.clear();
                 }
 
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);

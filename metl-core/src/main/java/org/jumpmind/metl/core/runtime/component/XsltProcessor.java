@@ -113,7 +113,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
             String batchXml = getBatchXml(getComponent().getInputModel(), inputRows, outputAllAttributes);
             String stylesheetXml = stylesheet.getValue();
             if (useParameterReplacement) {
-                stylesheetXml = FormatUtils.replaceTokens(stylesheetXml, context.getFlowParametersAsString(), true);
+                stylesheetXml = FormatUtils.replaceTokens(stylesheetXml, context.getFlowParameters(), true);
             }
             String outputXml = getTransformedXml(batchXml, stylesheetXml, xmlFormat, omitXmlDeclaration);
             outputPayload.add(outputXml);

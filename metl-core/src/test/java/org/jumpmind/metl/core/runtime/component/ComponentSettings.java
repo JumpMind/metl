@@ -20,36 +20,25 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.jumpmind.metl.core.model.FlowStep;
 
 public class ComponentSettings {
-	Map<String, String> flowParametersAsString;
-	Map<String, Serializable> flowParameters;
+	Map<String, String> flowParameters;
 	FlowStep flowStep;
 	
 	public ComponentSettings() {
-		this.flowParametersAsString = new HashMap<String, String>();
-		this.flowParameters = new HashMap<String, Serializable>();
+		this.flowParameters = new HashMap<>();
 		this.flowStep = new FlowStep();
 	}
 	
-	Map<String, String> getFlowParametersAsString() {
-		return flowParametersAsString;
-	}
-
-	void setFlowParametersAsString(Map<String, String> flowParametersAsString) {
-		this.flowParametersAsString = flowParametersAsString;
-	}
-
-	Map<String, Serializable> getFlowParameters() {
+	Map<String, String> getFlowParameters() {
 		return flowParameters;
 	}
 
-	void setFlowParameters(Map<String, Serializable> flowParameters) {
+	void setFlowParameters(Map<String, String> flowParameters) {
 		this.flowParameters = flowParameters;
 	}
 

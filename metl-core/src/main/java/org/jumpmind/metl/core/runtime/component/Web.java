@@ -103,7 +103,7 @@ public class Web extends AbstractComponentRuntime {
 						getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
 						if (parameterReplacement) {
 							requestContent = FormatUtils.replaceTokens(requestContent,
-									context.getFlowParametersAsString(), true);
+									context.getFlowParameters(), true);
 						}
 						HttpOutputStream os = (HttpOutputStream) streamable.getOutputStream(relativePath, false);
 						BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, DEFAULT_CHARSET));

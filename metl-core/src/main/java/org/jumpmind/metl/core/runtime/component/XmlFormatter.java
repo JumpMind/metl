@@ -98,7 +98,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         builder.setFeature("http://xml.org/sax/features/validation", false);
         Document document = null;
         try {
-            document = builder.build(new StringReader(FormatUtils.replaceTokens(template, context.getFlowParametersAsString(), true)));
+            document = builder.build(new StringReader(FormatUtils.replaceTokens(template, context.getFlowParameters(), true)));
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {

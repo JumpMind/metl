@@ -7,10 +7,10 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
+import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
 public abstract class AbstractFileReader extends AbstractComponentRuntime {
@@ -42,18 +42,18 @@ public abstract class AbstractFileReader extends AbstractComponentRuntime {
 
 	protected void init() {
         filesRead = new ArrayList<String>();
-        Component component = getComponent();
-        relativePathAndFile = component.get(SETTING_RELATIVE_PATH, relativePathAndFile);
-        mustExist = component.getBoolean(SETTING_MUST_EXIST, mustExist);
-        getFileNameFromMessage = component.getBoolean(SETTING_GET_FILE_FROM_MESSAGE, getFileNameFromMessage);
-        actionOnSuccess = component.get(SETTING_ACTION_ON_SUCCESS, actionOnSuccess);
-        actionOnError = component.get(SETTING_ACTION_ON_ERROR, actionOnError);
-        archiveOnErrorPath = FormatUtils.replaceTokens(component.get(SETTING_ARCHIVE_ON_ERROR_PATH), context.getFlowParametersAsString(),
+        TypedProperties properties = getTypedProperties();
+        relativePathAndFile = properties.get(SETTING_RELATIVE_PATH, relativePathAndFile);
+        mustExist = properties.is(SETTING_MUST_EXIST, mustExist);
+        getFileNameFromMessage = properties.is(SETTING_GET_FILE_FROM_MESSAGE, getFileNameFromMessage);
+        actionOnSuccess = properties.get(SETTING_ACTION_ON_SUCCESS, actionOnSuccess);
+        actionOnError = properties.get(SETTING_ACTION_ON_ERROR, actionOnError);
+        archiveOnErrorPath = FormatUtils.replaceTokens(properties.get(SETTING_ARCHIVE_ON_ERROR_PATH), context.getFlowParameters(),
                 true);
-        archiveOnSuccessPath = FormatUtils.replaceTokens(component.get(SETTING_ARCHIVE_ON_SUCCESS_PATH), context.getFlowParametersAsString(),
+        archiveOnSuccessPath = FormatUtils.replaceTokens(properties.get(SETTING_ARCHIVE_ON_SUCCESS_PATH), context.getFlowParameters(),
                 true);
-        runWhen = component.get(RUN_WHEN, runWhen);
-        controlMessageOnEof = component.getBoolean(SETTING_CNTRL_MSG_ON_EOF, controlMessageOnEof);
+        runWhen = properties.get(RUN_WHEN, runWhen);
+        controlMessageOnEof = properties.is(SETTING_CNTRL_MSG_ON_EOF, controlMessageOnEof);
 	}
 	
     @Override

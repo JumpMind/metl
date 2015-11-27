@@ -57,7 +57,7 @@ public class Execute extends AbstractComponentRuntime {
 
     @Override
     protected void start() {
-        String line = FormatUtils.replaceTokens(getComponent().get(COMMAND, null), context.getFlowParametersAsString(), true);
+        String line = FormatUtils.replaceTokens(getComponent().get(COMMAND, null), context.getFlowParameters(), true);
         continueOnError = getComponent().getBoolean(CONTINUE_ON_ERROR, continueOnError);
         successCode = getComponent().getInt(SUCCESS_CODE, successCode);
         runWhen = getComponent().get(RUN_WHEN, PER_UNIT_OF_WORK);

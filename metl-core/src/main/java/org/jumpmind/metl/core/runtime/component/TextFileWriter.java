@@ -30,66 +30,37 @@ import java.util.ArrayList;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.util.FormatUtils;
 
-public class TextFileWriter extends AbstractComponentRuntime {
+public class TextFileWriter extends AbstractFileWriter {
 
     public static final String TYPE = "Text File Writer";
 
     public final static String DEFAULT_ENCODING = "UTF-8";
 
-    public final static String TEXTFILEWRITER_ENCODING = "textfilewriter.encoding";
+    public final static String SETTING_ENCODING = "encoding";
 
-    public final static String TEXTFILEWRITER_RELATIVE_PATH = "textfilewriter.relative.path";
-
-    public static final String TEXTFILEWRITER_MUST_EXIST = "textfilewriter.must.exist";
-
-    public static final String TEXTFILEWRITER_APPEND = "textfilewriter.append";
-
-    public static final String TEXTFILEWRITER_TEXT_LINE_TERMINATOR = "textfilewriter.text.line.terminator";
-
-    public static final String TEXTFILEWRITER_GET_FILE_FROM_MESSAGE = "textfilewriter.get.file.name.from.message";
-
-    public static final String TEXTFILEWRITER_FILENAME_PROPERTY = "textfilewriter.filename.property";
+    public static final String SETTING_TEXT_LINE_TERMINATOR = "text.line.terminator";
 
     String encoding;
 
-    String relativePathAndFile;
-
-    boolean mustExist;
-
-    boolean append;
-
     String lineTerminator;
 
-    boolean getFileNameFromMessage;
-    
-    String fileNameFromMessageProperty;
-    
     BufferedWriter bufferedWriter = null;
 
     @Override
     protected void start() {
+    	init();
         TypedProperties properties = getTypedProperties();
-        Component component = getComponent();
-        relativePathAndFile = FormatUtils.replaceTokens(properties.get(TEXTFILEWRITER_RELATIVE_PATH), context.getFlowParametersAsString(),
-                true);
-        mustExist = properties.is(TEXTFILEWRITER_MUST_EXIST);
-        append = properties.is(TEXTFILEWRITER_APPEND);
-        lineTerminator = properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR);
-        encoding = properties.get(TEXTFILEWRITER_ENCODING, DEFAULT_ENCODING);
-        getFileNameFromMessage = component.getBoolean(TEXTFILEWRITER_GET_FILE_FROM_MESSAGE, getFileNameFromMessage);
-        fileNameFromMessageProperty = component.get(TEXTFILEWRITER_FILENAME_PROPERTY, fileNameFromMessageProperty);
-        
+        lineTerminator = properties.get(SETTING_TEXT_LINE_TERMINATOR);
+        encoding = properties.get(SETTING_ENCODING, DEFAULT_ENCODING);        
         if (lineTerminator != null) {
-            lineTerminator = StringEscapeUtils.unescapeJava(properties.get(TEXTFILEWRITER_TEXT_LINE_TERMINATOR));
+            lineTerminator = StringEscapeUtils.unescapeJava(properties.get(SETTING_TEXT_LINE_TERMINATOR));
         }
     }
 
@@ -100,72 +71,53 @@ public class TextFileWriter extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+    	
         if (getResourceRuntime() == null) {
             throw new IllegalStateException("The msgTarget resource has not been configured.  Please choose a resource.");
         }
 
-        initStreamAndWriter(inputMessage);
-        
-        try {
-            Object payload = inputMessage.getPayload();
-            if (payload instanceof ArrayList) {
-                ArrayList<?> recs = (ArrayList<?>) payload;
-                for (Object rec : recs) {
-                    bufferedWriter.write(rec != null ? rec.toString() : "");
-                    if (lineTerminator != null) {
-                        bufferedWriter.write(lineTerminator);
-                    } else {
-                        bufferedWriter.newLine();
-                    }
-                }
-                bufferedWriter.flush();
-
-            } else if (payload instanceof String) {
-                bufferedWriter.write((String) payload);
-            } else {
-                bufferedWriter.write("");
-            }
-        } catch (IOException e) {
-            throw new IoException(e);
+        if (!(inputMessage instanceof ControlMessage)) {
+	        initStreamAndWriter(inputMessage);
+	        
+	        try {
+	            Object payload = inputMessage.getPayload();
+	            if (payload instanceof ArrayList) {
+	                ArrayList<?> recs = (ArrayList<?>) payload;
+	                for (Object rec : recs) {
+	                    bufferedWriter.write(rec != null ? rec.toString() : "");
+	                    if (lineTerminator != null) {
+	                        bufferedWriter.write(lineTerminator);
+	                    } else {
+	                        bufferedWriter.newLine();
+	                    }
+	                }
+	                bufferedWriter.flush();
+	
+	            } else if (payload instanceof String) {
+	                bufferedWriter.write((String) payload);
+	            } else {
+	                bufferedWriter.write("");
+	            }
+	        } catch (IOException e) {
+	            throw new IoException(e);
+	        }
         }
         
-        if (unitOfWorkBoundaryReached && callback != null) {
+        if ((inputMessage instanceof ControlMessage ||
+        		unitOfWorkBoundaryReached) && callback != null) {
             close();
             callback.sendMessage(null, "{\"status\":\"success\"}");
         }
     }
 
     private void initStreamAndWriter(Message inputMessage) {
-    	String messageHeaderFileName = null;
-    	
-    	if (getFileNameFromMessage && !(inputMessage instanceof ControlMessage)) {
-    		Object fileName = inputMessage.getHeader().get(fileNameFromMessageProperty);
-			if (fileName == null || ((String) fileName).length() == 0) {
-				throw new RuntimeException("Configuration determines that the file name should be in "
-						+ "the message header but was not.  Verify the property " + 
-						fileNameFromMessageProperty + " is being passed into the message header");
-    		}
-    		messageHeaderFileName = (String) fileName;
+
+    	if (bufferedWriter == null) {
+	    	String fileName = getFileName(inputMessage);
+	    	IDirectory streamable = initStream(fileName);
+	        log(LogLevel.INFO, String.format("Writing text file to %s", streamable.toString()));
+	       	bufferedWriter = initializeWriter(streamable.getOutputStream(fileName, mustExist));
     	}
-    
-        if (bufferedWriter == null) {
-            IDirectory streamable = (IDirectory) getResourceReference();
-            if (!append && streamable.supportsDelete() && !(inputMessage instanceof ControlMessage)) {
-                if (getFileNameFromMessage) {
-                	streamable.delete(messageHeaderFileName);
-                }
-                else {
-                	streamable.delete(relativePathAndFile);
-                }
-            }
-            log(LogLevel.INFO, String.format("Writing text file to %s", streamable.toString()));
-            if (getFileNameFromMessage && !(inputMessage instanceof ControlMessage)) {
-            	bufferedWriter = initializeWriter(streamable.getOutputStream(messageHeaderFileName, mustExist));
-            }
-            else {
-            	bufferedWriter = initializeWriter(streamable.getOutputStream(relativePathAndFile, mustExist));
-            }
-        }
     }
 
     private BufferedWriter initializeWriter(OutputStream stream) {

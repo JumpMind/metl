@@ -258,7 +258,7 @@ public class PropertySheet extends AbsoluteLayout {
         };
         textField.setValue(component.getName());
         textField.setRequired(true);
-        textField.setDescription("Name for the component on the manipulatedFlow");
+        textField.setDescription("Name for the component on the flow");
         formLayout.addComponent(textField);
     }
 
@@ -281,8 +281,8 @@ public class PropertySheet extends AbsoluteLayout {
             @Override
             public void valueChange(ValueChangeEvent event) {
                 // TODO: Don't allow unshare if component is already on more
-                // than 1 manipulatedFlow?
-                // TODO: Refresh palette for the existing manipulatedFlow to have this item
+                // than 1 flow?
+                // TODO: Refresh palette for the existing flow to have this item
                 // display in shared definitions
                 component.setShared((boolean) event.getProperty().getValue());
                 context.getConfigurationService().save(component);
