@@ -83,7 +83,9 @@ public class Assert extends AbstractComponentRuntime {
                 textMessageCount++;
             } else if(ComponentUtils.getPayloadType(inputMessage.getPayload()) == ComponentUtils.PAYLOAD_BYTE_ARRAY) {
             	binaryMessageCount++;
-            } else emptyPayloadMessageCount++;
+            } else {
+                emptyPayloadMessageCount++;
+            }
         }
         callback.forward(inputMessage);
     }

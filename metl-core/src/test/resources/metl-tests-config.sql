@@ -106,12 +106,12 @@ insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, 
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('0b97e1f8-158c-45b3-a34d-f11f23f20428','61113711-1101-499c-b73a-e45f0f7ad372','handle.msg.script','classpathToDirectory(''/test.zip'')',{ts '2015-11-24 17:05:13.687'},null,null,{ts '2015-11-24 17:43:31.768'});
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('0be6997c-8c67-42bf-9ed5-60f665bb84cc','2f97f219-9936-4eea-8a5f-cfbc5f7a0c7e','expected.control.messages.count','2',{ts '2015-11-24 16:03:37.501'},null,null,{ts '2015-11-24 16:03:37.501'});
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('0ddc333c-12ff-438a-9182-c607f46f5d3f','9d11f30b-ccc2-4612-97dd-7fde79501700','handle.msg.script','File workingDir = new File("working/directory1")
-workingDir.delete()
+deleteQuietly(workingDir)
 File inboxDir = new File(workingDir, "inbox")
 inboxDir.mkdirs()
 writeStringToFile(new File(inboxDir, "a.txt"), "<root><test>a</test></root>")
 writeStringToFile(new File(inboxDir, "b.txt"), "<root><test>a</test><test>b</test></root>")
-writeStringToFile(new File(inboxDir, "c.xxx"), "this is a test")',{ts '2015-11-23 16:07:12.724'},null,null,{ts '2015-11-26 23:21:23.531'});
+writeStringToFile(new File(inboxDir, "c.xxx"), "this is a test")',{ts '2015-11-23 16:07:12.724'},null,null,{ts '2015-11-26 23:49:11.220'});
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('0e020fa5-d4ab-48ba-9fb1-4e881b034266','6b837790-40e4-435e-8167-cff8f1c627f5','handle.msg.script','File workingDir = new File("working/directory1")
 File inboxDir = new File(workingDir, "inbox")
 inboxDir.delete()
@@ -215,20 +215,21 @@ insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, 
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('7c4b7dcc-5dd2-4eec-b093-432adec6820d','2895049e-e3b9-40e8-92b7-5e6577a68187','expected.control.messages.count','0',{ts '2015-11-18 19:53:03.102'},null,null,{ts '2015-11-18 20:10:32.061'});
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('7e87b3f8-f45d-4341-9816-3318f73a31ba','2895049e-e3b9-40e8-92b7-5e6577a68187','expected.text.messages.count','0',{ts '2015-11-18 19:53:02.037'},null,null,{ts '2015-11-18 20:10:32.062'});
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('7f51ff65-2283-493c-887b-dfaf0f733ba7','1bde79b1-c9e0-4238-b3f9-03cd6bca4084','handle.msg.script','File workingDir = new File("working/directory1")
+deleteQuietly(workingDir)
+deleteQuietly(new File("working/directory2"))
 File inboxDir = new File(workingDir, "inbox")
-inboxDir.delete()
 inboxDir.mkdirs()
 writeStringToFile(new File(inboxDir, "a.txt"), "this is the first file")
-writeStringToFile(new File(inboxDir, "b.txt"), "this is the second file")',{ts '2015-11-25 13:48:17.272'},null,null,{ts '2015-11-25 14:00:56.674'});
+writeStringToFile(new File(inboxDir, "b.txt"), "this is the second file")',{ts '2015-11-25 13:48:17.272'},null,null,{ts '2015-11-26 23:50:37.771'});
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('7f9c9c4e-10aa-4dbb-a2d5-5dce6ab59258','bed44be7-d081-4a66-a6e7-a38751282f53','split.on.line.feed','true',{ts '2015-11-16 08:44:57.642'},null,null,{ts '2015-11-16 09:05:16.626'});
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('81cca495-5f28-4aff-a037-574ae8c5c7b9','b5edc435-7b7e-466f-b882-7d40d274c1f2','logInput','true',{ts '2015-11-24 17:44:08.704'},null,null,{ts '2015-11-24 17:44:08.704'});
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('822eb932-b698-49f5-843c-d2f548017ee9','fd0315f1-315a-49bf-8a71-692b0194614e','handle.msg.script','File workingDir = new File("working/directory1")
-workingDir.delete()
+deleteQuietly(workingDir)
 File inboxDir = new File(workingDir, "inbox")
 inboxDir.mkdirs()
 writeStringToFile(new File(inboxDir, "a.txt"), "<root><test>a</test></root>")
 writeStringToFile(new File(inboxDir, "b.txt"), "<root><test>a</test><test>b</test></root>")
-writeStringToFile(new File(inboxDir, "c.xxx"), "this is a test")',{ts '2015-11-22 19:10:06.517'},null,null,{ts '2015-11-26 23:21:42.391'});
+writeStringToFile(new File(inboxDir, "c.xxx"), "this is a test")',{ts '2015-11-22 19:10:06.517'},null,null,{ts '2015-11-26 23:49:04.428'});
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('82fec70a-2018-47c5-83ed-5297f8ccfd59','b5edc435-7b7e-466f-b882-7d40d274c1f2','source.resource','333e4c84-63cf-4c8b-87c3-d8ab917955a8',{ts '2015-11-24 17:10:07.038'},null,null,{ts '2015-11-24 17:43:24.609'});
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('842fde54-2190-4f9d-8ed6-ea3355a15f6f','1a5f050a-313b-43a8-b07f-f951d9fe175f','expected.text.messages.count','0',{ts '2015-11-16 08:48:08.093'},null,null,{ts '2015-11-16 09:04:56.036'});
 insert into METL_COMPONENT_SETTING (ID, COMPONENT_ID, NAME, VALUE, CREATE_TIME, CREATE_BY, LAST_UPDATE_BY, LAST_UPDATE_TIME) values ('846f2902-4dee-414d-b3ae-6a301d9a502e','adc55964-d974-4ce7-96fb-bf1df26e22c0','control.message.on.eof','true',{ts '2015-11-24 16:03:00.554'},null,null,{ts '2015-11-24 16:03:11.771'});
