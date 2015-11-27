@@ -437,7 +437,7 @@ public class AgentRuntime {
                 List<Notification> notifications = configurationService.findNotificationsForDeployment(deployment);
                 flowRuntime.start(executionId, deployedResources, agent, notifications, globalSettings, runtimeParameters);
             } catch (Exception e) {
-                log.error("Error while waiting for the manipulatedFlow to complete", e);
+                log.error("Error while waiting for the flow to complete", e);
                 //flowRuntime.stop(true);
             } finally {
                 flowRuntime.waitForFlowCompletion();

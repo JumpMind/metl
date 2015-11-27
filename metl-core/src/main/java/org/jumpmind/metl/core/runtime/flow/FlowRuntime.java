@@ -207,7 +207,7 @@ public class FlowRuntime {
         
         /* each step is started as a thread */
         for (StepRuntime stepRuntime : stepRuntimes.values()) {
-            stepRuntime.setRunning(true);
+            stepRuntime.startRunning();
             threadService.execute(stepRuntime);
         }
 

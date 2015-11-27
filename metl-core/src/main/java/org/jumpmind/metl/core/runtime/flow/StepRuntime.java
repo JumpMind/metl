@@ -210,9 +210,8 @@ public class StepRuntime implements Runnable {
                  * components could be generating messages which could block if
                  * we don't continue to poll
                  */
-                final Message inputMessage = inQueue.poll(5, TimeUnit.SECONDS);
+                final Message inputMessage = inQueue.poll(500, TimeUnit.MILLISECONDS);
                 if (running && !cancelled) {
-
                     if (inputMessage instanceof ShutdownMessage) {
                         process((ShutdownMessage) inputMessage, target);
                     } else if (inputMessage != null) {
@@ -294,7 +293,6 @@ public class StepRuntime implements Runnable {
                         + " because one was received but not sent forward.");
                 target.sendControlMessage(inputMessage.getHeader());
             }
-
         }
     }
 
@@ -351,7 +349,7 @@ public class StepRuntime implements Runnable {
                 ExecutorService service = (ExecutorService) this.componentRuntimeExecutor;
                 service.shutdown();
                 while (waitForShutdown && !service.isTerminated()) {
-                    service.awaitTermination(1, TimeUnit.SECONDS);
+                    service.awaitTermination(500, TimeUnit.MILLISECONDS);
                 }
             } catch (Exception e) {
                 recordError(1, e);
@@ -372,8 +370,8 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    public void setRunning(boolean running) {
-        this.running = running;
+    public void startRunning() {
+        this.running = true;
     }
 
     public boolean isRunning() {
