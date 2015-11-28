@@ -37,9 +37,9 @@ import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.symmetric.csv.CsvReader;
 
@@ -93,8 +93,8 @@ public class DelimitedParser extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (!(inputMessage instanceof ControlMessage)) {
-            ArrayList<String> inputRows = inputMessage.getPayload();
+        if (inputMessage instanceof TextMessage) {
+            ArrayList<String> inputRows = ((TextMessage)inputMessage).getPayload();
 
             ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
             int headerRowsToSkip = inputMessage.getHeader().getSequenceNumber() == 0 ? numberOfHeaderLinesToSkip : 0;
@@ -120,7 +120,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
                 throw new IoException(e);
             }
 
-            callback.sendMessage(null, outputPayload);
+            callback.sendEntityDataMessage(null, outputPayload);
         }
     }
 

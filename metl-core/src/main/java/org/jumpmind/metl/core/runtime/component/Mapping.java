@@ -33,8 +33,8 @@ import java.util.Set;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -98,9 +98,8 @@ public class Mapping extends AbstractComponentRuntime {
 
 	@Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-
-		if (!(inputMessage instanceof ControlMessage)) {
-			ArrayList<EntityData> inputRows = inputMessage.getPayload();
+		if (inputMessage instanceof EntityDataMessage) {
+			ArrayList<EntityData> inputRows = ((EntityDataMessage)inputMessage).getPayload();
 			if (inputRows == null) {
 				return;
 			}
@@ -136,7 +135,7 @@ public class Mapping extends AbstractComponentRuntime {
 				}
 			}
 
-			callback.sendMessage(null, outputPayload);
+			callback.sendEntityDataMessage(null, outputPayload);
 		}
 	}
 }

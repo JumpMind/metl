@@ -36,6 +36,7 @@ import java.util.Map;
 
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -64,7 +65,7 @@ public abstract class AbstractRdbmsComponentTest extends AbstractComponentRuntim
 		rowsPerMessage = 0L;
 	    trimColumns = false;
 	    matchOnColumnNameOnly = false;
-	    resultMessage = new Message("resultMessage");
+	    resultMessage = new TextMessage("resultMessage");
 	}
 	
 	abstract protected boolean sqlRequired();

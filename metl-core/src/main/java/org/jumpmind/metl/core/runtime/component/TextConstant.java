@@ -76,7 +76,7 @@ public class TextConstant extends AbstractComponentRuntime {
 					reader = new BufferedReader(new StringReader(constantText));
 					while ((currentLine = reader.readLine()) != null) {
 						if (linesInMessage == textRowsPerMessage) {
-							callback.sendMessage(null, payload);
+							callback.sendTextMessage(null, payload);
 							linesInMessage = 0;
 							payload = new ArrayList<String>();
 						}
@@ -91,7 +91,9 @@ public class TextConstant extends AbstractComponentRuntime {
 				}
 			}
 
-			callback.sendMessage(null, payload);
+			if (payload.size() > 0) {
+			    callback.sendTextMessage(null, payload);
+			}
 		}
 	}
 	

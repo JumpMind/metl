@@ -96,7 +96,7 @@ public class TextFileReader extends AbstractFileReader {
                 while ((currentLine = reader.readLine()) != null) {
                     currentFileLinesRead++;
                     if (linesInMessage == textRowsPerMessage) {
-                        callback.sendMessage(headers, payload);
+                        callback.sendTextMessage(headers, payload);
                         linesInMessage = 0;
                         payload = new ArrayList<String>();
                     }
@@ -107,7 +107,7 @@ public class TextFileReader extends AbstractFileReader {
                     }
                 }
                 if (payload.size() > 0) {
-                    callback.sendMessage(headers, payload);
+                    callback.sendTextMessage(headers, payload);
                 }
                 linesInMessage = 0;
             } catch (IOException e) {

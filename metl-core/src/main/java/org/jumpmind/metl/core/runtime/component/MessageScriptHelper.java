@@ -42,6 +42,7 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
@@ -136,12 +137,11 @@ public class MessageScriptHelper {
 
     protected Row nextRowFromInputMessage() {
         if (flowStep.getComponent().getInputModel() != null) {
-            if (entityDataIterator == null) {
-                List<EntityData> list = inputMessage.getPayload();
-                entityDataIterator = list.iterator();
+            if (entityDataIterator == null && inputMessage instanceof EntityDataMessage) {
+                entityDataIterator = ((EntityDataMessage)inputMessage).getPayload().iterator();
             }
 
-            if (entityDataIterator.hasNext()) {
+            if (entityDataIterator != null && entityDataIterator.hasNext()) {
                 EntityData data = entityDataIterator.next();
                 return flowStep.getComponent().toRow(data, false, true);
             } else {
@@ -185,7 +185,7 @@ public class MessageScriptHelper {
 
     protected Object getAttributeValue(String entityName, String attributeName) {
         Model model = flowStep.getComponent().getInputModel();
-        ArrayList<EntityData> rows = inputMessage.getPayload();
+        ArrayList<EntityData> rows =  ((EntityDataMessage)inputMessage).getPayload();
         return ComponentUtils.getAttributeValue(model, rows, entityName, attributeName);
     }
     
@@ -196,7 +196,7 @@ public class MessageScriptHelper {
 
     protected List<Object> getAttributeValues(String entityName, String attributeName) {
         Model model = flowStep.getComponent().getInputModel();
-        ArrayList<EntityData> rows = inputMessage.getPayload();
+        ArrayList<EntityData> rows = ((EntityDataMessage)inputMessage).getPayload();
         return ComponentUtils.getAttributeValues(model, rows, entityName, attributeName);
     }
     
@@ -206,7 +206,7 @@ public class MessageScriptHelper {
         if (inputMessage instanceof ControlMessage) {
             callback.sendControlMessage(headers);
         } else {
-            callback.sendMessage(headers, inputMessage.getPayload());
+            callback.forward(headers, inputMessage);
         }
     }
     
@@ -214,7 +214,7 @@ public class MessageScriptHelper {
         if (inputMessage instanceof ControlMessage) {
             callback.sendControlMessage(params);
         } else {
-            callback.sendMessage(params, inputMessage.getPayload());
+            callback.forward(params, inputMessage);
         }
     }
     
@@ -222,12 +222,12 @@ public class MessageScriptHelper {
         if (inputMessage instanceof ControlMessage) {
             callback.sendControlMessage(inputMessage.getHeader());
         } else {
-            callback.sendMessage(inputMessage.getHeader(), inputMessage.getPayload());
+            callback.forward(inputMessage);
         }
     }
     
     protected void sendControlMessage() {
-        callback.sendControlMessage(inputMessage.getHeader());
+        callback.sendControlMessage();
     }
     
     protected void setSendMessageCallback(ISendMessageCallback callback) {

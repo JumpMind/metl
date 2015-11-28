@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class TextReplace extends AbstractComponentRuntime {
@@ -34,12 +35,12 @@ public class TextReplace extends AbstractComponentRuntime {
     public static final String TYPE = "Text Replace";
 
     public final static String SETTING_SEARCH_FOR = "search.for";
-    
+
     public final static String SETTING_REPLACE_WITH = "replace.with";
 
     String searchFor;
-    
-    String replaceWith;   
+
+    String replaceWith;
 
     @Override
     protected void start() {
@@ -53,7 +54,7 @@ public class TextReplace extends AbstractComponentRuntime {
             replaceWith = "";
         }
     }
-    
+
     @Override
     public boolean supportsStartupMessages() {
         return false;
@@ -61,16 +62,20 @@ public class TextReplace extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        List<String> in = inputMessage.getPayload();
-        ArrayList<String> out = new ArrayList<String>();
-        if (in != null) {
-            for (String string : in) {
-                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                out.add(string.replaceAll(searchFor, replaceWith));                
-            }            
+        if (inputMessage instanceof TextMessage) {
+            List<String> in = ((TextMessage) inputMessage).getPayload();
+            ArrayList<String> out = new ArrayList<String>();
+            if (in != null) {
+                for (String string : in) {
+                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                    out.add(string.replaceAll(searchFor, replaceWith));
+                }
+            }
+
+            callback.sendTextMessage(null, out);
+        } else {
+            callback.forward(inputMessage);
         }
-        
-        callback.sendMessage(null, out);
     }
 
 }

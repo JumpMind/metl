@@ -37,6 +37,7 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.properties.TypedProperties;
@@ -105,8 +106,8 @@ public class XmlReader extends AbstractComponentRuntime {
 
     private List<String> getFilesToRead(Message inputMessage) {
         ArrayList<String> files = null;
-        if (getFileNameFromMessage) {
-            files = inputMessage.getPayload();
+        if (getFileNameFromMessage && inputMessage instanceof TextMessage) {
+            files = ((TextMessage)inputMessage).getPayload();
         } else {
             files = new ArrayList<String>(1);
             files.add(relativePathAndFile);
@@ -190,7 +191,7 @@ public class XmlReader extends AbstractComponentRuntime {
                                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                                 outboundPayload.add(xml.toString());
                                 if (outboundPayload.size() == readTagsPerMessage) {
-                                    callback.sendMessage(headers, outboundPayload);
+                                    callback.sendTextMessage(headers, outboundPayload);
                                     outboundPayload = new ArrayList<String>();
                                 }
                                 startCol = 0;
@@ -205,7 +206,7 @@ public class XmlReader extends AbstractComponentRuntime {
             }
 
             if (outboundPayload.size() > 0) {
-                callback.sendMessage(headers, outboundPayload);
+                callback.sendTextMessage(headers, outboundPayload);
             }
         }
 

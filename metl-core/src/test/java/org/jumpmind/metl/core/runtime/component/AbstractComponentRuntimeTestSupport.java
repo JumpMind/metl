@@ -37,6 +37,7 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageAssert;
@@ -252,7 +253,7 @@ public abstract class AbstractComponentRuntimeTestSupport {
 	
 	public void initHandleParams() {
 		messages = new ArrayList<HandleParams>();
-		Message m = new Message("step1");
+		EntityDataMessage m = new EntityDataMessage("step1");
 		m.setPayload(PayloadTestHelper.createPayloadWithMultipleEntityData());
 		HandleParams params = new HandleParams(m);
 		messages.add(params);

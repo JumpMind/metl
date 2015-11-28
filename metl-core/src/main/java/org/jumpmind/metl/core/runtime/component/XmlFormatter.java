@@ -43,8 +43,8 @@ import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -88,8 +88,8 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (!(inputMessage instanceof ControlMessage)) {
-        ArrayList<EntityData> inputRows = inputMessage.getPayload();
+        if (inputMessage instanceof EntityDataMessage) {
+        ArrayList<EntityData> inputRows = ((EntityDataMessage)inputMessage).getPayload();
         boolean hasPayload = inputRows != null && inputRows.size() > 0;
         ArrayList<String> outputPayload = new ArrayList<String>();
 
@@ -177,7 +177,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
         log(LogLevel.DEBUG, outputPayload.toString());
 
-        callback.sendMessage(null, outputPayload);
+        callback.sendTextMessage(null, outputPayload);
         }
     }
 

@@ -20,8 +20,6 @@
  */
 package org.jumpmind.metl.core.runtime;
 
-import java.util.ArrayList;
-
 public class ControlMessage extends Message {
 
 	private static final long serialVersionUID = 1L;
@@ -32,7 +30,6 @@ public class ControlMessage extends Message {
 	
 	public ControlMessage(String originatingFlowStepId) {
 	    super(originatingFlowStepId);
-	    this.payload = new ArrayList<>(0);
     }
 	
 	

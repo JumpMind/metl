@@ -30,6 +30,7 @@ import java.util.Map;
 
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
@@ -79,9 +80,11 @@ public class Lookup extends AbstractComponentRuntime {
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
-            List<EntityData> datas = inputMessage.getPayload();
-            for (EntityData entityData : datas) {
-                lookup.put(entityData.get(keyAttributeId), entityData.get(valueAttributeId));
+            if (inputMessage instanceof EntityDataMessage) {
+                List<EntityData> datas = ((EntityDataMessage)inputMessage).getPayload();
+                for (EntityData entityData : datas) {
+                    lookup.put(entityData.get(keyAttributeId), entityData.get(valueAttributeId));
+                }
             }
             lookupInitialized = inputMessage instanceof ControlMessage;
 
@@ -89,17 +92,21 @@ public class Lookup extends AbstractComponentRuntime {
                 Iterator<Message> messages = queuedWhileWaitingForLookup.iterator();
                 while (messages.hasNext()) {
                     Message message = messages.next();
-                    enhanceAndSend(message, callback, unitOfWorkBoundaryReached);
+                    if (message instanceof EntityDataMessage) {
+                        enhanceAndSend((EntityDataMessage)message, callback, unitOfWorkBoundaryReached);
+                    }
                 }
             }
         } else if (!lookupInitialized) {
             queuedWhileWaitingForLookup.add(inputMessage);
         } else if (lookupInitialized && !(inputMessage instanceof ControlMessage)) {
-            enhanceAndSend(inputMessage, callback, unitOfWorkBoundaryReached);
+            if (inputMessage instanceof EntityDataMessage) {
+                enhanceAndSend((EntityDataMessage)inputMessage, callback, unitOfWorkBoundaryReached);
+            }
         }
     }
 
-    protected void enhanceAndSend(Message message, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    protected void enhanceAndSend(EntityDataMessage message, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
         List<EntityData> datas = message.getPayload();
         if (datas != null) {
             debug("Using lookup table: {}", lookup);
@@ -112,8 +119,7 @@ public class Lookup extends AbstractComponentRuntime {
                 newData.put(replacementValueAttributeId, lookup.get(oldData.get(replacementKeyAttributeId)));
                 payload.add(newData);
             }
-
-            callback.sendMessage(null, payload);
+            callback.sendEntityDataMessage(null, payload);
         }
     }
 

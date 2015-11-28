@@ -34,8 +34,8 @@ import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -63,44 +63,43 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
         useHeader = properties.is(FIXED_LENGTH_FORMATTER_WRITE_HEADER);
         convertAttributeSettingsToAttributeFormat();
     }
-    
+
     @Override
     public boolean supportsStartupMessages() {
         return false;
     }
 
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (!(inputMessage instanceof ControlMessage)) {
-        if (attributesList == null || attributesList.size() == 0) {
-            throw new IllegalStateException(
-                    "There are no format attributes configured.  Writing all entity fields to the output.");
-        }
-
-        ArrayList<EntityData> inputRows = inputMessage.getPayload();
-
-        ArrayList<String> outputPayload = new ArrayList<String>();
-
-        if (useHeader) {
-            StringBuilder stringBuilder = new StringBuilder();
-            for (AttributeFormat attr : attributesList) {
-                if (attr.getAttribute() != null) {
-                    String name = attr.getAttribute().getName();
-                    String paddedValue = StringUtils.pad(name != null ? name.toString() : "", attr.getLength(), " ", true);
-                    stringBuilder.append(paddedValue);
-                }
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        if (inputMessage instanceof EntityDataMessage) {
+            if (attributesList == null || attributesList.size() == 0) {
+                throw new IllegalStateException("There are no format attributes configured.  Writing all entity fields to the output.");
             }
-            outputPayload.add(stringBuilder.toString());
-        }
 
-        String outputRec;
-        for (EntityData inputRow : inputRows) {
-            outputRec = processInputRow(inputMessage, inputRow);
-            log(LogLevel.DEBUG, String.format("Generated record: %s", outputRec));
-            outputPayload.add(outputRec);
-        }
+            ArrayList<EntityData> inputRows = ((EntityDataMessage) inputMessage).getPayload();
 
-        callback.sendMessage(null, outputPayload);
+            ArrayList<String> outputPayload = new ArrayList<String>();
+
+            if (useHeader) {
+                StringBuilder stringBuilder = new StringBuilder();
+                for (AttributeFormat attr : attributesList) {
+                    if (attr.getAttribute() != null) {
+                        String name = attr.getAttribute().getName();
+                        String paddedValue = StringUtils.pad(name != null ? name.toString() : "", attr.getLength(), " ", true);
+                        stringBuilder.append(paddedValue);
+                    }
+                }
+                outputPayload.add(stringBuilder.toString());
+            }
+
+            String outputRec;
+            for (EntityData inputRow : inputRows) {
+                outputRec = processInputRow(inputMessage, inputRow);
+                log(LogLevel.DEBUG, String.format("Generated record: %s", outputRec));
+                outputPayload.add(outputRec);
+            }
+
+            callback.sendTextMessage(null, outputPayload);
         }
     }
 
@@ -109,7 +108,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
         for (AttributeFormat attribute : attributesList) {
             Object value = inputRow.get(attribute.getAttributeId());
             if (isNotBlank(attribute.getFormatFunction())) {
-                value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, attribute.getEntity(), 
+                value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, attribute.getEntity(),
                         inputRow, attribute.getFormatFunction());
             }
             String paddedValue = StringUtils.pad(value != null ? value.toString() : "", attribute.getLength(), " ", true);
@@ -117,7 +116,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
         }
         return stringBuilder.toString();
     }
-    
+
     private void convertAttributeSettingsToAttributeFormat() {
 
         Map<String, AttributeFormat> attributesMap = new HashMap<String, AttributeFormat>();
@@ -189,11 +188,11 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
         public String getFormatFunction() {
             return formatFunction;
         }
-        
+
         public ModelAttribute getAttribute() {
             return attribute;
         }
-        
+
         public ModelEntity getEntity() {
             return entity;
         }

@@ -33,6 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.jumpmind.db.sql.SqlScriptReader;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
@@ -101,7 +102,7 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
         }
 
         if (callback != null && sqlCount > 0) {
-            callback.sendMessage(null, convertResultsToTextPayload(results));
+            callback.sendTextMessage(null, convertResultsToTextPayload(results));
         }
         
         log(LogLevel.INFO, "Ran %d sql statements", sqlCount);
@@ -119,8 +120,8 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
             results.add(new Result(sqlToExecute, count));
             getComponentStatistics().incrementNumberEntitiesProcessed(count);
             sqlCount++;
-        } else if (runWhen.equals(PER_ENTITY) && !(inputMessage instanceof ControlMessage)) {
-            List<EntityData> datas = inputMessage.getPayload();
+        } else if (runWhen.equals(PER_ENTITY) && inputMessage instanceof EntityDataMessage) {
+            List<EntityData> datas = ((EntityDataMessage)inputMessage).getPayload();
             for (EntityData entityData : datas) {
                 params.putAll(getComponent().toRow(entityData, false, true));
                 int count = template.update(sqlToExecute, params);

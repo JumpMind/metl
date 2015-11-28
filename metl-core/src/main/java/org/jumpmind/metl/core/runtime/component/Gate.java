@@ -65,14 +65,14 @@ public class Gate extends AbstractComponentRuntime {
                 while (messages.hasNext()) {
                     Message message = messages.next();
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                    callback.sendMessage(null, message.getPayload());
+                    callback.forward(message);
                 }
             }
         } else if (!gateOpened && !(inputMessage instanceof ControlMessage)) {
         	queuedWhileWaitingForGateController.add(inputMessage);
         } else if (gateOpened && !(inputMessage instanceof ControlMessage)) {
         	getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-        	callback.sendMessage(null, inputMessage.getPayload());
+        	callback.forward(inputMessage);
         }
     }
     

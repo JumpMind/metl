@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
@@ -58,57 +59,64 @@ public class Multiplier extends AbstractComponentRuntime {
             throw new IllegalStateException("The source step must be specified");
         }
     }
-    
+
     @Override
     public boolean supportsStartupMessages() {
         return false;
     }
 
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-    	if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
-            List<EntityData> datas = inputMessage.getPayload();
-            multipliers.addAll(datas);
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        if (sourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
+            if (inputMessage instanceof EntityDataMessage) {
+                List<EntityData> datas = ((EntityDataMessage) inputMessage).getPayload();
+                multipliers.addAll(datas);
+            }
+
             multipliersInitialized = inputMessage instanceof ControlMessage;
-            
+
             if (multipliersInitialized) {
                 Iterator<Message> messages = queuedWhileWaitingForMultiplier.iterator();
                 while (messages.hasNext()) {
                     Message message = messages.next();
-                    multiply(message, callback);
+                    if (message instanceof EntityDataMessage) {
+                        multiply((EntityDataMessage) message, callback);
+                    }
                 }
             }
         } else if (!multipliersInitialized) {
             queuedWhileWaitingForMultiplier.add(inputMessage);
         } else if (multipliersInitialized) {
-            multiply(inputMessage, callback);
+            if (inputMessage instanceof EntityDataMessage) {
+                multiply((EntityDataMessage) inputMessage, callback);
+            }
         }
     }
 
-    protected void multiply(Message message, ISendMessageCallback callback) {
+    protected void multiply(EntityDataMessage message, ISendMessageCallback callback) {
         ArrayList<EntityData> multiplied = new ArrayList<EntityData>();
         for (int i = 0; i < multipliers.size(); i++) {
             EntityData multiplierData = multipliers.get(i);
 
             List<EntityData> datas = message.getPayload();
             if (datas != null) {
-            	for (int j = 0; j < datas.size(); j++) {
+                for (int j = 0; j < datas.size(); j++) {
                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-	                EntityData oldData = datas.get(j);
-	                EntityData newData = new EntityData();
-	                newData.putAll(oldData);
-	                newData.putAll(multiplierData);
-	                multiplied.add(newData);
-	                if (multiplied.size() >= rowsPerMessage) {
-	                    callback.sendMessage(null, multiplied);                    
-	                    multiplied = new ArrayList<EntityData>();
-	               }
-            	}
+                    EntityData oldData = datas.get(j);
+                    EntityData newData = new EntityData();
+                    newData.putAll(oldData);
+                    newData.putAll(multiplierData);
+                    multiplied.add(newData);
+                    if (multiplied.size() >= rowsPerMessage) {
+                        callback.sendEntityDataMessage(null, multiplied);
+                        multiplied = new ArrayList<EntityData>();
+                    }
+                }
             }
         }
 
         if (multiplied.size() > 0) {
-            callback.sendMessage(null, multiplied);               
+            callback.sendEntityDataMessage(null, multiplied);
         }
     }
 

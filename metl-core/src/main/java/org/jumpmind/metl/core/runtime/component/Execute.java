@@ -94,8 +94,7 @@ public class Execute extends AbstractComponentRuntime {
     }
 
 	@Override
-	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-		
+	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {		
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
 			try {
@@ -116,7 +115,7 @@ public class Execute extends AbstractComponentRuntime {
 
 					ArrayList<String> payload = new ArrayList<String>();
 					payload.add(output);
-					callback.sendMessage(null, payload);
+					callback.sendTextMessage(null, payload);
 				} else {
 					info("The output of the command was: %s", output);
 					throw new IoException("%s failed with an error code of %d", ArrayUtils.toString(commands), code);

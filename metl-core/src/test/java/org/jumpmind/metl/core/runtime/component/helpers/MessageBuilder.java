@@ -23,29 +23,26 @@ package org.jumpmind.metl.core.runtime.component.helpers;
 import java.util.ArrayList;
 
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
 
 public class MessageBuilder {
 	
-	Message message;
+    EntityDataMessage message;
 	
 	public MessageBuilder() {
-		message = new Message("unitTest");
+		message = new EntityDataMessage("unitTest");
 	}
-	public MessageBuilder(String originatingStepId) {
-		message = new Message(originatingStepId);
-	}
+	
+	public MessageBuilder(String orginatingStepId) {
+        message = new EntityDataMessage(orginatingStepId);
+    }
 	
 	public MessageBuilder withPayload(ArrayList<EntityData> payload) {
 		this.message.setPayload(payload);
 		return this;
 	}
-	
-	public MessageBuilder withPayloadString(ArrayList<String> payload) {
-		this.message.setPayload(payload);
-		return this;
-	}
-	
+		
 	public MessageBuilder withKeyValue(String key, Object value, int entityPosition) {
 		if (this.message.getPayload() == null) {
 			this.message.setPayload(new ArrayList<EntityData>());
@@ -60,15 +57,6 @@ public class MessageBuilder {
 	
 	public MessageBuilder withKeyValue(String key, Object value) {
 		return withKeyValue(key, value, 1);
-	}
-	
-	public MessageBuilder withValue(String value) {
-		if (this.message.getPayload() == null) {
-			this.message.setPayload(new ArrayList<String>());
-		}
-		((ArrayList<String>) this.message.getPayload()).add(value);
-		
-		return this;
 	}
 	
 	public Message build() {

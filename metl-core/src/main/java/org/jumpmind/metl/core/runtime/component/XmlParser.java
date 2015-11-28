@@ -37,11 +37,11 @@ import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class XmlParser extends AbstractXMLComponentRuntime {
@@ -95,8 +95,8 @@ public class XmlParser extends AbstractXMLComponentRuntime {
     @SuppressWarnings("unchecked")
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (!(inputMessage instanceof ControlMessage)) {
-            ArrayList<String> inputRows = inputMessage.getPayload();
+        if (inputMessage instanceof TextMessage) {
+            ArrayList<String> inputRows = ((TextMessage)inputMessage).getPayload();
             ArrayList<EntityData> payload = new ArrayList<EntityData>();
             if (inputRows != null) {
                 for (String xml : inputRows) {
@@ -156,7 +156,7 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                 }
             }
 
-            callback.sendMessage(null, payload);
+            callback.sendEntityDataMessage(null, payload);
         }
 
     }

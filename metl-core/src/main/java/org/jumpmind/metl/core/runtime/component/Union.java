@@ -22,8 +22,8 @@ package org.jumpmind.metl.core.runtime.component;
 
 import java.util.ArrayList;
 
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
@@ -43,16 +43,15 @@ public class Union extends AbstractComponentRuntime {
     }
     
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-    	
-        if (!(inputMessage instanceof ControlMessage)) {
-            ArrayList<EntityData> payload = inputMessage.getPayload();
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {    	
+        if (inputMessage instanceof EntityDataMessage) {
+            ArrayList<EntityData> payload = ((EntityDataMessage)inputMessage).getPayload();
             dataToSend.addAll(payload);
             getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber, payload.size());
         }
 
         if (unitOfWorkBoundaryReached) {
-            callback.sendMessage(null, dataToSend);
+            callback.sendEntityDataMessage(null, dataToSend);
             dataToSend.clear();
         }
     }

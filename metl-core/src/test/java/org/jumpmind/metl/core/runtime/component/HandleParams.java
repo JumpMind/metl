@@ -21,12 +21,15 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.BinaryMessage;
+import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class HandleParams {
@@ -35,7 +38,6 @@ public class HandleParams {
     Boolean unitOfWorkLastMessage;
 
     public HandleParams() {
-        this.inputMessage = new Message("inputMessage");
         this.callback = new TestingSendMessageCallback();
         this.unitOfWorkLastMessage = false;
     }
@@ -79,17 +81,46 @@ public class HandleParams {
     public class TestingSendMessageCallback implements ISendMessageCallback {
         HandleMessageMonitor monitor = new HandleMessageMonitor();
 
+        public void forward(Map<String, Serializable> messageHeaders, Message message) {
+            if (message instanceof EntityDataMessage) {
+                sendEntityDataMessage(messageHeaders, ((EntityDataMessage) message).getPayload());
+            } else if (message instanceof TextMessage) {
+                sendTextMessage(messageHeaders, ((TextMessage) message).getPayload());
+            } else if (message instanceof BinaryMessage) {
+                sendBinaryMessage(messageHeaders, ((BinaryMessage) message).getPayload());
+            }
+        }        
+        
         @Override
-        public void sendMessage(Map<String, Serializable> additionalHeaders, Serializable payload, String... targetStepIds) {
-            if (payload instanceof List) {
-                Message message = new Message("unitTest");
+        public void forward(Message message) {
+            forward(null, message);
+        }
+        
+        @Override
+        public void sendBinaryMessage(Map<String, Serializable> messageHeaders, byte[] payload, String... targetStepIds) {
+            BinaryMessage message = new BinaryMessage("unitTest");
+            message.setPayload(payload);
+            monitor.getMessages().add(message);
+        Collections.addAll(monitor.getTargetStepIds(), targetStepIds);
+        }
+        
+        @Override
+        public void sendEntityDataMessage(Map<String, Serializable> messageHeaders, ArrayList<EntityData> payload, String... targetStepIds) {
+            EntityDataMessage message = new EntityDataMessage("unitTest");
+            message.setPayload(payload);
+            monitor.getMessages().add(message);
+        Collections.addAll(monitor.getTargetStepIds(), targetStepIds);
+        }
+        
+        @Override
+        public void sendTextMessage(Map<String, Serializable> messageHeaders, ArrayList<String> payload, String... targetStepIds) {
+                TextMessage message = new TextMessage("unitTest");
                 message.setPayload(payload);
                 monitor.getMessages().add(message);
-            }
-
             Collections.addAll(monitor.getTargetStepIds(), targetStepIds);
-        }
 
+        }
+        
         @Override
         public void sendShutdownMessage(boolean cancel) {
             monitor.incrementShutdownMessageCount();
@@ -104,13 +135,6 @@ public class HandleParams {
         public void sendControlMessage(Map<String, Serializable> messageHeaders, String ... targetStepIds) {
             monitor.incrementStartupMessageCount();
         }
-
-        @Override
-        public void forward(Message message) {
-            if (!(message instanceof ControlMessage)) {
-                sendMessage(message.getHeader(), message.getPayload());
-            }
-        };
 
         HandleMessageMonitor getMonitor() {
             return monitor;

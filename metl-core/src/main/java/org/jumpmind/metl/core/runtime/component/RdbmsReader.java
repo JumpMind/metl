@@ -42,6 +42,7 @@ import org.jumpmind.db.sql.SqlException;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
@@ -59,15 +60,15 @@ import org.springframework.util.StringUtils;
 public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     public static final String TYPE = "RDBMS Reader";
-    
+
     public final static String TRIM_COLUMNS = "trim.columns";
 
     public final static String MATCH_ON_COLUMN_NAME_ONLY = "match.on.column.name";
-    
+
     public final static String RUN_WHEN = "run.when";
 
     List<String> sqls;
-    
+
     String runWhen = PER_UNIT_OF_WORK;
 
     long rowsPerMessage = 10000;
@@ -75,11 +76,11 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     boolean trimColumns = false;
 
     boolean matchOnColumnNameOnly = false;
-    
+
     ChangeType entityChangeType = ChangeType.ADD;
-    
+
     int rowReadDuringHandle;
-    
+
     @Override
     protected void start() {
         TypedProperties properties = getTypedProperties();
@@ -89,7 +90,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
         runWhen = properties.get(RUN_WHEN, runWhen);
     }
-        
+
     @Override
     public boolean supportsStartupMessages() {
         return true;
@@ -97,25 +98,23 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     @Override
     public void handle(final Message inputMessage, final ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        
+
         rowReadDuringHandle = 0;
-        
+
         NamedParameterJdbcTemplate template = getJdbcTemplate();
 
         int inboundRecordCount = 0;
         Iterator<?> inboundPayload = null;
-        if (PER_ENTITY.equals(runWhen) 
-                && !(inputMessage instanceof ControlMessage)) {
-            inboundPayload = ((Collection<?>)inputMessage.getPayload()).iterator();
-            inboundRecordCount = ((Collection<?>)inputMessage.getPayload()).size();
+        if (PER_ENTITY.equals(runWhen) && inputMessage instanceof ContentMessage<?>) {
+            inboundPayload = ((Collection<?>) ((ContentMessage<?>) inputMessage).getPayload()).iterator();
+            inboundRecordCount = ((Collection<?>) ((ContentMessage<?>) inputMessage).getPayload()).size();
         } else if (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage)) {
             inboundPayload = null;
-            inboundRecordCount = 1;            
+            inboundRecordCount = 1;
         } else if (PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage) {
             inboundPayload = null;
-            inboundRecordCount = 1;            
+            inboundRecordCount = 1;
         }
-
 
         /*
          * A reader can be started by a startup message (if it has no input
@@ -123,10 +122,12 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
          * to it. If the reader is started by another component, then loop for
          * all records in the input message
          */
-        ArrayList<EntityData> outboundPayload = new ArrayList<EntityData>(); // = null;
-        for (int i = 0; i < inboundRecordCount; i++) {            
+        ArrayList<EntityData> outboundPayload = new ArrayList<EntityData>(); // =
+                                                                             // null;
+        for (int i = 0; i < inboundRecordCount; i++) {
             Object entity = inboundPayload != null && inboundPayload.hasNext() ? inboundPayload.next() : null;
-            ResultSetToEntityDataConverter resultSetToEntityDataConverter = new ResultSetToEntityDataConverter(inputMessage, callback, unitOfWorkBoundaryReached, outboundPayload);
+            ResultSetToEntityDataConverter resultSetToEntityDataConverter = new ResultSetToEntityDataConverter(inputMessage, callback,
+                    unitOfWorkBoundaryReached, outboundPayload);
             for (String sql : getSqls()) {
                 String sqlToExecute = prepareSql(sql, inputMessage, entity);
                 Map<String, Object> paramMap = prepareParams(sqlToExecute, inputMessage, entity);
@@ -137,18 +138,17 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             }
         }
         if (outboundPayload != null && outboundPayload.size() > 0) {
-            callback.sendMessage(null, outboundPayload);
+            callback.sendEntityDataMessage(null, outboundPayload);
         }
-        
+
     }
-    
-    
+
     protected String prepareSql(String sql, Message inputMessage, Object entity) {
         sql = FormatUtils.replaceTokens(sql, getComponentContext().getFlowParameters(), true);
         sql = FormatUtils.replaceTokens(sql, inputMessage.getHeader().getAsStrings(), true);
         return sql;
     }
-    
+
     protected Map<String, Object> prepareParams(String sql, Message inputMessage, Object entity) {
         Map<String, Object> paramMap = new HashMap<>();
         /*
@@ -158,19 +158,21 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         paramMap.putAll(context.getFlowParameters() == null ? Collections.emptyMap() : context.getFlowParameters());
         paramMap.putAll(inputMessage.getHeader());
         if (entity instanceof EntityData) {
-            EntityData entityData = (EntityData)entity;
+            EntityData entityData = (EntityData) entity;
             paramMap.putAll(this.getComponent().toRow(entityData, true, true));
         } else if (entity != null) {
             paramMap.put("RECORD", entity.toString());
         }
-        
-        if (PER_MESSAGE.equals(runWhen) && inputMessage.getPayload() instanceof Collection) {
-            Collection<?> payload = (Collection<?>)inputMessage.getPayload();
-            enhanceParamMapWithInValues(paramMap, payload, sql);
+
+        if (PER_MESSAGE.equals(runWhen) && inputMessage instanceof ContentMessage<?>) {
+            if (((ContentMessage<?>) inputMessage).getPayload() instanceof Collection) {
+                Collection<?> payload = (Collection<?>) ((ContentMessage<?>) inputMessage).getPayload();
+                enhanceParamMapWithInValues(paramMap, payload, sql);
+            }
         }
         return paramMap;
     }
-    
+
     protected void enhanceParamMapWithInValues(Map<String, Object> paramMap, Collection<?> payload, String sql) {
         Set<String> attributeNames = findWhereInParameters(sql);
         for (String attributeName : attributeNames) {
@@ -179,7 +181,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             while (i.hasNext()) {
                 Object next = i.next();
                 if (next instanceof EntityData) {
-                    EntityData entityData = (EntityData)next;
+                    EntityData entityData = (EntityData) next;
                     Row row = this.getComponent().toRow(entityData, true, true);
                     Object value = row.get(attributeName);
                     if (value != null) {
@@ -190,29 +192,29 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             paramMap.put(attributeName, in);
         }
     }
-    
+
     protected Set<String> findWhereInParameters(String sql) {
         Set<String> inAttributeNames = new HashSet<>();
         List<Integer> indexes = new ArrayList<>();
         int currentIndex = -4;
         do {
-          int index = sql.indexOf(" in ", currentIndex+4);
-          if (index < 0) {
-              index = sql.indexOf(" IN ", currentIndex+4);
-          }
-          currentIndex = index;
-          if (currentIndex > 0) {
-              indexes.add(currentIndex);
-              int left = sql.indexOf("(", currentIndex+4);
-              int right = sql.indexOf(")", currentIndex+4);
-              if (left > 0 && right > 0) {
-                  String attributeId = sql.substring(left+1, right).trim();
-                  attributeId = attributeId.substring(1);
-                  inAttributeNames.add(attributeId);
-              }              
-          }
+            int index = sql.indexOf(" in ", currentIndex + 4);
+            if (index < 0) {
+                index = sql.indexOf(" IN ", currentIndex + 4);
+            }
+            currentIndex = index;
+            if (currentIndex > 0) {
+                indexes.add(currentIndex);
+                int left = sql.indexOf("(", currentIndex + 4);
+                int right = sql.indexOf(")", currentIndex + 4);
+                if (left > 0 && right > 0) {
+                    String attributeId = sql.substring(left + 1, right).trim();
+                    attributeId = attributeId.substring(1);
+                    inAttributeNames.add(attributeId);
+                }
+            }
         } while (currentIndex > 0 && currentIndex < sql.length());
-        
+
         return inAttributeNames;
     }
 
@@ -230,23 +232,23 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                     tableName = hint;
                 }
             }
-            
+
             if (isBlank(tableName)) {
                 /*
-                 * Some database driver do not support returning the table name from the
-                 * metadata.  This code attempts to parse the entity name from the sql
+                 * Some database driver do not support returning the table name
+                 * from the metadata. This code attempts to parse the entity
+                 * name from the sql
                  */
                 tableName = getTableNameFromSql(sql);
             }
-            
+
             if (matchOnColumnNameOnly) {
                 attributeIds.addAll(getAttributeIds(columnName));
             } else {
                 if (StringUtils.isEmpty(tableName)) {
                     throw new SQLException("Table name could not be determined from metadata or hints.  Please check column and hint.  "
                             + "(Note to SQL-Server users: metadata may not be returned unless you append 'FOR BROWSE' to the end of your query "
-                            + "or set 'useCursors=true' on the JDBC URL.)"
-                            + "Query column = " + i);
+                            + "or set 'useCursors=true' on the JDBC URL.)" + "Query column = " + i);
                 }
                 attributeIds.add(getAttributeId(tableName, columnName));
             }
@@ -254,7 +256,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
         return attributeIds;
     }
-    
+
     protected String getTableNameFromSql(String sql) {
         String tableName = getTableNameFromSql(sql, ' ', ' ');
         if (isBlank(tableName)) {
@@ -277,27 +279,27 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         }
         return tableName;
     }
-    
+
     protected String getTableNameFromSql(String sql, char beforeFrom, char afterFrom) {
         String tableName = null;
-        int fromIndex = sql.toLowerCase().indexOf(beforeFrom+"from"+afterFrom)+6;
+        int fromIndex = sql.toLowerCase().indexOf(beforeFrom + "from" + afterFrom) + 6;
         if (fromIndex > 5) {
             tableName = sql.substring(fromIndex).trim();
             int nextSpaceIndex = tableName.indexOf(" ");
             if (nextSpaceIndex > 0) {
                 tableName = tableName.substring(0, nextSpaceIndex).trim();
             }
-            
+
             if (tableName.startsWith("\"") || tableName.startsWith("`")) {
                 tableName = tableName.substring(1);
-            } 
-            
+            }
+
             if (tableName.endsWith("\"") || tableName.endsWith("`")) {
-                tableName = tableName.substring(0, tableName.length()-1);
+                tableName = tableName.substring(0, tableName.length() - 1);
             }
         }
         return tableName;
-        
+
     }
 
     private List<String> getAttributeIds(String columnName) {
@@ -324,7 +326,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                 return modelAttribute.getId();
             } else {
                 return null;
-            }            
+            }
         } else {
             throw new SqlException("No output model was specified for the db reader component.  An output model is required.");
         }
@@ -386,7 +388,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             } else {
                 sb.append(",\n");
             }
-            sb.append("   \"") .append(entity.getName()).append("\" { ");
+            sb.append("   \"").append(entity.getName()).append("\" { ");
             boolean firstAttribute = true;
             for (ModelAttribute attribute : entity.getModelAttributes()) {
                 if (rowData.containsKey(attribute.getId())) {
@@ -404,7 +406,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         sb.append("\n}");
         log(LogLevel.DEBUG, sb.toString());
     }
-    
+
     protected Set<ModelEntity> getModelEntities(EntityData rowData) {
         Set<ModelEntity> entities = new LinkedHashSet<ModelEntity>();
         Model model = getOutputModel();
@@ -419,66 +421,67 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         }
         return entities;
     }
-    
+
     public void setSqls(List<String> sqls) {
         this.sqls = sqls;
     }
-    
+
     public void setSql(String sql) {
         this.sqls = new ArrayList<>(1);
         this.sqls.add(sql);
     }
-    
+
     public void setRowsPerMessage(long rowsPerMessage) {
         this.rowsPerMessage = rowsPerMessage;
     }
-    
+
     public void setMatchOnColumnNameOnly(boolean matchOnColumnNameOnly) {
         this.matchOnColumnNameOnly = matchOnColumnNameOnly;
     }
-    
+
     public void setTrimColumns(boolean trimColumns) {
         this.trimColumns = trimColumns;
     }
-    
+
     public void setEntityChangeType(ChangeType entityChangeType) {
         this.entityChangeType = entityChangeType;
     }
-    
+
     List<String> getSqls() {
-		return sqls;
-	}
+        return sqls;
+    }
 
-	long getRowsPerMessage() {
-		return rowsPerMessage;
-	}
+    long getRowsPerMessage() {
+        return rowsPerMessage;
+    }
 
-	boolean isTrimColumns() {
-		return trimColumns;
-	}
+    boolean isTrimColumns() {
+        return trimColumns;
+    }
 
-	boolean isMatchOnColumnNameOnly() {
-		return matchOnColumnNameOnly;
-	}
-	
-	public int getRowReadDuringHandle() {
+    boolean isMatchOnColumnNameOnly() {
+        return matchOnColumnNameOnly;
+    }
+
+    public int getRowReadDuringHandle() {
         return rowReadDuringHandle;
     }
 
-	class ResultSetToEntityDataConverter implements ResultSetExtractor<ArrayList<EntityData>> {
+    class ResultSetToEntityDataConverter implements ResultSetExtractor<ArrayList<EntityData>> {
         Message inputMessage;
-        
+
         ISendMessageCallback callback;
 
         String sqlToExecute;
-        
+
         int outputRecCount;
-        
+
         boolean unitOfWorkLastMessage;
-        
+
         ArrayList<EntityData> payload;
 
-        public ResultSetToEntityDataConverter(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage, ArrayList<EntityData> payload) {
+        public ResultSetToEntityDataConverter(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage,
+                ArrayList<EntityData> payload) {
             this.inputMessage = inputMessage;
             this.callback = callback;
             this.unitOfWorkLastMessage = unitOfWorkLastMessage;
@@ -493,7 +496,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             long ts = System.currentTimeMillis();
             while (rs.next()) {
                 if (outputRecCount++ % rowsPerMessage == 0 && payload != null && !payload.isEmpty()) {
-                    callback.sendMessage(null, payload);
+                    callback.sendEntityDataMessage(null, payload);
                     payload.clear();
                 }
 
@@ -516,7 +519,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                 if (context.getDeployment() != null && context.getDeployment().asLogLevel() == LogLevel.DEBUG) {
                     logEntityAttributes(rowData);
                 }
-                
+
                 long newTs = System.currentTimeMillis();
                 if (newTs - ts > 10000) {
                     getExecutionTracker().updateStatistics(threadNumber, context);
@@ -530,8 +533,8 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             this.sqlToExecute = sqlToExecute;
         }
     }
-	
-	public void setRunWhen(String runWhen) {
+
+    public void setRunWhen(String runWhen) {
         this.runWhen = runWhen;
     }
 }

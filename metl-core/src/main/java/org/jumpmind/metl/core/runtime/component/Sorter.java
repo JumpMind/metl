@@ -27,8 +27,8 @@ import java.util.List;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
@@ -80,8 +80,8 @@ public class Sorter extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (!(inputMessage instanceof ControlMessage)) {
-            ArrayList<EntityData> payload = inputMessage.getPayload();
+        if (inputMessage instanceof EntityDataMessage) {
+            ArrayList<EntityData> payload = ((EntityDataMessage)inputMessage).getPayload();
             for (int i = 0; i < payload.size(); i++) {
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 EntityData record = payload.get(i);
@@ -96,7 +96,7 @@ public class Sorter extends AbstractComponentRuntime {
             
             for (EntityData record : sortedRecords) {
                 if (dataToSend.size() >= rowsPerMessage) {
-                    callback.sendMessage(null, dataToSend);
+                    callback.sendEntityDataMessage(null, dataToSend);
                     dataToSend = new ArrayList<EntityData>();
                 }
                 dataToSend.add(record);
@@ -105,7 +105,7 @@ public class Sorter extends AbstractComponentRuntime {
             sortedRecords.clear();
             
             if (dataToSend != null && dataToSend.size() > 0) {
-                callback.sendMessage(null, dataToSend);
+                callback.sendEntityDataMessage(null, dataToSend);
             }
         }
     }

@@ -39,8 +39,8 @@ import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -85,12 +85,12 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (!(inputMessage instanceof ControlMessage)) {
+        if (inputMessage instanceof EntityDataMessage) {
             if (attributes.size() == 0) {
                 log(LogLevel.INFO, "There are no format attributes configured.  Writing all entity fields to the output");
             }
 
-            ArrayList<EntityData> inputRows = inputMessage.getPayload();
+            ArrayList<EntityData> inputRows = ((EntityDataMessage)inputMessage).getPayload();
 
             ArrayList<String> outputPayload = new ArrayList<String>();
 
@@ -115,12 +115,11 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
                 outputPayload.add(outputRec);
             }
 
-            callback.sendMessage(null, outputPayload);
+            callback.sendTextMessage(null, outputPayload);
         }
     }
 
     private String processInputRow(Message inputMessage, EntityData inputRow) {
-
         Writer writer = new StringWriter();
         CsvWriter csvWriter = getCsvWriter(writer);
         try {

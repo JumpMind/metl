@@ -22,7 +22,7 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.junit.Assert.assertEquals;
 
-import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.component.helpers.SettingsBuilder;
 import org.junit.Test;
@@ -123,8 +123,7 @@ public class TextConstantTest extends AbstractComponentRuntimeTestSupport {
 		MessageTestHelper.addInputMessage(this, true, "step1", "Ohio State\nBuckeyes");
 		
 		// Expected
-		MessageTestHelper.addOutputMonitor(this, new MessageBuilder()
-				.withValue("GO").withValue("BUCKS").build());
+		MessageTestHelper.addOutputMonitor(this, new TextMessage("test").addString("GO").addString("BUCKS"));
 				
 		runHandle();
 		assertHandle(2);
@@ -142,8 +141,8 @@ public class TextConstantTest extends AbstractComponentRuntimeTestSupport {
 		
 		// Expected
 		MessageTestHelper.addOutputMonitor(this, 
-				new MessageBuilder().withValue("GO").build(),
-				new MessageBuilder().withValue("BUCKS").build());
+		        new TextMessage("test").addString("GO"),
+		        new TextMessage("test").addString("BUCKS"));
 		
 		runHandle();
 		assertHandle(2);

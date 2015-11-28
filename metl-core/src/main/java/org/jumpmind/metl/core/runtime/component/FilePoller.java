@@ -110,7 +110,6 @@ public class FilePoller extends AbstractComponentRuntime {
             throw new MisconfiguredException("A resource is required");
         }
         TypedProperties properties = getTypedProperties();
-
         filesPerMessage = properties.getInt(ROWS_PER_MESSAGE);
         filePattern = FormatUtils.replaceTokens(properties.get(SETTING_FILE_PATTERN),
                 context.getFlowParameters(), true);
@@ -238,13 +237,13 @@ public class FilePoller extends AbstractComponentRuntime {
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 filePaths.add(file.getRelativePath());
                 if (filePaths.size() <= filesPerMessage) {
-                    callback.sendMessage(null, filePaths);
+                    callback.sendTextMessage(null, filePaths);
                     filePaths = new ArrayList<>();
                 }
             }
             
             if (filePaths.size() > 0) {
-                callback.sendMessage(null, filePaths);
+                callback.sendTextMessage(null, filePaths);
             }
         } else if (cancelOnNoFiles) {
             callback.sendShutdownMessage(true);

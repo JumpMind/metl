@@ -26,6 +26,7 @@ import java.util.Arrays;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntimeTestSupport;
 import org.jumpmind.metl.core.runtime.component.HandleMessageMonitor;
 import org.jumpmind.metl.core.runtime.component.HandleParams;
@@ -56,14 +57,15 @@ public class MessageTestHelper {
     }
 
     public static void addInputMessage(AbstractComponentRuntimeTestSupport testComponent, boolean unitOfWorkBoundaryReached,
-            String originatinStepId, String... values) {
+            String originatingStepId, String... values) {
         ArrayList<String> payload = new ArrayList<String>();
 
         for (String s : values) {
             payload.add(s);
         }
 
-        Message message = new MessageBuilder(originatinStepId).withPayloadString(payload).build();
+        TextMessage message = new TextMessage(originatingStepId);
+        message.setPayload(payload);
 
         testComponent.getMessages().add(new HandleParams(message, unitOfWorkBoundaryReached));
 
@@ -91,12 +93,14 @@ public class MessageTestHelper {
     }
 
     public static void addOutputMonitor(AbstractComponentRuntimeTestSupport testComponent, String value) {
-        Message message = new MessageBuilder().withValue(value).build();
+        TextMessage message = new TextMessage("unitTest");
+        message.addString(value);
         testComponent.getExpectedMonitors().add(getMessageMonitor(false, message));
     }
 
     public static void addOutputMonitor(AbstractComponentRuntimeTestSupport testComponent, boolean xmlPayload, String value) {
-        Message message = new MessageBuilder().withValue(value).build();
+        TextMessage message = new TextMessage("unitTest");
+        message.addString(value);
         testComponent.getExpectedMonitors().add(getMessageMonitor(xmlPayload, message));
     }
 

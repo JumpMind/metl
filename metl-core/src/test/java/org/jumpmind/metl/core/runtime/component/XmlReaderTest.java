@@ -29,7 +29,7 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.jumpmind.metl.core.model.Resource;
-import org.jumpmind.metl.core.runtime.component.helpers.MessageBuilder;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageTestHelper;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
@@ -107,8 +107,8 @@ public class XmlReaderTest extends AbstractComponentRuntimeTestSupport {
 
         // Expected
         MessageTestHelper.addOutputMonitor(this, true,
-        		new MessageBuilder().withValue("<Item>" + "<Id>1</Id>" + "<Name>Hat</Name>" + "<Size>Large</Size>" + "</Item>").build(),
-        		new MessageBuilder().withValue("<Item>" + "<Id>2</Id>" + "<Name>Shirt</Name>" + "<Size>Medium</Size>" + "</Item>").build());
+                new TextMessage("test").addString("<Item>" + "<Id>1</Id>" + "<Name>Hat</Name>" + "<Size>Large</Size>" + "</Item>"),
+                new TextMessage("test").addString("<Item>" + "<Id>2</Id>" + "<Name>Shirt</Name>" + "<Size>Medium</Size>" + "</Item>"));
 
         runHandle();
         assertHandle(2);

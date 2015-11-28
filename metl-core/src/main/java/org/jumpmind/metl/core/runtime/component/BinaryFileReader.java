@@ -56,7 +56,7 @@ public class BinaryFileReader extends AbstractFileReader {
                 //TODO: if the file is bigger than the allowable message size, this doesn't work
                 
                 byte[] payload = IOUtils.toByteArray(inStream);
-                callback.sendMessage(headers, payload);
+                callback.sendBinaryMessage(headers, payload);
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);               
                 
             } catch (IOException e) {

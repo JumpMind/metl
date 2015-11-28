@@ -39,11 +39,11 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.FileInfo;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.util.ComponentUtils;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.properties.TypedProperties;
 
@@ -119,8 +119,8 @@ public class UnZip extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (ComponentUtils.getPayloadType(inputMessage.getPayload()) == ComponentUtils.PAYLOAD_TYPE_LIST_STRING) {
-            List<String> files = inputMessage.getPayload();
+        if (inputMessage instanceof TextMessage) {
+            List<String> files = ((TextMessage)inputMessage).getPayload();
             ArrayList<String> filePaths = new ArrayList<String>();
             for (String fileName : files) {
                 log(LogLevel.INFO, "Preparing to extract file : %s", fileName);
@@ -172,7 +172,7 @@ public class UnZip extends AbstractComponentRuntime {
                 }
             }
             if (filePaths.size() > 0) {
-                callback.sendMessage(null, filePaths);
+                callback.sendTextMessage(null, filePaths);
             }
         }
     }

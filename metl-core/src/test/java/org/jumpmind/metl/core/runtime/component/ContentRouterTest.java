@@ -37,8 +37,8 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
-import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.component.ContentRouter.Route;
 import org.jumpmind.metl.core.util.NameValue;
 import org.jumpmind.metl.core.utils.TestUtils;
@@ -113,7 +113,7 @@ public class ContentRouterTest {
         ContentRouter router = new ContentRouter();
         ComponentContext context = new ComponentContext(null, step, flow, new ExecutionTrackerNoOp(), null, null, null);
         router.start(0, context);
-        Message inputMessage = new Message("");
+        EntityDataMessage inputMessage = new EntityDataMessage("");
         ArrayList<EntityData> datas = new ArrayList<EntityData>();
         for (EntityData entityData : data) {
             datas.add(entityData);

@@ -36,6 +36,7 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.utils.TestUtils;
@@ -72,7 +73,7 @@ public class DelimitedFormatterTest {
 
     private static Message createInboundMessage() {
         
-        Message message = new Message("fake step id");
+        EntityDataMessage message = new EntityDataMessage("fake step id");
         ArrayList<EntityData> inboundPayload = new ArrayList<EntityData>();
         EntityData entityData = new EntityData();
         entityData.put("tt1col1", "tt1col1_value");

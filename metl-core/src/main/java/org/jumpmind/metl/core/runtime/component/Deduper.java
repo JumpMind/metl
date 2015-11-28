@@ -23,8 +23,8 @@ package org.jumpmind.metl.core.runtime.component;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
@@ -48,8 +48,8 @@ public class Deduper extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (!(inputMessage instanceof ControlMessage)) {
-            ArrayList<EntityData> payload = inputMessage.getPayload();
+        if (inputMessage instanceof EntityDataMessage) {
+            ArrayList<EntityData> payload = ((EntityDataMessage)inputMessage).getPayload();
             for (EntityData entityData : payload) {
                 String key = entityData.toString();
                 if (!deduped.containsKey(key)) {
@@ -65,7 +65,7 @@ public class Deduper extends AbstractComponentRuntime {
                 ArrayList<EntityData> payload = new ArrayList<EntityData>(rowsPerMessage);
                 for (EntityData data : deduped.values()) {
                     if (count >= rowsPerMessage) {
-                        callback.sendMessage(null, payload);
+                        callback.sendEntityDataMessage(null, payload);
                         payload = new ArrayList<EntityData>();
                         count = 0;
                     }
@@ -75,7 +75,7 @@ public class Deduper extends AbstractComponentRuntime {
 
                 deduped.clear();
 
-                callback.sendMessage(null, payload);
+                callback.sendEntityDataMessage(null, payload);
             }
         }
     }

@@ -21,22 +21,13 @@
 package org.jumpmind.metl.core.runtime;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Iterator;
 
-public class Message implements Serializable {
+abstract public class Message implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
     MessageHeader header;
 
-    Serializable payload;
-    
-    public Message(String originatingStepId, Serializable payload) {
-        this(originatingStepId);
-        this.payload = payload;
-    }
-    
     public Message(String originatingStepId) {
         this.header = new MessageHeader(originatingStepId);
     }
@@ -44,31 +35,5 @@ public class Message implements Serializable {
     public MessageHeader getHeader() {
         return header;
     }
-    
-    @SuppressWarnings("unchecked")
-    public <T extends Serializable> T getPayload() {
-        return (T)payload;
-    }
-
-    public <T extends Serializable> void setPayload(T payload) {
-        this.payload = payload;
-    }
-    
-    public String getTextFromPayload() {
-        StringBuilder b = new StringBuilder();
-        if (payload instanceof Collection) {
-            Iterator<?> i = ((Collection<?>)payload).iterator();
-            while (i.hasNext()) {
-                Object obj = i.next();
-                b.append(obj);
-                if (i.hasNext()) {
-                    b.append(System.getProperty("line.separator"));
-                }
-            }
-        } else if (payload instanceof CharSequence) {
-            b.append((CharSequence)payload);
-        }
-        return b.toString();
-    }
-    
+            
 }

@@ -26,10 +26,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.BinaryMessage;
+import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
+@SuppressWarnings("unchecked")
 class SendMessageCallback<T> implements ISendMessageCallback {
 
     List<T> payloadList = new ArrayList<T>();
@@ -40,12 +44,39 @@ class SendMessageCallback<T> implements ISendMessageCallback {
 
     boolean sentShutdown = false;
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void sendMessage(Map<String, Serializable> additionalHeaders, Serializable payload, String... targetStepIds) {
+    public void sendBinaryMessage(Map<String, Serializable> messageHeaders, byte[] payload, String... targetStepIds) {
         payloadList.add((T) payload);
         this.targetStepIds.add(Arrays.asList(targetStepIds));
     }
+    
+    @Override
+    public void sendEntityDataMessage(Map<String, Serializable> messageHeaders, ArrayList<EntityData> payload, String... targetStepIds) {
+        payloadList.add((T) payload);        this.targetStepIds.add(Arrays.asList(targetStepIds));
+
+    }
+    
+    @Override
+    public void sendTextMessage(Map<String, Serializable> messageHeaders, ArrayList<String> payload, String... targetStepIds) {
+        payloadList.add((T) payload);
+        this.targetStepIds.add(Arrays.asList(targetStepIds));
+    }
+    
+    public void forward(Map<String, Serializable> messageHeaders, Message message) {
+        if (message instanceof EntityDataMessage) {
+            sendEntityDataMessage(messageHeaders, ((EntityDataMessage) message).getPayload());
+        } else if (message instanceof TextMessage) {
+            sendTextMessage(messageHeaders, ((TextMessage) message).getPayload());
+        } else if (message instanceof BinaryMessage) {
+            sendBinaryMessage(messageHeaders, ((BinaryMessage) message).getPayload());
+        }
+    }        
+    
+    @Override
+    public void forward(Message message) {
+        forward(null, message);
+    }
+
 
     @Override
     public void sendShutdownMessage(boolean cancel) {
@@ -78,11 +109,5 @@ class SendMessageCallback<T> implements ISendMessageCallback {
         return sentStartup;
     }
 
-    @Override
-    public void forward(Message message) {
-        if (!(message instanceof ControlMessage)) {
-            sendMessage(message.getHeader(), message.getPayload());
-        }
-    }
 
 }

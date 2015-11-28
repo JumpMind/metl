@@ -40,6 +40,7 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
@@ -99,7 +100,7 @@ public class TextFileWriterTest {
     }
 
     private static Message createMultipleRowTextMessageToWrite() {
-        Message msg = new Message("originating step id");
+        TextMessage msg = new TextMessage("originating step id");
         msg.getHeader().setSequenceNumber(1);
         ArrayList<String> payload = new ArrayList<String>();
         payload.add("Line 1");
@@ -111,7 +112,7 @@ public class TextFileWriterTest {
     }
 
     private static Message createSingleRowTextMessageToWrite(int lineNumber, boolean lastMsg) {
-        Message msg = new Message("originating step id");
+        TextMessage msg = new TextMessage("originating step id");
         msg.getHeader().setSequenceNumber(lineNumber);
         ArrayList<String> payload = new ArrayList<String>();
         payload.add("Line " + lineNumber);

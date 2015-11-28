@@ -2,9 +2,11 @@ package org.jumpmind.metl.core.runtime.component;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.runtime.BinaryMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -24,12 +26,13 @@ public class BinaryFileWriter extends AbstractFileWriter {
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
 		
 		IDirectory streamable;
-		if (!(inputMessage instanceof ControlMessage)) {			
+		if (inputMessage instanceof BinaryMessage) {
+		    BinaryMessage message = (BinaryMessage)inputMessage;
 			String fileName = getFileName(inputMessage);
 			streamable = initStream(fileName);
 			initFos(streamable, fileName);
 			try {
-				fos.write(inputMessage.getPayload());
+				fos.write(message.getPayload());
 			} catch(IOException e) {
 				throw new IoException(e);
 			}
@@ -38,13 +41,14 @@ public class BinaryFileWriter extends AbstractFileWriter {
         if ((inputMessage instanceof ControlMessage ||
         		unitOfWorkBoundaryReached) && callback != null) {
         	IOUtils.closeQuietly(fos);
-            callback.sendMessage(null, "{\"status\":\"success\"}");			
+        	ArrayList<String> results = new ArrayList<>();
+        	results.add("{\"status\":\"success\"}");
+            callback.sendTextMessage(null, results);			
 		}
 	}
 
 	@Override
 	public boolean supportsStartupMessages() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	

@@ -29,6 +29,7 @@ import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.Http;
 import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
@@ -84,15 +85,14 @@ public class Web extends AbstractComponentRuntime {
 
 	@Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
 			IDirectory streamable = getResourceReference();
 
 			ArrayList<String> outputPayload = new ArrayList<String>();
 			ArrayList<String> inputPayload = new ArrayList<String>();
-			if (bodyFrom.equals("Message")) {
-				inputPayload = inputMessage.getPayload();
+			if (bodyFrom.equals("Message") && inputMessage instanceof TextMessage) {
+				inputPayload = ((TextMessage)inputMessage).getPayload();
 			} else {
 				inputPayload.add(bodyText);
 			}
@@ -119,7 +119,7 @@ public class Web extends AbstractComponentRuntime {
 					}
 
 					if (outputPayload.size() > 0) {
-						callback.sendMessage(null, outputPayload);
+						callback.sendTextMessage(null, outputPayload);
 					}
 				} catch (IOException e) {
 					throw new IoException(String.format("Error writing to %s ", streamable), e);

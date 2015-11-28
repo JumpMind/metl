@@ -38,9 +38,10 @@ import javax.script.ScriptException;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.util.ComponentUtils;
 import org.jumpmind.properties.TypedProperties;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -89,12 +90,12 @@ public class ContentRouter extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (ComponentUtils.getPayloadType(inputMessage.getPayload()) == ComponentUtils.PAYLOAD_TYPE_LIST_ENTITY) {
-            handleEntityListPayload(inputMessage, callback, unitOfWorkBoundaryReached);
-        } else if (ComponentUtils.getPayloadType(inputMessage.getPayload()) == ComponentUtils.PAYLOAD_TYPE_LIST_STRING) {
-            handleStringListPayload(inputMessage, callback, unitOfWorkBoundaryReached);
+        if (inputMessage instanceof EntityDataMessage) {
+            handleEntityListPayload((EntityDataMessage)inputMessage, callback, unitOfWorkBoundaryReached);
+        } else if (inputMessage instanceof TextMessage) {
+            handleStringListPayload((TextMessage)inputMessage, callback, unitOfWorkBoundaryReached);
         } else if (inputMessage instanceof ControlMessage) {
-            handleControlMessages(inputMessage, callback, unitOfWorkBoundaryReached);
+            handleControlMessages((ControlMessage)inputMessage, callback, unitOfWorkBoundaryReached);
         }
         
         if (unitOfWorkBoundaryReached) {
@@ -104,7 +105,7 @@ public class ContentRouter extends AbstractComponentRuntime {
         }
     }
 
-    void handleEntityListPayload(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+    void handleEntityListPayload(EntityDataMessage inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         Map<String, ArrayList<EntityData>> outboundMessages = new HashMap<String, ArrayList<EntityData>>();
         ArrayList<EntityData> inputDatas = inputMessage.getPayload();
 
@@ -124,7 +125,7 @@ public class ContentRouter extends AbstractComponentRuntime {
                             }
                             if (outboundPayload.size() >= rowsPerMessage) {
                                 outboundMessages.remove(route.getTargetStepId());
-                                callback.sendMessage(null, outboundPayload, route.getTargetStepId());
+                                callback.sendEntityDataMessage(null, outboundPayload, route.getTargetStepId());
                                 targetStepsThatNeedControlMessages.add(route.getTargetStepId());
                             }
                             outboundPayload.add(entityData.copy());
@@ -140,12 +141,12 @@ public class ContentRouter extends AbstractComponentRuntime {
         }
 
         for (String targetFlowStepId : outboundMessages.keySet()) {
-            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), targetFlowStepId);
+            callback.sendEntityDataMessage(null, outboundMessages.get(targetFlowStepId), targetFlowStepId);
             targetStepsThatNeedControlMessages.add(targetFlowStepId);
         }
     }
 
-    protected void handleControlMessages(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+    protected void handleControlMessages(ControlMessage inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         Bindings bindings = scriptEngine.createBindings();
         bindHeadersAndFlowParameters(bindings, inputMessage);
         scriptEngine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
@@ -166,8 +167,7 @@ public class ContentRouter extends AbstractComponentRuntime {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    protected void handleStringListPayload(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+    protected void handleStringListPayload(TextMessage inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         Map<String, ArrayList<String>> outboundMessages = new HashMap<String, ArrayList<String>>();
         ArrayList<String> inputDatas = (ArrayList<String>) inputMessage.getPayload();
         for (String data : inputDatas) {
@@ -184,7 +184,7 @@ public class ContentRouter extends AbstractComponentRuntime {
                             }
                             if (outboundPayload.size() >= rowsPerMessage) {
                                 outboundMessages.remove(route.getTargetStepId());
-                                callback.sendMessage(null, outboundPayload, route.getTargetStepId());
+                                callback.sendTextMessage(null, outboundPayload, route.getTargetStepId());
                                 targetStepsThatNeedControlMessages.add(route.getTargetStepId());
                             }
                             outboundPayload.add(data);
@@ -200,7 +200,7 @@ public class ContentRouter extends AbstractComponentRuntime {
         }
 
         for (String targetFlowStepId : outboundMessages.keySet()) {
-            callback.sendMessage(null, outboundMessages.get(targetFlowStepId), targetFlowStepId);
+            callback.sendTextMessage(null, outboundMessages.get(targetFlowStepId), targetFlowStepId);
             targetStepsThatNeedControlMessages.add(targetFlowStepId);
         }
 

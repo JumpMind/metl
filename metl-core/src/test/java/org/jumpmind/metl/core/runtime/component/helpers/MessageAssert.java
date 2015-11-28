@@ -20,18 +20,18 @@
  */
 package org.jumpmind.metl.core.runtime.component.helpers;
 
+import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.utils.TestUtils;
 import org.junit.Assert;
 
 public class MessageAssert extends Assert {
-	
-	public static void assertMessage(int callbackNumber, int messageNumber, Message expected, Message actual, boolean isPayloadXML) {
-		TestUtils.assertNullNotNull(expected, actual);
-		if (expected != null && actual != null) {
-			// TODO Assert Message Header
-			
-			PayloadAssert.assertPayload(callbackNumber, messageNumber, expected.getPayload(), actual.getPayload(), isPayloadXML);
-		}
-	}
+
+    public static void assertMessage(int callbackNumber, int messageNumber, Message expected, Message actual, boolean isPayloadXML) {
+        TestUtils.assertNullNotNull(expected, actual);
+        if (expected != null && actual != null && expected instanceof ContentMessage<?> && actual instanceof ContentMessage<?>) {
+            PayloadAssert.assertPayload(callbackNumber, messageNumber, ((ContentMessage<?>) expected).getPayload(),
+                    ((ContentMessage<?>) expected).getPayload(), isPayloadXML);
+        }
+    }
 }

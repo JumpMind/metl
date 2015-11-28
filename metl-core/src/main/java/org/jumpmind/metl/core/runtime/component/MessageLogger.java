@@ -23,6 +23,7 @@ package org.jumpmind.metl.core.runtime.component;
 import java.io.Serializable;
 import java.util.List;
 
+import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
@@ -49,20 +50,22 @@ public class MessageLogger extends AbstractComponentRuntime {
         MessageHeader header = inputMessage.getHeader();
         log(LogLevel.INFO,
                 String.format("%s{sequenceNumber=%d,unitOfWorkBoundaryReached=%s,source='%s',headers=%s}",
-                        inputMessage.getClass().getSimpleName(), header.getSequenceNumber(), 
-                        unitOfWorkBoundaryReached, getFlow().findFlowStepWithId(header.getOriginatingStepId()).getName(), header.toString()));
-        Serializable payload = inputMessage.getPayload();
-        if (payload instanceof List) {
-            @SuppressWarnings("unchecked")
-            List<Object> list = (List<Object>) payload;
-            for (Object object : list) {
-                if (object instanceof EntityData && getComponent().getInputModel() != null) {
-                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                    log(LogLevel.INFO, String.format("Message Payload: %s", getComponent().toRow((EntityData) object,
-                            context.getFlowStep().getComponent().getBoolean(SETTING_QUALIFY_WITH_ENTITY_NAME, true), true)));
-                } else {
-                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                    log(LogLevel.INFO, String.format("Message Payload: %s", object));
+                        inputMessage.getClass().getSimpleName(), header.getSequenceNumber(), unitOfWorkBoundaryReached,
+                        getFlow().findFlowStepWithId(header.getOriginatingStepId()).getName(), header.toString()));
+        if (inputMessage instanceof ContentMessage<?>) {
+            Serializable payload = ((ContentMessage<?>) inputMessage).getPayload();
+            if (payload instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<Object> list = (List<Object>) payload;
+                for (Object object : list) {
+                    if (object instanceof EntityData && getComponent().getInputModel() != null) {
+                        getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                        log(LogLevel.INFO, String.format("Message Payload: %s", getComponent().toRow((EntityData) object,
+                                context.getFlowStep().getComponent().getBoolean(SETTING_QUALIFY_WITH_ENTITY_NAME, true), true)));
+                    } else {
+                        getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                        log(LogLevel.INFO, String.format("Message Payload: %s", object));
+                    }
                 }
             }
         }

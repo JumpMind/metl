@@ -40,6 +40,7 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.runtime.AbstractRuntimeObject;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
@@ -264,12 +265,12 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return bindings;
     }
 
-    protected Object getAttributeValue(Message inputMessage, String entityName, String attributeName) {
+    protected Object getAttributeValue(EntityDataMessage inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
         return ComponentUtils.getAttributeValue(getInputModel(), rows, entityName, attributeName);
     }
 
-    protected List<Object> getAttributeValues(Message inputMessage, String entityName, String attributeName) {
+    protected List<Object> getAttributeValues(EntityDataMessage inputMessage, String entityName, String attributeName) {
         ArrayList<EntityData> rows = inputMessage.getPayload();
         return ComponentUtils.getAttributeValues(getInputModel(), rows, entityName, attributeName);
     }

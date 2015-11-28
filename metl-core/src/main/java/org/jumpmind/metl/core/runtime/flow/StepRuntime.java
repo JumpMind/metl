@@ -36,17 +36,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.FlowStep;
+import org.jumpmind.metl.core.runtime.BinaryMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MessageHeader;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.ShutdownMessage;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.AssertException;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
@@ -171,7 +175,7 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    protected void recordError(int threadNumber, Throwable ex) {        
+    protected void recordError(int threadNumber, Throwable ex) {
         String msg = null;
         if (ex instanceof MisconfiguredException || ex instanceof AssertException) {
             msg = ex.getMessage();
@@ -431,47 +435,50 @@ public class StepRuntime implements Runnable {
         componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
                 String.format("INPUT %s{sequenceNumber=%d,unitOfWorkBoundaryReached=%s,source='%s',headers=%s}",
                         inputMessage.getClass().getSimpleName(), header.getSequenceNumber(), unitOfWorkBoundaryReached, source, header));
-        Serializable payload = inputMessage.getPayload();
-        if (payload instanceof List) {
-            @SuppressWarnings("unchecked")
-            List<Object> list = (List<Object>) payload;
-            for (Object object : list) {
-                if (object instanceof EntityData && componentContext.getFlowStep().getComponent().getInputModel() != null) {
-                    componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
-                            String.format("INPUT Message Payload: %s",
-                                    componentContext.getFlowStep().getComponent().toRow((EntityData) object, true, true)));
-                } else {
-                    componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
-                            String.format("INPUT Message Payload: %s", object));
+        if (inputMessage instanceof EntityDataMessage) {
+            EntityDataMessage message = (EntityDataMessage) inputMessage;
+            if (componentContext.getFlowStep().getComponent().getInputModel() != null) {
+                ArrayList<EntityData> payload = message.getPayload();
+                for (EntityData entityData : payload) {
+                    componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext, String.format(
+                            "INPUT Message Payload: %s", componentContext.getFlowStep().getComponent().toRow(entityData, true, true)));
                 }
+            }
+        } else if (inputMessage instanceof TextMessage) {
+            TextMessage message = (TextMessage) inputMessage;
+            ArrayList<String> payload = message.getPayload();
+            for (String string : payload) {
+                componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
+                        String.format("INPUT Message Payload: %s", string));
             }
         }
 
     }
 
-    protected void logOutput(Message message, String... targetFlowStepIds) {
+    protected void logOutput(Message outputMessage, String... targetFlowStepIds) {
 
         String targets = targetFlowStepIds != null && targetFlowStepIds.length > 0 ? Arrays.toString(targetFlowStepIds) : "[all]";
         int threadNumber = ThreadUtils.getThreadNumber();
 
-        MessageHeader header = message.getHeader();
+        MessageHeader header = outputMessage.getHeader();
         componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
-                String.format("OUTPUT %s{sequenceNumber=%d,headers=%s,targetsteps:%s}", message.getClass().getSimpleName(),
+                String.format("OUTPUT %s{sequenceNumber=%d,headers=%s,targetsteps:%s}", outputMessage.getClass().getSimpleName(),
                         header.getSequenceNumber(), header, targets));
-
-        Serializable payload = message.getPayload();
-        if (payload instanceof List) {
-            @SuppressWarnings("unchecked")
-            List<Object> list = (List<Object>) payload;
-            for (Object object : list) {
-                if (object instanceof EntityData) {
-                    componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
-                            String.format("OUTPUT Message Payload: %s",
-                                    componentContext.getFlowStep().getComponent().toRow((EntityData) object, true, false)));
-                } else {
-                    componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
-                            String.format("OUTPUT Message Payload: %s", object));
+        if (outputMessage instanceof EntityDataMessage) {
+            EntityDataMessage message = (EntityDataMessage) outputMessage;
+            if (componentContext.getFlowStep().getComponent().getOutputModel() != null) {
+                ArrayList<EntityData> payload = message.getPayload();
+                for (EntityData entityData : payload) {
+                    componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext, String.format(
+                            "INPUT Message Payload: %s", componentContext.getFlowStep().getComponent().toRow(entityData, true, false)));
                 }
+            }
+        } else if (outputMessage instanceof TextMessage) {
+            TextMessage message = (TextMessage) outputMessage;
+            ArrayList<String> payload = message.getPayload();
+            for (String string : payload) {
+                componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
+                        String.format("INPUT Message Payload: %s", string));
             }
         }
     }
@@ -484,10 +491,8 @@ public class StepRuntime implements Runnable {
             currentInputMessages.put(threadNumber, currentInputMessage);
         }
 
-        private Message createMessage(Message newMessage, Map<String, Serializable> headerSettings, Serializable payload) {
-            createMessage(newMessage, headerSettings);
-            newMessage.setPayload(payload);
-            return newMessage;
+        private Message createMessage(Message newMessage) {
+            return createMessage(newMessage, null);
         }
 
         private Message createMessage(Message newMessage, Map<String, Serializable> headerSettings) {
@@ -504,9 +509,9 @@ public class StepRuntime implements Runnable {
             return newMessage;
         }
 
-        private Serializable copy(Serializable payload) {
+        @SuppressWarnings("unchecked")
+        private <T extends Serializable> T copy(T payload) {
             if (payload instanceof ArrayList) {
-                payload = (Serializable) ((ArrayList<?>) payload).clone();
                 ArrayList<?> old = (ArrayList<?>) payload;
                 ArrayList<Object> copied = new ArrayList<>(old.size());
                 for (Object object : old) {
@@ -515,11 +520,13 @@ public class StepRuntime implements Runnable {
                     }
                     copied.add(object);
                 }
-                payload = copied;
+                payload = (T) copied;
+            } else if (payload instanceof byte[]) {
+                payload = (T) ArrayUtils.clone((byte[]) payload);
             }
             return payload;
         }
-        
+
         private void sendMessage(Message message, String... targetFlowStepIds) {
             ComponentStatistics statistics = componentContext.getComponentStatistics();
             statistics.incrementOutboundMessages(ThreadUtils.getThreadNumber());
@@ -560,33 +567,55 @@ public class StepRuntime implements Runnable {
         @Override
         public void sendShutdownMessage(boolean cancel) {
             FlowStep flowStep = componentContext.getFlowStep();
-            sendMessage(createMessage(new ShutdownMessage(flowStep.getId(), cancel), null, new ArrayList<>()));
+            sendMessage(createMessage(new ShutdownMessage(flowStep.getId(), cancel)));
         }
 
         @Override
         public void sendControlMessage() {
-        	sendControlMessage(null);
+            sendControlMessage(null);
         }
 
         @Override
-        public void sendControlMessage(Map<String, Serializable> messageHeaders, String ... targetStepIds) {
+        public void sendControlMessage(Map<String, Serializable> messageHeaders, String... targetStepIds) {
             FlowStep flowStep = componentContext.getFlowStep();
-            sendMessage(createMessage(new ControlMessage(flowStep.getId()), null), targetStepIds);
+            sendMessage(createMessage(new ControlMessage(flowStep.getId())), targetStepIds);
         }
 
         @Override
-        public void sendMessage(Map<String, Serializable> additionalHeaders, Serializable payload, String... targetFlowStepIds) {
+        public void sendBinaryMessage(Map<String, Serializable> messageHeaders, byte[] payload, String... targetStepIds) {
             payload = copy(payload);
             FlowStep flowStep = componentContext.getFlowStep();
-            sendMessage(createMessage(new Message(flowStep.getId()), additionalHeaders, payload), targetFlowStepIds);
-
+            sendMessage(createMessage(new BinaryMessage(flowStep.getId(), payload), messageHeaders), targetStepIds);
         }
 
         @Override
-        public void forward(Message message) {
-            if (!(message instanceof ControlMessage)) {
-                sendMessage(message.getHeader(), message.getPayload());
+        public void sendEntityDataMessage(Map<String, Serializable> messageHeaders, ArrayList<EntityData> payload, String... targetStepIds) {
+            payload = copy(payload);
+            FlowStep flowStep = componentContext.getFlowStep();
+            sendMessage(createMessage(new EntityDataMessage(flowStep.getId(), payload), messageHeaders), targetStepIds);
+        }
+
+        @Override
+        public void sendTextMessage(Map<String, Serializable> messageHeaders, ArrayList<String> payload, String... targetStepIds) {
+            payload = copy(payload);
+            FlowStep flowStep = componentContext.getFlowStep();
+            sendMessage(createMessage(new TextMessage(flowStep.getId(), payload), messageHeaders), targetStepIds);
+        }
+
+        @Override
+        public void forward(Map<String, Serializable> messageHeaders, Message message) {
+            if (message instanceof EntityDataMessage) {
+                sendEntityDataMessage(messageHeaders, ((EntityDataMessage) message).getPayload());
+            } else if (message instanceof TextMessage) {
+                sendTextMessage(messageHeaders, ((TextMessage) message).getPayload());
+            } else if (message instanceof BinaryMessage) {
+                sendBinaryMessage(messageHeaders, ((BinaryMessage) message).getPayload());
             }
+        }        
+        
+        @Override
+        public void forward(Message message) {
+            forward(null, message);
         }
     }
 

@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
@@ -76,11 +77,11 @@ public class TextFileWriter extends AbstractFileWriter {
             throw new IllegalStateException("The msgTarget resource has not been configured.  Please choose a resource.");
         }
 
-        if (!(inputMessage instanceof ControlMessage)) {
+        if (inputMessage instanceof ContentMessage<?>) {
 	        initStreamAndWriter(inputMessage);
 	        
 	        try {
-	            Object payload = inputMessage.getPayload();
+	            Object payload = ((ContentMessage<?>)inputMessage).getPayload();
 	            if (payload instanceof ArrayList) {
 	                ArrayList<?> recs = (ArrayList<?>) payload;
 	                for (Object rec : recs) {
@@ -106,7 +107,9 @@ public class TextFileWriter extends AbstractFileWriter {
         if ((inputMessage instanceof ControlMessage ||
         		unitOfWorkBoundaryReached) && callback != null) {
             close();
-            callback.sendMessage(null, "{\"status\":\"success\"}");
+            ArrayList<String> results = new ArrayList<>(1);
+            results.add("{\"status\":\"success\"}");
+            callback.sendTextMessage(null, results);
         }
     }
 

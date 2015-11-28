@@ -43,8 +43,8 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.Setting;
-import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
@@ -105,8 +105,8 @@ public class XsltProcessor extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (!(inputMessage instanceof ControlMessage)) {
-            ArrayList<EntityData> inputRows = inputMessage.getPayload();
+        if (inputMessage instanceof EntityDataMessage) {
+            ArrayList<EntityData> inputRows = ((EntityDataMessage)inputMessage).getPayload();
 
             ArrayList<String> outputPayload = new ArrayList<String>();
 
@@ -120,7 +120,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
 
             log(LogLevel.DEBUG, outputPayload.toString());
 
-            callback.sendMessage(null, outputPayload);
+            callback.sendTextMessage(null, outputPayload);
         }
     }
 

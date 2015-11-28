@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.properties.TypedProperties;
@@ -113,7 +114,11 @@ public abstract class AbstractFileReader extends AbstractComponentRuntime {
     protected List<String> getFilesToRead(Message inputMessage) {
         ArrayList<String> files = null;
         if (getFileNameFromMessage) {
-            files = inputMessage.getPayload();
+            if (inputMessage instanceof TextMessage) {
+                files = ((TextMessage)inputMessage).getPayload();
+            } else {
+                files = new ArrayList<>(0);
+            }
         } else {
             files = new ArrayList<String>(1);
             files.add(relativePathAndFile);
