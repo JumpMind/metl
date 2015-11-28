@@ -229,17 +229,18 @@ public class StepRuntime implements Runnable {
     }
 
     protected void process(Message inputMessage, SendMessageCallback target) {
-        this.componentRuntimeExecutor.execute(() -> processOnAnotherThread(inputMessage, target));
+        boolean unitOfWorkBoundaryReached = calculateUnitOfWorkLastMessage(inputMessage);
+        this.componentRuntimeExecutor.execute(() -> processOnAnotherThread(inputMessage, unitOfWorkBoundaryReached, target));
     }
 
-    protected void processOnAnotherThread(Message inputMessage, SendMessageCallback target) {
+    protected void processOnAnotherThread(Message inputMessage, boolean unitOfWorkBoundaryReached, 
+            SendMessageCallback target) {
         int threadNumber = ThreadUtils.getThreadNumber();
         try {
             componentContext.getExecutionTracker().beforeHandle(threadNumber, componentContext);
             componentContext.getComponentStatistics().incrementInboundMessages(threadNumber);
 
             IComponentRuntime componentRuntime = componentRuntimeByThread.get(threadNumber);
-            boolean unitOfWorkBoundaryReached = calculateUnitOfWorkLastMessage(inputMessage);
 
             Component component = componentContext.getFlowStep().getComponent();
             boolean logInput = component.getBoolean(AbstractComponentRuntime.LOG_INPUT, false);
