@@ -73,9 +73,9 @@ public class HttpOutputStream extends OutputStream {
             responseCode = httpUrlConnection.getResponseCode();
             boolean isError = (httpUrlConnection.getResponseCode() >= 400);
             if (isError) {
-                in = new BufferedReader(new InputStreamReader(httpUrlConnection.getErrorStream()));
+                in = new BufferedReader(new InputStreamReader(httpUrlConnection.getErrorStream(), "UTF-8"));
             } else {
-                in = new BufferedReader(new InputStreamReader(httpUrlConnection.getInputStream()));
+                in = new BufferedReader(new InputStreamReader(httpUrlConnection.getInputStream(), "UTF-8"));
             }
             if (isError) {
                 log.warn("Error Response:");
