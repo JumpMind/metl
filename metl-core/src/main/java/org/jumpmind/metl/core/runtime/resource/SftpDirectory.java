@@ -22,6 +22,7 @@ package org.jumpmind.metl.core.runtime.resource;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -74,12 +75,54 @@ public class SftpDirectory implements IDirectory {
     
     @Override
     public FileInfo listFile(String relativePath) {
-        throw new UnsupportedOperationException();
+        Session session = null;
+        ChannelSftp sftp = null;
+        FileInfo fileInfo = null;
+        try {
+            session = connect();
+            sftp = (ChannelSftp) session.openChannel("sftp");
+            sftp.connect();
+            sftp.cd(basePath);
+
+        	if (!relativePath.equals(".") && !relativePath.equals("..")) {
+            	@SuppressWarnings("rawtypes")
+				Vector list = sftp.ls(relativePath);
+	            for (Object object : list) {
+	                LsEntry entry = (LsEntry)object;
+	                if (!entry.getFilename().equals(".") && !entry.getFilename().equals("..")) {
+	                	fileInfo = new FileInfo(relativePath, entry.getAttrs().isDir(), entry.getAttrs().getMTime());
+	                }
+	            }
+        	}
+    		return fileInfo;
+        } catch (Exception e) {
+        	return null;
+        } finally {
+            SftpDirectory.this.close(session, sftp);
+        }
     }
         
     @Override
     public void copyFile(String fromFilePath, String toFilePath) {
-        throw new UnsupportedOperationException();
+        Session session = null;
+        ChannelSftp uploadSftp = null;
+        ChannelSftp downloadSftp = null;
+        try {
+            session = connect();
+            uploadSftp = (ChannelSftp) session.openChannel("sftp");
+            uploadSftp.connect();
+            uploadSftp.cd(basePath);
+            downloadSftp = (ChannelSftp) session.openChannel("sftp");
+            downloadSftp.connect();
+            downloadSftp.cd(basePath);
+            InputStream inputStream = getInputStream(fromFilePath, true);
+            uploadSftp.put(inputStream, toFilePath);
+        } catch (Exception e) {
+            throw new IoException("Error copying file.  Error %s", e.getMessage());
+        } finally {
+            SftpDirectory.this.close(session, uploadSftp);
+            SftpDirectory.this.close(session, downloadSftp);
+        }  
     }
     
     @Override
@@ -176,8 +219,8 @@ public class SftpDirectory implements IDirectory {
     public List<FileInfo> listFiles(String... relativePaths) {
         Session session = null;
         ChannelSftp sftp = null;
+        List<FileInfo> fileInfoList =  new ArrayList<>();
         try {
-            List<FileInfo> fileInfoList =  new ArrayList<>();
             session = connect();
             sftp = (ChannelSftp) session.openChannel("sftp");
             sftp.connect();
@@ -196,7 +239,7 @@ public class SftpDirectory implements IDirectory {
             }
             return fileInfoList;
         } catch (Exception e) {
-            throw new IoException("Error getting the input stream for ssh endpoint.  Error %s", e.getMessage());
+            return fileInfoList;
         } finally {
             SftpDirectory.this.close(session, sftp);
         }
@@ -204,7 +247,29 @@ public class SftpDirectory implements IDirectory {
     
     @Override
     public void copyToDir(String fromFilePath, String toDirPath) {
-        throw new UnsupportedOperationException();
+        Session session = null;
+        ChannelSftp uploadSftp = null;
+        ChannelSftp downloadSftp = null;
+        FileInfo fileInfo = new FileInfo(fromFilePath, false, new java.util.Date().getTime());
+        try {
+            session = connect();
+            uploadSftp = (ChannelSftp) session.openChannel("sftp");
+            uploadSftp.connect();
+            uploadSftp.cd(basePath);
+            downloadSftp = (ChannelSftp) session.openChannel("sftp");
+            downloadSftp.connect();
+            downloadSftp.cd(basePath);
+            if (!toDirPath.endsWith("/")) {
+            	toDirPath += "/";
+            }
+            InputStream inputStream = getInputStream(fromFilePath, true);
+            uploadSftp.put(inputStream, toDirPath + fileInfo.getName());
+        } catch (Exception e) {
+            throw new IoException("Error copying directory.  Error %s", e.getMessage());
+        } finally {
+            SftpDirectory.this.close(session, uploadSftp);
+            SftpDirectory.this.close(session, downloadSftp);
+        }  
     }
     
     @Override
@@ -243,7 +308,7 @@ public class SftpDirectory implements IDirectory {
             }
             return new CloseableInputStreamStream(sftp.get(relativePath), session, sftp);
         } catch (Exception e) {
-            throw new IoException("Error getting the input stream for ssh endpoint.  Error %s", e.getMessage());
+            throw new IoException("Error getting the input stream for sftp endpoint.  Error %s", e.getMessage());
         } 
     }
 
