@@ -30,13 +30,13 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
-public class TestProjectTest {
+public class GeneralFlowTest {
 
     static StandaloneTestFlowRunner standaloneFlowRunner;
 
     FlowName flow;
 
-    public TestProjectTest(FlowName flow) {
+    public GeneralFlowTest(FlowName flow) {
         this.flow = flow;
     }
 
@@ -47,7 +47,7 @@ public class TestProjectTest {
 
     @Parameters(name = "{0}")
     public static Collection<Object[]> getFlows() throws Exception {
-        standaloneFlowRunner = new StandaloneTestFlowRunner("/metl-tests-config.sql");
+        standaloneFlowRunner = new StandaloneTestFlowRunner("/general-flow-test-config.sql");
         return standaloneFlowRunner.getFlowAsTestParams();
     }
 

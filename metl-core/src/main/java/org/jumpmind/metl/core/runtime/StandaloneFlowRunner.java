@@ -29,6 +29,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.io.FilenameUtils;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlPersistenceManager;
@@ -182,7 +183,7 @@ public class StandaloneFlowRunner {
     protected IDatabasePlatform initDatabasePlatform() {
         TypedProperties properties = new TypedProperties();
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_DRIVER, "org.h2.Driver");
-        properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_URL, "jdbc:h2:mem:configdb");
+        properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_URL, "jdbc:h2:mem:" + FilenameUtils.removeExtension(configSqlScript).replaceAll("-", ""));
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_USER, "jumpmind");
         properties.setProperty(BasicDataSourcePropertyConstants.DB_POOL_PASSWORD, "jumpmind");
         DataSource ds = BasicDataSourceFactory.create(properties);
