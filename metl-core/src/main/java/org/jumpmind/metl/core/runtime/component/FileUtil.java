@@ -118,19 +118,21 @@ public class FileUtil extends AbstractComponentRuntime {
 			if (files != null) {
 				for (String fileName : files) {
 					try {
-						String targetFile = null;
-						if (action.equals(ACTION_COPY) || action.equals(ACTION_MOVE)) {
-							targetFile = copyFile(inputMessage, fileName);
-							if (isNotBlank(targetFile)) {
-								getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-								filesProcessed.add(targetFile);
+						if (fileName != null) {
+							String targetFile = null;
+							if (action.equals(ACTION_COPY) || action.equals(ACTION_MOVE)) {
+								targetFile = copyFile(inputMessage, fileName);
+								if (isNotBlank(targetFile)) {
+									getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+									filesProcessed.add(targetFile);
+								}
 							}
-						}
-
-						if (action.equals(ACTION_MOVE)) {
-							if (isNotBlank(targetFile)) {
-							    IDirectory directory = getResourceReference();
-								directory.delete(fileName);
+	
+							if (action.equals(ACTION_MOVE)) {
+								if (isNotBlank(targetFile)) {
+								    IDirectory directory = getResourceReference();
+									directory.delete(fileName);
+								}
 							}
 						}
 					} catch (Exception e) {
@@ -163,16 +165,16 @@ public class FileUtil extends AbstractComponentRuntime {
             }
             targetPath = FormatUtils.replaceTokens(targetPath, parms, true);
             String tokenResolvedAppendToName = FormatUtils.replaceTokens(appendToName, parms, true);
-            String targetFileWithouPart = getTargetFileName(targetPath, sourceFileInfo, tokenResolvedAppendToName);
-            String targetFileName = targetFileWithouPart + ".part";
+            String targetFileWithoutPart = getTargetFileName(targetPath, sourceFileInfo, tokenResolvedAppendToName);
+            String targetFileName = targetFileWithoutPart + ".part";
 
             FileInfo targetFile = directory.listFile(targetFileName);
             if ((targetFile != null && overwrite) || targetFile == null) {
                 directory.copyFile(sourceFileName, targetFileName);
-                if (!directory.renameFile(targetFileName, targetFileWithouPart)) {
-                    throw new IoException(String.format("Rename of %s to %s failed", targetFileName, targetFileWithouPart));
+                if (!directory.renameFile(targetFileName, targetFileWithoutPart)) {
+                    throw new IoException(String.format("Rename of %s to %s failed", targetFileName, targetFileWithoutPart));
                 }
-                return targetFileWithouPart;
+                return targetFileWithoutPart;
             } else {
                 return null;
             }
