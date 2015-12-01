@@ -82,7 +82,7 @@ public class StepRuntime implements Runnable {
 
     boolean cancelled = false;
 
-    boolean finished = false;
+    boolean finished = false;    
 
     Throwable error;
 
@@ -107,6 +107,10 @@ public class StepRuntime implements Runnable {
     Boolean startStep = null;
 
     Set<String> liveSourceStepIds;
+    
+    int messageCount;
+    
+    int controlMessagesSentCount;
 
     public StepRuntime(IComponentRuntimeFactory componentFactory, ComponentContext componentContext, FlowRuntime flowRuntime) {
         this.flowRuntime = flowRuntime;
@@ -122,9 +126,25 @@ public class StepRuntime implements Runnable {
     private String getComponentType() {
         return componentContext.getFlowStep().getComponent().getType();
     }
+    
+    public int getMessageCount() {
+        return messageCount;
+    }
+    
+    public int getControlMessagesSentCount() {
+        return controlMessagesSentCount;
+    }
+    
+    public int getQueueCount() {
+        return this.inQueue.size();
+    }
 
     public void setTargetStepRuntimes(List<StepRuntime> targetStepRuntimes) {
         this.targetStepRuntimes = targetStepRuntimes;
+    }
+    
+    public List<StepRuntime> getTargetStepRuntimes() {
+        return targetStepRuntimes;
     }
 
     public void setSourceStepRuntimes(List<StepRuntime> sourceStepRuntimes) {
@@ -133,6 +153,10 @@ public class StepRuntime implements Runnable {
         for (StepRuntime stepRuntime : sourceStepRuntimes) {
             this.liveSourceStepIds.add(stepRuntime.getComponentContext().getFlowStep().getId());
         }
+    }
+
+    public List<StepRuntime> getSourceStepRuntimes() {
+        return sourceStepRuntimes;
     }
 
     protected void queue(Message message) throws InterruptedException {
@@ -216,10 +240,13 @@ public class StepRuntime implements Runnable {
                  */
                 final Message inputMessage = inQueue.poll(500, TimeUnit.MILLISECONDS);
                 if (running && !cancelled) {
-                    if (inputMessage instanceof ShutdownMessage) {
-                        process((ShutdownMessage) inputMessage, target);
-                    } else if (inputMessage != null) {
-                        process(inputMessage, target);
+                    if (inputMessage != null) {
+                        if (inputMessage instanceof ShutdownMessage) {
+                            process((ShutdownMessage) inputMessage, target);
+                        } else {
+                            messageCount++;
+                            process(inputMessage, target);
+                        }
                     }
                 }
             }
@@ -230,6 +257,10 @@ public class StepRuntime implements Runnable {
 
     protected void process(Message inputMessage, SendMessageCallback target) {
         boolean unitOfWorkBoundaryReached = calculateUnitOfWorkLastMessage(inputMessage);
+        /*
+         * If unitOfWorkBoundaryReached, we might want to consider waiting to send this until all other threads have finished 
+         * processing to avoid race conditions.
+         */
         this.componentRuntimeExecutor.execute(() -> processOnAnotherThread(inputMessage, unitOfWorkBoundaryReached, target));
     }
 
@@ -301,20 +332,56 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    private boolean calculateUnitOfWorkLastMessage(Message inputMessage) {
+    protected boolean calculateUnitOfWorkLastMessage(Message inputMessage) {
         boolean lastMessage = true;
         if (inputMessage instanceof ControlMessage) {
             sourceStepRuntimeUnitOfWorkReceived.put(inputMessage.getHeader().getOriginatingStepId(), Boolean.TRUE);
         }
+        Set<StepRuntime> activeRuntimes = new HashSet<>();
         for (StepRuntime sourceRuntime : sourceStepRuntimes) {
-            lastMessage &= sourceStepRuntimeUnitOfWorkReceived.get(sourceRuntime.getComponentContext().getFlowStep().getId()) != null;
+            boolean controlMessageReceived = sourceStepRuntimeUnitOfWorkReceived.get(sourceRuntime.getComponentContext().getFlowStep().getId()) != null;
+            lastMessage &= controlMessageReceived;
+            if (!controlMessageReceived) {
+                activeRuntimes.add(sourceRuntime);
+            }
         }
+        
+        if (!lastMessage) {   
+            lastMessage = areStepRuntimesDead(activeRuntimes);
+        }
+        
         if (lastMessage) {
             // TODO figure out when/how to reset the last unit of work calc
             // sourceStepRuntimeUnitOfWorkReceived.clear();
-        }
+        } 
         return lastMessage;
     }
+    
+
+    protected boolean areStepRuntimesDead(Set<StepRuntime> runtimes) {
+        for (StepRuntime stepRuntime : runtimes) {
+            if (!isStepRuntimeDead(stepRuntime)) {
+                return false;
+            } 
+        }
+        return true;
+    }
+    
+    protected boolean isStepRuntimeDead(StepRuntime stepRuntime) {
+        if (stepRuntime.getMessageCount() > 0 || stepRuntime.getQueueCount() > 0) {
+            return false;
+        } else {
+            List<StepRuntime> parentSteps = stepRuntime.getSourceStepRuntimes();
+            for (StepRuntime parentStep : parentSteps) {
+                boolean parentStepIsDead = parentStep.isStepRuntimeDead(parentStep);
+                if (!parentStepIsDead && parentStep.getControlMessagesSentCount() == 0) {
+                    return false;
+                } 
+            }
+        }
+        return true;
+    }
+
 
     private void stop(int threadNumber, IComponentRuntime componentRuntime) {
         try {
@@ -580,6 +647,7 @@ public class StepRuntime implements Runnable {
         public void sendControlMessage(Map<String, Serializable> messageHeaders, String... targetStepIds) {
             FlowStep flowStep = componentContext.getFlowStep();
             sendMessage(createMessage(new ControlMessage(flowStep.getId())), targetStepIds);
+            controlMessagesSentCount++;
         }
 
         @Override

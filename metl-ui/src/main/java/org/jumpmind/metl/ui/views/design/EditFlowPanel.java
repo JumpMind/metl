@@ -109,8 +109,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
     IConfigurationService configurationService;
 
-    public EditFlowPanel(ApplicationContext context, String flowId,
-            DesignNavigator designNavigator, TabbedPanel tabs) {
+    public EditFlowPanel(ApplicationContext context, String flowId, DesignNavigator designNavigator, TabbedPanel tabs) {
 
         this.configurationService = context.getConfigurationService();
         this.flow = context.getConfigurationService().findFlow(flowId);
@@ -119,14 +118,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         this.designNavigator = designNavigator;
 
         this.propertySheet = new PropertySheet(context, tabs);
-        this.propertySheet.setListener(new IPropertySheetChangeListener() {
-
-            @Override
-            public void componentNameChanged(Component component) {
-                refreshStepOnDiagram(EditFlowPanel.this.flow.findFlowStepWithComponentId(component
-                        .getId()));
-            }
-        });
+        this.propertySheet
+                .setListener(component -> refreshStepOnDiagram(EditFlowPanel.this.flow.findFlowStepWithComponentId(component.getId())));
         this.propertySheet.setCaption("Property Sheet");
 
         this.componentPalette = new EditFlowPalette(this, context, flow.getProjectVersionId());
@@ -264,8 +257,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
     protected void addComponent(int x, int y, Component component) {
 
-        component.setName(component.getType() + " "
-                + (countComponentsOfType(component.getType()) + 1));
+        component.setName(component.getType() + " " + (countComponentsOfType(component.getType()) + 1));
         component.setProjectVersionId(flow.getProjectVersionId());
 
         FlowStep flowStep = new FlowStep(component);
@@ -277,17 +269,16 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         context.getConfigurationService().save(flowStep);
 
         selected = flowStep;
-        
+
         redrawFlow();
-        
+
         propertySheet.setSource(flowStep);
 
         designNavigator.refresh();
-        
 
     }
 
-    protected void redrawFlow() {       
+    protected void redrawFlow() {
         if (diagram != null) {
             diagramLayout.removeComponent(diagram);
         }
@@ -315,18 +306,17 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             Node node = new Node();
             String name = flowStep.getComponent().getName();
             String type = flowStep.getComponent().getType();
-            String imageText = String
-                    .format("<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>",
-                            componentPalette.getBase64RepresentationOfImageForComponentType(type));
-            
+            String imageText = String.format(
+                    "<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>",
+                    componentPalette.getBase64RepresentationOfImageForComponentType(type));
+
             node.setText(imageText);
             node.setName(name);
             node.setId(flowStep.getId());
             node.setX(flowStep.getX());
             node.setY(flowStep.getY());
 
-            XMLComponent definition = context.getComponentFactory()
-                    .getComonentDefinition(type);
+            XMLComponent definition = context.getComponentFactory().getComonentDefinition(type);
             if (definition == null) {
                 log.error("Could not find defintion of type {}", type);
             }
@@ -352,8 +342,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         Set<Agent> agents = agentManager.getAvailableAgents();
         Agent myDesignAgent = null;
         for (Agent agent : agents) {
-            if (agent.getFolder() != null && DESIGN_FOLDER_NAME.equals(agent.getFolder().getName()) &&
-                    agent.getName().equals(AGENT_NAME)) {
+            if (agent.getFolder() != null && DESIGN_FOLDER_NAME.equals(agent.getFolder().getName()) && agent.getName().equals(AGENT_NAME)) {
                 myDesignAgent = agent;
                 break;
             }
@@ -385,8 +374,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
         AgentDeployment deployment = agentManager.deploy(myDesignAgent.getId(), flow, new HashMap<String, String>());
         if (oldDeployment != null) {
-            deployment.setLogLevel(oldDeployment.getLogLevel());    
-        }        
+            deployment.setLogLevel(oldDeployment.getLogLevel());
+        }
         configurationService.save(deployment);
 
         String executionId = agentManager.getAgentRuntime(myDesignAgent).scheduleNow(deployment);
@@ -424,21 +413,16 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             } else if (e instanceof LinkEvent) {
                 LinkEvent event = (LinkEvent) e;
                 if (!event.isRemoved()) {
-                    flow.getFlowStepLinks().add(
-                            new FlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
-                    Component sourceComp = flow.findFlowStepWithId(event.getSourceNodeId())
-                            .getComponent();
-                    Component targetComp = flow.findFlowStepWithId(event.getTargetNodeId())
-                            .getComponent();
+                    flow.getFlowStepLinks().add(new FlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
+                    Component sourceComp = flow.findFlowStepWithId(event.getSourceNodeId()).getComponent();
+                    Component targetComp = flow.findFlowStepWithId(event.getTargetNodeId()).getComponent();
                     IComponentRuntimeFactory factory = context.getComponentFactory();
-                    XMLComponent sourceDefn = factory
-                            .getComonentDefinition(sourceComp.getType());
+                    XMLComponent sourceDefn = factory.getComonentDefinition(sourceComp.getType());
 
                     if (targetComp.getInputModel() == null) {
                         if (sourceComp.getOutputModel() != null) {
                             targetComp.setInputModel(sourceComp.getOutputModel());
-                        } else if (sourceDefn.isInputOutputModelsMatch()
-                                && sourceComp.getInputModel() != null) {
+                        } else if (sourceDefn.isInputOutputModelsMatch() && sourceComp.getInputModel() != null) {
                             targetComp.setInputModel(sourceComp.getInputModel());
                         }
                     }
@@ -448,7 +432,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                             sourceComp.setOutputModel(targetComp.getInputModel());
                         }
                     }
-                    
+
                     if (sourceComp.getInputModel() == null && sourceDefn.isInputOutputModelsMatch()) {
                         if (targetComp.getInputModel() != null) {
                             sourceComp.setInputModel(targetComp.getInputModel());
@@ -457,8 +441,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
                     configurationService.save(flow);
                 } else {
-                    FlowStepLink link = flow.removeFlowStepLink(event.getSourceNodeId(),
-                            event.getTargetNodeId());
+                    FlowStepLink link = flow.removeFlowStepLink(event.getSourceNodeId(), event.getTargetNodeId());
                     if (link != null) {
                         if (configurationService.delete(link)) {
                             redrawFlow();
@@ -502,6 +485,5 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             return AcceptAll.get();
         }
     }
-
 
 }
