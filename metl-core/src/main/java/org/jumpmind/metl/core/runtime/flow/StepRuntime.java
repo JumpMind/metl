@@ -538,7 +538,7 @@ public class StepRuntime implements Runnable {
                 ArrayList<EntityData> payload = message.getPayload();
                 for (EntityData entityData : payload) {
                     componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext, String.format(
-                            "INPUT Message Payload: %s", componentContext.getFlowStep().getComponent().toRow(entityData, true, false)));
+                            "OUTPUT Message Payload: %s", componentContext.getFlowStep().getComponent().toRow(entityData, true, false)));
                 }
             }
         } else if (outputMessage instanceof TextMessage) {
@@ -546,7 +546,7 @@ public class StepRuntime implements Runnable {
             ArrayList<String> payload = message.getPayload();
             for (String string : payload) {
                 componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
-                        String.format("INPUT Message Payload: %s", string));
+                        String.format("OUTPUT Message Payload: %s", string));
             }
         }
     }
