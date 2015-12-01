@@ -384,6 +384,7 @@ public class DesignNavigator extends VerticalLayout {
             final EnableFocusTextField field = new EnableFocusTextField();
             field.addStyleName(ValoTheme.TEXTFIELD_SMALL);
             field.setImmediate(true);
+            field.setWidth(95, Unit.PERCENTAGE);
             field.addFocusListener(new FocusListener() {
 
                 @Override
