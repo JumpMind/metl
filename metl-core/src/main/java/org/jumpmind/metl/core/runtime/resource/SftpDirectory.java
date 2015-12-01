@@ -22,7 +22,6 @@ package org.jumpmind.metl.core.runtime.resource;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Resource;
 import org.slf4j.Logger;
@@ -326,12 +326,36 @@ public class SftpDirectory implements IDirectory {
             sftp = (ChannelSftp) session.openChannel("sftp");
             sftp.connect();
             sftp.cd(basePath);
+            createRelativePathDirectoriesIfNecessary(sftp, relativePath, mustExist);
             return new CloseableOutputStream(sftp.put(relativePath, ChannelSftp.OVERWRITE), session, sftp);
         } catch (Exception e) {            
             throw new IoException(e);
         } 
     }
 
+    private void createRelativePathDirectoriesIfNecessary(ChannelSftp sftp, String relativePath, boolean mustExist) {
+    	String[] elements = StringUtils.split(relativePath,"/");
+    	if (elements.length == 1) {
+    		//if there is only one element, it's the filename itself.  No directories to create
+    		return;
+    	} else {
+        	for (int i=0;i<elements.length-1;i++) {
+        		try {
+        			sftp.cd(elements[i]);
+        		} catch (SftpException cdex) {
+        			//if we can't change to the directory, try and create it
+        			try {
+        				sftp.mkdir(elements[i]);
+        			} catch (SftpException mkdirex) {
+        				log.error("Error writing to Sftp site.  Unable to create relative directory %s.  "
+        						+ "Error %s",elements[i], mkdirex.getMessage());
+        				throw new IoException(mkdirex);
+        			}
+        		}
+        	}
+    	}
+    }
+    
     @Override
     public void close() {
     }
