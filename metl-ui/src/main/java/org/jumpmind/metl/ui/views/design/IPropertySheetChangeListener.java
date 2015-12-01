@@ -20,9 +20,11 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
+import java.io.Serializable;
+
 import org.jumpmind.metl.core.model.Component;
 
-public interface IPropertySheetChangeListener {
+public interface IPropertySheetChangeListener extends Serializable {
 
     public void componentNameChanged(Component component);
     
