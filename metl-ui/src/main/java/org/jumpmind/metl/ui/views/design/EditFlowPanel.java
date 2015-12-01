@@ -37,6 +37,7 @@ import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderType;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.IAgentManager;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -318,7 +319,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
             XMLComponent definition = context.getComponentFactory().getComonentDefinition(type);
             if (definition == null) {
-                log.error("Could not find defintion of type {}", type);
+                throw new MisconfiguredException("Could not find the component defintion for a component of type '%s'", type);
             }
             node.setInputLabel(definition.getInputMessageType().getLetter());
             node.setOutputLabel(definition.getOutputMessageType().getLetter());
