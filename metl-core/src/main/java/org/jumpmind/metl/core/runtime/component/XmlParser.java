@@ -22,6 +22,7 @@ package org.jumpmind.metl.core.runtime.component;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,7 +112,7 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                             List<Element> entityMatches = (List<Element>) entitySetting.getExpression().evaluate(document.getRootElement());
                             for (Element element : entityMatches) {
                                 String text = toXML(element);
-                                Document childDocument = builder.build(new ByteArrayInputStream(text.getBytes()));
+                                Document childDocument = builder.build(new ByteArrayInputStream(text.getBytes(Charset.forName("utf-8"))));
                                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                                 EntityData data = new EntityData();
                                 for (XmlFormatterAttributeSetting attributeSetting : attributeSettings) {
@@ -134,7 +135,7 @@ public class XmlParser extends AbstractXMLComponentRuntime {
 
                                         if (!resultsFound && targetElement.getParentElement() != null) {
                                             targetElement = targetElement.getParentElement();
-                                            targetDocument = builder.build(new ByteArrayInputStream(toXML(targetElement).getBytes()));
+                                            targetDocument = builder.build(new ByteArrayInputStream(toXML(targetElement).getBytes(Charset.forName("utf-8"))));
                                         } else {
                                             targetDocument = null;
                                             targetElement = null;
