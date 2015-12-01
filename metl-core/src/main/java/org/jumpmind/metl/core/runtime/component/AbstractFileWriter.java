@@ -1,5 +1,8 @@
 package org.jumpmind.metl.core.runtime.component;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.properties.TypedProperties;
@@ -19,11 +22,9 @@ public abstract class AbstractFileWriter extends AbstractComponentRuntime {
     boolean getFileNameFromMessage;
     String fileNameFromMessageProperty;
     
-    protected void init() {
-    	
+    protected void init() {    
         TypedProperties properties = getTypedProperties();
-        relativePathAndFile = FormatUtils.replaceTokens(properties.get(SETTING_RELATIVE_PATH), context.getFlowParameters(),
-                true);
+        relativePathAndFile = properties.get(SETTING_RELATIVE_PATH);
         mustExist = properties.is(SETTING_MUST_EXIST);
         append = properties.is(SETTING_APPEND);
         getFileNameFromMessage = properties.is(SETTING_GET_FILE_FROM_MESSAGE, getFileNameFromMessage);
@@ -32,18 +33,20 @@ public abstract class AbstractFileWriter extends AbstractComponentRuntime {
     }
     
     protected String getFileName(Message inputMessage) {
-    	
+        Map<String, String> parms = new HashMap<>(getComponentContext().getFlowParameters());
+        parms.putAll(inputMessage.getHeader().getAsStrings());
+
     	String fileName = null;
     	if (getFileNameFromMessage) {
-    		Object objFileName = inputMessage.getHeader().get(fileNameFromMessageProperty);
+    		String objFileName = inputMessage.getHeader().getAsStrings().get(fileNameFromMessageProperty);
 			if (objFileName == null || ((String) objFileName).length() == 0) {
 				throw new RuntimeException("Configuration determines that the file name should be in "
 						+ "the message header but was not.  Verify the property " + 
 						fileNameFromMessageProperty + " is being passed into the message header");
     		}
-	    	fileName = (String) objFileName;
+	    	fileName = FormatUtils.replaceTokens(objFileName, parms, true);
     	} else {
-    		fileName = relativePathAndFile;
+    		fileName = FormatUtils.replaceTokens(relativePathAndFile, parms, true);;
     	}
     	return fileName;
     }
