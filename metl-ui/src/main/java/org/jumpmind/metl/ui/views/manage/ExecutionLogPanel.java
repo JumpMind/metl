@@ -25,6 +25,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -42,13 +43,13 @@ import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.Table;
 import org.jumpmind.metl.ui.views.IFlowRunnable;
 import org.jumpmind.symmetric.ui.common.ConfirmDialog;
-import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
 import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.symmetric.ui.common.ReadOnlyTextAreaDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.data.Property;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.sort.SortOrder;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
@@ -71,12 +72,17 @@ import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
-@SuppressWarnings("serial")
 public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable {
+
+    private static final long serialVersionUID = 1L;
+
+    final protected Logger log = LoggerFactory.getLogger(getClass()); 
 
     IExecutionService executionService;
 
     Table stepTable = new Table();
+    
+    Grid logTable;
 
     BeanContainer<String, ExecutionStep> stepContainer = new BeanContainer<String, ExecutionStep>(
             ExecutionStep.class);
@@ -105,6 +111,10 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
     TabbedPanel parentTabSheet;
     
     IFlowRunnable flowRunnable;
+    
+    boolean lastDataRefreshWasDone = false;
+    
+    List<SortOrder> lastSortOrder;
 
     public ExecutionLogPanel(String executionId, ApplicationContext context, TabbedPanel parentTabSheet, IFlowRunnable flowRunnable) {
         this.executionService = context.getExecutionService();
@@ -159,18 +169,15 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
         stepTable.setColumnWidth("threadNumber", 100);
         stepTable.setColumnWidth("startTime", 100);
         stepTable.setColumnExpandRatio("endTime", 1);
-        stepTable.addValueChangeListener(new ValueChangeListener() {
-            public void valueChange(ValueChangeEvent event) {
-                @SuppressWarnings("unchecked")
-                Set<String> executionStepIds = (Set<String>) event.getProperty().getValue();
-                logContainer.removeAllItems();
-                List<ExecutionStepLog> logs = executionService
-                        .findExecutionStepLogs(executionStepIds);
-                logContainer.addAll(logs);
-            }
+        stepTable.addValueChangeListener(event -> {
+            @SuppressWarnings("unchecked")
+            Set<String> executionStepIds = (Set<String>) event.getProperty().getValue();
+            logContainer.removeAllItems();
+            List<ExecutionStepLog> logs = executionService.findExecutionStepLogs(executionStepIds);
+            logContainer.addAll(logs);
         });
 
-        final Grid logTable = new Grid();
+        logTable = new Grid();
         logTable.addColumn("level", String.class).setHeaderCaption("Level").setWidth(110).setMaximumWidth(200);
         logTable.addColumn("createTime", Date.class).setHeaderCaption("Time").setWidth(120).setMaximumWidth(200).setRenderer(
                 new DateRenderer("%1$tk:%1$tM:%1$tS:%1$tL"));
@@ -178,6 +185,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
         logTable.setContainerDataSource(logContainer);
         logTable.setSizeFull();
         logTable.addItemClickListener(event -> logTableCellClicked(logTable, event));
+        logTable.addSortListener(event -> {lastSortOrder = event.getSortOrder();});
         
         HeaderRow filteringHeader = logTable.appendHeaderRow();        
         HeaderCell logTextFilterCell = filteringHeader.getCell("logText");
@@ -267,52 +275,47 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
     }
     
     protected void remove() {
-        ConfirmDialog.show("Delete Execution?",
-                "Are you sure you want to delete this execution?",
-                new IConfirmListener() {
-                    
-                    @Override
-                    public boolean onOk() {
-                        context.getExecutionService().deleteExecution(executionId);
-                        parentTabSheet.closeTab(executionId);
-                        return true;
-                    }
-                });
+        ConfirmDialog.show("Delete Execution?", "Are you sure you want to delete this execution?", () -> {
+            context.getExecutionService().deleteExecution(executionId);
+            parentTabSheet.closeTab(executionId);
+            return true;
+        });
 
     }
-    
+
     protected void cancel() {
-        ConfirmDialog.show("Cancel Execution?",
-                "Are you sure you want to cancel this execution?",
-                new IConfirmListener() {
-                    
-                    @Override
-                    public boolean onOk() {
-                        context.getAgentManager().cancel(executionId);
-                        cancelButton.setEnabled(false);
-                        return true;
-                    }
-                });
-        
+        ConfirmDialog.show("Cancel Execution?", "Are you sure you want to cancel this execution?", () -> {
+            context.getAgentManager().cancel(executionId);
+            cancelButton.setEnabled(false);
+            return true;
+        });
+
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Object onBackgroundDataRefresh() {
-        return getExecutionData();
+        if (!lastDataRefreshWasDone) {
+            return getExecutionData();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public void onBackgroundUIRefresh(Object backgroundData) {
-        refreshUI((ExecutionData) backgroundData);
+        if (backgroundData != null) {
+           refreshUI((ExecutionData) backgroundData);
+        }
     }
 
     @SuppressWarnings("unchecked")
-    protected ExecutionData getExecutionData() {
+    protected ExecutionData getExecutionData() {        
         ExecutionData data = new ExecutionData();
         data.execution = executionService.findExecution(executionId);
         data.steps = executionService.findExecutionSteps(executionId);
-        data.logs = executionService.findExecutionStepLogs((Set<String>) stepTable.getValue());
+        Set<String> selected = (Set<String>) stepTable.getValue();
+        data.logs = executionService.findExecutionStepLogs(selected);
         return data;
     }
     
@@ -321,7 +324,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
     }
 
     protected void refreshUI(ExecutionData data) {
-        if (!isDone()) {
+        if (!lastDataRefreshWasDone) {
             flowLabel.setValue(data.execution.getFlowName());
             startLabel.setValue(formatDate(data.execution.getStartTime()));
             if (data.execution.getStatus() != null) {
@@ -344,25 +347,39 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
             }
             endLabel.setValue(formatDate(data.execution.getEndTime()));
 
+            @SuppressWarnings("unchecked")
+            Set<String> selected = (Set<String>)stepTable.getValue();
             stepContainer.removeAllItems();
             stepContainer.addAll(data.steps);
-
-            List<ExecutionStepLog> logMessages = new ArrayList<ExecutionStepLog>(
-                    logContainer.getItemIds());
-
-            for (ExecutionStepLog logMsg : data.logs) {
-                logMessages.remove(logMsg);
+            if (selected != null && selected.size() > 0) {
+                stepTable.setValue(selected);
+            } else if (data.steps.size() > 0) {
+                selected = new HashSet<>();
+                selected.add(data.steps.get(0).getId());
+                stepTable.setValue(selected);
             }
 
-            if (logMessages.size() > 0) {
-                logContainer.removeAllItems();
-                logContainer.addAll(data.logs);
+            List<ExecutionStepLog> logMessages = new ArrayList<>(
+                    logContainer.getItemIds());
+            List<ExecutionStepLog> newLogMessages = new ArrayList<>(data.logs);
+
+            for (ExecutionStepLog logMsg : logMessages) {
+                newLogMessages.remove(logMsg);
+            }
+
+            if (newLogMessages.size() > 0) {
+                logContainer.addAll(newLogMessages);
+                if (lastSortOrder != null) {
+                    logTable.setSortOrder(lastSortOrder);
+                }
             }
         }
         
         rerunButton.setVisible(isDone() && flowRunnable != null);
         removeButton.setVisible(isDone());
         cancelButton.setVisible(!isDone());
+        
+        lastDataRefreshWasDone = isDone();
     }
 
     protected String formatDate(Date date) {
@@ -380,6 +397,9 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
     }
 
     public class ComponentNameColumnGenerator implements ColumnGenerator {
+        
+        private static final long serialVersionUID = 1L;
+
         @SuppressWarnings("unchecked")
         public Object generateCell(com.vaadin.ui.Table source, Object itemId, Object columnId) {
             BeanItem<ExecutionStepLog> logItem = (BeanItem<ExecutionStepLog>) source

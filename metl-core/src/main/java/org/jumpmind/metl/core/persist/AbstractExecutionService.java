@@ -94,6 +94,7 @@ abstract public class AbstractExecutionService extends AbstractService implement
                 try {
                     reader = new CsvReader(file.getAbsolutePath());
                     reader.setTextQualifier('"');
+                    long id = 1;
                     while (reader.readRecord()) {
                         String[] values = reader.getValues();
                         if (values != null && values.length > 2 && isNotBlank(values[0]) && 
@@ -104,6 +105,7 @@ abstract public class AbstractExecutionService extends AbstractService implement
                             stepLog.setCreateTime(FormatUtils.parseDate(values[1], FormatUtils.TIMESTAMP_PATTERNS));
                             stepLog.setLevel(values[0]);
                             stepLog.setLogText(values[2]);
+                            stepLog.setId(Long.toString(id++));
                             executionStepLogs.add(stepLog);
                         }
                     }

@@ -72,7 +72,7 @@ public class AsyncRecorder implements Runnable {
 
         while (!stopping || inQueue.size() > 0) {
             try {
-                AbstractObject object = inQueue.poll(5, TimeUnit.SECONDS);
+                AbstractObject object = inQueue.poll(100, TimeUnit.MILLISECONDS);
                 if (object instanceof ExecutionStepLog) {
                     ExecutionStepLog stepLog = (ExecutionStepLog) object;
                     String executionStepId = stepLog.getExecutionStepId();
@@ -81,10 +81,11 @@ public class AsyncRecorder implements Runnable {
                         File logFile = new File(LogUtils.getLogDir(), executionStepId + ".log");
                         writer = new CsvWriter(logFile.getAbsolutePath());
                         writer.setTextQualifier('"');
-                        logWriters.put(executionStepId, writer);
+                        logWriters.put(executionStepId, writer);                        
                     }
                     try {
                         writer.writeRecord(new String[] { stepLog.getLevel(), FormatUtils.TIMESTAMP_FORMATTER.format(stepLog.getCreateTime()), stepLog.getLogText() });
+                        writer.flush();
                     } catch (IOException e) {
                         writer.close();
                         logWriters.remove(executionStepId);

@@ -39,7 +39,7 @@ import org.jumpmind.util.AppUtils;
 
 public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
 
-    final long TIME_BETWEEN_MESSAGE_UPDATES_IN_MS = 5000;
+    final long TIME_BETWEEN_MESSAGE_UPDATES_IN_MS = 500;
 
     AsyncRecorder recorder;
 
@@ -131,7 +131,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         super.beforeHandle(threadNumber, context);
         ExecutionStep step = getExecutionStep(threadNumber, context);
         Date lastUpdateTime = step.getLastUpdateTime();
-        if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
+        if (step.getStatus().equals(ExecutionStatus.READY.name()) || lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             if (step.getStartTime() == null) {
                 step.setStartTime(new Date());
             }
