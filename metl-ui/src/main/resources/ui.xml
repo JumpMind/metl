@@ -45,11 +45,14 @@
     <component-ui id="Content Router UI" componentId="Content Router">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-content-router-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditContentRouterPanel</className>
-    </component-ui>
+    </component-ui>    
     <component-ui id="Format Delimited UI" componentId="Format Delimited">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delimitedformatter-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
     </component-ui>
+    <component-ui id="Gate UI" componentId="Gate">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-gate-48x48-color.png</iconImage>
+    </component-ui>    
     <component-ui id="Parse Delimited UI" componentId="Parse Delimited">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delimitedformatter-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
