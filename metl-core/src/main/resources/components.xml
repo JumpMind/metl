@@ -1021,6 +1021,9 @@
             <setting id='gate.control.source.step' type='source_step' required='true'>
                 <name>Gate Control Source</name>
             </setting>
+            <setting id='force.gate.open' type='boolean' required='false'>
+                <name>Force Gate Open On No Source Message</name>
+            </setting>
         </settings>
     </component>    
     <component id='Union' category='PROCESSOR' inputMessageType='entity' outputMessageType='entity' resourceCategory='none' inputOutputModelsMatch='true'>

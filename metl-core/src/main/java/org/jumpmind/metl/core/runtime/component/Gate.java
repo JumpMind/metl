@@ -37,7 +37,11 @@ public class Gate extends AbstractComponentRuntime {
     
     public final static String SOURCE_STEP = "gate.control.source.step";
 
+    public final static String SETTING_FORCE_GATE_OPEN = "force.gate.open";
+
     boolean gateOpened = false;
+
+    boolean forceGateOpen = false;
 
     String gateControlSourceStepId;
 
@@ -46,8 +50,9 @@ public class Gate extends AbstractComponentRuntime {
     @Override
     protected void start() {
     	gateOpened = false;
-        TypedProperties properties = getTypedProperties();
-        gateControlSourceStepId = properties.get(SOURCE_STEP); 
+        TypedProperties typedProperties = getTypedProperties();
+        gateControlSourceStepId = typedProperties.get(SOURCE_STEP); 
+        forceGateOpen = typedProperties.is(SETTING_FORCE_GATE_OPEN, forceGateOpen);
         
         if (isBlank(gateControlSourceStepId) || getFlow().findFlowStepWithId(gateControlSourceStepId) == null) {
             throw new IllegalStateException("The gate control source must be specified");
@@ -55,7 +60,7 @@ public class Gate extends AbstractComponentRuntime {
     }
     
     @Override
-    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {    
+    public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (gateControlSourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
 
             gateOpened = inputMessage instanceof ControlMessage;
@@ -73,6 +78,13 @@ public class Gate extends AbstractComponentRuntime {
         } else if (gateOpened && !(inputMessage instanceof ControlMessage)) {
         	getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
         	callback.forward(inputMessage);
+        } else if (unitOfWorkBoundaryReached && !gateOpened && forceGateOpen) {
+            Iterator<Message> messages = queuedWhileWaitingForGateController.iterator();
+            while (messages.hasNext()) {
+                Message message = messages.next();
+                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                callback.forward(message);
+            }
         }
     }
     
