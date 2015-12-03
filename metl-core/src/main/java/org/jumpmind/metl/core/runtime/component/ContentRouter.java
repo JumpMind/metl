@@ -22,6 +22,7 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -206,7 +207,10 @@ public class ContentRouter extends AbstractComponentRuntime {
 
     }
 
-    static public class Route {
+    static public class Route implements Serializable {
+        
+        private static final long serialVersionUID = 1L;
+        
         String matchExpression;
         String targetStepId;
 
