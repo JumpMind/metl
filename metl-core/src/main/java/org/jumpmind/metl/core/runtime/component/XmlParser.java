@@ -133,10 +133,12 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                                             }
                                         }
 
-                                        if (!resultsFound && targetElement.getParentElement() != null) {
+                                        if (!resultsFound && !attributeSetting.getExpression().getExpression().startsWith("/" + element.getName()) &&
+                                               targetElement.getParentElement() != null) {
                                             targetElement = targetElement.getParentElement();
                                             targetDocument = builder.build(new ByteArrayInputStream(toXML(targetElement).getBytes(Charset.forName("utf-8"))));
-                                        } else {
+                                        } else if (!resultsFound) {
+                                            info("Did not find a match for: %s\n in:\n %s", attributeSetting.getExpression().getExpression(), text);
                                             targetDocument = null;
                                             targetElement = null;
                                         }
