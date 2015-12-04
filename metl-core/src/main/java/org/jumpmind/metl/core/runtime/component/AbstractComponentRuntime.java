@@ -211,6 +211,8 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         }
         
         bindings.put("text", null);
+        bindings.put("CHANGE_TYPE", null);
+        bindings.put("ENTITY_NAMES", new ArrayList<>());  
     }
     
     protected void bindModelEntities(Bindings bindings) {
