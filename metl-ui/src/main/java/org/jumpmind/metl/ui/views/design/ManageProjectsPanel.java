@@ -32,10 +32,10 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.views.DesignNavigator;
-import org.jumpmind.symmetric.ui.common.CommonUiUtils;
-import org.jumpmind.symmetric.ui.common.ConfirmDialog;
-import org.jumpmind.symmetric.ui.common.ConfirmDialog.IConfirmListener;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.CommonUiUtils;
+import org.jumpmind.vaadin.ui.common.ConfirmDialog;
+import org.jumpmind.vaadin.ui.common.ConfirmDialog.IConfirmListener;
+import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

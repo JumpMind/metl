@@ -42,9 +42,9 @@ import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.Table;
 import org.jumpmind.metl.ui.views.IFlowRunnable;
-import org.jumpmind.symmetric.ui.common.ConfirmDialog;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
-import org.jumpmind.symmetric.ui.common.ReadOnlyTextAreaDialog;
+import org.jumpmind.vaadin.ui.common.ConfirmDialog;
+import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.ReadOnlyTextAreaDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

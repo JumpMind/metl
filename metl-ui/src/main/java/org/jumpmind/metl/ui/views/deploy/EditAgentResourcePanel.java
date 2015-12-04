@@ -23,7 +23,7 @@ package org.jumpmind.metl.ui.views.deploy;
 import org.jumpmind.metl.core.model.AgentResource;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.views.design.PropertySheet;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.ui.VerticalLayout;
 

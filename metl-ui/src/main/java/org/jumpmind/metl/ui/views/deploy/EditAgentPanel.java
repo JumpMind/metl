@@ -53,9 +53,9 @@ import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
 import org.jumpmind.metl.ui.views.manage.ExecutionLogPanel;
-import org.jumpmind.symmetric.ui.common.CommonUiUtils;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.util.AppUtils;
+import org.jumpmind.vaadin.ui.common.CommonUiUtils;
+import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jumpmind.symmetric.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.server.Resource;
 import com.vaadin.ui.Component;

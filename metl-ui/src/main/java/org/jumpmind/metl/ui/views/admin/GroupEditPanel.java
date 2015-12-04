@@ -29,7 +29,7 @@ import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.GroupPrivilege;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;

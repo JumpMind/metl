@@ -31,8 +31,8 @@ import org.jumpmind.metl.core.model.StartType;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TabbedPanel;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
-import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
+import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;

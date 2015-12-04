@@ -22,7 +22,7 @@ package org.jumpmind.metl.ui.views.design;
 
 import org.jumpmind.metl.core.runtime.component.Web;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.symmetric.ui.common.CommonUiUtils;
+import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 

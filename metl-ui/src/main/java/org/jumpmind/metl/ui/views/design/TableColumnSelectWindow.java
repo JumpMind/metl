@@ -36,9 +36,9 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.DbProvider;
-import org.jumpmind.symmetric.ui.common.ResizableWindow;
-import org.jumpmind.symmetric.ui.sqlexplorer.DbTree;
-import org.jumpmind.symmetric.ui.sqlexplorer.DefaultSettingsProvider;
+import org.jumpmind.vaadin.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.sqlexplorer.DbTree;
+import org.jumpmind.vaadin.ui.sqlexplorer.DefaultSettingsProvider;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;

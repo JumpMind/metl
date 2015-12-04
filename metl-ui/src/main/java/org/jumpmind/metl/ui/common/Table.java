@@ -22,7 +22,7 @@ package org.jumpmind.metl.ui.common;
 
 import java.util.Date;
 
-import org.jumpmind.symmetric.ui.common.CommonUiUtils;
+import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 
 import com.vaadin.data.Property;
 

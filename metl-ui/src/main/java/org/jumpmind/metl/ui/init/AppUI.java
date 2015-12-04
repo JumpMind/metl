@@ -39,7 +39,7 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TopBar;
 import org.jumpmind.metl.ui.common.ViewManager;
 import org.jumpmind.metl.ui.init.LoginDialog.LoginListener;
-import org.jumpmind.symmetric.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;

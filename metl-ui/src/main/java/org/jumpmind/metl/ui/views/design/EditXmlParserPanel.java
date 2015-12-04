@@ -42,7 +42,7 @@ import org.jumpmind.metl.core.runtime.component.XmlFormatter;
 import org.jumpmind.metl.core.runtime.component.XmlParser;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.views.design.ImportXmlTemplateWindow.ImportXmlListener;
-import org.jumpmind.symmetric.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
 

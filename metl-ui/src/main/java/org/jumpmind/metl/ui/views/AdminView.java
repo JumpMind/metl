@@ -35,8 +35,8 @@ import org.jumpmind.metl.ui.views.admin.LoggingPanel;
 import org.jumpmind.metl.ui.views.admin.MailServerPanel;
 import org.jumpmind.metl.ui.views.admin.NotificationPanel;
 import org.jumpmind.metl.ui.views.admin.UserPanel;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
-import org.jumpmind.symmetric.ui.common.UiComponent;
+import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 

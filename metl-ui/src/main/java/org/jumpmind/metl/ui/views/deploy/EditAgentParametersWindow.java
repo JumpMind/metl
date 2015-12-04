@@ -25,8 +25,8 @@ import org.jumpmind.metl.core.model.AgentParameter;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
-import org.jumpmind.symmetric.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
+import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;

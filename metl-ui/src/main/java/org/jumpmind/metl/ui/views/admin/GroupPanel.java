@@ -30,7 +30,7 @@ import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.TabbedPanel;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;

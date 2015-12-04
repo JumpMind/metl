@@ -30,10 +30,10 @@ import org.jumpmind.metl.core.model.GlobalSetting;
 import org.jumpmind.metl.core.util.MailSession;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TabbedPanel;
-import org.jumpmind.symmetric.ui.common.CommonUiUtils;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
-import org.jumpmind.symmetric.ui.common.ImmediateUpdatePasswordField;
-import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
+import org.jumpmind.vaadin.ui.common.CommonUiUtils;
+import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.ImmediateUpdatePasswordField;
+import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

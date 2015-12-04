@@ -32,7 +32,7 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.component.ContentRouter;
 import org.jumpmind.metl.core.runtime.component.ContentRouter.Route;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
+import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;

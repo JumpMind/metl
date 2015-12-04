@@ -30,9 +30,9 @@ import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentStatus;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
-import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextArea;
-import org.jumpmind.symmetric.ui.common.ImmediateUpdateTextField;
+import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextArea;
+import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;

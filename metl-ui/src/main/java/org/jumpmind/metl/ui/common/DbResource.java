@@ -31,7 +31,7 @@ import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.symmetric.ui.sqlexplorer.IDb;
+import org.jumpmind.vaadin.ui.sqlexplorer.IDb;
 
 public class DbResource implements IDb, Serializable {
 

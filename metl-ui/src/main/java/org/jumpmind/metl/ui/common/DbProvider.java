@@ -34,8 +34,8 @@ import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.symmetric.ui.sqlexplorer.IDb;
-import org.jumpmind.symmetric.ui.sqlexplorer.IDbProvider;
+import org.jumpmind.vaadin.ui.sqlexplorer.IDb;
+import org.jumpmind.vaadin.ui.sqlexplorer.IDbProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

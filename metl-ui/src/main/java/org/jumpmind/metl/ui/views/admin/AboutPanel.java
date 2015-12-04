@@ -35,8 +35,8 @@ import org.jumpmind.metl.core.runtime.AgentManager;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.Table;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.util.AppUtils;
+import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.VerticalLayout;

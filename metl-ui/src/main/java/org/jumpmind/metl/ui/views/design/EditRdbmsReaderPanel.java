@@ -34,11 +34,11 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.component.RdbmsReader;
 import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.ui.common.ButtonBar;
-import org.jumpmind.symmetric.ui.sqlexplorer.IButtonBar;
-import org.jumpmind.symmetric.ui.sqlexplorer.IDb;
-import org.jumpmind.symmetric.ui.sqlexplorer.ISettingsProvider;
-import org.jumpmind.symmetric.ui.sqlexplorer.QueryPanel;
-import org.jumpmind.symmetric.ui.sqlexplorer.Settings;
+import org.jumpmind.vaadin.ui.sqlexplorer.IButtonBar;
+import org.jumpmind.vaadin.ui.sqlexplorer.IDb;
+import org.jumpmind.vaadin.ui.sqlexplorer.ISettingsProvider;
+import org.jumpmind.vaadin.ui.sqlexplorer.QueryPanel;
+import org.jumpmind.vaadin.ui.sqlexplorer.Settings;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutAction.ModifierKey;

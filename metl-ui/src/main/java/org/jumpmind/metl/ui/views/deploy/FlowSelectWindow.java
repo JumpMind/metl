@@ -32,7 +32,7 @@ import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Icons;
-import org.jumpmind.symmetric.ui.common.ResizableWindow;
+import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;

@@ -54,8 +54,8 @@ import org.jumpmind.metl.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.metl.ui.views.DesignNavigator;
 import org.jumpmind.metl.ui.views.IFlowRunnable;
 import org.jumpmind.metl.ui.views.manage.ExecutionLogPanel;
-import org.jumpmind.symmetric.ui.common.IUiPanel;
 import org.jumpmind.util.AppUtils;
+import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
