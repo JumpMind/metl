@@ -135,8 +135,9 @@ public class StepRuntime implements Runnable {
         return controlMessagesSentCount;
     }
     
-    public int getQueueCount() {
-        return this.inQueue.size();
+    public boolean isQueueEmpty() {
+        Message message = this.inQueue.peek();
+        return message == null || message instanceof ShutdownMessage;
     }
 
     public void setTargetStepRuntimes(List<StepRuntime> targetStepRuntimes) {
@@ -356,7 +357,6 @@ public class StepRuntime implements Runnable {
         } 
         return lastMessage;
     }
-    
 
     protected boolean areStepRuntimesDead(Set<StepRuntime> runtimes) {
         for (StepRuntime stepRuntime : runtimes) {
@@ -368,7 +368,7 @@ public class StepRuntime implements Runnable {
     }
     
     protected boolean isStepRuntimeDead(StepRuntime stepRuntime) {
-        if (stepRuntime.getMessageCount() > 0 || stepRuntime.getQueueCount() > 0) {
+        if (stepRuntime.getMessageCount() > 0 || !isQueueEmpty()) {
             return false;
         } else {
             List<StepRuntime> parentSteps = stepRuntime.getSourceStepRuntimes();
