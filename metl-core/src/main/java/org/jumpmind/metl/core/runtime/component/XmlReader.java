@@ -84,7 +84,7 @@ public class XmlReader extends AbstractComponentRuntime {
         readTag = properties.get(SETTING_READ_TAG, readTag);
         runWhen = properties.get(RUN_WHEN, runWhen);
 
-        if (!getFileNameFromMessage && getComponent().getResource() == null) {
+        if (getComponent().getResource() == null) {
             throw new MisconfiguredException(
                     "A resource has not been selected.  The resource is required if not configured to get the file name from the inbound message");
         }

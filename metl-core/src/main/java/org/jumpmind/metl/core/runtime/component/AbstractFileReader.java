@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
@@ -55,6 +56,11 @@ public abstract class AbstractFileReader extends AbstractComponentRuntime {
                 true);
         runWhen = properties.get(RUN_WHEN, runWhen);
         controlMessageOnEof = properties.is(SETTING_CNTRL_MSG_ON_EOF, controlMessageOnEof);
+        
+        if (getComponent().getResource() == null) {
+            throw new MisconfiguredException(
+                    "A resource has not been selected.  The resource is required if not configured to get the file name from the inbound message");
+        }
 	}
 	
     @Override
