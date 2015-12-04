@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
+import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -318,7 +319,7 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
         }
     }
 
-    public class Record {
+    public class Record implements Serializable {
         ModelEntity modelEntity;
 
         ModelAttribute modelAttribute;
