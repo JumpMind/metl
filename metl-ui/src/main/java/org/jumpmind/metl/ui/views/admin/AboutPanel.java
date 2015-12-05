@@ -36,6 +36,7 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.Table;
 import org.jumpmind.util.AppUtils;
+import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.server.VaadinServlet;
@@ -106,7 +107,7 @@ public class AboutPanel extends VerticalLayout implements IUiPanel {
                 itemId++);
         table.addItem(new Object[] { "Heap Size", Long.toString(Runtime.getRuntime().maxMemory()) }, itemId++);
         table.addItem(
-                new Object[] { "Last Restart", FastDateFormat.getTimeInstance(FastDateFormat.MEDIUM).format(AgentManager.lastRestartTime) },
+                new Object[] { "Last Restart", CommonUiUtils.formatDateTime(AgentManager.lastRestartTime) },
                 itemId++);
 
         addComponent(table);
