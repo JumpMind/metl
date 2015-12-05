@@ -43,16 +43,25 @@ evaluates to true.
 TIP: The inbound message will go to ALL target steps where the expression evaluates to true (i.e. a message can go to more than one target step)
 unless the "Only Route First Match" option is checked.
 
-[id="entity-router-example-1",reftext="Example 1"]
+[id="content-router-example-1",reftext="Example 1"]
 ====== Example 1.  Sample groovy expressions for an entity based message
 ----
 if (ENTITY.ATTRIBUTE=='Value 1') return true;
 if (ENTITY.ATTRIBUTE=='Value 2') return true;
 ----
 
-[id="entity-router-example-2",reftext="Example 2"]
+[id="content-router-example-2",reftext="Example 2"]
 ====== Example 2.  Sample groovy expressions for a text based message
 ----
 if (text.indexOf("Some text string") > 0) return true;
 if (text.indexOf("Some other text string") > 0) return true;
 ----
+
+[id="content-router-example-3",reftext="Example 3"]
+====== Example 2.  Sample groovy expressions for routing based on a message header.  This example tests to see if the header variable is available before testing it
+----
+binding.variables.containsKey('chainId') && chainId.equals('001')
+----
+
+
+
