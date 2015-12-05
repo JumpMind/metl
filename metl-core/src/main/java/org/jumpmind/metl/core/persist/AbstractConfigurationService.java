@@ -292,7 +292,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
     @Override
     public Agent findAgent(String agentId) {
         Agent agent = findOne(Agent.class, new NameValue("id", agentId));
-        refreshAgentSettings(agent);
+        refreshAgentParameters(agent);
         refreshAgentResourceSettings(agent);
         return agent;
     }
@@ -312,7 +312,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         }
 
         for (Agent agent : list) {
-            refreshAgentSettings(agent);
+            refreshAgentParameters(agent);
             refreshAgentResourceSettings(agent);
             refreshAgentDeployments(agent);
             agent.setFolder(folderMapById.get(agent.getFolderId()));
@@ -327,7 +327,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         return list;
     }
 
-    protected void refreshAgentSettings(Agent agent) {
+    public synchronized void refreshAgentParameters(Agent agent) {
         Map<String, Object> settingParams = new HashMap<String, Object>();
         settingParams.put("agentId", agent.getId());
         List<AgentParameter> parameters = persistenceManager.find(AgentParameter.class, settingParams,
@@ -732,7 +732,7 @@ abstract class AbstractConfigurationService extends AbstractService implements
         if (agent.getFolder() != null) {
             refresh(agent.getFolder());
         }
-        refreshAgentSettings(agent);
+        refreshAgentParameters(agent);
         refreshAgentResourceSettings(agent);
         refreshAgentDeployments(agent);
     }

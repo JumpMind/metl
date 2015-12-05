@@ -135,6 +135,8 @@ public interface IConfigurationService {
     
     public void refresh(Agent agent);
     
+    public void refreshAgentParameters(Agent agent);
+    
     public void refresh(Resource resource);
     
     public void refresh(Component component);

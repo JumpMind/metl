@@ -433,12 +433,13 @@ public class AgentRuntime {
             try {
                 log.info("Scheduled deployment '{}' is running on the '{}' agent", deployment.getName(),
                         agent.getName());
+                configurationService.refresh(deployment);
+                configurationService.refreshAgentParameters(agent);
                 configurationService.refresh(deployment.getFlow());
                 List<Notification> notifications = configurationService.findNotificationsForDeployment(deployment);
                 flowRuntime.start(executionId, deployedResources, agent, notifications, globalSettings, runtimeParameters);
             } catch (Exception e) {
                 log.error("Error while waiting for the flow to complete", e);
-                //flowRuntime.stop(true);
             } finally {
                 flowRuntime.waitForFlowCompletion();
                 flowRuntime.notifyStepsTheFlowIsComplete();

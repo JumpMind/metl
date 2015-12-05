@@ -88,7 +88,7 @@ public class MessageScriptHelper {
         this.componentStatistics = context.getComponentStatistics();
         this.flow = context.getManipulatedFlow();
         this.flowStep = context.getFlowStep();
-        this.scriptContext = new HashMap<String, Object>(); 
+        this.scriptContext = new HashMap<String, Object>();
     }
 
     protected JdbcTemplate getJdbcTemplate() {
