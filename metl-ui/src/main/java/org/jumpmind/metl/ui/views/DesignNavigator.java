@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.jumpmind.metl.core.model.AbstractObject;
+import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.ComponentName;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
@@ -560,6 +561,7 @@ public class DesignNavigator extends VerticalLayout {
         IConfigurationService configurationService = context.getConfigurationService();
         List<ResourceName> resources = configurationService.findResourcesInProject(projectVersion
                 .getId());
+        AbstractObjectNameBasedSorter.sort(resources);
         for (ResourceName resource : resources) {
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(resource);
@@ -580,6 +582,7 @@ public class DesignNavigator extends VerticalLayout {
         IConfigurationService configurationService = context.getConfigurationService();
         List<ComponentName> components = configurationService.findSharedComponentsInProject(projectVersion
                 .getId());
+        AbstractObjectNameBasedSorter.sort(components);
         for (ComponentName component : components) {
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(component);
@@ -592,12 +595,7 @@ public class DesignNavigator extends VerticalLayout {
     protected void addFlowsToFolder(FolderName folder, ProjectVersion projectVersion, boolean test) {
         IConfigurationService configurationService = context.getConfigurationService();
         List<FlowName> flows = configurationService.findFlowsInProject(projectVersion.getId(), test);
-        Collections.sort(flows, new Comparator<FlowName>() {
-            @Override
-            public int compare(FlowName o1, FlowName o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });        
+        AbstractObjectNameBasedSorter.sort(flows);
         for (FlowName flow : flows) {
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(flow);
@@ -610,6 +608,7 @@ public class DesignNavigator extends VerticalLayout {
     protected void addModelsToFolder(FolderName folder, ProjectVersion projectVersion) {
         IConfigurationService configurationService = context.getConfigurationService();
         List<ModelName> models = configurationService.findModelsInProject(projectVersion.getId());
+        AbstractObjectNameBasedSorter.sort(models);
         for (ModelName model : models) {
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(model);
