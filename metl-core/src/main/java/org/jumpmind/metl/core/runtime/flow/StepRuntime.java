@@ -383,14 +383,12 @@ public class StepRuntime implements Runnable {
     
     protected boolean isStepRuntimeDead(StepRuntime stepRuntime) {
         if (stepRuntime.getContentMessagesSentCount() > 0 || !stepRuntime.isQueueEmpty() || !stepRuntime.idle()) {
-            log.error(stepRuntime.getComponentContext().getFlowStep().getComponent().getName() + " was not dead ");
             return false;
         } else {
             List<StepRuntime> parentSteps = stepRuntime.getSourceStepRuntimes();
             for (StepRuntime parentStep : parentSteps) {
                 boolean parentStepIsDead = parentStep.isStepRuntimeDead(parentStep);
                 if (!parentStepIsDead && parentStep.getControlMessagesSentCount() == 0) {
-                    log.error(parentStep.getComponentContext().getFlowStep().getComponent().getName() + " was not dead ");
                     return false;
                 } 
             }
