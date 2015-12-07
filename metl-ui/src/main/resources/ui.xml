@@ -35,7 +35,7 @@
         <className>org.jumpmind.metl.ui.views.design.EditRdbmsWriterPanel</className>
     </component-ui>
     <component-ui id="Sql Executor UI" componentId="Sql Executor">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-writer-48x48-color.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-sql-execute-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditRdbmsReaderPanel</className>        
     </component-ui>       
     <component-ui id="RDBMS Reader UI" componentId="RDBMS Reader">
@@ -47,14 +47,14 @@
         <className>org.jumpmind.metl.ui.views.design.EditContentRouterPanel</className>
     </component-ui>    
     <component-ui id="Format Delimited UI" componentId="Format Delimited">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delimitedformatter-48x48-color.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delimitedformatter-out-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
     </component-ui>
     <component-ui id="Gate UI" componentId="Gate">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-gate-48x48-color.png</iconImage>
     </component-ui>    
     <component-ui id="Parse Delimited UI" componentId="Parse Delimited">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delimitedformatter-48x48-color.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delimitedformatter-in-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditFormatPanel</className>
     </component-ui>      
     <component-ui id="Mapping UI" componentId="Mapping">
@@ -85,11 +85,11 @@
         <className>org.jumpmind.metl.ui.views.design.EditTransformerPanel</className>
     </component-ui>
     <component-ui id="Format XML UI" componentId="Format XML">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-48x48-color.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-out-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditXmlFormatPanel</className>
     </component-ui>
     <component-ui id="Parse XML UI" componentId="Parse XML">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-48x48-color.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-in-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditXmlParserPanel</className>
     </component-ui>
     <component-ui id="XSLT Processor UI" componentId="XSLT Processor">
@@ -140,7 +140,7 @@
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-zip-48x48-color.png</iconImage>
     </component-ui>   
     <component-ui id="UnZip UI" componentId="UnZip">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-zip-48x48-color.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-unzip-48x48-color.png</iconImage>
     </component-ui>      
     <component-ui id="File Poller UI" componentId="File Poller">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-file-poller-48x48-color.png</iconImage>
@@ -152,10 +152,13 @@
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-48x48-color.png</iconImage>
     </component-ui>
     <component-ui id="Data Diff UI" componentId="DataDiff">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-data-diff-48x48-color.png</iconImage>
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-diff-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditDataDiffPanel</className>        
     </component-ui>
     <component-ui id="File Util UI" componentId="File Util">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-file-util-48x48-color.png</iconImage>
     </component-ui>
+    <component-ui id="Union UI" componentId="Union">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-union-48x48-color.png</iconImage>
+    </component-ui>    
 </ui>
