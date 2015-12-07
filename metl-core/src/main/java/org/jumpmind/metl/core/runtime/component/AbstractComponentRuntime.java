@@ -78,7 +78,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     protected XMLComponent componentDefinition;   
     
     @Override
-    public void register(XMLComponent definition) {
+    public void create(XMLComponent definition) {
         this.componentDefinition = definition;
     }
     

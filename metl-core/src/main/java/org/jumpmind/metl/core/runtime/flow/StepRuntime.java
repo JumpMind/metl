@@ -108,9 +108,11 @@ public class StepRuntime implements Runnable {
 
     Set<String> liveSourceStepIds;
     
-    int messageCount;
+    int contentMessagesSentCount;
     
     int controlMessagesSentCount;
+    
+    int activeCount;
 
     public StepRuntime(IComponentRuntimeFactory componentFactory, ComponentContext componentContext, FlowRuntime flowRuntime) {
         this.flowRuntime = flowRuntime;
@@ -127,8 +129,8 @@ public class StepRuntime implements Runnable {
         return componentContext.getFlowStep().getComponent().getType();
     }
     
-    public int getMessageCount() {
-        return messageCount;
+    public int getContentMessagesSentCount() {
+        return contentMessagesSentCount;
     }
     
     public int getControlMessagesSentCount() {
@@ -242,11 +244,19 @@ public class StepRuntime implements Runnable {
                 final Message inputMessage = inQueue.poll(500, TimeUnit.MILLISECONDS);
                 if (running && !cancelled) {
                     if (inputMessage != null) {
-                        if (inputMessage instanceof ShutdownMessage) {
-                            process((ShutdownMessage) inputMessage, target);
-                        } else {
-                            messageCount++;
-                            process(inputMessage, target);
+                        try {
+                            synchronized (this) {
+                                activeCount++;
+                            }
+                            if (inputMessage instanceof ShutdownMessage) {
+                                process((ShutdownMessage) inputMessage, target);
+                            } else {
+                                process(inputMessage, target);
+                            }
+                        } finally {
+                            synchronized (this) {
+                                activeCount--;
+                            }
                         }
                     }
                 }
@@ -299,6 +309,10 @@ public class StepRuntime implements Runnable {
         } finally {
             componentContext.getExecutionTracker().afterHandle(threadNumber, componentContext, error);
         }
+    }
+    
+    protected synchronized boolean idle() {
+        return activeCount <= 0;
     }
 
     protected void process(ShutdownMessage shutdownMessage, SendMessageCallback target) {
@@ -368,13 +382,15 @@ public class StepRuntime implements Runnable {
     }
     
     protected boolean isStepRuntimeDead(StepRuntime stepRuntime) {
-        if (stepRuntime.getMessageCount() > 0 || !isQueueEmpty()) {
+        if (stepRuntime.getContentMessagesSentCount() > 0 || !stepRuntime.isQueueEmpty() || !stepRuntime.idle()) {
+            log.error(stepRuntime.getComponentContext().getFlowStep().getComponent().getName() + " was not dead ");
             return false;
         } else {
             List<StepRuntime> parentSteps = stepRuntime.getSourceStepRuntimes();
             for (StepRuntime parentStep : parentSteps) {
                 boolean parentStepIsDead = parentStep.isStepRuntimeDead(parentStep);
                 if (!parentStepIsDead && parentStep.getControlMessagesSentCount() == 0) {
+                    log.error(parentStep.getComponentContext().getFlowStep().getComponent().getName() + " was not dead ");
                     return false;
                 } 
             }
@@ -655,6 +671,7 @@ public class StepRuntime implements Runnable {
             payload = copy(payload);
             FlowStep flowStep = componentContext.getFlowStep();
             sendMessage(createMessage(new BinaryMessage(flowStep.getId(), payload), messageHeaders), targetStepIds);
+            contentMessagesSentCount++;
         }
 
         @Override
@@ -662,6 +679,7 @@ public class StepRuntime implements Runnable {
             payload = copy(payload);
             FlowStep flowStep = componentContext.getFlowStep();
             sendMessage(createMessage(new EntityDataMessage(flowStep.getId(), payload), messageHeaders), targetStepIds);
+            contentMessagesSentCount++;
         }
 
         @Override
@@ -669,6 +687,7 @@ public class StepRuntime implements Runnable {
             payload = copy(payload);
             FlowStep flowStep = componentContext.getFlowStep();
             sendMessage(createMessage(new TextMessage(flowStep.getId(), payload), messageHeaders), targetStepIds);
+            contentMessagesSentCount++;
         }
 
         @Override

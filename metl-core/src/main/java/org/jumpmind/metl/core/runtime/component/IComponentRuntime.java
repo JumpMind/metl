@@ -26,7 +26,7 @@ import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public interface IComponentRuntime {
 
-    public void register(XMLComponent definition);
+    public void create(XMLComponent definition);
     
     public void start(int threadNumber, ComponentContext context);
 
