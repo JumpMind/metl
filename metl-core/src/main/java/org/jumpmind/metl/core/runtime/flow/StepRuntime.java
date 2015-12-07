@@ -244,20 +244,14 @@ public class StepRuntime implements Runnable {
                 final Message inputMessage = inQueue.poll(500, TimeUnit.MILLISECONDS);
                 if (running && !cancelled) {
                     if (inputMessage != null) {
-                        try {
-                            synchronized (this) {
-                                activeCount++;
-                            }
                             if (inputMessage instanceof ShutdownMessage) {
                                 process((ShutdownMessage) inputMessage, target);
                             } else {
+                                synchronized (this) {
+                                    activeCount++;
+                                }
                                 process(inputMessage, target);
                             }
-                        } finally {
-                            synchronized (this) {
-                                activeCount--;
-                            }
-                        }
                     }
                 }
             }
@@ -308,6 +302,9 @@ public class StepRuntime implements Runnable {
             recordError(ThreadUtils.getThreadNumber(), ex);
         } finally {
             componentContext.getExecutionTracker().afterHandle(threadNumber, componentContext, error);
+            synchronized (this) {
+                activeCount--;
+            }
         }
     }
     
