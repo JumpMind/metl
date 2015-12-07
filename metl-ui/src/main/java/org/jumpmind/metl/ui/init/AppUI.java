@@ -65,6 +65,8 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Embedded;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
@@ -264,6 +266,14 @@ public class AppUI extends UI implements LoginListener {
 
         TopBar menu = new TopBar(viewManager, appCtx);
 
+//        HorizontalLayout bottom = new HorizontalLayout();
+//        bottom.setWidth(100, Unit.PERCENTAGE);
+//        bottom.setMargin(false);
+//        Embedded right = new Embedded(null, new ThemeResource(
+//                "../apptheme/images/powered-by-jumpmind.png"));
+//        bottom.addComponents(right);
+//        bottom.setComponentAlignment(right, Alignment.BOTTOM_RIGHT);
+        
         root.addComponents(menu, contentArea);
         root.setExpandRatio(contentArea, 1);
     }
