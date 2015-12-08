@@ -36,6 +36,7 @@ import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderType;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
@@ -368,16 +369,13 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             agentManager.refresh(myDesignAgent);
         }
 
-        AgentDeployment oldDeployment = myDesignAgent.getAgentDeploymentFor(flow);
-        if (oldDeployment != null) {
-            agentManager.undeploy(oldDeployment);
+        AgentDeployment deployment = myDesignAgent.getAgentDeploymentFor(flow);
+        AgentRuntime runtime = agentManager.getAgentRuntime(myDesignAgent.getId());
+        if (deployment == null) {
+            deployment = runtime.deploy(flow, new HashMap<String, String>());
+        } else {
+            runtime.deployResources(flow);
         }
-
-        AgentDeployment deployment = agentManager.deploy(myDesignAgent.getId(), flow, new HashMap<String, String>());
-        if (oldDeployment != null) {
-            deployment.setLogLevel(oldDeployment.getLogLevel());
-        }
-        configurationService.save(deployment);
 
         String executionId = agentManager.getAgentRuntime(myDesignAgent).scheduleNow(deployment);
         if (executionId != null) {
