@@ -415,6 +415,8 @@ public class AgentRuntime {
         public FlowRunner(AgentDeployment deployment, String executionId, Map<String, String> runtimeParameters) {
             this.executionId = executionId;
             this.runtimeParameters = runtimeParameters;
+            deployment = configurationService.findAgentDeployment(deployment.getId());
+            deployment.setFlow(configurationService.findFlow(deployment.getFlowId()));
             this.flowRuntime = new FlowRuntime(deployment, componentFactory,
                     resourceFactory,
                     flowStepsExecutionThreads, configurationService, executionService);
@@ -429,10 +431,8 @@ public class AgentRuntime {
             AgentDeployment deployment = flowRuntime.getDeployment();
             try {
                 log.info("Scheduled deployment '{}' is running on the '{}' agent", deployment.getName(),
-                        agent.getName());
-                configurationService.refresh(deployment);
+                        agent.getName());                
                 configurationService.refreshAgentParameters(agent);
-                configurationService.refresh(deployment.getFlow());
                 List<Notification> notifications = configurationService.findNotificationsForDeployment(deployment);
                 flowRuntime.start(executionId, deployedResources, agent, notifications, globalSettings, runtimeParameters);
             } catch (Exception e) {
