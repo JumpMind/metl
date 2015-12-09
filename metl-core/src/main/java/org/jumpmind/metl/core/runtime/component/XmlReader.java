@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
@@ -142,7 +143,7 @@ public class XmlReader extends AbstractComponentRuntime {
                 while (eventType != XmlPullParser.END_DOCUMENT) {
                     switch (eventType) {
                         case XmlPullParser.START_TAG:
-                            if (readTag == null) {
+                            if (StringUtils.isBlank(readTag)) {
                                 readTag = parser.getName();
                                 info("Read tag was not set, defaulting to root tag: " + readTag);
                             }
