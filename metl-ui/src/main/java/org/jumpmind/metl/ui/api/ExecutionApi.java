@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
+import org.jumpmind.metl.core.model.DeploymentStatus;
 import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.ExecutionStep;
@@ -93,6 +94,7 @@ public class ExecutionApi {
                 for (AgentDeployment agentDeployment : deployments) {
                     if (agentDeployment.getName().equals(deploymentName)) {
                         foundDeployment = true;
+                        if (agentDeployment.getDeploymentStatus() == DeploymentStatus.DEPLOYED) {
                         AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent);
                         String executionId = agentRuntime.scheduleNow(agentDeployment, toObjectMap(req));
                         boolean done = false;
@@ -105,6 +107,7 @@ public class ExecutionApi {
                             }
                         } while (!done);
                         break;
+                        } 
                     }
                 }
             }
@@ -131,9 +134,11 @@ public class ExecutionApi {
         } else {
             String msg = "Unexpected error";
             if (!foundAgent) {
-                msg = String.format("Could not find an agent named '%s'", agentName);
+                msg = String.format("Could not find an agent named '%s'", agentName);                
             } else if (!foundDeployment) {
                 msg = String.format("Could not find a deployment name '%s'", deploymentName);
+            } else {
+                msg = String.format("Found deployment '%s', but it was not enabled", deploymentName);
             }
             throw new CouldNotFindDeploymentException(msg);
         }
