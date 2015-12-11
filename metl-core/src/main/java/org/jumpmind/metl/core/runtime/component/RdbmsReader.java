@@ -139,8 +139,11 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         }
         if (outboundPayload != null && outboundPayload.size() > 0) {
             callback.sendEntityDataMessage(null, outboundPayload);
+        } else if (inboundRecordCount ==1) {
+        	//we should have sent data, but had none to send
+        	//send a control message
+        	callback.sendControlMessage();
         }
-
     }
 
     protected String prepareSql(String sql, Message inputMessage, Object entity) {

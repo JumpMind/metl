@@ -294,8 +294,8 @@ public class StepRuntime implements Runnable {
             /*
              * Detect shutdown condition
              */
-            if (startStep || (sourceStepRuntimes.size() == 1 && sourceStepRuntimes.get(0).getComponentContext().getFlowStep().getId()
-                    .equals(StepRuntime.this.componentContext.getFlowStep().getId()) && inQueue.size() == 0)) {
+            if (startStep || (liveSourceStepIds.size() == 1 && liveSourceStepIds.contains(
+                    StepRuntime.this.componentContext.getFlowStep().getId()) && inQueue.size() == 0)) {
                 StepRuntime.this.shutdown(threadNumber, target, false);
             }
         } catch (Exception ex) {
