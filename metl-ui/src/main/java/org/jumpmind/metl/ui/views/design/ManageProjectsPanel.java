@@ -20,16 +20,18 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.metl.ui.common.FieldFactory;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.views.DesignNavigator;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
@@ -39,25 +41,27 @@ import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Item;
-import com.vaadin.event.FieldEvents.FocusEvent;
-import com.vaadin.event.FieldEvents.FocusListener;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitEvent;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
+import com.vaadin.data.sort.SortOrder;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.DefaultFieldFactory;
-import com.vaadin.ui.Field;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.HeaderCell;
+import com.vaadin.ui.Grid.HeaderRow;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
-@SuppressWarnings("serial")
 public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
+
+    private static final long serialVersionUID = 1L;
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -65,7 +69,9 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     DesignNavigator projectNavigator;
 
-    TreeTable treeTable;
+    Grid grid;
+
+    BeanItemContainer<ProjectVersionItem> gridContainer;
 
     Button openProjectButton;
 
@@ -77,7 +83,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     Button removeButton;
 
-    AbstractObject currentlyEditing;
+    List<SortOrder> lastSortOrder;
 
     public ManageProjectsPanel(ApplicationContext context, DesignNavigator projectNavigator) {
         this.setSizeFull();
@@ -88,200 +94,190 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         addComponent(buttonBar);
 
         openProjectButton = buttonBar.addButton("Open Project", Icons.PROJECT);
-        openProjectButton.addClickListener(event -> openProject(treeTable.getValue()));
+        openProjectButton.addClickListener(event -> open());
 
         newProjectButton = buttonBar.addButton("New Project", Icons.PROJECT);
-        newProjectButton.addClickListener(event -> createNewProject());
+        newProjectButton.addClickListener(event -> newProject());
 
         newVersionButton = buttonBar.addButton("New Version", Icons.VERSION);
-        newVersionButton.addClickListener(event -> createNewVersion());
+        newVersionButton.addClickListener(event -> newVersion());
         newVersionButton.setEnabled(false);
         newVersionButton.setDescription("Not yet supported");
 
         editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
-        editButton.addClickListener(event -> edit(treeTable.getValue()));
+        editButton.addClickListener(event -> edit());
 
         removeButton = buttonBar.addButton("Remove", Icons.DELETE);
         removeButton.addClickListener(event -> removeProject());
 
-        treeTable = new TreeTable();
-        treeTable.setSizeFull();
-        treeTable.setSortEnabled(true);
-        treeTable.setCacheRate(100);
-        treeTable.setImmediate(true);
-        treeTable.setSelectable(true);
-        treeTable.setEditable(true);
-        treeTable.addContainerProperty("name", String.class, "", "Name", null, null);
-        treeTable.addContainerProperty("description", String.class, "", "Description", null, null);
-        treeTable.addContainerProperty("locked", Boolean.class, null, "Locked", null, null);
-        treeTable.setColumnWidth("locked", 45);
-        treeTable.addContainerProperty("archived", Boolean.class, null, "Archived", null, null);
-        treeTable.addContainerProperty("createTime", Date.class, null, "Create Time", null, null);
-        treeTable.setColumnCollapsingAllowed(true);
-        treeTable.setColumnCollapsed("archived", true);
-        treeTable.addItemClickListener(new TreeTableItemClickListener());
-        treeTable.addValueChangeListener(event -> save());
-        treeTable.setTableFieldFactory(new FieldFactory());
-        treeTable.setSortContainerPropertyId("name");
-        treeTable.setSortAscending(true);
+        gridContainer = new BeanItemContainer<>(ProjectVersionItem.class);
+        grid = new Grid();
+        grid.setSizeFull();
+        grid.setEditorEnabled(true);
+        grid.setSelectionMode(SelectionMode.MULTI);
 
-        addComponent(treeTable);
-        setExpandRatio(treeTable, 1);
+        grid.addColumn("name", String.class).setHeaderCaption("Name").setExpandRatio(2);
+        grid.addColumn("description", String.class).setHeaderCaption("Description").setExpandRatio(1);
+        grid.addColumn("version", String.class).setHeaderCaption("Version").setMaximumWidth(200);
+        grid.addColumn("createTime", Date.class).setHeaderCaption("Create Time").setWidth(120).setMaximumWidth(200).setEditable(false);
 
-        refresh();
+        grid.setContainerDataSource(gridContainer);
+        grid.setEditorFieldFactory(new FieldFactory());
+        grid.addSortListener(event -> {
+            lastSortOrder = event.getSortOrder();
+        });
+
+        grid.addSelectionListener(event -> setButtonsEnabled());
+        grid.addItemClickListener(event -> {
+            if (!event.isDoubleClick()) {
+                if (!event.isShiftKey()) {
+                    Collection<Object> all = grid.getSelectedRows();
+                    for (Object selected : all) {
+                        if (!selected.equals(event.getItemId())) {
+                            grid.deselect(selected);
+                        }
+                    }
+                }
+                if (grid.getSelectedRows().contains(event.getItemId())) {
+                    grid.deselect(event.getItemId());
+                } else {
+                    grid.select(event.getItemId());
+                }
+            }
+        });
+
+        grid.getEditorFieldGroup().addCommitHandler(new FieldGroup.CommitHandler() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void preCommit(CommitEvent commitEvent) throws CommitException {
+            }
+
+            @Override
+            public void postCommit(CommitEvent commitEvent) throws CommitException {
+                ProjectVersionItem item = (ProjectVersionItem) grid.getEditedItemId();
+                IConfigurationService configurationService = context.getConfigurationService();
+                configurationService.save(item.version);
+                configurationService.save(item.project);
+                /*
+                 * TODO once project versions are supported we'll need to update
+                 * other project version items because the name might have
+                 * changed
+                 */
+            }
+        });
+
+        HeaderRow filteringHeader = grid.appendHeaderRow();
+        HeaderCell logTextFilterCell = filteringHeader.getCell("name");
+        TextField filterField = new TextField();
+        filterField.setInputPrompt("Filter");
+        filterField.addStyleName(ValoTheme.TEXTFIELD_TINY);
+        filterField.setWidth("100%");
+
+        filterField.addTextChangeListener(change -> {
+            gridContainer.removeContainerFilters("name");
+            if (!change.getText().isEmpty()) {
+                gridContainer.addContainerFilter(new SimpleStringFilter("name", change.getText(), true, false));
+            }
+        });
+        logTextFilterCell.setComponent(filterField);
+
+        addComponent(grid);
+        setExpandRatio(grid, 1);
 
     }
 
-    protected void setButtonsEnabled() {
-        Object obj = treeTable.getValue();
-        removeButton.setEnabled(obj != null);
-        openProjectButton.setEnabled(obj != null);
-        editButton.setEnabled(obj != null);
-        newVersionButton.setEnabled(obj instanceof ProjectVersion);
+    protected void sort() {
+        if (lastSortOrder == null) {
+            lastSortOrder = new ArrayList<>();
+            lastSortOrder.add(new SortOrder("version", SortDirection.DESCENDING));
+            lastSortOrder.add(new SortOrder("name", SortDirection.ASCENDING));            
+        }
+        grid.setSortOrder(lastSortOrder);
+    }
 
-        removeButton.setEnabled(currentlyEditing == null);
-        openProjectButton.setEnabled(currentlyEditing == null);
-        editButton.setEnabled(currentlyEditing == null);
-        newProjectButton.setEnabled(currentlyEditing == null);
-        newVersionButton.setEnabled(currentlyEditing == null);
+    protected void deselectAll() {
+        Collection<Object> all = grid.getSelectedRows();
+        for (Object selected : all) {
+            grid.deselect(selected);
+        }
+    }
+
+    protected void setButtonsEnabled() {
+        boolean selected = grid.getSelectionModel().getSelectedRows().size() > 0;
+        removeButton.setEnabled(selected);
+        openProjectButton.setEnabled(selected);
+        editButton.setEnabled(selected);
+        newVersionButton.setEnabled(selected);
+
+        boolean currentlyEditing = grid.getEditedItemId() != null;
+        if (currentlyEditing) {
+            removeButton.setEnabled(false);
+            openProjectButton.setEnabled(false);
+            editButton.setEnabled(false);
+            newProjectButton.setEnabled(false);
+            newVersionButton.setEnabled(false);
+        }
     }
 
     @Override
     public boolean closing() {
         return true;
     }
-    
+
     @Override
     public void selected() {
+        refresh();
     }
-    
+
     @Override
     public void deselected() {
     }
 
-    protected void openProject(Object source) {
-        Object selected = source != null ? source : treeTable.getValue();
-        if (selected instanceof Project) {
-            selected = ((Project) selected).getLatestProjectVersion();
-        }
-
-        if (selected instanceof ProjectVersion) {
-            projectNavigator.addProjectVersion((ProjectVersion) selected);
+    protected void open() {
+        Collection<Object> selected = grid.getSelectedRows();
+        for (Object object : selected) {
+            projectNavigator.addProjectVersion(((ProjectVersionItem) object).version);
         }
     }
 
     protected void refresh() {
-        Object selected = treeTable.getValue();
-
+        Collection<Object> selected = grid.getSelectedRows();
+        gridContainer.removeAllItems();
         IConfigurationService configurationService = context.getConfigurationService();
-        addAll(configurationService.findProjects());
 
-        setButtonsEnabled();
-
-        if (selected == null && treeTable.size() > 0) {
-            selected = treeTable.getItemIds().iterator().next();
-        }
-        treeTable.setValue(selected);
-
-        Object parent = treeTable.getParent(selected);
-        if (parent != null) {
-            treeTable.setCollapsed(parent, false);
-        }
-
-    }
-
-    protected void addAll(List<Project> projects) {
-        treeTable.removeAllItems();
+        List<Project> projects = configurationService.findProjects();
         for (Project project : projects) {
-            add(project);
-        }
-
-        treeTable.sort();
-    }
-
-    protected void add(Project project) {
-        treeTable.addItem(new Object[] { project.getName(), project.getDescription(), null, null, project.getCreateTime() }, project);
-        treeTable.setItemIcon(project, Icons.PROJECT);
-        List<ProjectVersion> versions = project.getProjectVersions();
-        for (ProjectVersion projectVersion : versions) {
-            addToTable(project, projectVersion);
-        }
-    }
-
-    protected void addToTable(Project project, ProjectVersion projectVersion) {
-        treeTable.setChildrenAllowed(project, true);
-        treeTable.addItem(new Object[] { projectVersion.getVersionLabel(), projectVersion.getDescription(), projectVersion.isLocked(),
-                projectVersion.isArchived(), project.getCreateTime() }, projectVersion);
-        treeTable.setItemIcon(projectVersion, Icons.VERSION);
-        treeTable.setParent(projectVersion, project);
-        treeTable.setChildrenAllowed(projectVersion, false);
-    }
-
-    protected void edit(Object obj) {
-        treeTable.setValue(obj);
-        if (currentlyEditing == null) {
-            currentlyEditing = (AbstractObject) obj;
-        }
-        setButtonsEnabled();
-        treeTable.refreshRowCache();
-    }
-
-    protected void selectPrevious() {
-        Object previous = null;
-        Object selected = treeTable.getValue();
-        Collection<?> items = treeTable.getItemIds();
-        for (Object object : items) {
-            if (object == selected) {
-                break;
+            List<ProjectVersion> versions = project.getProjectVersions();
+            for (ProjectVersion version : versions) {
+                grid.getContainerDataSource().addItem(new ProjectVersionItem(project, version));
             }
-            previous = object;
         }
-        treeTable.setValue(previous);
+
+        for (Object s : selected) {
+            grid.select(s);
+        }
+
+        setButtonsEnabled();
+
+        sort();
+
     }
 
-    protected void createNewVersion() {
+    protected void edit() {
+        Collection<Object> selected = grid.getSelectedRows();
+        if (selected.size() > 0) {
+            grid.editItem(selected.iterator().next());
+        }
+    }
+
+    protected void newVersion() {
         CommonUiUtils.notify("Not implemented.  Coming Soon.", Type.HUMANIZED_MESSAGE);
     }
 
-    protected void save() {
-        Item item = treeTable.getItem(currentlyEditing);
-        if (item != null) {
-            IConfigurationService configurationService = context.getConfigurationService();
-
-            String name = (String) item.getItemProperty("name").getValue();
-            String desc = (String) item.getItemProperty("description").getValue();
-            if (currentlyEditing instanceof Project) {
-                Project project = (Project) currentlyEditing;
-                project.setName(name);
-                project.setDescription(desc);
-                configurationService.save(project);
-                projectNavigator.refresh();
-
-            } else if (currentlyEditing instanceof ProjectVersion) {
-                ProjectVersion version = (ProjectVersion) currentlyEditing;
-                version.setVersionLabel(name);
-                version.setDescription(desc);
-
-                Boolean locked = (Boolean) item.getItemProperty("locked").getValue();
-                locked = locked == null ? false : locked;
-                version.setLocked(locked);
-
-                Boolean archived = (Boolean) item.getItemProperty("archived").getValue();
-                archived = archived == null ? false : archived;
-                version.setArchived(archived);
-                configurationService.save(version);
-                projectNavigator.refresh();
-            }
-
-            currentlyEditing = null;
-            setButtonsEnabled();
-            treeTable.setSortContainerPropertyId(treeTable.getSortContainerPropertyId());
-            treeTable.refreshRowCache();
-            treeTable.focus();
-        }
-    }
-    
-    protected void createNewProject() {
+    protected void newProject() {
+        deselectAll();
         Project project = new Project();
         project.setName("New Project");
         ProjectVersion version = new ProjectVersion();
@@ -291,80 +287,76 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         IConfigurationService configurationService = context.getConfigurationService();
         configurationService.save(project);
         configurationService.save(version);
-        refresh();
-        edit(project);
+        ProjectVersionItem item = new ProjectVersionItem(project, version);
+        grid.getContainerDataSource().addItem(item);
+        grid.select(item);
+        edit();
     }
-    
-    protected void removeProject () {
-        ConfirmDialog.show("Delete Project?", "Are you sure you want to delete the selected project?", new IConfirmListener() {
+
+    protected void removeProject() {
+        ConfirmDialog.show("Delete Project(s)?", "Are you sure you want to delete the selected project(s)?", new IConfirmListener() {
+            private static final long serialVersionUID = 1L;
+
             @Override
             public boolean onOk() {
-                Object selected = treeTable.getValue();
-                if (selected instanceof ProjectVersion) {
-                    ProjectVersion projectVersion = (ProjectVersion) selected;
-                    projectVersion.setDeleted(true);
-                    context.getConfigurationService().save(projectVersion);
-
-                    if (projectVersion.getProject().getProjectVersions().size() <= 1) {
-                        selected = projectVersion.getProject();
-                    }
+                Collection<Object> selected = grid.getSelectedRows();
+                for (Object object : selected) {
+                    ProjectVersionItem item = (ProjectVersionItem) object;
+                    grid.getContainerDataSource().removeItem(item);
+                    item.version.setDeleted(true);
+                    context.getConfigurationService().save(item.version);
                 }
-
-                if (selected instanceof Project) {
-                    Project project = (Project) selected;
-                    project.setDeleted(true);
-                    context.getConfigurationService().save(project);
-                }
-
-                selectPrevious();
-                refresh();
-                projectNavigator.refresh();
+                sort();
+                setButtonsEnabled();
                 return true;
             }
         });
     }
 
-    class TreeTableItemClickListener implements ItemClickListener {
-        public void itemClick(ItemClickEvent event) {
-            if (event.isDoubleClick()) {
-                openProject(event.getItemId());
-            }
+    public static class ProjectVersionItem implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        Project project;
+
+        ProjectVersion version;
+
+        public ProjectVersionItem() {
         }
-    }
 
-    class FieldFactory extends DefaultFieldFactory {
-        @Override
-        public Field<?> createField(Container container, Object itemId, Object propertyId, Component uiContext) {
-            boolean isVersion = itemId instanceof ProjectVersion;
-            if (itemId.equals(currentlyEditing) && !propertyId.equals("createTime")
-                    && !(!isVersion && (propertyId.equals("locked") || propertyId.equals("archived")))) {
-                Field<?> field = super.createField(container, itemId, propertyId, uiContext);
-                if (field instanceof TextField) {
-                    final TextField textField = (TextField) field;
-                    textField.setNullRepresentation("");
-                    textField.setWidth(100, Unit.PERCENTAGE);
-                    textField.addFocusListener(new FocusListener() {
-
-                        @Override
-                        public void focus(FocusEvent event) {
-                            textField.selectAll();
-                        }
-                    });
-                    if ("name".equals(propertyId)) {
-                        textField.focus();
-                    }
-
-                } else if (field instanceof CheckBox) {
-                    CheckBox checkBox = (CheckBox) field;
-                    checkBox.setCaption(null);
-                    checkBox.setWidth(100, Unit.PERCENTAGE);
-                }
-
-                return field;
-            } else {
-                return null;
-            }
+        public ProjectVersionItem(Project project, ProjectVersion version) {
+            this.project = project;
+            this.version = version;
         }
+
+        public String getName() {
+            return project.getName();
+        }
+
+        public void setName(String projectName) {
+            this.project.setName(projectName);
+        }
+
+        public String getVersion() {
+            return version.getVersionLabel();
+        }
+
+        public void setVersion(String version) {
+            this.version.setVersionLabel(version);
+        }
+
+        public String getDescription() {
+            return this.version.getDescription();
+        }
+
+        public void setDescription(String description) {
+            this.version.setDescription(description);
+        }
+
+        public Date getCreateTime() {
+            return this.version.getCreateTime();
+        }
+
     }
 
 }

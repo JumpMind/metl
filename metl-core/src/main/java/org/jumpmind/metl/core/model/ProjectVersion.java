@@ -26,7 +26,7 @@ public class ProjectVersion extends AbstractObject {
 
     Project project;
     
-    String description;
+    String description = "";
 
     String origProjectId;
     
