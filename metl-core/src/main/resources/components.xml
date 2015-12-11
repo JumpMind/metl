@@ -326,10 +326,19 @@
             <setting id='xml.formatter.xml.format' type='choice' required='false'>
                 <name>XML Format</name>
                 <defaultValue>Pretty</defaultValue>
-                    <choices>
+                <choices>
                     <choice>Pretty</choice>
                     <choice>Compact</choice>
                     <choice>Raw</choice>
+                </choices>
+            </setting> 
+            <setting id='xml.formatter.null.handling' type='choice' required='false'>
+                <name>XML Null Handling</name>
+                <defaultValue>Empty Element</defaultValue>
+                <choices>
+                    <choice>Empty Element</choice>
+                    <choice>Remove Element</choice>
+                    <choice>XML nil</choice>
                 </choices>
             </setting>
         </settings>

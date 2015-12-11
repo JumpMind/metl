@@ -60,6 +60,14 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
     public static final String RAW_FORMAT = "Raw";
 
     public final static String XML_FORMAT = "xml.formatter.xml.format";
+    
+    public static final String NULL_HANDLING_XML_NIL = "XML nil";
+    
+    public static final String NULL_HANDLING_EMPTY = "Empty Element";
+    
+    public static final String NULL_HANDLING_REMOVE = "Remove Element";
+    
+    public static final String NULL_HANDLING = "xml.formatter.null.handling";
 
     public static final String TYPE = "Format XML";
 
@@ -70,6 +78,8 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
     String xmlFormat;
 
     String template;
+    
+    String nullHandling;
 
     @Override
     protected void start() {
@@ -78,7 +88,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         ignoreNamespace = properties.is(IGNORE_NAMESPACE);
         xmlFormat = properties.get(XML_FORMAT);
         template = properties.get(XML_FORMATTER_TEMPLATE);
-
+        nullHandling = properties.get(NULL_HANDLING);
     }
 
     @Override
@@ -222,22 +232,36 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
     private void applyAttributeXpath(Document document, EntityData inputRow, List<XmlFormatterAttributeSetting> settings) {
         for (XmlFormatterAttributeSetting setting : settings) {
-            String attributeId = setting.getSetting().getAttributeId();
-            if (inputRow.containsKey(attributeId)) {
-                Object inputValue = inputRow.get(setting.getSetting().getAttributeId());
-                String value = (inputValue == null) ? null : inputValue.toString();
-                List<Object> matches = setting.getExpression().evaluate(document.getRootElement());
-                if (matches.size() == 0) {
-                    log(LogLevel.WARN, "XPath expression " + setting.getExpression().getExpression() + " did not find any matches");
-                }
-                Object object = matches.get(0);
-                    if (object instanceof Element) {
-                        ((Element) object).setText(value);
-                    } else if (object instanceof Attribute) {
-                        ((Attribute) object).setValue(value);
+            Object inputValue = inputRow.get(setting.getSetting().getAttributeId());
+            String value = (inputValue == null) ? null : inputValue.toString();
+            List<Object> matches = setting.getExpression().evaluate(document.getRootElement());
+            if (matches.size() == 0) {
+                log(LogLevel.WARN, "XPath expression " + setting.getExpression().getExpression() + " did not find any matches");
+            }
+            Object object = matches.get(0);
+            if (object instanceof Element) {
+            	Element element = (Element) object;
+                if (value != null) {
+                	element.setText(value.toString());
+                } else {
+                    if (nullHandling.equals(NULL_HANDLING_REMOVE)) {
+                        Element parent = element.getParentElement();
+                        parent.removeContent(element);
+                    } else if (nullHandling.equalsIgnoreCase(NULL_HANDLING_XML_NIL)) {
+                        element.setAttribute("nil", "true", getXmlNamespace());
                     }
+                }
+            } else if (object instanceof Attribute) {
+            	Attribute attribute = (Attribute) object;
+                if (value != null) {
+                    attribute.setValue(value);
+                }
             }
         }
+    }
+    
+    protected final static Namespace getXmlNamespace() {
+        return Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
     }
 
     class XmlFormatterAttributeSetting {
