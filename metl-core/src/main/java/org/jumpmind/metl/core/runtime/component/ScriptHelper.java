@@ -55,7 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-public class MessageScriptHelper {
+public class ScriptHelper {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
     
@@ -82,7 +82,7 @@ public class MessageScriptHelper {
     
     protected boolean unitOfWorkBoundaryReached;
     
-    public MessageScriptHelper(IComponentRuntime component) {
+    public ScriptHelper(IComponentRuntime component) {
         this.context = component.getComponentContext();
         this.resource = context.getResourceRuntime();
         this.componentStatistics = context.getComponentStatistics();

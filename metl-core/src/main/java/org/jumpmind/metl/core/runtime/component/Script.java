@@ -75,7 +75,7 @@ public class Script extends AbstractComponentRuntime {
             script.append(String.format("import %s;\n", FileUtils.class.getName()));
             script.append(String.format("import static %s.*;\n", FileUtils.class.getName()));
             script.append(String.format("import %s.*;\n", Message.class.getPackage().getName()));
-            script.append(String.format("import %s;\n", MessageScriptHelper.class.getName()));
+            script.append(String.format("import %s;\n", ScriptHelper.class.getName()));
             script.append(String.format("import %s;\n", MisconfiguredException.class.getName()));
             script.append(String.format("import %s;\n", AssertException.class.getName()));
             script.append(String.format("import %s.%s;\n", EntityData.class.getName(), ChangeType.class.getSimpleName()));
@@ -85,7 +85,7 @@ public class Script extends AbstractComponentRuntime {
             }
             script.append("\n");
             script.append(String.format("helper = new %1$s(component) { \n",
-                    MessageScriptHelper.class.getSimpleName()));
+                    ScriptHelper.class.getSimpleName()));
             if (isNotBlank(initScript)) {
                 script.append("\n");
                 script.append(String.format(" protected void onInit() { %s} \n", initScript));
