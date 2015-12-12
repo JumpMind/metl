@@ -21,7 +21,6 @@
 package org.jumpmind.metl.ui.views.design;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -372,12 +371,12 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         AgentDeployment deployment = myDesignAgent.getAgentDeploymentFor(flow);
         AgentRuntime runtime = agentManager.getAgentRuntime(myDesignAgent.getId());
         if (deployment == null) {
-            deployment = runtime.deploy(flow, new HashMap<String, String>());
+            deployment = runtime.deploy(flow, null);
         } else {
             runtime.deployResources(flow);
         }
 
-        String executionId = agentManager.getAgentRuntime(myDesignAgent).scheduleNow(deployment);
+        String executionId = agentManager.getAgentRuntime(myDesignAgent).scheduleNow(deployment, flow.toFlowParametersAsString());
         if (executionId != null) {
             ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context, tabs, this);
             tabs.addCloseableTab(executionId, "Run " + flow.getName(), Icons.LOG, logPanel);

@@ -268,6 +268,16 @@ public class Flow extends AbstractObject {
         this.flowParameters = flowParameters;
     }
     
+    public Map<String, String> toFlowParametersAsString() {
+        Map<String, String> params = new HashMap<>();
+        if (flowParameters != null) {
+            for (FlowParameter flowParameter : flowParameters) {
+                params.put(flowParameter.getName(), flowParameter.getDefaultValue());
+            }
+        }
+        return params;
+    }
+    
     public void setTest(boolean test) {
         this.test = test;
     }
