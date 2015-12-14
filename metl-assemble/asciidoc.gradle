@@ -14,20 +14,14 @@ task generateDocs(type: Copy) {
     
     dependsOn asciidoctor
     
-    destinationDir = file(rootProject.buildDir.path + "/../../metl-ui/src/main/webapp/doc")
+    destinationDir = file(rootProject.buildDir.path + "/../../metl-ui/src/main/webapp/doc/html")
 
-    into('html') {
         from ("$buildDir/src/asciidoc/html5") { include "user-guide.html" }
         filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
             'version': version,
             'buildTime': new java.text.SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new java.util.Date()),
             'scmVersion' : gitVersion
         ])
-    }
-    
-    into('pdf') {
-        from ("$buildDir/src/asciidoc/pdf") { include "user-guide.pdf" }
-    }
 
     doFirst {
         println "Deleting $destinationDir.path"

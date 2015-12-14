@@ -40,6 +40,7 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
@@ -55,33 +56,75 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+/**
+ * Helper class for the {@link Script} component. The Script component builds a
+ * Groovy implementation of the {@link ScriptHelper#onInit()},
+ * {@link ScriptHelper#onHandle()}, {@link ScriptHelper#onSuccess()} and
+ * {@link ScriptHelper#onError(Throwable)} methods using the script settings
+ * provided by the component user. Groovy scripts have access to the methods and
+ * the fields on this class.
+ */
 public class ScriptHelper {
 
+    /**
+     * Use this to log to the Metl log file.
+     */
     protected final Logger log = LoggerFactory.getLogger(getClass());
-    
-	protected ComponentContext context;
-	
-	protected FlowStep flowStep;
-	
-	protected Flow flow;
 
+    /**
+     * The context under which the componenot runtime was called.
+     */
+    protected ComponentContext context;
+
+    /**
+     * The configuration of the flow step.
+     */
+    protected FlowStep flowStep;
+
+    /**
+     * The configuration of the entire flow.
+     */
+    protected Flow flow;
+
+    /**
+     * Don't access this directly. Used by {{@link #nextRowFromInputMessage()}
+     */
     protected Iterator<EntityData> entityDataIterator;
 
+    /**
+     * The message that was received. This can be accessed from the
+     * {@link #onHandle()} method.
+     */
     protected Message inputMessage;
 
-    @Deprecated
-    protected ISendMessageCallback messageTarget;
-    
+    /**
+     * This is a handle to the API that can be used to send outbound
+     * {@link Message}s.
+     */
     protected ISendMessageCallback callback;
-    
+
+    /**
+     * Access to component statistics.
+     */
     protected ComponentStatistics componentStatistics;
-    
+
+    /**
+     * Access to the resource runtime if it is set.
+     */
     protected IResourceRuntime resource;
 
+    /**
+     * A context object that can be used by scripts to save objects between
+     * calls to {@link #onHandle()}.
+     */
     protected Map<String, Object> scriptContext;
-    
+
+    /**
+     * An indicator that a {@link ControlMessage} has been received from each
+     * source link.
+     */
     protected boolean unitOfWorkBoundaryReached;
-    
+
     public ScriptHelper(IComponentRuntime component) {
         this.context = component.getComponentContext();
         this.resource = context.getResourceRuntime();
@@ -91,6 +134,12 @@ public class ScriptHelper {
         this.scriptContext = new HashMap<String, Object>();
     }
 
+    /**
+     * If the resource is a {@link DataSource}, then this method returns a
+     * Spring JdbcTemplate for use in the script.
+     * 
+     * @return {@link JdbcTemplate}
+     */
     protected JdbcTemplate getJdbcTemplate() {
         if (resource == null) {
             throw new MisconfiguredException("In order to create a jdbc template, a datasource resource must be defined");
@@ -98,22 +147,28 @@ public class ScriptHelper {
         DataSource ds = resource.reference();
         return new JdbcTemplate(ds);
     }
-    
+
+    /**
+     * If the resource is a directory, this is the reference to the directory.
+     * 
+     * @return {@link IDirectory}
+     */
     protected IDirectory getDirectory() {
         if (resource == null) {
             throw new MisconfiguredException("In order to access a directory you must configure a directory resource");
         }
-        
+
         Object directory = resource.reference();
         if (directory instanceof IDirectory) {
-            return (IDirectory)directory;
+            return (IDirectory) directory;
         } else {
             throw new MisconfiguredException("A directory resource is required");
         }
     }
-    
-    /*
-     * This is mainly to support unit tests or components that need to copy a classpath resource to a directory resource in a script
+
+    /**
+     * This is mainly to support unit tests or components that need to copy a
+     * classpath resource to a directory resource in a script
      */
     protected void classpathToDirectory(String fileName) {
         InputStream is = getClass().getResourceAsStream(fileName);
@@ -131,6 +186,12 @@ public class ScriptHelper {
         }
     }
 
+    /**
+     * If the resource is a {@link DataSource} then return a reference to the
+     * {@link DataSource}.
+     * 
+     * @return {@link DataSource}
+     */
     protected BasicDataSource getBasicDataSource() {
         return (BasicDataSource) resource.reference();
     }
@@ -138,7 +199,7 @@ public class ScriptHelper {
     protected Row nextRowFromInputMessage() {
         if (flowStep.getComponent().getInputModel() != null) {
             if (entityDataIterator == null && inputMessage instanceof EntityDataMessage) {
-                entityDataIterator = ((EntityDataMessage)inputMessage).getPayload().iterator();
+                entityDataIterator = ((EntityDataMessage) inputMessage).getPayload().iterator();
             }
 
             if (entityDataIterator != null && entityDataIterator.hasNext()) {
@@ -148,58 +209,196 @@ public class ScriptHelper {
                 return null;
             }
         } else {
-            throw new IllegalStateException(
-                    "The input model needs to be set if you are going to use the entity data");
+            throw new IllegalStateException("The input model needs to be set if you are going to use the entity data");
         }
     }
 
-    protected void info(String message, Object... args) {        
+    /**
+     * Call this method to record debug level messages in the component log. Use
+     * {@link String#format(String, Object...)} syntax if you are using the
+     * args.
+     * 
+     * @param message
+     *            The log message in {@link String#format(String, Object...)}
+     *            format
+     * @param args
+     *            Message arguments
+     */
+    protected void debug(String message, Object... args) {
+        context.getExecutionTracker().log(ThreadUtils.getThreadNumber(), LogLevel.DEBUG, context, message, args);
+    }
+
+    /**
+     * Call this method to record info level messages in the component log. Use
+     * {@link String#format(String, Object...)} syntax if you are using the
+     * args.
+     * 
+     * @param message
+     *            The log message in {@link String#format(String, Object...)}
+     *            format
+     * @param args
+     *            Message arguments
+     */
+    protected void info(String message, Object... args) {
         context.getExecutionTracker().log(ThreadUtils.getThreadNumber(), LogLevel.INFO, context, message, args);
     }
-    
-    protected void error(String message, Object... args) {        
+
+    /**
+     * Call this method to record warn level messages in the component log. Use
+     * {@link String#format(String, Object...)} syntax if you are using the
+     * args.
+     * 
+     * @param message
+     *            The log message in {@link String#format(String, Object...)}
+     *            format
+     * @param args
+     *            Message arguments
+     */
+    protected void warn(String message, Object... args) {
+        context.getExecutionTracker().log(ThreadUtils.getThreadNumber(), LogLevel.WARN, context, message, args);
+    }
+
+    /**
+     * Call this method to record error level messages in the component log. Use
+     * {@link String#format(String, Object...)} syntax if you are using the
+     * args.
+     * 
+     * @param message
+     *            The log message in {@link String#format(String, Object...)}
+     *            format
+     * @param args
+     *            Message arguments
+     */
+    protected void error(String message, Object... args) {
         context.getExecutionTracker().log(ThreadUtils.getThreadNumber(), LogLevel.ERROR, context, message, args);
     }
 
+    /**
+     * Called by the {@link Script} component to set the message prior to
+     * calling {@link #onHandle()}
+     * 
+     * @param inputMessage
+     *            Sets the input message
+     */
     protected void setInputMessage(Message inputMessage) {
         this.inputMessage = inputMessage;
     }
-    
+
+    /**
+     * Called by the {@link Script} component to set the
+     * {@link #unitOfWorkBoundaryReached} prior to calling {@link #onHandle()}
+     * 
+     * @param unitOfWorkBoundaryReached
+     *            The unit of work boundary
+     */
     protected void setUnitOfWorkBoundaryReached(boolean unitOfWorkBoundaryReached) {
-    	this.unitOfWorkBoundaryReached = unitOfWorkBoundaryReached;
+        this.unitOfWorkBoundaryReached = unitOfWorkBoundaryReached;
     }
-    
+
+    /**
+     * Called by the {@link Script} component to set the {@link #callback} prior
+     * to calling {@link #onHandle()}
+     * 
+     * @param callback
+     */
+    protected void setSendMessageCallback(ISendMessageCallback callback) {
+        this.callback = callback;
+    }
+
+    /**
+     * Helper method to check if an entity data contains data for a
+     * {@link ModelEntity}
+     * 
+     * @param entityName
+     *            The name to check for
+     * @param data
+     *            The data object to check
+     * @return true when the data object contains data for an
+     *         {@link ModelEntity} with a specific name
+     */
     protected boolean containsEntity(String entityName, EntityData data) {
         return flowStep.getComponent().getEntityNames(data, true).contains(entityName);
     }
-    
+
+    /**
+     * Helper method to set an {@link ModelAttribute} in the {@link EntityData}
+     * object.
+     * 
+     * @param entityName
+     *            The name of the {@link ModelEntity}
+     * @param attributeName
+     *            The name of the {@link ModelAttribute}
+     * @param data
+     *            The data object on which to set the attribute
+     * @param value
+     *            The value of the attribute
+     */
     protected void putAttributeValue(String entityName, String attributeName, EntityData data, Object value) {
         ModelAttribute attribute = flowStep.getComponent().getInputModel().getAttributeByName(entityName, attributeName);
         data.put(attribute.getId(), value);
     }
-    
+
+    /**
+     * Helper method to get an attribute value from the data object by name
+     * @param entityName
+     *            The name of the {@link ModelEntity}
+     * @param attributeName
+     *            The name of the {@link ModelAttribute}
+     * @param data
+     *            The data object on which to set the attribute
+     * @return The value of the attribute
+     */
     protected Object getAttributeValue(String entityName, String attributeName, EntityData data) {
         Model model = flowStep.getComponent().getInputModel();
         return ComponentUtils.getAttributeValue(model, data, entityName, attributeName);
     }
 
+    /**
+     * Helper method to get an attribute value from the first data object in the current {@link #inputMessage}
+     * @param entityName
+     *            The name of the {@link ModelEntity}
+     * @param attributeName
+     *            The name of the {@link ModelAttribute}
+     * @return The value of the attribute
+     */
     protected Object getAttributeValue(String entityName, String attributeName) {
         Model model = flowStep.getComponent().getInputModel();
-        ArrayList<EntityData> rows =  ((EntityDataMessage)inputMessage).getPayload();
+        ArrayList<EntityData> rows = ((EntityDataMessage) inputMessage).getPayload();
         return ComponentUtils.getAttributeValue(model, rows, entityName, attributeName);
     }
-    
+
+    /**
+     * Helper method to get an attribute value from the data object by attribute name only.
+     * @param attributeName
+     *            The name of the {@link ModelAttribute}
+     * @param data
+     *            The data object on which to set the attribute            
+     * @return The value of the attribute
+     */
     protected Object getAttributeValue(String attributeName, EntityData data) {
         Model model = flowStep.getComponent().getInputModel();
         return ComponentUtils.getAttributeValue(model, data, attributeName);
     }
 
+    /**
+     * Helper method to get a list of attribute values with a specific entity and attribute name from all the data objects in an {@link #inputMessage}
+     * @param entityName
+     *            The name of the {@link ModelEntity}
+     * @param attributeName
+     *            The name of the {@link ModelAttribute}
+     * @return A list of attribute values
+     */
     protected List<Object> getAttributeValues(String entityName, String attributeName) {
         Model model = flowStep.getComponent().getInputModel();
-        ArrayList<EntityData> rows = ((EntityDataMessage)inputMessage).getPayload();
+        ArrayList<EntityData> rows = ((EntityDataMessage) inputMessage).getPayload();
         return ComponentUtils.getAttributeValues(model, rows, entityName, attributeName);
     }
-    
+
+    /**
+     * Helper method to forward the current {@link #inputMessage}.
+     * @param parameterName The name of a parameter to add to the message header
+     * @param value The value of the parameter to add to the message header
+     */
     protected void forwardMessageWithParameter(String parameterName, Serializable value) {
         Map<String, Serializable> headers = new HashMap<>();
         headers.put(parameterName, value);
@@ -209,15 +408,23 @@ public class ScriptHelper {
             callback.forward(headers, inputMessage);
         }
     }
-    
-    protected void forwardMessageWithParameters(Map<String,Serializable> params) {
+
+    /**
+     * Helper method to forward the current {@link #inputMessage}.
+     * @param params Parameters to add to the {@link Message#getHeader()}
+     */
+    protected void forwardMessageWithParameters(Map<String, Serializable> params) {
+
         if (inputMessage instanceof ControlMessage) {
             callback.sendControlMessage(params);
         } else {
             callback.forward(params, inputMessage);
         }
     }
-    
+
+    /**
+     * Helper method to forward the current {@link #inputMessage}.
+     */
     protected void forwardMessage() {
         if (inputMessage instanceof ControlMessage) {
             callback.sendControlMessage(inputMessage.getHeader());
@@ -225,29 +432,23 @@ public class ScriptHelper {
             callback.forward(inputMessage);
         }
     }
-    
+
+    /**
+     * Helper method to send a control message.
+     */
     protected void sendControlMessage() {
         callback.sendControlMessage();
     }
-    
-    protected void setSendMessageCallback(ISendMessageCallback callback) {
-        this.messageTarget = callback;
-        this.callback = callback;
+
+    protected void onInit() {
     }
 
-    protected Map<String, Object> getScriptContext() {
-		return scriptContext;
-	}
-
-	protected void onInit() {
-    }
-
-    protected void onHandle() {        
+    protected void onHandle() {
     }
 
     protected void onError(Throwable myError) {
     }
-    
+
     protected void onSuccess() {
     }
 

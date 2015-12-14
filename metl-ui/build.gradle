@@ -63,10 +63,19 @@ dependencies {
     testCompile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
     testCompile "org.eclipse.jetty:jetty-jmx:$jettyVersion"
     testCompile "org.eclipse.jetty:jetty-annotations:$jettyVersion"    
-    executableWar project(":metl-server")
-    
+    executableWar project(":metl-server")    
+}
+
+task copyJavaDocsToWebapp(type: Copy) {    
+    dependsOn javadoc    
+    destinationDir = file("src/main/webapp/doc")
+    into('javadoc') {
+        from ("../metl-core/build/docs/javadoc") { include "**/*" }
+    }    
 }
 
 develop.dependsOn vaadinCompileWidgetset
 develop.dependsOn generateDocs
+develop.dependsOn copyJavaDocsToWebapp
 assemble.dependsOn generateDocs
+assemble.dependsOn copyJavaDocsToWebapp

@@ -7,7 +7,9 @@
 |Samples|
 |Description|The script component executes one or more configurable groovy script.  Groovy scripts can be configured to run at different
 points in the component lifecycle including Component Initialization (onInit), Inbound message arrival (onHandleMessage), 
-Successfull flow completeion (onSuccess), and Flow completion with error (onError).
+Successfull flow completeion (onSuccess), and Flow completion with error (onError).  The different run points are implemented as methods in  
+link:../javadoc/org/jumpmind/metl/core/runtime/component/ScriptHelper.html[ScriptHelper].  All methods and fields in `ScriptHelper` are available
+for use in your script.
    
 |Inbound Message Type|Any Message Type
 |Output Message Type|Any Message Type

@@ -104,7 +104,7 @@ public class Script extends AbstractComponentRuntime {
             if (isNotBlank(onError)) {
                 script.append("\n");
                 script.append(String
-                        .format(" protected void onError(Throwable myError, List<Throwable> allErrors) { %s } \n",
+                        .format(" protected void onError(Throwable myError) { %s } \n",
                                 onError));
             }
             script.append("\n};\n");
