@@ -87,7 +87,7 @@ public class ScriptHelper {
     protected Flow flow;
 
     /**
-     * Don't access this directly. Used by {{@link #nextRowFromInputMessage()}
+     * Don't access this directly. Used by {@link #nextRowFromInputMessage()}
      */
     protected Iterator<EntityData> entityDataIterator;
 
