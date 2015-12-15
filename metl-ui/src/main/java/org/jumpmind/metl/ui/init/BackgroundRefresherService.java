@@ -85,7 +85,9 @@ public class BackgroundRefresherService implements Serializable {
                         try {
                             log.debug("refreshing background data " + refreshing.getClass().getSimpleName());
                             final Object data = refreshing.onBackgroundDataRefresh();
-                            appUi.access(() -> refreshing.onBackgroundUIRefresh(data));
+                            if (data != null) {
+                            	appUi.access(() -> refreshing.onBackgroundUIRefresh(data));
+                            }
                         } catch (Exception e) {
                             log.error(e.getMessage(), e);
                         }

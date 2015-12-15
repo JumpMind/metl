@@ -82,7 +82,7 @@ Metl can be installed as a linux/unix or windows service.  To install Metl as a 
 java -Dorg.jumpmind.metl.ui.init.config.dir=/opt/metl -jar metl.war install
 ----
 
-By default, Metl will be installed as a service with service name Metl.  A service configuration file named metl_service.conf 
+By default, Metl will be installed as a service with service name metl.  A service configuration file named metl_service.conf 
 will be written to the configuration directory and can be used to further configure the Metl service.  
 
 === Starting the Metl service
@@ -96,7 +96,7 @@ java -Dorg.jumpmind.metl.ui.init.config.dir=/opt/metl -jar metl.war start
 or, use the operating system tools to start and stop the service.  On linux:
 
 ----
-service Metl start
+service metl start
 ----
 
 For windows, use the local services control panel to start the Metl service.
@@ -112,7 +112,7 @@ java -Dorg.jumpmind.metl.ui.init.config.dir=/opt/metl -jar metl.war stop
 or, use the operating system tools to start and stop the service.  On linux:
 
 ----
-service Metl stop
+service metl stop
 ----
 
 For windows, use the local services control panel to stop the Metl service.
