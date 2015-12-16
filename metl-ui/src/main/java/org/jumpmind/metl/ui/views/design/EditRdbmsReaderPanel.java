@@ -49,8 +49,9 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Label;
 
-@SuppressWarnings("serial")
 public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
+
+    private static final long serialVersionUID = 1L;
 
     IDatabasePlatform platform;
 
@@ -131,6 +132,8 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
             queryPanel.appendSql(component.get(RdbmsReader.SQL));
 
             queryPanel.addShortcutListener(new ShortcutListener("", KeyCode.ENTER, new int[] { ModifierKey.CTRL }) {
+                private static final long serialVersionUID = 1L;
+
                 @Override
                 public void handleAction(Object sender, Object target) {
                     executeSqlClickListener.buttonClick(new ClickEvent(executeButton));
@@ -180,6 +183,8 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
     }
 
     class ExecuteSqlClickListener implements ClickListener {
+        private static final long serialVersionUID = 1L;
+
         public void buttonClick(ClickEvent event) {
             save();
             queryPanel.execute(false);
