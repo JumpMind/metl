@@ -192,7 +192,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         if (lastSortOrder == null) {
             lastSortOrder = new ArrayList<>();
             lastSortOrder.add(new SortOrder("version", SortDirection.DESCENDING));
-            lastSortOrder.add(new SortOrder("name", SortDirection.ASCENDING));            
+            lastSortOrder.add(new SortOrder("name", SortDirection.ASCENDING));
         }
         grid.setSortOrder(lastSortOrder);
     }
@@ -355,6 +355,20 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
         public Date getCreateTime() {
             return this.version.getCreateTime();
+        }
+
+        @Override
+        public int hashCode() {
+            return version.getId().hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof ProjectVersionItem) {
+                return ((ProjectVersionItem) obj).version.getId().equals(version.getId());
+            } else {
+                return false;
+            }
         }
 
     }
