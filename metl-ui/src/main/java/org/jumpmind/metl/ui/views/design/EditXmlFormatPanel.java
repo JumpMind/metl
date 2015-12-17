@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
+import java.io.Serializable;
 import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Set;
@@ -63,8 +64,9 @@ import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 
-@SuppressWarnings("serial")
 public class EditXmlFormatPanel extends AbstractComponentEditPanel implements TextChangeListener {
+
+    private static final long serialVersionUID = 1L;
 
     Table table = new Table();
 
@@ -207,6 +209,8 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
     }
 
     class EditTemplateClickListener implements ClickListener {
+        private static final long serialVersionUID = 1L;
+        
         public void buttonClick(ClickEvent event) {
             EditTemplateWindow window = new EditTemplateWindow();
             window.show();
@@ -214,6 +218,8 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
     }
 
     class EditTemplateWindow extends ResizableWindow {
+        private static final long serialVersionUID = 1L;
+        
         AceEditor editor;
 
         public EditTemplateWindow() {
@@ -248,6 +254,8 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
     }
 
     class ImportTemplateClickListener implements ClickListener, ImportXmlListener {
+        private static final long serialVersionUID = 1L;
+        
         ImportXmlTemplateWindow importWindow;
 
         public void buttonClick(ClickEvent event) {
@@ -266,6 +274,8 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
     }
 
     class EditFieldFactory implements TableFieldFactory {
+        private static final long serialVersionUID = 1L;
+        
         public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
                 com.vaadin.ui.Component uiContext) {
             Field<?> field = null;
@@ -287,11 +297,13 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
                 combo.setScrollToSelectedItem(true);
                 combo.setValue(record.getXpath());
                 combo.addValueChangeListener(new ValueChangeListener() {
+                    private static final long serialVersionUID = 1L;
                     public void valueChange(ValueChangeEvent event) {
                         saveXPathSettings();
                     }
                 });
                 combo.addFocusListener(new FocusListener() {
+                    private static final long serialVersionUID = 1L;
                     public void focus(FocusEvent event) {
                         table.select(itemId);
                     }
@@ -302,7 +314,10 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
         }
     }
 
-    public class Record {
+    public class Record implements Serializable {
+        
+        private static final long serialVersionUID = 1L;
+        
         ModelEntity modelEntity;
 
         ModelAttribute modelAttribute;
