@@ -321,7 +321,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
   		   
             ComponentAttributeSetting compare = component.getSingleAttributeSetting(attribute.getId(), DataDiff.ATTRIBUTE_COMPARE_ENABLED);
             boolean compareEnabled = compare != null ? Boolean.parseBoolean(compare.getValue()) : true;
-            attributeSettings.add(new AttributeSettings(attribute.getId(), compareEnabled));     		        		   
+            attributeSettings.add(new AttributeSettings(attribute.getId(), compareEnabled, attribute.isPk() == true?true:false));     		        		   
   	   }
      }
 
@@ -348,6 +348,9 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
     protected CheckBox createAttributeCheckBox(final AttributeSettings settings, final String key) {
         final CheckBox checkBox = new CheckBox();
         checkBox.setImmediate(true);
+        if (settings.isPrimaryKey()) {
+        	checkBox.setEnabled(false);
+        }
         checkBox.addValueChangeListener(new ValueChangeListener() {
             private static final long serialVersionUID = 1L;
             @Override
@@ -370,12 +373,14 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
     
     public static class AttributeSettings implements Serializable {
         private static final long serialVersionUID = 1L;
+        boolean primaryKey;
         String attributeId;
         boolean compareEnabled;
 
-        public AttributeSettings(String attributeId, boolean compareEnabled) {
+        public AttributeSettings(String attributeId, boolean compareEnabled, boolean primaryKey) {
             this.attributeId = attributeId;
             this.compareEnabled = compareEnabled;
+            this.primaryKey = primaryKey;
         }
 
         public void setCompareEnabled(boolean compareEnabled) {
@@ -392,6 +397,14 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
 
         public void setAttributeId(String attributeId) {
             this.attributeId = attributeId;
+        }
+        
+        public void setPrimaryKey(boolean primaryKey) {
+        	this.primaryKey = primaryKey;
+        }
+        
+        public boolean isPrimaryKey() {
+        	return primaryKey;
         }
 
         @Override
