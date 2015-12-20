@@ -22,6 +22,7 @@ package org.jumpmind.metl.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,9 +53,10 @@ import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
 
-@SuppressWarnings("serial")
 public class EditDataDiffPanel extends AbstractComponentEditPanel {
 
+    private static final long serialVersionUID = 1L;
+    
     Table entityTable = new Table();
     BeanItemContainer<EntitySettings> entitySettingsContainer = new BeanItemContainer<EntitySettings>(EntitySettings.class);
     List<EntitySettings> entitySettings = new ArrayList<EntitySettings>();
@@ -90,6 +92,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
     }
 
     class EditButtonClickListener implements ClickListener {
+        private static final long serialVersionUID = 1L;
         public void buttonClick(ClickEvent event) {
         	refreshAttributeContainer((EntitySettings) entityTable.getValue());
         	updateAttributeTable();
@@ -105,6 +108,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         entityTable.setSortEnabled(false);
         entityTable.setSizeFull();
         entityTable.addGeneratedColumn("entityName", new ColumnGenerator() {
+            private static final long serialVersionUID = 1L;
             @Override
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 EntitySettings setting = (EntitySettings) itemId;
@@ -120,6 +124,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         entityTable.setTableFieldFactory(new EditEntityFieldFactory());
         entityTable.setEditable(true);
         entityTable.addItemClickListener(new ItemClickListener() {
+            private static final long serialVersionUID = 1L;
         	public void itemClick(ItemClickEvent event) {
         		if (entityTable.getValue() == null) {
         			editButton.setEnabled(true);
@@ -161,6 +166,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
     }
     
     class EditEntityFieldFactory implements TableFieldFactory {
+        private static final long serialVersionUID = 1L;
         public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
                 com.vaadin.ui.Component uiContext) {
             final EntitySettings settings = (EntitySettings) itemId;
@@ -181,7 +187,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         final CheckBox checkBox = new CheckBox();
         checkBox.setImmediate(true);
         checkBox.addValueChangeListener(new ValueChangeListener() {
-
+            private static final long serialVersionUID = 1L;
             @Override
             public void valueChange(ValueChangeEvent event) {
                 ComponentEntitySetting setting = component.getSingleEntitySetting(settings.getEntityId(), key);
@@ -200,8 +206,8 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         return checkBox;
     }
 
-    public static class EntitySettings {
-
+    public static class EntitySettings implements Serializable {
+        private static final long serialVersionUID = 1L;
         String entityId;
         boolean addEnabled;
         boolean updateEnabled;
@@ -269,7 +275,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
     }
     
     class EditAttributesWindow extends ResizableWindow {
-    	
+        private static final long serialVersionUID = 1L;
 		public EditAttributesWindow() {
 			super("Edit Columns to Compare");
 			setWidth(800f, Unit.PIXELS);
@@ -288,6 +294,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
      	   attributeTable.setSortEnabled(false);
      	   attributeTable.setSizeFull();
      	   attributeTable.addGeneratedColumn("attributeName", new ColumnGenerator() {
+     	      private static final long serialVersionUID = 1L;
                 @Override
                 public Object generateCell(Table source, Object itemId, Object columnId) {
              	   AttributeSettings setting = (AttributeSettings) itemId;
@@ -302,7 +309,8 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
      	   attributeTable.setColumnExpandRatio("attributeName", 1);
      	   attributeTable.setTableFieldFactory(new EditAttributeFieldFactory());
      	   attributeTable.setEditable(true);
-            addComponent(attributeTable);
+            addComponent(attributeTable, 1);
+            
         }
     }
         
@@ -325,6 +333,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
     }    
     
     class EditAttributeFieldFactory implements TableFieldFactory {
+        private static final long serialVersionUID = 1L;
         public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
                 com.vaadin.ui.Component uiContext) {
             final AttributeSettings settings = (AttributeSettings) itemId;
@@ -340,7 +349,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         final CheckBox checkBox = new CheckBox();
         checkBox.setImmediate(true);
         checkBox.addValueChangeListener(new ValueChangeListener() {
-
+            private static final long serialVersionUID = 1L;
             @Override
             public void valueChange(ValueChangeEvent event) {
                 ComponentAttributeSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
@@ -359,8 +368,8 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         return checkBox;
     }
     
-    public static class AttributeSettings {
-
+    public static class AttributeSettings implements Serializable {
+        private static final long serialVersionUID = 1L;
         String attributeId;
         boolean compareEnabled;
 
