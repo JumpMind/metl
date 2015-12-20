@@ -44,6 +44,7 @@ import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.ResettableBasicDataSource;
 import org.jumpmind.metl.core.model.Component;
+import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
@@ -68,8 +69,10 @@ public class DataDiff extends AbstractComponentRuntime {
     public final static String ENTITY_CHG_ENABLED = "chg.enabled";
 
     public final static String ENTITY_DEL_ENABLED = "del.enabled";
-
+    
     public final static String ENTITY_ORDER = "order";
+
+    public final static String ATTRIBUTE_COMPARE_ENABLED = "compare.enabled";
 
     int rowsPerMessage = 10000;
 
@@ -138,6 +141,7 @@ public class DataDiff extends AbstractComponentRuntime {
         Map<ModelEntity, String> changeSqls = new HashMap<>();
         Map<ModelEntity, String> addSqls = new HashMap<>();
         Map<ModelEntity, String> delSqls = new HashMap<>();
+        Component component = context.getFlowStep().getComponent();
         for (ModelEntity entity : entities) {
             StringBuilder addSql = new StringBuilder("select ");
             StringBuilder chgSql = new StringBuilder(addSql);
@@ -179,11 +183,15 @@ public class DataDiff extends AbstractComponentRuntime {
                     delSql.append("curr.").append(attribute.getName()).append(" is null");
                     secondPk = true;
                 } else {
-                    if (secondCol) {
-                        chgSql.append(" or ");
+                    ComponentAttributeSetting matchColumnSetting = component.getSingleAttributeSetting(attribute.getId(), DataDiff.ATTRIBUTE_COMPARE_ENABLED);
+                    boolean matchColumn = matchColumnSetting != null ? Boolean.parseBoolean(matchColumnSetting.getValue()) : true;
+                    if (matchColumn) {
+                        if (secondCol) {
+                            chgSql.append(" or ");
+                        }
+                		chgSql.append("curr.").append(attribute.getName()).append(" != ").append("orig.").append(attribute.getName());
+                		secondCol = true;
                     }
-                    chgSql.append("curr.").append(attribute.getName()).append(" != ").append("orig.").append(attribute.getName());
-                    secondCol = true;
                 }
             }
 
@@ -207,7 +215,6 @@ public class DataDiff extends AbstractComponentRuntime {
         reader.setThreadNumber(threadNumber);
         
         for (ModelEntity entity : entities) {
-            Component component = context.getFlowStep().getComponent();
             ComponentEntitySetting add = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_ADD_ENABLED);
             ComponentEntitySetting chg = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_CHG_ENABLED);
             boolean addEnabled = add != null ? Boolean.parseBoolean(add.getValue()) : true;
@@ -230,7 +237,6 @@ public class DataDiff extends AbstractComponentRuntime {
         
         for(int i = entities.size()-1; i >= 0; i--) {
             ModelEntity entity = entities.get(i);
-            Component component = context.getFlowStep().getComponent();
             ComponentEntitySetting del = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_DEL_ENABLED);
             boolean delEnabled = del != null ? Boolean.parseBoolean(del.getValue()) : true;
 
@@ -268,8 +274,14 @@ public class DataDiff extends AbstractComponentRuntime {
 
     protected void appendColumns(StringBuilder sql, String prefix, ModelEntity entity) {
         for (ModelAttribute attribute : entity.getModelAttributes()) {
-            sql.append(prefix).append(attribute.getName()).append(" /* ").append(entity.getName()).append(".").append(attribute.getName())
-                    .append(" */").append(",");
+        	
+            Component component = context.getFlowStep().getComponent();
+            ComponentAttributeSetting matchColumnSetting = component.getSingleAttributeSetting(attribute.getId(), DataDiff.ATTRIBUTE_COMPARE_ENABLED);
+            boolean matchColumn = matchColumnSetting != null ? Boolean.parseBoolean(matchColumnSetting.getValue()) : true;
+        	if (matchColumn) {        	
+	            sql.append(prefix).append(attribute.getName()).append(" /* ").append(entity.getName()).append(".").append(attribute.getName())
+	                    .append(" */").append(",");
+        	}
         }
         sql.replace(sql.length() - 1, sql.length(), "");
     }
