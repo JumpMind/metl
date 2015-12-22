@@ -440,6 +440,14 @@ public class ScriptHelper {
         callback.sendControlMessage();
     }
 
+    /**
+     * Getter to get the script context
+     * @return A Map containing script context information
+     */
+    protected Map<String, Object> getScriptContext() {
+		return scriptContext;
+	}
+    
     protected void onInit() {
     }
 
