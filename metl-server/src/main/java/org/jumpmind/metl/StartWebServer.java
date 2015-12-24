@@ -90,15 +90,33 @@ public class StartWebServer {
         webapp.setSessionHandler(sessionHandler);
         
         webapp.setContextPath("/metl");
-        webapp.setWar(location.toExternalForm());
+        webapp.setWar(location.toExternalForm());        
         webapp.addAliasCheck(new AllowSymLinkAliasChecker());
         webapp.addServlet(DefaultServlet.class, "/*");
         
+        File pluginsDir = new File(locationDir, "plugins");
+        pluginsDir.mkdirs();
+        StringBuilder extraClasspath = new StringBuilder();
+        File[] files = pluginsDir.listFiles();
+        for (File file : files) {
+            if (file.isFile() && file.getName().endsWith(".jar")) {
+                extraClasspath.append(file.toURI().toURL().toExternalForm()).append(",");
+            }
+        }
+        webapp.setExtraClasspath(extraClasspath.toString());
+        
         server.setHandler(webapp);
         server.start();
-        
-        Logger.getLogger(StartWebServer.class.getName()).info("To use Metl, navigate to http://localhost:" + PORT + "/metl/app");
+
+        if (extraClasspath.length() > 0) {
+            getLogger().info("Adding extra classpath of: " + extraClasspath.toString());
+        }
+        getLogger().info("To use Metl, navigate to http://localhost:" + PORT + "/metl/app");
         
         server.join();
+    }
+    
+    private final static Logger getLogger() {
+        return Logger.getLogger(StartWebServer.class.getName());
     }
 }
