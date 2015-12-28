@@ -235,7 +235,7 @@ public class AgentRuntime {
             List<FlowParameter> defaultParameters = flow.getFlowParameters();
             for (FlowParameter flowParameter : defaultParameters) {
                 String value = flowParameter.getDefaultValue();
-                if (parameters.containsKey(flowParameter.getName())) {
+                if (parameters != null && parameters.containsKey(flowParameter.getName())) {
                     value = parameters.get(flowParameter.getName());
                 }
                 deployment.getAgentDeploymentParameters().add(
