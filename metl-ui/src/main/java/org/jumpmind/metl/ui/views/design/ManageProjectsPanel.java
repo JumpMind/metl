@@ -119,7 +119,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         grid.addColumn("name", String.class).setHeaderCaption("Name").setExpandRatio(2);
         grid.addColumn("description", String.class).setHeaderCaption("Description").setExpandRatio(1);
         grid.addColumn("version", String.class).setHeaderCaption("Version").setMaximumWidth(200);
-        grid.addColumn("createTime", Date.class).setHeaderCaption("Create Time").setWidth(120).setMaximumWidth(200).setEditable(false);
+        grid.addColumn("createTime", Date.class).setHeaderCaption("Create Time").setWidth(185).setMaximumWidth(200).setEditable(false);
 
         grid.setContainerDataSource(gridContainer);
         grid.setEditorFieldFactory(new FieldFactory());
