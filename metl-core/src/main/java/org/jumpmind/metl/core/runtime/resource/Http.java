@@ -25,6 +25,7 @@ import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.HTTP_METHOD_
 import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.HTTP_METHOD_PUT;
 import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.SECURITY_BASIC;
 import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.SECURITY_NONE;
+import static org.jumpmind.metl.core.runtime.resource.HttpDirectory.SECURITY_TOKEN;
 
 import org.jumpmind.metl.core.model.SettingDefinition;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.ResourceCategory;
@@ -68,7 +69,7 @@ public class Http extends AbstractResourceRuntime {
     @SettingDefinition(
             type = Type.CHOICE,
             order = 30,
-            choices = { SECURITY_NONE, SECURITY_BASIC },
+            choices = { SECURITY_NONE, SECURITY_BASIC, SECURITY_TOKEN },
             defaultValue = SECURITY_NONE,
             label = "Security")
     public static final String SECURITY = "security.type";
@@ -79,6 +80,9 @@ public class Http extends AbstractResourceRuntime {
     @SettingDefinition(type = Type.PASSWORD, order = 50, required = false, label = "Password")
     public static final String SECURITY_PASSWORD = "security.usertoken.password";
 
+    @SettingDefinition(type = Type.PASSWORD, order = 60, required = false, label = "Token")
+    public static final String SECURITY_TOKEN_VALUE = "security.usertoken.token";    
+    
     HttpDirectory streamable;
 
     @Override
@@ -87,7 +91,8 @@ public class Http extends AbstractResourceRuntime {
                 HTTP_METHOD_GET),
                 properties.get(CONTENT_TYPE),
                 properties.getInt(HTTP_TIMEOUT), properties.get(SECURITY),
-                properties.get(SECURITY_USERNAME), properties.get(SECURITY_PASSWORD));
+                properties.get(SECURITY_USERNAME), properties.get(SECURITY_PASSWORD),
+                properties.get(SECURITY_TOKEN_VALUE));
     }
 
     @Override

@@ -46,6 +46,7 @@ public class HttpDirectory implements IDirectory {
 
     public static final String SECURITY_NONE = "None";
     public static final String SECURITY_BASIC = "Basic Auth";
+    public static final String SECURITY_TOKEN = "Token Auth";
 
     String url;
     String httpMethod;
@@ -53,11 +54,12 @@ public class HttpDirectory implements IDirectory {
     String security;
     String username;
     String password;
+    String token;
     int timeout;
     int contentLength;
 
     public HttpDirectory(String url, String httpMethod, String contentType, int timeout, String security,
-            String username, String password) {
+            String username, String password, String token) {
         this.url = url;
         this.httpMethod = httpMethod;
         this.contentType = contentType;
@@ -65,6 +67,7 @@ public class HttpDirectory implements IDirectory {
         this.security = security;
         this.username = username;
         this.password = password;
+        this.token = token;
     }
     
     @Override
@@ -156,6 +159,8 @@ public class HttpDirectory implements IDirectory {
             String userpassword = String.format("%s:%s", username, password);
             String encodedAuthorization = new String(Base64.encodeBase64(userpassword.getBytes()));
             conn.setRequestProperty("Authorization", "Basic " + encodedAuthorization);
+        } else if (SECURITY_TOKEN.equals(security)) {
+        	conn.setRequestProperty("Authorization", "Bearer " + token);
         }
     }
 
