@@ -134,7 +134,7 @@ http://myservername:myport/metl
 If Metl is running on the default port (42000) on the local machine, the url would be as follows:
 
 ----
-http://localhost:43000/metl
+http://localhost:42000/metl
 ----
 
 The following home screen will be displayed:
