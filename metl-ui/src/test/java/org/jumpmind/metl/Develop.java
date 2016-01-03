@@ -28,8 +28,6 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.annotations.AnnotationConfiguration.ClassInheritanceMap;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.session.HashSessionManager;
-import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.jetty.webapp.Configuration;
@@ -48,15 +46,15 @@ public class Develop {
 
         WebAppContext webapp = new WebAppContext();
         
-        HashSessionManager sessionManager = new HashSessionManager();
-        File storeDir = new File("working", "sessions");
-        storeDir.mkdirs();
-        sessionManager.setStoreDirectory(storeDir);
-        sessionManager.setLazyLoad(true);
-        sessionManager.setSavePeriod(5);
-        sessionManager.setDeleteUnrestorableSessions(true);
-        SessionHandler sessionHandler = new SessionHandler(sessionManager);
-        webapp.setSessionHandler(sessionHandler);
+//        HashSessionManager sessionManager = new HashSessionManager();
+//        File storeDir = new File("working", "sessions");
+//        storeDir.mkdirs();
+//        sessionManager.setStoreDirectory(storeDir);
+//        sessionManager.setLazyLoad(true);
+//        sessionManager.setSavePeriod(5);
+//        sessionManager.setDeleteUnrestorableSessions(true);
+//        SessionHandler sessionHandler = new SessionHandler(sessionManager);
+//        webapp.setSessionHandler(sessionHandler);
         
         webapp.setParentLoaderPriority(true);
         webapp.setConfigurationDiscovered(true);
