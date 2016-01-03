@@ -61,7 +61,7 @@ public class LocalFileDirectory implements IDirectory {
     public FileInfo listFile(String relativePath) {
         File file = new File(basePath, relativePath);
         if (file.exists()) {
-            return new FileInfo(relativePath, file.isDirectory(), file.lastModified());
+            return new FileInfo(relativePath, file.isDirectory(), file.lastModified(), file.length());
         } else {
             return null;
         }
@@ -74,7 +74,7 @@ public class LocalFileDirectory implements IDirectory {
             for (String relativePath : relativePaths) {
                 File file = new File(basePath, relativePath);
                 if (file.isFile() && file.exists()) {
-                    list.add(new FileInfo(relativePath, false, file.lastModified()));
+                    list.add(new FileInfo(relativePath, false, file.lastModified(), file.length()));
                 } else {
                     list.addAll(listFiles(new File(basePath, relativePath)));
                 }
@@ -156,9 +156,9 @@ public class LocalFileDirectory implements IDirectory {
                 path = path.replaceAll("\\\\", "/");
                 int index = path.indexOf(basePath);
                 if (index >= 0) {
-                    path = path.substring(index + basePath.length() + 1);
+                    path = path.substring(index + basePath.length());
                 }
-                list.add(new FileInfo(path, file.isDirectory(), file.lastModified()));
+                list.add(new FileInfo(path, file.isDirectory(), file.lastModified(), file.length()));
             }
         }
         return list;

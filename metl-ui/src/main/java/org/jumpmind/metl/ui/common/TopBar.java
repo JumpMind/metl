@@ -91,7 +91,7 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
         Set<Category> categories = menuItemsByCategory.keySet();
         for (Category category : categories) {
             if (!context.getUser().hasPrivilege(category.name())) {
-                log.info("{} does not have access to the {} menu tab", context.getUser(), category.name());
+                log.info("'{}' does not have access to the {} menu tab", context.getUser(), category.name());
                 continue;
             }
             List<TopBarLink> links = menuItemsByCategory.get(category);
@@ -99,7 +99,6 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
             MenuItem categoryItem = null;
             if (links.size() > 1) {
                 categoryItem = menuBar.addItem(category.name(), null);
-                categoryItem.setCheckable(true);
                 categoryItems.add(categoryItem);
             }
             

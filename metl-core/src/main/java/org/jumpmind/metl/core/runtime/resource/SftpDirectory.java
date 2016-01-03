@@ -90,7 +90,7 @@ public class SftpDirectory implements IDirectory {
 	            for (Object object : list) {
 	                LsEntry entry = (LsEntry)object;
 	                if (!entry.getFilename().equals(".") && !entry.getFilename().equals("..")) {
-	                	fileInfo = new FileInfo(relativePath, entry.getAttrs().isDir(), entry.getAttrs().getMTime());
+	                	fileInfo = new FileInfo(relativePath, entry.getAttrs().isDir(), entry.getAttrs().getMTime(), entry.getAttrs().getSize());
 	                }
 	            }
         	}
@@ -232,7 +232,7 @@ public class SftpDirectory implements IDirectory {
 		            for (Object object : list) {
 		                LsEntry entry = (LsEntry)object;
 		                if (!entry.getFilename().equals(".") && !entry.getFilename().equals("..")) {
-		                	fileInfoList.add(new FileInfo(relativePath + entry.getFilename(), entry.getAttrs().isDir(), entry.getAttrs().getMTime()));
+		                	fileInfoList.add(new FileInfo(relativePath + entry.getFilename(), entry.getAttrs().isDir(), entry.getAttrs().getMTime(), entry.getAttrs().getSize()));
 		                }
 		            }
             	}
@@ -250,7 +250,7 @@ public class SftpDirectory implements IDirectory {
         Session session = null;
         ChannelSftp uploadSftp = null;
         ChannelSftp downloadSftp = null;
-        FileInfo fileInfo = new FileInfo(fromFilePath, false, new java.util.Date().getTime());
+        FileInfo fileInfo = new FileInfo(fromFilePath, false, new java.util.Date().getTime(), -1);
         try {
             session = connect();
             uploadSftp = (ChannelSftp) session.openChannel("sftp");
@@ -276,7 +276,7 @@ public class SftpDirectory implements IDirectory {
     public void moveToDir(String fromFilePath, String toDirPath) {
         Session session = null;
         ChannelSftp sftp = null;
-        FileInfo fileInfo = new FileInfo(fromFilePath, false, new java.util.Date().getTime());
+        FileInfo fileInfo = new FileInfo(fromFilePath, false, new java.util.Date().getTime(), -1);
         try {
             session = connect();
             sftp = (ChannelSftp) session.openChannel("sftp");

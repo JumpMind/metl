@@ -2,23 +2,32 @@ package org.jumpmind.metl.core.runtime.resource;
 
 public class FileInfo {
 
+    long size;
     String relativePath;
     boolean directory;
     long lastUpdated;
+    String name;
     
-    public FileInfo(String path, boolean directory, long lastUpdated) {
+    public FileInfo(String path, boolean directory, long lastUpdated, long size) {
         this.relativePath = path;
         this.directory = directory;
         this.lastUpdated = lastUpdated;
+        this.size = size;
+        int index = relativePath.lastIndexOf("/");
+        if (index > 0) {
+            name = relativePath.substring(index + 1, relativePath.length());
+        } else {
+            name = relativePath;
+        }
+
+    }
+    
+    public long getSize() {
+        return size;
     }
     
     public String getName() {
-        int index = relativePath.lastIndexOf("/");
-        if (index > 0) {
-            return relativePath.substring(index + 1, relativePath.length());
-        } else {
-            return relativePath;
-        }
+        return name;
     }
     
     public String getRelativePath() {

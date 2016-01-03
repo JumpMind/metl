@@ -39,7 +39,7 @@ public @interface TopBarLink {
     
     Class<? extends UI> uiClass() default AppUI.class;
     
-    Category category() default Category.DESIGN;
+    Category category() default Category.Design;
     
     int menuOrder() default 10;
     

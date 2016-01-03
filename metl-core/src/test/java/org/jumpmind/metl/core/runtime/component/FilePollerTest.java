@@ -182,7 +182,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport {
         doReturn(mockDirectory).when((AbstractComponentRuntime) spy).getResourceReference();
 
         List<FileInfo> fileInfos = new ArrayList<>();
-        fileInfos.add(new FileInfo("file.txt", false, System.currentTimeMillis()));
+        fileInfos.add(new FileInfo("file.txt", false, System.currentTimeMillis(), 100000));
         when(mockDirectory.listFiles(any())).thenReturn(fileInfos);
 
         ((FilePoller) spy).setRunWhen(Execute.PER_MESSAGE);

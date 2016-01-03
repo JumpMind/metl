@@ -59,7 +59,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @UiComponent
 @Scope(value = "ui")
-@TopBarLink(category = Category.ADMIN, name = "Admin", id = "admin", icon = FontAwesome.GEARS, menuOrder = 10)
+@TopBarLink(category = Category.Admin, name = "Admin", id = "admin", icon = FontAwesome.GEARS, menuOrder = 10)
 public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemClickListener {
 
     private static final long serialVersionUID = 1L;

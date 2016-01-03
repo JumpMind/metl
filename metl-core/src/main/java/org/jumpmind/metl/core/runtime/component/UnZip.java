@@ -139,7 +139,7 @@ public class UnZip extends AbstractComponentRuntime {
                     try {
                         String targetDirNameResolved = resolveParamsAndHeaders(targetRelativePath, inputMessage);
                         if (targetSubDir) {
-                            targetDirNameResolved = targetDirNameResolved + "/" + FilenameUtils.removeExtension(new FileInfo(fileName, false, 0).getName());
+                            targetDirNameResolved = targetDirNameResolved + "/" + FilenameUtils.removeExtension(new FileInfo(fileName, false, 0, 0).getName());
                         }
                         for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();) {
                             ZipEntry entry = e.nextElement();

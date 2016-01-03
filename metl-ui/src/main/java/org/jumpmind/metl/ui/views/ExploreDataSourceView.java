@@ -40,8 +40,8 @@ import com.vaadin.ui.VerticalLayout;
 
 @UiComponent
 @Scope("ui")
-@TopBarLink(id = "explore", category = Category.EXPLORE, menuOrder = 20, name = "Explore", icon = FontAwesome.DATABASE)
-public class ExploreView extends VerticalLayout implements View {
+@TopBarLink(id = "exploreDataSources", category = Category.Explore, menuOrder = 10, name = "DataSource", icon = FontAwesome.DATABASE)
+public class ExploreDataSourceView extends VerticalLayout implements View {
 
     private static final long serialVersionUID = 1L;
 
@@ -55,7 +55,7 @@ public class ExploreView extends VerticalLayout implements View {
     
     SqlExplorer explorer;
 
-    public ExploreView() {
+    public ExploreDataSourceView() {
         setSizeFull();
     }
     
