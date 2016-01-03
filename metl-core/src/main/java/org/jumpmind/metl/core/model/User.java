@@ -101,12 +101,17 @@ public class User extends AbstractObjectWithSettings {
     public boolean hasPrivilege(String privilegeName) {
         for (Group group : groups) {
             for (GroupPrivilege priv : group.getGroupPrivileges()) {
-                if (privilegeName.equals(priv.getName())) {
+                if (privilegeName.equalsIgnoreCase(priv.getName())) {
                     return true;
                 }
             }
         }
         return false;
     }
+    
+   @Override
+   public String toString() {
+      return loginId;
+   }
 
 }
