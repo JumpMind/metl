@@ -156,6 +156,9 @@ public class LocalFileDirectory implements IDirectory {
                 path = path.replaceAll("\\\\", "/");
                 int index = path.indexOf(basePath);
                 if (index >= 0) {
+                    if (!basePath.endsWith("/")) {
+                        index++;
+                    }
                     path = path.substring(index + basePath.length());
                 }
                 list.add(new FileInfo(path, file.isDirectory(), file.lastModified(), file.length()));
