@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
 import org.jumpmind.metl.ui.common.TabbedPanel;
@@ -84,8 +85,8 @@ public class LoggingPanel extends VerticalLayout implements IUiPanel, IBackgroun
         this.context = context;
         this.tabbedPanel = tabbedPanel;
         this.backgroundRefresherService = context.getBackgroundRefresherService();
-        if (context.isLogToFileEnabled()) {
-            logFile = new File(context.getLogFile());
+        if (LogUtils.isFileEnabled()) {
+            logFile = new File(LogUtils.getLogFilePath());
         }
         setSizeFull();
         setSpacing(true);

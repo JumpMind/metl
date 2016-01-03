@@ -35,8 +35,20 @@ public final class LogUtils {
     static String logFilePath;
     
     static File logDir;
+    
+    static boolean fileEnabled;
+    
+    static boolean consoleEnabled;
 
     private LogUtils() {
+    }
+    
+    public static boolean isConsoleEnabled() {
+        return consoleEnabled;
+    }
+    
+    public static boolean isFileEnabled() {
+        return fileEnabled;
     }
     
     public static String getLogFilePath() {
@@ -75,13 +87,13 @@ public final class LogUtils {
          */
         SLF4JBridgeHandler.install();
 
-        boolean consoleEnabled = Boolean.parseBoolean(ctx.getEnvironment().getProperty(
+        consoleEnabled = Boolean.parseBoolean(ctx.getEnvironment().getProperty(
                 EnvConstants.LOG_TO_CONSOLE_ENABLED, "true"));
         if (!consoleEnabled) {
             org.apache.log4j.Logger.getRootLogger().removeAppender("CONSOLE");
         }
 
-        boolean fileEnabled = Boolean.parseBoolean(ctx.getEnvironment().getProperty(
+        fileEnabled = Boolean.parseBoolean(ctx.getEnvironment().getProperty(
                 EnvConstants.LOG_TO_FILE_ENABLED, "true"));
         if (fileEnabled) {
             logFilePath = ctx.getEnvironment().getProperty(EnvConstants.LOG_FILE,(String)null);

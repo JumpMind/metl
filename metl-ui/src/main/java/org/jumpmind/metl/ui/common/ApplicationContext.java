@@ -70,12 +70,6 @@ public class ApplicationContext implements Serializable {
     
     @Autowired
     String configDir;
-    
-    @Autowired
-    String logFile;
-    
-    @Autowired
-    boolean logToFileEnabled;
 
     User user = new User();
     
@@ -119,14 +113,6 @@ public class ApplicationContext implements Serializable {
     
     public List<ProjectVersion> getOpenProjects() {
         return openProjects;
-    }
-    
-    public String getLogFile() {
-        return logFile;
-    }
-    
-    public boolean isLogToFileEnabled() {
-        return logToFileEnabled;
     }
 
     public IDatabasePlatform getConfigDatabasePlatform() {
