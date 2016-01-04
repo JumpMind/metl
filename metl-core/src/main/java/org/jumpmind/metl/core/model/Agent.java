@@ -35,6 +35,8 @@ public class Agent extends AbstractObject {
     String name;
 
     String host;
+    
+    boolean allowTestFlows = false;
 
     String startMode = AgentStartMode.AUTO.name();
 
@@ -180,7 +182,15 @@ public class Agent extends AbstractObject {
     public boolean isDeleted() {
         return deleted;
     }
+    
+    public void setAllowTestFlows(boolean allowTestFlows) {
+    	this.allowTestFlows = allowTestFlows;
+    }
 
+    public boolean isAllowTestFlows() {
+    	return allowTestFlows;
+    }
+    
     public AgentDeployment getAgentDeploymentFor(Flow flow) {
         for (AgentDeployment agentDeployment : agentDeployments) {
             if (agentDeployment.getFlow().equals(flow)) {

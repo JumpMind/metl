@@ -60,7 +60,8 @@ public class FlowSelectWindow extends ResizableWindow {
     FlowSelectListener listener;
     
     @SuppressWarnings({ "serial" })
-    public FlowSelectWindow(ApplicationContext context, String caption, String introText) {
+    public FlowSelectWindow(ApplicationContext context, String caption, String introText,
+    		boolean includeTestFlows) {
         super(caption);
         this.context = context;
         
@@ -72,7 +73,7 @@ public class FlowSelectWindow extends ResizableWindow {
             public void nodeExpand(ExpandEvent event) {
                 Object itemId = event.getItemId();
                 if (itemId instanceof ProjectVersion) {
-                    addFlowsToVersion((ProjectVersion) itemId);
+                    addFlowsToVersion((ProjectVersion) itemId, includeTestFlows);
                 }
             }               
         });
@@ -108,7 +109,7 @@ public class FlowSelectWindow extends ResizableWindow {
 
         selectButton.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {
-                Collection<FlowName> flowCollection = getFlowCollection();
+                Collection<FlowName> flowCollection = getFlowCollection(includeTestFlows);
                 listener.selected(flowCollection);
                 close();
             }
@@ -116,24 +117,24 @@ public class FlowSelectWindow extends ResizableWindow {
     }
 
     @SuppressWarnings("unchecked")
-    protected Collection<FlowName> getFlowCollection() {
+    protected Collection<FlowName> getFlowCollection(boolean includeTestFlows) {
         Collection<FlowName> flowCollection = new HashSet<FlowName>();
-        addFlowsToCollection(flowCollection, (Collection<Object>) tree.getValue());
+        addFlowsToCollection(flowCollection, (Collection<Object>) tree.getValue(), includeTestFlows);
         return flowCollection;
     }
 
-    protected void addFlowsToCollection(Collection<FlowName> flowCollection, Collection<?> itemIds) {
+    protected void addFlowsToCollection(Collection<FlowName> flowCollection, Collection<?> itemIds, boolean includeTestFlows) {
         for (Object itemId : itemIds) {
             if (itemId instanceof FlowName) {
                 flowCollection.add((FlowName) itemId);    
             } else {
                 Collection<?> children = tree.getChildren(itemId);
                 if (children == null) {
-                    addFlowsToVersion((ProjectVersion) itemId);
+                    addFlowsToVersion((ProjectVersion) itemId, includeTestFlows);
                     children = tree.getChildren(itemId);
                 }
                 if (children != null) {
-                    addFlowsToCollection(flowCollection, children);
+                    addFlowsToCollection(flowCollection, children, includeTestFlows);
                 }
             }
         }
@@ -149,8 +150,11 @@ public class FlowSelectWindow extends ResizableWindow {
         }
     }
 
-    protected void addFlowsToVersion(ProjectVersion version) {
+    protected void addFlowsToVersion(ProjectVersion version, boolean includeTestFlows) {
         List<FlowName> flows = context.getConfigurationService().findFlowsInProject(version.getId(), false);
+        if (includeTestFlows) {
+        	flows.addAll(context.getConfigurationService().findFlowsInProject(version.getId(), true));
+        }
         for (FlowName flow : flows) {
             addItem(flow, flow.getName(), Icons.FLOW, version, false);
         }

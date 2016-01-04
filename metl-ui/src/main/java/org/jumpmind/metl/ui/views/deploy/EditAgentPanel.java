@@ -76,6 +76,7 @@ import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
@@ -166,6 +167,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
             EditAgentPanel.this.context.getConfigurationService().save((AbstractObject) agent);
             EditAgentPanel.this.context.getAgentManager().refresh(agent);
         });
+        
         buttonGroup.addComponent(hostNameField);
         buttonGroup.setComponentAlignment(hostNameField, Alignment.BOTTOM_LEFT);
 
@@ -181,9 +183,19 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         editAgentLayout.addComponent(exportButton);
         editAgentLayout.setComponentAlignment(exportButton, Alignment.BOTTOM_LEFT);
 
+        CheckBox allowTestFlowsField = new CheckBox("Allow Test Flows", Boolean.valueOf(agent.isAllowTestFlows()));
+        allowTestFlowsField.setImmediate(true);        
+        allowTestFlowsField.addValueChangeListener(event -> {
+            agent.setAllowTestFlows(allowTestFlowsField.getValue());
+            EditAgentPanel.this.context.getConfigurationService().save((AbstractObject) agent);
+            EditAgentPanel.this.context.getAgentManager().refresh(agent);
+        });
+        editAgentLayout.addComponent(allowTestFlowsField);
+        editAgentLayout.setComponentAlignment(allowTestFlowsField, Alignment.BOTTOM_LEFT);
+ 
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
-
+               
         addDeploymentButton = buttonBar.addButton("Add Deployment", Icons.DEPLOYMENT);
         addDeploymentButton.addClickListener(new AddDeploymentClickListener());
 
@@ -385,7 +397,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
             } else {
                 if (flowSelectWindow == null) {
                     String introText = "Select one or more flows for deployment to this agent.";
-                    flowSelectWindow = new FlowSelectWindow(context, "Add Deployment", introText);
+                    flowSelectWindow = new FlowSelectWindow(context, "Add Deployment", introText, agent.isAllowTestFlows());
                     flowSelectWindow.setFlowSelectListener(this);
                 }
                 UI.getCurrent().addWindow(flowSelectWindow);

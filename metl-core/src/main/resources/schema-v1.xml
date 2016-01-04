@@ -320,6 +320,7 @@
         <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>
         <column name="folder_id" type="CHAR" size="36" description="" />
         <column name="host" type="VARCHAR" size="255" description="" />
+        <column name="allow_test_flows" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether test flows can be deployed to this agent."/>
         <column name="start_mode" type="VARCHAR" size="255" description="" />
         <column name="status" type="VARCHAR" size="255" description="" />
         <column name="last_start_time" type="TIMESTAMP" description="" />
