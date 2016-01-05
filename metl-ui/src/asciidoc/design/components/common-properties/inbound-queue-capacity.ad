@@ -1,1 +1,0 @@
-|Inbound Queue Capacity|The number of pending inbound messages this component can store as it processes other requests

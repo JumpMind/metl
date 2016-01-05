@@ -1,3 +1,0 @@
-|Msg Strategy|Either REPLACE or ENHANCE.  If ENHANCE, for every inbound message and entity record, the inbound message and record will be enhanced by the 
-current components action and passed forwarded to any child components.  If REPLACE, the inbound message and entity record will trigger the components action
-that will result in new message creation from the current component.  Other than for triggering the current component's action, the inbound message will be discarded  

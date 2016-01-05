@@ -1,8 +1,0 @@
-
-==== Controls
-
-Controls are a set of components that impact the sequence of events within a flow.  
-
-include::gate.ad[]
-
-include::last-unit-of-work.ad[]

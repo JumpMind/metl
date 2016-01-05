@@ -1,4 +1,0 @@
-|Action on Success|Either None, Archive or Delete.  If Delete, the input file will be deleted after it is successfully read.
-If Archive the input file will be archived to the Archive on Success Path property location.  If None, the input file will be 
-left it its original location once read
-
