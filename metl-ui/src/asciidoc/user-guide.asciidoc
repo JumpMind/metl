@@ -1,0 +1,33 @@
+:toc: left
+:toclevels: 4
+:imagesdir: .
+:icons: font
+:source-highlighter: coderay
+
+include::home.asciidoc[]
+
+:numbered:
+
+include::introduction.asciidoc[]
+include::ui/ui.asciidoc[]
+include::design/design.asciidoc[]
+include::design/projects/projects.asciidoc[]
+include::design/flows/flows.asciidoc[]
+include::design/flows/flows-unit-of-work.asciidoc[]
+include::design/components/components.asciidoc[]
+include::design/models/models.asciidoc[]
+include::design/resources/sql-database.asciidoc[]
+include::design/resources/localfilesystem.asciidoc[]
+include::design/resources/ftp.asciidoc[]
+include::design/resources/sftp.asciidoc[]
+include::design/resources/webresources.asciidoc[]
+include::deploy/deploy.asciidoc[]
+include::manage/manage.asciidoc[]
+include::explore/explore.asciidoc[]
+include::admin/admin.asciidoc[]
+include::admin/users.asciidoc[] 
+include::admin/groups.asciidoc[]
+include::admin/rest.asciidoc[]
+include::admin/mailserver.asciidoc[]
+include::admin/notifications.asciidoc[] 
+include::admin/logging.asciidoc[]

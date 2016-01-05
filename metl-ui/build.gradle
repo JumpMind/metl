@@ -75,7 +75,7 @@ task copyJavaDocsToWebapp(type: Copy) {
 }
 
 develop.dependsOn vaadinCompileWidgetset
-develop.dependsOn generateDocs
+//develop.dependsOn generateDocs
 develop.dependsOn copyJavaDocsToWebapp
-assemble.dependsOn generateDocs
+//assemble.dependsOn generateDocs
 assemble.dependsOn copyJavaDocsToWebapp

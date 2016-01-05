@@ -10,26 +10,38 @@ reference {
     expandPlaceholders = '**/user-guide.xml'
 }
 
+task cleanAsciidocBuildDir {
+    doFirst {
+        delete "$buildDir/../../metl-ui/working/asciidoc"
+        delete "$buildDir/../../metl-ui/src/main/webapp/doc/html"
+    }
+}
+
+task copyWiki(type: Copy) {
+
+    dependsOn cleanAsciidocBuildDir
+    
+    destinationDir = file("$buildDir/../../metl-ui/working/asciidoc")
+
+    from ("$buildDir/../../../metl.wiki/") { include "**/*" } 
+    from ("$buildDir/../../metl-ui/src/asciidoc/") 
+
+}
+
 task generateDocs(type: Copy) {
     
     dependsOn asciidoctor
     
-    destinationDir = file(rootProject.buildDir.path + "/../../metl-ui/src/main/webapp/doc/html")
+    destinationDir = file("$buildDir/../../metl-ui/src/main/webapp/doc/html")
 
-        from ("$buildDir/src/asciidoc/html5") { include "user-guide.html" }
-        filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
-            'version': version,
-            'buildTime': new java.text.SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new java.util.Date()),
-            'scmVersion' : gitVersion
-        ])
-
-    doFirst {
-        println "Deleting $destinationDir.path"
-        delete destinationDir
-    }
+    from ("$buildDir/src/asciidoc/html5") { include "user-guide.html" }
+    filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
+       'version': version,
+       'buildTime': new java.text.SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new java.util.Date()),
+       'scmVersion' : gitVersion
+    ])
 
 }
-
 
 task publishDoc {
     dependsOn generateDocs
@@ -41,7 +53,7 @@ task publishDoc {
             todir: "$publishUser:$publishPassword@$publishServer:~/www/doc/$majorMinorVersion",
             trust: 'true',
             verbose: 'true') {
-            fileset(dir: "$buildDir/doc") { include(name: '**/**')
+            fileset(dir: "$buildDir/../../metl-ui/src/main/webapp/doc/html") { include(name: '**/**')
             }
         }
     }
@@ -49,15 +61,17 @@ task publishDoc {
 
 asciidoctor { (1)
 	backends = docFormat.split ","
-    sourceDir = file(metlUIDir + '/src/asciidoc')
+    sourceDir = file("$buildDir/../../metl-ui/working/asciidoc")
     outputDir = file("$buildDir/src/asciidoc")
     options = [
         doctype: 'book',
         sourceDocumentNames: [
-            metlAssembleDir + 'user-guide.ad']
+            metlAssembleDir + 'user-guide.asciidoc']
     ]    
     attributes = [
         'source-highlighter':'coderay',
         'data-uri':'true'
     ]
 }
+
+asciidoctor.dependsOn copyWiki
