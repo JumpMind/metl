@@ -43,6 +43,8 @@ import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.symmetric.csv.CsvReader;
 
+import groovy.json.StringEscapeUtils;
+
 public class DelimitedParser extends AbstractComponentRuntime {
 
     public static final String TYPE = "Parse Delimited";
@@ -75,7 +77,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
 
     @Override
     protected void start() {
-        delimiter = getComponent().get(SETTING_DELIMITER, delimiter);
+        delimiter = StringEscapeUtils.unescapeJava(getComponent().get(SETTING_DELIMITER, delimiter));
         quoteCharacter = getComponent().get(SETTING_QUOTE_CHARACTER, quoteCharacter);
         encoding = getComponent().get(SETTING_ENCODING, encoding);
         numberOfFooterLinesToSkip = getComponent().getInt(SETTING_FOOTER_LINES_TO_SKIP, 0);
