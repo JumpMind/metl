@@ -50,7 +50,7 @@ public class Union extends AbstractComponentRuntime {
             getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber, payload.size());
         }
 
-        if (unitOfWorkBoundaryReached) {
+        if (unitOfWorkBoundaryReached && dataToSend.size() != 0) {
             callback.sendEntityDataMessage(null, dataToSend);
             dataToSend.clear();
         }
