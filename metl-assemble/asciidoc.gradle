@@ -17,14 +17,31 @@ task cleanAsciidocBuildDir {
     }
 }
 
-task copyWiki(type: Copy) {
+task copyImages(type: Copy) {
 
     dependsOn cleanAsciidocBuildDir
+        
+    destinationDir = file("$buildDir/../../metl-ui/working/asciidoc")
+    from ("$buildDir/../../../metl.wiki/") { include "images/**/*" } 
+}
+
+
+task copyWiki(type: Copy) {
+
+    dependsOn copyImages
     
     destinationDir = file("$buildDir/../../metl-ui/working/asciidoc")
 
-    from ("$buildDir/../../../metl.wiki/") { include "**/*" } 
+    from ("$buildDir/../../../metl.wiki/") { include "**/*.asciidoc" } 
     from ("$buildDir/../../metl-ui/src/asciidoc/") 
+    
+    filter { text ->
+      text.findAll(/link:.*]/).each { link ->
+         def ref = link.replace('link:','<<').replace('[',',').replace(']','>>')
+         text = text.replace(link, ref)
+      }
+      return text
+    }
 
 }
 
@@ -66,11 +83,16 @@ asciidoctor { (1)
     options = [
         doctype: 'book',
         sourceDocumentNames: [
-            metlAssembleDir + 'user-guide.asciidoc']
+            'user-guide.asciidoc'            
+            ]
     ]    
     attributes = [
         'source-highlighter':'coderay',
-        'data-uri':'true'
+        'data-uri':'true',
+        'toc': 'left',
+'toclevels': '4',
+'imagesdir': '.',
+'icons': 'font'
     ]
 }
 
