@@ -90,8 +90,6 @@ asciidoctor { (1)
     attributes = [
         'source-highlighter':'coderay',
         'data-uri':'true',
-        'toc': 'left',
-        'toclevels': '3',
         'imagesdir': '.',
         'icons': 'font'
     ]

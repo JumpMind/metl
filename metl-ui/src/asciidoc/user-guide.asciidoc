@@ -1,3 +1,6 @@
+:toc: left
+:toclevels: 3
+
 include::home.asciidoc[]
 
 :numbered:
@@ -10,6 +13,25 @@ include::design/projects/projects.asciidoc[]
 include::design/flows/flows.asciidoc[]
 include::design/flows/flows-unit-of-work.asciidoc[]
 include::design/components/components.asciidoc[]
+include::design/components/readers/file-poller.asciidoc[]
+include::design/components/readers/rdbms-reader.asciidoc[]
+
+===== Common Properties
+include::design/components/common-properties/action-on-error.asciidoc[]
+include::design/components/common-properties/archive-on-error-path.asciidoc[]
+include::design/components/common-properties/action-on-success.asciidoc[]
+include::design/components/common-properties/archive-on-success-path.asciidoc[]
+include::design/components/common-properties/cancel-on-no-files.asciidoc[]
+include::design/components/common-properties/enabled.asciidoc[]
+include::design/components/common-properties/encoding.asciidoc[]
+include::design/components/common-properties/inbound-queue-capacity.asciidoc[]
+include::design/components/common-properties/input_model.asciidoc[]
+include::design/components/common-properties/log-input.asciidoc[]
+include::design/components/common-properties/log-output.asciidoc[]
+include::design/components/common-properties/output-model.asciidoc[]
+include::design/components/common-properties/rows-per-message.asciidoc[]
+include::design/components/common-properties/shared.asciidoc[]
+
 include::design/models/models.asciidoc[]
 include::design/resources/resources.asciidoc[]
 include::design/resources/sql-database.asciidoc[]
