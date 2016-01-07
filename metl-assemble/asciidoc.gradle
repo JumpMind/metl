@@ -22,7 +22,8 @@ task copyImages(type: Copy) {
     dependsOn cleanAsciidocBuildDir
         
     destinationDir = file("$buildDir/../../metl-ui/working/asciidoc")
-    from ("$buildDir/../../../metl.wiki/") { include "images/**/*" } 
+    from ("$buildDir/../../../metl.wiki/") { include "images/**/*" }
+     
 }
 
 
@@ -90,9 +91,9 @@ asciidoctor { (1)
         'source-highlighter':'coderay',
         'data-uri':'true',
         'toc': 'left',
-'toclevels': '4',
-'imagesdir': '.',
-'icons': 'font'
+        'toclevels': '3',
+        'imagesdir': '.',
+        'icons': 'font'
     ]
 }
 

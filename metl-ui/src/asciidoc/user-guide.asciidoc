@@ -1,9 +1,3 @@
-:toc: left
-:toclevels: 4
-:imagesdir: .
-:icons: font
-:source-highlighter: coderay
-
 include::home.asciidoc[]
 
 :numbered:
