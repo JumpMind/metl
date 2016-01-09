@@ -334,26 +334,33 @@ public class SftpDirectory implements IDirectory {
     }
 
     private void createRelativePathDirectoriesIfNecessary(ChannelSftp sftp, String relativePath, boolean mustExist) {
-    	String[] elements = StringUtils.split(relativePath,"/");
-    	if (elements.length == 1) {
-    		//if there is only one element, it's the filename itself.  No directories to create
-    		return;
-    	} else {
-        	for (int i=0;i<elements.length-1;i++) {
-        		try {
-        			sftp.cd(elements[i]);
-        		} catch (SftpException cdex) {
-        			//if we can't change to the directory, try and create it
-        			try {
-        				sftp.mkdir(elements[i]);
-        			} catch (SftpException mkdirex) {
-        				log.error("Error writing to Sftp site.  Unable to create relative directory %s.  "
-        						+ "Error %s",elements[i], mkdirex.getMessage());
-        				throw new IoException(mkdirex);
-        			}
-        		}
-        	}
-    	}
+        String[] elements = StringUtils.split(relativePath, "/");
+        if (elements.length == 1) {
+            // if there is only one element, it's the filename itself. No
+            // directories to create
+            return;
+        } else {
+            try {
+                for (int i = 0; i < elements.length - 1; i++) {
+                    try {
+                        sftp.cd(elements[i]);
+                    } catch (SftpException cdex) {
+                        // if we can't change to the directory, try and create
+                        // it
+                        sftp.mkdir(elements[i]);
+                        sftp.cd(elements[i]);
+                    }
+                }
+                for (int i = 0; i < elements.length - 1; i++) {
+                    sftp.cd("../");
+                }
+            } catch (SftpException mkdirex) {
+                log.error("Error writing to Sftp site.  Unable to create relative directory %s.  " + "Error %s", relativePath,
+                        mkdirex.getMessage());
+                throw new IoException(mkdirex);
+            }
+
+        }
     }
     
     @Override
