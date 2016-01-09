@@ -377,15 +377,17 @@ public class AgentRuntime {
         }
 
         List<FlowRuntime> flowRuntimes = scheduledFlows.get(deployment);
-        for (FlowRuntime flowRuntime : flowRuntimes) {
-            if (flowRuntime != null) {
-                try {
-                    flowRuntime.cancel();
-                    log.info("Flow '{}' has been undeployed", deployment.getFlow().getName());
-                } catch (Exception e) {
-                    log.warn("Failed to stop '{}'", deployment.getFlow().getName(), e);
-                }
-            }
+        if (flowRuntimes != null) {
+	        for (FlowRuntime flowRuntime : flowRuntimes) {
+	            if (flowRuntime != null) {
+	                try {
+	                    flowRuntime.cancel();
+	                    log.info("Flow '{}' has been undeployed", deployment.getFlow().getName());
+	                } catch (Exception e) {
+	                    log.warn("Failed to stop '{}'", deployment.getFlow().getName(), e);
+	                }
+	            }
+	        }
         }
     }
     
