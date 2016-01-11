@@ -5,7 +5,7 @@ Metl is a simple, web-based integration platform that allows for several differe
 Metl was built to solve fairly simple day to day integration tasks without the need for custom coding, heavy infrastructure or high costs. It can be deployed in the cloud or in an internal data center, and was built to allow developers to extend it to fit their needs by writing their own components that can be included and leveraged by the existing Metl infrastructure.
 
 <p align="center">
-  <img src='metl-ui/src/asciidoc/images/screenshots/design/design.png?raw=true' />
+  <img src='https://raw.githubusercontent.com/wiki/JumpMind/metl/images/screenshots/design/design.png' />
 </p>
 
 ## Build Me, Run Me
