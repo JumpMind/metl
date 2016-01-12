@@ -164,6 +164,12 @@ public class PropertySheet extends AbsoluteLayout {
                 context.getConfigurationService().refresh(component);
                 addComponentProperties(formLayout, component);
             }
+            
+            if (obj instanceof Resource) {
+                Resource resource = (Resource)obj;
+                context.getConfigurationService().refresh(resource);
+                addResourceProperties(formLayout, resource);
+            }
 
             if (obj instanceof AbstractObjectWithSettings) {
                 List<XMLSetting> settings = buildSettings(obj);
@@ -183,6 +189,13 @@ public class PropertySheet extends AbsoluteLayout {
 
         }
         panel.setContent(formLayout);
+    }
+    
+    protected void addResourceProperties(FormLayout formLayout, Resource resource) {
+        TextField textField = new TextField("Resource Type");
+        textField.setValue(resource.getType());
+        textField.setReadOnly(true);
+        formLayout.addComponent(textField);        
     }
 
     protected void addComponentProperties(FormLayout formLayout, Component component) {
