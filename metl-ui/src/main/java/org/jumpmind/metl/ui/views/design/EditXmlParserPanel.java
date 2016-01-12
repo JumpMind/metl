@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Attribute;
@@ -61,6 +62,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
+import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
@@ -73,9 +75,14 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
 
     BeanItemContainer<Record> container = new BeanItemContainer<Record>(Record.class);
 
-    TextField filterField;
+    TextField filterTextField;
+    
+    NativeSelect filterPopField;
 
     Collection<String> xpathChoices;
+    
+    static final String SHOW_ALL = "Show All Entities";
+    static final String SHOW_POPULATED = "Filter Populated Entites";
 
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
@@ -87,8 +94,21 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
         Button importButton = buttonBar.addButton("Import Template", FontAwesome.DOWNLOAD);
         importButton.addClickListener(new ImportTemplateClickListener());
 
-        filterField = buttonBar.addFilter();
-        filterField.addTextChangeListener(this);
+        filterPopField = new NativeSelect();
+        filterPopField.addItem(SHOW_ALL);
+        filterPopField.addItem(SHOW_POPULATED);
+        filterPopField.setNullSelectionAllowed(false);
+        filterPopField.setImmediate(true);
+        filterPopField.setValue(SHOW_ALL);
+        filterPopField.addValueChangeListener(new ValueChangeListener() {
+			public void valueChange(ValueChangeEvent event) {
+				updateTable(filterTextField.getValue(), filterPopField.getValue().equals(SHOW_POPULATED));
+			}
+		});
+        buttonBar.addRight(filterPopField);
+        
+        filterTextField = buttonBar.addFilter();
+        filterTextField.addTextChangeListener(this);
 
         table.setContainerDataSource(container);
         table.setSelectable(true);
@@ -102,18 +122,18 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
         addComponent(table);
         setExpandRatio(table, 1.0f);
 
-        updateTable(null);
+        updateTable(null, false);
         saveXPathSettings();
         buildXpathChoices();
     }
 
     @Override
     public void textChange(TextChangeEvent event) {
-        filterField.setValue(event.getText());
-        updateTable(event.getText());
+        filterTextField.setValue(event.getText());
+        updateTable(event.getText(), filterPopField.getValue().equals(SHOW_POPULATED));
     }
 
-    protected void updateTable(String filterText) {
+    protected void updateTable(String filterText, boolean filterPopulated) {
         Model model = component.getType().equals(XmlParser.TYPE) ? component.getOutputModel() : component.getInputModel();
         if (model != null) {
             table.removeAllItems();
@@ -127,17 +147,25 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
             for (ModelEntity entity : model.getModelEntities()) {
                 boolean firstAttribute = true;
                 boolean entityMatches = upperFilterText.equals("") || entity.getName().toUpperCase().indexOf(upperFilterText) >= 0;
+                Record entityRecord = new Record(entity, null);
+                boolean populated = !filterPopulated || StringUtils.isNotBlank(entityRecord.getXpath());
+                List<Record> entityAttrGroup = new ArrayList<Record>();
                 for (ModelAttribute attr : entity.getModelAttributes()) {
                     if (entityMatches || attr.getName().toUpperCase().indexOf(upperFilterText) >= 0) {
                         if (firstAttribute) {
                             firstAttribute = false;
-                            table.addItem(new Record(entity, null));
+                            entityAttrGroup.add(entityRecord);
                         }
-                        table.addItem(new Record(entity, attr));
+                        Record attrRecord = new Record(entity, attr);
+                        populated = populated || StringUtils.isNotBlank(attrRecord.getXpath());
+                        entityAttrGroup.add(attrRecord);
                     }
                 }
                 if (entityMatches && firstAttribute) {
-                    table.addItem(new Record(entity, null));
+                	entityAttrGroup.add(entityRecord);
+                }
+                if (populated) {
+                	table.addItems(entityAttrGroup);
                 }
             }
         }
@@ -259,7 +287,7 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
             templateSetting.setValue(editor.getValue());
             context.getConfigurationService().save(templateSetting);
             buildXpathChoices();
-            updateTable(filterField.getValue());
+            updateTable(filterTextField.getValue(), filterPopField.getValue().equals(SHOW_POPULATED));
             return true;
         }
     }
