@@ -328,7 +328,11 @@ public class AgentRuntime {
                 log.info("Deploying '{}' to '{}'", deployment.getFlow().toString(), agent.getName());
     
                 deployResources(deployment.getFlow());
-    
+
+                if (scheduledFlows.get(deployment) == null) {
+                    scheduledFlows.put(deployment, Collections.synchronizedList(new ArrayList<FlowRuntime>()));
+                }
+
                 if (deployment.asStartType() == StartType.ON_DEPLOY) {
                     scheduleNow(deployment);
                 } else if (deployment.asStartType() == StartType.SCHEDULED_CRON) {
@@ -345,7 +349,6 @@ public class AgentRuntime {
     
                 deployment.setStatus(DeploymentStatus.DEPLOYED.name());
                 deployment.setMessage("");
-                scheduledFlows.put(deployment, Collections.synchronizedList(new ArrayList<FlowRuntime>()));
                 log.info("Flow '{}' has been deployed", deployment.getFlow().getName());
             } catch (Exception e) {
                 log.warn("Failed to start '{}'", deployment.getFlow().getName(), e);
