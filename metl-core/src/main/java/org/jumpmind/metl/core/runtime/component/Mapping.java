@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -47,20 +48,24 @@ public class Mapping extends AbstractComponentRuntime {
 
     public final static String SET_UNMAPPED_ATTRIBUTES_TO_NULL = "set.unmapped.attributes.to.null";
 
+    public final static String ENTITY_PER_ROW = "entity.per.record";
+
     Map<String, Set<String>> attrToAttrMap;
 
     boolean setUnmappedAttributesToNull;
 
+    boolean entityPerRecord;
+
     @Override
     protected void start() {
-        
+
         validate();
 
-        setUnmappedAttributesToNull = getComponent().getBoolean(
-                SET_UNMAPPED_ATTRIBUTES_TO_NULL, false);
+        setUnmappedAttributesToNull = getComponent().getBoolean(SET_UNMAPPED_ATTRIBUTES_TO_NULL,
+                false);
+        entityPerRecord = getComponent().getBoolean(ENTITY_PER_ROW, false);
         attrToAttrMap = new HashMap<String, Set<String>>();
-        List<ComponentAttributeSetting> attributeSettings = getComponent()
-                .getAttributeSettings();
+        List<ComponentAttributeSetting> attributeSettings = getComponent().getAttributeSettings();
         for (ComponentAttributeSetting attributeSetting : attributeSettings) {
             if (attributeSetting.getName().equalsIgnoreCase(ATTRIBUTE_MAPS_TO)) {
                 Set<String> targets = attrToAttrMap.get(attributeSetting.getAttributeId());
@@ -72,7 +77,7 @@ public class Mapping extends AbstractComponentRuntime {
             }
         }
     }
-    
+
     @Override
     public boolean supportsStartupMessages() {
         return false;
@@ -96,46 +101,110 @@ public class Mapping extends AbstractComponentRuntime {
         }
     }
 
-	@Override
-	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-		if (inputMessage instanceof EntityDataMessage) {
-			ArrayList<EntityData> inputRows = ((EntityDataMessage)inputMessage).getPayload();
-			if (inputRows == null) {
-				return;
-			}
+    @Override
+    public void handle(Message inputMessage, ISendMessageCallback callback,
+            boolean unitOfWorkBoundaryReached) {
 
-			ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
+        if (inputMessage instanceof EntityDataMessage) {
+            ArrayList<EntityData> inputRows = ((EntityDataMessage) inputMessage).getPayload();
+            if (inputRows == null) {
+                return;
+            }
+            ArrayList<EntityData> outputPayload = null;
+            for (EntityData inputRow : inputRows) {
+                if (entityPerRecord) {
+                    outputPayload = mapInputToOutputByEntity(inputRow);
+                } else {
+                    outputPayload = mapInputToOutput(inputRow);
+                }
+            }
+            callback.sendEntityDataMessage(null, outputPayload);
+        }
+    }
 
-			for (EntityData inputRow : inputRows) {
-				EntityData outputRow = new EntityData();
-				outputRow.setChangeType(inputRow.getChangeType());
+    protected ArrayList<EntityData> mapInputToOutputByEntity(EntityData inputRow) {
+        ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
 
-				for (Entry<String, Object> attrEntry : inputRow.entrySet()) {
-					Set<String> newAttrIds = attrToAttrMap.get(attrEntry.getKey());
-					if (newAttrIds != null) {
-						for (String newAttrId : newAttrIds) {
-							outputRow.put(newAttrId, attrEntry.getValue());
-						}
-					}
-				}
+        Model outputModel = getOutputModel();
+        String entityName = null;
+        HashMap<String, EntityData> outputRows = new HashMap<String, EntityData>();
 
-				if (setUnmappedAttributesToNull) {
-					for (ModelEntity entity : getComponent().getOutputModel().getModelEntities()) {
-						for (ModelAttribute attr : entity.getModelAttributes()) {
-							if (!outputRow.containsKey(attr.getId())) {
-								outputRow.put(attr.getId(), null);
-							}
-						}
-					}
-				}
+        for (Entry<String, Object> attrEntry : inputRow.entrySet()) {
+            Set<String> newAttrIds = attrToAttrMap.get(attrEntry.getKey());
+            if (newAttrIds != null) {
+                for (String newAttrId : newAttrIds) {
+                    entityName = outputModel
+                            .getEntityById(outputModel.getAttributeById(newAttrId).getEntityId())
+                            .getName();
+                    EntityData outputRow = outputRows.get(entityName);
+                    if (outputRow == null) {
+                        outputRow = new EntityData();                  
+                        outputRows.put(entityName, outputRow);
+                    } 
+                    outputRow.put(newAttrId, attrEntry.getValue());
+                }
+            }
+        }
 
-				if (outputRow.size() > 0) {
-					outputPayload.add(outputRow);
-					getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-				}
-			}
+        if (setUnmappedAttributesToNull) {
+            for (ModelEntity entity : outputModel.getModelEntities()) {
+                for (ModelAttribute attr : entity.getModelAttributes()) {
+                    entityName = outputModel
+                            .getEntityById(attr.getEntityId())
+                            .getName();                    
+                    EntityData outputRow = outputRows.get(entityName);
+                    if (outputRow == null) {
+                        outputRow = new EntityData();
+                        outputRows.put(entityName, outputRow);   
+                    }
+                    if (!outputRow.containsKey(attr.getId())) {
+                        outputRow.put(attr.getId(), null);
+                     }                    
+                }
+            }
+        }
+        
+        for (Map.Entry<String, EntityData> entry : outputRows.entrySet()) {
+            EntityData outputRow = entry.getValue();
+            if (outputRow.size() > 0) {
+                outputPayload.add(entry.getValue());
+            }
+        }
 
-			callback.sendEntityDataMessage(null, outputPayload);
-		}
-	}
+        return outputPayload;
+    }
+
+    protected ArrayList<EntityData> mapInputToOutput(EntityData inputRow) {
+        ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
+
+        EntityData outputRow = new EntityData();
+        outputRow.setChangeType(inputRow.getChangeType());
+
+        for (Entry<String, Object> attrEntry : inputRow.entrySet()) {
+            Set<String> newAttrIds = attrToAttrMap.get(attrEntry.getKey());
+            if (newAttrIds != null) {
+                for (String newAttrId : newAttrIds) {
+                    outputRow.put(newAttrId, attrEntry.getValue());
+                }
+            }
+        }
+
+        if (setUnmappedAttributesToNull) {
+            for (ModelEntity entity : getComponent().getOutputModel().getModelEntities()) {
+                for (ModelAttribute attr : entity.getModelAttributes()) {
+                    if (!outputRow.containsKey(attr.getId())) {
+                        outputRow.put(attr.getId(), null);
+                    }
+                }
+            }
+        }
+
+        if (outputRow.size() > 0) {
+            outputPayload.add(outputRow);
+            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+        }
+
+        return outputPayload;
+
+    }
 }
