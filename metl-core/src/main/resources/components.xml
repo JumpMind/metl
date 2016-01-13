@@ -387,6 +387,10 @@
                 <name>Set Unmapped Attributes To Null</name>
                 <defaultValue>false</defaultValue>
             </setting>
+            <setting id='entity.per.record' type='boolean' required='false'>
+                <name>Entity Per Record</name>
+                <defaultValue>false</defaultValue>
+            </setting>
         </settings>
     </component>
     <component id='Message Logger' category='PROCESSOR' inputMessageType='any' outputMessageType='any' resourceCategory='none' inputOutputModelsMatch='true'>
