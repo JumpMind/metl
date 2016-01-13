@@ -167,7 +167,6 @@ public class PropertySheet extends AbsoluteLayout {
             
             if (obj instanceof Resource) {
                 Resource resource = (Resource)obj;
-                context.getConfigurationService().refresh(resource);
                 addResourceProperties(formLayout, resource);
             }
 
