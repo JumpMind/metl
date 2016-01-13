@@ -110,12 +110,12 @@ public class Mapping extends AbstractComponentRuntime {
             if (inputRows == null) {
                 return;
             }
-            ArrayList<EntityData> outputPayload = null;
+            ArrayList<EntityData> outputPayload = new ArrayList<EntityData>();
             for (EntityData inputRow : inputRows) {
                 if (entityPerRecord) {
-                    outputPayload = mapInputToOutputByEntity(inputRow);
+                    outputPayload.addAll(mapInputToOutputByEntity(inputRow)); 
                 } else {
-                    outputPayload = mapInputToOutput(inputRow);
+                    outputPayload.addAll(mapInputToOutput(inputRow));
                 }
             }
             callback.sendEntityDataMessage(null, outputPayload);
