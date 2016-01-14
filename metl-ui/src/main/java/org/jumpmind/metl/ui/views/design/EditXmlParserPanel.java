@@ -57,12 +57,12 @@ import com.vaadin.event.FieldEvents.FocusListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
-import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
@@ -76,13 +76,13 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
     BeanItemContainer<Record> container = new BeanItemContainer<Record>(Record.class);
 
     TextField filterTextField;
-    
-    NativeSelect filterPopField;
+
+    AbstractSelect filterPopField;
 
     Collection<String> xpathChoices;
-    
+
     static final String SHOW_ALL = "Show All Entities";
-    static final String SHOW_POPULATED = "Filter Populated Entites";
+    static final String SHOW_POPULATED_ENTITIES = "Filter Populated Entites";
 
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
@@ -94,19 +94,20 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
         Button importButton = buttonBar.addButton("Import Template", FontAwesome.DOWNLOAD);
         importButton.addClickListener(new ImportTemplateClickListener());
 
-        filterPopField = new NativeSelect();
+        filterPopField = new ComboBox();
         filterPopField.addItem(SHOW_ALL);
-        filterPopField.addItem(SHOW_POPULATED);
+        filterPopField.addItem(SHOW_POPULATED_ENTITIES);
         filterPopField.setNullSelectionAllowed(false);
         filterPopField.setImmediate(true);
         filterPopField.setValue(SHOW_ALL);
         filterPopField.addValueChangeListener(new ValueChangeListener() {
-			public void valueChange(ValueChangeEvent event) {
-				updateTable(filterTextField.getValue(), filterPopField.getValue().equals(SHOW_POPULATED));
-			}
-		});
+            public void valueChange(ValueChangeEvent event) {
+                updateTable(filterTextField.getValue(),
+                        filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES));
+            }
+        });
         buttonBar.addRight(filterPopField);
-        
+
         filterTextField = buttonBar.addFilter();
         filterTextField.addTextChangeListener(this);
 
@@ -130,28 +131,33 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
     @Override
     public void textChange(TextChangeEvent event) {
         filterTextField.setValue(event.getText());
-        updateTable(event.getText(), filterPopField.getValue().equals(SHOW_POPULATED));
+        updateTable(event.getText(), filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES));                
     }
 
     protected void updateTable(String filterText, boolean filterPopulated) {
-        Model model = component.getType().equals(XmlParser.TYPE) ? component.getOutputModel() : component.getInputModel();
+        Model model = component.getType().equals(XmlParser.TYPE) ? component.getOutputModel()
+                : component.getInputModel();
         if (model != null) {
             table.removeAllItems();
             String upperFilterText = StringUtils.trimToEmpty(filterText).toUpperCase();
             Collections.sort(model.getModelEntities(), new Comparator<ModelEntity>() {
                 public int compare(ModelEntity entity1, ModelEntity entity2) {
-                    return entity1.getName().toLowerCase().compareTo(entity2.getName().toLowerCase());
+                    return entity1.getName().toLowerCase()
+                            .compareTo(entity2.getName().toLowerCase());
                 }
             });
 
             for (ModelEntity entity : model.getModelEntities()) {
                 boolean firstAttribute = true;
-                boolean entityMatches = upperFilterText.equals("") || entity.getName().toUpperCase().indexOf(upperFilterText) >= 0;
+                boolean entityMatches = upperFilterText.equals("")
+                        || entity.getName().toUpperCase().indexOf(upperFilterText) >= 0;
                 Record entityRecord = new Record(entity, null);
-                boolean populated = !filterPopulated || StringUtils.isNotBlank(entityRecord.getXpath());
+                boolean populated = !filterPopulated
+                        || StringUtils.isNotBlank(entityRecord.getXpath());
                 List<Record> entityAttrGroup = new ArrayList<Record>();
                 for (ModelAttribute attr : entity.getModelAttributes()) {
-                    if (entityMatches || attr.getName().toUpperCase().indexOf(upperFilterText) >= 0) {
+                    if (entityMatches
+                            || attr.getName().toUpperCase().indexOf(upperFilterText) >= 0) {
                         if (firstAttribute) {
                             firstAttribute = false;
                             entityAttrGroup.add(entityRecord);
@@ -162,10 +168,10 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
                     }
                 }
                 if (entityMatches && firstAttribute) {
-                	entityAttrGroup.add(entityRecord);
+                    entityAttrGroup.add(entityRecord);
                 }
                 if (populated) {
-                	table.addItems(entityAttrGroup);
+                    table.addItems(entityAttrGroup);
                 }
             }
         }
@@ -174,9 +180,11 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
     protected void saveXPathSettings() {
         for (Record record : container.getItemIds()) {
             if (record.getAttributeId() != null) {
-                saveAttributeSetting(record.getAttributeId(), XmlFormatter.XML_FORMATTER_XPATH, StringUtils.trimToNull(record.getXpath()));
+                saveAttributeSetting(record.getAttributeId(), XmlFormatter.XML_FORMATTER_XPATH,
+                        StringUtils.trimToNull(record.getXpath()));
             } else {
-                saveEntitySetting(record.getEntityId(), XmlFormatter.XML_FORMATTER_XPATH, StringUtils.trimToNull(record.getXpath()));
+                saveEntitySetting(record.getEntityId(), XmlFormatter.XML_FORMATTER_XPATH,
+                        StringUtils.trimToNull(record.getXpath()));
             }
         }
     }
@@ -230,7 +238,7 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
             }
         }
     }
-    
+
     protected void buildXpathChoicesForElement(String prefix, Element element) {
         String base = "/" + element.getName();
         String newPrefix = prefix + base;
@@ -287,7 +295,8 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
             templateSetting.setValue(editor.getValue());
             context.getConfigurationService().save(templateSetting);
             buildXpathChoices();
-            updateTable(filterTextField.getValue(), filterPopField.getValue().equals(SHOW_POPULATED));
+            updateTable(filterTextField.getValue(),
+                    filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES));
             return true;
         }
     }
@@ -311,8 +320,8 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
     }
 
     class EditFieldFactory implements TableFieldFactory {
-        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
-                com.vaadin.ui.Component uiContext) {
+        public Field<?> createField(final Container dataContainer, final Object itemId,
+                final Object propertyId, com.vaadin.ui.Component uiContext) {
             Field<?> field = null;
             Record record = (Record) itemId;
             if (propertyId.equals("xpath")) {
@@ -321,7 +330,8 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
                 if (xpathChoices != null) {
                     combo.addItems(xpathChoices);
                 }
-                if (!StringUtils.trimToEmpty(record.getXpath()).equals("") && !combo.getItemIds().contains(record.getXpath())) {
+                if (!StringUtils.trimToEmpty(record.getXpath()).equals("")
+                        && !combo.getItemIds().contains(record.getXpath())) {
                     combo.addItem(record.getXpath());
                 }
                 combo.setPageLength(20);
@@ -358,13 +368,14 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
             this.modelEntity = modelEntity;
             this.modelAttribute = modelAttribute;
             if (modelAttribute != null) {
-                ComponentAttributeSetting setting = component.getSingleAttributeSetting(modelAttribute.getId(),
-                        XmlFormatter.XML_FORMATTER_XPATH);
+                ComponentAttributeSetting setting = component.getSingleAttributeSetting(
+                        modelAttribute.getId(), XmlFormatter.XML_FORMATTER_XPATH);
                 if (setting != null) {
                     xpath = setting.getValue();
                 }
             } else {
-                ComponentEntitySetting setting = component.getSingleEntitySetting(modelEntity.getId(), XmlFormatter.XML_FORMATTER_XPATH);
+                ComponentEntitySetting setting = component.getSingleEntitySetting(
+                        modelEntity.getId(), XmlFormatter.XML_FORMATTER_XPATH);
                 if (setting != null) {
                     xpath = setting.getValue();
                 }
@@ -372,7 +383,8 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
         }
 
         public int hashCode() {
-            return modelEntity.hashCode() + (modelAttribute == null ? 0 : modelAttribute.hashCode());
+            return modelEntity.hashCode()
+                    + (modelAttribute == null ? 0 : modelAttribute.hashCode());
         }
 
         public boolean equals(Object obj) {
