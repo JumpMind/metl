@@ -71,6 +71,7 @@ public class ButtonBar extends HorizontalLayout {
         wrapper.setExpandRatio(spacer, 1);
 
         right = new HorizontalLayout();
+        right.setSpacing(true);
         wrapper.addComponent(right);
         wrapper.setComponentAlignment(right, Alignment.MIDDLE_RIGHT);
 
