@@ -11,6 +11,8 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.h2.Driver;
 import org.jumpmind.db.model.Column;
+import org.jumpmind.db.model.IIndex;
+import org.jumpmind.db.model.IndexColumn;
 import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
@@ -79,11 +81,6 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
         reader.setComponentDefinition(componentDefinition);
         reader.setRowsPerMessage(rowsPerMessage);
         reader.setThreadNumber(threadNumber);
-        
-        //test
-        ResettableBasicDataSource ds1 = databasePlatform.getDataSource();
-        log(LogLevel.INFO, "query ds1: %s", ds1.getUrl());
-        // adb end test
         
         reader.setSqls(sqls);
         reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
@@ -167,10 +164,35 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
                     table.addColumn(column);
                 }
                 log(LogLevel.INFO, "Creating table: " + table.getName() + "  on db: " + databasePlatform.getDataSource().toString());
+                
+                // H2 database platform sets names to upper case by default unless 
+                // the database name is mixed case. For our purposes, we 
+                // always want the name to be case insensitive in the logical model.
+                alterCaseToMatchLogicalCase(table);
+                
                 databasePlatform.createTables(false, false, table);
             }
 
             log(LogLevel.INFO, "Creating databasePlatform with the following url: %s", ds.getUrl());
+        }
+    }
+    
+    private void alterCaseToMatchLogicalCase(Table table) {
+        table.setName(table.getName().toUpperCase());
+
+        Column[] columns = table.getColumns();
+        for (Column column : columns) {
+            column.setName(column.getName().toUpperCase());
+        }
+
+        IIndex[] indexes = table.getIndices();
+        for (IIndex index : indexes) {
+            index.setName(index.getName().toUpperCase());
+
+            IndexColumn[] indexColumns = index.getColumns();
+            for (IndexColumn indexColumn : indexColumns) {
+                indexColumn.setName(indexColumn.getName().toUpperCase());
+            }
         }
     }
 
