@@ -24,8 +24,14 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.Model;
@@ -42,17 +48,26 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.event.Transferable;
+import com.vaadin.event.dd.DragAndDropEvent;
+import com.vaadin.event.dd.DropHandler;
+import com.vaadin.event.dd.acceptcriteria.AcceptAll;
+import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.AbstractSelect.AbstractSelectTargetDetails;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.ColumnGenerator;
+import com.vaadin.ui.Table.TableDragMode;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
 
+@SuppressWarnings("serial")
 public class EditDataDiffPanel extends AbstractComponentEditPanel {
 
     private static final long serialVersionUID = 1L;
@@ -71,6 +86,8 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
     
     EditAttributesWindow attributeWindow;
     
+    Set<EntitySettings> selectedItemIds;
+    
     protected void buildUI() {
 
     	buildButtonBar();
@@ -88,9 +105,42 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         editButton.setEnabled(false);
         entityFilterField = buttonBar.addFilter();
         entityFilterField.addTextChangeListener(event -> updateEntityTable(event.getText()));
+        
+        Button moveUpButton = buttonBar.addButton("Move Up", FontAwesome.ARROW_UP);
+        moveUpButton.addClickListener(new MoveUpClickListener());
+
+        Button moveDownButton = buttonBar.addButton("Move Down", FontAwesome.ARROW_DOWN);
+        moveDownButton.addClickListener(new MoveDownClickListener());
+
+        Button moveTopButton = buttonBar.addButton("Move Top", FontAwesome.ANGLE_DOUBLE_UP);
+        moveTopButton.addClickListener(new MoveTopClickListener());
+
+        Button moveBottomButton = buttonBar.addButton("Move Bottom", FontAwesome.ANGLE_DOUBLE_DOWN);
+        moveBottomButton.addClickListener(new MoveBottomClickListener());
+
+        Button cutButton = buttonBar.addButton("Cut", FontAwesome.CUT);
+        cutButton.addClickListener(new CutClickListener());
+
+        Button pasteButton = buttonBar.addButton("Paste", FontAwesome.PASTE);
+        pasteButton.addClickListener(new PasteClickListener());
+
+
         addComponent(buttonBar);    	
     }
 
+    @SuppressWarnings("unchecked")
+    protected Set<EntitySettings> getSelectedItems() {
+        return (Set<EntitySettings>) entityTable.getValue();
+    }
+    
+    protected EntitySettings getSelectedItem() {
+        Set<EntitySettings> selectedItems = getSelectedItems();
+        if (selectedItems != null && selectedItems.size() == 1) {
+            return selectedItems.iterator().next();
+        }
+        return null;
+    }
+    
     class EditButtonClickListener implements ClickListener {
         private static final long serialVersionUID = 1L;
         public void buttonClick(ClickEvent event) {
@@ -105,7 +155,6 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         entityTable.setSelectable(true);
         entityTable.setSortEnabled(false);
         entityTable.setImmediate(true);
-        entityTable.setSortEnabled(false);
         entityTable.setSizeFull();
         entityTable.addGeneratedColumn("entityName", new ColumnGenerator() {
             private static final long serialVersionUID = 1L;
@@ -123,6 +172,10 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         entityTable.setColumnExpandRatio("entityName", 1);
         entityTable.setTableFieldFactory(new EditEntityFieldFactory());
         entityTable.setEditable(true);
+        entityTable.setMultiSelect(true);
+        entityTable.setDragMode(TableDragMode.MULTIROW);
+        entityTable.setDropHandler(new TableDropHandler());
+        entityTable.setCellStyleGenerator(new TableCellStyleGenerator());
         entityTable.addItemClickListener(new ItemClickListener() {
             private static final long serialVersionUID = 1L;
         	public void itemClick(ItemClickEvent event) {
@@ -135,8 +188,17 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         });
         addComponent(entityTable);        
         setExpandRatio(entityTable, 1.0f);
-    }
+    }    
     
+    class TableCellStyleGenerator implements CellStyleGenerator {
+        public String getStyle(Table source, Object itemId, Object propertyId) {
+            if (propertyId != null && selectedItemIds != null && selectedItemIds.contains(itemId)) {
+                return "highlight";
+            }
+            return null;
+        }
+    }
+
     protected void fillEntityContainer() {  	
         if (component.getInputModel() != null) {
 
@@ -144,11 +206,19 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
                 ComponentEntitySetting insert = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_ADD_ENABLED);
                 ComponentEntitySetting update = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_CHG_ENABLED);
                 ComponentEntitySetting delete = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_DEL_ENABLED);
+                ComponentEntitySetting ordinal = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_ORDER);
                 boolean insertEnabled = insert != null ? Boolean.parseBoolean(insert.getValue()) : true;
                 boolean updateEnabled = update != null ? Boolean.parseBoolean(update.getValue()) : true;
                 boolean deleteEnabled = delete != null ? Boolean.parseBoolean(delete.getValue()) : true;
-                entitySettings.add(new EntitySettings(entity.getId(), insertEnabled, updateEnabled, deleteEnabled));
+                entitySettings.add(new EntitySettings(entity.getId(), insertEnabled, updateEnabled, deleteEnabled, 
+                        Integer.parseInt(ordinal.getValue())));
             }
+            
+            Collections.sort(entitySettings, new Comparator<EntitySettings>() {
+                public int compare(EntitySettings o1, EntitySettings o2) {
+                    return new Integer(o1.getOrdinalSetting()).compareTo(new Integer(o2.getOrdinalSetting()));
+                }
+            });
         }    	
     }
     
@@ -162,6 +232,62 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
             if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)) {
             	entityTable.addItem(entitySetting);
             }
+        }
+    }
+    
+    protected void moveItemsTo(Set<EntitySettings> itemIds, int index) {
+        if (index >= 0 && index < entitySettingsContainer.getItemIds().size() && itemIds.size() > 0) {
+            int firstItemIndex = entitySettingsContainer.indexOfId(itemIds.iterator().next());
+            if (index != firstItemIndex) {
+                for (EntitySettings itemId : itemIds) {
+                    boolean movingUp = index < entitySettingsContainer.indexOfId(itemId);
+                    entitySettingsContainer.removeItem(itemId);
+                    entitySettingsContainer.addItemAt(index, itemId);
+                    if (movingUp) {
+                        index++;
+                    }
+                }
+                calculatePositions();
+                saveOrdinalSettings();
+            }
+        }
+    }
+    
+    protected void saveOrdinalSettings() {
+        String attrName = DataDiff.ENTITY_ORDER;
+        int ordinal = 1;
+        for (EntitySettings record : entitySettingsContainer.getItemIds()) {
+            saveSetting(record.getEntityId(), attrName, String.valueOf(ordinal));
+            ordinal++;
+        }
+    }
+         
+    protected void saveSetting(String entityId, String name, String value) {
+        ComponentEntitySetting setting = component.getSingleEntitySetting(entityId, name);
+        if (setting == null) {
+            setting = new ComponentEntitySetting(entityId, name, value);
+            setting.setComponentId(component.getId());
+            component.addEntitySetting(setting);
+            context.getConfigurationService().save(setting);
+        } else if (!StringUtils.equals(setting.getValue(), value)) {
+            setting.setValue(value);
+            context.getConfigurationService().save(setting);
+        }
+    }
+
+    protected void calculatePositions() {
+        boolean needsRefreshed = false;
+
+        int ordinal = 1;
+        for (EntitySettings record : entitySettingsContainer.getItemIds()) {
+            if (record.getOrdinalSetting() != ordinal) {
+                record.setOrdinalSetting(ordinal);
+                needsRefreshed = true;
+            }
+            ordinal++;
+        }
+        if (needsRefreshed) {
+            entityTable.refreshRowCache();
         }
     }
     
@@ -212,12 +338,14 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         boolean addEnabled;
         boolean updateEnabled;
         boolean deleteEnabled;
+        int ordinalSetting;
 
-        public EntitySettings(String entityId, boolean insertEnabled, boolean updateEnabled, boolean deleteEnabled) {
+        public EntitySettings(String entityId, boolean insertEnabled, boolean updateEnabled, boolean deleteEnabled, int ordinal) {
             this.entityId = entityId;
             this.addEnabled = insertEnabled;
             this.updateEnabled = updateEnabled;
             this.deleteEnabled = deleteEnabled;
+            this.ordinalSetting = ordinal;
         }
 
         public void setAddEnabled(boolean insertEnabled) {
@@ -266,6 +394,13 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
             return entityId.hashCode();
         }
 
+        public int getOrdinalSetting() {
+            return ordinalSetting;
+        }
+
+        public void setOrdinalSetting(int ordinalSetting) {
+            this.ordinalSetting = ordinalSetting;
+        }
     }
 
     //attribute window and support
@@ -414,7 +549,81 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
             } else {
                 return super.equals(obj);
             }
+        }   
+    }
+
+    class MoveUpClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            Set<EntitySettings> itemIds = getSelectedItems();
+            if (itemIds.size() > 0 && itemIds != null) {
+                EntitySettings firstItem = itemIds.iterator().next();
+                int index = entitySettingsContainer.indexOfId(firstItem) - 1;
+                moveItemsTo(getSelectedItems(), index);
+            }
+        }
+    }
+
+    class MoveDownClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            Set<EntitySettings> itemIds = getSelectedItems();
+            if (itemIds.size() > 0 && itemIds != null) {
+                EntitySettings lastItem = null;
+                Iterator<EntitySettings> iter = itemIds.iterator();
+                while (iter.hasNext()) {
+                    lastItem = iter.next();
+                }
+                int index = entitySettingsContainer.indexOfId(lastItem) + 1;
+                moveItemsTo(getSelectedItems(), index);
+            }
+        }
+    }
+
+    class MoveTopClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            moveItemsTo(getSelectedItems(), 0);
+        }
+    }
+
+    class MoveBottomClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            moveItemsTo(getSelectedItems(), entitySettingsContainer.size() - 1);
+        }
+    }
+
+    class CutClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            Set<EntitySettings> itemIds = getSelectedItems();
+            selectedItemIds = new LinkedHashSet<EntitySettings>(itemIds);
+            for (EntitySettings itemId : itemIds) {
+                entityTable.unselect(itemId);
+            }
+            entityTable.refreshRowCache();
+        }
+    }
+
+    class PasteClickListener implements ClickListener {
+        public void buttonClick(ClickEvent event) {
+            Set<EntitySettings> itemIds = getSelectedItems();
+            if (itemIds.size() > 0 && selectedItemIds != null) {
+                int index = entitySettingsContainer.indexOfId(itemIds.iterator().next());
+                moveItemsTo(selectedItemIds, index);
+                selectedItemIds = null;
+            }
         }
     }
     
+    class TableDropHandler implements DropHandler {
+        public void drop(DragAndDropEvent event) {
+            AbstractSelectTargetDetails targetDetails = (AbstractSelectTargetDetails) event.getTargetDetails();
+            Transferable transferable = event.getTransferable();
+            if (transferable.getSourceComponent() == entityTable) {
+                EntitySettings target = (EntitySettings) targetDetails.getItemIdOver();
+                moveItemsTo(getSelectedItems(), entitySettingsContainer.indexOfId(target));
+            }
+        }
+
+        public AcceptCriterion getAcceptCriterion() {
+            return AcceptAll.get();
+        }
+    }
 }
