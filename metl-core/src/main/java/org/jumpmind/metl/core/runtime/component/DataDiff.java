@@ -91,9 +91,12 @@ public class DataDiff extends AbstractComponentRuntime {
     String databaseName;
 
     List<ModelEntity> entities;
+    
+    Throwable error;
 
     @Override
     protected void start() {
+        error = null;
         TypedProperties properties = getTypedProperties();
         this.sourceStep1Id = properties.get(SOURCE_1);
         if (isBlank(sourceStep1Id)) {
@@ -134,7 +137,7 @@ public class DataDiff extends AbstractComponentRuntime {
     public void handle(Message message, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         createDatabase();
         loadIntoDatabase(message);
-        if (unitOfWorkBoundaryReached) {
+        if (unitOfWorkBoundaryReached && error == null) {
             calculateDiff(callback);
         }
     }
@@ -308,7 +311,11 @@ public class DataDiff extends AbstractComponentRuntime {
 
         if (tableSuffix != null) {
             databaseWriter.setTableSuffix(tableSuffix);
-            databaseWriter.handle(message, null, false);
+            try {
+                databaseWriter.handle(message, null, false);
+            } finally {
+                error = databaseWriter.getError();
+            }
         }
     }
 

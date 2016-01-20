@@ -318,7 +318,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                 if (replaceRows) {
                     log.debug("Falling back to update");
                     Object[] rowData = getValues(false, targetUpdateTable, inputRow);
-                    int count = execute(transaction, targetUpdateTable.getStatement(), new Object(), rowData, true);
+                    int count = execute(transaction, targetUpdateTable.getStatement(), new Object(), rowData);
                     stats.fallbackUpdateCount += count;
                 } else if (!continueOnError) {
                     throw e;
@@ -331,7 +331,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 
     private int executeSql(TargetTable targetTable, ISqlTransaction transaction, Object[] rowData) {
 
-        int count = execute(transaction, targetTable.getStatement(), new Object(), rowData, !replaceRows && !continueOnError);
+        int count = execute(transaction, targetTable.getStatement(), new Object(), rowData);
         if (count > 0) {
             results.add(new Result(targetTable.getStatement().getSql(), count));
             totalStatementCount++;
@@ -404,7 +404,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         }
     }
 
-    private int execute(ISqlTransaction transaction, DmlStatement dmlStatement, Object marker, Object[] data, boolean logFailure) {
+    private int execute(ISqlTransaction transaction, DmlStatement dmlStatement, Object marker, Object[] data) {
 
         String sql = dmlStatement.getSql();
         if (!sql.equals(lastPreparedDml)) {
@@ -421,11 +421,20 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         try {
             return transaction.addRow(marker, data, dmlStatement.getTypes());
         } catch (SqlException ex) {
-            if (logFailure) {
-                log(LogLevel.WARN, String.format("Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n",
-                        dmlStatement.getSql(), Arrays.toString(data), Arrays.toString(dmlStatement.getTypes())));
+            if (!(replaceRows && ex instanceof UniqueKeyException)) {
+                if (continueOnError) {
+                    log(LogLevel.WARN, String.format("Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n."
+                            + "Continue on Error flag set - Continuing load",
+                            dmlStatement.getSql(), Arrays.toString(data), Arrays.toString(dmlStatement.getTypes())));
+                    return 0;
+                } else {
+                    log(LogLevel.ERROR, String.format("Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n",
+                            dmlStatement.getSql(), Arrays.toString(data), Arrays.toString(dmlStatement.getTypes())));
+                    throw ex;
+                }
+            } else {
+                throw ex;
             }
-            throw ex;
         }
     }
 
@@ -480,6 +489,10 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 
     public void setUpdateFirst(boolean updateFirst) {
         this.updateFirst = updateFirst;
+    }
+    
+    public Throwable getError() {
+        return error;
     }
 
     class TargetTableDefintion implements Comparable<TargetTableDefintion> {
