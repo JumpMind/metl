@@ -38,6 +38,8 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.h2.Driver;
 import org.jumpmind.db.model.Column;
+import org.jumpmind.db.model.IIndex;
+import org.jumpmind.db.model.IndexColumn;
 import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
@@ -350,9 +352,10 @@ public class DataDiff extends AbstractComponentRuntime {
                     column.setPrimaryKey(attribute.isPk());
                     table.addColumn(column);
                 }
+                alterCaseToMatchLogicalCase(table);
                 databasePlatform.createTables(false, false, table);
 
-                table.setName(entity.getName() + "_2");
+                table.setName(entity.getName().toUpperCase() + "_2");
                 databasePlatform.createTables(false, false, table);
 
             }
@@ -364,6 +367,25 @@ public class DataDiff extends AbstractComponentRuntime {
     @Override
     public boolean supportsStartupMessages() {
         return false;
+    }
+    
+    private void alterCaseToMatchLogicalCase(Table table) {
+        table.setName(table.getName().toUpperCase());
+
+        Column[] columns = table.getColumns();
+        for (Column column : columns) {
+            column.setName(column.getName().toUpperCase());
+        }
+
+        IIndex[] indexes = table.getIndices();
+        for (IIndex index : indexes) {
+            index.setName(index.getName().toUpperCase());
+
+            IndexColumn[] indexColumns = index.getColumns();
+            for (IndexColumn indexColumn : indexColumns) {
+                indexColumn.setName(indexColumn.getName().toUpperCase());
+            }
+        }
     }
 
 }

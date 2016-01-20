@@ -87,7 +87,6 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
         info("Sent %d records", reader.getRowReadDuringHandle());
 
         ResettableBasicDataSource ds = databasePlatform.getDataSource();
-        log(LogLevel.INFO, "Closing ds: %s", ds.getUrl());
         ds.close();
 
         if (!inMemoryDb) {
