@@ -210,8 +210,9 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
                 boolean insertEnabled = insert != null ? Boolean.parseBoolean(insert.getValue()) : true;
                 boolean updateEnabled = update != null ? Boolean.parseBoolean(update.getValue()) : true;
                 boolean deleteEnabled = delete != null ? Boolean.parseBoolean(delete.getValue()) : true;
+                Integer order = ordinal != null ? Integer.parseInt(ordinal.getValue()) : 0;
                 entitySettings.add(new EntitySettings(entity.getId(), insertEnabled, updateEnabled, deleteEnabled, 
-                        Integer.parseInt(ordinal.getValue())));
+                        order));
             }
             
             Collections.sort(entitySettings, new Comparator<EntitySettings>() {
