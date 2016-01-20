@@ -433,10 +433,10 @@ abstract class AbstractConfigurationService extends AbstractService implements
         return resource;
     }
 
-    protected Component findComponent(String id) {
+    protected Component findComponent(String id, boolean readRelations) {
         Component component = new Component();
         component.setId(id);
-        refresh(component);
+        refresh(component, readRelations);
         return component;
     }
 
@@ -447,15 +447,17 @@ abstract class AbstractConfigurationService extends AbstractService implements
     }
 
     @Override
-    public void refresh(Component component) {
+    public void refresh(Component component, boolean readRelations) {
 
         persistenceManager.refresh(component, null, null, tableName(Component.class));
 
-        if (isNotBlank(component.getInputModelId())) {
-            component.setInputModel(findModel(component.getInputModelId()));
-        }
-        if (isNotBlank(component.getOutputModelId())) {
-            component.setOutputModel(findModel(component.getOutputModelId()));
+        if (readRelations) {
+            if (isNotBlank(component.getInputModelId())) {
+                component.setInputModel(findModel(component.getInputModelId()));
+            }
+            if (isNotBlank(component.getOutputModelId())) {
+                component.setOutputModel(findModel(component.getOutputModelId()));
+            }
         }
 
         List<ComponentSetting> settings = find(ComponentSetting.class, new NameValue("componentId",
@@ -473,7 +475,9 @@ abstract class AbstractConfigurationService extends AbstractService implements
         AbstractObjectLastUpdateTimeDescSorter.sort(attributeSettings);
         component.setAttributeSettings(attributeSettings);
 
-        component.setResource(findResource(component.getResourceId()));
+        if (readRelations) {
+            component.setResource(findResource(component.getResourceId()));
+        }
 
     }
 
@@ -792,9 +796,45 @@ abstract class AbstractConfigurationService extends AbstractService implements
                 return new Integer(o1.getX()).compareTo(new Integer(o2.getX()));
             }
         });
+        
+        Map<String, Model> models = new HashMap<>();
+        Map<String, Resource> resources = new HashMap<>();
+        
         for (FlowStep step : steps) {
-            step.setComponent(findComponent(step.getComponentId()));
-            flow.getFlowSteps().add(step);
+            Component component = findComponent(step.getComponentId(), false);            
+            step.setComponent(component);
+            flow.getFlowSteps().add(step);            
+            
+            String modelId = component.getOutputModelId();
+            if (isNotBlank(modelId)) {
+                Model model = models.get(modelId);
+                if (model == null) {
+                    model = findModel(modelId);
+                    models.put(modelId, model);
+                }
+                component.setOutputModel(model);
+            }
+            
+            modelId = component.getInputModelId();
+            if (isNotBlank(modelId)) {
+                Model model = models.get(modelId);
+                if (model == null) {
+                    model = findModel(modelId);
+                    models.put(modelId, model);
+                }
+                component.setInputModel(model);
+            }
+
+            String resourceId = component.getResourceId(); 
+            if (isNotBlank(resourceId)) {
+                Resource resource = resources.get(resourceId);
+                if (resource == null) {
+                    resource = findResource(resourceId);
+                    resources.put(resourceId, resource);
+                }
+                component.setResource(resource);
+            }
+
 
             Map<String, Object> linkParams = new HashMap<String, Object>();
             linkParams.put("sourceStepId", step.getId());

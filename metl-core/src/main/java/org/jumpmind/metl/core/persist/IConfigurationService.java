@@ -139,7 +139,7 @@ public interface IConfigurationService {
     
     public void refresh(Resource resource);
     
-    public void refresh(Component component);
+    public void refresh(Component component, boolean readRelations);
     
     public void refresh(User user);
     

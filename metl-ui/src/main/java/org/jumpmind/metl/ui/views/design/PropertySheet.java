@@ -161,7 +161,7 @@ public class PropertySheet extends AbsoluteLayout {
 
             if (obj instanceof Component) {
                 Component component = (Component) obj;
-                context.getConfigurationService().refresh(component);
+                context.getConfigurationService().refresh(component, true);
                 addComponentProperties(formLayout, component);
             }
             

@@ -221,7 +221,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     }
 
     protected void refreshStepOnDiagram(FlowStep step) {
-        context.getConfigurationService().refresh(step.getComponent());
+        context.getConfigurationService().refresh(step.getComponent(), true);
         diagram.setNodes(getNodes());
         diagram.setSelectedNodeId(step.getId());
     }
@@ -466,7 +466,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             if (flowPaletteItem.isShared()) {
                 Component component = new Component();
                 component.setId(flowPaletteItem.getComponentId());
-                configurationService.refresh(component);
+                configurationService.refresh(component, true);
                 addComponent(details.getMouseEvent().getClientX() - details.getAbsoluteLeft(),
                         details.getMouseEvent().getClientY() - details.getAbsoluteTop(), component);
             } else {
