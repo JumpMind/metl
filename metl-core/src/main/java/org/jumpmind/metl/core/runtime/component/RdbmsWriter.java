@@ -421,11 +421,20 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         try {
             return transaction.addRow(marker, data, dmlStatement.getTypes());
         } catch (SqlException ex) {
-            if (!(continueOnError || (replaceRows && ex instanceof UniqueKeyException))) {
-                log(LogLevel.WARN, String.format("Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n",
-                        dmlStatement.getSql(), Arrays.toString(data), Arrays.toString(dmlStatement.getTypes())));
+            if (!(replaceRows && ex instanceof UniqueKeyException)) {
+                if (continueOnError) {
+                    log(LogLevel.WARN, String.format("Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n."
+                            + "Continue on Error flag set - Continuing load",
+                            dmlStatement.getSql(), Arrays.toString(data), Arrays.toString(dmlStatement.getTypes())));
+                    return 0;
+                } else {
+                    log(LogLevel.ERROR, String.format("Failed to run the following sql: \n%s\nWith values: \n%s\nWith types: \n%s\n",
+                            dmlStatement.getSql(), Arrays.toString(data), Arrays.toString(dmlStatement.getTypes())));
+                    throw ex;
+                }
+            } else {
+                throw ex;
             }
-            throw ex;
         }
     }
 
