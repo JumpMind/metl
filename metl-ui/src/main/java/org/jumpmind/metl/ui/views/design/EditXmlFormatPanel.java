@@ -22,7 +22,11 @@ package org.jumpmind.metl.ui.views.design;
 
 import java.io.Serializable;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -54,6 +58,7 @@ import com.vaadin.event.FieldEvents.FocusListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -72,9 +77,14 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
 
     BeanItemContainer<Record> container = new BeanItemContainer<Record>(Record.class);
 
-    TextField filterField;
+    TextField filterTextField;
+
+    AbstractSelect filterPopField;
 
     Set<String> xpathChoices;
+
+    static final String SHOW_ALL = "Show All Entities";
+    static final String SHOW_POPULATED_ENTITIES = "Filter Populated Entites";
 
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
@@ -86,8 +96,24 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
         Button importButton = buttonBar.addButton("Import Template", FontAwesome.DOWNLOAD);
         importButton.addClickListener(new ImportTemplateClickListener());
 
-        filterField = buttonBar.addFilter();
-        filterField.addTextChangeListener(this);
+        filterPopField = new ComboBox();
+        filterPopField.addItem(SHOW_ALL);
+        filterPopField.addItem(SHOW_POPULATED_ENTITIES);
+        filterPopField.setNullSelectionAllowed(false);
+        filterPopField.setImmediate(true);
+        filterPopField.setValue(SHOW_ALL);
+        filterPopField.addValueChangeListener(new ValueChangeListener() {
+			private static final long serialVersionUID = 1L;
+
+			public void valueChange(ValueChangeEvent event) {
+                updateTable(filterTextField.getValue(),
+                        filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES));
+            }
+        });
+        buttonBar.addRight(filterPopField);
+
+        filterTextField = buttonBar.addFilter();
+        filterTextField.addTextChangeListener(this);
 
         table.setContainerDataSource(container);
         table.setSelectable(true);
@@ -101,36 +127,56 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
         addComponent(table);
         setExpandRatio(table, 1.0f);
 
-        updateTable(null);
+        updateTable(null,false);
         saveXPathSettings();
         buildXpathChoices();
     }
 
     @Override
     public void textChange(TextChangeEvent event) {
-        filterField.setValue(event.getText());
-        updateTable(event.getText());
+        filterTextField.setValue(event.getText());
+        updateTable(event.getText(),
+        		filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES));
     }
 
-    protected void updateTable(String filterText) {
-        Model model = component.getType().equals(XmlParser.TYPE) ? component.getOutputModel() : component.getInputModel();
+    protected void updateTable(String filterText, boolean filterPopulated) {
+        Model model = component.getType().equals(XmlParser.TYPE) ? component.getOutputModel()
+                : component.getInputModel();
         if (model != null) {
             table.removeAllItems();
             String upperFilterText = StringUtils.trimToEmpty(filterText).toUpperCase();
+            Collections.sort(model.getModelEntities(), new Comparator<ModelEntity>() {
+                public int compare(ModelEntity entity1, ModelEntity entity2) {
+                    return entity1.getName().toLowerCase()
+                            .compareTo(entity2.getName().toLowerCase());
+                }
+            });
+
             for (ModelEntity entity : model.getModelEntities()) {
                 boolean firstAttribute = true;
-                boolean entityMatches = upperFilterText.equals("") || entity.getName().toUpperCase().indexOf(upperFilterText) >= 0;
+                boolean entityMatches = upperFilterText.equals("")
+                        || entity.getName().toUpperCase().indexOf(upperFilterText) >= 0;
+                Record entityRecord = new Record(entity, null);
+                boolean populated = !filterPopulated
+                        || StringUtils.isNotBlank(entityRecord.getXpath());
+                List<Record> entityAttrGroup = new ArrayList<Record>();
                 for (ModelAttribute attr : entity.getModelAttributes()) {
-                    if (entityMatches || attr.getName().toUpperCase().indexOf(upperFilterText) >= 0) {
+                    if (entityMatches
+                            || attr.getName().toUpperCase().indexOf(upperFilterText) >= 0) {
                         if (firstAttribute) {
                             firstAttribute = false;
-                            table.addItem(new Record(entity, null));
+                            entityAttrGroup.add(entityRecord);
                         }
-                        table.addItem(new Record(entity, attr));
+                        Record attrRecord = new Record(entity, attr);
+                        populated = populated || StringUtils.isNotBlank(attrRecord.getXpath());
+                        entityAttrGroup.add(attrRecord);
                     }
                 }
                 if (entityMatches && firstAttribute) {
-                    table.addItem(new Record(entity, null));
+                    entityAttrGroup.add(entityRecord);
+                }
+                if (populated) {
+                    table.addItems(entityAttrGroup);
                 }
             }
         }
@@ -248,7 +294,8 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
             templateSetting.setValue(editor.getValue());
             context.getConfigurationService().save(templateSetting);
             buildXpathChoices();
-            updateTable(filterField.getValue());
+            updateTable(filterTextField.getValue(),
+            		filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES));
             return true;
         }
     }
