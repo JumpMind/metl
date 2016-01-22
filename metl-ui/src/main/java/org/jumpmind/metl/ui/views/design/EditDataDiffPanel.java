@@ -46,8 +46,6 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
@@ -102,7 +100,6 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         addComponent(buttonBar);
         editButton = buttonBar.addButton("Edit Columns", FontAwesome.EDIT);
         editButton.addClickListener(new EditButtonClickListener());
-        editButton.setEnabled(false);
         entityFilterField = buttonBar.addFilter();
         entityFilterField.addTextChangeListener(event -> updateEntityTable(event.getText()));
         
@@ -144,9 +141,11 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
     class EditButtonClickListener implements ClickListener {
         private static final long serialVersionUID = 1L;
         public void buttonClick(ClickEvent event) {
-        	refreshAttributeContainer((EntitySettings) entityTable.getValue());
-        	updateAttributeTable();
-            attributeWindow.show();
+            if (getSelectedItem() != null) {
+            	refreshAttributeContainer((EntitySettings) getSelectedItem());
+            	updateAttributeTable();
+                attributeWindow.show();
+            }
         }   
     }    
     
@@ -176,16 +175,6 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
         entityTable.setDragMode(TableDragMode.MULTIROW);
         entityTable.setDropHandler(new TableDropHandler());
         entityTable.setCellStyleGenerator(new TableCellStyleGenerator());
-        entityTable.addItemClickListener(new ItemClickListener() {
-            private static final long serialVersionUID = 1L;
-        	public void itemClick(ItemClickEvent event) {
-        		if (entityTable.getValue() == null) {
-        			editButton.setEnabled(true);
-        		} else {
-        			editButton.setEnabled(false);
-        		}
-        	}
-        });
         addComponent(entityTable);        
         setExpandRatio(entityTable, 1.0f);
     }    
