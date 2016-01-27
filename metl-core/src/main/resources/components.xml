@@ -1425,15 +1425,31 @@
              inputMessageType='text'
              inputOutputModelsMatch='false'
              outputMessageType='none'
-             resourceCategory='streamable'>
+             resourceCategory='none'>
     <name>Zip</name>
     <className>org.jumpmind.metl.core.runtime.component.Zip</className>
     <description></description>
     <settings>
-      <setting id='relative.path'
+      <setting id='source.resource'
+               required='true'
+               type='streamable_resource'>
+        <name>Source Directory Resource</name>
+      </setting>
+      <setting id='target.resource'
+               required='true'
+               type='streamable_resource'>
+        <name>Zip Target Directory Resource</name>
+      </setting>
+      <setting id='target.relative.path'
                required='false'
                type='text'>
-        <name>File Path</name>
+        <name>Target Path</name>
+      </setting>
+      <setting id='must.exist'
+               required='false'
+               type='boolean'>
+        <name>Must Exist</name>
+        <defaultValue>false</defaultValue>
       </setting>
       <setting id='delete.on.complete'
                required='false'
