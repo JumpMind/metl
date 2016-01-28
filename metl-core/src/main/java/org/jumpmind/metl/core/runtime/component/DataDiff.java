@@ -221,16 +221,17 @@ public class DataDiff extends AbstractComponentRuntime {
                 }
             }
 
-            if (entity.hasOnlyPrimaryKeys()) {
-                chgSql.append(" 1=0 ");
+            //we only want to do a change compare if this entity has 
+            //cols to compare other than the primary key.
+            if (!entity.hasOnlyPrimaryKeys() && secondCol) {
+                changeSqls.put(entity, chgSql.toString());
+                log(LogLevel.INFO, "Generated diff sql for CHG: %s", chgSql);
             }
-
             log(LogLevel.INFO, "Generated diff sql for ADD: %s", addSql);
-            log(LogLevel.INFO, "Generated diff sql for CHG: %s", chgSql);
             log(LogLevel.INFO, "Generated diff sql for DEL: %s", delSql);
             addSqls.put(entity, addSql.toString());
             delSqls.put(entity, delSql.toString());
-            changeSqls.put(entity, chgSql.toString());
+
         }
 
         RdbmsReader reader = new RdbmsReader();
@@ -256,7 +257,7 @@ public class DataDiff extends AbstractComponentRuntime {
                         entity.getName());
             }
 
-            if (chgEnabled) {
+            if (chgEnabled && changeSqls.get(entity) != null) {
                 reader.setSql(changeSqls.get(entity));
                 reader.setEntityChangeType(ChangeType.CHG);
                 reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback,
