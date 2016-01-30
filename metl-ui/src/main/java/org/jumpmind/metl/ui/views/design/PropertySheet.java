@@ -264,7 +264,7 @@ public class PropertySheet extends AbsoluteLayout {
                 component.setName(text);
                 context.getConfigurationService().save(component);
                 if (listener != null) {
-                    listener.componentNameChanged(component);
+                    listener.componentChanged(component);
                 }
             };
         };
@@ -432,6 +432,7 @@ public class PropertySheet extends AbsoluteLayout {
                     checkBox.setValue(obj.getBoolean(definition.getId(), defaultValue));
                     checkBox.setRequired(required);
                     checkBox.setDescription(description);
+                    
                     checkBox.addValueChangeListener(new ValueChangeListener() {
 
                         private static final long serialVersionUID = 1L;
@@ -439,8 +440,14 @@ public class PropertySheet extends AbsoluteLayout {
                         @Override
                         public void valueChange(ValueChangeEvent event) {
                             saveSetting(definition.getId(), checkBox.getValue().toString(), obj);
+                            if (listener != null) {
+                                listener.componentChanged((Component)obj);
+                            }
                         }
                     });
+                    
+                    
+                    
                     formLayout.addComponent(checkBox);
                     break;
                 case CHOICE:

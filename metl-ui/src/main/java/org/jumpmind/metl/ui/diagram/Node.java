@@ -39,8 +39,9 @@ public class Node implements Serializable {
     String name;
     String id = UUID.randomUUID().toString();
     List<String> targetNodeIds = new ArrayList<String>();
+    boolean enabled = true;
 
-    public Node(String text) {
+	public Node(String text) {
         this.text = text;
     }
     
@@ -126,4 +127,12 @@ public class Node implements Serializable {
     public void setOutputLabel(String outputLabel) {
         this.outputLabel = outputLabel;
     }
+
+    public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
 }

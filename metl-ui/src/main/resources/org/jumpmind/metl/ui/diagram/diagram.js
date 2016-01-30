@@ -51,7 +51,7 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
     });
 
     /**
-     * Enhance an node with input and output end points
+     * Enhance a node with input and output end points
      */
     this.addEndpoints = function(node, nodeDiv) {
         if (node.outputLabel != null) {
@@ -124,6 +124,9 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
             nodeDiv.setAttribute('style', 'width:' + node.width + 'px;height:' + node.height + "px");
             nodeDiv.innerHTML = node.text;
             nodeDiv.className = "diagram-node";
+            if (!node.enabled) {
+            	nodeDiv.className = nodeDiv.className + " disabled";
+            }
 
             nodeDiv.addEventListener("click", function(event) {
                 if (state.selectedNodeId !== event.currentTarget.id) {
@@ -237,6 +240,11 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
                 if (node != null) {                    
                     node.className = node.className + " selected ";
                     node.parentNode.childNodes[1].innerHTML = findNode(state.selectedNodeId).name;
+                    if (findNode(state.selectedNodeId).enabled) {
+                    	node.className = node.className.replace(/(?:^|\s)disabled(?!\S)/g, '');
+                    } else {
+                    	node.className = node.className + " disabled";
+                    }
                 }
             }
         });

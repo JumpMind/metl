@@ -26,6 +26,6 @@ import org.jumpmind.metl.core.model.Component;
 
 public interface IPropertySheetChangeListener extends Serializable {
 
-    public void componentNameChanged(Component component);
+    public void componentChanged(Component component);
     
 }

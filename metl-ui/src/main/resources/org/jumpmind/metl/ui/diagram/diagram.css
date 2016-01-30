@@ -40,6 +40,10 @@
 	border: 2px solid orange;
 }
 
+.diagram-node.disabled {
+	opacity: 0.25;
+}
+
 .diagram ._jsPlumb_endpoint {
 	z-index: 3;
 }

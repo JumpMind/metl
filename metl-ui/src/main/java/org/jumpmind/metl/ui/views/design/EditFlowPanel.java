@@ -38,6 +38,7 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -307,12 +308,14 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             Node node = new Node();
             String name = flowStep.getComponent().getName();
             String type = flowStep.getComponent().getType();
+            boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true);
             String imageText = String.format(
                     "<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>",
                     componentPalette.getBase64RepresentationOfImageForComponentType(type));
 
             node.setText(imageText);
             node.setName(name);
+            node.setEnabled(enabled);
             node.setId(flowStep.getId());
             node.setX(flowStep.getX());
             node.setY(flowStep.getY());
