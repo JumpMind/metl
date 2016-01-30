@@ -21,7 +21,8 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -32,18 +33,25 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
+import org.jumpmind.metl.core.runtime.resource.FileInfo;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
+import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
+import org.jumpmind.properties.TypedProperties;
 
 public class Zip extends AbstractComponentRuntime {
 
     public static final String TYPE = "Zip";
 
-    public final static String SETTING_RELATIVE_PATH = "relative.path";
+    public final static String SETTING_TARGET_RESOURCE = "target.resource";
+
+    public final static String SETTING_SOURCE_RESOURCE = "source.resource";
+
+    public final static String SETTING_TARGET_RELATIVE_PATH = "target.relative.path";
 
     public static final String SETTING_MUST_EXIST = "must.exist";
 
@@ -51,7 +59,15 @@ public class Zip extends AbstractComponentRuntime {
 
     public final static String SETTING_ENCODING = "encoding";
 
-    String relativePathAndFile;
+    IResourceRuntime sourceResource;
+    
+    IResourceRuntime targetResource;
+    
+    String sourceResourceId;
+    
+    String targetRelativePath;
+    
+    String targetResourceId;
 
     boolean mustExist;
 
@@ -63,12 +79,27 @@ public class Zip extends AbstractComponentRuntime {
 
     @Override
     protected void start() {
-        Component component = getComponent();
-        relativePathAndFile = component.get(SETTING_RELATIVE_PATH, relativePathAndFile);
-        mustExist = component.getBoolean(SETTING_MUST_EXIST, mustExist);
-        deleteOnComplete = component.getBoolean(SETTING_DELETE_ON_COMPLETE, deleteOnComplete);
-        encoding = component.get(SETTING_ENCODING, encoding);
+        
+        TypedProperties properties = getTypedProperties();
+
+        deleteOnComplete = properties.is(SETTING_DELETE_ON_COMPLETE, deleteOnComplete);
+        encoding = properties.get(SETTING_ENCODING, encoding);
         fileNames = new ArrayList<String>();
+
+        sourceResourceId = properties.get(SETTING_SOURCE_RESOURCE);
+        sourceResource = context.getDeployedResources().get(sourceResourceId);
+        if (sourceResource == null) {
+            throw new MisconfiguredException("The source resource must be defined");
+        }
+
+        targetResourceId = properties.get(SETTING_TARGET_RESOURCE);
+        targetResource = context.getDeployedResources().get(targetResourceId);
+        if (targetResource == null) {
+            throw new MisconfiguredException("The target resource must be defined");
+        }
+
+        targetRelativePath = properties.get(SETTING_TARGET_RELATIVE_PATH, "");
+        mustExist = properties.is(SETTING_MUST_EXIST, mustExist);
     }
     
     @Override
@@ -78,35 +109,40 @@ public class Zip extends AbstractComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {        
-        if (inputMessage instanceof TextMessage) {
+    	if (inputMessage instanceof TextMessage) {
             List<String> files = ((TextMessage)inputMessage).getPayload();
             fileNames.addAll(files);
             getComponentStatistics().incrementNumberEntitiesProcessed(files.size());
         }
         
         if (unitOfWorkBoundaryReached) {
-            IDirectory streamable = getResourceReference();
+            IDirectory sourceDir = null;
+            IDirectory targetDir = null;
             ZipOutputStream zos = null;
+
+            sourceDir = sourceResource.reference();
+            targetDir = targetResource.reference();
+        	
             try {
-                streamable.delete(relativePathAndFile);
-                zos = new ZipOutputStream(streamable.getOutputStream(relativePathAndFile, false), Charset.forName(encoding));
+            	targetDir.delete(targetRelativePath);
+                zos = new ZipOutputStream(targetDir.getOutputStream(targetRelativePath, false), Charset.forName(encoding));
 
                 for (String fileName : fileNames) {
-                    File file = new File(fileName);                                
-                    log(LogLevel.INFO, "Received file name to add to zip: %s", fileName);
-                    if (mustExist && !file.exists()) {
-                        throw new IoException(String.format("Could not find file to zip: %s", fileName));
+                    FileInfo sourceZipFile = sourceDir.listFile(fileName);           
+                    log(LogLevel.INFO, "Received file name to add to zip: %s", sourceZipFile);
+                    if (mustExist && sourceZipFile == null) {
+                        throw new IoException(String.format("Could not find file to zip: %s", sourceZipFile));
                     }
 
-                    if (file.exists()) {
+                    if (sourceZipFile != null) {
                         try {
-                            if (file.isFile()) {
-                                ZipEntry entry = new ZipEntry(file.getName());
-                                entry.setSize(file.length());
-                                entry.setTime(file.lastModified());
+                            if (!sourceZipFile.isDirectory()) {
+                                ZipEntry entry = new ZipEntry(sourceZipFile.getName());
+                                entry.setSize(sourceZipFile.getSize());
+                                entry.setTime(sourceZipFile.getLastUpdated());
                                 zos.putNextEntry(entry);
-                                log(LogLevel.INFO, "Adding %s", file.getName());
-                                FileInputStream fis = new FileInputStream(file);
+                                log(LogLevel.INFO, "Adding %s", sourceZipFile.getName());                        
+                                InputStream fis = sourceDir.getInputStream(sourceZipFile.getRelativePath(), unitOfWorkBoundaryReached);
                                 try {
                                     IOUtils.copy(fis, zos);
                                 } finally {
@@ -120,7 +156,7 @@ public class Zip extends AbstractComponentRuntime {
                     }
                 }
                 
-                log(LogLevel.INFO, "Generated %s", relativePathAndFile);
+                log(LogLevel.INFO, "Generated %s", targetRelativePath);
 
             } finally {
                 IOUtils.closeQuietly(zos);
@@ -128,8 +164,7 @@ public class Zip extends AbstractComponentRuntime {
             
             if (deleteOnComplete) {
                 for (String fileName : fileNames) {
-                    File file = new File(fileName);
-                    FileUtils.deleteQuietly(file);
+                	sourceDir.delete(fileName);
                 }
             }            
         }

@@ -71,7 +71,7 @@ public class DataDiff extends AbstractComponentRuntime {
     public final static String ENTITY_CHG_ENABLED = "chg.enabled";
 
     public final static String ENTITY_DEL_ENABLED = "del.enabled";
-    
+
     public final static String ENTITY_ORDER = "order";
 
     public final static String ATTRIBUTE_COMPARE_ENABLED = "compare.enabled";
@@ -91,7 +91,7 @@ public class DataDiff extends AbstractComponentRuntime {
     String databaseName;
 
     List<ModelEntity> entities;
-    
+
     Throwable error;
 
     @Override
@@ -100,11 +100,13 @@ public class DataDiff extends AbstractComponentRuntime {
         TypedProperties properties = getTypedProperties();
         this.sourceStep1Id = properties.get(SOURCE_1);
         if (isBlank(sourceStep1Id)) {
-            throw new MisconfiguredException("Please choose a step where the original data comes from");
+            throw new MisconfiguredException(
+                    "Please choose a step where the original data comes from");
         }
         this.sourceStep2Id = properties.get(SOURCE_2);
         if (isBlank(sourceStep2Id)) {
-            throw new MisconfiguredException("Please choose a step where the data to compare comes from");
+            throw new MisconfiguredException(
+                    "Please choose a step where the data to compare comes from");
         }
 
         this.inMemoryCompare = properties.is(IN_MEMORY_COMPARE);
@@ -120,12 +122,12 @@ public class DataDiff extends AbstractComponentRuntime {
         Collections.sort(entities, new Comparator<ModelEntity>() {
             @Override
             public int compare(ModelEntity o1, ModelEntity o2) {
-                ComponentEntitySetting order1 = context.getFlowStep().getComponent().getSingleEntitySetting(o1.getId(),
-                        DataDiff.ENTITY_ORDER);
+                ComponentEntitySetting order1 = context.getFlowStep().getComponent()
+                        .getSingleEntitySetting(o1.getId(), DataDiff.ENTITY_ORDER);
                 int orderValue1 = order1 != null ? Integer.parseInt(order1.getValue()) : 0;
 
-                ComponentEntitySetting order2 = context.getFlowStep().getComponent().getSingleEntitySetting(o2.getId(),
-                        DataDiff.ENTITY_ORDER);
+                ComponentEntitySetting order2 = context.getFlowStep().getComponent()
+                        .getSingleEntitySetting(o2.getId(), DataDiff.ENTITY_ORDER);
                 int orderValue2 = order2 != null ? Integer.parseInt(order2.getValue()) : 0;
 
                 return new Integer(orderValue1).compareTo(new Integer(orderValue2));
@@ -134,7 +136,8 @@ public class DataDiff extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message message, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+    public void handle(Message message, ISendMessageCallback callback,
+            boolean unitOfWorkBoundaryReached) {
         createDatabase();
         loadIntoDatabase(message);
         if (unitOfWorkBoundaryReached && error == null) {
@@ -155,9 +158,12 @@ public class DataDiff extends AbstractComponentRuntime {
             appendColumns(delSql, "orig.", entity);
             appendColumns(chgSql, "curr.", entity);
 
-            addSql.append(" from " + entity.getName() + "_2 curr left join " + entity.getName() + "_1 orig on ");
-            delSql.append(" from " + entity.getName() + "_1 orig left join " + entity.getName() + "_2 curr on ");
-            chgSql.append(" from " + entity.getName() + "_1 orig join " + entity.getName() + "_2 curr on ");
+            addSql.append(" from " + entity.getName() + "_2 curr left join " + entity.getName()
+                    + "_1 orig on ");
+            delSql.append(" from " + entity.getName() + "_1 orig left join " + entity.getName()
+                    + "_2 curr on ");
+            chgSql.append(" from " + entity.getName() + "_1 orig join " + entity.getName()
+                    + "_2 curr on ");
             boolean secondPk = false;
             for (ModelAttribute attribute : entity.getModelAttributes()) {
                 if (attribute.isPk()) {
@@ -166,9 +172,12 @@ public class DataDiff extends AbstractComponentRuntime {
                         delSql.append(" and ");
                         chgSql.append(" and ");
                     }
-                    addSql.append("curr.").append(attribute.getName()).append("=").append("orig.").append(attribute.getName());
-                    delSql.append("curr.").append(attribute.getName()).append("=").append("orig.").append(attribute.getName());
-                    chgSql.append("curr.").append(attribute.getName()).append("=").append("orig.").append(attribute.getName());
+                    addSql.append("curr.").append(attribute.getName()).append("=").append("orig.")
+                            .append(attribute.getName());
+                    delSql.append("curr.").append(attribute.getName()).append("=").append("orig.")
+                            .append(attribute.getName());
+                    chgSql.append("curr.").append(attribute.getName()).append("=").append("orig.")
+                            .append(attribute.getName());
                     secondPk = true;
                 }
             }
@@ -188,84 +197,107 @@ public class DataDiff extends AbstractComponentRuntime {
                     delSql.append("curr.").append(attribute.getName()).append(" is null");
                     secondPk = true;
                 } else {
-                    ComponentAttributeSetting matchColumnSetting = component.getSingleAttributeSetting(attribute.getId(), DataDiff.ATTRIBUTE_COMPARE_ENABLED);
-                    boolean matchColumn = matchColumnSetting != null ? Boolean.parseBoolean(matchColumnSetting.getValue()) : true;
+                    ComponentAttributeSetting matchColumnSetting = component
+                            .getSingleAttributeSetting(attribute.getId(),
+                                    DataDiff.ATTRIBUTE_COMPARE_ENABLED);
+                    boolean matchColumn = matchColumnSetting != null
+                            ? Boolean.parseBoolean(matchColumnSetting.getValue()) : true;
                     if (matchColumn) {
                         if (secondCol) {
                             chgSql.append(" or ");
                         }
-                		chgSql.append("curr.").append(attribute.getName()).append(" != ").append("orig.").append(attribute.getName());
-                		secondCol = true;
+                        chgSql.append("curr.").append(attribute.getName()).append(" != ")
+                                .append("orig.").append(attribute.getName());
+                        chgSql.append(" or ");
+                        chgSql.append("curr.").append(attribute.getName()).append(" is null and ")
+                                .append("orig.").append(attribute.getName())
+                                .append(" is not null ");
+                        chgSql.append(" or ");
+                        chgSql.append("curr.").append(attribute.getName())
+                                .append(" is not null and ").append("orig.")
+                                .append(attribute.getName()).append(" is null ");
+                        secondCol = true;
                     }
                 }
             }
 
-            if (entity.hasOnlyPrimaryKeys()) {
-                chgSql.append(" 1=0 ");
+            //we only want to do a change compare if this entity has 
+            //cols to compare other than the primary key.
+            if (!entity.hasOnlyPrimaryKeys() && secondCol) {
+                changeSqls.put(entity, chgSql.toString());
+                log(LogLevel.INFO, "Generated diff sql for CHG: %s", chgSql);
             }
-
             log(LogLevel.INFO, "Generated diff sql for ADD: %s", addSql);
-            log(LogLevel.INFO, "Generated diff sql for CHG: %s", chgSql);
             log(LogLevel.INFO, "Generated diff sql for DEL: %s", delSql);
             addSqls.put(entity, addSql.toString());
             delSqls.put(entity, delSql.toString());
-            changeSqls.put(entity, chgSql.toString());
+
         }
-        
+
         RdbmsReader reader = new RdbmsReader();
         reader.setDataSource(databasePlatform.getDataSource());
         reader.setContext(context);
         reader.setComponentDefinition(componentDefinition);
         reader.setRowsPerMessage(rowsPerMessage);
         reader.setThreadNumber(threadNumber);
-        
+
         for (ModelEntity entity : entities) {
-            ComponentEntitySetting add = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_ADD_ENABLED);
-            ComponentEntitySetting chg = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_CHG_ENABLED);
+            ComponentEntitySetting add = component.getSingleEntitySetting(entity.getId(),
+                    DataDiff.ENTITY_ADD_ENABLED);
+            ComponentEntitySetting chg = component.getSingleEntitySetting(entity.getId(),
+                    DataDiff.ENTITY_CHG_ENABLED);
             boolean addEnabled = add != null ? Boolean.parseBoolean(add.getValue()) : true;
             boolean chgEnabled = chg != null ? Boolean.parseBoolean(chg.getValue()) : true;
             if (addEnabled) {
                 reader.setSql(addSqls.get(entity));
                 reader.setEntityChangeType(ChangeType.ADD);
-                reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
-                info("Sent %d ADD records for %s", reader.getRowReadDuringHandle(), entity.getName());
+                reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback,
+                        false);
+                info("Sent %d ADD records for %s", reader.getRowReadDuringHandle(),
+                        entity.getName());
             }
 
-            if (chgEnabled) {
+            if (chgEnabled && changeSqls.get(entity) != null) {
                 reader.setSql(changeSqls.get(entity));
                 reader.setEntityChangeType(ChangeType.CHG);
-                reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
-                info("Sent %d CHG records for %s", reader.getRowReadDuringHandle(), entity.getName());
+                reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback,
+                        false);
+                info("Sent %d CHG records for %s", reader.getRowReadDuringHandle(),
+                        entity.getName());
             }
 
         }
-        
-        for(int i = entities.size()-1; i >= 0; i--) {
+
+        for (int i = entities.size() - 1; i >= 0; i--) {
             ModelEntity entity = entities.get(i);
-            ComponentEntitySetting del = component.getSingleEntitySetting(entity.getId(), DataDiff.ENTITY_DEL_ENABLED);
+            ComponentEntitySetting del = component.getSingleEntitySetting(entity.getId(),
+                    DataDiff.ENTITY_DEL_ENABLED);
             boolean delEnabled = del != null ? Boolean.parseBoolean(del.getValue()) : true;
 
             if (delEnabled) {
                 reader.setSql(delSqls.get(entity));
                 reader.setEntityChangeType(ChangeType.DEL);
-                reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback, false);
-                info("Sent %d DEL records for %s", reader.getRowReadDuringHandle(), entity.getName());
-            }            
+                reader.handle(new ControlMessage(this.context.getFlowStep().getId()), callback,
+                        false);
+                info("Sent %d DEL records for %s", reader.getRowReadDuringHandle(),
+                        entity.getName());
+            }
         }
 
         ResettableBasicDataSource ds = databasePlatform.getDataSource();
-        
+
         ds.close();
 
         if (!inMemoryCompare) {
             try {
-                Files.list(Paths.get(System.getProperty("h2.baseDir"))).filter(path -> path.toFile().getName().startsWith(databaseName))
+                Files.list(Paths.get(System.getProperty("h2.baseDir")))
+                        .filter(path -> path.toFile().getName().startsWith(databaseName))
                         .forEach(path -> deleteDatabaseFile(path.toFile()));
             } catch (IOException e) {
                 log.warn("Failed to delete file", e);
             }
         }
-        
+
         databasePlatform = null;
         databaseName = null;
         databaseWriter = null;
@@ -279,14 +311,17 @@ public class DataDiff extends AbstractComponentRuntime {
 
     protected void appendColumns(StringBuilder sql, String prefix, ModelEntity entity) {
         for (ModelAttribute attribute : entity.getModelAttributes()) {
-        	
+
             Component component = context.getFlowStep().getComponent();
-            ComponentAttributeSetting matchColumnSetting = component.getSingleAttributeSetting(attribute.getId(), DataDiff.ATTRIBUTE_COMPARE_ENABLED);
-            boolean matchColumn = matchColumnSetting != null ? Boolean.parseBoolean(matchColumnSetting.getValue()) : true;
-        	if (matchColumn) {        	
-	            sql.append(prefix).append(attribute.getName()).append(" /* ").append(entity.getName()).append(".").append(attribute.getName())
-	                    .append(" */").append(",");
-        	}
+            ComponentAttributeSetting matchColumnSetting = component.getSingleAttributeSetting(
+                    attribute.getId(), DataDiff.ATTRIBUTE_COMPARE_ENABLED);
+            boolean matchColumn = matchColumnSetting != null
+                    ? Boolean.parseBoolean(matchColumnSetting.getValue()) : true;
+            if (matchColumn) {
+                sql.append(prefix).append(attribute.getName()).append(" /* ")
+                        .append(entity.getName()).append(".").append(attribute.getName())
+                        .append(" */").append(",");
+            }
         }
         sql.replace(sql.length() - 1, sql.length(), "");
     }
@@ -333,7 +368,8 @@ public class DataDiff extends AbstractComponentRuntime {
             } else {
                 ds.setUrl("jdbc:h2:file:./" + databaseName);
             }
-            databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(ds, new SqlTemplateSettings(), true, false);
+            databasePlatform = JdbcDatabasePlatformFactory.createNewPlatformInstance(ds,
+                    new SqlTemplateSettings(), true, false);
 
             Model inputModel = context.getFlowStep().getComponent().getInputModel();
             List<ModelEntity> entities = inputModel.getModelEntities();
@@ -375,7 +411,7 @@ public class DataDiff extends AbstractComponentRuntime {
     public boolean supportsStartupMessages() {
         return false;
     }
-    
+
     private void alterCaseToMatchLogicalCase(Table table) {
         table.setName(table.getName().toUpperCase());
 

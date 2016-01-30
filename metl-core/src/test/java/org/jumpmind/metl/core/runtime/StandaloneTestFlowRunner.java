@@ -15,6 +15,7 @@ public class StandaloneTestFlowRunner extends StandaloneFlowRunner {
         setConfigSqlScript(configFile);
         setIncludeRegularFlows(false);
         setIncludeTestFlows(true);
+        System.setProperty("h2.baseDir", "working");
         setLogDir("working/logs");
     }
 
