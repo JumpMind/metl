@@ -180,7 +180,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             }
         });
         
-        copyButton = buttonBar.addButton("Copy", FontAwesome.FILE_O);
+        copyButton = buttonBar.addButton("Copy", FontAwesome.COPY);
         copyButton.addClickListener(new ClickListener() {
 			
 			@Override
