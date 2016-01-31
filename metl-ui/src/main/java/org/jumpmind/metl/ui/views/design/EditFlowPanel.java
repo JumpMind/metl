@@ -102,6 +102,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     AbstractLayout diagramLayout;
 
     Button runButton;
+    
+    Button copyButton;
 
     Button delButton;
 
@@ -177,6 +179,15 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                 runFlow();
             }
         });
+        
+        copyButton = buttonBar.addButton("Copy", FontAwesome.FILE_O);
+        copyButton.addClickListener(new ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				copySelected();
+			}
+		});
 
         delButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
         delButton.addClickListener(new ClickListener() {
@@ -229,6 +240,20 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
     @Override
     public void deselected() {
+    }
+
+    protected void copySelected() {
+        IConfigurationService configurationService = context.getConfigurationService();
+        if (selected instanceof FlowStep) {
+            FlowStep copy = (FlowStep)selected.copy();
+            copy.setX(copy.getX() + 10);
+            copy.setY(copy.getY() + 10);
+            copy.setName(copy.getName() + " Copy");
+            selected = copy;
+            flow.getFlowSteps().add(copy);
+            configurationService.save(copy);
+            redrawFlow();
+        }
     }
 
     protected void deleteSelected() {
