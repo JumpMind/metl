@@ -21,6 +21,7 @@
 package org.jumpmind.metl.ui.views.design;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -109,7 +110,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
     Button parametersButton;
 
-    AbstractObject selected;
+    List<AbstractObject> selected = new ArrayList<AbstractObject>();
 
     IConfigurationService configurationService;
 
@@ -122,8 +123,16 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         this.designNavigator = designNavigator;
 
         this.propertySheet = new PropertySheet(context, tabs);
-        this.propertySheet
-                .setListener(component -> refreshStepOnDiagram(EditFlowPanel.this.flow.findFlowStepWithComponentId(component.getId())));
+        this.propertySheet.setListener(new IPropertySheetChangeListener() {
+            	@Override
+            	public void componentChanged(List<Component> components) {
+            		List<FlowStep> steps = new ArrayList<FlowStep>();
+            		for (Component c : components) {
+            			steps.add(EditFlowPanel.this.flow.findFlowStepWithComponentId(c.getId()));
+            		}
+            		refreshStepOnDiagram(steps);
+            	}
+            });
         this.propertySheet.setCaption("Property Sheet");
 
         this.componentPalette = new EditFlowPalette(this, context, flow.getProjectVersionId());
@@ -162,8 +171,9 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         setExpandRatio(rightLayout, 1);
 
         if (flow.getFlowSteps().size() > 0) {
-            selected = flow.getFlowSteps().get(0);
-            propertySheet.setSource(selected);
+            selected = new ArrayList<AbstractObject>();
+            selected.add(flow.getFlowSteps().get(0));
+            propertySheet.setSource(selected.get(0));
         }
 
         redrawFlow();
@@ -232,10 +242,14 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         return flow;
     }
 
-    protected void refreshStepOnDiagram(FlowStep step) {
-        context.getConfigurationService().refresh(step.getComponent(), true);
-        diagram.setNodes(getNodes());
-        diagram.setSelectedNodeId(step.getId());
+    protected void refreshStepOnDiagram(List<FlowStep> steps) {
+        List<String> ids = new ArrayList<String>(steps.size());
+    	for (FlowStep step : steps) {
+	        context.getConfigurationService().refresh(step.getComponent(), true);
+	        ids.add(step.getId());
+    	}
+    	diagram.setNodes(getNodes());
+        diagram.setSelectedNodeIds(ids);
     }
 
     @Override
@@ -244,31 +258,42 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
     protected void copySelected() {
         IConfigurationService configurationService = context.getConfigurationService();
-        if (selected instanceof FlowStep) {
-            FlowStep copy = (FlowStep)selected.copy();
-            copy.setX(copy.getX() + 10);
-            copy.setY(copy.getY() + 10);
-            copy.setName(copy.getName() + " Copy");
-            selected = copy;
-            flow.getFlowSteps().add(copy);
-            configurationService.save(copy);
-            redrawFlow();
+        List<AbstractObject> copies = new ArrayList<AbstractObject>(selected.size());
+        for (AbstractObject s : selected) {
+	        if (s instanceof FlowStep) {
+	            FlowStep copy = (FlowStep)s.copy();
+	            copy.setX(copy.getX() + 20);
+	            copy.setY(copy.getY() + 20);
+	            copy.setName(copy.getName() + " Copy");
+				
+	            flow.getFlowSteps().add(copy);
+	            configurationService.save(copy);
+	            copies.add(copy);
+	        }
         }
+        selected = copies;
+        propertySheet.setSource(selected);
+        redrawFlow();
     }
 
     protected void deleteSelected() {
         IConfigurationService configurationService = context.getConfigurationService();
-        if (selected instanceof FlowStep) {
-            FlowStep flowStep = (FlowStep) selected;
-            configurationService.delete(flow, flowStep);
-            selected = null;
-            redrawFlow();
-        } else if (selected instanceof FlowStepLink) {
-            FlowStepLink link = (FlowStepLink) selected;
-            configurationService.delete(link);
-            flow.removeFlowStepLink(link.getSourceStepId(), link.getTargetStepId());
-            redrawFlow();
+        Iterator<AbstractObject> iter = selected.iterator();
+        while(iter.hasNext()) {
+            AbstractObject s = iter.next();
+	        if (s instanceof FlowStep) {
+	            FlowStep flowStep = (FlowStep) s;
+	            configurationService.delete(flow, flowStep);
+	            iter.remove();
+	        } else if (selected instanceof FlowStepLink) {
+	            FlowStepLink link = (FlowStepLink) s;
+	            configurationService.delete(link);
+	            flow.removeFlowStepLink(link.getSourceStepId(), link.getTargetStepId());
+	            iter.remove();
+	        }
         }
+        propertySheet.setSource(null);
+        redrawFlow();
     }
 
     protected int countComponentsOfType(String type) {
@@ -292,17 +317,12 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         flowStep.setY(y);
         flowStep.setFlowId(flow.getId());
         flow.getFlowSteps().add(flowStep);
-
         context.getConfigurationService().save(flowStep);
-
-        selected = flowStep;
-
+        
+        selected.add(flowStep);
         redrawFlow();
-
         propertySheet.setSource(flowStep);
-
         designNavigator.refresh();
-
     }
 
     protected void redrawFlow() {
@@ -311,18 +331,20 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         }
 
         diagram = new Diagram();
-        if (selected != null && selected instanceof FlowStep) {
-            diagram.setSelectedNodeId(((FlowStep) selected).getId());
-            delButton.setEnabled(true);
-        } else {
-            delButton.setEnabled(false);
+        List<String> ids = new ArrayList<String>(selected.size());
+        for (AbstractObject s : selected) {
+	        if (s instanceof FlowStep) {
+	        	ids.add(s.getId());
+	        }
         }
+        delButton.setEnabled(ids.size() > 0);
+        
+        diagram.setSelectedNodeIds(ids);
         diagram.setSizeFull();
         diagram.addListener(new DiagramChangedListener());
-
-        diagramLayout.addComponent(diagram);
-
         diagram.setNodes(getNodes());
+        
+        diagramLayout.addComponent(diagram);
     }
 
     protected List<Node> getNodes() {
@@ -386,7 +408,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                 folder.setName(DESIGN_FOLDER_NAME);
                 configurationService.save(folder);
             }
-
+            
             myDesignAgent = new Agent();
             myDesignAgent.setHost(AppUtils.getHostName());
             myDesignAgent.setName(AGENT_NAME);
@@ -395,7 +417,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             configurationService.save(myDesignAgent);
             agentManager.refresh(myDesignAgent);
         }
-
+        
         AgentDeployment deployment = myDesignAgent.getAgentDeploymentFor(flow);
         AgentRuntime runtime = agentManager.getAgentRuntime(myDesignAgent.getId());
         if (deployment == null) {
@@ -419,10 +441,13 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             IConfigurationService configurationService = context.getConfigurationService();
             if (e instanceof NodeSelectedEvent) {
                 NodeSelectedEvent event = (NodeSelectedEvent) e;
-                Node node = event.getNode();
-                FlowStep flowStep = flow.findFlowStepWithId(node.getId());
-                selected = flowStep;
-                propertySheet.setSource(flowStep);
+                List<String> nodeIds = event.getNodeIds();
+                selected = new ArrayList<AbstractObject>(nodeIds.size());
+                for (String id : nodeIds) {
+                	FlowStep flowStep = flow.findFlowStepWithId(id);
+                    selected.add(flowStep);
+                }
+                propertySheet.setSource(selected);
                 delButton.setEnabled(true);
             } else if (e instanceof NodeDoubleClickedEvent) {
                 propertySheet.openAdvancedEditor();
@@ -476,7 +501,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                 }
             } else if (e instanceof LinkSelectedEvent) {
                 LinkSelectedEvent event = (LinkSelectedEvent) e;
-                selected = flow.findFlowStepLink(event.getSourceNodeId(), event.getTargetNodeId());
+                selected = new ArrayList<AbstractObject>(1);
+                selected.add(flow.findFlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
                 delButton.setEnabled(true);
             }
         }

@@ -31,6 +31,6 @@ public class DiagramState extends JavaScriptComponentState {
     
     public List<Node> nodes = new ArrayList<Node>();
     
-    public String selectedNodeId;
+    public List<String> selectedNodeIds = new ArrayList<String>();
     
 }

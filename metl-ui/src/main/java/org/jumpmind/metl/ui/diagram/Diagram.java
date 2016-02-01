@@ -30,7 +30,7 @@ import com.vaadin.ui.JavaScriptFunction;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
-@JavaScript({ "dom.jsPlumb-1.7.5-min.js", "diagram.js" })
+@JavaScript({ "jquery-2.2.0.min.js", "dom.jsPlumb-1.7.5-min.js", "diagram.js" })
 @StyleSheet({ "diagram.css" })
 public class Diagram extends AbstractJavaScriptComponent {
 
@@ -64,23 +64,22 @@ public class Diagram extends AbstractJavaScriptComponent {
 
             @Override
             public void call(JsonArray arguments) {
+            	DiagramState state = getState();
+                List<String> ids = state.selectedNodeIds;
+                ids.clear();
                 if (arguments.length() > 0) {
                     Object obj = arguments.get(0);
                     if (obj instanceof JsonObject) {
                         JsonObject json = arguments.getObject(0);
-                        if (json.hasKey("id")) {
-                            String id = json.getString("id");
-                            DiagramState state = getState();
-                            for (Node node : state.nodes) {
-                                if (node.getId().equals(id)) {
-                                    state.selectedNodeId = id;
-                                    fireEvent(new NodeSelectedEvent(Diagram.this, node));
-                                    break;
-                                }
+                        if (json.hasKey("nodes")) {
+                            JsonArray nodes = json.getArray("nodes");
+                            for (int i=0; i<nodes.length(); i++) {
+                            	ids.add( nodes.getObject(i).getString("id") );
                             }
                         }
                     }
                 }
+                fireEvent(new NodeSelectedEvent(Diagram.this, ids));
             }
         });
 
@@ -123,6 +122,7 @@ public class Diagram extends AbstractJavaScriptComponent {
                         DiagramState state = getState();
                         for (Node node : state.nodes) {
                             if (node.getId().equals(id)) {
+                            	// Why do we set the state on the server side? Don't we have to send this back to the client now?
                                 node.setX((int) x);
                                 node.setY((int) y);
                                 fireEvent(new NodeMovedEvent(Diagram.this, node));
@@ -205,23 +205,20 @@ public class Diagram extends AbstractJavaScriptComponent {
 
     }
 
-    public void setSelectedNodeId(String nodeId) {
-        getState().selectedNodeId = nodeId;
-        markAsDirty();
+    public void setSelectedNodeIds(List<String> ids) {
+        getState().selectedNodeIds = ids;
     }
 
-    public String getSelectedNodeId() {
-        return getState().selectedNodeId;
+    public List<String> getSelectedNodeIds() {
+        return getState().selectedNodeIds;
     }
 
     public void setNodes(List<Node> nodes) {
         getState().nodes = nodes;
-        markAsDirty();
     }
 
     public void addNode(Node node) {
         getState().nodes.add(node);
-        markAsDirty();
     }
 
     @Override

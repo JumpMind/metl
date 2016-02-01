@@ -5,7 +5,11 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
     var connectorColor = "#0072C6";
     var outlineColor = "white";
     var selectedColor = "orange";
-
+    var diagramStart = {};
+    var nodeStart = {};
+    var rubberbandDrawingActive = false;
+    var ctrlPress = false;
+    
     /**
      * When you configure jsPlumb you can give it default settings to use.  These can be
      * overwritten on a component by component basis if need be
@@ -103,17 +107,12 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
         instance.unbind("connectionDetached");
         instance.unbind("connectionMoved");
 
-        var parentDiv = document.getElementById(state.id);
-        while (parentDiv.firstChild) {
-            parentDiv.removeChild(parentDiv.firstChild);
-        }
-
+        var parentDiv = this.getElement();
         var nodeList = state.nodes;
         for (i = 0; i < nodeList.length; i++) {
             var node = nodeList[i];
-
             var draggableDiv = document.createElement('div');
-            draggableDiv.className='diagram-node-wrapper';
+            $(draggableDiv).addClass('diagram-node-wrapper');
             draggableDiv.setAttribute('style', "top:" + node.y
                     + "px;left:" + node.x + "px");
             
@@ -125,16 +124,11 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
             nodeDiv.innerHTML = node.text;
             nodeDiv.className = "diagram-node";
             if (!node.enabled) {
-            	nodeDiv.className = nodeDiv.className + " disabled";
+            	$(nodeDiv).addClass("disabled");
             }
-
-            nodeDiv.addEventListener("click", function(event) {
-                if (state.selectedNodeId !== event.currentTarget.id) {
-                    self.onNodeSelected({
-                        'id' : event.currentTarget.id
-                    });
-                } 
-            }, false);
+            
+            $(nodeDiv).click(node_Click);
+            $(nodeDiv).mousedown(node_MouseDown);
             
             nodeDiv.addEventListener("dblclick", function(event) {
                     self.onNodeDoubleClick({
@@ -143,7 +137,7 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
             }, false);
             
             var labelDiv = document.createElement('div');
-            labelDiv.className = "diagram-node-label";
+            $(labelDiv).addClass("diagram-node-label");
             labelDiv.innerHTML = node.name;
             draggableDiv.appendChild(labelDiv);
 
@@ -152,25 +146,27 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
             instance.draggable(draggableDiv, {
                 constrain:true,
                 start : function(event) {
+                    nodeStart[event.el.firstChild.id] = $(event.el).position();
                     event.el.dragging = true;
                 },
                 stop : function(event) {
                     event.el.dragging = false;
-                    self.onNodeMoved({
-                        'id' : event.el.firstChild.id,
-                        'x' : event.pos[0],
-                        'y' : event.pos[1]
-                    });
+                    var start = nodeStart[event.el.firstChild.id];
+                    if(start != undefined && 
+                    		(start.left !== event.pos[0] || start.top !== event.pos[1])) {
+	                    self.onNodeMoved({
+	                        'id' : event.el.firstChild.id,
+	                        'x' : event.pos[0],
+	                        'y' : event.pos[1]
+	                    });
+                	}
                 },
                 grid : [10, 10],
                 snapThreshold : 10
-                
             });
-
+            
             self.addEndpoints(node, nodeDiv);
-
         }
-
         for (j = 0; j < nodeList.length; j++) {
             for (i = 0; i < nodeList[j].targetNodeIds.length; i++) {
                 instance.connect({
@@ -206,8 +202,11 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
                 "removed" : true
             });
         });
+        
         instance.bind("click", function(connection, originalEvent) {
-            unselectAll();            
+            originalEvent.stopImmediatePropagation();
+            unselectAllLinks();
+            $(".diagram-node").removeClass("selected");
             state.selectedNodeId = null;
             instance.detach(connection, {fireEvent:false});
             connection = instance.connect({
@@ -220,12 +219,27 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
                 'sourceNodeId' : connection.sourceId,
                 'targetNodeId' : connection.targetId,
             });
+            sendSelected();
         });
         
-        self.onNodeSelected({
-            'id' : state.selectedNodeId
-        });
+        var rubberband = document.createElement('div');
+        rubberband.id = "rubberband";
+        $(rubberband).addClass("rubberband");
+        parentDiv.appendChild(rubberband);
         
+
+        $(document).keydown(function(event){
+            if(event.which=="17")
+            	ctrlPress = true;
+        });
+        $(document).keyup(function(){
+        	ctrlPress = false;
+        });
+
+        $(parentDiv).click(diagramContainer_Click);
+        $(parentDiv).mousedown(diagramContainer_MouseDown);
+        $(parentDiv).mousemove(diagramContainer_MouseMove);
+        $(parentDiv).mouseup(diagramContainer_MouseUp);
     };
 
     instance.bind("ready", function() {
@@ -234,17 +248,19 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
 
     this.onStateChange = function() {
         instance.batch(function() {
-            unselectAll();  
-            if (state.selectedNodeId != null) {
-                var node = document.getElementById(state.selectedNodeId);
-                if (node != null) {                    
-                    node.className = node.className + " selected ";
-                    node.parentNode.childNodes[1].innerHTML = findNode(state.selectedNodeId).name;
-                    if (findNode(state.selectedNodeId).enabled) {
-                    	node.className = node.className.replace(/(?:^|\s)disabled(?!\S)/g, '');
-                    } else {
-                    	node.className = node.className + " disabled";
-                    }
+        	$( ".diagram-node.selected" ).removeClass("selected");
+        	instance.clearDragSelection();
+            var selected = state.selectedNodeIds;
+            for (var i = 0; i < selected.length; i++) {
+            	var node = document.getElementById(selected[i]);
+            	$(node).addClass("selected");
+            	instance.addToDragSelection(node.parentNode);
+            	var serverNode = findNode(selected[i]);
+            	node.parentNode.childNodes[1].innerHTML = serverNode.name;
+            	if (serverNode.enabled) {
+                	$(node).removeClass("disabled");
+                } else {
+                	$(node).addClass("disabled");
                 }
             }
         });
@@ -261,17 +277,132 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
         return null;
     };
     
-    var unselectAll = function() {
-        var children = document.getElementsByClassName("diagram-node");
-        for (var i = 0; i < children.length; i++) {
-            children[i].className = children[i].className.replace(/(?:^|\s)selected(?!\S)/g, '');
-        }
-        
+    var unselectAllLinks = function() {
         var connections = instance.getAllConnections();
         for (j = 0; j < connections.length; j++) {
             var connection = connections[j];
             connection.removeType("selected");
         }
     }
+    
+    function diagramContainer_Click(event) {
+        if(diagramStart.x === event.pageX && diagramStart.y === event.pageY) {
+            instance.clearDragSelection();
+            $(".diagram-node").removeClass("selected");
+            sendSelected();
+        }
+    }
+    
+    function node_Click(event) {
+    	event.stopPropagation();
+        if(!ctrlPress
+        		&& (diagramStart.x === event.pageX && diagramStart.y === event.pageY)) {
+            instance.clearDragSelection();
+            instance.addToDragSelection(this.parentNode);
+            $(".diagram-node").removeClass("selected");
+            unselectAllLinks();
+            $(this).addClass("selected");
+            sendSelected();
+        }
+    }
+    
+    function sendSelected() {
+    	var selected = {nodes: []};
+    	$( ".diagram-node.selected" ).each(function() {
+    	    selected.nodes.push({
+    	    	"id" : this.id
+    	    });
+    	});
+    	self.onNodeSelected(selected);
+    }
+    
+    function node_MouseDown(event) {
+    	if(!$(this).hasClass("selected")) {
+    		if (!ctrlPress) {
+	    		instance.clearDragSelection();
+	    		$(".diagram-node").removeClass("selected");
+	    		unselectAllLinks();
+    		}
+    		instance.addToDragSelection(this.parentNode);
+    		$(this).addClass("selected");
+    		sendSelected();
+    	}
+    	diagramStart.x = event.pageX;
+    	diagramStart.y = event.pageY;
+    }
 
+    function diagramContainer_MouseDown(event) {
+    	diagramStart.x = event.pageX;
+    	diagramStart.y = event.pageY;
+        
+        var offset = $("#diagram").offset();
+        var t=diagramStart.x - offset.top;
+        var l=diagramStart.y - offset.left;
+        
+        $("#rubberband").css({top:t, left:l, height:1, width:1, position:'absolute'});
+        $("#rubberband").show();
+    }
+    
+    function diagramContainer_MouseMove(event) {
+        if($("#rubberband").is(":visible") !== true) { return; }
+        
+        var t = (event.pageY > diagramStart.y) ? diagramStart.y : event.pageY;
+        var l = (event.pageX >= diagramStart.x) ? diagramStart.x : event.pageX;
+        var offset = $("#diagram").offset();
+        t=t - offset.top;
+        l=l - offset.left;
+        
+        wcalc = event.pageX - diagramStart.x;
+        var w = (event.pageX > diagramStart.x) ? wcalc : (wcalc * -1); 
+        
+        hcalc = event.pageY - diagramStart.y;
+        var h = (event.pageY > diagramStart.y) ? hcalc : (hcalc * -1); 
+        
+        $("#rubberband").css({top:t, left:l, height:h, width:w, position:'absolute'});
+    }
+    
+    function diagramContainer_MouseUp(event) {
+        if(diagramStart.x !== event.pageX && diagramStart.y !== event.pageY) {
+        	diagramContainer_FindSelectedItem();
+        }
+        $("#rubberband").hide();
+    }
+    
+    function diagramContainer_FindSelectedItem() {
+        if($("#rubberband").is(":visible") !== true) { return; }
+        
+        var rubberbandOffset = getTopLeftOffset($("#rubberband")); 
+
+        $(".diagram-node").each(function() {
+            var itemOffset = getTopLeftOffset($(this));
+            if( itemOffset.top > rubberbandOffset.top &&
+                itemOffset.left > rubberbandOffset.left &&
+                itemOffset.right < rubberbandOffset.right &&
+                itemOffset.bottom < rubberbandOffset.bottom) 
+            {
+                $(this).addClass("selected");
+                instance.addToDragSelection(this.parentNode);
+            }
+        });
+        sendSelected();
+    }
+    
+    function getTopLeftOffset(element) {
+        var elementDimension = {};
+        elementDimension.left = element.offset().left;
+        elementDimension.top =  element.offset().top;
+        elementDimension.right = elementDimension.left + element.outerWidth();
+        elementDimension.bottom = elementDimension.top + element.outerHeight();
+        return elementDimension;
+    }
+    
+    function diagramContainer_Click(event) {
+        if(diagramStart.x === event.pageX && diagramStart.y === event.pageY)
+        {
+            instance.clearDragSelection();
+            $(".diagram-node").removeClass("selected");
+            unselectAllLinks();
+            sendSelected();
+        }
+    }
 }

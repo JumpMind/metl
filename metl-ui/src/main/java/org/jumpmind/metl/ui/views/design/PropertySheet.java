@@ -42,6 +42,7 @@ import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.SettingDefinition;
+import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.MessageType;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.ResourceCategory;
@@ -67,6 +68,7 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.ui.AbsoluteLayout;
+import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Button;
@@ -146,7 +148,8 @@ public class PropertySheet extends AbsoluteLayout {
         return value;
     }
 
-    public void setSource(Object obj) {
+    @SuppressWarnings("unchecked")
+	public void setSource(Object obj) {
         value = obj;
         editButton.setVisible(hasAdvancedEditor());
         FormLayout formLayout = new FormLayout();
@@ -155,6 +158,16 @@ public class PropertySheet extends AbsoluteLayout {
         formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
 
         if (obj != null) {
+        	
+        	if (obj instanceof List<?>) {
+        		List<Object> l = (List<Object>) obj;
+        		if (l.size()==1) {
+            		if (l.get(0) instanceof FlowStep) {
+            			obj = (FlowStep)l.get(0);
+            		}
+        		}
+            }
+        	
             if (obj instanceof FlowStep) {
                 obj = ((FlowStep) obj).getComponent();
             }
@@ -185,9 +198,70 @@ public class PropertySheet extends AbsoluteLayout {
                 addThreadCount(componentDefintion, formLayout, component);
                 addComponentShared(formLayout, component);      
             }
+            
+            if (obj instanceof List<?>) {
+                addCommonComponentSettings(formLayout, obj);
+            }
 
         }
         panel.setContent(formLayout);
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected void addCommonComponentSettings(FormLayout formLayout, Object obj) {
+        List<Object> list = (List<Object>) obj;
+        List<Component> components = new ArrayList<Component>(list.size());
+        
+        // Check if all selected components support the enabled property
+        // TODO: Support more than the enable component.
+        //       Look for all common parameters.
+        boolean supportEnable = true;
+        boolean enabled = true;
+        for (Object o : list) {
+            if (o instanceof FlowStep) {
+                Component component = ((FlowStep)o).getComponent();
+                if (!hasSetting(component, AbstractComponentRuntime.ENABLED)) {
+                    supportEnable = false;
+                    break;
+                }
+                if(enabled && !component.getBoolean(AbstractComponentRuntime.ENABLED, true)) {
+                    enabled = false;
+                }
+                components.add(component);
+            } else {
+                supportEnable = false;
+                break;
+            }
+        }
+        
+        // Create the enabled field if all selected components support the enabled setting.
+        if (components.size() != 0 && supportEnable) {
+            final CheckBox checkBox = new CheckBox("Enabled");
+            checkBox.setImmediate(true);
+            checkBox.setRequired(true);
+            checkBox.setValue(enabled);
+            checkBox.addValueChangeListener(new ValueChangeListener() {
+                private static final long serialVersionUID = 1L;
+    
+                @Override
+                public void valueChange(ValueChangeEvent event) {
+                    for (final Component component : components) {
+                        saveSetting(AbstractComponentRuntime.ENABLED, checkBox.getValue().toString(), component);
+                    }
+                    if (listener != null) {
+                        listener.componentChanged(components);
+                    }
+                }
+            });
+            formLayout.addComponent(checkBox);
+        }
+    }
+
+    
+    private boolean hasSetting(Component component, String setting) {
+    	XMLComponent componentDefinition = 
+				context.getComponentFactory().getComonentDefinition(component.getType());
+		return (componentDefinition.findXMLSetting(setting) != null);
     }
     
     protected void addResourceProperties(FormLayout formLayout, Resource resource) {
@@ -264,7 +338,9 @@ public class PropertySheet extends AbsoluteLayout {
                 component.setName(text);
                 context.getConfigurationService().save(component);
                 if (listener != null) {
-                    listener.componentChanged(component);
+                	List<Component> components = new ArrayList<Component>(1);
+                	components.add(component);
+                    listener.componentChanged(components);
                 }
             };
         };
@@ -441,12 +517,12 @@ public class PropertySheet extends AbsoluteLayout {
                         public void valueChange(ValueChangeEvent event) {
                             saveSetting(definition.getId(), checkBox.getValue().toString(), obj);
                             if (listener != null) {
-                                listener.componentChanged((Component)obj);
+                            	List<Component> components = new ArrayList<Component>(1);
+                            	components.add((Component) obj);
+                                listener.componentChanged(components);
                             }
                         }
                     });
-                    
-                    
                     
                     formLayout.addComponent(checkBox);
                     break;

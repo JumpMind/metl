@@ -21,11 +21,12 @@
 package org.jumpmind.metl.ui.views.design;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.jumpmind.metl.core.model.Component;
 
 public interface IPropertySheetChangeListener extends Serializable {
 
-    public void componentChanged(Component component);
+    public void componentChanged(List<Component> components);
     
 }

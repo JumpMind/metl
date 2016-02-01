@@ -20,21 +20,24 @@
  */
 package org.jumpmind.metl.ui.diagram;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Component.Event;
 
 public class NodeSelectedEvent extends Event {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    Node node;
-    
-    public NodeSelectedEvent(Component source, Node node) {
-        super(source);
-        this.node = node;
-    }
+	List<String> nodeIds = new ArrayList<String>();
 
-    public Node getNode() {
-        return node;
-    }
+	public NodeSelectedEvent(Component source, List<String> nodeIds) {
+		super(source);
+		this.nodeIds = nodeIds;
+	}
+
+	public List<String> getNodeIds() {
+		return nodeIds;
+	}
 }
