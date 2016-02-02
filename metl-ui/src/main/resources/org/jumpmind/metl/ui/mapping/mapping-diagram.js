@@ -3,12 +3,14 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function() {
 	state = this.getState();
     selectedSrcId = null;
     selectedDstId = null;
-    inputModelFilter = null;
-    outputModelFilter = null;
+    inputModelFilter = "";
+    outputModelFilter = "";
+    inputFilterPopulated = false;
+    outputFilterPopulated = false;
 
     mappingDiv = document.getElementById("mapping-diagram");
     scrollDiv = mappingDiv.parentNode;
-    topDiv = scrollDiv.parentNode;    
+    topDiv = scrollDiv.parentNode;
 
     scrollDiv.parentNode.addEventListener("click", function(event) {
     	if (event.target.tagName == "DIV") {
@@ -85,7 +87,6 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function() {
 
     instance.bind("connectionDrag", function(connection) {
     	dragConnection = connection;
-    	console.log("drag start");
     });
     
     unselectAllConnections = function() {
@@ -122,26 +123,28 @@ window.org_jumpmind_metl_ui_mapping_MappingDiagram = function() {
     	});
     };
     
-    this.filterInputModel = function(text) {
+    this.filterInputModel = function(text, filterPopulated) {
     	inputModelFilter = text;
+    	inputFilterPopulated = filterPopulated;
     	rebuildAll();
     };
 
-    this.filterOutputModel = function(text) {
+    this.filterOutputModel = function(text, filterPopulated) {
     	outputModelFilter = text;
+    	outputFilterPopulated = filterPopulated;
     	rebuildAll();
     };
-
+    
     instance.ready(function () {
     	rebuildAll();
     });
 }
 
 function rebuildAll() {
-	removeConnections();
-	removeNodes();
-	appendNodes(mappingDiv, state.inputModel.modelEntities, "src", 10, 10, inputModelFilter);
-    appendNodes(mappingDiv, state.outputModel.modelEntities, "dst", (mappingDiv.clientWidth / 2) + 12, 10, outputModelFilter);
+    removeConnections();
+    removeNodes();
+    appendNodes(mappingDiv, state.inputModel.modelEntities, "src", 10, 10, inputModelFilter, inputFilterPopulated, true);
+    appendNodes(mappingDiv, state.outputModel.modelEntities, "dst", (mappingDiv.clientWidth / 2) + 12, 10, outputModelFilter, outputFilterPopulated, false);
 
     var srcNodes = jsPlumb.getSelector(".mapping-diagram .src");
     if (srcNodes.length > 0) {
@@ -163,22 +166,29 @@ function removeNodes() {
 	}	
 }
 
-function appendNodes(parentDiv, entities, prefix, left, top, filterText) {
-	var lineHeight = 23;
-	var filteredEntities = [];
+function appendNodes(parentDiv, entities, prefix, left, top, filterText, filterMapped, src) {
+    var lineHeight = 23;
+    var filteredEntities = [];
     for (var i = 0; i < entities.length; i++) {
     	var entity = entities[i];
-    	if (filterText == null || entity.name.toUpperCase().indexOf(filterText.toUpperCase()) != -1) {
+    	
+    	var mapped = !filterMapped;
+    	var match = (filterText == "");
+    	if (match || entity.name.toUpperCase().indexOf(filterText.toUpperCase()) != -1) {
+    		match = true
+    	}
+		var attrs = entity.modelAttributes;
+    	for (var j = 0; j < attrs.length && (!match || !mapped); j++) {
+    		var attr = attrs[j];
+    		if (match || attr.name.toUpperCase().indexOf(filterText.toUpperCase()) != -1) {
+    			match = true;
+    		}
+    		if (mapped || hasMap(attr,src)) {
+    			mapped = true;
+    		}
+    	}
+    	if (match && mapped) {
     		filteredEntities[filteredEntities.length] = entity;
-    	} else {
-    		var attrs = entity.modelAttributes;
-        	for (var j = 0; j < attrs.length; j++) {
-        		var attr = attrs[j];
-        		if (filterText == null || attr.name.toUpperCase().indexOf(filterText.toUpperCase()) != -1) {
-        			filteredEntities[filteredEntities.length] = entity;
-        			break;
-        		}
-        	}
     	}
     }
 	for (var i = 0; i < filteredEntities.length; i++, top += lineHeight) {
@@ -243,3 +253,20 @@ function unselectNodes(className) {
 		}
 	}
 }
+
+function hasMap(attribute,src) {
+    var settings = state.component.attributeSettings;
+    for (var i = 0; i < settings.length; i++) {
+    	var setting = settings[i];
+    	if (setting.name == state.mapsToAttrName) {
+    		// If evaluating source, compare setting id
+    		// If evaluating target, compare setting value
+			if ((src && attribute.id == setting.attributeId)
+					|| (!src && attribute.id == setting.value)){
+				return true;
+			}
+    	}
+    }
+    return false;
+}
+

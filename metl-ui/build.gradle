@@ -34,6 +34,8 @@ war {
     manifest { attributes 'Main-Class': 'org.jumpmind.metl.Metl' }
 }
 
+// Don't compress javascript
+// vaadin.gwt.style = "PRETTY"
 vaadin.version = vaadinVersion
 vaadin.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
 vaadin.manageWidgetset = true

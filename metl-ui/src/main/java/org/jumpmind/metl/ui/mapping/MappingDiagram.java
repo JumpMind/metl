@@ -88,12 +88,12 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
     	}
     }
 
-    public void filterInputModel(String text) {
-        callFunction("filterInputModel", text);
+    public void filterInputModel(String text, boolean filterMapped) {
+        callFunction("filterInputModel", text, filterMapped);
     }
 
-    public void filterOutputModel(String text) {
-        callFunction("filterOutputModel", text);
+    public void filterOutputModel(String text, boolean filterMapped) {
+        callFunction("filterOutputModel", text, filterMapped);
     }
 
     protected void removeConnection(String sourceId, String targetId) {

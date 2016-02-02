@@ -27,15 +27,19 @@ import org.jumpmind.metl.core.runtime.component.Mapping;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.views.design.AbstractComponentEditPanel;
 
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
@@ -49,6 +53,14 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
     MappingDiagram diagram;
 
     Button removeButton;
+    
+    CheckBox srcMapFilter;
+    
+    CheckBox dstMapFilter;
+    
+    TextField srcTextFilter;
+    
+    TextField dstTextFilter;
 
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
@@ -59,42 +71,60 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
         autoMapButton.addClickListener(new AutoMapListener());
         removeButton.addClickListener(new RemoveListener());
 
-        HorizontalLayout header1 = new HorizontalLayout();
-        header1.setSpacing(true);
-        header1.setMargin(new MarginInfo(false, true, false, true));
-        header1.setWidth(100f, Unit.PERCENTAGE);
-        header1.addComponent(
+        HorizontalLayout titleHeader = new HorizontalLayout();
+        titleHeader.setSpacing(true);
+        titleHeader.setMargin(new MarginInfo(false, true, false, true));
+        titleHeader.setWidth(100f, Unit.PERCENTAGE);
+        titleHeader.addComponent(
                 new Label("<b>Input Model:</b> &nbsp;" + (component.getInputModel() != null ? component.getInputModel().getName() : "?"),
                         ContentMode.HTML));
-        header1.addComponent(
+        titleHeader.addComponent(
                 new Label("<b>Output Model:</b> &nbsp;" + (component.getOutputModel() != null ? component.getOutputModel().getName() : "?"),
                         ContentMode.HTML));
-        addComponent(header1);
+        addComponent(titleHeader);
 
-        HorizontalLayout header2 = new HorizontalLayout();
-        header2.setSpacing(true);
-        header2.setMargin(new MarginInfo(true, true, true, true));
-        header2.setWidth(100f, Unit.PERCENTAGE);
-        TextField srcFilter = new TextField();
-        srcFilter.setInputPrompt("Filter");
-        srcFilter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        srcFilter.setIcon(FontAwesome.SEARCH);
-        srcFilter.setImmediate(true);
-        srcFilter.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        srcFilter.setTextChangeTimeout(200);
-        srcFilter.addTextChangeListener(new FilterInputModelListener());
-        header2.addComponent(srcFilter);
-        TextField dstFilter = new TextField();
-        dstFilter.setInputPrompt("Filter");
-        dstFilter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        dstFilter.setIcon(FontAwesome.SEARCH);
-        dstFilter.setImmediate(true);
-        dstFilter.setTextChangeEventMode(TextChangeEventMode.LAZY);
-        dstFilter.setTextChangeTimeout(200);
-        dstFilter.addTextChangeListener(new FilterOutputModelListener());
-        header2.addComponent(dstFilter);
-        addComponent(header2);
+        HorizontalLayout filterHeader = new HorizontalLayout();
+        filterHeader.setSpacing(true);
+        filterHeader.setMargin(new MarginInfo(true, true, true, true));
+        filterHeader.setWidth(100f, Unit.PERCENTAGE);
+        HorizontalLayout srcFilterHeader = new HorizontalLayout();
+        srcFilterHeader.setSpacing(true);
+        srcFilterHeader.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
+        filterHeader.addComponent(srcFilterHeader);
+        HorizontalLayout dstFilterHeader = new HorizontalLayout();
+        dstFilterHeader.setSpacing(true);
+        dstFilterHeader.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
+        filterHeader.addComponent(dstFilterHeader);
+        addComponent(filterHeader);
 
+        srcTextFilter = new TextField();
+        srcTextFilter.setInputPrompt("Filter");
+        srcTextFilter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
+        srcTextFilter.setIcon(FontAwesome.SEARCH);
+        srcTextFilter.setImmediate(true);
+        srcTextFilter.setTextChangeEventMode(TextChangeEventMode.LAZY);
+        srcTextFilter.setTextChangeTimeout(200);
+        srcTextFilter.addTextChangeListener(new FilterInputTextListener());
+        srcFilterHeader.addComponent(srcTextFilter);
+        
+        srcMapFilter = new CheckBox("Mapped Only");
+        srcMapFilter.addValueChangeListener(new FilterSrcMapListener());
+        srcFilterHeader.addComponent(srcMapFilter);
+        
+        dstTextFilter = new TextField();
+        dstTextFilter.setInputPrompt("Filter");
+        dstTextFilter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
+        dstTextFilter.setIcon(FontAwesome.SEARCH);
+        dstTextFilter.setImmediate(true);
+        dstTextFilter.setTextChangeEventMode(TextChangeEventMode.LAZY);
+        dstTextFilter.setTextChangeTimeout(200);
+        dstTextFilter.addTextChangeListener(new FilterOutputTextListener());
+        dstFilterHeader.addComponent(dstTextFilter);
+        
+        dstMapFilter = new CheckBox("Mapped Only");
+        dstMapFilter.addValueChangeListener(new FilterDstMapListener());
+        dstFilterHeader.addComponent(dstMapFilter);
+        
         Panel panel = new Panel();
         VerticalLayout vlay = new VerticalLayout();
         vlay.setSizeFull();
@@ -207,15 +237,27 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
         }
     }
 
-    class FilterInputModelListener implements TextChangeListener {
+    class FilterInputTextListener implements TextChangeListener {
         public void textChange(TextChangeEvent event) {
-            diagram.filterInputModel((String) event.getText());
+            diagram.filterInputModel((String) event.getText(), srcMapFilter.getValue());
         }
     }
 
-    class FilterOutputModelListener implements TextChangeListener {
+    class FilterOutputTextListener implements TextChangeListener {
         public void textChange(TextChangeEvent event) {
-            diagram.filterOutputModel((String) event.getText());
+            diagram.filterOutputModel((String) event.getText(), dstMapFilter.getValue());
         }
+    }
+    
+    class FilterSrcMapListener implements ValueChangeListener {
+		public void valueChange(ValueChangeEvent event) {
+			diagram.filterInputModel(srcTextFilter.getValue(), (boolean) event.getProperty().getValue());
+		}
+    }
+    
+    class FilterDstMapListener implements ValueChangeListener {
+		public void valueChange(ValueChangeEvent event) {
+			diagram.filterOutputModel(dstTextFilter.getValue(), (boolean) event.getProperty().getValue());
+		}
     }
 }
