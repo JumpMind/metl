@@ -169,6 +169,9 @@ function removeNodes() {
 function appendNodes(parentDiv, entities, prefix, left, top, filterText, filterMapped, src) {
     var lineHeight = 23;
     var filteredEntities = [];
+    var key = "";
+    var column = "";
+    var table = "";
     for (var i = 0; i < entities.length; i++) {
     	var entity = entities[i];
     	
@@ -194,20 +197,24 @@ function appendNodes(parentDiv, entities, prefix, left, top, filterText, filterM
 	for (var i = 0; i < filteredEntities.length; i++, top += lineHeight) {
     	var entity = filteredEntities[i];
     	var attrs = entity.modelAttributes;
-    	createNode(parentDiv, prefix + entity.id, entity.name, "entity", left, top);
+    	createNode(parentDiv, prefix + entity.id, entity.name, "entity", left, top, table);
     	for (j = 0, top += lineHeight; j < attrs.length; j++, top += lineHeight) {
     		var attr = attrs[j];
-    		createNode(parentDiv, prefix + attr.id, attr.name, "entity " + prefix, left + 10, top);
+    		var icon = column;
+    		if (attr.pk) {
+    			icon = key;
+    		}
+    		createNode(parentDiv, prefix + attr.id, attr.name, "entity " + prefix, left + 10, top, icon);
     	}
     }
 }
 
-function createNode(parentDiv, id, name, className, left, top) {
+function createNode(parentDiv, id, name, className, left, top, icon) {
     var div = document.createElement("div");
     div.id = id;
     div.style.top = top + "px";
     div.style.left = left + "px";
-    div.innerHTML = name;
+    div.innerHTML = "<i class=\"v-icon FontAwesome\">" + icon + "</i><span>" + name + "</span>";
     div.className = className;
     div.onmousedown = nodeClick;
 	parentDiv.appendChild(div);
