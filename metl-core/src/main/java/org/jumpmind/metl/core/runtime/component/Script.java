@@ -88,23 +88,23 @@ public class Script extends AbstractComponentRuntime {
                     ScriptHelper.class.getSimpleName()));
             if (isNotBlank(initScript)) {
                 script.append("\n");
-                script.append(String.format(" protected void onInit() { %s} \n", initScript));
+                script.append(String.format(" protected void onInit() { %s \n} \n", initScript));
             }
             if (isNotBlank(handleMessageScript)) {
                 script.append("\n");
-                script.append(String.format(" protected void onHandle() { %s } \n",
+                script.append(String.format(" protected void onHandle() { %s \n} \n",
                         handleMessageScript));
             }
             if (isNotBlank(onSuccess)) {
                 script.append("\n");
                 script.append(String
-                        .format(" protected void onSuccess() { %s } \n",
+                        .format(" protected void onSuccess() { %s \n} \n",
                                 onSuccess));
             }
             if (isNotBlank(onError)) {
                 script.append("\n");
                 script.append(String
-                        .format(" protected void onError(Throwable myError) { %s } \n",
+                        .format(" protected void onError(Throwable myError) { %s \n} \n",
                                 onError));
             }
             script.append("\n};\n");
