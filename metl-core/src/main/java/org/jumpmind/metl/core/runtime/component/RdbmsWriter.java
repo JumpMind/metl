@@ -244,8 +244,19 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     }
                 }
             } // end each target table option
+            
+            String entityNameToBeProcessed="Not Found";
             if (!processedRow) {
-                throw new MisconfiguredException("Could not find table to write to for row: %s", inputRow.toString());
+                Model inputModel = getInputModel();
+                for (ModelEntity entity : inputModel.getModelEntities()) {
+                    for (ModelAttribute attribute : entity.getModelAttributes()) {
+                        if (inputRow.containsKey(attribute.getId())) {
+                            entityNameToBeProcessed = entity.getName();
+                        }
+                    }
+                }
+                throw new MisconfiguredException("Could not find table to write to for row.  Operation %s. " +
+                "Entity %s. Row values %s", inputRow.getChangeType(), entityNameToBeProcessed, inputRow.toString());
             }
             processedRow = false;
         } // end for each row
