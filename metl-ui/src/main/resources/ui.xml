@@ -98,6 +98,7 @@
     </component-ui>
     <component-ui id="Deduper UI" componentId="Deduper">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-deduper-48x48-color.png</iconImage>
+        <className>org.jumpmind.metl.ui.views.design.EditDeduperPanel</className>        
     </component-ui>    
     <component-ui id="Delay UI" componentId="Delay">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-delay-48x48-color.png</iconImage>

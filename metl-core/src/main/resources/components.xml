@@ -137,6 +137,26 @@
     <className>org.jumpmind.metl.core.runtime.component.Deduper</className>
     <description></description>
     <settings>
+      <setting id='dedupe.type'
+               required='true'
+               type='choice'>
+        <name>Dedupe Type</name>
+        <defaultValue>ENTITY</defaultValue>
+        <choices>
+          <choice>ENTITY</choice>
+          <choice>ATTRIBUTE</choice>
+        </choices>
+      </setting>
+      <setting id='preserve.record'
+               required='false'
+               type='choice'>
+        <name>Preserve Record</name>
+        <defaultValue>First Record</defaultValue>
+        <choices>
+          <choice>First Record</choice>
+          <choice>Last Record</choice>
+        </choices>
+      </setting>
       <setting id='rows.per.message'
                required='false'
                type='integer'>
