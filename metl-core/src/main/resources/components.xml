@@ -722,12 +722,24 @@
     <className>org.jumpmind.metl.core.runtime.component.XmlParser</className>
     <description></description>
     <settings>
+      <setting id='rows.per.message'
+               required='true'
+               type='integer'>
+        <name>Rows/Msg</name>
+        <defaultValue>1000</defaultValue>
+      </setting>    
+      <setting id='optimize.for.speed'
+               required='false'
+               type='boolean'>
+        <name>Optimize for speed.  Supports only basic XPath</name>
+        <defaultValue>false</defaultValue>
+      </setting>    
       <setting id='xml.formatter.ignore.namespace'
                required='false'
                type='boolean'>
         <name>Ignore namespaces for XPath matching</name>
         <defaultValue>true</defaultValue>
-      </setting>
+      </setting>        
     </settings>
   </component>
   <component category='READER'
