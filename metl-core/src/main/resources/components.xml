@@ -717,7 +717,8 @@
              inputMessageType='text'
              inputOutputModelsMatch='false'
              outputMessageType='entity'
-             resourceCategory='none'>
+             resourceCategory='none'
+             supportsMultipleThreads='true'>
     <name>Parse XML</name>
     <className>org.jumpmind.metl.core.runtime.component.XmlParser</className>
     <description></description>
