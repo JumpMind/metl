@@ -139,6 +139,7 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                                 EntityData data = processCurrentLevel(fullPath.toString(), currentDataAtLevel);
                                 if (data != null) {
                                     payload.add(data);
+                                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                                 }
 
                                 int index = fullPath.lastIndexOf("/");

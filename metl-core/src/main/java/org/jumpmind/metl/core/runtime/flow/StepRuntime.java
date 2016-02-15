@@ -113,12 +113,14 @@ public class StepRuntime implements Runnable {
     int controlMessagesSentCount;
 
     int activeCount;
+    
+    int queueCapacity;
 
     public StepRuntime(IComponentRuntimeFactory componentFactory, ComponentContext componentContext, FlowRuntime flowRuntime) {
         this.flowRuntime = flowRuntime;
         this.componentContext = componentContext;
-        int capacity = componentContext.getFlowStep().getComponent().getInt(AbstractComponentRuntime.INBOUND_QUEUE_CAPACITY, 1000);
-        this.inQueue = new LinkedBlockingQueue<Message>(capacity);
+        this.queueCapacity = componentContext.getFlowStep().getComponent().getInt(AbstractComponentRuntime.INBOUND_QUEUE_CAPACITY, 1000);
+        this.inQueue = new LinkedBlockingQueue<Message>(queueCapacity);
         this.sourceStepRuntimeUnitOfWorkReceived = new HashMap<String, Boolean>();
         this.targetStepRuntimeUnitOfWorkSent = new HashSet<String>();
         this.componentFactory = componentFactory;
@@ -179,7 +181,7 @@ public class StepRuntime implements Runnable {
             int threadCount = component.getInt(StepRuntime.THREAD_COUNT, 1);
             String prefix = String.format("%s-%s", LogUtils.normalizeName(flowRuntime.getAgent().getName()),
                     LogUtils.normalizeName(componentContext.getFlowStep().getName()));
-            this.componentRuntimeExecutor = ThreadUtils.createFixedThreadPool(prefix, threadCount);
+            this.componentRuntimeExecutor = ThreadUtils.createFixedThreadPool(prefix, queueCapacity, threadCount);
             for (int threadNumber = 1; threadNumber <= threadCount; threadNumber++) {
                 createComponentRuntime(threadNumber);
             }

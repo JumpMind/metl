@@ -22,8 +22,13 @@ package org.jumpmind.metl.core.util;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.jumpmind.metl.core.runtime.Message;
 
 final public class ThreadUtils {
 
@@ -43,8 +48,17 @@ final public class ThreadUtils {
         return threadNumber;
     }
 
-    public static ExecutorService createFixedThreadPool(String namePrefix, int threadCount) {
-        return Executors.newFixedThreadPool(threadCount, new CustomThreadFactory(namePrefix));
+    public static ExecutorService createFixedThreadPool(String namePrefix, int queueCapacity, int threadCount) {
+          ThreadPoolExecutor executor =  new ThreadPoolExecutor(threadCount, threadCount,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(queueCapacity),
+                new CustomThreadFactory(namePrefix));
+            executor.setRejectedExecutionHandler((r, e) -> {try {
+                e.getQueue().put(r);
+            } catch (Exception e1) {
+                throw new RuntimeException(e1);
+            }});
+          return executor;
     }
 
     public static ExecutorService createUnboundedThreadPool(String namePrefix) {
