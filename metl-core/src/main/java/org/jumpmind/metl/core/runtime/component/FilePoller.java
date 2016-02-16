@@ -66,6 +66,8 @@ public class FilePoller extends AbstractComponentRuntime {
     
     public final static String SETTING_MIN_FILES_TO_POLL = "min.files.to.poll";
     
+    public final static String SETTING_RECURSE_SUBDIRECTORIES = "recurse.subdirectories";
+    
     public final static String SORT_NAME = "Name";
     public final static String SORT_MODIFIED = "Last Modified";
 
@@ -83,6 +85,8 @@ public class FilePoller extends AbstractComponentRuntime {
     boolean useTriggerFile = false;
 
     boolean cancelOnNoFiles = true;
+    
+    boolean recurseSubdirectories = true;
     
     int maxFilesToPoll;
     
@@ -117,6 +121,7 @@ public class FilePoller extends AbstractComponentRuntime {
                 context.getFlowParameters(), true);
         useTriggerFile = properties.is(SETTING_USE_TRIGGER_FILE, useTriggerFile);
         cancelOnNoFiles = properties.is(SETTING_CANCEL_ON_NO_FILES, cancelOnNoFiles);
+        recurseSubdirectories = properties.is(SETTING_RECURSE_SUBDIRECTORIES, recurseSubdirectories);
         actionOnSuccess = properties.get(SETTING_ACTION_ON_SUCCESS, actionOnSuccess);
         actionOnError = properties.get(SETTING_ACTION_ON_ERROR, actionOnError);
         archiveOnErrorPath = FormatUtils.replaceTokens(
@@ -128,7 +133,7 @@ public class FilePoller extends AbstractComponentRuntime {
         maxFilesToPoll = properties.getInt(SETTING_MAX_FILES_TO_POLL);
         minFilesToPoll = properties.getInt(SETTING_MIN_FILES_TO_POLL);
         fileSortOption = properties.get(SETTING_FILE_SORT_ORDER, fileSortOption);
-        runWhen = properties.get(RUN_WHEN, PER_UNIT_OF_WORK);
+        runWhen = properties.get(RUN_WHEN, PER_UNIT_OF_WORK);        
 
     }
         
@@ -195,7 +200,7 @@ public class FilePoller extends AbstractComponentRuntime {
                 if (!fileInfo.isDirectory() && pathMatcher.match(pattern, fileInfo.getName()) 
                         && !matches.contains(fileInfo)) {
                     matches.add(fileInfo);
-                } else if (fileInfo.isDirectory()) {
+                } else if (fileInfo.isDirectory() && recurseSubdirectories) {
                     matches.addAll(matchFiles(fileInfo.getRelativePath(), pattern, directory, pathMatcher));
                 }
             }
