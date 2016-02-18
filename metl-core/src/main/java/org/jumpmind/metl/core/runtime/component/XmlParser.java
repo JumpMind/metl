@@ -123,37 +123,40 @@ public class XmlParser extends AbstractXMLComponentRuntime {
             ArrayList<EntityData> payload = new ArrayList<EntityData>();
             if (inputRows != null) {
                 for (String xml : inputRows) {
-                    StringBuilder fullPath = new StringBuilder();
-                    List<StringBuilder> shortPaths = new ArrayList<>();
+                    List<StringBuilder> paths = new ArrayList<>();
                     parser.setInput(new StringReader(xml));
                     int eventType = parser.getEventType();
                     while (eventType != XmlPullParser.END_DOCUMENT) {
                         switch (eventType) {
                             case XmlPullParser.START_TAG:
-                                fullPath.append("/").append(parser.getName());
+                                for (StringBuilder path : paths) {
+                                    path.append("/").append(parser.getName());    
+                                }                                
                                 StringBuilder shortPath = new StringBuilder("/").append(parser.getName());
-                                shortPaths.add(shortPath);
-                                addAttributes(parser, shortPath, fullPath, currentDataAtLevel);
+                                paths.add(shortPath);
+                                addAttributes(parser, paths, currentDataAtLevel);
                                 break;
                             case XmlPullParser.END_TAG:
-                                EntityData data = processCurrentLevel(fullPath.toString(), currentDataAtLevel);
+                                EntityData data = processCurrentLevel(paths.get(0).toString(), currentDataAtLevel);
                                 if (data != null) {
                                     payload.add(data);
                                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                                 }
 
-                                int index = fullPath.lastIndexOf("/");
-                                if (index >= 0) {
-                                    fullPath.replace(index, fullPath.length(), "");
+                                paths.remove(paths.size()-1);
+                                for (StringBuilder path : paths) {
+                                    int index = path.lastIndexOf("/");
+                                    if (index >= 0) {
+                                        path.replace(index, path.length(), "");
+                                    }                                    
                                 }
                                 break;
-                            case XmlPullParser.TEXT:
-                                StringBuilder path = shortPaths.get(shortPaths.size()-1);
-                                String text = parser.getText();
-                                currentDataAtLevel.put(String.format("%s/text()", fullPath), text);
-                                currentDataAtLevel.put(fullPath.toString(), text);
-                                currentDataAtLevel.put(String.format("%s/text()", path), text);
-                                currentDataAtLevel.put(path.toString(), text);
+                            case XmlPullParser.TEXT:                               
+                                String text = parser.getText();                               
+                                for (StringBuilder path : paths) {
+                                    currentDataAtLevel.put(String.format("%s/text()", path), text);
+                                    currentDataAtLevel.put(path.toString(), text);                                    
+                                }
 
                                 break;
                         }
@@ -179,13 +182,14 @@ public class XmlParser extends AbstractXMLComponentRuntime {
         }
     }
 
-    protected void addAttributes(XmlPullParser parser, StringBuilder shortPath, StringBuilder fullPath, Map<String, String> values) {
+    protected void addAttributes(XmlPullParser parser, List<StringBuilder> paths, Map<String, String> values) {
         int attributeCount = parser.getAttributeCount();
         for (int i = 0; i < attributeCount; i++) {
             String attributeName = parser.getAttributeName(i);
             String attributeValue = parser.getAttributeValue(i);
-            values.put(String.format("%s/@%s", fullPath, attributeName), attributeValue);
-            values.put(String.format("%s/@%s", shortPath, attributeName), attributeValue);
+            for (StringBuilder path : paths) {
+               values.put(String.format("%s/@%s", path, attributeName), attributeValue);
+            }
         }
     }
 
