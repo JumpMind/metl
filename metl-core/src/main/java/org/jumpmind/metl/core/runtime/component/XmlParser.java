@@ -25,8 +25,10 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.jdom2.Attribute;
 import org.jdom2.Content;
@@ -130,8 +132,8 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                         switch (eventType) {
                             case XmlPullParser.START_TAG:
                                 for (StringBuilder path : paths) {
-                                    path.append("/").append(parser.getName());    
-                                }                                
+                                    path.append("/").append(parser.getName());
+                                }
                                 StringBuilder shortPath = new StringBuilder("/").append(parser.getName());
                                 paths.add(shortPath);
                                 addAttributes(parser, paths, currentDataAtLevel);
@@ -143,19 +145,27 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                                 }
 
-                                paths.remove(paths.size()-1);
+                                String removed = paths.remove(paths.size() - 1).toString();
+                                Iterator<Entry<String, String>> entries = currentDataAtLevel.entrySet().iterator();
+                                while (entries.hasNext()) {
+                                    Entry<String, String> entry = entries.next();
+                                    if (entry.getKey().startsWith(removed)) {
+                                        entries.remove();
+                                    }
+                                }
+
                                 for (StringBuilder path : paths) {
                                     int index = path.lastIndexOf("/");
                                     if (index >= 0) {
                                         path.replace(index, path.length(), "");
-                                    }                                    
+                                    }
                                 }
                                 break;
-                            case XmlPullParser.TEXT:                               
-                                String text = parser.getText();                               
+                            case XmlPullParser.TEXT:
+                                String text = parser.getText();
                                 for (StringBuilder path : paths) {
                                     currentDataAtLevel.put(String.format("%s/text()", path), text);
-                                    currentDataAtLevel.put(path.toString(), text);                                    
+                                    currentDataAtLevel.put(path.toString(), text);
                                 }
 
                                 break;
@@ -188,7 +198,7 @@ public class XmlParser extends AbstractXMLComponentRuntime {
             String attributeName = parser.getAttributeName(i);
             String attributeValue = parser.getAttributeValue(i);
             for (StringBuilder path : paths) {
-               values.put(String.format("%s/@%s", path, attributeName), attributeValue);
+                values.put(String.format("%s/@%s", path, attributeName), attributeValue);
             }
         }
     }
