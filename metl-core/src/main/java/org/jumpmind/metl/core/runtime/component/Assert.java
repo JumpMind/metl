@@ -22,10 +22,13 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.ArrayList;
+
 import javax.sql.DataSource;
 
 import org.jumpmind.metl.core.runtime.BinaryMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
+import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.TextMessage;
@@ -37,6 +40,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class Assert extends AbstractComponentRuntime {
 
     public static final String EXPECTED_ENTITY_MESSAGE_COUNT = "expected.entity.messages.count";
+    public static final String EXPECTED_ENTITY_COUNT_PER_MESSAGE = "expected.entity.couunt.per.message";
     public static final String EXPECTED_TEXT_MESSAGE_COUNT = "expected.text.messages.count";
     public static final String EXPECTED_BINARY_MESSAGE_COUNT = "expected.binary.messages.count";
     public static final String EXPECTED_CONTROL_MESSAGE_COUNT = "expected.control.messages.count";
@@ -51,6 +55,7 @@ public class Assert extends AbstractComponentRuntime {
     int expectedControlMessageCount = 0;
     int expectedEmptyPayloadMessageCount = 0;
     int expectedSqlCount = 0;
+    Long expectedEntityCountPerMessage;
 
     String sql;
     String dataSourceId;
@@ -60,25 +65,35 @@ public class Assert extends AbstractComponentRuntime {
     int binaryMessageCount = 0;
     int controlMessageCount = 0;
     int emptyPayloadMessageCount = 0;
+    int entityCountPerMessage = 0;
 
     @Override
     protected void start() {
         TypedProperties properties = getTypedProperties();
-        expectedControlMessageCount = properties.getInt(EXPECTED_CONTROL_MESSAGE_COUNT, expectedEntityMessageCount);
-        expectedTextMessageCount = properties.getInt(EXPECTED_TEXT_MESSAGE_COUNT, expectedTextMessageCount);
-        expectedEntityMessageCount = properties.getInt(EXPECTED_ENTITY_MESSAGE_COUNT, expectedControlMessageCount);
-        expectedEmptyPayloadMessageCount = properties.getInt(EXPECTED_EMPTY_PAYLOAD_MESSAGE_COUNT, expectedEmptyPayloadMessageCount);
-        expectedBinaryMessageCount = properties.getInt(EXPECTED_BINARY_MESSAGE_COUNT, expectedBinaryMessageCount);
+        expectedControlMessageCount = properties.getInt(EXPECTED_CONTROL_MESSAGE_COUNT,
+                expectedEntityMessageCount);
+        expectedTextMessageCount = properties.getInt(EXPECTED_TEXT_MESSAGE_COUNT,
+                expectedTextMessageCount);
+        expectedEntityMessageCount = properties.getInt(EXPECTED_ENTITY_MESSAGE_COUNT,
+                expectedControlMessageCount);
+        expectedEmptyPayloadMessageCount = properties.getInt(EXPECTED_EMPTY_PAYLOAD_MESSAGE_COUNT,
+                expectedEmptyPayloadMessageCount);
+        expectedBinaryMessageCount = properties.getInt(EXPECTED_BINARY_MESSAGE_COUNT,
+                expectedBinaryMessageCount);
         expectedSqlCount = properties.getInt(EXPECTED_SQL_COUNT, expectedSqlCount);
+        expectedEntityCountPerMessage = properties.getLong(EXPECTED_ENTITY_COUNT_PER_MESSAGE);
         sql = properties.get(ASSERT_SQL);
         dataSourceId = properties.get(ASSERT_SQL_DATASOURCE);
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+    public void handle(Message inputMessage, ISendMessageCallback callback,
+            boolean unitOfWorkBoundaryReached) {
         if (inputMessage instanceof ControlMessage) {
             controlMessageCount++;
         } else if (inputMessage instanceof EntityDataMessage) {
+            ArrayList<EntityData> payload = ((EntityDataMessage) inputMessage).getPayload();
+            entityCountPerMessage = payload.size();
             entityMessageCount++;
         } else if (inputMessage instanceof TextMessage) {
             textMessageCount++;
@@ -100,27 +115,34 @@ public class Assert extends AbstractComponentRuntime {
     public void flowCompleted(boolean cancelled) {
         StringBuilder assertFailed = new StringBuilder();
         if (expectedControlMessageCount != controlMessageCount) {
-            assertFailed.append(
-                    String.format("\nExpected %d control messages but received %s.", expectedControlMessageCount, controlMessageCount));
+            assertFailed.append(String.format("\nExpected %d control messages but received %s.",
+                    expectedControlMessageCount, controlMessageCount));
         }
 
         if (expectedEmptyPayloadMessageCount != emptyPayloadMessageCount) {
-            assertFailed.append(String.format("\nExpected %d empty messages but received %s.", expectedEmptyPayloadMessageCount,
-                    emptyPayloadMessageCount));
+            assertFailed.append(String.format("\nExpected %d empty messages but received %s.",
+                    expectedEmptyPayloadMessageCount, emptyPayloadMessageCount));
         }
 
         if (expectedEntityMessageCount != entityMessageCount) {
-            assertFailed
-                    .append(String.format("\nExpected %d entity messages but received %s.", expectedEntityMessageCount, entityMessageCount));
+            assertFailed.append(String.format("\nExpected %d entity messages but received %s.",
+                    expectedEntityMessageCount, entityMessageCount));
         }
 
         if (expectedTextMessageCount != textMessageCount) {
-            assertFailed.append(String.format("\nExpected %d text messages but received %s.", expectedTextMessageCount, textMessageCount));
+            assertFailed.append(String.format("\nExpected %d text messages but received %s.",
+                    expectedTextMessageCount, textMessageCount));
         }
 
         if (expectedBinaryMessageCount != binaryMessageCount) {
-            assertFailed
-                    .append(String.format("\nExpected %d binary messages but received %s.", expectedBinaryMessageCount, binaryMessageCount));
+            assertFailed.append(String.format("\nExpected %d binary messages but received %s.",
+                    expectedBinaryMessageCount, binaryMessageCount));
+        }
+
+        if (expectedEntityCountPerMessage.intValue() != -1
+                && expectedEntityCountPerMessage.intValue() != entityCountPerMessage) {
+            assertFailed.append(String.format("\nExpected %d entities per message but received %s.",
+                    expectedEntityCountPerMessage.intValue(), entityCountPerMessage));
         }
 
         if (isNotBlank(sql)) {
@@ -129,7 +151,8 @@ public class Assert extends AbstractComponentRuntime {
             JdbcTemplate template = new JdbcTemplate(ds);
             int sqlCount = template.queryForObject(sql, Integer.class);
             if (expectedSqlCount != sqlCount) {
-                assertFailed.append(String.format("\nExpected %d sql count but received %s.", expectedSqlCount, sqlCount));
+                assertFailed.append(String.format("\nExpected %d sql count but received %s.",
+                        expectedSqlCount, sqlCount));
             }
         }
 

@@ -35,6 +35,11 @@
         <name>Expected Number of Entity Messages</name>
         <defaultValue>0</defaultValue>
       </setting>
+      <setting id='expected.entity.couunt.per.message'
+               required='false'
+               type='integer'>
+        <name>Expected Number of Entities Per Entity Message</name>
+      </setting>
       <setting id='expected.text.messages.count'
                required='false'
                type='integer'>

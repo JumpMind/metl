@@ -56,9 +56,9 @@ public class XmlParser extends AbstractXMLComponentRuntime {
 
     public static final String TYPE = "Parse XML";
 
-    List<XmlFormatterEntitySetting> entitySettings;
-
-    Map<String, XmlFormatterEntitySetting> entitySettingsByPath = new HashMap<>();
+    Map<String, List<XmlFormatterEntitySetting>> entitySettingsByPath = new HashMap<>();  //THIS DOESN'T WORK BECAUSE THERE CAN BE MULTIPLE ENTITY SETTINGS PER PATH
+    
+    List<XmlFormatterEntitySetting> entitySettings = new ArrayList<XmlFormatterEntitySetting>();
 
     boolean optimizeForSpeed = false;
 
@@ -75,7 +75,8 @@ public class XmlParser extends AbstractXMLComponentRuntime {
         if (model == null) {
             throw new IllegalStateException("The output model must be defined");
         }
-        entitySettings = new ArrayList<XmlParser.XmlFormatterEntitySetting>();
+        
+        List<XmlFormatterEntitySetting> entitySettingsForPath;  
 
         Component component = getComponent();
 
@@ -83,8 +84,15 @@ public class XmlParser extends AbstractXMLComponentRuntime {
             if (compEntitySetting.getName().equals(XML_FORMATTER_XPATH)) {
                 XPathExpression<?> expression = XPathFactory.instance().compile(compEntitySetting.getValue());
                 XmlFormatterEntitySetting entitySetting = new XmlFormatterEntitySetting(compEntitySetting, expression);
+                
+                entitySettingsForPath = entitySettingsByPath.get(compEntitySetting.getValue());
+                if (entitySettingsForPath == null) {
+                    entitySettingsForPath = new ArrayList<XmlParser.XmlFormatterEntitySetting>();
+                    entitySettingsByPath.put(compEntitySetting.getValue(), entitySettingsForPath);
+                }
+                entitySettingsForPath.add(entitySetting);
                 entitySettings.add(entitySetting);
-                entitySettingsByPath.put(compEntitySetting.getValue(), entitySetting);
+                
                 List<ComponentAttributeSetting> attributeSettings = component
                         .getAttributeSettingsFor(entitySetting.getSetting().getEntityId());
                 for (ComponentAttributeSetting componentAttributeSetting : attributeSettings) {
@@ -139,9 +147,9 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                                 addAttributes(parser, paths, currentDataAtLevel);
                                 break;
                             case XmlPullParser.END_TAG:
-                                EntityData data = processCurrentLevel(paths.get(0).toString(), currentDataAtLevel);
+                                List<EntityData> data = processCurrentLevel(paths.get(0).toString(), currentDataAtLevel);
                                 if (data != null) {
-                                    payload.add(data);
+                                    payload.addAll(data);
                                     getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                                 }
 
@@ -203,21 +211,31 @@ public class XmlParser extends AbstractXMLComponentRuntime {
         }
     }
 
-    protected EntityData processCurrentLevel(String path, Map<String, String> currentDataByLevel) {
+    protected List<EntityData> processCurrentLevel(String path, Map<String, String> currentDataByLevel) {
+        List<EntityData> entitiesData = null;
         EntityData data = null;
-        XmlFormatterEntitySetting entitySetting = entitySettingsByPath.get(path);
-        if (entitySetting != null) {
-            data = new EntityData();
-            List<XmlFormatterAttributeSetting> attributeSettings = entitySetting.getAttributeSettings();
-            for (XmlFormatterAttributeSetting attributeSetting : attributeSettings) {
-                String xpath = attributeSetting.getExpression().getExpression();
-                String value = currentDataByLevel.get(xpath);
-                if (value != null) {
-                    data.put(attributeSetting.getSetting().getAttributeId(), value);
+
+        if (entitySettingsByPath.get(path) != null) {
+            for (XmlFormatterEntitySetting entitySetting : entitySettingsByPath.get(path)) {
+                if (entitySetting != null) {                    
+                    data = new EntityData();
+                    List<XmlFormatterAttributeSetting> attributeSettings = entitySetting
+                            .getAttributeSettings();
+                    for (XmlFormatterAttributeSetting attributeSetting : attributeSettings) {
+                        String xpath = attributeSetting.getExpression().getExpression();
+                        String value = currentDataByLevel.get(xpath);
+                        if (value != null) {
+                            data.put(attributeSetting.getSetting().getAttributeId(), value);
+                        }
+                    }
+                    if (entitiesData == null) {
+                        entitiesData = new ArrayList<EntityData>();
+                    }
+                    entitiesData.add(data);
                 }
             }
         }
-        return data;
+        return entitiesData;
     }
 
     @SuppressWarnings("unchecked")
