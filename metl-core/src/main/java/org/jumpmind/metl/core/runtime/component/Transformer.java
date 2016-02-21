@@ -29,6 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
@@ -45,6 +49,10 @@ public class Transformer extends AbstractComponentRuntime {
     public static String TRANSFORM_EXPRESSION = "transform.expression";
 
     Map<String, String> transformsByAttributeId = new HashMap<String, String>();
+    
+    ScriptEngine scriptEngine;
+    
+    Map<String, ModelAttributeScriptHelper> helpers = new HashMap<>();
    
     
     @Override
@@ -59,16 +67,23 @@ public class Transformer extends AbstractComponentRuntime {
                 }
             }
         }
+        
+        ScriptEngineManager factory = new ScriptEngineManager();
+        scriptEngine = factory.getEngineByName("groovy");
+     
     }
     
     @Override
     public boolean supportsStartupMessages() {
         return false;
-    }
+    }   
+    
+    long totalTime = 0;
+    long totalCalls = 0;
 
     @Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-
+totalTime = 0;
 		if (inputMessage instanceof EntityDataMessage) {
 			Model inputModel = getComponent().getInputModel();
 			List<EntityData> inDatas = ((EntityDataMessage)inputMessage).getPayload();
@@ -103,9 +118,35 @@ public class Transformer extends AbstractComponentRuntime {
 							ModelAttribute attribute = inputModel.getAttributeById(attributeId);
 							ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
 
-							// Transform
-							value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute, value, entity,
-									inData, transform);
+							ModelAttributeScriptHelper helper = helpers.get(attribute.getId());
+							if (helper == null) {
+							    long ts = System.currentTimeMillis();
+						        scriptEngine.put("entity", entity);
+						        scriptEngine.put("attribute", attribute);
+						        scriptEngine.put("context", context);        
+
+						        try {
+						            String importString = "import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;\n";
+						            String code = String.format(
+						                    "return new ModelAttributeScriptHelper(context, attribute, entity) { public Object eval() { return %s } }",
+						                    transform);
+						            helper = (ModelAttributeScriptHelper)scriptEngine.eval(importString + code);
+						            helpers.put(attribute.getId(), helper);
+						        } catch (ScriptException e) {
+						            throw new RuntimeException("Unable to evaluate groovy script.  Attribute ==> " + attribute.getName() + ".  Value ==> "
+						                    + value.toString() + "." + e.getCause().getMessage(), e);
+						        }
+						        
+						        log.info("It took " + (System.currentTimeMillis()-ts) + "ms to create class");
+							}
+							
+							helper.setData(inData);
+							helper.setValue(value);
+							helper.setMessage(inputMessage);
+							long ts = System.currentTimeMillis();
+							value = helper.eval();
+							totalTime += (System.currentTimeMillis()-ts);
+							totalCalls ++;
 						}
 						if (value != ModelAttributeScriptHelper.REMOVE_ATTRIBUTE) {
 							outData.put(attributeId, value);
@@ -115,6 +156,8 @@ public class Transformer extends AbstractComponentRuntime {
 				}
 			}
 			callback.sendEntityDataMessage(null, outDatas);
+			
+			log.info("It took " + (totalTime/totalCalls) + "ms on average to call eval");
 		}
 	}
 }

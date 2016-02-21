@@ -64,12 +64,28 @@ public class ModelAttributeScriptHelper {
 
     public ModelAttributeScriptHelper(Message message, ComponentContext context, ModelAttribute attribute, ModelEntity entity,
             EntityData data, Object value) {
-        this.context = context;
+        this(context, attribute, entity);
         this.value = value;
         this.data = data;
+        this.message = message;
+    }
+    
+    public ModelAttributeScriptHelper(ComponentContext context, ModelAttribute attribute, ModelEntity entity) {
+        this.context = context;
         this.attribute = attribute;
         this.entity = entity;
+    }
+    
+    public void setMessage(Message message) {
         this.message = message;
+    }
+    
+    public void setData(EntityData data) {
+        this.data = data;
+    }
+    
+    public void setValue(Object value) {
+        this.value = value;
     }
 
     public Object nullvalue() {
