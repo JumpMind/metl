@@ -28,10 +28,11 @@ public class BinaryFileWriter extends AbstractFileWriter {
         if (inputMessage instanceof BinaryMessage) {
             BinaryMessage message = (BinaryMessage) inputMessage;
             String fileName = getFileName(inputMessage);
-            OutputStream fos = streamable.getOutputStream(fileName, mustExist);
             if (!append) {
                 streamable.delete(fileName);
             }
+
+            OutputStream fos = streamable.getOutputStream(fileName, mustExist);
 
             try {
                 fos.write(message.getPayload());
