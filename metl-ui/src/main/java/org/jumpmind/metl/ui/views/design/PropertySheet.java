@@ -113,9 +113,18 @@ public class PropertySheet extends AbsoluteLayout {
 
     }
     
+    @SuppressWarnings("unchecked")
     protected boolean hasAdvancedEditor() {
-        if (value instanceof FlowStep) {
-            FlowStep flowStep = (FlowStep) value;
+        FlowStep flowStep = null;
+        if (value instanceof List<?>) {
+            List<Object> l = (List<Object>) value;
+            if (l.size()==1) {
+                if (l.get(0) instanceof FlowStep) {
+                    flowStep = (FlowStep)l.get(0);
+                }
+            }
+        }
+        if (flowStep != null) {
             String type = flowStep.getComponent().getType();
             XMLComponentUI definition = context.getUiFactory().getDefinition(type);
             return definition != null && definition.getClassName() != null;
@@ -124,9 +133,18 @@ public class PropertySheet extends AbsoluteLayout {
         }        
     }
     
+    @SuppressWarnings("unchecked")
     public void openAdvancedEditor() {
-        if (value instanceof FlowStep) {
-            FlowStep flowStep = (FlowStep) value;           
+        FlowStep flowStep = null;
+        if (value instanceof List<?>) {
+            List<Object> l = (List<Object>) value;
+            if (l.size()==1) {
+                if (l.get(0) instanceof FlowStep) {
+                    flowStep = (FlowStep)l.get(0);
+                }
+            }
+        }
+        if (flowStep != null) {          
             String type = flowStep.getComponent().getType();
             IComponentEditPanel panel = context.getUiFactory().create(type);
             if (panel != null) {
