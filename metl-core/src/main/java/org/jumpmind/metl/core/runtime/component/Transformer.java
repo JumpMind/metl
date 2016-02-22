@@ -83,7 +83,7 @@ public class Transformer extends AbstractComponentRuntime {
 
     @Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-totalTime = 0;
+        totalTime = 0;
 		if (inputMessage instanceof EntityDataMessage) {
 			Model inputModel = getComponent().getInputModel();
 			List<EntityData> inDatas = ((EntityDataMessage)inputMessage).getPayload();
@@ -157,7 +157,10 @@ totalTime = 0;
 			}
 			callback.sendEntityDataMessage(null, outDatas);
 			
-			log.info("It took " + (totalTime/totalCalls) + "ms on average to call eval");
+			if (totalCalls > 0) {
+			   log.info("It took " + (totalTime/totalCalls) + "ms on average to call eval");
+			}
+						
 		}
 	}
 }
