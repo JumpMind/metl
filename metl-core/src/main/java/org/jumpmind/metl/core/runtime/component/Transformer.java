@@ -66,11 +66,7 @@ public class Transformer extends AbstractComponentRuntime {
                     transformsByAttributeId.put(setting.getAttributeId(), setting.getValue());
                 }
             }
-        }
-        
-        ScriptEngineManager factory = new ScriptEngineManager();
-        scriptEngine = factory.getEngineByName("groovy");
-     
+        }     
     }
     
     @Override
@@ -83,6 +79,10 @@ public class Transformer extends AbstractComponentRuntime {
 
     @Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        if (scriptEngine == null) {
+            ScriptEngineManager factory = new ScriptEngineManager();
+            scriptEngine = factory.getEngineByName("groovy");
+        }
         totalTime = 0;
 		if (inputMessage instanceof EntityDataMessage) {
 			Model inputModel = getComponent().getInputModel();

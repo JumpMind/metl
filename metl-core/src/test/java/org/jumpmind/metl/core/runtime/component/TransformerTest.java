@@ -44,7 +44,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class TransformerTest extends AbstractComponentRuntimeTestSupport {
 	
 	public static String TRANSFORM_SOURCE = "transform me";
-	public static String TRANSFORM_EXP = "transform logic";
+	public static String TRANSFORM_EXP = "'transform logic'";
 	public static String TRANSFORM_RESULT = "transformed";
 	
 	@Test
