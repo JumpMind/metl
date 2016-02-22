@@ -115,15 +115,7 @@ public class PropertySheet extends AbsoluteLayout {
     
     @SuppressWarnings("unchecked")
     protected boolean hasAdvancedEditor() {
-        FlowStep flowStep = null;
-        if (value instanceof List<?>) {
-            List<Object> l = (List<Object>) value;
-            if (l.size()==1) {
-                if (l.get(0) instanceof FlowStep) {
-                    flowStep = (FlowStep)l.get(0);
-                }
-            }
-        }
+        FlowStep flowStep = getSingleFlowStep();
         if (flowStep != null) {
             String type = flowStep.getComponent().getType();
             XMLComponentUI definition = context.getUiFactory().getDefinition(type);
@@ -135,15 +127,7 @@ public class PropertySheet extends AbsoluteLayout {
     
     @SuppressWarnings("unchecked")
     public void openAdvancedEditor() {
-        FlowStep flowStep = null;
-        if (value instanceof List<?>) {
-            List<Object> l = (List<Object>) value;
-            if (l.size()==1) {
-                if (l.get(0) instanceof FlowStep) {
-                    flowStep = (FlowStep)l.get(0);
-                }
-            }
-        }
+        FlowStep flowStep = getSingleFlowStep();
         if (flowStep != null) {          
             String type = flowStep.getComponent().getType();
             IComponentEditPanel panel = context.getUiFactory().create(type);
@@ -308,9 +292,10 @@ public class PropertySheet extends AbsoluteLayout {
         }
     }
 
+    @SuppressWarnings("unchecked")
     protected void addOutputModelCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
-        if (value instanceof FlowStep) {
-            FlowStep step = (FlowStep) value;
+        FlowStep step = getSingleFlowStep();
+        if (step != null) {
             String projectVersionId = step.getComponent().getProjectVersionId();
             if ((componentDefintion.getOutputMessageType() == MessageType.ENTITY || componentDefintion.getOutputMessageType() == MessageType.ANY)
                     && !componentDefintion.isInputOutputModelsMatch()) {
@@ -399,8 +384,8 @@ public class PropertySheet extends AbsoluteLayout {
     }
     
     protected void addInputModelCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
-        if (value instanceof FlowStep) {
-            FlowStep step = (FlowStep) value;
+        FlowStep step = getSingleFlowStep();
+        if (step != null) {
             String projectVersionId = step.getComponent().getProjectVersionId();
             if (componentDefintion.getInputMessageType() == MessageType.ENTITY || componentDefintion.getInputMessageType() == MessageType.ANY) {
                 final AbstractSelect combo = new ComboBox("Input Model");
@@ -440,9 +425,10 @@ public class PropertySheet extends AbsoluteLayout {
         if (componentDefintion == null) {
             log.info("null kaboom " + component.getName() + " " + component.getType());
         }
-        if (componentDefintion.getResourceCategory() != null && componentDefintion.getResourceCategory() != ResourceCategory.NONE
-                && value instanceof FlowStep) {
-            FlowStep step = (FlowStep) value;
+        FlowStep step = getSingleFlowStep();
+        if (componentDefintion.getResourceCategory() != null 
+                && componentDefintion.getResourceCategory() != ResourceCategory.NONE
+                && step != null) {
             final AbstractSelect resourcesCombo = new ComboBox("Resource");
             resourcesCombo.setImmediate(true);
             List<String> types = context.getResourceFactory().getResourceTypes(componentDefintion.getResourceCategory());
@@ -752,7 +738,7 @@ public class PropertySheet extends AbsoluteLayout {
     }
     
     protected AbstractSelect createResourceCombo(XMLSetting definition, AbstractObjectWithSettings obj, ResourceCategory category) {
-        FlowStep step = (FlowStep) value;
+        FlowStep step = getSingleFlowStep();
         String projectVersionId = step.getComponent().getProjectVersionId();
         final AbstractSelect combo = new ComboBox(definition.getName());
         combo.setImmediate(true);
@@ -779,6 +765,20 @@ public class PropertySheet extends AbsoluteLayout {
         Setting data = obj.findSetting(key);
         data.setValue(text);
         context.getConfigurationService().save(data);
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected FlowStep getSingleFlowStep() {
+        FlowStep step = null;
+        if (value instanceof List<?>) {
+            List<Object> l = (List<Object>) value;
+            if (l.size()==1) {
+                if (l.get(0) instanceof FlowStep) {
+                    step = (FlowStep)l.get(0);
+                }
+            }
+        }
+        return step;
     }
 
 }
