@@ -285,7 +285,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 	            FlowStep flowStep = (FlowStep) s;
 	            configurationService.delete(flow, flowStep);
 	            iter.remove();
-	        } else if (selected instanceof FlowStepLink) {
+	        } else if (s instanceof FlowStepLink) {
 	            FlowStepLink link = (FlowStepLink) s;
 	            configurationService.delete(link);
 	            flow.removeFlowStepLink(link.getSourceStepId(), link.getTargetStepId());

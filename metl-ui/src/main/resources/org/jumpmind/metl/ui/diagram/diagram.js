@@ -215,11 +215,11 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
                 fireEvent:false
             });
             connection.toggleType("selected");
+            sendSelected();
             self.onLinkSelected({
                 'sourceNodeId' : connection.sourceId,
                 'targetNodeId' : connection.targetId,
             });
-            sendSelected();
         });
         
         var rubberband = document.createElement('div');
