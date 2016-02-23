@@ -32,6 +32,7 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.FileInfo;
@@ -49,6 +50,8 @@ public class FilePoller extends AbstractComponentRuntime {
     public static final String ACTION_ARCHIVE = "Archive";
 
     public final static String SETTING_FILE_PATTERN = "file.pattern";
+    
+    public final static String SETTING_GET_FILE_PATTERN_FROM_MESSAGE = "get.file.pattern.from.message";
 
     public final static String SETTING_CANCEL_ON_NO_FILES = "cancel.on.no.files";
 
@@ -88,6 +91,8 @@ public class FilePoller extends AbstractComponentRuntime {
     
     boolean recurseSubdirectories = true;
     
+    boolean getFilePatternFromMessage = false;
+    
     int maxFilesToPoll;
     
     int minFilesToPoll = 1;
@@ -123,7 +128,7 @@ public class FilePoller extends AbstractComponentRuntime {
         cancelOnNoFiles = properties.is(SETTING_CANCEL_ON_NO_FILES, cancelOnNoFiles);
         recurseSubdirectories = properties.is(SETTING_RECURSE_SUBDIRECTORIES, recurseSubdirectories);
         actionOnSuccess = properties.get(SETTING_ACTION_ON_SUCCESS, actionOnSuccess);
-        actionOnError = properties.get(SETTING_ACTION_ON_ERROR, actionOnError);
+        actionOnError = properties.get(SETTING_ACTION_ON_ERROR, actionOnError);        
         archiveOnErrorPath = FormatUtils.replaceTokens(
                 properties.get(SETTING_ARCHIVE_ON_ERROR_PATH), context.getFlowParameters(),
                 true);
@@ -134,7 +139,12 @@ public class FilePoller extends AbstractComponentRuntime {
         minFilesToPoll = properties.getInt(SETTING_MIN_FILES_TO_POLL);
         fileSortOption = properties.get(SETTING_FILE_SORT_ORDER, fileSortOption);
         runWhen = properties.get(RUN_WHEN, PER_UNIT_OF_WORK);        
-
+        getFilePatternFromMessage = properties.is(SETTING_GET_FILE_PATTERN_FROM_MESSAGE);
+        
+        if (!getFilePatternFromMessage && StringUtils.isEmpty(filePattern)) {
+            throw new MisconfiguredException(
+                    "If file patterns do not come from inbound messages, then a file pattern must be set.");
+        }
     }
         
     @Override
@@ -144,23 +154,36 @@ public class FilePoller extends AbstractComponentRuntime {
 
 	@Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+	    
+        List<String> filePatternsToPoll = getFilePatternsToPoll(inputMessage);
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
 		    IDirectory directory = getResourceReference();
 			if (useTriggerFile) {
 				List<FileInfo> triggerFiles = directory.listFiles(triggerFilePath);
 				if (triggerFiles != null && triggerFiles.size() > 0) {
-					pollForFiles(inputMessage, callback, unitOfWorkBoundaryReached);
+					pollForFiles(filePatternsToPoll, callback, unitOfWorkBoundaryReached);
 					directory.delete(triggerFilePath);
 				} else if (cancelOnNoFiles) {
 					callback.sendShutdownMessage(true);
 				}
 			} else {
-				pollForFiles(inputMessage, callback, unitOfWorkBoundaryReached);
+				pollForFiles(filePatternsToPoll, callback, unitOfWorkBoundaryReached);
 			}
 		}
 	}
-	
+		
+    protected List<String> getFilePatternsToPoll(Message inputMessage) {
+        ArrayList<String> filePatternsToPoll = null;
+        if (getFilePatternFromMessage && inputMessage instanceof TextMessage) {
+            filePatternsToPoll = ((TextMessage)inputMessage).getPayload();
+        } else {
+            filePatternsToPoll = new ArrayList<String>(1);
+            filePatternsToPoll.add(filePattern);
+        }
+        return filePatternsToPoll;
+    }
+
 	protected List<FileInfo> matchFiles (String pattern, IDirectory directory, AntPathMatcher pathMatcher) {
         List<FileInfo> matches = new ArrayList<>();
 	    if (pathMatcher.isPattern(pattern)) {
@@ -208,50 +231,63 @@ public class FilePoller extends AbstractComponentRuntime {
 	    return matches;
 	}
 
-    protected void pollForFiles(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-        String[] includes = StringUtils.isNotBlank(filePattern) ? filePattern.split(",")
-                : new String[] { "*" };
-        
+    protected void pollForFiles(List<String> filePatternsToPoll, ISendMessageCallback callback,
+            boolean unitOfWorkLastMessage) {
+
         AntPathMatcher pathMatcher = new AntPathMatcher();
-        
+
         IDirectory directory = getResourceReference();
-        
+
         List<FileInfo> matches = new ArrayList<>();
-        for (String pattern : includes) {
-            matches.addAll(matchFiles(pattern, directory, pathMatcher));
-        }
         
-        if (matches.size() >= minFilesToPoll) {
-            for(int i = 0; i < matches.size() && i < maxFilesToPoll; i++) {
-                filesSent.add(matches.get(i));
+        ArrayList<FileInfo> filesToSend = new ArrayList<FileInfo>();
+
+        for (String patternToPoll : filePatternsToPoll) {
+
+            String[] includes = StringUtils.isNotBlank(patternToPoll) ? patternToPoll.split(",")
+                    : new String[] { "*" };
+
+            for (String pattern : includes) {
+                matches.addAll(matchFiles(pattern, directory, pathMatcher));
             }
-            
-            Collections.sort(filesSent, (o1,o2) -> {
-                	int cmpr = 0;
-                	if (SORT_NAME.equals(fileSortOption)) {
-                		cmpr = new String(o1.getRelativePath()).compareTo(new String(o2.getRelativePath()));
-                    } else if (SORT_MODIFIED.equals(fileSortOption)) {
-                    	cmpr = new Long(o1.getLastUpdated()).compareTo(new Long(o2.getLastUpdated()));
-                    }
-                	return cmpr;
-            });
-            
-            ArrayList<String> filePaths = new ArrayList<>();
-            for (FileInfo file : filesSent) {
-                log(LogLevel.INFO, "File polled: " + file.getRelativePath());
-                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                filePaths.add(file.getRelativePath());
-                if (filePaths.size() <= filesPerMessage) {
-                    callback.sendTextMessage(null, filePaths);
-                    filePaths = new ArrayList<>();
+
+            if (matches.size() >= minFilesToPoll) {
+                for (int i = 0; i < matches.size() && i < maxFilesToPoll; i++) {
+                    filesSent.add(matches.get(i));
+                    filesToSend.add(matches.get(i));
                 }
+
+                Collections.sort(filesSent, (o1, o2) -> {
+                    int cmpr = 0;
+                    if (SORT_NAME.equals(fileSortOption)) {
+                        cmpr = new String(o1.getRelativePath())
+                                .compareTo(new String(o2.getRelativePath()));
+                    } else if (SORT_MODIFIED.equals(fileSortOption)) {
+                        cmpr = new Long(o1.getLastUpdated())
+                                .compareTo(new Long(o2.getLastUpdated()));
+                    }
+                    return cmpr;
+                });
+
+                ArrayList<String> filePaths = new ArrayList<>();
+                for (FileInfo file : filesToSend) {
+                    log(LogLevel.INFO, "File polled: " + file.getRelativePath());
+                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                    filePaths.add(file.getRelativePath());
+                    if (filePaths.size() <= filesPerMessage) {
+                        callback.sendTextMessage(null, filePaths);
+                        filePaths = new ArrayList<>();
+                    }
+                }
+
+                if (filePaths.size() > 0) {
+                    callback.sendTextMessage(null, filePaths);
+                }
+            } else if (cancelOnNoFiles) {
+                callback.sendShutdownMessage(true);
             }
-            
-            if (filePaths.size() > 0) {
-                callback.sendTextMessage(null, filePaths);
-            }
-        } else if (cancelOnNoFiles) {
-            callback.sendShutdownMessage(true);
+            matches.clear();
+            filesToSend.clear();
         }
     }
     

@@ -283,8 +283,14 @@
           <choice>PER MESSAGE</choice>
         </choices>
       </setting>
+      <setting id='get.file.pattern.from.message'
+               required='false'
+               type='boolean'>
+        <name>Get File Pattern From Message</name>
+        <defaultValue>false</defaultValue>
+      </setting>
       <setting id='file.pattern'
-               required='true'
+               required='false'
                type='text'>
         <name>File Pattern</name>
       </setting>
