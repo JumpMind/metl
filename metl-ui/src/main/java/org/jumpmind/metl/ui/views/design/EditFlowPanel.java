@@ -173,7 +173,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         if (flow.getFlowSteps().size() > 0) {
             selected = new ArrayList<AbstractObject>();
             selected.add(flow.getFlowSteps().get(0));
-            propertySheet.setSource(selected.get(0));
+            propertySheet.setSource(selected);
         }
 
         redrawFlow();

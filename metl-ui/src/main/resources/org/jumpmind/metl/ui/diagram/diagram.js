@@ -118,7 +118,7 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
             
             var nodeDiv = document.createElement('div');
             draggableDiv.appendChild(nodeDiv);
-                        
+            
             nodeDiv.id = node.id;
             nodeDiv.setAttribute('style', 'width:' + node.width + 'px;height:' + node.height + "px");
             nodeDiv.innerHTML = node.text;
@@ -164,6 +164,14 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
                 grid : [10, 10],
                 snapThreshold : 10
             });
+
+            var selected = state.selectedNodeIds;
+            for (var k = 0; k < selected.length; k++) {
+                if (selected[k] == nodeDiv.id) {
+                    $(nodeDiv).addClass("selected");
+                    instance.addToDragSelection(nodeDiv.parentNode);
+                }
+            }
             
             self.addEndpoints(node, nodeDiv);
         }
@@ -248,13 +256,9 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
 
     this.onStateChange = function() {
         instance.batch(function() {
-        	$( ".diagram-node.selected" ).removeClass("selected");
-        	instance.clearDragSelection();
             var selected = state.selectedNodeIds;
             for (var i = 0; i < selected.length; i++) {
             	var node = document.getElementById(selected[i]);
-            	$(node).addClass("selected");
-            	instance.addToDragSelection(node.parentNode);
             	var serverNode = findNode(selected[i]);
             	node.parentNode.childNodes[1].innerHTML = serverNode.name;
             	if (serverNode.enabled) {
