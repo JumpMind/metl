@@ -46,17 +46,7 @@ public class FilePollerTest extends AbstractComponentRuntimeTestSupport {
     @Test
     @Override
     public void testStartDefaults() {
-        Resource resource = mock(Resource.class);
-        when(resource.getType()).thenReturn(LocalFile.TYPE);
-        setupStart(new ComponentBuilder().withResource(resource).build());
-
-        ((FilePoller) spy).start();
-
-        Assert.assertEquals(false, ((FilePoller) spy).useTriggerFile);
-        Assert.assertEquals(true, ((FilePoller) spy).cancelOnNoFiles);
-        Assert.assertEquals(FilePoller.ACTION_NONE, ((FilePoller) spy).actionOnSuccess);
-        Assert.assertEquals(FilePoller.ACTION_NONE, ((FilePoller) spy).actionOnError);
-        Assert.assertEquals(FilePoller.SORT_MODIFIED, ((FilePoller) spy).fileSortOption);
+        //TODO: Determine what to do with components that have required elements in OR pattern / misconfiguration
     }
 
     @Test
