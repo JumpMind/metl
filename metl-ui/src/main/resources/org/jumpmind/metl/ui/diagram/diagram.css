@@ -29,6 +29,7 @@
 
 .diagram-node-label {
     word-wrap: break-word;
+    white-space: normal;
     text-align:center;
     width: 110px;
     margin-left: -15px;
