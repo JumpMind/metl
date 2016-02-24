@@ -197,7 +197,7 @@ public class FlowRuntime {
             StepRuntime stepRuntime = stepRuntimes.get(flowStep.getId());
             if (stepRuntime != null) {
                 try {
-                    stepRuntime.start(executionTracker, resourceFactory);
+                    stepRuntime.start(resourceFactory);
                 } catch (RuntimeException ex) {
                     stepRuntime.error = ex;
                     throw ex;

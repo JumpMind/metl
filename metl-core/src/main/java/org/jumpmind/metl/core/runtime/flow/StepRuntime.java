@@ -44,7 +44,6 @@ import org.jumpmind.metl.core.runtime.BinaryMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
-import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MessageHeader;
@@ -173,7 +172,7 @@ public class StepRuntime implements Runnable {
         inQueue.put(message);
     }
 
-    public void start(IExecutionTracker tracker, IResourceFactory resourceFactory) {
+    public void start(IResourceFactory resourceFactory) {
         try {
             componentContext.setComponentStatistics(new ComponentStatistics());
             startStep = sourceStepRuntimes == null || sourceStepRuntimes.size() == 0;
@@ -288,8 +287,9 @@ public class StepRuntime implements Runnable {
     protected void processOnAnotherThread(Message inputMessage, boolean unitOfWorkBoundaryReached, SendMessageCallback target) {
         int threadNumber = ThreadUtils.getThreadNumber();
         try {
-            componentContext.getExecutionTracker().beforeHandle(threadNumber, componentContext);
             componentContext.getComponentStatistics().incrementInboundMessages(threadNumber);
+            
+            componentContext.getExecutionTracker().beforeHandle(threadNumber, componentContext);            
 
             IComponentRuntime componentRuntime = componentRuntimeByThread.get(threadNumber);
 
@@ -621,7 +621,9 @@ public class StepRuntime implements Runnable {
 
         private void sendMessage(Message message, String... targetFlowStepIds) {
             ComponentStatistics statistics = componentContext.getComponentStatistics();
-            statistics.incrementOutboundMessages(ThreadUtils.getThreadNumber());
+            int threadNumber = ThreadUtils.getThreadNumber();
+            statistics.incrementOutboundMessages(threadNumber);
+            componentContext.getExecutionTracker().updateStatistics(threadNumber, componentContext);
 
             Component component = componentContext.getFlowStep().getComponent();
             boolean logOutput = component.getBoolean(AbstractComponentRuntime.LOG_OUTPUT, false);
