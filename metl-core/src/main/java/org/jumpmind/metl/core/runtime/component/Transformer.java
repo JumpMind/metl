@@ -138,7 +138,7 @@ public class Transformer extends AbstractComponentRuntime {
 						                    + value.toString() + "." + e.getCause().getMessage(), e);
 						        }
 						        
-						        log.info("It took " + (System.currentTimeMillis()-ts) + "ms to create class");
+						        log.debug("It took " + (System.currentTimeMillis()-ts) + "ms to create class");
 							}
 							
 							helper.setData(inData);
@@ -159,7 +159,7 @@ public class Transformer extends AbstractComponentRuntime {
 			callback.sendEntityDataMessage(null, outDatas);
 			
 			if (totalCalls > 0) {
-			   log.info("It took " + (totalTime/totalCalls) + "ms on average to call eval");
+			   log.debug("It took " + (totalTime/totalCalls) + "ms on average to call eval");
 			}
 						
 		}
