@@ -121,6 +121,7 @@ public class Transformer extends AbstractComponentRuntime {
 							ModelAttributeScriptHelper helper = helpers.get(attribute.getId());
 							if (helper == null) {
 							    long ts = System.currentTimeMillis();
+						        scriptEngine.put("value", value);
 						        scriptEngine.put("entity", entity);
 						        scriptEngine.put("attribute", attribute);
 						        scriptEngine.put("context", context);        
