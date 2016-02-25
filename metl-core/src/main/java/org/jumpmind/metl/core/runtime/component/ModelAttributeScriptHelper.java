@@ -46,17 +46,17 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
 public class ModelAttributeScriptHelper {
 
-    Object value;
+    protected Object value;
 
-    EntityData data;
+    protected EntityData data;
 
-    ModelAttribute attribute;
+    protected ModelAttribute attribute;
 
-    ModelEntity entity;
+    protected ModelEntity entity;
 
-    ComponentContext context;
+    protected ComponentContext context;
 
-    Message message;
+    protected Message message;
 
     public static final RemoveAttribute REMOVE_ATTRIBUTE = new RemoveAttribute();
 
