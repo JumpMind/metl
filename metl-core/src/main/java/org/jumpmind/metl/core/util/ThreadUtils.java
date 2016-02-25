@@ -28,8 +28,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jumpmind.metl.core.runtime.Message;
-
 final public class ThreadUtils {
 
     private ThreadUtils() {

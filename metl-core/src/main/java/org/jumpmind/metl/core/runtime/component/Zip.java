@@ -20,17 +20,14 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.LogLevel;
