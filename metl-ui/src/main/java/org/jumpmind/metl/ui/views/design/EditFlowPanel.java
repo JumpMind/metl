@@ -319,9 +319,11 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         flow.getFlowSteps().add(flowStep);
         context.getConfigurationService().save(flowStep);
         
+        selected = new ArrayList<AbstractObject>(1);
         selected.add(flowStep);
+        propertySheet.setSource(selected);
+		
         redrawFlow();
-        propertySheet.setSource(flowStep);
         designNavigator.refresh();
     }
 
