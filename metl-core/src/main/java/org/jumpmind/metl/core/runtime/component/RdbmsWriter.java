@@ -378,7 +378,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     }
                     msg.append("Fallback Updates: ");
                     msg.append(stats.fallbackUpdateCount);
-                    rowCount += stats.fallbackUpdateCount;
+                    rowCount += stats.fallbackUpdateCount * 2;
                 }
                 if (stats.updateCount > 0) {
                     if (msg.length() > 0) {
@@ -402,7 +402,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     }
                     msg.append("Fallback Inserts: ");
                     msg.append(stats.fallbackInsertCount);
-                    rowCount += stats.fallbackInsertCount;
+                    rowCount += stats.fallbackInsertCount * 2;
                 }
                 if (stats.ignoredCount > 0) {
                     if (msg.length() > 0) {
@@ -410,6 +410,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     }
                     msg.append("Ignored Count: ");
                     msg.append(stats.ignoredCount);
+                    rowCount += stats.ignoredCount;
                 }
                 if (msg.length() > 0) {
                     log(LogLevel.INFO, "%s: %s", table.getInsertTable().getTable().getFullyQualifiedTableName(), msg.toString());
