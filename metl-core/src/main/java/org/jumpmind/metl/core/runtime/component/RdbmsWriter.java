@@ -354,17 +354,15 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     private void write(ISqlTransaction transaction, EntityDataMessage inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
 
         long ts = System.currentTimeMillis();
-        int totalStatementCount = 0;
         Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<TargetTableDefintion, WriteStats>();
         sortAndStoreRowsByTableAndOperation(inputMessage.getPayload());
         executeSqlByTableAndOperation(transaction, statsMap);
-        writeStats(statsMap);
-
+        int totalStatementCount = writeStats(statsMap);       
         info("Ran a total of %d statements in %s", totalStatementCount, LogUtils.formatDuration(System.currentTimeMillis() - ts));
     }
 
-    private void writeStats(Map<TargetTableDefintion, WriteStats> statsMap) {
-
+    private int writeStats(Map<TargetTableDefintion, WriteStats> statsMap) {
+        int rowCount = 0;
         for (TargetTableDefintion table : targetTables) {
             WriteStats stats = statsMap.get(table);
             if (stats != null) {
@@ -372,6 +370,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                 if (stats.insertCount > 0) {
                     msg.append("Inserted: ");
                     msg.append(stats.insertCount);
+                    rowCount += stats.insertCount;
                 }
                 if (stats.fallbackUpdateCount > 0) {
                     if (msg.length() > 0) {
@@ -379,6 +378,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     }
                     msg.append("Fallback Updates: ");
                     msg.append(stats.fallbackUpdateCount);
+                    rowCount += stats.fallbackUpdateCount;
                 }
                 if (stats.updateCount > 0) {
                     if (msg.length() > 0) {
@@ -386,6 +386,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     }
                     msg.append("Updated: ");
                     msg.append(stats.updateCount);
+                    rowCount += stats.updateCount;
                 }
                 if (stats.deleteCount > 0) {
                     if (msg.length() > 0) {
@@ -393,6 +394,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     }
                     msg.append("Deleted: ");
                     msg.append(stats.deleteCount);
+                    rowCount += stats.deleteCount;
                 }
                 if (stats.fallbackInsertCount > 0) {
                     if (msg.length() > 0) {
@@ -400,6 +402,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     }
                     msg.append("Fallback Inserts: ");
                     msg.append(stats.fallbackInsertCount);
+                    rowCount += stats.fallbackInsertCount;
                 }
                 if (stats.ignoredCount > 0) {
                     if (msg.length() > 0) {
@@ -413,6 +416,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                 }
             }
         }
+        return rowCount;
     }
 
     private int execute(ISqlTransaction transaction, DmlStatement dmlStatement, Object marker, Object[] data) {
