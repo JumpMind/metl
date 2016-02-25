@@ -501,6 +501,7 @@ public class PropertySheet extends AbsoluteLayout {
             }
             String description = definition.getDescription();
             Type type = definition.getType();
+            FlowStep step = null;
             switch (type) {
                 case BOOLEAN:
                     final CheckBox checkBox = new CheckBox(definition.getName());
@@ -592,8 +593,8 @@ public class PropertySheet extends AbsoluteLayout {
                     formLayout.addComponent(textField);
                     break;
                 case SOURCE_STEP:
-                    if (value instanceof FlowStep) {
-                        FlowStep step = (FlowStep) value;
+                    step = getSingleFlowStep();
+                    if (step != null) {
                         Flow flow = context.getConfigurationService().findFlow(step.getFlowId());
                         final AbstractSelect sourceStepsCombo = new ComboBox(definition.getName());
                         sourceStepsCombo.setImmediate(true);
@@ -620,8 +621,8 @@ public class PropertySheet extends AbsoluteLayout {
                     }
                     break;
                 case FLOW:
-                    if (value instanceof FlowStep) {
-                        FlowStep step = (FlowStep) value;
+                    step = getSingleFlowStep();
+                    if (step != null) {
                         String projectVersionId = step.getComponent().getProjectVersionId();
                         List<FlowName> flows = context.getConfigurationService().findFlowsInProject(projectVersionId, false);
                         final AbstractSelect combo = new ComboBox(definition.getName());
