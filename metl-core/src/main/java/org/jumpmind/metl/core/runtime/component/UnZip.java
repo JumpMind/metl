@@ -143,15 +143,16 @@ public class UnZip extends AbstractComponentRuntime {
                         }
                         for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();) {
                             ZipEntry entry = e.nextElement();
-                            info("Unzipping %s", entry.getName());
-
                             if (!entry.isDirectory() && (extractEmptyFiles || entry.getSize() > 0)) {
                                 String relativePathToEntry = targetDirNameResolved + "/" + entry.getName();
                                 if (overwrite || targetDir.listFile(relativePathToEntry) == null) {
+                                    info("Unzipping %s", entry.getName());
                                     out = targetDir.getOutputStream(relativePathToEntry, false);
                                     in = zipFile.getInputStream(entry);
                                     IOUtils.copy(in, out);
                                     filePaths.add(relativePathToEntry);
+                                } else if (!overwrite) {
+                                    info("Not unzipping %s.  It already exists and the override property is not enabled", entry.getName());
                                 }
                             }
                         }
