@@ -290,12 +290,16 @@ public class Flow extends AbstractObject {
         int order = 0;
         Collections.sort(flowSteps, new YSorter());
         List<FlowStep> starterSteps = findStartSteps();
+        Set<FlowStep> visited = new HashSet<FlowStep>(flowSteps.size());
         for (FlowStep starterStep : starterSteps) {
-            order = calculateApproximateOrder(order, starterStep);
+            order = calculateApproximateOrder(order, starterStep, visited);
         }
     }
     
-    protected int calculateApproximateOrder(int order, FlowStep starterStep) {
+    protected int calculateApproximateOrder(int order, FlowStep starterStep, Set<FlowStep> visited) {
+        if (!visited.add(starterStep)) {
+            return order; // cycle detected
+        }
         starterStep.setApproximateOrder(order++);
         
         List<FlowStep> children = new ArrayList<FlowStep>();
@@ -307,11 +311,7 @@ public class Flow extends AbstractObject {
         }
         Collections.sort(children, new YSorter());
         for (FlowStep child : children) {
-            //TODO: this takes care of when you loop back to yourself, but not if there is a larger
-            //loop in the flow.  Work this out based on possibility of a broader cyclic graph
-            if (!starterStep.getId().equals(child.getId())) {
-                order = calculateApproximateOrder(order, child);
-            }
+            order = calculateApproximateOrder(order, child, visited);
         }
         return order;
     }
