@@ -138,8 +138,10 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             if (!step.getStatus().equals(ExecutionStatus.ERROR.name())) {
                 step.setStatus(ExecutionStatus.RUNNING.name());
             }
-            step.setLastUpdateTime(new Date());
-            this.recorder.record(step);
+            // Is there a reason to record step before the handle?
+            // https://github.com/JumpMind/metl/issues/255
+//            step.setLastUpdateTime(new Date());
+//            this.recorder.record(step);
         }
     }
 
