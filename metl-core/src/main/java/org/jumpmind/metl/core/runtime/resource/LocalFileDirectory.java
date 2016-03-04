@@ -227,4 +227,8 @@ public class LocalFileDirectory implements IDirectory {
     public String toString() {
         return basePath;
     }
+
+    @Override
+    public void connect() {
+    }
 }

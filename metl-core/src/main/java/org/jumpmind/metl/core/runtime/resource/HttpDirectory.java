@@ -202,4 +202,10 @@ public class HttpDirectory implements IDirectory {
     public String toString() {
         return url;
     }
+
+    @Override
+    public void connect() {
+        // TODO connect for thread
+        
+    }
 }

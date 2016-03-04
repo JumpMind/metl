@@ -154,6 +154,7 @@ public class FilePoller extends AbstractComponentRuntime {
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
 		    IDirectory directory = getResourceReference();
+	        directory.connect();
 			if (useTriggerFile) {
 				List<FileInfo> triggerFiles = directory.listFiles(triggerFilePath);
 				if (triggerFiles != null && triggerFiles.size() > 0) {
@@ -165,6 +166,7 @@ public class FilePoller extends AbstractComponentRuntime {
 			} else {
 				pollForFiles(filePatternsToPoll, callback, unitOfWorkBoundaryReached);
 			}
+			directory.close();
 		}
 	}
 		
@@ -202,7 +204,7 @@ public class FilePoller extends AbstractComponentRuntime {
                             subPartToMatch.toString(), patternParts[i], resourceDirectory, pathMatcher);
                     String childPartToMatch = null;
                     String remainderPath = "";
-                    for (int j=i;j<patternParts.length;j++) {
+                    for (int j=i+1;j<patternParts.length;j++) {
                         remainderPath = remainderPath + patternParts[j];
                         if (j != patternParts.length-1) {
                             remainderPath = remainderPath + "/";
@@ -220,7 +222,7 @@ public class FilePoller extends AbstractComponentRuntime {
         }
         fileMatches.addAll(listFilesAndDirsFromDirectory(subPartToMatch.toString(),
                 patternParts[patternParts.length - 1], resourceDirectory, pathMatcher));
-
+        
         return fileMatches;
     }
 

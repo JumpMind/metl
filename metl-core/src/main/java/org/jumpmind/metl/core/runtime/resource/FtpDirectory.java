@@ -260,4 +260,10 @@ public class FtpDirectory implements IDirectory {
             FtpDirectory.this.close(ftpClient);
         }
     }
+
+    @Override
+    public void connect() {
+        // TODO: connect for thread
+        
+    }
 }
