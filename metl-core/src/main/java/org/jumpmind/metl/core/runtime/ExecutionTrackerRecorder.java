@@ -46,6 +46,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     Agent agent;
 
     Map<String, ExecutionStep> steps;
+    
+    Map<ExecutionStep, Date> lastStatUpdate = new HashMap<ExecutionStep, Date>();
 
     Date startTime;
 
@@ -138,10 +140,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             if (!step.getStatus().equals(ExecutionStatus.ERROR.name())) {
                 step.setStatus(ExecutionStatus.RUNNING.name());
             }
-            // Is there a reason to record step before the handle?
-            // https://github.com/JumpMind/metl/issues/255
-//            step.setLastUpdateTime(new Date());
-//            this.recorder.record(step);
+            step.setLastUpdateTime(new Date());
+            this.recorder.record(step);
         }
     }
 
@@ -149,13 +149,14 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     public void updateStatistics(int threadNumber, ComponentContext context) {
         super.updateStatistics(threadNumber, context);
         ExecutionStep step = getExecutionStep(threadNumber, context);
-        Date lastUpdateTime = step.getLastUpdateTime();
+        Date lastUpdateTime = lastStatUpdate.get(step);
         if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             ComponentStatistics stats = context.getComponentStatistics();
             if (stats != null) {
                 step.setEntitiesProcessed(stats.getNumberEntitiesProcessed(threadNumber));
                 step.setMessagesReceived(stats.getNumberInboundMessages(threadNumber));
                 step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
+                lastStatUpdate.put(step, new Date());
             }
             step.setLastUpdateTime(new Date());
             this.recorder.record(step);
@@ -166,7 +167,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     public void afterHandle(int threadNumber, ComponentContext context, Throwable error) {
         super.afterHandle(threadNumber, context, error);
         ExecutionStep step = getExecutionStep(threadNumber, context);
-        Date lastUpdateTime = step.getLastUpdateTime();
+        Date lastUpdateTime = lastStatUpdate.get(step);
         if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.READY.name());
             ComponentStatistics stats = context.getComponentStatistics();
@@ -174,6 +175,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                 step.setEntitiesProcessed(stats.getNumberEntitiesProcessed(threadNumber));
                 step.setMessagesReceived(stats.getNumberInboundMessages(threadNumber));
                 step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
+                lastStatUpdate.put(step, new Date());
             }
             step.setLastUpdateTime(new Date());
             this.recorder.record(step);
@@ -202,6 +204,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             step.setEntitiesProcessed(stats.getNumberEntitiesProcessed(threadNumber));
             step.setMessagesReceived(stats.getNumberInboundMessages(threadNumber));
             step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
+            lastStatUpdate.put(step, new Date());
         }
         step.setLastUpdateTime(new Date());
         this.recorder.record(step);
