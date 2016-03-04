@@ -300,12 +300,6 @@
         <name>Cancel On No Files</name>
         <defaultValue>true</defaultValue>
       </setting>
-      <setting id='recurse.subdirectories'
-               required='false'
-               type='boolean'>
-        <name>Recurse Subdirectories</name>
-        <defaultValue>true</defaultValue>
-      </setting>
       <setting id='file.sort.order'
                required='false'
                type='choice'>

@@ -69,8 +69,6 @@ public class FilePoller extends AbstractComponentRuntime {
     
     public final static String SETTING_MIN_FILES_TO_POLL = "min.files.to.poll";
     
-    public final static String SETTING_RECURSE_SUBDIRECTORIES = "recurse.subdirectories";
-    
     public final static String SORT_NAME = "Name";
     public final static String SORT_MODIFIED = "Last Modified";
 
@@ -88,8 +86,6 @@ public class FilePoller extends AbstractComponentRuntime {
     boolean useTriggerFile = false;
 
     boolean cancelOnNoFiles = true;
-    
-    boolean recurseSubdirectories = true;
     
     boolean getFilePatternFromMessage = false;
     
@@ -126,7 +122,6 @@ public class FilePoller extends AbstractComponentRuntime {
                 context.getFlowParameters(), true);
         useTriggerFile = properties.is(SETTING_USE_TRIGGER_FILE, useTriggerFile);
         cancelOnNoFiles = properties.is(SETTING_CANCEL_ON_NO_FILES, cancelOnNoFiles);
-        recurseSubdirectories = properties.is(SETTING_RECURSE_SUBDIRECTORIES, recurseSubdirectories);
         actionOnSuccess = properties.get(SETTING_ACTION_ON_SUCCESS, actionOnSuccess);
         actionOnError = properties.get(SETTING_ACTION_ON_ERROR, actionOnError);        
         archiveOnErrorPath = FormatUtils.replaceTokens(
@@ -184,53 +179,65 @@ public class FilePoller extends AbstractComponentRuntime {
         return filePatternsToPoll;
     }
 
-	protected List<FileInfo> matchFiles (String pattern, IDirectory directory, AntPathMatcher pathMatcher) {
-        List<FileInfo> matches = new ArrayList<>();
-	    if (pathMatcher.isPattern(pattern)) {
-	        String[] parts = pattern.split("/");
-	        StringBuilder pathPart = new StringBuilder();
-	        StringBuilder patternPart = new StringBuilder();
-	        boolean switchToPattern = false;
-	        for(int i = 0; i < parts.length; i++) {
-	            String part = parts[i];
-                if (!pathMatcher.isPattern(part) && !switchToPattern) {
-                    pathPart.append(part);
-                    if (i < parts.length-1) {
-                        pathPart.append("/");                        
-                    }
-                } else {
-                    switchToPattern = true;
-                    patternPart.append(part);
-                    if (i < parts.length-1) {
-                        patternPart.append("/");                        
-                    }
+    
+    protected List<FileInfo> matchFiles(String pattern, IDirectory resourceDirectory,
+            AntPathMatcher pathMatcher) {
 
-                }
-                
-            }	        
-	        matches.addAll(matchFiles(pathPart.toString(), patternPart.toString(), directory, pathMatcher));
-	    } else {
-            matches.addAll(directory.listFiles(pattern));	        
-	    }
-	    return matches;
-	}
-	
-	protected List<FileInfo> matchFiles (String relativePath, String pattern, IDirectory directory, AntPathMatcher pathMatcher) {
-	    List<FileInfo> matches = new ArrayList<>();
-	    List<FileInfo> fileInfos = directory.listFiles(relativePath);
-        for (FileInfo fileInfo : fileInfos) {
-            if (matches.size() < maxFilesToPoll) {
-                if (!fileInfo.isDirectory() && pathMatcher.match(pattern, fileInfo.getName()) 
-                        && !matches.contains(fileInfo)) {
-                    matches.add(fileInfo);
-                } else if (fileInfo.isDirectory() && recurseSubdirectories) {
-                    matches.addAll(matchFiles(fileInfo.getRelativePath(), pattern, directory, pathMatcher));
+        StringBuilder subPartToMatch = new StringBuilder();
+        List<FileInfo> fileMatches = new ArrayList<FileInfo>();
+        String[] patternParts = pattern.split("/");
+
+        for (int i = 0; i < patternParts.length; i++) {
+            if (i != patternParts.length - 1) {
+                // directory specifications
+                if (!pathMatcher.isPattern(patternParts[i])) {
+                    // fixed path with no wildcards
+                    if (subPartToMatch.length() > 0) {
+                        subPartToMatch.append("/");
+                    }
+                    subPartToMatch.append(patternParts[i]);
+                } else {
+                    // some type of wildcard pattern in a relative directory
+                    List<FileInfo> childFileMatches = listFilesAndDirsFromDirectory(
+                            subPartToMatch.toString(), patternParts[i], resourceDirectory, pathMatcher);
+                    String childPartToMatch = null;
+                    String remainderPath = "";
+                    for (int j=i;j<patternParts.length;j++) {
+                        remainderPath = remainderPath + patternParts[j];
+                        if (j != patternParts.length-1) {
+                            remainderPath = remainderPath + "/";
+                        }
+                    }
+                    for (FileInfo fileInfo : childFileMatches) {
+                        if (fileInfo.isDirectory()) {
+                            childPartToMatch = subPartToMatch + "/" + fileInfo.getName() + "/" + remainderPath;
+                            fileMatches.addAll(
+                                    matchFiles(childPartToMatch, resourceDirectory, pathMatcher));
+                        }
+                    }
                 }
             }
         }
-	    return matches;
-	}
+        fileMatches.addAll(listFilesAndDirsFromDirectory(subPartToMatch.toString(),
+                patternParts[patternParts.length - 1], resourceDirectory, pathMatcher));
 
+        return fileMatches;
+    }
+
+    protected List<FileInfo> listFilesAndDirsFromDirectory(String pattern, String fileSpecification,
+            IDirectory resourceDirectory, AntPathMatcher pathMatcher) {
+        
+        List<FileInfo> files = new ArrayList<FileInfo>();
+        List<FileInfo> matchedFiles = new ArrayList<FileInfo>();
+        files = resourceDirectory.listFiles(pattern);
+        for (FileInfo file : files) {
+            if (pathMatcher.match(fileSpecification, file.getName())) {
+                matchedFiles.add(file);
+            }
+        }
+        return matchedFiles;
+    }
+    
     protected void pollForFiles(List<String> filePatternsToPoll, ISendMessageCallback callback,
             boolean unitOfWorkLastMessage) {
 
