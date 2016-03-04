@@ -45,7 +45,6 @@ import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.util.FormatUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRuntime {
@@ -91,8 +90,7 @@ abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRun
     }
     
     protected String prepareSql(String sql, Message inputMessage, Object entity) {
-        sql = FormatUtils.replaceTokens(sql, getComponentContext().getFlowParameters(), true);
-        sql = FormatUtils.replaceTokens(sql, inputMessage.getHeader().getAsStrings(), true);
+        sql = resolveParamsAndHeaders(sql, inputMessage);
         return sql;
     }    
     

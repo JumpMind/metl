@@ -35,7 +35,6 @@ import org.jumpmind.metl.core.runtime.resource.Http;
 import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.util.FormatUtils;
 
 public class Web extends AbstractComponentRuntime {
 
@@ -102,8 +101,7 @@ public class Web extends AbstractComponentRuntime {
 					for (String requestContent : inputPayload) {
 						getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
 						if (parameterReplacement) {
-							requestContent = FormatUtils.replaceTokens(requestContent,
-									context.getFlowParameters(), true);
+							requestContent = resolveParamsAndHeaders(requestContent, inputMessage);
 						}
 						HttpOutputStream os = (HttpOutputStream) streamable.getOutputStream(relativePath, false);
 						BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, DEFAULT_CHARSET));

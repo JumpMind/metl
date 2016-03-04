@@ -25,9 +25,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -38,7 +36,6 @@ import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.FileInfo;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.util.FormatUtils;
 
 public class FileUtil extends AbstractComponentRuntime {
 
@@ -150,9 +147,6 @@ public class FileUtil extends AbstractComponentRuntime {
         if (mustExist && sourceFileInfo == null) {
             throw new FileNotFoundException("Unable to locate file " + sourceFileName);
         } else if (sourceFileInfo != null) {
-            Map<String, String> parms = new HashMap<>(getComponentContext().getFlowParameters());
-            parms.putAll(inputMessage.getHeader().getAsStrings());
-            
             String targetPath = targetRelativePath;
             if (getFileNameFromMessage || targetRelativePath.endsWith("/") || isNotBlank(newName)) {
                 String fileName = null;
@@ -163,8 +157,8 @@ public class FileUtil extends AbstractComponentRuntime {
                 }
                 targetPath = targetPath + "/" + fileName;
             }
-            targetPath = FormatUtils.replaceTokens(targetPath, parms, true);
-            String tokenResolvedAppendToName = FormatUtils.replaceTokens(appendToName, parms, true);
+            targetPath = resolveParamsAndHeaders(targetPath, inputMessage);
+            String tokenResolvedAppendToName = resolveParamsAndHeaders(appendToName, inputMessage);
             String targetFileWithoutPart = getTargetFileName(targetPath, sourceFileInfo, tokenResolvedAppendToName);
             String targetFileName = targetFileWithoutPart + ".part";
 

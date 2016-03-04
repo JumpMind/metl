@@ -14,7 +14,6 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
-import org.jumpmind.util.FormatUtils;
 
 public class BinaryFileReader extends AbstractFileReader {
 
@@ -35,11 +34,11 @@ public class BinaryFileReader extends AbstractFileReader {
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
 			List<String> files = getFilesToRead(inputMessage);
-    		processFiles(files, callback, unitOfWorkBoundaryReached);
+    		processFiles(files, inputMessage, callback, unitOfWorkBoundaryReached);
     	}
     }
 
-    private void processFiles(List<String> files, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
+    private void processFiles(List<String> files, Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
 
         filesRead.addAll(files);
 
@@ -50,7 +49,7 @@ public class BinaryFileReader extends AbstractFileReader {
             try {
                 info("Reading file: %s", file);
                 IDirectory resource = (IDirectory) getResourceReference();
-                String filePath = FormatUtils.replaceTokens(file, context.getFlowParameters(), true);
+                String filePath = resolveParamsAndHeaders(file, inputMessage);
                 inStream = resource.getInputStream(filePath, mustExist);
 
                 //TODO: if the file is bigger than the allowable message size, this doesn't work

@@ -1,12 +1,8 @@
 package org.jumpmind.metl.core.runtime.component;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.util.FormatUtils;
 
 public abstract class AbstractFileWriter extends AbstractComponentRuntime {
 
@@ -33,9 +29,6 @@ public abstract class AbstractFileWriter extends AbstractComponentRuntime {
     }
     
     protected String getFileName(Message inputMessage) {
-        Map<String, String> parms = new HashMap<>(getComponentContext().getFlowParameters());
-        parms.putAll(inputMessage.getHeader().getAsStrings());
-
     	String fileName = null;
     	if (getFileNameFromMessage) {
     		String objFileName = inputMessage.getHeader().getAsStrings().get(fileNameFromMessageProperty);
@@ -44,9 +37,9 @@ public abstract class AbstractFileWriter extends AbstractComponentRuntime {
 						+ "the message header but was not.  Verify the property " + 
 						fileNameFromMessageProperty + " is being passed into the message header");
     		}
-	    	fileName = FormatUtils.replaceTokens(objFileName, parms, true);
+	    	fileName = resolveParamsAndHeaders(objFileName, inputMessage);
     	} else {
-    		fileName = FormatUtils.replaceTokens(relativePathAndFile, parms, true);;
+    		fileName = resolveParamsAndHeaders(relativePathAndFile, inputMessage);
     	}
     	return fileName;
     }

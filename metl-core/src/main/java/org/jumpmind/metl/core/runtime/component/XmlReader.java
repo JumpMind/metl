@@ -42,7 +42,6 @@ import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.util.FormatUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -98,7 +97,7 @@ public class XmlReader extends AbstractComponentRuntime {
         if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
                 || (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
             try {
-                processFiles(files, callback, unitOfWorkBoundaryReached);
+                processFiles(files, inputMessage, callback, unitOfWorkBoundaryReached);
             } catch (Exception e) {
                 throw new IoException(e);
             }
@@ -116,7 +115,7 @@ public class XmlReader extends AbstractComponentRuntime {
         return files;
     }
 
-    void processFiles(List<String> files, ISendMessageCallback callback, boolean unitOfWorkLastMessage)
+    void processFiles(List<String> files, Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage)
             throws XmlPullParserException, IOException {
         IDirectory directory = getResourceReference();
         XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
@@ -128,7 +127,7 @@ public class XmlReader extends AbstractComponentRuntime {
             LineNumberReader lineNumberReader = null;
             InputStream parserIs = null;
             try {
-                String filePath = FormatUtils.replaceTokens(file, context.getFlowParameters(), true);
+                String filePath = resolveParamsAndHeaders(file, inputMessage);
                 InputStreamReader reader = new InputStreamReader(directory.getInputStream(filePath, mustExist), encoding);
                 parserIs = directory.getInputStream(filePath, mustExist);
                 parser.setInput(parserIs, encoding);

@@ -49,7 +49,6 @@ import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.util.FormatUtils;
 
 public class XsltProcessor extends AbstractComponentRuntime {
 
@@ -113,7 +112,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
             String batchXml = getBatchXml(getComponent().getInputModel(), inputRows, outputAllAttributes);
             String stylesheetXml = stylesheet.getValue();
             if (useParameterReplacement) {
-                stylesheetXml = FormatUtils.replaceTokens(stylesheetXml, context.getFlowParameters(), true);
+                stylesheetXml = resolveParamsAndHeaders(stylesheetXml, inputMessage);
             }
             String outputXml = getTransformedXml(batchXml, stylesheetXml, xmlFormat, omitXmlDeclaration);
             outputPayload.add(outputXml);

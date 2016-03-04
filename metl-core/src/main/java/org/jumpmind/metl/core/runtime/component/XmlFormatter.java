@@ -49,7 +49,6 @@ import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
-import org.jumpmind.util.FormatUtils;
 
 public class XmlFormatter extends AbstractXMLComponentRuntime {
 
@@ -108,7 +107,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         builder.setFeature("http://xml.org/sax/features/validation", false);
         Document document = null;
         try {
-            document = builder.build(new StringReader(FormatUtils.replaceTokens(template, context.getFlowParameters(), true)));
+            document = builder.build(new StringReader(resolveParamsAndHeaders(template, inputMessage)));
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
