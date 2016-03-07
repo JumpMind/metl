@@ -267,6 +267,10 @@ public class ModelAttributeScriptHelper {
         return value;
     }
 
+    public Object getAttributeValueByName(String attributeName) {        
+        return data.get(entity.getModelAttributeByName(attributeName).getId());
+    }
+    
     public static String[] getSignatures() {
         List<String> signatures = new ArrayList<String>();
         Method[] methods = ModelAttributeScriptHelper.class.getMethods();
