@@ -37,6 +37,8 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
     int rowsPerMessage = 10000;
 
     boolean inMemoryDb = true;
+    
+    String runWhen = PER_UNIT_OF_WORK;
 
     IDatabasePlatform databasePlatform;
 
@@ -61,6 +63,7 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
         if (inputModel == null) {
             throw new MisconfiguredException("The input model is not set and it is required");
         }
+        runWhen = getComponent().get(RUN_WHEN, PER_UNIT_OF_WORK);
     }
 
     
@@ -68,11 +71,11 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         createDatabase();
         loadIntoDatabase(inputMessage);
-        if (unitOfWorkBoundaryReached) {
-        	query(callback);
+        if ( (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))
+                || (PER_UNIT_OF_WORK.equals(runWhen) && unitOfWorkBoundaryReached)) {
+            query(callback);
         }
     }
-
 
     protected void query(ISendMessageCallback callback) {
         RdbmsReader reader = new RdbmsReader();

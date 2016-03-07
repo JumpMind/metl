@@ -1020,6 +1020,16 @@
     <name>Temp RDBMS</name>
     <className>org.jumpmind.metl.core.runtime.component.TempRdbms</className>
     <settings>
+      <setting id='run.when'
+               required='false'
+               type='choice'>
+        <name>Run When</name>
+        <defaultValue>PER UNIT OF WORK</defaultValue>
+        <choices>
+          <choice>PER UNIT OF WORK</choice>
+          <choice>PER MESSAGE</choice>
+        </choices>
+      </setting>
       <setting id='sql'
                required='true'
                type='multiline_text'>
