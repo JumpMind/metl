@@ -139,10 +139,11 @@ public class XmlParser extends AbstractXMLComponentRuntime {
                     while (eventType != XmlPullParser.END_DOCUMENT) {
                         switch (eventType) {
                             case XmlPullParser.START_TAG:
+                                String tagName = removeNameSpace(parser.getName());
                                 for (StringBuilder path : paths) {
-                                    path.append("/").append(parser.getName());
+                                    path.append("/").append(tagName);
                                 }
-                                StringBuilder shortPath = new StringBuilder("/").append(parser.getName());
+                                StringBuilder shortPath = new StringBuilder("/").append(tagName);
                                 paths.add(shortPath);
                                 addAttributes(parser, paths, currentDataAtLevel);
                                 break;
@@ -198,6 +199,13 @@ public class XmlParser extends AbstractXMLComponentRuntime {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    private String removeNameSpace(String name) {
+        if (name != null) {
+            name = name.substring(name.lastIndexOf(':')+1);
+        }
+        return name;
     }
 
     protected void addAttributes(XmlPullParser parser, List<StringBuilder> paths, Map<String, String> values) {
