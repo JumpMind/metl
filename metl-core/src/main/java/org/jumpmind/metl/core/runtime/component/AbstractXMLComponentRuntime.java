@@ -67,6 +67,13 @@ abstract public class AbstractXMLComponentRuntime extends AbstractComponentRunti
         }
         return namespaces;
     }
+    
+    protected String removeNameSpace(String name) {
+        if (ignoreNamespace && name != null) {
+            name = name.substring(name.lastIndexOf(':')+1);
+        }
+        return name;
+    }
 
     protected void restoreNamespaces(Document document, Map<Element, Namespace> namespaces) {
         if (ignoreNamespace) {

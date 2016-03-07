@@ -200,13 +200,6 @@ public class XmlParser extends AbstractXMLComponentRuntime {
             throw new RuntimeException(e);
         }
     }
-    
-    private String removeNameSpace(String name) {
-        if (name != null) {
-            name = name.substring(name.lastIndexOf(':')+1);
-        }
-        return name;
-    }
 
     protected void addAttributes(XmlPullParser parser, List<StringBuilder> paths, Map<String, String> values) {
         int attributeCount = parser.getAttributeCount();
