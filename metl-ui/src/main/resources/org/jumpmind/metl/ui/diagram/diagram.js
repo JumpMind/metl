@@ -375,6 +375,7 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
     function diagramContainer_FindSelectedItem() {
         if($("#rubberband").is(":visible") !== true) { return; }
         
+        $(".diagram-node").removeClass("selected");
         var rubberbandOffset = getTopLeftOffset($("#rubberband")); 
 
         $(".diagram-node").each(function() {
