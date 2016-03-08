@@ -148,6 +148,7 @@
     </component-ui>     
     <component-ui id="Text Constant UI" componentId="Text Constant">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-text-constant-48x48-color.png</iconImage>
+        <className>org.jumpmind.metl.ui.views.design.EditTextConstant</className>
     </component-ui>    
     <component-ui id="XML Reader UI" componentId="XmlReader">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-48x48-color.png</iconImage>
