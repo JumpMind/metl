@@ -340,8 +340,8 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
     	diagramStart.y = event.pageY;
         
         var offset = $("#diagram").offset();
-        var t=diagramStart.x - offset.top;
-        var l=diagramStart.y - offset.left;
+        var t=diagramStart.x - offset.left;
+        var l=diagramStart.y - offset.top;
         
         $("#rubberband").css({top:t, left:l, height:1, width:1, position:'absolute'});
         $("#rubberband").show();
