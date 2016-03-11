@@ -33,17 +33,21 @@ final public class ThreadUtils {
     private ThreadUtils() {
     }
 
-    public static int getThreadNumber() {
-        int threadNumber = 1;
-        String name = Thread.currentThread().getName();
-        int lastIndex = name.lastIndexOf("-");
-        if (lastIndex >= 0) {
-            try {
-                threadNumber = Integer.parseInt(name.substring(lastIndex + 1));
-            } catch (NumberFormatException e) {
+    public static int getThreadNumber(int maxThreads) {
+        if (maxThreads == 1) {
+            return 1;
+        } else {
+            int threadNumber = 1;
+            String name = Thread.currentThread().getName();
+            int lastIndex = name.lastIndexOf("-");
+            if (lastIndex >= 0) {
+                try {
+                    threadNumber = Integer.parseInt(name.substring(lastIndex + 1));
+                } catch (NumberFormatException e) {
+                }
             }
+            return threadNumber;
         }
-        return threadNumber;
     }
 
     public static ExecutorService createFixedThreadPool(String namePrefix, int queueCapacity, int threadCount) {

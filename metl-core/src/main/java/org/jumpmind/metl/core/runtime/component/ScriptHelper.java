@@ -51,7 +51,6 @@ import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.util.ComponentUtils;
-import org.jumpmind.metl.core.util.ThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -124,9 +123,12 @@ public class ScriptHelper {
      * source link.
      */
     protected boolean unitOfWorkBoundaryReached;
+    
+    protected IComponentRuntime componentRuntime;
 
-    public ScriptHelper(IComponentRuntime component) {
-        this.context = component.getComponentContext();
+    public ScriptHelper(IComponentRuntime componentRuntime) {
+        this.componentRuntime = componentRuntime;
+        this.context = componentRuntime.getComponentContext();
         this.resource = context.getResourceRuntime();
         this.componentStatistics = context.getComponentStatistics();
         this.flow = context.getManipulatedFlow();
@@ -225,7 +227,7 @@ public class ScriptHelper {
      *            Message arguments
      */
     protected void debug(String message, Object... args) {
-        context.getExecutionTracker().log(ThreadUtils.getThreadNumber(), LogLevel.DEBUG, context, message, args);
+        context.getExecutionTracker().log(componentRuntime.getThreadNumber(), LogLevel.DEBUG, context, message, args);
     }
 
     /**
@@ -240,7 +242,7 @@ public class ScriptHelper {
      *            Message arguments
      */
     protected void info(String message, Object... args) {
-        context.getExecutionTracker().log(ThreadUtils.getThreadNumber(), LogLevel.INFO, context, message, args);
+        context.getExecutionTracker().log(componentRuntime.getThreadNumber(), LogLevel.INFO, context, message, args);
     }
 
     /**
@@ -255,7 +257,7 @@ public class ScriptHelper {
      *            Message arguments
      */
     protected void warn(String message, Object... args) {
-        context.getExecutionTracker().log(ThreadUtils.getThreadNumber(), LogLevel.WARN, context, message, args);
+        context.getExecutionTracker().log(componentRuntime.getThreadNumber(), LogLevel.WARN, context, message, args);
     }
 
     /**
@@ -270,7 +272,7 @@ public class ScriptHelper {
      *            Message arguments
      */
     protected void error(String message, Object... args) {
-        context.getExecutionTracker().log(ThreadUtils.getThreadNumber(), LogLevel.ERROR, context, message, args);
+        context.getExecutionTracker().log(componentRuntime.getThreadNumber(), LogLevel.ERROR, context, message, args);
     }
 
     /**

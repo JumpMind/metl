@@ -114,6 +114,8 @@ public class StepRuntime implements Runnable {
     int activeCount;
     
     int queueCapacity;
+    
+    int threadCount;
 
     public StepRuntime(IComponentRuntimeFactory componentFactory, ComponentContext componentContext, FlowRuntime flowRuntime) {
         this.flowRuntime = flowRuntime;
@@ -177,10 +179,12 @@ public class StepRuntime implements Runnable {
             componentContext.setComponentStatistics(new ComponentStatistics());
             startStep = sourceStepRuntimes == null || sourceStepRuntimes.size() == 0;
             Component component = componentContext.getFlowStep().getComponent();
-            int threadCount = component.getInt(StepRuntime.THREAD_COUNT, 1);
-            String prefix = String.format("%s-%s", LogUtils.normalizeName(flowRuntime.getAgent().getName()),
-                    LogUtils.normalizeName(componentContext.getFlowStep().getName()));
-            this.componentRuntimeExecutor = ThreadUtils.createFixedThreadPool(prefix, queueCapacity, threadCount);
+            threadCount = component.getInt(StepRuntime.THREAD_COUNT, 1);            
+            if (threadCount > 1) {
+                String prefix = String.format("%s-%s", LogUtils.normalizeName(flowRuntime.getAgent().getName()),
+                        LogUtils.normalizeName(componentContext.getFlowStep().getName()));
+                this.componentRuntimeExecutor = ThreadUtils.createFixedThreadPool(prefix, queueCapacity, threadCount);
+            }
             for (int threadNumber = 1; threadNumber <= threadCount; threadNumber++) {
                 createComponentRuntime(threadNumber);
             }
@@ -281,11 +285,15 @@ public class StepRuntime implements Runnable {
          * send this until all other threads have finished processing to avoid
          * race conditions.
          */
-        this.componentRuntimeExecutor.execute(() -> processOnAnotherThread(inputMessage, unitOfWorkBoundaryReached, target));
+        if (threadCount > 1) {
+            this.componentRuntimeExecutor.execute(() -> processOnAnotherThread(inputMessage, unitOfWorkBoundaryReached, target));
+        } else {
+            processOnAnotherThread(inputMessage, unitOfWorkBoundaryReached, target);
+        }
     }
 
     protected void processOnAnotherThread(Message inputMessage, boolean unitOfWorkBoundaryReached, SendMessageCallback target) {
-        int threadNumber = ThreadUtils.getThreadNumber();
+        int threadNumber = ThreadUtils.getThreadNumber(threadCount);
         try {
             componentContext.getComponentStatistics().incrementInboundMessages(threadNumber);
             
@@ -314,7 +322,7 @@ public class StepRuntime implements Runnable {
                 shutdown(threadNumber, target, false);
             }
         } catch (Exception ex) {
-            recordError(ThreadUtils.getThreadNumber(), ex);
+            recordError(ThreadUtils.getThreadNumber(threadCount), ex);
         } finally {
             componentContext.getExecutionTracker().afterHandle(threadNumber, componentContext, error);
             decrementActiveCount();
@@ -515,7 +523,7 @@ public class StepRuntime implements Runnable {
     protected void logInput(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {
         MessageHeader header = inputMessage.getHeader();
 
-        int threadNumber = ThreadUtils.getThreadNumber();
+        int threadNumber = ThreadUtils.getThreadNumber(threadCount);
 
         String source = "ENTRY";
         try {
@@ -550,7 +558,7 @@ public class StepRuntime implements Runnable {
     protected void logOutput(Message outputMessage, String... targetFlowStepIds) {
 
         String targets = targetFlowStepIds != null && targetFlowStepIds.length > 0 ? Arrays.toString(targetFlowStepIds) : "[all]";
-        int threadNumber = ThreadUtils.getThreadNumber();
+        int threadNumber = ThreadUtils.getThreadNumber(threadCount);
 
         MessageHeader header = outputMessage.getHeader();
         componentContext.getExecutionTracker().log(threadNumber, LogLevel.INFO, componentContext,
@@ -590,14 +598,14 @@ public class StepRuntime implements Runnable {
         private Message createMessage(Message newMessage, Map<String, Serializable> headerSettings) {
             ComponentStatistics statistics = componentContext.getComponentStatistics();
             MessageHeader header = newMessage.getHeader();
-            Message inputMessage = currentInputMessages.get(ThreadUtils.getThreadNumber());
+            Message inputMessage = currentInputMessages.get(ThreadUtils.getThreadNumber(threadCount));
             if (inputMessage != null) {
                 header.putAll(inputMessage.getHeader());
             }
             if (headerSettings != null) {
                 header.putAll(headerSettings);
             }
-            header.setSequenceNumber(statistics.getNumberOutboundMessages(ThreadUtils.getThreadNumber()) + 1);
+            header.setSequenceNumber(statistics.getNumberOutboundMessages(ThreadUtils.getThreadNumber(threadCount)) + 1);
             return newMessage;
         }
 
@@ -621,7 +629,7 @@ public class StepRuntime implements Runnable {
 
         private void sendMessage(Message message, String... targetFlowStepIds) {
             ComponentStatistics statistics = componentContext.getComponentStatistics();
-            int threadNumber = ThreadUtils.getThreadNumber();
+            int threadNumber = ThreadUtils.getThreadNumber(threadCount);
             statistics.incrementOutboundMessages(threadNumber);
             componentContext.getExecutionTracker().updateStatistics(threadNumber, componentContext);
 

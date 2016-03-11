@@ -289,4 +289,9 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         this.threadNumber = threadNumber;
     }
     
+    @Override
+    public int getThreadNumber() {
+        return this.threadNumber;
+    }
+    
 }

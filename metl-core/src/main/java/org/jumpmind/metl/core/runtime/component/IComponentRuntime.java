@@ -44,4 +44,6 @@ public interface IComponentRuntime {
     
     public boolean supportsStartupMessages();   
     
+    public int getThreadNumber();
+    
 }
