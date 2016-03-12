@@ -20,6 +20,10 @@
  */
 package org.jumpmind.metl.core.model;
 
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalUnit;
 import java.util.Date;
 
 public class ExecutionStep extends AbstractObject {
@@ -48,6 +52,25 @@ public class ExecutionStep extends AbstractObject {
     
     private Date endTime;
     
+    private long handleDuration = 0;
+    
+    public long getHandleDuration() {
+        return handleDuration;
+    }
+
+    public void setHandleDuration(long handleDuration) {
+        this.handleDuration = handleDuration;
+    }
+
+    public void incrementHandleDuration(long handleDuration) {
+        this.handleDuration += handleDuration;
+    }
+    
+    public String getHandleDurationString() {
+        LocalTime t = LocalTime.MIDNIGHT.plus(Duration.ofMillis(handleDuration));
+        return DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(t);
+    }
+
     public void setThreadNumber(int threadNumber) {
         this.threadNumber = threadNumber;
     }

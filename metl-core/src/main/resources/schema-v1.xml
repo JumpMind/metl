@@ -428,6 +428,7 @@
         <column name="entities_processed" type="INTEGER" default="0" required="true" />
         <column name="start_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="end_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="handle_duration" type="INTEGER" default="0" required="true" />
     </table>   
 
     <table name="user" description="">

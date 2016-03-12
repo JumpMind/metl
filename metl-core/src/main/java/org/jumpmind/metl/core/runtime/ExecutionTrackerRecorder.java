@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +50,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     Map<String, ExecutionStep> steps;
     
     Map<ExecutionStep, Date> lastStatUpdate = new HashMap<ExecutionStep, Date>();
+    
+    Map<ExecutionStep, Instant> startHandle = new HashMap<ExecutionStep, Instant>();
 
     Date startTime;
 
@@ -131,8 +135,10 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     @Override
     public void beforeHandle(int threadNumber, ComponentContext context) {
         super.beforeHandle(threadNumber, context);
+
         ExecutionStep step = getExecutionStep(threadNumber, context);
         Date lastUpdateTime = step.getLastUpdateTime();
+        startHandle.put(step, Instant.now());
         if (step.getStatus().equals(ExecutionStatus.READY.name()) || lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             if (step.getStartTime() == null) {
                 step.setStartTime(new Date());
@@ -168,6 +174,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         super.afterHandle(threadNumber, context, error);
         ExecutionStep step = getExecutionStep(threadNumber, context);
         Date lastUpdateTime = lastStatUpdate.get(step);
+        step.incrementHandleDuration(Duration.between(startHandle.get(step),Instant.now()).toMillis());
         if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.READY.name());
             ComponentStatistics stats = context.getComponentStatistics();
