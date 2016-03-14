@@ -57,6 +57,7 @@ import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.component.Response;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -100,7 +101,7 @@ public class FlowRuntime {
     
     IConfigurationService configurationService;
     
-    IExecutionService executionService;
+    IExecutionService executionService;    
     
     public FlowRuntime(AgentDeployment deployment, IComponentRuntimeFactory componentFactory,
             IResourceFactory resourceFactory, 
@@ -115,6 +116,20 @@ public class FlowRuntime {
     
     public AgentDeployment getDeployment() {
         return deployment;
+    }
+    
+    public String getResponse() {
+        StringBuilder response = new StringBuilder();
+        Collection<StepRuntime> steps = stepRuntimes.values();
+        for (StepRuntime stepRuntime : steps) {
+            List<IComponentRuntime> runtimes = stepRuntime.getComponentRuntimes();
+            for (IComponentRuntime runtime : runtimes) {
+                if (runtime instanceof Response) {
+                    response.append(((Response)runtime).getResponse());
+                }
+            }
+        }
+        return response.toString();
     }
     
 

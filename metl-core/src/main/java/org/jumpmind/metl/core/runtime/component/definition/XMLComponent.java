@@ -76,6 +76,9 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
     @XmlElement(required = true)
     protected String className;
     
+    @XmlElement(required = false)
+    protected String deploymentListenerClassName;
+    
     @XmlElement(required = true)
     protected String flowManipulatorClassName;    
 
@@ -236,5 +239,12 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
     public int compareTo(XMLComponent o) {
         return name.compareTo(o.getName());
     }
+
+    public void getDeploymentListenerClassName(String deploymentListenerClassname) {
+        this.deploymentListenerClassName = deploymentListenerClassname;
+    }
     
+    public String getDeploymentListenerClassName() {
+        return deploymentListenerClassName;
+    }
 }

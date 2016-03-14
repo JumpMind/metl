@@ -37,6 +37,7 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
+import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.util.AppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,15 +55,18 @@ public class AgentManager implements IAgentManager {
     IComponentRuntimeFactory componentFactory;
 
     IResourceFactory resourceFactory;
+    
+    IHttpRequestMappingRegistry httpRequestMappingRegistry;
 
     Map<Agent, AgentRuntime> engines = new HashMap<Agent, AgentRuntime>();
 
     public AgentManager(IConfigurationService configurationService, IExecutionService executionService,
-            IComponentRuntimeFactory componentFactory, IResourceFactory resourceFactory) {
+            IComponentRuntimeFactory componentFactory, IResourceFactory resourceFactory, IHttpRequestMappingRegistry httpRequestMappingRegistry) {
         this.executionService = executionService;
         this.configurationService = configurationService;
         this.componentFactory = componentFactory;
         this.resourceFactory = resourceFactory;
+        this.httpRequestMappingRegistry = httpRequestMappingRegistry;
     }
     
     @Override
@@ -131,7 +135,7 @@ public class AgentManager implements IAgentManager {
 
     protected AgentRuntime createAndStartRuntime(Agent agent) {
         AgentRuntime engine = new AgentRuntime(agent, configurationService, executionService, componentFactory,
-                resourceFactory);
+                resourceFactory, httpRequestMappingRegistry);
         engines.put(agent, engine);
         if (agent.getAgentStartMode() == AgentStartMode.AUTO) {
             engine.start();

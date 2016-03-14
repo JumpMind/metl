@@ -481,6 +481,10 @@ public class StepRuntime implements Runnable {
     public boolean isRunning() {
         return running;
     }
+    
+    public List<IComponentRuntime> getComponentRuntimes() {
+        return new ArrayList<>(componentRuntimeByThread.values());
+    }
 
     public void flowCompletedWithoutError() {
         componentRuntimeByThread.values().forEach(c -> flowCompletedWithoutError(c));

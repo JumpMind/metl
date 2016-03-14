@@ -59,6 +59,8 @@ import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFromXMLFactory;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
+import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
+import org.jumpmind.metl.core.runtime.web.HttpRequestMappingRegistry;
 import org.jumpmind.metl.core.util.EnvConstants;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.ui.views.IUIFactory;
@@ -110,6 +112,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     IPersistenceManager persistenceManager;
 
     IExecutionService executionService;
+    
+    IHttpRequestMappingRegistry httpRequestMappingRegistry;
     
     IUIFactory uiFactory;
 
@@ -276,12 +280,23 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IAgentManager agentManager() {
         IAgentManager agentManager = new AgentManager(configurationService(), executionService(),
-                componentFactory(), resourceFactory());
+                componentFactory(), resourceFactory(), httpRequestMappingRegistry());
         return agentManager;
     }
+    
+    @Bean
+    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
+    public IHttpRequestMappingRegistry httpRequestMappingRegistry() {
+        if (httpRequestMappingRegistry == null) {
+            httpRequestMappingRegistry = new HttpRequestMappingRegistry();
+        }
+        return httpRequestMappingRegistry;
+    }
+
 
     @Bean
     static UIScope uiScope() {
         return new UIScope();
     }
+    
 }

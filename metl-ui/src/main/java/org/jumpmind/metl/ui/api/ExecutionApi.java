@@ -20,6 +20,9 @@
  */
 package org.jumpmind.metl.ui.api;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
@@ -30,7 +33,9 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.DeploymentStatus;
@@ -42,18 +47,23 @@ import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.LogLevel;
+import org.jumpmind.metl.core.runtime.web.HttpMethod;
+import org.jumpmind.metl.core.runtime.web.HttpRequestMapping;
+import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.util.AppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.HandlerMapping;
 
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -64,21 +74,42 @@ import com.wordnik.swagger.annotations.ApiParam;
 public class ExecutionApi {
 
     final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     @Autowired
     IAgentManager agentManager;
 
     @Autowired
     IExecutionService executionService;
 
+    @Autowired
+    IHttpRequestMappingRegistry requestRegistry;
+    
+    AntPathMatcher patternMatcher = new AntPathMatcher();
+
+    @RequestMapping(value = "/**", method = RequestMethod.GET)
+    public final void get(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String restOfTheUrl = (String) req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+        HttpRequestMapping mapping = requestRegistry.findBestMatch(HttpMethod.GET, restOfTheUrl);
+        if (mapping != null) {
+            Map<String, String> params = toObjectMap(req);
+            params.putAll(patternMatcher.extractUriTemplateVariables(mapping.getPath(), restOfTheUrl));
+            AgentDeployment deployment = mapping.getDeployment();
+            AgentRuntime agentRuntime = agentManager.getAgentRuntime(deployment.getAgentId());
+            String response = agentRuntime.execute(deployment, params);
+            if (isNotBlank(response)) {
+                resp.setContentType(mapping.getContentType());
+                IOUtils.write(response, resp.getOutputStream());
+            }
+        } else {
+            throw new CouldNotFindDeploymentException("Could not find a deployed web request that matches " + restOfTheUrl);
+        }
+    }
+
     @ApiOperation(value = "Invoke a flow that is deployed to an agent by name")
-    @RequestMapping(
-            value = "/agents/{agentName}/deployments/{deploymentName}/invoke",
-            method = RequestMethod.GET)
+    @RequestMapping(value = "/agents/{agentName}/deployments/{deploymentName}/invoke", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final ExecutionResults invoke(
-            @ApiParam(value = "The name of the agent to use") @PathVariable("agentName") String agentName,
+    public final ExecutionResults invoke(@ApiParam(value = "The name of the agent to use") @PathVariable("agentName") String agentName,
             @ApiParam(value = "The name of the flow deployment to invoke") @PathVariable("deploymentName") String deploymentName,
             HttpServletRequest req) {
         agentName = decode(agentName);
@@ -95,27 +126,26 @@ public class ExecutionApi {
                     if (agentDeployment.getName().equals(deploymentName)) {
                         foundDeployment = true;
                         if (agentDeployment.getDeploymentStatus() == DeploymentStatus.DEPLOYED) {
-                        AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent);
-                        String executionId = agentRuntime.scheduleNow(agentDeployment, toObjectMap(req));
-                        boolean done = false;
-                        do {
-                            execution = executionService.findExecution(executionId);
-                            done = execution != null
-                                    && ExecutionStatus.isDone(execution.getExecutionStatus());
-                            if (!done) {
-                                AppUtils.sleep(5000);
-                            }
-                        } while (!done);
-                        break;
-                        } 
+                            AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent);
+                            String executionId = agentRuntime.scheduleNow(agentDeployment, toObjectMap(req));
+                            boolean done = false;
+                            do {
+                                execution = executionService.findExecution(executionId);
+                                done = execution != null && ExecutionStatus.isDone(execution.getExecutionStatus());
+                                if (!done) {
+                                    AppUtils.sleep(5000);
+                                }
+                            } while (!done);
+                            break;
+                        }
                     }
                 }
             }
         }
 
         if (execution != null) {
-            ExecutionResults result = new ExecutionResults(execution.getId(), execution.getStatus(),
-                    execution.getStartTime(), execution.getEndTime());
+            ExecutionResults result = new ExecutionResults(execution.getId(), execution.getStatus(), execution.getStartTime(),
+                    execution.getEndTime());
             if (execution.getExecutionStatus() == ExecutionStatus.ERROR) {
                 List<ExecutionStep> steps = executionService.findExecutionSteps(execution.getId());
                 for (ExecutionStep executionStep : steps) {
@@ -134,7 +164,7 @@ public class ExecutionApi {
         } else {
             String msg = "Unexpected error";
             if (!foundAgent) {
-                msg = String.format("Could not find an agent named '%s'", agentName);                
+                msg = String.format("Could not find an agent named '%s'", agentName);
             } else if (!foundDeployment) {
                 msg = String.format("Could not find a deployment name '%s'", deploymentName);
             } else {
