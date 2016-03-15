@@ -128,77 +128,81 @@ public class XmlReader extends AbstractComponentRuntime {
             InputStream parserIs = null;
             try {
                 String filePath = resolveParamsAndHeaders(file, inputMessage);
-                InputStreamReader reader = new InputStreamReader(directory.getInputStream(filePath, mustExist), encoding);
                 parserIs = directory.getInputStream(filePath, mustExist);
-                parser.setInput(parserIs, encoding);
-                lineNumberReader = new LineNumberReader(reader);
-                lineNumberReader.setLineNumber(1);
-                int startCol = 0;
-                int startLine = 1;
-                int prevEndLine = 1;
-                int prevEndCol = 0;
-                int eventType = parser.getEventType();
-                String line = null;
-                while (eventType != XmlPullParser.END_DOCUMENT) {
-                    switch (eventType) {
-                        case XmlPullParser.START_TAG:
-                            if (StringUtils.isBlank(readTag)) {
-                                readTag = parser.getName();
-                                info("Read tag was not set, defaulting to root tag: " + readTag);
-                            }
-                            if (parser.getName().equals(readTag)) {
-                                startCol = prevEndCol;
-                                startLine = prevEndLine;
-                            }
-                            prevEndCol = parser.getColumnNumber();
-                            prevEndLine = parser.getLineNumber();
-                            break;
-                        case XmlPullParser.END_TAG:
-                            prevEndCol = parser.getColumnNumber();
-                            prevEndLine = parser.getLineNumber();
-                            if (parser.getName().equals(readTag)) {
-                                StringBuilder xml = new StringBuilder();
-
-                                forward(startLine, lineNumberReader);
-
-                                int linesToRead = parser.getLineNumber() - lineNumberReader.getLineNumber();
-                                if (lineNumberReader.getLineNumber() > startLine) {
-                                    startCol = 0;
+                if (parserIs != null) {
+                    InputStreamReader reader = new InputStreamReader(parserIs, encoding);
+                    parser.setInput(parserIs, encoding);
+                    lineNumberReader = new LineNumberReader(reader);
+                    lineNumberReader.setLineNumber(1);
+                    int startCol = 0;
+                    int startLine = 1;
+                    int prevEndLine = 1;
+                    int prevEndCol = 0;
+                    int eventType = parser.getEventType();
+                    String line = null;
+                    while (eventType != XmlPullParser.END_DOCUMENT) {
+                        switch (eventType) {
+                            case XmlPullParser.START_TAG:
+                                if (StringUtils.isBlank(readTag)) {
+                                    readTag = parser.getName();
+                                    info("Read tag was not set, defaulting to root tag: " + readTag);
                                 }
-                                line = lineNumberReader.readLine();
-
-                                while (linesToRead >= 0 && line != null) {
-                                    if (startCol > 0) {
-                                        if (line.length() > startCol) {
-                                            xml.append(line.substring(startCol)).append("\n");
-                                        }
+                                if (parser.getName().equals(readTag)) {
+                                    startCol = prevEndCol;
+                                    startLine = prevEndLine;
+                                }
+                                prevEndCol = parser.getColumnNumber();
+                                prevEndLine = parser.getLineNumber();
+                                break;
+                            case XmlPullParser.END_TAG:
+                                prevEndCol = parser.getColumnNumber();
+                                prevEndLine = parser.getLineNumber();
+                                if (parser.getName().equals(readTag)) {
+                                    StringBuilder xml = new StringBuilder();
+    
+                                    forward(startLine, lineNumberReader);
+    
+                                    int linesToRead = parser.getLineNumber() - lineNumberReader.getLineNumber();
+                                    if (lineNumberReader.getLineNumber() > startLine) {
                                         startCol = 0;
-                                    } else if (linesToRead == 0) {
-                                        if (line.length() > parser.getColumnNumber()) {
-                                            xml.append(line.substring(0, parser.getColumnNumber()));
+                                    }
+                                    line = lineNumberReader.readLine();
+    
+                                    while (linesToRead >= 0 && line != null) {
+                                        if (startCol > 0) {
+                                            if (line.length() > startCol) {
+                                                xml.append(line.substring(startCol)).append("\n");
+                                            }
+                                            startCol = 0;
+                                        } else if (linesToRead == 0) {
+                                            if (line.length() > parser.getColumnNumber()) {
+                                                xml.append(line.substring(0, parser.getColumnNumber()));
+                                            } else {
+                                                xml.append(line).append("\n");
+                                            }
                                         } else {
                                             xml.append(line).append("\n");
                                         }
-                                    } else {
-                                        xml.append(line).append("\n");
+    
+                                        linesToRead--;
+                                        if (linesToRead >= 0) {
+                                            line = lineNumberReader.readLine();
+                                        }
                                     }
-
-                                    linesToRead--;
-                                    if (linesToRead >= 0) {
-                                        line = lineNumberReader.readLine();
+                                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                                    outboundPayload.add(xml.toString());
+                                    if (outboundPayload.size() == readTagsPerMessage) {
+                                        callback.sendTextMessage(headers, outboundPayload);
+                                        outboundPayload = new ArrayList<String>();
                                     }
+                                    startCol = 0;
                                 }
-                                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                                outboundPayload.add(xml.toString());
-                                if (outboundPayload.size() == readTagsPerMessage) {
-                                    callback.sendTextMessage(headers, outboundPayload);
-                                    outboundPayload = new ArrayList<String>();
-                                }
-                                startCol = 0;
-                            }
-                            break;
+                                break;
+                        }
+                        eventType = parser.next();
                     }
-                    eventType = parser.next();
+                } else {
+                    info("File %s didn't exist, but Must Exist setting was false.  Continuing",file);                    
                 }
             } finally {
                 closeQuietly(lineNumberReader);
@@ -209,7 +213,6 @@ public class XmlReader extends AbstractComponentRuntime {
                 callback.sendTextMessage(headers, outboundPayload);
             }
         }
-
     }
 
     protected static void forward(int toLine, LineNumberReader lineNumberReader) throws IOException {

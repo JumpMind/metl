@@ -175,13 +175,17 @@ public class FtpDirectory implements IDirectory {
             if (is != null) {
                 return new CloseableInputStreamStream(is, ftpClient);
             } else {
-                String msg = String.format("Failed to read %s.  The ftp return code was %s", relativePath, ftpClient.getReplyCode());
-                close(ftpClient);
-                throw new IoException(msg);
+                if (!mustExist) {
+                    String msg = String.format("Failed to open %s.  The ftp return code was %s", relativePath, ftpClient.getReplyCode());
+                    throw new IoException(msg);
+                } else {
+                    return null;
+                }
             }
         } catch (Exception e) {
-            close(ftpClient);
             throw new IoException(e);
+        } finally {
+            close(ftpClient);
         }
     }
 

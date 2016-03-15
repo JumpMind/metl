@@ -51,13 +51,14 @@ public class BinaryFileReader extends AbstractFileReader {
                 IDirectory resource = (IDirectory) getResourceReference();
                 String filePath = resolveParamsAndHeaders(file, inputMessage);
                 inStream = resource.getInputStream(filePath, mustExist);
-
                 //TODO: if the file is bigger than the allowable message size, this doesn't work
-                
-                byte[] payload = IOUtils.toByteArray(inStream);
-                callback.sendBinaryMessage(headers, payload);
-                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);               
-                
+                if (inStream != null) {
+                    byte[] payload = IOUtils.toByteArray(inStream);
+                    callback.sendBinaryMessage(headers, payload);
+                    getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);               
+                } else {
+                    info("File %s didn't exist, but Must Exist setting was false.  Continuing",file);
+                }
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
             } finally {

@@ -183,10 +183,15 @@ public class UnZip extends AbstractComponentRuntime {
         FileOutputStream os = null;
         try {
             is = sourceDir.getInputStream(fileName, true);
-            File localZipFile = new File(unzipDir, UUID.randomUUID().toString() + ".zip");
-            os = new FileOutputStream(localZipFile);
-            IOUtils.copy(is, os);
-            return localZipFile;
+            if (is != null) {
+                File localZipFile = new File(unzipDir, UUID.randomUUID().toString() + ".zip");
+                os = new FileOutputStream(localZipFile);
+                IOUtils.copy(is, os);
+                return localZipFile;
+            } else {
+                String msg = String.format("Failed to open %s.", fileName);
+                throw new IoException(msg);
+            }
         } catch (IOException e) {
             throw new IoException(e);
         } finally {

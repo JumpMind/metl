@@ -90,25 +90,29 @@ public class TextFileReader extends AbstractFileReader {
                 IDirectory resource = (IDirectory) getResourceReference();
                 String filePath = resolveParamsAndHeaders(file, inputMessage);
                 inStream = resource.getInputStream(filePath, mustExist);
-                reader = new BufferedReader(new InputStreamReader(inStream, encoding));
-
-                while ((currentLine = reader.readLine()) != null) {
-                    currentFileLinesRead++;
-                    if (linesInMessage == textRowsPerMessage) {
+                if (inStream != null) {
+                    reader = new BufferedReader(new InputStreamReader(inStream, encoding));
+    
+                    while ((currentLine = reader.readLine()) != null) {
+                        currentFileLinesRead++;
+                        if (linesInMessage == textRowsPerMessage) {
+                            callback.sendTextMessage(headers, payload);
+                            linesInMessage = 0;
+                            payload = new ArrayList<String>();
+                        }
+                        if (currentFileLinesRead > textHeaderLinesToSkip) {
+                            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                            payload.add(currentLine);
+                            linesInMessage++;
+                        }
+                    }
+                    if (payload.size() > 0) {
                         callback.sendTextMessage(headers, payload);
-                        linesInMessage = 0;
-                        payload = new ArrayList<String>();
                     }
-                    if (currentFileLinesRead > textHeaderLinesToSkip) {
-                        getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-                        payload.add(currentLine);
-                        linesInMessage++;
-                    }
+                    linesInMessage = 0;
+                } else {
+                    info("File %s didn't exist, but Must Exist setting was false.  Continuing",file);
                 }
-                if (payload.size() > 0) {
-                    callback.sendTextMessage(headers, payload);
-                }
-                linesInMessage = 0;
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
             } finally {

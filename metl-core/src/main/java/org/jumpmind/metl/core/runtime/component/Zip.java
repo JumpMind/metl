@@ -140,10 +140,12 @@ public class Zip extends AbstractComponentRuntime {
                                 zos.putNextEntry(entry);
                                 log(LogLevel.INFO, "Adding %s", sourceZipFile.getName());                        
                                 InputStream fis = sourceDir.getInputStream(sourceZipFile.getRelativePath(), unitOfWorkBoundaryReached);
-                                try {
-                                    IOUtils.copy(fis, zos);
-                                } finally {
-                                    IOUtils.closeQuietly(fis);
+                                if (fis != null) {
+                                    try {
+                                        IOUtils.copy(fis, zos);
+                                    } finally {
+                                        IOUtils.closeQuietly(fis);
+                                    }
                                 }
                             }
                             zos.closeEntry();

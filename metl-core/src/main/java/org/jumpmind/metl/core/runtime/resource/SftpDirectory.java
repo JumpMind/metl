@@ -357,7 +357,11 @@ public class SftpDirectory implements IDirectory {
             }
             return new CloseableInputStreamStream(sftp.get(relativePath), session, sftp);
         } catch (Exception e) {
-            throw new IoException("Error getting the input stream for sftp endpoint.  Error %s", e.getMessage());
+            if (((SftpException) e).id != 2) {
+                throw new IoException("Error getting the input stream for sftp endpoint.  Error %s", e.getMessage());       
+            } else {
+                return null;
+            }
         } 
     }
 
