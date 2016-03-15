@@ -51,6 +51,10 @@ dependencies {
 
 }
 
+clean.doFirst {
+    delete "working"
+}
+
 task (schemaspy, dependsOn: 'classes', type: JavaExec) {
     description 'Generates schema spy output for the Metl configuration data model'
     main = 'org.jumpmind.metl.core.persist.SchemaSpy'

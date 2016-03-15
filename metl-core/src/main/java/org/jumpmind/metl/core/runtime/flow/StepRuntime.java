@@ -60,6 +60,7 @@ import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.ThreadUtils;
+import org.jumpmind.util.AppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -261,7 +262,7 @@ public class StepRuntime implements Runnable {
                             process(inputMessage, target);
                         }
                     } else {
-                        Thread.sleep(50);
+                        AppUtils.sleep(50);
                     }
                 }
             }

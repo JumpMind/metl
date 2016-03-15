@@ -32,7 +32,7 @@ public class StandaloneTestFlowRunner extends StandaloneFlowRunner {
         String executionId = runFlow(flow, true);
         Execution execution = findExecution(executionId);
         if (execution.isNotSuccess()) {
-            fail(getFailureMessage(executionId));
+            fail(getFailureMessage(execution));
         }
     }
 

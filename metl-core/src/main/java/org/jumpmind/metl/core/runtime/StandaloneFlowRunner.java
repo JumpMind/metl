@@ -135,9 +135,9 @@ public class StandaloneFlowRunner {
         return executionId;
     }
     
-    public String getFailureMessage(String executionId) {
-        List<ExecutionStep> steps = executionService.findExecutionSteps(executionId);
-        StringBuilder message = new StringBuilder();
+    public String getFailureMessage(Execution execution) {
+        List<ExecutionStep> steps = executionService.findExecutionSteps(execution.getId());
+        StringBuilder message = new StringBuilder("The flow failed with a status of ").append(execution.getStatus()).append(".  ");
         for (ExecutionStep executionStep : steps) {
             if (executionStep.getExecutionStatus() == ExecutionStatus.ERROR) {
                 List<ExecutionStepLog> logs = executionService.findExecutionStepLogs(executionStep.getId());
