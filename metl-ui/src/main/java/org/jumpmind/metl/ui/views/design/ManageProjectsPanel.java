@@ -290,7 +290,6 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         ProjectVersionItem item = new ProjectVersionItem(project, version);
         grid.getContainerDataSource().addItem(item);
         grid.select(item);
-        edit();
     }
 
     protected void removeProject() {
