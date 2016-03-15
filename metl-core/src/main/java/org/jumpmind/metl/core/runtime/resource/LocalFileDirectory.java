@@ -191,7 +191,11 @@ public class LocalFileDirectory implements IDirectory {
         try {
             return new FileInputStream(toFile(relativePath, mustExist));
         } catch (FileNotFoundException e) {
-            throw new IoException(e);
+            if (mustExist) {
+                throw new IoException(e);
+            } else {                
+                return null;
+            }
         }
     }
 
