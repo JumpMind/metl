@@ -52,8 +52,15 @@ class SendMessageCallback<T> implements ISendMessageCallback {
     
     @Override
     public void sendEntityDataMessage(Map<String, Serializable> messageHeaders, ArrayList<EntityData> payload, String... targetStepIds) {
-        payloadList.add((T) payload);        this.targetStepIds.add(Arrays.asList(targetStepIds));
-
+        payloadList.add((T) payload);        
+        this.targetStepIds.add(Arrays.asList(targetStepIds));
+    }
+    
+    @Override
+    public void sendTextMessage(Map<String, Serializable> messageHeaders, String payload, String... targetStepIds) {
+        ArrayList<String> messages = new ArrayList<>();
+        messages.add(payload);
+        sendTextMessage(messageHeaders, messages, targetStepIds);
     }
     
     @Override

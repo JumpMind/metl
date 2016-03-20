@@ -113,6 +113,13 @@ public class HandleParams {
         }
         
         @Override
+        public void sendTextMessage(Map<String, Serializable> messageHeaders, String payload, String... targetStepIds) {
+            ArrayList<String> messages = new ArrayList<>();
+            messages.add(payload);
+            sendTextMessage(messageHeaders, messages, targetStepIds);
+        }
+        
+        @Override
         public void sendTextMessage(Map<String, Serializable> messageHeaders, ArrayList<String> payload, String... targetStepIds) {
                 TextMessage message = new TextMessage("unitTest");
                 message.setPayload(payload);

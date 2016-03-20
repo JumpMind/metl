@@ -136,7 +136,10 @@
     <component-ui id="Web UI" componentId="Web">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditWebPanel</className>
-    </component-ui>                        
+    </component-ui>
+    <component-ui id="HttpRequest UI" componentId="HttpRequest">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
+    </component-ui>                                                    
     <component-ui id="Zip UI" componentId="Zip">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-zip-48x48-color.png</iconImage>
     </component-ui>   
@@ -162,7 +165,10 @@
     </component-ui>
     <component-ui id="Union UI" componentId="Union">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-union-48x48-color.png</iconImage>
-    </component-ui> 
+    </component-ui>
+    <component-ui id="Entity Result UI" componentId="16170152-eee5-11e5-9ce9-5e5517507c66">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-entity-result-48x48-color.png</iconImage>
+    </component-ui>      
     <component-ui id="Temp RDBMS UI" componentId="Temp RDBMS">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-temp-rdbms-48x48-color.png</iconImage>
         <className>org.jumpmind.metl.ui.views.design.EditTempRdbmsPanel</className>

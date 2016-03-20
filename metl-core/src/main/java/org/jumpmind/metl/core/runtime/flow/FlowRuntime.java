@@ -41,7 +41,9 @@ import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentDeploymentParameter;
 import org.jumpmind.metl.core.model.AgentParameter;
+import org.jumpmind.metl.core.model.EntityRow;
 import org.jumpmind.metl.core.model.Flow;
+import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Notification;
@@ -57,7 +59,7 @@ import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
-import org.jumpmind.metl.core.runtime.component.Response;
+import org.jumpmind.metl.core.runtime.component.EntityResult;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -118,18 +120,21 @@ public class FlowRuntime {
         return deployment;
     }
     
-    public String getResponse() {
-        StringBuilder response = new StringBuilder();
+    public ArrayList<EntityRow> getEntityResult() {
+        ArrayList<EntityRow> response = null;
         Collection<StepRuntime> steps = stepRuntimes.values();
         for (StepRuntime stepRuntime : steps) {
             List<IComponentRuntime> runtimes = stepRuntime.getComponentRuntimes();
             for (IComponentRuntime runtime : runtimes) {
-                if (runtime instanceof Response) {
-                    response.append(((Response)runtime).getResponse());
+                if (runtime instanceof EntityResult) {
+                    if (response == null) {
+                        response = new ArrayList<>();
+                    }
+                    response.addAll(((EntityResult)runtime).getResponse());
                 }
             }
         }
-        return response.toString();
+        return response;
     }
     
 
@@ -151,7 +156,7 @@ public class FlowRuntime {
         this.notifications = notifications;
         this.mailSession = new MailSession(globalSettings);
         
-        Map<String, String> parameters = getFlowParameters(deployment.getAgentDeploymentParameters(), agent.getAgentParameters());
+        Map<String, String> parameters = getFlowParameters(agent, deployment);
         
         flowParameters = new HashMap<String, String>();
         flowParameters.putAll(parameters);
@@ -253,9 +258,24 @@ public class FlowRuntime {
         }
         return flow;
     }
-
-    protected Map<String, String> getFlowParameters(List<AgentDeploymentParameter> deployParameters, List<AgentParameter> agentParameters) {
+    
+    public static Map<String, String> getFlowParameters(Flow flow, Agent agent, AgentDeployment agentDeployment) {
         Map<String, String> params = new HashMap<String, String>();
+        List<FlowParameter> flowParameters = flow.getFlowParameters();
+        for (FlowParameter flowParameter : flowParameters) {
+            params.put(flowParameter.getName(), flowParameter.getDefaultValue());
+        }
+        return getFlowParameters(params, agent, agentDeployment);
+    }
+
+    public static Map<String, String> getFlowParameters(Agent agent, AgentDeployment agentDeployment) {
+        Map<String, String> params = new HashMap<String, String>();
+        return getFlowParameters(params, agent, agentDeployment);
+    }
+    
+    public static Map<String, String> getFlowParameters(Map<String, String> params, Agent agent, AgentDeployment agentDeployment) {
+        List<AgentDeploymentParameter> deployParameters = agentDeployment.getAgentDeploymentParameters();
+        List<AgentParameter> agentParameters = agent.getAgentParameters();
         if (agentParameters != null) {
             for (AgentParameter agentParameter : agentParameters) {
                 params.put(agentParameter.getName(), agentParameter.getValue());
@@ -268,8 +288,8 @@ public class FlowRuntime {
         }
         Date date = new Date();
         params.put("_agentName", agent.getName());
-        params.put("_deploymentName", deployment.getName());
-        params.put("_flowName", deployment.getFlow().getName());
+        params.put("_deploymentName", agentDeployment.getName());
+        params.put("_flowName", agentDeployment.getFlow().getName());
         params.put("_host", agent.getHost());
         params.put("_date", DateFormatUtils.format(date, DATE_FORMAT));
         params.put("_time", DateFormatUtils.format(date, TIME_FORMAT));
@@ -283,19 +303,14 @@ public class FlowRuntime {
      */
     public void waitForFlowCompletion() {
         while (isRunning()) {
-            AppUtils.sleep(50);
+            AppUtils.sleep(5);
         }        
     }
     
-    public void notifyStepsTheFlowIsComplete() {
-        Collection<StepRuntime> allSteps = stepRuntimes.values();
-        List<Throwable> allErrors = new ArrayList<Throwable>();
-        for (StepRuntime stepRuntime : allSteps) {
-            if (stepRuntime.getError() != null) {
-               allErrors.add(stepRuntime.getError());
-            }
-        }
+    public void notifyStepsTheFlowIsComplete() {        
+        List<Throwable> allErrors = getAllErrors();
 
+        Collection<StepRuntime> allSteps = stepRuntimes.values();
         for (StepRuntime stepRuntime : allSteps) {
             if (allErrors.size() > 0) {
                 stepRuntime.flowCompletedWithErrors(stepRuntime.getError(), allErrors);
@@ -305,20 +320,36 @@ public class FlowRuntime {
         }
         
         executionTracker.afterFlow();
-        if (allErrors.size() > 0) {
-            StringBuilder sb = new StringBuilder();
-            int count = 0;
-            for (Throwable error : allErrors) {
-                if (++count < 10) {
-                    sb.append(ExceptionUtils.getStackTrace(error)).append("\n");
-                } else {
-                    sb.append("\n...and ").append(allErrors.size() - 10).append(" more errors...");
-                }
-            }
-            flowParameters.put("_errorText", sb.toString());
+        
+        if (allErrors.size() > 0) {            
+            flowParameters.put("_errorText", getErrorText(allErrors));
             sendNotifications(Notification.EventType.FLOW_ERROR);    
         }
         sendNotifications(Notification.EventType.FLOW_END);
+    }
+    
+    public List<Throwable> getAllErrors() {
+        Collection<StepRuntime> allSteps = stepRuntimes.values();
+        List<Throwable> allErrors = new ArrayList<Throwable>();
+        for (StepRuntime stepRuntime : allSteps) {
+            if (stepRuntime.getError() != null) {
+               allErrors.add(stepRuntime.getError());
+            }
+        }
+        return allErrors;
+    }
+    
+    public String getErrorText(List<Throwable> allErrors) {
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        for (Throwable error : allErrors) {
+            if (++count < 10) {
+                sb.append(ExceptionUtils.getStackTrace(error)).append("\n");
+            } else {
+                sb.append("\n...and ").append(allErrors.size() - 10).append(" more errors...");
+            }
+        }
+        return sb.toString();
     }
 
     public boolean isRunning() {

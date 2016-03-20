@@ -44,6 +44,7 @@ import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentDeploymentParameter;
 import org.jumpmind.metl.core.model.AgentStatus;
 import org.jumpmind.metl.core.model.DeploymentStatus;
+import org.jumpmind.metl.core.model.EntityRow;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.FlowStep;
@@ -341,7 +342,7 @@ public class AgentRuntime {
                     scheduledFlows.put(deployment, Collections.synchronizedList(new ArrayList<FlowRuntime>()));
                 }
                 
-                doComponentDeploymentEvent(deployment, (l, s, c) -> l.onDeploy(deployment, s, c));
+                doComponentDeploymentEvent(deployment, (l, f, s, c) -> l.onDeploy(agent, deployment, f, s, c));
 
                 if (deployment.asStartType() == StartType.ON_DEPLOY) {
                     scheduleNow(deployment);
@@ -374,13 +375,13 @@ public class AgentRuntime {
         List<FlowStep> steps = flow.getFlowSteps();
         for (FlowStep flowStep : steps) {
             XMLComponent componentDefintion = componentFactory.getComonentDefinition(flowStep.getComponent().getType());
-            if (isNotBlank(componentDefintion.getDeploymentListenerClassName())) {
+            if (componentDefintion != null && isNotBlank(componentDefintion.getDeploymentListenerClassName())) {
                 try {
                     IComponentDeploymentListener listener = (IComponentDeploymentListener)Class.forName(componentDefintion.getDeploymentListenerClassName()).newInstance();
                     if (listener instanceof IHttpRequestMappingRegistryAware) {
                         ((IHttpRequestMappingRegistryAware)listener).setHttpRequestMappingRegistry(httpRequestMappingRegistry);
                     }
-                    method.run(listener, flowStep, componentDefintion);
+                    method.run(listener, flow, flowStep, componentDefintion);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -392,7 +393,7 @@ public class AgentRuntime {
     	return scheduleNow(deployment, null);
     }
     
-    public String execute(AgentDeployment deployment, Map<String, String> runtimeParameters) {
+    public ArrayList<EntityRow> execute(AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
         log.info("Executing '{}' on '{}' for now", new Object[] {
                 deployment.getName(), agent.getName() });
         String executionId = createExecutionId();
@@ -411,7 +412,28 @@ public class AgentRuntime {
             flowRuntime.waitForFlowCompletion();
             flowRuntime.notifyStepsTheFlowIsComplete();
         }        
-        return flowRuntime.getResponse();
+        
+        List<Throwable> errors = flowRuntime.getAllErrors();
+        if (errors.size() == 0) {
+            ArrayList<EntityRow> entities = flowRuntime.getEntityResult();
+            if (entities != null) {
+                return entities;
+            } else {
+                // TODO maybe in the future also check to see if there was a TextResult
+                return null;
+            }
+        } else {
+            for (Throwable throwable : errors) {
+                if (throwable instanceof Exception) {
+                    throw (Exception)throwable;
+                } else if (throwable instanceof Error) {
+                    throw (Error)throwable;
+                } else {
+                    throw new RuntimeException(throwable);
+                }
+            }
+            throw new Exception(flowRuntime.getErrorText(errors));
+        }
     }
     
     private final String createExecutionId() {
@@ -454,7 +476,7 @@ public class AgentRuntime {
     }
 
     public synchronized void undeploy(AgentDeployment deployment) {
-        doComponentDeploymentEvent(deployment, (l, s, c) -> l.onUndeploy(deployment, s, c));
+        doComponentDeploymentEvent(deployment, (l, f, s, c) -> l.onUndeploy(agent, deployment, f, s, c));
         stop(deployment);
         configurationService.delete(deployment);
         agent.getAgentDeployments().remove(deployment);
@@ -539,7 +561,7 @@ public class AgentRuntime {
     }
     
     interface DeployListenerAction {
-        public void run(IComponentDeploymentListener listener, FlowStep step, XMLComponent componentDefintion) throws Exception;
+        public void run(IComponentDeploymentListener listener, Flow flow, FlowStep step, XMLComponent componentDefintion) throws Exception;
     }
 
 }

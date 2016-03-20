@@ -20,12 +20,10 @@
  */
 package org.jumpmind.metl.ui.api;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -35,10 +33,10 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.DeploymentStatus;
+import org.jumpmind.metl.core.model.EntityRow;
 import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.ExecutionStep;
@@ -69,10 +67,14 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 
+import springfox.documentation.annotations.ApiIgnore;
+
 @Api(value = "Execution API", description = "This is the API for Metl")
 @Controller
 public class ExecutionApi {
-
+    
+    static final String WS = "/ws";
+    
     final Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired
@@ -86,20 +88,19 @@ public class ExecutionApi {
     
     AntPathMatcher patternMatcher = new AntPathMatcher();
 
-    @RequestMapping(value = "/**", method = RequestMethod.GET)
-    public final void get(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String restOfTheUrl = (String) req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+    @ApiIgnore
+    @RequestMapping(value = WS + "/**", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public final ArrayList<EntityRow> get(HttpServletRequest req) throws Exception {
+        String restOfTheUrl = ((String) req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).substring(WS.length());
         HttpRequestMapping mapping = requestRegistry.findBestMatch(HttpMethod.GET, restOfTheUrl);
         if (mapping != null) {
             Map<String, String> params = toObjectMap(req);
             params.putAll(patternMatcher.extractUriTemplateVariables(mapping.getPath(), restOfTheUrl));
             AgentDeployment deployment = mapping.getDeployment();
             AgentRuntime agentRuntime = agentManager.getAgentRuntime(deployment.getAgentId());
-            String response = agentRuntime.execute(deployment, params);
-            if (isNotBlank(response)) {
-                resp.setContentType(mapping.getContentType());
-                IOUtils.write(response, resp.getOutputStream());
-            }
+            return agentRuntime.execute(deployment, params);
         } else {
             throw new CouldNotFindDeploymentException("Could not find a deployed web request that matches " + restOfTheUrl);
         }

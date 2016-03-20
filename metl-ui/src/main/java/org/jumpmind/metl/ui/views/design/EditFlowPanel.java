@@ -307,9 +307,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         return count;
     }
 
-    protected void addComponent(int x, int y, Component component) {
-
-        component.setName(component.getType() + " " + (countComponentsOfType(component.getType()) + 1));
+    protected void addComponent(String name, int x, int y, Component component) {
+        component.setName(name + " " + (countComponentsOfType(component.getType()) + 1));
         component.setProjectVersionId(flow.getProjectVersionId());
 
         FlowStep flowStep = new FlowStep(component);
@@ -523,13 +522,13 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                 Component component = new Component();
                 component.setId(flowPaletteItem.getComponentId());
                 configurationService.refresh(component, true);
-                addComponent(details.getMouseEvent().getClientX() - details.getAbsoluteLeft(),
+                addComponent(flowPaletteItem.getCaption(), details.getMouseEvent().getClientX() - details.getAbsoluteLeft(),
                         details.getMouseEvent().getClientY() - details.getAbsoluteTop(), component);
             } else {
                 Component component = new Component();
                 component.setType(flowPaletteItem.getComponentType());
                 component.setShared(false);
-                addComponent(details.getMouseEvent().getClientX() - details.getAbsoluteLeft(),
+                addComponent(flowPaletteItem.getCaption(), details.getMouseEvent().getClientX() - details.getAbsoluteLeft(),
                         details.getMouseEvent().getClientY() - details.getAbsoluteTop(), component);
             }
         }

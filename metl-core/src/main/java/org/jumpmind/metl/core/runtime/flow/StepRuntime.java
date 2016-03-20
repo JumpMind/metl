@@ -704,6 +704,13 @@ public class StepRuntime implements Runnable {
             sendMessage(createMessage(new EntityDataMessage(flowStep.getId(), payload), messageHeaders), targetStepIds);
             contentMessagesSentCount++;
         }
+        
+        @Override
+        public void sendTextMessage(Map<String, Serializable> messageHeaders, String payload, String... targetStepIds) {
+            ArrayList<String> messages = new ArrayList<>();
+            messages.add(payload);
+            sendTextMessage(messageHeaders, messages, targetStepIds);
+        }
 
         @Override
         public void sendTextMessage(Map<String, Serializable> messageHeaders, ArrayList<String> payload, String... targetStepIds) {

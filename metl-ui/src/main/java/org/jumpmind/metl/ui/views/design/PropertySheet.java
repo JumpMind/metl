@@ -68,7 +68,6 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.ui.AbsoluteLayout;
-import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Button;
@@ -113,7 +112,6 @@ public class PropertySheet extends AbsoluteLayout {
 
     }
     
-    @SuppressWarnings("unchecked")
     protected boolean hasAdvancedEditor() {
         FlowStep flowStep = getSingleFlowStep();
         if (flowStep != null) {
@@ -125,7 +123,6 @@ public class PropertySheet extends AbsoluteLayout {
         }        
     }
     
-    @SuppressWarnings("unchecked")
     public void openAdvancedEditor() {
         FlowStep flowStep = getSingleFlowStep();
         if (flowStep != null) {          
@@ -277,7 +274,7 @@ public class PropertySheet extends AbsoluteLayout {
         XMLComponent componentDefintion = context.getComponentFactory().getComonentDefinition(component.getType());
         addComponentName(formLayout, component);
         TextField textField = new TextField("Component Type");
-        textField.setValue(component.getType());
+        textField.setValue(componentDefintion.getName());
         textField.setReadOnly(true);
         formLayout.addComponent(textField);
         addResourceCombo(componentDefintion, formLayout, component);
@@ -292,7 +289,6 @@ public class PropertySheet extends AbsoluteLayout {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected void addOutputModelCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
         FlowStep step = getSingleFlowStep();
         if (step != null) {

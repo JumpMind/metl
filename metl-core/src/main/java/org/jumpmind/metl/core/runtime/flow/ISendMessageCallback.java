@@ -32,6 +32,8 @@ public interface ISendMessageCallback {
     public void sendEntityDataMessage(Map<String, Serializable> messageHeaders, ArrayList<EntityData> payload, String... targetStepIds);
     
     public void sendTextMessage(Map<String, Serializable> messageHeaders, ArrayList<String> payload, String... targetStepIds);
+    
+    public void sendTextMessage(Map<String, Serializable> messageHeaders, String payload, String... targetStepIds);
 
     public void sendBinaryMessage(Map<String, Serializable> messageHeaders, byte[] payload, String... targetStepIds);
     

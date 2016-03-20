@@ -134,7 +134,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Bean
     public Docket swaggerSpringMvcPlugin() {
       return new Docket(DocumentationType.SWAGGER_2).pathMapping("/api").produces(contentTypes()).consumes(contentTypes()).
-              apiInfo(new ApiInfo("Metl API", "This is the REST API for Metl", "1.0", null, null, null, null));
+              apiInfo(new ApiInfo("Metl API", "This is the REST API for Metl", null, null, null, null, null));
     }
 
     protected Set<String> contentTypes() {
