@@ -174,7 +174,10 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         super.afterHandle(threadNumber, context, error);
         ExecutionStep step = getExecutionStep(threadNumber, context);
         Date lastUpdateTime = lastStatUpdate.get(step);
-        step.incrementHandleDuration(Duration.between(startHandle.get(step),Instant.now()).toMillis());
+        Instant startInstant = startHandle.get(step);
+        if (startInstant != null) {
+            step.incrementHandleDuration(Duration.between(startInstant,Instant.now()).toMillis());
+        }
         if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.READY.name());
             ComponentStatistics stats = context.getComponentStatistics();

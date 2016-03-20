@@ -1399,7 +1399,7 @@
                required='false'
                type='choice'>
         <name>Run When</name>
-        <defaultValue>PER UNIT OF WORK</defaultValue>
+        <defaultValue>PER MESSAGE</defaultValue>
         <choices>
           <choice>PER UNIT OF WORK</choice>
           <choice>PER MESSAGE</choice>
