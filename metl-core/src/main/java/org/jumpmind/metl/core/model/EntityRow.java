@@ -1,29 +1,35 @@
 package org.jumpmind.metl.core.model;
 
-import org.jumpmind.db.sql.Row;
+import java.io.Serializable;
+import java.util.Map;
 
-public class EntityRow extends Row {
+public class EntityRow implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    String entityName;
+    String name;
+    
+    Map<String, Object> data;
 
-    public EntityRow(String entityName, int numberOfColumns) {
-        super(numberOfColumns);
-        this.entityName = entityName;
+    public EntityRow(String entityName, Map<String, Object> row) {
+        this.name = entityName;
+        this.data = row;
     }
 
-    public EntityRow(String entityName, String columnName, Object value) {
-        super(columnName, value);
-        this.entityName = entityName;
+    public String getName() {
+        return name;
     }
     
-    public String getEntityName() {
-        return entityName;
+    public void setName(String entityName) {
+        this.name = entityName;
     }
     
-    public void setEntityName(String entityName) {
-        this.entityName = entityName;
+    public Map<String, Object> getData() {
+        return data;
+    }
+    
+    public void setData(Map<String, Object> row) {
+        this.data = row;
     }
 
 }

@@ -1,6 +1,7 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.jumpmind.metl.core.model.EntityRow;
 import org.jumpmind.metl.core.model.Model;
@@ -39,10 +40,10 @@ public class EntityResult extends AbstractComponentRuntime {
                         for (ModelAttribute attribute : entity.getModelAttributes()) {
                             if (entityData.containsKey(attribute.getId())) {
                                 if (row == null) {
-                                    row = new EntityRow(entity.getName(), entity.getModelAttributes().size());
+                                    row = new EntityRow(entity.getName(), new HashMap<>(entity.getModelAttributes().size()));
                                     response.add(row);
                                 }
-                                row.put(attribute.getName(), entityData.get(attribute.getId()));
+                                row.getData().put(attribute.getName(), entityData.get(attribute.getId()));
                             }
                         }
                     }
