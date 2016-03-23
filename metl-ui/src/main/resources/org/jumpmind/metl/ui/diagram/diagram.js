@@ -211,7 +211,7 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
             });
         });
         
-        instance.bind("click", function(connection, originalEvent) {
+        instance.bind("mousedown", function(connection, originalEvent) {
             originalEvent.stopImmediatePropagation();
             unselectAllLinks();
             $(".diagram-node").removeClass("selected");
