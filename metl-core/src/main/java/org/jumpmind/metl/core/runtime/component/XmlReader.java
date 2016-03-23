@@ -130,7 +130,7 @@ public class XmlReader extends AbstractComponentRuntime {
                 String filePath = resolveParamsAndHeaders(file, inputMessage);
                 parserIs = directory.getInputStream(filePath, mustExist);
                 if (parserIs != null) {
-                    InputStreamReader reader = new InputStreamReader(parserIs, encoding);
+                    InputStreamReader reader = new InputStreamReader(directory.getInputStream(filePath, mustExist), encoding);
                     parser.setInput(parserIs, encoding);
                     lineNumberReader = new LineNumberReader(reader);
                     lineNumberReader.setLineNumber(1);
