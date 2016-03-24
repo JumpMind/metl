@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Resource;
@@ -108,6 +109,7 @@ public class SftpDirectory implements IDirectory {
         Session session = null;
         ChannelSftp uploadSftp = null;
         ChannelSftp downloadSftp = null;
+        InputStream inputStream = null;
         try {
             session = openSession();
             uploadSftp = (ChannelSftp) session.openChannel("sftp");
@@ -116,13 +118,14 @@ public class SftpDirectory implements IDirectory {
             downloadSftp = (ChannelSftp) session.openChannel("sftp");
             downloadSftp.connect();
             downloadSftp.cd(basePath);
-            InputStream inputStream = getInputStream(fromFilePath, true);
+            inputStream = getInputStream(fromFilePath, true);
             uploadSftp.put(inputStream, toFilePath);
         } catch (Exception e) {
             throw new IoException("Error copying file.  Error %s", e.getMessage());
         } finally {
             SftpDirectory.this.closeStateless(session, uploadSftp);
             SftpDirectory.this.closeStateless(session, downloadSftp);
+            IOUtils.closeQuietly(inputStream);
         }  
     }
     
@@ -300,6 +303,7 @@ public class SftpDirectory implements IDirectory {
         ChannelSftp uploadSftp = null;
         ChannelSftp downloadSftp = null;
         FileInfo fileInfo = new FileInfo(fromFilePath, false, new java.util.Date().getTime(), -1);
+        InputStream inputStream = null;
         try {
             session = openSession();
             uploadSftp = (ChannelSftp) session.openChannel("sftp");
@@ -311,13 +315,14 @@ public class SftpDirectory implements IDirectory {
             if (!toDirPath.endsWith("/")) {
             	toDirPath += "/";
             }
-            InputStream inputStream = getInputStream(fromFilePath, true);
+            inputStream = getInputStream(fromFilePath, true);
             uploadSftp.put(inputStream, toDirPath + fileInfo.getName());
         } catch (Exception e) {
             throw new IoException("Error copying directory.  Error %s", e.getMessage());
         } finally {
             SftpDirectory.this.closeStateless(session, uploadSftp);
             SftpDirectory.this.closeStateless(session, downloadSftp);
+            IOUtils.closeQuietly(inputStream);
         }  
     }
     
