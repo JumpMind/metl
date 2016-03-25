@@ -35,7 +35,7 @@ public class Agent extends AbstractObject {
     String name;
 
     String host;
-    
+
     boolean allowTestFlows = false;
 
     String startMode = AgentStartMode.AUTO.name();
@@ -46,12 +46,14 @@ public class Agent extends AbstractObject {
 
     Date heartbeatTime;
 
+    boolean autoRefresh;
+
     List<AgentDeployment> agentDeployments;
-    
+
     List<AgentResourceSetting> agentResourceSettings;
-    
+
     List<AgentParameter> agentParameters;
-    
+
     boolean deleted;
 
     public Agent(String name, String host) {
@@ -59,7 +61,7 @@ public class Agent extends AbstractObject {
         this.name = name;
         this.host = host;
     }
-    
+
     public Agent() {
         this.agentDeployments = new ArrayList<>();
         this.agentParameters = new ArrayList<>();
@@ -103,7 +105,7 @@ public class Agent extends AbstractObject {
             folder = new Folder(folderId);
         } else {
             folder = null;
-        }            
+        }
     }
 
     public String getFolderId() {
@@ -169,28 +171,28 @@ public class Agent extends AbstractObject {
     public boolean isDeployed(Flow flow) {
         return getAgentDeploymentFor(flow) != null;
     }
-    
+
     @Override
     public boolean isSettingNameAllowed() {
         return true;
     }
-    
+
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
-    
+
     public boolean isDeleted() {
         return deleted;
     }
-    
+
     public void setAllowTestFlows(boolean allowTestFlows) {
-    	this.allowTestFlows = allowTestFlows;
+        this.allowTestFlows = allowTestFlows;
     }
 
     public boolean isAllowTestFlows() {
-    	return allowTestFlows;
+        return allowTestFlows;
     }
-    
+
     public AgentDeployment getAgentDeploymentFor(Flow flow) {
         for (AgentDeployment agentDeployment : agentDeployments) {
             if (agentDeployment.getFlow().equals(flow)) {
@@ -199,7 +201,7 @@ public class Agent extends AbstractObject {
         }
         return null;
     }
-    
+
     public TypedProperties toTypedProperties(Resource resource) {
         TypedProperties properties = new TypedProperties();
         if (agentResourceSettings != null) {
@@ -218,6 +220,14 @@ public class Agent extends AbstractObject {
 
     public void setAgentParameters(List<AgentParameter> agentParameters) {
         this.agentParameters = agentParameters;
+    }
+
+    public void setAutoRefresh(boolean autoRefresh) {
+        this.autoRefresh = autoRefresh;
+    }
+
+    public boolean isAutoRefresh() {
+        return autoRefresh;
     }
 
 }

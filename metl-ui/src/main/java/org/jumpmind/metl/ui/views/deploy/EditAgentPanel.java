@@ -183,6 +183,16 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         editAgentLayout.addComponent(exportButton);
         editAgentLayout.setComponentAlignment(exportButton, Alignment.BOTTOM_LEFT);
 
+        CheckBox autoRefresh = new CheckBox("Auto Refresh", Boolean.valueOf(agent.isAutoRefresh()));
+        autoRefresh.setImmediate(true);        
+        autoRefresh.addValueChangeListener(event -> {
+            agent.setAutoRefresh(autoRefresh.getValue());
+            EditAgentPanel.this.context.getConfigurationService().save((AbstractObject) agent);
+            EditAgentPanel.this.context.getAgentManager().refresh(agent);
+        });
+        editAgentLayout.addComponent(autoRefresh);
+        editAgentLayout.setComponentAlignment(autoRefresh, Alignment.BOTTOM_LEFT);
+        
         CheckBox allowTestFlowsField = new CheckBox("Allow Test Flows", Boolean.valueOf(agent.isAllowTestFlows()));
         allowTestFlowsField.setImmediate(true);        
         allowTestFlowsField.addValueChangeListener(event -> {

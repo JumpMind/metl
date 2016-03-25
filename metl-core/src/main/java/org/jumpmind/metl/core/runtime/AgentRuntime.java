@@ -397,6 +397,10 @@ public class AgentRuntime {
         log.info("Executing '{}' on '{}' for now", new Object[] {
                 deployment.getName(), agent.getName() });
         String executionId = createExecutionId();
+        if (agent.isAutoRefresh()) {
+            deployment = configurationService.findAgentDeployment(deployment.getId());
+            deployment.setFlow(configurationService.findFlow(deployment.getFlowId()));
+        }
         FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory,
                 resourceFactory,
                 flowStepsExecutionThreads, configurationService, executionService);
@@ -498,8 +502,10 @@ public class AgentRuntime {
         public FlowRunner(AgentDeployment deployment, String executionId, Map<String, String> runtimeParameters) {
             this.executionId = executionId;
             this.runtimeParameters = runtimeParameters;
-            deployment = configurationService.findAgentDeployment(deployment.getId());
-            deployment.setFlow(configurationService.findFlow(deployment.getFlowId()));
+            if (agent.isAutoRefresh()) {
+                deployment = configurationService.findAgentDeployment(deployment.getId());
+                deployment.setFlow(configurationService.findFlow(deployment.getFlowId()));
+            }
             this.flowRuntime = new FlowRuntime(deployment, componentFactory,
                     resourceFactory,
                     flowStepsExecutionThreads, configurationService, executionService);
