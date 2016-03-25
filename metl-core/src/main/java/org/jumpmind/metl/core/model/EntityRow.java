@@ -9,9 +9,9 @@ public class EntityRow implements Serializable {
     
     String name;
     
-    Map<String, Object> data;
+    Map<String, String> data;
 
-    public EntityRow(String entityName, Map<String, Object> row) {
+    public EntityRow(String entityName, Map<String, String> row) {
         this.name = entityName;
         this.data = row;
     }
@@ -24,11 +24,11 @@ public class EntityRow implements Serializable {
         this.name = entityName;
     }
     
-    public Map<String, Object> getData() {
+    public Map<String, String> getData() {
         return data;
     }
     
-    public void setData(Map<String, Object> row) {
+    public void setData(Map<String, String> row) {
         this.data = row;
     }
 

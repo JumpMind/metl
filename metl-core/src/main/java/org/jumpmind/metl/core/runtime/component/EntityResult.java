@@ -1,6 +1,7 @@
 package org.jumpmind.metl.core.runtime.component;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import org.jumpmind.metl.core.model.EntityRow;
@@ -11,6 +12,7 @@ import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
+import org.jumpmind.util.FormatUtils;
 
 public class EntityResult extends AbstractComponentRuntime {
 
@@ -43,7 +45,14 @@ public class EntityResult extends AbstractComponentRuntime {
                                     row = new EntityRow(entity.getName(), new HashMap<>(entity.getModelAttributes().size()));
                                     response.add(row);
                                 }
-                                row.getData().put(attribute.getName(), entityData.get(attribute.getId()));
+                                String stringValue = null;
+                                Object value = entityData.get(attribute.getId());
+                                if (value instanceof Date) {
+                                    stringValue = FormatUtils.TIMESTAMP_FORMATTER.format((Date)value);
+                                } if (value != null) {
+                                    stringValue = value.toString();
+                                }
+                                row.getData().put(attribute.getName(), stringValue);
                             }
                         }
                     }
