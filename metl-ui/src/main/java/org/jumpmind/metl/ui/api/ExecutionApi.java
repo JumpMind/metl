@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
@@ -194,13 +195,14 @@ public class ExecutionApi {
 
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    public RestError handleError(Exception ex, HttpServletRequest req) {
+    public RestError handleError(Exception ex, HttpServletRequest req, HttpServletResponse resp) {
         log.error("Web service call failed with error", ex);
         int httpErrorCode = 500;
         Annotation annotation = ex.getClass().getAnnotation(ResponseStatus.class);
         if (annotation != null) {
             httpErrorCode = ((ResponseStatus) annotation).value().value();
         }
+        resp.setStatus(httpErrorCode);
         return new RestError(ex, httpErrorCode);
     }
 
