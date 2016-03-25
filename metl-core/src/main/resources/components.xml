@@ -1085,6 +1085,12 @@
         <name>Rows / Msg</name>
         <defaultValue>10000</defaultValue>
       </setting>
+      <setting id='control.message.on.text.send'
+               required='false'
+               type='boolean'>
+        <name>Send Control Message on Text Send</name>
+        <defaultValue>false</defaultValue>
+      </setting>      
     </settings>
   </component>
   <component category='READER'

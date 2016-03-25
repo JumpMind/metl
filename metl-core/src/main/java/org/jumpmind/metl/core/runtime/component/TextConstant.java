@@ -36,6 +36,8 @@ public class TextConstant extends AbstractComponentRuntime {
     public static final String TYPE = "Text Constant";
 
     public static final String SETTING_SPLIT_ON_LINE_FEED = "split.on.line.feed";
+    
+    public static final String SETTING_CONTROL_MESSAGE_ON_TEXT_SEND = "control.message.on.text.send";
 
     public static final String SETTING_TEXT = "text";
     
@@ -43,6 +45,7 @@ public class TextConstant extends AbstractComponentRuntime {
 
     int textRowsPerMessage;
     boolean splitOnLineFeed;
+    boolean controlMessageOnTextSend;
     String constantText;
     
     @Override
@@ -50,6 +53,7 @@ public class TextConstant extends AbstractComponentRuntime {
     	textRowsPerMessage = context.getFlowStep().getComponent().getInt(ROWS_PER_MESSAGE, 1000);
         splitOnLineFeed = context.getFlowStep().getComponent().getBoolean(SETTING_SPLIT_ON_LINE_FEED, false);
         constantText = context.getFlowStep().getComponent().get(SETTING_TEXT, "");
+        controlMessageOnTextSend = context.getFlowStep().getComponent().getBoolean(SETTING_CONTROL_MESSAGE_ON_TEXT_SEND, false);
         runWhen = getComponent().get(RUN_WHEN, PER_UNIT_OF_WORK);
     }
 
@@ -93,7 +97,11 @@ public class TextConstant extends AbstractComponentRuntime {
 
 			if (payload.size() > 0) {
 			    callback.sendTextMessage(null, payload);
+			    if (PER_MESSAGE.equals(runWhen) && controlMessageOnTextSend) {
+			        callback.sendControlMessage();
+			    }
 			}
+			
 		}
 	}
 	
