@@ -60,6 +60,8 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     public final static String TRIM_COLUMNS = "trim.columns";
 
     public final static String MATCH_ON_COLUMN_NAME_ONLY = "match.on.column.name";
+    
+    public final static String PASS_INPUT_ROWS_THROUGH = "pass.input.rows.through";
 
     public final static String RUN_WHEN = "run.when";
 
@@ -72,6 +74,8 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     boolean trimColumns = false;
 
     boolean matchOnColumnNameOnly = false;
+    
+    boolean passInputRowsThrough = false;
 
     ChangeType entityChangeType = ChangeType.ADD;
 
@@ -84,6 +88,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         trimColumns = properties.is(TRIM_COLUMNS);
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
+        passInputRowsThrough = properties.is(PASS_INPUT_ROWS_THROUGH, false);
         runWhen = properties.get(RUN_WHEN, runWhen);
     }
 
@@ -124,6 +129,9 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
             Object entity = inboundPayload != null && inboundPayload.hasNext() ? inboundPayload.next() : null;
             ResultSetToEntityDataConverter resultSetToEntityDataConverter = new ResultSetToEntityDataConverter(inputMessage, callback,
                     unitOfWorkBoundaryReached, outboundPayload);
+            if (passInputRowsThrough) {
+                outboundPayload.add((EntityData) entity);
+            }
             for (String sql : getSqls()) {
                 String sqlToExecute = prepareSql(sql, inputMessage, entity);
                 Map<String, Object> paramMap = prepareParams(sqlToExecute, inputMessage, entity, runWhen);
@@ -401,6 +409,8 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         int outputRecCount;
 
         boolean unitOfWorkLastMessage;
+        
+        boolean passInputRowsThrough=false;
 
         ArrayList<EntityData> payload;
 

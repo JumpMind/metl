@@ -801,6 +801,12 @@
         <name>Match On Column Name</name>
         <defaultValue>false</defaultValue>
       </setting>
+      <setting id='pass.input.rows.through'
+               required='true'
+               type='boolean'>
+        <name>Pass Input Rows Through</name>
+        <defaultValue>false</defaultValue>
+      </setting>
     </settings>
   </component>
   <component category='WRITER'
