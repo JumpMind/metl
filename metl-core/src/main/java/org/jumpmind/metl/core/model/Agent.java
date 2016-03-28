@@ -46,7 +46,7 @@ public class Agent extends AbstractObject {
 
     Date heartbeatTime;
 
-    boolean autoRefresh;
+    boolean autoRefresh = true;
 
     List<AgentDeployment> agentDeployments;
 
