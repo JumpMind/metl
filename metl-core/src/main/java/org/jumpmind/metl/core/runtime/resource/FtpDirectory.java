@@ -64,33 +64,68 @@ public class FtpDirectory implements IDirectory {
     }
 
     @Override
+    public FileInfo listFile(String relativePath, boolean closeSession) {
+        return listFile(relativePath);
+    }
+
+    @Override
     public List<FileInfo> listFiles(String... relativePaths) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<FileInfo> listFiles(boolean closeSession, String... relativePaths) {
+        return listFiles(relativePaths);
     }
     
     @Override
     public void copyToDir(String fromFilePath, String toDirPath) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void copyToDir(String fromFilePath, String toDirPath, boolean closeSession) {
+        copyToDir(fromFilePath, toDirPath);
+    }
     
     @Override
     public void moveToDir(String fromFilePath, String toDirPath) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void moveToDir(String fromFilePath, String toDirPath, boolean closeSession) {
+        moveToDir(fromFilePath, toDirPath);
     }
     
     @Override
     public void copyFile(String fromFilePath, String toFilePath) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void copyFile(String fromFilePath, String toFilePath, boolean closeSession) {
+        copyFile(fromFilePath, toFilePath);
+    }
     
     @Override
     public void moveFile(String fromFilePath, String toFilePath) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void moveFile(String fromFilePath, String toFilePath, boolean closeSession) {
+        moveFile(fromFilePath, toFilePath);
+    }
     
     @Override
     public boolean renameFile(String fileFilePath, String toFilePath) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean renameFile(String fileFilePath, String toFilePath, boolean closeSession) {
+        return renameFile(fileFilePath, toFilePath);
     }
 
     protected FTPClient createClient() {
@@ -190,6 +225,11 @@ public class FtpDirectory implements IDirectory {
     }
 
     @Override
+    public InputStream getInputStream(String relativePath, boolean mustExist, boolean closeSession) {
+        return getInputStream(relativePath, mustExist);
+    }
+
+    @Override
     public boolean supportsOutputStream() {
         return true;
     }
@@ -204,6 +244,11 @@ public class FtpDirectory implements IDirectory {
             close(ftpClient);
             throw new IoException(e);
         }
+    }
+
+    @Override
+    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession) {
+        return getOutputStream(relativePath, mustExist);
     }
 
     @Override
@@ -223,6 +268,11 @@ public class FtpDirectory implements IDirectory {
             FtpDirectory.this.close(ftpClient);
 
         }
+    }
+
+    @Override
+    public boolean delete(String relativePath, boolean closeSession) {
+        return delete(relativePath);
     }
 
     @Override
@@ -267,7 +317,5 @@ public class FtpDirectory implements IDirectory {
 
     @Override
     public void connect() {
-        // TODO: connect for thread
-        
     }
 }

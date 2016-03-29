@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Resource;
@@ -54,6 +53,12 @@ public class SftpDirectory implements IDirectory {
     protected Integer connectionTimeout;
     protected boolean mustExist;
     protected ThreadLocal<Session> threadSession;
+    protected ChannelSftp[] channels = new ChannelSftp[3];
+
+    // Define reusable channels
+    private static final int CHANNEL_1 = 0;
+    private static final int CHANNEL_OUT = 1;
+    private static final int CHANNEL_IN  = 2;
     
     protected static final Logger log = LoggerFactory.getLogger(SftpDirectory.class);
 
@@ -75,16 +80,18 @@ public class SftpDirectory implements IDirectory {
         this.mustExist = mustExist;
         this.threadSession = new ThreadLocal<Session>();
     }
-    
+
     @Override
     public FileInfo listFile(String relativePath) {
-        Session session = null;
+        return listFile(relativePath, true);
+    }
+    
+    @Override
+    public FileInfo listFile(String relativePath, boolean closeSession) {
         ChannelSftp sftp = null;
         FileInfo fileInfo = null;
         try {
-            session = openSession();
-            sftp = (ChannelSftp) session.openChannel("sftp");
-            sftp.connect();
+            sftp = openConnectedChannel(CHANNEL_1);
             sftp.cd(basePath);
         	if (!relativePath.equals(".") && !relativePath.equals("..")) {
             	@SuppressWarnings("rawtypes")
@@ -100,67 +107,75 @@ public class SftpDirectory implements IDirectory {
         } catch (Exception e) {
         	return null;
         } finally {
-            SftpDirectory.this.closeStateless(session, sftp);
+            if (closeSession) {
+                close();
+            }
         }
     }
-        
+
     @Override
     public void copyFile(String fromFilePath, String toFilePath) {
-        Session session = null;
+        copyFile(fromFilePath, toFilePath, true);
+    }
+    
+    @Override
+    public void copyFile(String fromFilePath, String toFilePath, boolean closeSession) {
         ChannelSftp uploadSftp = null;
-        ChannelSftp downloadSftp = null;
         InputStream inputStream = null;
         try {
-            session = openSession();
-            uploadSftp = (ChannelSftp) session.openChannel("sftp");
-            uploadSftp.connect();
+            uploadSftp = openConnectedChannel(CHANNEL_1);
             uploadSftp.cd(basePath);
-            downloadSftp = (ChannelSftp) session.openChannel("sftp");
-            downloadSftp.connect();
-            downloadSftp.cd(basePath);
             inputStream = getInputStream(fromFilePath, true);
             uploadSftp.put(inputStream, toFilePath);
         } catch (Exception e) {
             throw new IoException("Error copying file.  Error %s", e.getMessage());
         } finally {
-            SftpDirectory.this.closeStateless(session, uploadSftp);
-            SftpDirectory.this.closeStateless(session, downloadSftp);
-            IOUtils.closeQuietly(inputStream);
+            if (closeSession) {
+                close();
+            }
         }  
+    }
+
+    @Override
+    public void moveFile(String fromFilePath, String toFilePath) {
+        moveFile(fromFilePath, toFilePath, true);
     }
     
     @Override
-    public void moveFile(String fromFilePath, String toFilePath) {
-        Session session = null;
+    public void moveFile(String fromFilePath, String toFilePath, boolean closeSession) {
         ChannelSftp sftp = null;
         try {
-            session = openSession();
-            sftp = (ChannelSftp) session.openChannel("sftp");
-            sftp.connect();
+            sftp = openConnectedChannel(CHANNEL_1);
             sftp.cd(basePath);
             sftp.rename(fromFilePath, toFilePath);
         } catch (Exception e) {
             throw new IoException("Error moving (renaming) file.  Error %s", e.getMessage());
         } finally {
-            SftpDirectory.this.closeStateless(session, sftp);
+            if (closeSession) {
+                close();
+            }
         }
+    }
+
+    @Override
+    public boolean renameFile(String fromFilePath, String toFilePath) {
+        return renameFile(fromFilePath, toFilePath, true);
     }
     
     @Override
-    public boolean renameFile(String fromFilePath, String toFilePath) {
-        Session session = null;
+    public boolean renameFile(String fromFilePath, String toFilePath, boolean closeSession) {
         ChannelSftp sftp = null;
         try {
-            session = openSession();
-            sftp = (ChannelSftp) session.openChannel("sftp");
-            sftp.connect();
+            sftp = openConnectedChannel(CHANNEL_1);
             sftp.cd(basePath);
             sftp.rename(fromFilePath, toFilePath);
             return true;
         } catch (Exception e) {
             return false;
         } finally {
-            SftpDirectory.this.closeStateless(session, sftp);
+            if (closeSession) {
+                close();
+            }
         }
     }    
 
@@ -183,19 +198,14 @@ public class SftpDirectory implements IDirectory {
         Session session = threadSession.get();
         if (session != null) {
             session.disconnect();
-            session = null;
+            threadSession.set(null);
         }
-    }
-    
-    protected void closeStateless(Session session, ChannelSftp sftp) {
-    	if (sftp != null) {
-            sftp.disconnect();
-            sftp = null;
+        for (int i=0; i<channels.length; i++) {
+            if (channels[i] != null) {
+                channels[i].disconnect();
+                channels[i] = null;
+            }
         }
-    	if (session != null && session != threadSession.get()) {
-    		session.disconnect();
-    		session = null;
-    	}
     }
     
     @Override
@@ -212,7 +222,6 @@ public class SftpDirectory implements IDirectory {
         return true;
     }
     
-    @Override
     public void connect() {
         JSch jsch=new JSch();
         Session session = null;
@@ -233,8 +242,23 @@ public class SftpDirectory implements IDirectory {
         Session session = threadSession.get();
         if (session == null) {
             session = statelessConnect();
-        }        
+            threadSession.set(session);
+        }    
+//    	session.sendKeepAliveMsg();
         return session;
+    }
+    
+    protected ChannelSftp openConnectedChannel(int channelId) throws JSchException  {
+        Session session = openSession();
+        ChannelSftp channel = channels[channelId];
+        if (channel == null || channel.isClosed()) {
+            channel = (ChannelSftp) session.openChannel("sftp");
+            channels[channelId] = channel;
+        }
+        if (!channel.isConnected()) {
+            channel.connect();
+        }
+        return channel;
     }
     
     protected Session statelessConnect() {
@@ -252,18 +276,20 @@ public class SftpDirectory implements IDirectory {
             throw new IoException(e);
 		}   
     }
+
+    @Override
+    public List<FileInfo> listFiles(String... relativePaths) {
+        return listFiles(true, relativePaths);
+    }
     
     @SuppressWarnings({"unchecked","rawtypes"})
     @Override
-    public List<FileInfo> listFiles(String... relativePaths) {
-        Session session = null;
+    public List<FileInfo> listFiles(boolean closeSession, String... relativePaths) {
         ChannelSftp sftp = null;
         String separator = null;
         List<FileInfo> fileInfoList =  new ArrayList<>();
         try {
-            session = openSession();
-            sftp = (ChannelSftp) session.openChannel("sftp");
-            sftp.connect();
+            sftp = openConnectedChannel(CHANNEL_1);
             sftp.cd(basePath);
             for (String relativePath : relativePaths) {
             	if (!relativePath.equals(".") && !relativePath.equals("..")) {
@@ -293,25 +319,26 @@ public class SftpDirectory implements IDirectory {
         } catch (Exception e) {
             throw new RuntimeException(String.format("Failure in listFiles for SFTP.  Error ==> %s",e.getMessage()),e);
         } finally {
-            SftpDirectory.this.closeStateless(session, sftp);
+            if (closeSession) {
+                close();
+            }
         }
+    }
+
+    @Override
+    public void copyToDir(String fromFilePath, String toDirPath) {
+        copyToDir(fromFilePath, toDirPath, true);
     }
     
     @Override
-    public void copyToDir(String fromFilePath, String toDirPath) {
-        Session session = null;
+    public void copyToDir(String fromFilePath, String toDirPath, boolean closeSession) {
         ChannelSftp uploadSftp = null;
-        ChannelSftp downloadSftp = null;
         FileInfo fileInfo = new FileInfo(fromFilePath, false, new java.util.Date().getTime(), -1);
         InputStream inputStream = null;
         try {
-            session = openSession();
-            uploadSftp = (ChannelSftp) session.openChannel("sftp");
-            uploadSftp.connect();
+            uploadSftp = openConnectedChannel(CHANNEL_1);
             uploadSftp.cd(basePath);
-            downloadSftp = (ChannelSftp) session.openChannel("sftp");
-            downloadSftp.connect();
-            downloadSftp.cd(basePath);
+            
             if (!toDirPath.endsWith("/")) {
             	toDirPath += "/";
             }
@@ -320,21 +347,23 @@ public class SftpDirectory implements IDirectory {
         } catch (Exception e) {
             throw new IoException("Error copying directory.  Error %s", e.getMessage());
         } finally {
-            SftpDirectory.this.closeStateless(session, uploadSftp);
-            SftpDirectory.this.closeStateless(session, downloadSftp);
-            IOUtils.closeQuietly(inputStream);
-        }  
+            if (closeSession) {
+                close();
+            }
+        }
+    }
+
+    @Override
+    public void moveToDir(String fromFilePath, String toDirPath) {
+        moveToDir(fromFilePath, toDirPath, true);
     }
     
     @Override
-    public void moveToDir(String fromFilePath, String toDirPath) {
-        Session session = null;
+    public void moveToDir(String fromFilePath, String toDirPath, boolean closeSession) {
         ChannelSftp sftp = null;
         FileInfo fileInfo = new FileInfo(fromFilePath, false, new java.util.Date().getTime(), -1);
         try {
-            session = openSession();
-            sftp = (ChannelSftp) session.openChannel("sftp");
-            sftp.connect();
+            sftp = openConnectedChannel(CHANNEL_1);
             sftp.cd(basePath);
             if (!toDirPath.endsWith("/")) {
             	toDirPath += "/";
@@ -343,24 +372,29 @@ public class SftpDirectory implements IDirectory {
         } catch (Exception e) {
             throw new IoException("Error moving (renaming) directory.  Error %s", e.getMessage());
         } finally {
-            SftpDirectory.this.closeStateless(session, sftp);
+            if (closeSession) {
+                close();
+            }
         }
     }
 
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist) {
+        return getInputStream(relativePath, mustExist, true);
+    }
+
+    @Override
+    public InputStream getInputStream(String relativePath, boolean mustExist, boolean closeSession) {
     	Session session = null;
     	ChannelSftp sftp = null;
         try {
         	session = openSession();
-            sftp = (ChannelSftp) session.openChannel("sftp");
-            sftp.connect();
+            sftp = openConnectedChannel(CHANNEL_IN);
             sftp.cd(basePath);
             if (mustExist && !fileExists(sftp, relativePath)) {
-            	SftpDirectory.this.closeStateless(session, sftp);
                 throw new IoException("Could not find endpoint %s that was configured as MUST EXIST",relativePath);
             }
-            return new CloseableInputStreamStream(sftp.get(relativePath), session, sftp);
+            return new CloseableInputStreamStream(sftp.get(relativePath), session, sftp, closeSession);
         } catch (Exception e) {
             if (((SftpException) e).id != 2) {
                 throw new IoException("Error getting the input stream for sftp endpoint.  Error %s", e.getMessage());       
@@ -377,15 +411,19 @@ public class SftpDirectory implements IDirectory {
 
     @Override
     public OutputStream getOutputStream(String relativePath, boolean mustExist) {
+        return getOutputStream(relativePath, mustExist, true);
+    }
+
+    @Override
+    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession) {
     	Session session = null;
     	ChannelSftp sftp = null;
         try {
         	session = openSession();
-            sftp = (ChannelSftp) session.openChannel("sftp");
-            sftp.connect();
+            sftp = openConnectedChannel(CHANNEL_OUT);
             sftp.cd(basePath);
             createRelativePathDirectoriesIfNecessary(sftp, relativePath, mustExist);
-            return new CloseableOutputStream(sftp.put(relativePath, ChannelSftp.OVERWRITE), session, sftp);
+            return new CloseableOutputStream(sftp.put(relativePath, ChannelSftp.OVERWRITE), session, sftp, closeSession);
         } catch (Exception e) {            
             throw new IoException(e);
         } 
@@ -420,22 +458,26 @@ public class SftpDirectory implements IDirectory {
 
         }
     }
-    
+
     @Override
     public boolean delete(String relativePath) {
-    	Session session = null;
+        return delete(relativePath, true);
+    }
+    
+    @Override
+    public boolean delete(String relativePath, boolean closeSession) {
     	ChannelSftp sftp = null;
         try {
-            session = openSession();
-            sftp = (ChannelSftp) session.openChannel("sftp");
-            sftp.connect();
+            sftp = openConnectedChannel(CHANNEL_1);
             sftp.cd(basePath);
             sftp.rm(relativePath);
             return true;
         } catch (Exception e) {
             return false;
         } finally {
-        	SftpDirectory.this.closeStateless(session, sftp);
+            if (closeSession) {
+                close();
+            }
         }
     }
     
@@ -452,34 +494,42 @@ public class SftpDirectory implements IDirectory {
     class CloseableOutputStream extends BufferedOutputStream {
         Session session;
         ChannelSftp sftp;
+        boolean closeSession = true;
 
-        public CloseableOutputStream(OutputStream os, Session session, ChannelSftp sftp) {
+        public CloseableOutputStream(OutputStream os, Session session, ChannelSftp sftp, boolean closeSession) {
             super(os);
             this.session = session;
             this.sftp = sftp;
+            this.closeSession = closeSession;
         }
 
         @Override
         public void close() throws IOException {
             super.close();
-            SftpDirectory.this.closeStateless(session, sftp);
+            if (closeSession) {
+                SftpDirectory.this.close();
+            }
         }
     }
 
     class CloseableInputStreamStream extends BufferedInputStream {
         Session session;
         ChannelSftp sftp;
+        boolean closeSession = true;
 
-        public CloseableInputStreamStream(InputStream is, Session session, ChannelSftp sftp) {
+        public CloseableInputStreamStream(InputStream is, Session session, ChannelSftp sftp, boolean closeSession) {
             super(is);
             this.session = session;
             this.sftp = sftp;
+            this.closeSession = closeSession;
         }
 
         @Override
         public void close() throws IOException {
             super.close();
-            SftpDirectory.this.closeStateless(session, sftp);
+            if (closeSession) {
+                SftpDirectory.this.close();
+            }
         }
-    }    
+    }
 }
