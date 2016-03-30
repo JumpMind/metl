@@ -152,6 +152,11 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
         return FormatUtils.replaceTokens(text, parms, true);
     }
     
+    protected String resolveFlowParams(String text) {
+        Map<String,String> parms = new HashMap<>(getComponentContext().getFlowParameters());
+        return FormatUtils.replaceTokens(text, parms, true);        
+    }
+    
     protected <T> T getResourceReference() {
         IResourceRuntime resource = getResourceRuntime();
         if (resource != null) {

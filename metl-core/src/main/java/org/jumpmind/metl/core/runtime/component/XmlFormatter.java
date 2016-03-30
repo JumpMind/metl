@@ -23,10 +23,11 @@ package org.jumpmind.metl.core.runtime.component;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
+import java.util.Stack;
 
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -42,13 +43,14 @@ import org.jdom2.xpath.XPathFactory;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
 import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
+import org.springframework.util.StringUtils;
 
 public class XmlFormatter extends AbstractXMLComponentRuntime {
 
@@ -79,6 +81,14 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
     String template;
     
     String nullHandling;
+    
+    ArrayList<Message> messagesToProcess;
+
+    Map<String, DocElement> entityAttributeDtls;
+
+    Document templateDoc;         
+    
+    Model inputModel;
 
     @Override
     protected void start() {
@@ -88,6 +98,10 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         xmlFormat = properties.get(XML_FORMAT);
         template = properties.get(XML_FORMATTER_TEMPLATE);
         nullHandling = properties.get(NULL_HANDLING);
+        messagesToProcess = new ArrayList<Message>();
+        inputModel = getComponent().getInputModel(); 
+        templateDoc = getTemplateDoc();                 
+        entityAttributeDtls = fillEntityAttributeDetails(templateDoc);
     }
 
     @Override
@@ -97,81 +111,25 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        if (inputMessage instanceof EntityDataMessage) {
-        ArrayList<EntityData> inputRows = ((EntityDataMessage)inputMessage).getPayload();
-        boolean hasPayload = inputRows != null && inputRows.size() > 0;
-        ArrayList<String> outputPayload = new ArrayList<String>();
-
-        SAXBuilder builder = new SAXBuilder();
-        builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
-        builder.setFeature("http://xml.org/sax/features/validation", false);
-        Document document = null;
-        try {
-            document = builder.build(new StringReader(resolveParamsAndHeaders(template, inputMessage)));
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        
+        if (inputMessage instanceof ControlMessage) {
+            createXml(callback);
+        } else if (inputMessage instanceof EntityDataMessage) {
+            messagesToProcess.add(inputMessage);
+        } else {
+            //todo log error, throw exception
         }
+    }
 
-        Model model = getComponent().getInputModel();
-        Map<String, XmlFormatterEntitySetting> entitySettings = new HashMap<String, XmlFormatterEntitySetting>();
-        List<XmlFormatterAttributeSetting> attributeSettings = new ArrayList<XmlFormatterAttributeSetting>();
+    private void createXml(ISendMessageCallback callback) {
 
-        if (model != null) {
-            Map<Element, Namespace> namespaces = removeNamespaces(document);
-            for (ComponentEntitySetting compEntitySetting : getComponent().getEntitySettings()) {
-                if (compEntitySetting.getName().equals(XML_FORMATTER_XPATH)) {
-                    XPathExpression<Element> expression = XPathFactory.instance().compile(compEntitySetting.getValue(), Filters.element());
-                    List<Element> matches = expression.evaluate(document.getRootElement());
-                    if (matches.size() == 0) {
-                        log(LogLevel.WARN, "XPath expression " + compEntitySetting.getValue() + " did not find any matches");
-                    } else {                        
-                        Element templateElement = matches.get(0);
-                        if (!hasPayload) {
-                            templateElement.getParentElement().removeContent(templateElement);
-                        }
-                        entitySettings.put(compEntitySetting.getEntityId(),
-                                new XmlFormatterEntitySetting(compEntitySetting, expression, templateElement.clone()));
-                    }
-                }
-            }
-            restoreNamespaces(document, namespaces);
-
-            for (ComponentAttributeSetting compAttrSetting : getComponent().getAttributeSettings()) {
-                if (compAttrSetting.getName().equals(XML_FORMATTER_XPATH)) {
-                    ModelAttribute attr = model.getAttributeById(compAttrSetting.getAttributeId());
-                    if (attr != null) {
-                        XPathExpression<Object> expression = XPathFactory.instance().compile(compAttrSetting.getValue());
-                        XmlFormatterEntitySetting entitySetting = entitySettings.get(attr.getEntityId());
-                        XmlFormatterAttributeSetting attrSetting = new XmlFormatterAttributeSetting(compAttrSetting, expression);
-                        if (entitySetting != null) {
-                            entitySetting.getAttributeSettings().add(attrSetting);
-                        } else {
-                            attributeSettings.add(attrSetting);
-                        }
-                    }
-                }
-            }
+        Document generatedXml = new Document();
+        Stack<DocElement> parentStack = new Stack<DocElement>();
+        ArrayList<String> outboundPayload = new ArrayList<String>();
+        
+        for (Message msg : messagesToProcess) {
+            processMsgEntities(parentStack, msg, generatedXml);            
         }
-
-        Map<Element, Namespace> namespaces = removeNamespaces(document);
-
-        for (XmlFormatterEntitySetting entitySetting : entitySettings.values()) {
-            List<Element> matches = entitySetting.getExpression().evaluate(document.getRootElement());
-            for (Element element : matches) {
-                entitySetting.setParentElement(element.getParentElement());
-            }
-        }
-
-        if (hasPayload) {
-            for (EntityData inputRow : inputRows) {
-                processInputRow(document, inputRow, entitySettings, attributeSettings);
-            }
-        }
-
-        restoreNamespaces(document, namespaces);
-
         XMLOutputter xmlOutputter = new XMLOutputter();
         Format format = null;
         if (xmlFormat.equals(COMPACT_FORMAT)) {
@@ -182,183 +140,217 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
             format = Format.getPrettyFormat();
         }
         xmlOutputter.setFormat(format);
-        outputPayload.add(xmlOutputter.outputString(document));
-
-        log(LogLevel.DEBUG, outputPayload.toString());
-
-        callback.sendTextMessage(null, outputPayload);
-        }
-    }
-
-    private void processInputRow(Document document, EntityData inputRow, Map<String, XmlFormatterEntitySetting> entitySettings,
-            List<XmlFormatterAttributeSetting> attributeSettings) {
-        Set<XmlFormatterEntitySetting> inputEntitySettings = getEntitySettings(inputRow, entitySettings);
-
-        // apply attributes whose entities do not need to repeat
-        applyAttributeXpath(document, inputRow, attributeSettings);
-
-        // apply attributes whose entities are supposed to repeat
-        for (XmlFormatterEntitySetting entitySetting : inputEntitySettings) {
-            if (entitySetting.isFirstTimeApply()) {
-                applyAttributeXpath(document, inputRow, entitySetting.getAttributeSettings());
-                entitySetting.setFirstTimeApply(false);
-            } else {
-                Map<Element, Namespace> namespaces = removeNamespaces(document);
-                Element clonedElement = entitySetting.getTemplateElement().clone();
-                entitySetting.getParentElement().addContent(0, clonedElement);
-                applyAttributeXpath(document, inputRow, entitySetting.getAttributeSettings());
-                restoreNamespaces(document, namespaces);
-            }
-        }
-    }
-
-    private Set<XmlFormatterEntitySetting> getEntitySettings(EntityData inputRow, Map<String, XmlFormatterEntitySetting> entitySettings) {
-        Set<XmlFormatterEntitySetting> entitySettingSet = new HashSet<XmlFormatterEntitySetting>();
-        Model model = getComponent().getInputModel();
-        if (model != null && inputRow.size() > 0) {
-            for (String attributeId : inputRow.keySet()) {
-                ModelAttribute attribute = model.getAttributeById(attributeId);
-                if (attribute != null) {
-                    XmlFormatterEntitySetting entitySetting = entitySettings.get(attribute.getEntityId());
-                    if (entitySetting != null) {
-                        entitySettingSet.add(entitySetting);
-                    }
-                }
-            }
-        }
-        return entitySettingSet;
-    }
-
-    private void applyAttributeXpath(Document document, EntityData inputRow, List<XmlFormatterAttributeSetting> settings) {
-        for (XmlFormatterAttributeSetting setting : settings) {
-            Object inputValue = inputRow.get(setting.getSetting().getAttributeId());
-            String value = (inputValue == null) ? null : inputValue.toString();
-            List<Object> matches = setting.getExpression().evaluate(document.getRootElement());
-            if (matches.size() == 0) {
-                log(LogLevel.WARN, "XPath expression " + setting.getExpression().getExpression() + " did not find any matches");
-            }
-            Object object = matches.get(0);
-            if (object instanceof Element) {
-            	Element element = (Element) object;
-                if (value != null) {
-                	element.setText(value.toString());
-                } else {
-                    if (nullHandling.equals(NULL_HANDLING_REMOVE)) {
-                        Element parent = element.getParentElement();
-                        parent.removeContent(element);
-                    } else if (nullHandling.equalsIgnoreCase(NULL_HANDLING_XML_NIL)) {
-                        element.setAttribute("nil", "true", getXmlNamespace());
-                    }
-                }
-            } else if (object instanceof Attribute) {
-            	Attribute attribute = (Attribute) object;
-                if (value != null) {
-                    attribute.setValue(value);
-                }
-            }
-        }
+        outboundPayload.add(xmlOutputter.outputString(generatedXml));
+        callback.sendTextMessage(null, outboundPayload);
     }
     
-    protected final static Namespace getXmlNamespace() {
+    private void processMsgEntities(Stack<DocElement> parentStack, Message msg, Document generatedXml) {
+        
+        ArrayList<EntityData> inputRows = ((EntityDataMessage)msg).getPayload();
+        for (EntityData inputRow : inputRows) {
+            Iterator<Entry<String, Object>> itr = inputRow.entrySet().iterator();
+            String lastEntityId="";
+            while (itr.hasNext()) {
+                Entry<String, Object> attribute = itr.next();
+                String entityId = inputModel.getAttributeById(attribute.getKey()).getEntityId();
+                if (!entityId.equalsIgnoreCase(lastEntityId)) {
+                    addXmlElement(parentStack, entityId, "", generatedXml);
+                    lastEntityId = entityId;
+                }
+                addXmlElement(parentStack, attribute.getKey(), attribute.getValue().toString(), generatedXml);
+            }
+        }
+    }
+
+    private void addXmlElement(Stack<DocElement> parentStack, String key, String value, Document generatedXml) {
+
+        //get parent we should attach to
+        DocElement templateDocElement = entityAttributeDtls.get(key);
+        DocElement parentToAttach = null;
+        DocElement newDocElement = null;
+
+        if (!StringUtils.isEmpty(value) || !nullHandling.equals(NULL_HANDLING_REMOVE)) {
+            
+            if (parentStack.isEmpty()) {
+                fillStackWithStaticParentElements(parentStack, templateDocElement, generatedXml);
+            }  
+            
+            while (!parentStack.isEmpty() && templateDocElement.level <= parentStack.peek().level) {
+                parentToAttach = parentStack.pop();
+            }
+            
+            //create the new doc element
+            if (templateDocElement.xmlElement != null) {
+                
+                Element newElement = templateDocElement.xmlElement.clone();
+                newElement.removeContent();
+                removeAllAttributes(newElement);
+                
+                if (StringUtils.isEmpty(value)) {
+                    if (nullHandling.equalsIgnoreCase(NULL_HANDLING_XML_NIL)) {
+                        newElement.setAttribute("nil", "true", getXmlNamespace());
+                    }
+                } else {
+                    newElement.setText(value);
+                }
+                
+                parentToAttach.xmlElement.addContent(newElement);
+                newDocElement = new DocElement(parentToAttach.level+1,newElement,null);
+            } else {
+                Attribute newAttribute = templateDocElement.xmlAttribute.clone();
+                newAttribute.setValue(value);
+                parentToAttach.xmlElement.setAttribute(newAttribute);
+                newDocElement = new DocElement(parentToAttach.level+1,null,newAttribute);
+            }      
+            parentStack.push(parentToAttach);
+            parentStack.push(newDocElement);
+        }
+    }
+
+    private final static Namespace getXmlNamespace() {
         return Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
     }
 
-    class XmlFormatterAttributeSetting {
+    private void fillStackWithStaticParentElements(Stack<DocElement> parentStack, DocElement firstDocElement, 
+            Document generatedXml) {
 
-        ComponentAttributeSetting setting;
-
-        XPathExpression<Object> expression;
-
-        XmlFormatterAttributeSetting(ComponentAttributeSetting setting, XPathExpression<Object> expression) {
-            this.setting = setting;
-            this.expression = expression;
+        Element newRootElement = templateDoc.getRootElement().clone();
+        generatedXml.setRootElement(newRootElement);
+        Element elementToPutOnStack = newRootElement;
+        int level=0;
+        for (level=0;level<firstDocElement.level;level++) {
+            List<Element> childElement = elementToPutOnStack.getChildren();
+            elementToPutOnStack = childElement.get(0);
         }
-
-        public ComponentAttributeSetting getSetting() {
-            return setting;
-        }
-
-        public void setSetting(ComponentAttributeSetting setting) {
-            this.setting = setting;
-        }
-
-        public XPathExpression<Object> getExpression() {
-            return expression;
-        }
-
-        public void setExpression(XPathExpression<Object> expression) {
-            this.expression = expression;
+        elementToPutOnStack.removeContent();
+        removeAllAttributes(elementToPutOnStack);
+        parentStack.push(new DocElement(level, elementToPutOnStack,null));
+    }
+    
+    private void removeAllAttributes(Element element) {
+        List<Attribute> attributes = new ArrayList<Attribute>();
+        attributes.addAll(element.getAttributes());
+        for (Attribute attribute : attributes) {
+            element.removeAttribute(attribute);
         }
     }
+        
+    private Map<String, DocElement> fillEntityAttributeDetails(Document templateDoc) {
+        
+        Map<String, DocElement> entityAttributeLevels = new HashMap<String, DocElement>();  
+        entityAttributeLevels.putAll(fillEntityDetails(templateDoc));
+        entityAttributeLevels.putAll(fillAttributeDetails(templateDoc));
+        return entityAttributeLevels;
+    }
+    
+    private Map<String, DocElement> fillAttributeDetails(Document templateDoc) {
 
-    class XmlFormatterEntitySetting {
-
-        ComponentEntitySetting setting;
-
-        XPathExpression<Element> expression;
-
-        Element templateElement;
-
-        Element parentElement;
-
-        List<XmlFormatterAttributeSetting> attributeSettings;
-
-        boolean firstTimeApply;
-
-        XmlFormatterEntitySetting(ComponentEntitySetting setting, XPathExpression<Element> expression, Element templateElement) {
-            this.setting = setting;
-            this.expression = expression;
-            this.templateElement = templateElement;
-            this.attributeSettings = new ArrayList<XmlFormatterAttributeSetting>();
-            this.firstTimeApply = true;
+        Map<String, DocElement> attributeLevels = new HashMap<String, DocElement>();
+        Map<Element, Namespace> namespaces = removeNamespaces(templateDoc);
+        for (ComponentAttributeSetting compAttributeSetting : getComponent()
+                .getAttributeSettings()) {
+            if (compAttributeSetting.getName().equals(XML_FORMATTER_XPATH)) {
+                XPathExpression<Object> expression = XPathFactory.instance()
+                        .compile(compAttributeSetting.getValue());
+                List<Object> matches = expression.evaluate(templateDoc.getRootElement());
+                if (matches.size() == 0) {
+                    log(LogLevel.WARN, "XPath expression " + compAttributeSetting.getValue()
+                            + " did not find any matches");
+                } else {
+                    if (matches.get(0) instanceof Element) {
+                        Element element = (Element) matches.get(0);
+                        // a model attribute could never be the root element of
+                        // the doc
+                        int level = 0;
+                        Element elementToMatch = element.getParentElement();
+                        while (!elementToMatch.getName()
+                                .equalsIgnoreCase(templateDoc.getRootElement().getName())) {
+                            elementToMatch = elementToMatch.getParentElement();
+                            level++;
+                        }
+                        attributeLevels.put(compAttributeSetting.getAttributeId(),
+                                new DocElement(level, element, null));
+                    }
+                    if (matches.get(0) instanceof Attribute) {
+                        Attribute attribute = (Attribute) matches.get(0);
+                        int level = 0;
+                        Element elementToMatch = attribute.getParent();
+                        while (!elementToMatch.getName()
+                                .equalsIgnoreCase(templateDoc.getRootElement().getName())) {
+                            elementToMatch = elementToMatch.getParentElement();
+                            level++;
+                        }
+                        attributeLevels.put(compAttributeSetting.getAttributeId(),
+                                new DocElement(level, null, attribute));
+                    }
+                }
+            }
         }
+        restoreNamespaces(templateDoc, namespaces);
+        return attributeLevels;
+    }
 
-        public ComponentEntitySetting getSetting() {
-            return setting;
+    private Map<String, DocElement> fillEntityDetails(Document templateDoc) {
+
+        Map<String, DocElement> entityLevels = new HashMap<String, DocElement>();
+
+        Map<Element, Namespace> namespaces = removeNamespaces(templateDoc);
+        for (ComponentEntitySetting compEntitySetting : getComponent().getEntitySettings()) {
+            if (compEntitySetting.getName().equals(XML_FORMATTER_XPATH)) {
+                XPathExpression<Element> expression = XPathFactory.instance()
+                        .compile(compEntitySetting.getValue(), Filters.element());
+                List<Element> matches = expression.evaluate(templateDoc.getRootElement());
+                if (matches.size() == 0) {
+                    log(LogLevel.WARN, "XPath expression " + compEntitySetting.getValue()
+                            + " did not find any matches");
+                } else {
+                    int level = 0;
+                    Element element = matches.get(0);
+                    if (!element.isRootElement()) {
+                        Element elementToMatch = element.getParentElement();
+                        while (!elementToMatch.getName()
+                                .equalsIgnoreCase(templateDoc.getRootElement().getName())) {
+                            elementToMatch = elementToMatch.getParentElement();
+                            level++;
+                        }
+                    }
+                    entityLevels.put(compEntitySetting.getEntityId(),
+                            new DocElement(level, element, null));
+                }
+            }
         }
-
-        public void setSetting(ComponentEntitySetting setting) {
-            this.setting = setting;
+        restoreNamespaces(templateDoc, namespaces);
+        return entityLevels;
+    }
+    
+    private Document getTemplateDoc() {
+        
+        Document templateDoc=null;
+        
+        SAXBuilder builder = new SAXBuilder();
+        builder.setXMLReaderFactory(XMLReaders.NONVALIDATING);
+        builder.setFeature("http://xml.org/sax/features/validation", false);
+        try {
+            templateDoc = builder.build(new StringReader(resolveFlowParams(template)));
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+        
+        return templateDoc;
+    }
+    
+    class DocElement {
 
-        public XPathExpression<Element> getExpression() {
-            return expression;
-        }
-
-        public void setExpression(XPathExpression<Element> expression) {
-            this.expression = expression;
-        }
-
-        public Element getTemplateElement() {
-            return templateElement;
-        }
-
-        public void setTemplateElement(Element matchingElement) {
-            this.templateElement = matchingElement;
-        }
-
-        public List<XmlFormatterAttributeSetting> getAttributeSettings() {
-            return attributeSettings;
-        }
-
-        public void setAttributeSettings(List<XmlFormatterAttributeSetting> attributeSettings) {
-            this.attributeSettings = attributeSettings;
-        }
-
-        public Element getParentElement() {
-            return parentElement;
-        }
-
-        public void setParentElement(Element parentElement) {
-            this.parentElement = parentElement;
-        }
-
-        public boolean isFirstTimeApply() {
-            return firstTimeApply;
-        }
-
-        public void setFirstTimeApply(boolean firstTimeApply) {
-            this.firstTimeApply = firstTimeApply;
+        int level;
+        Element xmlElement;
+        Attribute xmlAttribute;
+        
+        public DocElement(int level, Element xmlElement, Attribute xmlAttribute) {
+            this.level = level;
+            this.xmlElement = xmlElement;
+            this.xmlAttribute = xmlAttribute;
         }
     }
 }
