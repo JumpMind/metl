@@ -34,30 +34,49 @@ public interface IDirectory {
     
     public InputStream getInputStream(String relativePath, boolean mustExist);
     
+    public InputStream getInputStream(String relativePath, boolean mustExist, boolean closeSession);
+    
     public boolean supportsOutputStream();
     
     public OutputStream getOutputStream(String relativePath, boolean mustExist);
+
+    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession);
     
     public void close();
     
     public boolean delete(String relativePath);
     
+    public boolean delete(String relativePath, boolean closeSession);
+    
     public boolean supportsDelete();
     
     public List<FileInfo> listFiles(String... relativePaths);    
+
+    public List<FileInfo> listFiles(boolean closeSession, String... relativePaths);
     
     public FileInfo listFile (String relativePath);
+
+    public FileInfo listFile(String relativePath, boolean closeSession);
     
     public void copyFile(String fromFilePath, String toFilePath);
+
+    public void copyFile(String fromFilePath, String toFilePath, boolean closeSession);
     
     public void moveFile(String fromFilePath, String toFilePath);
+
+    public void moveFile(String fromFilePath, String toFilePath, boolean closeSession);
     
     public void copyToDir(String fromFilePath, String toDirPath);
+
+    public void copyToDir(String fromFilePath, String toDirPath, boolean closeSession);
     
     public void moveToDir(String fromFilePath, String toDirPath);
+
+    public void moveToDir(String fromFilePath, String toDirPath, boolean closeSession);
     
     public boolean renameFile(String fromFilePath, String toFilePath);
+
+    public boolean renameFile(String fromFilePath, String toFilePath, boolean closeSession);
     
     public void connect();
-            
 }

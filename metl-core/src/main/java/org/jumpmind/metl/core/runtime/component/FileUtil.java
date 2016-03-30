@@ -27,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.Message;
@@ -76,6 +77,8 @@ public class FileUtil extends AbstractComponentRuntime {
 
     boolean overwrite = true;
     
+    IDirectory directory;
+    
     @Override
     public boolean supportsStartupMessages() {
         return true;
@@ -85,7 +88,7 @@ public class FileUtil extends AbstractComponentRuntime {
     protected void start() {
         TypedProperties typedProperties = getTypedProperties();
         
-        IDirectory directory = getResourceReference();
+        directory = getResourceReference();
         if (directory == null) {
             throw new MisconfiguredException("A directory resource must be configured.  It is required.");
         }
@@ -105,6 +108,13 @@ public class FileUtil extends AbstractComponentRuntime {
         runWhen = typedProperties.get(RUN_WHEN, PER_UNIT_OF_WORK);
         newName = typedProperties.get(SETTING_TARGET_NAME);
     }
+    
+    @Override
+    public void stop() {
+        if (directory != null) {
+            directory.close();
+        }
+    }
 
 	@Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
@@ -117,20 +127,15 @@ public class FileUtil extends AbstractComponentRuntime {
 					try {
 						if (fileName != null) {
 							String targetFile = null;
-							if (action.equals(ACTION_COPY) || action.equals(ACTION_MOVE)) {
-								targetFile = copyFile(inputMessage, fileName);
-								if (isNotBlank(targetFile)) {
-									getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-									filesProcessed.add(targetFile);
-								}
+							if (action.equals(ACTION_COPY)) {
+							    targetFile = copyFile(inputMessage, fileName);
+							} else if (action.equals(ACTION_MOVE)) {
+							    targetFile = moveFile(inputMessage, fileName);
 							}
-	
-							if (action.equals(ACTION_MOVE)) {
-								if (isNotBlank(targetFile)) {
-								    IDirectory directory = getResourceReference();
-									directory.delete(fileName);
-								}
-							}
+							if (isNotBlank(targetFile)) {
+                                getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
+                                filesProcessed.add(targetFile);
+                            }
 						}
 					} catch (Exception e) {
 						throw new IoException(e);
@@ -140,10 +145,38 @@ public class FileUtil extends AbstractComponentRuntime {
 			callback.sendTextMessage(null, filesProcessed);
 		}
 	}
+	
+	protected String moveFile(Message inputMessage, String sourceFileName) throws Exception {
+        FileInfo sourceFileInfo = directory.listFile(sourceFileName, false);
+        String movedFileName = null;
+        
+        if (mustExist && sourceFileInfo == null) {
+            throw new FileNotFoundException("Unable to locate file " + sourceFileName);
+        } else if (sourceFileInfo != null) {
+            String targetPath = targetRelativePath;
+            if (getFileNameFromMessage || targetRelativePath.endsWith("/") || isNotBlank(newName)) {
+                String fileName = null;
+                if (isNotBlank(newName)) {
+                    fileName = newName;
+                } else {
+                    fileName = sourceFileInfo.getName();
+                }
+                targetPath = targetPath + "/" + fileName;
+            }
+            targetPath = resolveParamsAndHeaders(targetPath, inputMessage);
+            String tokenResolvedAppendToName = resolveParamsAndHeaders(appendToName, inputMessage);
+            String targetFileName = getTargetFileName(targetPath, sourceFileInfo, tokenResolvedAppendToName);
+
+            if (overwrite ||(!overwrite && directory.listFile(targetFileName, false)==null)) {
+                directory.moveFile(sourceFileName, targetFileName, false);
+                movedFileName = targetFileName;
+            }
+        }
+        return movedFileName;
+	}
 
     protected String copyFile(Message inputMessage, String sourceFileName) throws Exception {
-        IDirectory directory = getResourceReference();
-        FileInfo sourceFileInfo = directory.listFile(sourceFileName);
+        FileInfo sourceFileInfo = directory.listFile(sourceFileName, false);
         if (mustExist && sourceFileInfo == null) {
             throw new FileNotFoundException("Unable to locate file " + sourceFileName);
         } else if (sourceFileInfo != null) {
@@ -162,10 +195,10 @@ public class FileUtil extends AbstractComponentRuntime {
             String targetFileWithoutPart = getTargetFileName(targetPath, sourceFileInfo, tokenResolvedAppendToName);
             String targetFileName = targetFileWithoutPart + ".part";
 
-            FileInfo targetFile = directory.listFile(targetFileName);
+            FileInfo targetFile = directory.listFile(targetFileName, false);
             if ((targetFile != null && overwrite) || targetFile == null) {
-                directory.copyFile(sourceFileName, targetFileName);
-                if (!directory.renameFile(targetFileName, targetFileWithoutPart)) {
+                directory.copyFile(sourceFileName, targetFileName, false);
+                if (!directory.renameFile(targetFileName, targetFileWithoutPart, false)) {
                     throw new IoException(String.format("Rename of %s to %s failed", targetFileName, targetFileWithoutPart));
                 }
                 return targetFileWithoutPart;

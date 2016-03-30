@@ -98,8 +98,6 @@ public class HttpOutputStream extends OutputStream {
                     responseCode, response.toString()));
         }
 
-        httpUrlConnection.disconnect();
-
     }
 
 }

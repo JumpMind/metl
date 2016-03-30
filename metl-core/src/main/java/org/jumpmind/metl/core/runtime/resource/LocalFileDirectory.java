@@ -68,6 +68,11 @@ public class LocalFileDirectory implements IDirectory {
     }
 
     @Override
+    public FileInfo listFile(String relativePath, boolean closeSession) {
+        return listFile(relativePath);
+    }
+
+    @Override
     public List<FileInfo> listFiles(String... relativePaths) {
         List<FileInfo> list = new ArrayList<>();
         if (relativePaths != null && relativePaths.length > 0) {
@@ -86,6 +91,11 @@ public class LocalFileDirectory implements IDirectory {
     }
 
     @Override
+    public List<FileInfo> listFiles(boolean closeSession, String... relativePaths) {
+        return listFiles(relativePaths);
+    }
+
+    @Override
     public void copyFile(String fromFilePath, String toFilePath) {
         try {
             File fromFile = new File(basePath, fromFilePath);
@@ -96,6 +106,11 @@ public class LocalFileDirectory implements IDirectory {
         } catch (IOException e) {
             throw new IoException(e);
         }
+    }
+
+    @Override
+    public void copyFile(String fromFilePath, String toFilePath, boolean closeSession) {
+        copyFile(fromFilePath, toFilePath);
     }
 
     @Override
@@ -113,12 +128,22 @@ public class LocalFileDirectory implements IDirectory {
     }
 
     @Override
+    public void moveFile(String fromFilePath, String toFilePath, boolean closeSession) {
+        moveFile(fromFilePath, toFilePath);
+    }
+
+    @Override
     public boolean renameFile(String fromFilePath, String toFilePath) {
         File fromFile = new File(basePath, fromFilePath);
         File toFile = new File(basePath, toFilePath);
         toFile.getParentFile().mkdirs();
         toFile.delete();
         return fromFile.renameTo(toFile);
+    }
+
+    @Override
+    public boolean renameFile(String fromFilePath, String toFilePath, boolean closeSession) {
+        return renameFile(fromFilePath, toFilePath);
     }
 
     @Override
@@ -135,6 +160,11 @@ public class LocalFileDirectory implements IDirectory {
     }
 
     @Override
+    public void copyToDir(String fromFilePath, String toDirPath, boolean closeSession) {
+        copyToDir(fromFilePath, toDirPath);
+    }
+
+    @Override
     public void moveToDir(String fromFilePath, String toDirPath) {
         try {
             File fromFile = new File(basePath, fromFilePath);
@@ -145,6 +175,11 @@ public class LocalFileDirectory implements IDirectory {
         } catch (IOException e) {
             throw new IoException(e);
         }
+    }
+
+    @Override
+    public void moveToDir(String fromFilePath, String toDirPath, boolean closeSession) {
+        moveToDir(fromFilePath, toDirPath);
     }
 
     protected List<FileInfo> listFiles(File dir) {
@@ -200,6 +235,11 @@ public class LocalFileDirectory implements IDirectory {
     }
 
     @Override
+    public InputStream getInputStream(String relativePath, boolean mustExist, boolean closeSession) {
+        return getInputStream(relativePath, mustExist);
+    }
+
+    @Override
     public boolean supportsOutputStream() {
         return true;
     }
@@ -214,12 +254,22 @@ public class LocalFileDirectory implements IDirectory {
     }
 
     @Override
+    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession) {
+        return getOutputStream(relativePath, mustExist);
+    }
+
+    @Override
     public void close() {
     }
 
     @Override
     public boolean delete(String relativePath) {
         return FileUtils.deleteQuietly(toFile(relativePath, false));
+    }
+
+    @Override
+    public boolean delete(String relativePath, boolean closeSession) {
+        return delete(relativePath);
     }
 
     @Override
