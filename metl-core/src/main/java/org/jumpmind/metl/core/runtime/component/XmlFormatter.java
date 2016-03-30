@@ -153,21 +153,22 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
             while (itr.hasNext()) {
                 Entry<String, Object> attribute = itr.next();
                 String entityId = inputModel.getAttributeById(attribute.getKey()).getEntityId();
-                if (!entityId.equalsIgnoreCase(lastEntityId)) {
+                if (entityId != null && !entityId.equalsIgnoreCase(lastEntityId)) {
                     addXmlElement(parentStack, entityId, "", generatedXml);
                     lastEntityId = entityId;
                 }
-                addXmlElement(parentStack, attribute.getKey(), attribute.getValue().toString(), generatedXml);
+                addXmlElement(parentStack, attribute.getKey(), attribute.getValue(), generatedXml);
             }
         }
     }
 
-    private void addXmlElement(Stack<DocElement> parentStack, String key, String value, Document generatedXml) {
+    private void addXmlElement(Stack<DocElement> parentStack, String key, Object attrValue, Document generatedXml) {
 
         //get parent we should attach to
         DocElement templateDocElement = entityAttributeDtls.get(key);
         DocElement parentToAttach = null;
         DocElement newDocElement = null;
+        String value = attrValue == null ? null : attrValue.toString();
 
         if (templateDocElement != null && 
                 (!StringUtils.isEmpty(value) || !nullHandling.equals(NULL_HANDLING_REMOVE))) {
@@ -199,7 +200,9 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                 newDocElement = new DocElement(parentToAttach.level+1,newElement,null);
             } else {
                 Attribute newAttribute = templateDocElement.xmlAttribute.clone();
-                newAttribute.setValue(value);
+                if (value != null) {
+                    newAttribute.setValue(value);
+                }
                 parentToAttach.xmlElement.setAttribute(newAttribute);
                 newDocElement = new DocElement(parentToAttach.level+1,null,newAttribute);
             }      
