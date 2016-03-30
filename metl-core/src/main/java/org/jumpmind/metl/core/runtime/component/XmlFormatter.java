@@ -169,7 +169,8 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         DocElement parentToAttach = null;
         DocElement newDocElement = null;
 
-        if (!StringUtils.isEmpty(value) || !nullHandling.equals(NULL_HANDLING_REMOVE)) {
+        if (templateDocElement != null && 
+                (!StringUtils.isEmpty(value) || !nullHandling.equals(NULL_HANDLING_REMOVE))) {
             
             if (parentStack.isEmpty()) {
                 fillStackWithStaticParentElements(parentStack, templateDocElement, generatedXml);
