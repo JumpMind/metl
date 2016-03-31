@@ -205,6 +205,8 @@ public class DelimitedParser extends AbstractComponentRuntime {
 
         public AttributeFormat(String attributeId, ModelEntity entity, ModelAttribute attribute) {
             this.attributeId = attributeId;
+            this.entity = entity;
+            this.attribute = attribute;
         }
 
         ModelEntity entity;
