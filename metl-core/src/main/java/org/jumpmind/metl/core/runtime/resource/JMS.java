@@ -35,6 +35,14 @@ public class JMS extends AbstractResourceRuntime {
     public static final String CREATE_MODE_JNDI = "JNDI";
 
     public static final String TYPE_TOPIC = "Topic";
+    
+    public static final String MSG_TYPE_TEXT = "Text";
+    
+    public static final String MSG_TYPE_BYTES = "Byte";
+    
+    public static final String MSG_TYPE_OBJECT = "Object";
+    
+    public static final String MSG_TYPE_MAP = "Map";
 
     @SettingDefinition(
             order = 10,
@@ -45,8 +53,8 @@ public class JMS extends AbstractResourceRuntime {
             defaultValue = CREATE_MODE_JNDI)
     public static final String SETTING_CREATE_MODE = "create.mode";
 
-    @SettingDefinition(order = 10, required = true, type = Type.CHOICE, label = "Type", choices = { TYPE_TOPIC }, defaultValue = TYPE_TOPIC)
-    public static final String SETTING_TYPE = "TYPE";
+    @SettingDefinition(order = 10, required = true, type = Type.CHOICE, label = "JMS Type", choices = { TYPE_TOPIC }, defaultValue = TYPE_TOPIC)
+    public static final String SETTING_TYPE = "jms.type";
 
     @SettingDefinition(type = Type.TEXT, order = 50, required = false, label = Context.INITIAL_CONTEXT_FACTORY, defaultValue="org.apache.activemq.jndi.ActiveMQInitialContextFactory")
     public static final String SETTING_INITIAL_CONTEXT_FACTORY = Context.INITIAL_CONTEXT_FACTORY;
@@ -65,6 +73,12 @@ public class JMS extends AbstractResourceRuntime {
 
     @SettingDefinition(type = Type.TEXT, order = 100, required = false, label = "Topic Name", defaultValue="dynamicTopics/foo.bar")
     public static final String SETTING_TOPIC_NAME = "topic.name";
+    
+    @SettingDefinition(order = 150, required = true, type = Type.CHOICE, label = "Message Type", choices = { MSG_TYPE_TEXT, MSG_TYPE_BYTES, MSG_TYPE_MAP, MSG_TYPE_OBJECT }, defaultValue = MSG_TYPE_TEXT)
+    public static final String SETTING_MESSAGE_TYPE = "msg.type";
+    
+    @SettingDefinition(order = 150, required = true, type = Type.TEXT, label = "Map Message Key", defaultValue = "Payload")
+    public static final String SETTING_MESSAGE_TYPE_MAP_VALUE = "msg.type";    
 
     IDirectory streamableResource;
 

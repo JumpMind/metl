@@ -840,7 +840,7 @@ public class DesignNavigator extends VerticalLayout {
     }
     
     protected void addNewJMSFileSystem() {
-        addNewResource(JMS.TYPE, "JMS", Icons.FILE_SYSTEM);
+        addNewResource(JMS.TYPE, "JMS", Icons.QUEUE);
     }
     
     protected void addNewHttpResource() {

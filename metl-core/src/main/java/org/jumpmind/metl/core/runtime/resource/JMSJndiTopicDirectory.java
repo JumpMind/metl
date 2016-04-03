@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Hashtable;
 
+import javax.jms.BytesMessage;
 import javax.jms.JMSException;
+import javax.jms.MapMessage;
+import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
@@ -99,7 +102,23 @@ public class JMSJndiTopicDirectory extends AbstractDirectory {
             super.close();
             String text = new String(toByteArray());
             try {
-                producer.publish(session.createTextMessage(text));
+                String msgType = properties.get(JMS.SETTING_MESSAGE_TYPE, JMS.MSG_TYPE_TEXT);
+                if (JMS.MSG_TYPE_TEXT.equals(msgType)) {
+                    producer.publish(session.createTextMessage(text));
+                } else if (JMS.MSG_TYPE_BYTES.equals(msgType)) {
+                    BytesMessage msg = session.createBytesMessage();
+                    msg.writeBytes(text.getBytes());
+                    producer.publish(msg);
+                } else if (JMS.MSG_TYPE_OBJECT.equals(msgType)) {
+                    ObjectMessage msg = session.createObjectMessage();
+                    msg.setObject(text);
+                    producer.publish(msg);
+                } else if (JMS.MSG_TYPE_MAP.equals(msgType)) {
+                    String keyName = properties.get(JMS.SETTING_MESSAGE_TYPE_MAP_VALUE, "Payload");
+                    MapMessage msg = session.createMapMessage();
+                    msg.setString(keyName, text);
+                    producer.publish(msg);
+                }
             } catch (JMSException e) {
                 throw new RuntimeException(e);
             }
