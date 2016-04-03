@@ -267,6 +267,28 @@ public class ModelAttributeScriptHelper {
         return value;
     }
 
+    public Long sequence(long seed_value, int incrementValue, String breakAttributeName) {
+        
+        ModelAttribute breakAttribute = entity.getModelAttributeByName(breakAttributeName);
+        if (breakAttribute == null) {
+            throw new RuntimeException("Break attribute not found.  Specify the name of the attribute (no entity qualifier)");
+        }
+        Long sequenceValue = (Long) context.getContext().get(attribute.getId());
+        Object breakAttributeValue = data.get(breakAttribute.getId());
+        if (sequenceValue == null) {
+            sequenceValue = new Long(seed_value);
+        } else {
+            if (context.getContext().get(attribute.getId() + "-" + breakAttribute.getId()).equals(breakAttributeValue)) {
+                sequenceValue = new Long(sequenceValue.longValue() + incrementValue);      
+            } else {
+                sequenceValue = new Long(seed_value);
+            }
+        }
+        context.getContext().put(attribute.getId(), sequenceValue);
+        context.getContext().put(attribute.getId() + "-" + breakAttribute.getId(), breakAttributeValue);
+        return sequenceValue;
+    }
+    
     public Object getAttributeValueByName(String attributeName) {        
         return data.get(entity.getModelAttributeByName(attributeName).getId());
     }
