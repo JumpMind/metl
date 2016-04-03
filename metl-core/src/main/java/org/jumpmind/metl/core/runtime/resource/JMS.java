@@ -1,0 +1,98 @@
+/**
+ * Licensed to JumpMind Inc under one or more contributor
+ * license agreements.  See the NOTICE file distributed
+ * with this work for additional information regarding
+ * copyright ownership.  JumpMind Inc licenses this file
+ * to you under the GNU General Public License, version 3.0 (GPLv3)
+ * (the "License"); you may not use this file except in compliance
+ * with the License.
+ *
+ * You should have received a copy of the GNU General Public License,
+ * version 3.0 (GPLv3) along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.jumpmind.metl.core.runtime.resource;
+
+import javax.naming.Context;
+
+import org.jumpmind.metl.core.model.SettingDefinition;
+import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.ResourceCategory;
+import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
+import org.jumpmind.properties.TypedProperties;
+
+@ResourceDefinition(typeName = JMS.TYPE, resourceCategory = ResourceCategory.STREAMABLE)
+public class JMS extends AbstractResourceRuntime {
+
+    public static final String TYPE = "JMS";
+
+    public static final String CREATE_MODE_JNDI = "JNDI";
+
+    public static final String TYPE_TOPIC = "Topic";
+
+    @SettingDefinition(
+            order = 10,
+            required = true,
+            type = Type.CHOICE,
+            label = "Create Mode",
+            choices = { CREATE_MODE_JNDI },
+            defaultValue = CREATE_MODE_JNDI)
+    public static final String SETTING_CREATE_MODE = "create.mode";
+
+    @SettingDefinition(order = 10, required = true, type = Type.CHOICE, label = "Type", choices = { TYPE_TOPIC }, defaultValue = TYPE_TOPIC)
+    public static final String SETTING_TYPE = "TYPE";
+
+    @SettingDefinition(type = Type.TEXT, order = 50, required = false, label = Context.INITIAL_CONTEXT_FACTORY, defaultValue="org.apache.activemq.jndi.ActiveMQInitialContextFactory")
+    public static final String SETTING_INITIAL_CONTEXT_FACTORY = Context.INITIAL_CONTEXT_FACTORY;
+
+    @SettingDefinition(type = Type.TEXT, order = 60, required = false, label = Context.PROVIDER_URL, defaultValue="tcp://localhost:61616")
+    public static final String SETTING_PROVIDER_URL = Context.PROVIDER_URL;
+
+    @SettingDefinition(type = Type.TEXT, order = 70, required = false, label = Context.SECURITY_PRINCIPAL)
+    public static final String SETTING_SECURITY_PRINCIPAL = Context.SECURITY_PRINCIPAL;
+
+    @SettingDefinition(type = Type.PASSWORD, order = 80, required = false, label = Context.SECURITY_CREDENTIALS)
+    public static final String SETTING_SECURITY_CREDENTIALS = Context.SECURITY_CREDENTIALS;
+
+    @SettingDefinition(type = Type.TEXT, order = 100, required = false, label = "Connection Factory Name", defaultValue="ConnectionFactory")
+    public static final String SETTING_CONNECTION_FACTORY_NAME = "connection.factory.name";
+
+    @SettingDefinition(type = Type.TEXT, order = 100, required = false, label = "Topic Name", defaultValue="dynamicTopics/foo.bar")
+    public static final String SETTING_TOPIC_NAME = "topic.name";
+
+    IDirectory streamableResource;
+
+    @Override
+    protected void start(TypedProperties properties) {
+        try {
+            String createMode = properties.get(SETTING_CREATE_MODE);
+            if (CREATE_MODE_JNDI.equals(createMode)) {
+                String type = properties.get(SETTING_TYPE);
+                if (TYPE_TOPIC.equals(type)) {
+                    streamableResource = new JMSJndiTopicDirectory(properties);
+                }
+            }
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void stop() {
+        streamableResource.close();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T reference() {
+        return (T) streamableResource;
+    }
+}

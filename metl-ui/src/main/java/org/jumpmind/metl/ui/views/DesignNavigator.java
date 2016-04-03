@@ -49,6 +49,7 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.core.runtime.resource.Ftp;
 import org.jumpmind.metl.core.runtime.resource.Http;
+import org.jumpmind.metl.core.runtime.resource.JMS;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
 import org.jumpmind.metl.core.runtime.resource.Sftp;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -137,6 +138,8 @@ public class DesignNavigator extends VerticalLayout {
     
     MenuItem newWebResource;
     
+    MenuItem newJMSResource;
+    
     MenuItem newFtpResource;
 
     MenuItem blank;    
@@ -195,6 +198,7 @@ public class DesignNavigator extends VerticalLayout {
         newDataSource.setVisible(false);
         newSSHResource.setVisible(false);
         newWebResource.setVisible(false);
+        newJMSResource.setVisible(false);
         newFtpResource.setVisible(false);
         newFileResource.setVisible(false);
         if (selected instanceof FolderName) {
@@ -207,6 +211,7 @@ public class DesignNavigator extends VerticalLayout {
                 newDataSource.setVisible(true);
                 newFileResource.setVisible(true);
                 newWebResource.setVisible(true);
+                newJMSResource.setVisible(true);
                 newSSHResource.setVisible(true);
                 newFtpResource.setVisible(true);
             } else {
@@ -264,6 +269,7 @@ public class DesignNavigator extends VerticalLayout {
         newFileResource = newMenu.addItem("Local File System", selectedItem -> addNewLocalFileSystem());        
         newSSHResource = newMenu.addItem("Sftp", selectedItem -> addNewSSHFileSystem());        
         newWebResource = newMenu.addItem("Web Resource", selectedItem -> addNewHttpResource());
+        newJMSResource = newMenu.addItem("JMS", selectedItem -> addNewJMSFileSystem());
 
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
@@ -830,7 +836,11 @@ public class DesignNavigator extends VerticalLayout {
     }
     
     protected void addNewSSHFileSystem() {
-        addNewResource(Sftp.TYPE, "Directory", Icons.FILE_SYSTEM);
+        addNewResource(Sftp.TYPE, "SFTP Directory", Icons.FILE_SYSTEM);
+    }
+    
+    protected void addNewJMSFileSystem() {
+        addNewResource(JMS.TYPE, "JMS", Icons.FILE_SYSTEM);
     }
     
     protected void addNewHttpResource() {

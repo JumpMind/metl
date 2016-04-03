@@ -28,7 +28,6 @@ import org.jumpmind.properties.TypedProperties;
 @ResourceDefinition(typeName=Sftp.TYPE, resourceCategory=ResourceCategory.STREAMABLE)
 public class Sftp extends AbstractResourceRuntime {
 
-    // TODO rename to Sftp
     public static final String TYPE = "Sftp";
 
     @SettingDefinition(order=10, required=true, type=Type.TEXT, label="Server")

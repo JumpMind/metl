@@ -43,7 +43,7 @@ public class ComponentContext {
 
     Map<String, String> flowParameters;
 
-    Map<String, String> globalSettings;
+    Map<String, String> globalSettings;    
 
     ComponentStatistics componentStatistics = new ComponentStatistics();
 
@@ -56,7 +56,7 @@ public class ComponentContext {
         this.deployedResources = deployedResources;
         this.flowParameters = flowParameters == null ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(flowParameters);
         this.globalSettings = globalSettings;
-    }
+    }   
 
     public AgentDeployment getDeployment() {
         return deployment;

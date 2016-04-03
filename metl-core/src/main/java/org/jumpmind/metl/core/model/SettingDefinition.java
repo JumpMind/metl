@@ -45,7 +45,7 @@ public @interface SettingDefinition {
 
     boolean visible() default true;
 
-    /**
+    /*
      * When set, this setting must be provided by the user/caller of the object
      * that defined the setting. For example, a file resource needs to be
      * provided the name of the file or an SMTP resource needs to be provided

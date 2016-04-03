@@ -171,6 +171,7 @@ public class ScriptHelper {
     /**
      * This is mainly to support unit tests or components that need to copy a
      * classpath resource to a directory resource in a script
+     * @param fileName The file to extract as a file resource 
      */
     protected void classpathToDirectory(String fileName) {
         InputStream is = getClass().getResourceAsStream(fileName);
@@ -301,7 +302,7 @@ public class ScriptHelper {
      * Called by the {@link Script} component to set the {@link #callback} prior
      * to calling {@link #onHandle()}
      * 
-     * @param callback
+     * @param callback The callback reference
      */
     protected void setSendMessageCallback(ISendMessageCallback callback) {
         this.callback = callback;
