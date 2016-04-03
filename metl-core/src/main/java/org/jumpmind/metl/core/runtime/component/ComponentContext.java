@@ -28,6 +28,7 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
+import org.jumpmind.util.LinkedCaseInsensitiveMap;
 
 public class ComponentContext {
 
@@ -43,9 +44,11 @@ public class ComponentContext {
 
     Map<String, String> flowParameters;
 
-    Map<String, String> globalSettings;    
+    Map<String, String> globalSettings;
 
     ComponentStatistics componentStatistics = new ComponentStatistics();
+
+    LinkedCaseInsensitiveMap<Object> context;    
 
     public ComponentContext(AgentDeployment deployment, FlowStep flowStep, Flow manipulatedFlow, IExecutionTracker executionTracker,
             Map<String, IResourceRuntime> deployedResources, Map<String, String> flowParameters, Map<String, String> globalSettings) {
@@ -56,8 +59,17 @@ public class ComponentContext {
         this.deployedResources = deployedResources;
         this.flowParameters = flowParameters == null ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(flowParameters);
         this.globalSettings = globalSettings;
-    }   
+        this.context = new LinkedCaseInsensitiveMap<Object>();
+    }
 
+    public LinkedCaseInsensitiveMap<Object> getContext() {
+        return context;
+    }
+
+    public void setContext(LinkedCaseInsensitiveMap<Object> context) {
+        this.context = context;
+    }
+    
     public AgentDeployment getDeployment() {
         return deployment;
     }
