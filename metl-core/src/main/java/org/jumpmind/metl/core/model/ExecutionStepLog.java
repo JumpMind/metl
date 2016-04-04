@@ -22,7 +22,6 @@ package org.jumpmind.metl.core.model;
 
 import java.util.Date;
 
-import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.runtime.LogLevel;
 
 public class ExecutionStepLog extends AbstractObject implements Comparable<ExecutionStepLog> {
