@@ -71,14 +71,14 @@ public class JMS extends AbstractResourceRuntime {
     @SettingDefinition(type = Type.TEXT, order = 100, required = false, label = "Connection Factory Name", defaultValue="ConnectionFactory")
     public static final String SETTING_CONNECTION_FACTORY_NAME = "connection.factory.name";
 
-    @SettingDefinition(type = Type.TEXT, order = 100, required = false, label = "Topic Name", defaultValue="dynamicTopics/foo.bar")
+    @SettingDefinition(type = Type.TEXT, order = 110, required = false, label = "Topic Name", defaultValue="dynamicTopics/foo.bar")
     public static final String SETTING_TOPIC_NAME = "topic.name";
     
     @SettingDefinition(order = 150, required = true, type = Type.CHOICE, label = "Message Type", choices = { MSG_TYPE_TEXT, MSG_TYPE_BYTES, MSG_TYPE_MAP, MSG_TYPE_OBJECT }, defaultValue = MSG_TYPE_TEXT)
     public static final String SETTING_MESSAGE_TYPE = "msg.type";
     
-    @SettingDefinition(order = 150, required = true, type = Type.TEXT, label = "Map Message Key", defaultValue = "Payload")
-    public static final String SETTING_MESSAGE_TYPE_MAP_VALUE = "msg.type";    
+    @SettingDefinition(order = 160, required = false, type = Type.TEXT, label = "Map Message Key", defaultValue = "Payload")
+    public static final String SETTING_MESSAGE_TYPE_MAP_VALUE = "map.msg.key";    
 
     IDirectory streamableResource;
 
