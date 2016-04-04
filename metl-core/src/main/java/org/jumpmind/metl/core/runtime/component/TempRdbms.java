@@ -58,8 +58,9 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
         this.inMemoryDb = properties.is(IN_MEMORY_DB);
         this.rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
         Component comp = context.getFlowStep().getComponent();
-        comp.setOutputModel(comp.getInputModel());
         Model inputModel = context.getFlowStep().getComponent().getInputModel();
+        Model outputModel = context.getFlowStep().getComponent().getOutputModel();
+        comp.setOutputModel(outputModel);
         if (inputModel == null) {
             throw new MisconfiguredException("The input model is not set and it is required");
         }
