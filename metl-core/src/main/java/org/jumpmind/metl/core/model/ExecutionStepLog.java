@@ -71,7 +71,7 @@ public class ExecutionStepLog extends AbstractObject implements Comparable<Execu
 	}
 
 	public void setLogText(String logText) {
-		this.logText = StringUtils.abbreviate(logText, 3900);
+		this.logText = logText;
 	}
 
 	public Date getCreateTime() {
