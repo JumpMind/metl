@@ -35,13 +35,13 @@ public class JMS extends AbstractResourceRuntime {
     public static final String CREATE_MODE_JNDI = "JNDI";
 
     public static final String TYPE_TOPIC = "Topic";
-    
+
     public static final String MSG_TYPE_TEXT = "Text";
-    
+
     public static final String MSG_TYPE_BYTES = "Byte";
-    
+
     public static final String MSG_TYPE_OBJECT = "Object";
-    
+
     public static final String MSG_TYPE_MAP = "Map";
 
     @SettingDefinition(
@@ -53,13 +53,24 @@ public class JMS extends AbstractResourceRuntime {
             defaultValue = CREATE_MODE_JNDI)
     public static final String SETTING_CREATE_MODE = "create.mode";
 
-    @SettingDefinition(order = 10, required = true, type = Type.CHOICE, label = "JMS Type", choices = { TYPE_TOPIC }, defaultValue = TYPE_TOPIC)
+    @SettingDefinition(
+            order = 10,
+            required = true,
+            type = Type.CHOICE,
+            label = "JMS Type",
+            choices = { TYPE_TOPIC },
+            defaultValue = TYPE_TOPIC)
     public static final String SETTING_TYPE = "jms.type";
 
-    @SettingDefinition(type = Type.TEXT, order = 50, required = false, label = Context.INITIAL_CONTEXT_FACTORY, defaultValue="org.apache.activemq.jndi.ActiveMQInitialContextFactory")
+    @SettingDefinition(
+            type = Type.TEXT,
+            order = 50,
+            required = false,
+            label = Context.INITIAL_CONTEXT_FACTORY,
+            defaultValue = "org.apache.activemq.jndi.ActiveMQInitialContextFactory")
     public static final String SETTING_INITIAL_CONTEXT_FACTORY = Context.INITIAL_CONTEXT_FACTORY;
 
-    @SettingDefinition(type = Type.TEXT, order = 60, required = false, label = Context.PROVIDER_URL, defaultValue="tcp://localhost:61616")
+    @SettingDefinition(type = Type.TEXT, order = 60, required = false, label = Context.PROVIDER_URL, defaultValue = "tcp://localhost:61616")
     public static final String SETTING_PROVIDER_URL = Context.PROVIDER_URL;
 
     @SettingDefinition(type = Type.TEXT, order = 70, required = false, label = Context.SECURITY_PRINCIPAL)
@@ -68,35 +79,31 @@ public class JMS extends AbstractResourceRuntime {
     @SettingDefinition(type = Type.PASSWORD, order = 80, required = false, label = Context.SECURITY_CREDENTIALS)
     public static final String SETTING_SECURITY_CREDENTIALS = Context.SECURITY_CREDENTIALS;
 
-    @SettingDefinition(type = Type.TEXT, order = 100, required = false, label = "Connection Factory Name", defaultValue="ConnectionFactory")
+    @SettingDefinition(type = Type.TEXT, order = 100, required = false, label = "Connection Factory Name", defaultValue = "ConnectionFactory")
     public static final String SETTING_CONNECTION_FACTORY_NAME = "connection.factory.name";
 
-    @SettingDefinition(type = Type.TEXT, order = 110, required = false, label = "Topic Name", defaultValue="dynamicTopics/foo.bar")
+    @SettingDefinition(type = Type.TEXT, order = 110, required = false, label = "Topic Name", defaultValue = "dynamicTopics/foo.bar")
     public static final String SETTING_TOPIC_NAME = "topic.name";
-    
-    @SettingDefinition(order = 150, required = true, type = Type.CHOICE, label = "Message Type", choices = { MSG_TYPE_TEXT, MSG_TYPE_BYTES, MSG_TYPE_MAP, MSG_TYPE_OBJECT }, defaultValue = MSG_TYPE_TEXT)
+
+    @SettingDefinition(
+            order = 150,
+            required = true,
+            type = Type.CHOICE,
+            label = "Message Type",
+            choices = { MSG_TYPE_TEXT, MSG_TYPE_BYTES, MSG_TYPE_MAP, MSG_TYPE_OBJECT },
+            defaultValue = MSG_TYPE_TEXT)
     public static final String SETTING_MESSAGE_TYPE = "msg.type";
-    
+
     @SettingDefinition(order = 160, required = false, type = Type.TEXT, label = "Map Message Key", defaultValue = "Payload")
-    public static final String SETTING_MESSAGE_TYPE_MAP_VALUE = "map.msg.key";    
+    public static final String SETTING_MESSAGE_TYPE_MAP_VALUE = "map.msg.key";
 
     IDirectory streamableResource;
 
+    TypedProperties properties;
+
     @Override
     protected void start(TypedProperties properties) {
-        try {
-            String createMode = properties.get(SETTING_CREATE_MODE);
-            if (CREATE_MODE_JNDI.equals(createMode)) {
-                String type = properties.get(SETTING_TYPE);
-                if (TYPE_TOPIC.equals(type)) {
-                    streamableResource = new JMSJndiTopicDirectory(properties);
-                }
-            }
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        this.properties = properties;
     }
 
     @Override
@@ -107,6 +114,21 @@ public class JMS extends AbstractResourceRuntime {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T reference() {
+        if (streamableResource == null) {
+            try {
+                String createMode = properties.get(SETTING_CREATE_MODE);
+                if (CREATE_MODE_JNDI.equals(createMode)) {
+                    String type = properties.get(SETTING_TYPE);
+                    if (TYPE_TOPIC.equals(type)) {
+                        streamableResource = new JMSJndiTopicDirectory(properties);
+                    }
+                }
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
         return (T) streamableResource;
     }
 }
