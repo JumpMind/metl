@@ -30,6 +30,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
@@ -105,14 +106,16 @@ public class Zip extends AbstractComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {        
+    public void handle(Message inputMessage, ISendMessageCallback messageTarget, boolean unitOfWorkBoundaryReached) {    
+        
+        String targetPath = resolveParamsAndHeaders(targetRelativePath, inputMessage);
     	if (inputMessage instanceof TextMessage) {
             List<String> files = ((TextMessage)inputMessage).getPayload();
             fileNames.addAll(files);
             getComponentStatistics().incrementNumberEntitiesProcessed(files.size());
         }
         
-        if (unitOfWorkBoundaryReached) {
+        if (inputMessage instanceof ControlMessage) {
             IDirectory sourceDir = null;
             IDirectory targetDir = null;
             ZipOutputStream zos = null;
@@ -121,8 +124,8 @@ public class Zip extends AbstractComponentRuntime {
             targetDir = targetResource.reference();
         	
             try {
-            	targetDir.delete(targetRelativePath);
-                zos = new ZipOutputStream(targetDir.getOutputStream(targetRelativePath, false), Charset.forName(encoding));
+            	targetDir.delete(targetPath);
+                zos = new ZipOutputStream(targetDir.getOutputStream(targetPath, false), Charset.forName(encoding));
 
                 for (String fileName : fileNames) {
                     FileInfo sourceZipFile = sourceDir.listFile(fileName);           
@@ -155,7 +158,7 @@ public class Zip extends AbstractComponentRuntime {
                     }
                 }
                 
-                log(LogLevel.INFO, "Generated %s", targetRelativePath);
+                log(LogLevel.INFO, "Generated %s", targetPath);
 
             } finally {
                 IOUtils.closeQuietly(zos);
