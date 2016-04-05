@@ -168,6 +168,7 @@ public class FilePoller extends AbstractComponentRuntime {
 			}
 			directory.close();
 		}
+		callback.sendControlMessage();
 	}
 		
     protected List<String> getFilePatternsToPoll(Message inputMessage) {
