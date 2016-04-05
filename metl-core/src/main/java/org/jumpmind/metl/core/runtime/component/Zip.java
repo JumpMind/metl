@@ -168,7 +168,9 @@ public class Zip extends AbstractComponentRuntime {
                 for (String fileName : fileNames) {
                 	sourceDir.delete(fileName);
                 }
-            }            
+            }  
+            
+            fileNames.clear();
         }
     }
 

@@ -167,8 +167,8 @@ public class FilePoller extends AbstractComponentRuntime {
 				pollForFiles(filePatternsToPoll, callback, unitOfWorkBoundaryReached);
 			}
 			directory.close();
+		    callback.sendControlMessage();
 		}
-		callback.sendControlMessage();
 	}
 		
     protected List<String> getFilePatternsToPoll(Message inputMessage) {
