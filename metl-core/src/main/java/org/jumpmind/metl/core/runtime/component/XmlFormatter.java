@@ -114,6 +114,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         
         if (inputMessage instanceof ControlMessage) {
             createXml(callback);
+            messagesToProcess.clear();
         } else if (inputMessage instanceof EntityDataMessage) {
             messagesToProcess.add(inputMessage);
         } else {
