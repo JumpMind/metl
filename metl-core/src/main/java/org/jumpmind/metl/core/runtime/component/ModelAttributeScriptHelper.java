@@ -93,7 +93,7 @@ public class ModelAttributeScriptHelper {
         return null;
     }
     
-    public void matchChangeType(Object add, Object chg, Object del) {
+    public void mapChangeType(Object add, Object chg, Object del) {
         if (value != null && value.equals(add)) {
             data.setChangeType(ChangeType.ADD);
         } else if (value != null && value.equals(chg)) {
