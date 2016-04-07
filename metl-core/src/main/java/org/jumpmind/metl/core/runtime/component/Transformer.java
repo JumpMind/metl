@@ -53,7 +53,9 @@ public class Transformer extends AbstractComponentRuntime {
     ScriptEngine scriptEngine;
     
     Map<String, ModelAttributeScriptHelper> helpers = new HashMap<>();
-   
+       
+    long totalTime = 0;
+    long totalCalls = 0;
     
     @Override
     protected void start() {
@@ -73,9 +75,6 @@ public class Transformer extends AbstractComponentRuntime {
     public boolean supportsStartupMessages() {
         return false;
     }   
-    
-    long totalTime = 0;
-    long totalCalls = 0;
 
     @Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

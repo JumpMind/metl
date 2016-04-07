@@ -41,6 +41,7 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
 import org.jumpmind.util.FormatUtils;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
@@ -90,6 +91,16 @@ public class ModelAttributeScriptHelper {
 
     public Object nullvalue() {
         return null;
+    }
+    
+    public void matchChangeType(Object add, Object chg, Object del) {
+        if (value != null && value.equals(add)) {
+            data.setChangeType(ChangeType.ADD);
+        } else if (value != null && value.equals(chg)) {
+            data.setChangeType(ChangeType.CHG);
+        } else if (value != null && value.equals(del)) {
+            data.setChangeType(ChangeType.DEL);
+        }
     }
 
     @Deprecated

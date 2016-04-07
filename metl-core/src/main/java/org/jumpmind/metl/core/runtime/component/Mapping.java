@@ -138,8 +138,10 @@ public class Mapping extends AbstractComponentRuntime {
                             .getName();
                     EntityData outputRow = outputRows.get(entityName);
                     if (outputRow == null) {
-                        outputRow = new EntityData();                  
+                        outputRow = new EntityData();
+                        outputRow.setChangeType(inputRow.getChangeType());
                         outputRows.put(entityName, outputRow);
+                        
                     } 
                     outputRow.put(newAttrId, attrEntry.getValue());
                 }
