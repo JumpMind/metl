@@ -47,6 +47,7 @@ import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -134,6 +135,30 @@ public class ScriptHelper {
         this.flow = context.getManipulatedFlow();
         this.flowStep = context.getFlowStep();
         this.scriptContext = new HashMap<String, Object>();
+    }
+    
+    /**
+     * Test whether the inputMessage is an EntityDataMessage
+     * @return true if so
+     */
+    protected boolean isEntityDataMessage() {
+        return inputMessage instanceof EntityDataMessage;
+    }
+
+    /**
+     * Test whether the inputMessage is an ControlMessage
+     * @return true if so
+     */
+    protected boolean isControlMessage() {
+        return inputMessage instanceof ControlMessage;
+    }
+    
+    /**
+     * Test whether the inputMessage is an TextMessage
+     * @return true if so
+     */
+    protected boolean isTextMessage() {
+        return inputMessage instanceof TextMessage;
     }
 
     /**
