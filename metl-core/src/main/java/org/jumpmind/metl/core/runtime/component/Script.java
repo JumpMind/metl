@@ -31,11 +31,15 @@ import javax.script.ScriptException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.jumpmind.metl.core.runtime.BinaryMessage;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
+import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
 public class Script extends AbstractComponentRuntime {
@@ -76,6 +80,10 @@ public class Script extends AbstractComponentRuntime {
             script.append(String.format("import static %s.*;\n", FileUtils.class.getName()));
             script.append(String.format("import %s.*;\n", Message.class.getPackage().getName()));
             script.append(String.format("import %s;\n", ScriptHelper.class.getName()));
+            script.append(String.format("import %s;\n", EntityDataMessage.class.getName()));
+            script.append(String.format("import %s;\n", TextMessage.class.getName()));
+            script.append(String.format("import %s;\n", ControlMessage.class.getName()));
+            script.append(String.format("import %s;\n", BinaryMessage.class.getName()));
             script.append(String.format("import %s;\n", MisconfiguredException.class.getName()));
             script.append(String.format("import %s;\n", AssertException.class.getName()));
             script.append(String.format("import %s.%s;\n", EntityData.class.getName(), ChangeType.class.getSimpleName()));
