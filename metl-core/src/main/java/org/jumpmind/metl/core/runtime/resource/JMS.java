@@ -98,7 +98,7 @@ public class JMS extends AbstractResourceRuntime {
     public static final String SETTING_MESSAGE_TYPE_MAP_VALUE = "map.msg.key";
     
     @SettingDefinition(order = 170, required = false, type = Type.TEXT, label = "Message JMS Type")
-    public static final String SETTING_JMS_TYPE = "jms.type";    
+    public static final String SETTING_MESSAGE_JMS_TYPE = "msg.jms.type";    
 
     IDirectory streamableResource;
 
@@ -111,7 +111,9 @@ public class JMS extends AbstractResourceRuntime {
 
     @Override
     public void stop() {
-        streamableResource.close();
+        if (streamableResource != null) {
+            streamableResource.close();
+        }
     }
 
     @SuppressWarnings("unchecked")

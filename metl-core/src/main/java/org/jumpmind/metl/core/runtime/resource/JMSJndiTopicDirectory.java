@@ -123,7 +123,7 @@ public class JMSJndiTopicDirectory extends AbstractDirectory {
                 }
                 
                 if (jmsMsg != null) {
-                    String jmsType = properties.get(JMS.SETTING_JMS_TYPE);
+                    String jmsType = properties.get(JMS.SETTING_MESSAGE_JMS_TYPE);
                     if (isNotBlank(jmsType)) {
                         jmsMsg.setJMSType(jmsType);
                     }
