@@ -26,7 +26,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
@@ -53,8 +57,8 @@ public class SftpDirectory implements IDirectory {
     protected Integer connectionTimeout;
     protected boolean mustExist;
     protected ThreadLocal<Session> threadSession;
-    protected ChannelSftp[] channels = new ChannelSftp[3];
-
+    protected ThreadLocal<Map<Integer, ChannelSftp>> threadChannels;
+    
     // Define reusable channels
     private static final int CHANNEL_1 = 0;
     private static final int CHANNEL_OUT = 1;
@@ -79,6 +83,7 @@ public class SftpDirectory implements IDirectory {
         this.connectionTimeout = connectionTimeout;
         this.mustExist = mustExist;
         this.threadSession = new ThreadLocal<Session>();
+        this.threadChannels = new ThreadLocal<Map<Integer, ChannelSftp>>();
     }
 
     @Override
@@ -200,12 +205,17 @@ public class SftpDirectory implements IDirectory {
             session.disconnect();
             threadSession.set(null);
         }
-        for (int i=0; i<channels.length; i++) {
-            if (channels[i] != null) {
-                channels[i].disconnect();
-                channels[i] = null;
+        Map<Integer, ChannelSftp> channels = threadChannels.get();
+        Iterator<Entry<Integer, ChannelSftp>> itr = channels.entrySet().iterator();
+        while (itr.hasNext()) {
+            Map.Entry<Integer, ChannelSftp> entry = itr.next();
+            ChannelSftp channel = entry.getValue();
+            if (channel != null) {
+                channel.disconnect();
+                channels.remove(entry.getKey());
             }
         }
+        threadChannels.set(null);
     }
     
     @Override
@@ -248,16 +258,22 @@ public class SftpDirectory implements IDirectory {
         return session;
     }
     
-    protected ChannelSftp openConnectedChannel(int channelId) throws JSchException  {
+    protected ChannelSftp openConnectedChannel(int channelId) throws JSchException {
+
         Session session = openSession();
-        ChannelSftp channel = channels[channelId];
+        Map<Integer, ChannelSftp> channels = threadChannels.get();
+        if (channels == null) {
+            channels = new HashMap<Integer, ChannelSftp>();            
+        }
+        ChannelSftp channel = channels.get(channelId);
         if (channel == null || channel.isClosed()) {
             channel = (ChannelSftp) session.openChannel("sftp");
-            channels[channelId] = channel;
         }
         if (!channel.isConnected()) {
             channel.connect();
         }
+        channels.put(channelId, channel);
+        threadChannels.set(channels);
         return channel;
     }
     
