@@ -96,6 +96,9 @@ public class JMS extends AbstractResourceRuntime {
 
     @SettingDefinition(order = 160, required = false, type = Type.TEXT, label = "Map Message Key", defaultValue = "Payload")
     public static final String SETTING_MESSAGE_TYPE_MAP_VALUE = "map.msg.key";
+    
+    @SettingDefinition(order = 170, required = false, type = Type.TEXT, label = "Message JMS Type")
+    public static final String SETTING_JMS_TYPE = "jms.type";    
 
     IDirectory streamableResource;
 

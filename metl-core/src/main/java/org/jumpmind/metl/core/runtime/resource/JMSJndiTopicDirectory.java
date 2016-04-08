@@ -116,6 +116,10 @@ public class JMSJndiTopicDirectory extends AbstractDirectory {
                 } else if (JMS.MSG_TYPE_MAP.equals(msgType)) {
                     String keyName = properties.get(JMS.SETTING_MESSAGE_TYPE_MAP_VALUE, "Payload");
                     MapMessage msg = session.createMapMessage();
+                    String jmsType = properties.get(JMS.SETTING_JMS_TYPE);
+                    if (isNotBlank(jmsType)) {
+                        msg.setJMSType(jmsType);
+                    }
                     msg.setString(keyName, text);
                     producer.publish(msg);
                 }
