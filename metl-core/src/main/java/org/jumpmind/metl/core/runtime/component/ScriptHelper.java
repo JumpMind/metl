@@ -125,9 +125,9 @@ public class ScriptHelper {
      */
     protected boolean unitOfWorkBoundaryReached;
     
-    protected IComponentRuntime componentRuntime;
+    protected IComponentRuntime componentRuntime;    
 
-    public ScriptHelper(IComponentRuntime componentRuntime) {
+    public ScriptHelper(IComponentRuntime componentRuntime) {        
         this.componentRuntime = componentRuntime;
         this.context = componentRuntime.getComponentContext();
         this.resource = context.getResourceRuntime();

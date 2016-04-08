@@ -10,6 +10,7 @@ import java.util.Hashtable;
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
+import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.Topic;
@@ -103,25 +104,30 @@ public class JMSJndiTopicDirectory extends AbstractDirectory {
             String text = new String(toByteArray());
             try {
                 String msgType = properties.get(JMS.SETTING_MESSAGE_TYPE, JMS.MSG_TYPE_TEXT);
+                Message jmsMsg = null;
                 if (JMS.MSG_TYPE_TEXT.equals(msgType)) {
-                    producer.publish(session.createTextMessage(text));
+                    jmsMsg = session.createTextMessage(text);
                 } else if (JMS.MSG_TYPE_BYTES.equals(msgType)) {
                     BytesMessage msg = session.createBytesMessage();
                     msg.writeBytes(text.getBytes());
-                    producer.publish(msg);
+                    jmsMsg = msg;
                 } else if (JMS.MSG_TYPE_OBJECT.equals(msgType)) {
                     ObjectMessage msg = session.createObjectMessage();
                     msg.setObject(text);
-                    producer.publish(msg);
+                    jmsMsg = msg;
                 } else if (JMS.MSG_TYPE_MAP.equals(msgType)) {
                     String keyName = properties.get(JMS.SETTING_MESSAGE_TYPE_MAP_VALUE, "Payload");
                     MapMessage msg = session.createMapMessage();
+                    msg.setString(keyName, text);
+                    jmsMsg = msg;
+                }
+                
+                if (jmsMsg != null) {
                     String jmsType = properties.get(JMS.SETTING_JMS_TYPE);
                     if (isNotBlank(jmsType)) {
-                        msg.setJMSType(jmsType);
+                        jmsMsg.setJMSType(jmsType);
                     }
-                    msg.setString(keyName, text);
-                    producer.publish(msg);
+                    producer.publish(jmsMsg);
                 }
             } catch (JMSException e) {
                 throw new RuntimeException(e);
