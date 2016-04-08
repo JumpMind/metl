@@ -402,7 +402,10 @@ public class StepRuntime implements Runnable {
     }
 
     protected boolean isStepRuntimeDead(StepRuntime stepRuntime) {
-        if (stepRuntime.getContentMessagesSentCount() > 0 || !stepRuntime.isQueueEmpty() || !stepRuntime.idle()) {
+        if (stepRuntime.getContentMessagesSentCount() > 0
+                || stepRuntime.getControlMessagesSentCount() > 0
+                || !stepRuntime.isQueueEmpty() 
+                || !stepRuntime.idle()) {
             return false;
         } else {
             List<StepRuntime> parentSteps = stepRuntime.getSourceStepRuntimes();
