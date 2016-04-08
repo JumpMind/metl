@@ -23,6 +23,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.jumpmind.properties.TypedProperties;
+import org.jumpmind.util.FormatUtils;
 
 public class JMSJndiTopicDirectory extends AbstractDirectory {
 
@@ -74,12 +75,12 @@ public class JMSJndiTopicDirectory extends AbstractDirectory {
 
     @Override
     public OutputStream getOutputStream(String relativePath, boolean mustExist) {
-        return new CloseableOutputStream();
+        return new CloseableOutputStream(relativePath);
     }
 
     @Override
     public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession) {
-        return new CloseableOutputStream();
+        return new CloseableOutputStream(relativePath);
     }
 
     @Override
@@ -97,6 +98,12 @@ public class JMSJndiTopicDirectory extends AbstractDirectory {
     }
 
     class CloseableOutputStream extends ByteArrayOutputStream {
+
+        String relativePath;
+
+        public CloseableOutputStream(String relativePath) {
+            this.relativePath = relativePath;
+        }
 
         @Override
         public void close() throws IOException {
@@ -121,10 +128,13 @@ public class JMSJndiTopicDirectory extends AbstractDirectory {
                     msg.setString(keyName, text);
                     jmsMsg = msg;
                 }
-                
+
                 if (jmsMsg != null) {
                     String jmsType = properties.get(JMS.SETTING_MESSAGE_JMS_TYPE);
                     if (isNotBlank(jmsType)) {
+                        if (isNotBlank(relativePath)) {
+                            jmsType = FormatUtils.replaceToken(jmsType, "relativePath", relativePath, true);
+                        }
                         jmsMsg.setJMSType(jmsType);
                     }
                     producer.publish(jmsMsg);
