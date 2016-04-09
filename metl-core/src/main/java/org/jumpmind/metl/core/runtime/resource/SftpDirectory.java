@@ -206,16 +206,18 @@ public class SftpDirectory implements IDirectory {
             threadSession.set(null);
         }
         Map<Integer, ChannelSftp> channels = threadChannels.get();
-        Iterator<Entry<Integer, ChannelSftp>> itr = channels.entrySet().iterator();
-        while (itr.hasNext()) {
-            Map.Entry<Integer, ChannelSftp> entry = itr.next();
-            ChannelSftp channel = entry.getValue();
-            if (channel != null) {
-                channel.disconnect();
-                channels.remove(entry.getKey());
+        if (channels != null) {
+            Iterator<Entry<Integer, ChannelSftp>> itr = channels.entrySet().iterator();
+            while (itr.hasNext()) {
+                Map.Entry<Integer, ChannelSftp> entry = itr.next();
+                ChannelSftp channel = entry.getValue();
+                if (channel != null) {
+                    channel.disconnect();
+                    channels.remove(entry.getKey());
+                }
             }
+            threadChannels.set(null);
         }
-        threadChannels.set(null);
     }
     
     @Override
