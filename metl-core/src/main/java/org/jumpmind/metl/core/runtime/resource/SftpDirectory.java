@@ -193,7 +193,7 @@ public class SftpDirectory implements IDirectory {
                     return false;
                 }
         } catch (SftpException e) {
-            log.error("Error determing whether a remote file exsits. Error %s", e.getMessage());
+            log.error(String.format("Error determing whether the remote file '%s' exsits. Error %s", filePath, e.getMessage()));
             return false;
         }
     }
@@ -311,17 +311,14 @@ public class SftpDirectory implements IDirectory {
             sftp.cd(basePath);
             for (String relativePath : relativePaths) {
             	if (!relativePath.equals(".") && !relativePath.equals("..")) {
-            	    if (StringUtils.endsWith(relativePath, "/")) {
+            	    if (relativePath.isEmpty() || StringUtils.endsWith(relativePath, "/")) {
             	        separator="";
             	    } else {
             	        separator="/";
             	    }
-            	    if (relativePath.isEmpty()) {
-            	        relativePath="*";
-            	    }
             	    Vector list=new Vector();
-	            	try {	            	    
-                        list.addAll(sftp.ls(relativePath));
+	            	try {
+                        list.addAll(sftp.ls(relativePath.isEmpty() ? "*" : relativePath));
 	            	} catch (SftpException e) {
 	            	    log.warn("List File Warning ==>" + e.getMessage());
 	            	}
@@ -414,8 +411,9 @@ public class SftpDirectory implements IDirectory {
             }
             return new CloseableInputStreamStream(sftp.get(relativePath), session, sftp, closeSession);
         } catch (Exception e) {
-            if (((SftpException) e).id != 2) {
-                throw new IoException("Error getting the input stream for sftp endpoint.  Error %s", e.getMessage());       
+            if (e instanceof IOException || 
+                    (e instanceof SftpException && ((SftpException) e).id != 2)) {
+                throw new IoException("Error getting the input stream for sftp endpoint.  Error %s", e.getMessage());
             } else {
                 return null;
             }
