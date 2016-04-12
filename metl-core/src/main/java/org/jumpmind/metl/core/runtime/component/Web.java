@@ -50,7 +50,7 @@ public class Web extends AbstractComponentRuntime {
     
     public static final String PARAMETER_REPLACEMENT = "parameter.replacement";
     
-    String runWhen = PER_UNIT_OF_WORK;
+    String runWhen = PER_MESSAGE;
 
     String relativePath;
     
