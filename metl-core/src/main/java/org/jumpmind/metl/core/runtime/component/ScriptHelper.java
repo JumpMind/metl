@@ -124,10 +124,10 @@ public class ScriptHelper {
      * source link.
      */
     protected boolean unitOfWorkBoundaryReached;
-    
-    protected IComponentRuntime componentRuntime;    
 
-    public ScriptHelper(IComponentRuntime componentRuntime) {        
+    protected IComponentRuntime componentRuntime;
+
+    public ScriptHelper(IComponentRuntime componentRuntime) {
         this.componentRuntime = componentRuntime;
         this.context = componentRuntime.getComponentContext();
         this.resource = context.getResourceRuntime();
@@ -139,6 +139,7 @@ public class ScriptHelper {
     
     /**
      * Test whether the inputMessage is an EntityDataMessage
+     * 
      * @return true if so
      */
     protected boolean isEntityDataMessage() {
@@ -147,14 +148,16 @@ public class ScriptHelper {
 
     /**
      * Test whether the inputMessage is an ControlMessage
+     * 
      * @return true if so
      */
     protected boolean isControlMessage() {
         return inputMessage instanceof ControlMessage;
     }
-    
+
     /**
      * Test whether the inputMessage is an TextMessage
+     * 
      * @return true if so
      */
     protected boolean isTextMessage() {
@@ -196,7 +199,9 @@ public class ScriptHelper {
     /**
      * This is mainly to support unit tests or components that need to copy a
      * classpath resource to a directory resource in a script
-     * @param fileName The file to extract as a file resource 
+     * 
+     * @param fileName
+     *            The file to extract as a file resource
      */
     protected void classpathToDirectory(String fileName) {
         InputStream is = getClass().getResourceAsStream(fileName);
@@ -327,7 +332,8 @@ public class ScriptHelper {
      * Called by the {@link Script} component to set the {@link #callback} prior
      * to calling {@link #onHandle()}
      * 
-     * @param callback The callback reference
+     * @param callback
+     *            The callback reference
      */
     protected void setSendMessageCallback(ISendMessageCallback callback) {
         this.callback = callback;
@@ -368,6 +374,7 @@ public class ScriptHelper {
 
     /**
      * Helper method to get an attribute value from the data object by name
+     * 
      * @param entityName
      *            The name of the {@link ModelEntity}
      * @param attributeName
@@ -382,7 +389,24 @@ public class ScriptHelper {
     }
 
     /**
-     * Helper method to get an attribute value from the first data object in the current {@link #inputMessage}
+     * Helper method to check whether the data contains data for a specific
+     * entityName
+     * 
+     * @param entityName
+     *            The name of the {@link ModelEntity}
+     * @param data
+     *            The data object on which to set the attribute
+     * @return true if data contains the entity with the passed in name
+     */
+    protected boolean containsEntityValues(String entityName, EntityData data) {
+        Model model = flowStep.getComponent().getInputModel();
+        return ComponentUtils.containsEntity(model, data, entityName);
+    }
+
+    /**
+     * Helper method to get an attribute value from the first data object in the
+     * current {@link #inputMessage}
+     * 
      * @param entityName
      *            The name of the {@link ModelEntity}
      * @param attributeName
@@ -396,11 +420,13 @@ public class ScriptHelper {
     }
 
     /**
-     * Helper method to get an attribute value from the data object by attribute name only.
+     * Helper method to get an attribute value from the data object by attribute
+     * name only.
+     * 
      * @param attributeName
      *            The name of the {@link ModelAttribute}
      * @param data
-     *            The data object on which to set the attribute            
+     *            The data object on which to set the attribute
      * @return The value of the attribute
      */
     protected Object getAttributeValue(String attributeName, EntityData data) {
@@ -409,7 +435,9 @@ public class ScriptHelper {
     }
 
     /**
-     * Helper method to get a list of attribute values with a specific entity and attribute name from all the data objects in an {@link #inputMessage}
+     * Helper method to get a list of attribute values with a specific entity
+     * and attribute name from all the data objects in an {@link #inputMessage}
+     * 
      * @param entityName
      *            The name of the {@link ModelEntity}
      * @param attributeName
@@ -424,8 +452,11 @@ public class ScriptHelper {
 
     /**
      * Helper method to forward the current {@link #inputMessage}.
-     * @param parameterName The name of a parameter to add to the message header
-     * @param value The value of the parameter to add to the message header
+     * 
+     * @param parameterName
+     *            The name of a parameter to add to the message header
+     * @param value
+     *            The value of the parameter to add to the message header
      */
     protected void forwardMessageWithParameter(String parameterName, Serializable value) {
         Map<String, Serializable> headers = new HashMap<>();
@@ -439,7 +470,9 @@ public class ScriptHelper {
 
     /**
      * Helper method to forward the current {@link #inputMessage}.
-     * @param params Parameters to add to the {@link Message#getHeader()}
+     * 
+     * @param params
+     *            Parameters to add to the {@link Message#getHeader()}
      */
     protected void forwardMessageWithParameters(Map<String, Serializable> params) {
 

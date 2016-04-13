@@ -51,6 +51,19 @@ final public class ComponentUtils {
         }
         return null;
     }
+    
+    public static boolean containsEntity(Model model, EntityData data, String entityName) {
+        ModelEntity modelEntity = model.getEntityByName(entityName);
+        if (modelEntity != null) {
+            List<ModelAttribute> attributes = modelEntity.getModelAttributes();
+            for (ModelAttribute modelAttribute : attributes) {
+                if (data.containsKey(modelAttribute.getId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public static Object getAttributeValue(Model model, EntityData data, String attributeName) {
         List<ModelEntity> entites = model.getModelEntities();
