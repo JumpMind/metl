@@ -389,21 +389,6 @@ public class ScriptHelper {
     }
 
     /**
-     * Helper method to check whether the data contains data for a specific
-     * entityName
-     * 
-     * @param entityName
-     *            The name of the {@link ModelEntity}
-     * @param data
-     *            The data object on which to set the attribute
-     * @return true if data contains the entity with the passed in name
-     */
-    protected boolean containsEntityValues(String entityName, EntityData data) {
-        Model model = flowStep.getComponent().getInputModel();
-        return ComponentUtils.containsEntity(model, data, entityName);
-    }
-
-    /**
      * Helper method to get an attribute value from the first data object in the
      * current {@link #inputMessage}
      * 
