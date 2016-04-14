@@ -198,14 +198,14 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                 }
                 
                 parentToAttach.xmlElement.addContent(newElement);
-                newDocElement = new DocElement(parentToAttach.level+1,newElement,null);
+                newDocElement = new DocElement(parentToAttach.level+1,newElement,null,null);
             } else {
                 Attribute newAttribute = templateDocElement.xmlAttribute.clone();
                 if (value != null) {
                     newAttribute.setValue(value);
                 }
                 parentToAttach.xmlElement.setAttribute(newAttribute);
-                newDocElement = new DocElement(parentToAttach.level+1,null,newAttribute);
+                newDocElement = new DocElement(parentToAttach.level+1,null,newAttribute,null);
             }      
             parentStack.push(parentToAttach);
             parentStack.push(newDocElement);
@@ -218,18 +218,24 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
     private void fillStackWithStaticParentElements(Stack<DocElement> parentStack, DocElement firstDocElement, 
             Document generatedXml) {
-
+        
         Element newRootElement = templateDoc.getRootElement().clone();
         generatedXml.setRootElement(newRootElement);
-        Element elementToPutOnStack = newRootElement;
-        int level=0;
-        for (level=0;level<firstDocElement.level;level++) {
-            List<Element> childElement = elementToPutOnStack.getChildren();
-            elementToPutOnStack = childElement.get(0);
+        Map<Element, Namespace> namespaces = removeNamespaces(generatedXml);
+        Element elementToPutOnStack = null;
+        
+        XPathExpression<Element> expression = XPathFactory.instance()
+                .compile(firstDocElement.xpath, Filters.element());
+        List<Element> matches = expression.evaluate(generatedXml.getRootElement());
+        if (matches.size() != 0) {
+            elementToPutOnStack = matches.get(0);
+        } else {
+            elementToPutOnStack = newRootElement;
         }
         elementToPutOnStack.removeContent();
         removeAllAttributes(elementToPutOnStack);
-        parentStack.push(new DocElement(level, elementToPutOnStack,null));
+        parentStack.push(new DocElement(firstDocElement.level, elementToPutOnStack,null,null));
+        restoreNamespaces(generatedXml, namespaces);
     }
     
     private void removeAllAttributes(Element element) {
@@ -274,7 +280,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                             level++;
                         }
                         attributeLevels.put(compAttributeSetting.getAttributeId(),
-                                new DocElement(level, element, null));
+                                new DocElement(level, element, null, compAttributeSetting.getValue()));
                     }
                     if (matches.get(0) instanceof Attribute) {
                         Attribute attribute = (Attribute) matches.get(0);
@@ -286,7 +292,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                             level++;
                         }
                         attributeLevels.put(compAttributeSetting.getAttributeId(),
-                                new DocElement(level, null, attribute));
+                                new DocElement(level, null, attribute, compAttributeSetting.getValue()));
                     }
                 }
             }
@@ -320,7 +326,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                         }
                     }
                     entityLevels.put(compEntitySetting.getEntityId(),
-                            new DocElement(level, element, null));
+                            new DocElement(level, element, null, compEntitySetting.getValue()));
                 }
             }
         }
@@ -351,11 +357,13 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         int level;
         Element xmlElement;
         Attribute xmlAttribute;
+        String xpath;
         
-        public DocElement(int level, Element xmlElement, Attribute xmlAttribute) {
+        public DocElement(int level, Element xmlElement, Attribute xmlAttribute, String xpath) {
             this.level = level;
             this.xmlElement = xmlElement;
             this.xmlAttribute = xmlAttribute;
+            this.xpath = xpath;
         }
     }
 }
