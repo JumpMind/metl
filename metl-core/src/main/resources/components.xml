@@ -900,6 +900,12 @@
                visible='false'>
         <name>Import Statements</name>
       </setting>
+      <setting id='methods'
+               required='true'
+               type='script'
+               visible='false'>
+        <name>Additional Methods</name>
+      </setting>      
       <setting id='init.script'
                required='true'
                type='script'
