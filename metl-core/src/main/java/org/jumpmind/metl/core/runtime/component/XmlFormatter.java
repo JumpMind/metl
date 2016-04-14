@@ -73,6 +73,8 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
     public static final String TYPE = "Format XML";
 
     public final static String XML_FORMATTER_TEMPLATE = "xml.formatter.template";
+    
+    String runWhen;
 
     boolean ignoreNamespace = true;
 
@@ -102,6 +104,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         inputModel = getComponent().getInputModel(); 
         templateDoc = getTemplateDoc();                 
         entityAttributeDtls = fillEntityAttributeDetails(templateDoc);
+        runWhen = getComponent().get(RUN_WHEN, PER_MESSAGE);
     }
 
     @Override
@@ -112,13 +115,14 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         
-        if (inputMessage instanceof ControlMessage) {
+        if (!(inputMessage instanceof ControlMessage)) {
+            messagesToProcess.add(inputMessage);
+        }
+        
+        if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
+                || (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
             createXml(callback);
             messagesToProcess.clear();
-        } else if (inputMessage instanceof EntityDataMessage) {
-            messagesToProcess.add(inputMessage);
-        } else {
-            //todo log error, throw exception
         }
     }
 
