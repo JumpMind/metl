@@ -40,6 +40,7 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
     private static final String SCRIPT_ON_INIT = "onInit()";
     private static final String SCRIPT_ON_HANDLE = "onHandleMessage(inputMessage, messageTarget)";
     private static final String SCRIPT_IMPORTS = "<Imports>";
+    private static final String SCRIPT_METHODS = "<Methods>";
 
     private static final long serialVersionUID = 1L;
 
@@ -62,6 +63,8 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
 
         select.addItem(Script.IMPORTS);
         select.setItemCaption(Script.IMPORTS, SCRIPT_IMPORTS);
+        select.addItem(Script.METHODS);
+        select.setItemCaption(Script.METHODS, SCRIPT_METHODS);
         select.addItem(Script.INIT_SCRIPT);
         select.setItemCaption(Script.INIT_SCRIPT, SCRIPT_ON_INIT);
         select.addItem(Script.HANDLE_SCRIPT);

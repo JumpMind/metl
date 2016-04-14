@@ -48,9 +48,11 @@ public class Script extends AbstractComponentRuntime {
 
     public final static String IMPORTS = "imports";
 
+    public final static String METHODS = "methods";
+    
     public final static String INIT_SCRIPT = "init.script";
 
-    public final static String HANDLE_SCRIPT = "handle.msg.script";
+    public final static String HANDLE_SCRIPT = "handle.msg.script";    
 
     public final static String ON_FLOW_SUCCESS = "on.flow.success.script";
     
@@ -65,6 +67,7 @@ public class Script extends AbstractComponentRuntime {
         String importStatements = getComponent().get(IMPORTS);
         String initScript = getComponent().get(INIT_SCRIPT);
         String handleMessageScript = getComponent().get(HANDLE_SCRIPT);
+        String methods = getComponent().get(METHODS);
         String onSuccess = getComponent().get(ON_FLOW_SUCCESS);
         String onError = getComponent().get(ON_FLOW_ERROR);
 
@@ -94,6 +97,12 @@ public class Script extends AbstractComponentRuntime {
             script.append("\n");
             script.append(String.format("helper = new %1$s(component) { \n",
                     ScriptHelper.class.getSimpleName()));
+            
+            if (isNotBlank(methods)) {
+                script.append("\n");
+                script.append(String.format("%s\n", methods));
+            }
+            
             if (isNotBlank(initScript)) {
                 script.append("\n");
                 script.append(String.format(" protected void onInit() { %s \n} \n", initScript));
