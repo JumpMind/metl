@@ -241,7 +241,7 @@ public class StepRuntime implements Runnable {
              * runtime to kick things off. If we have input links, we must loop
              * until we get a shutdown message from one of our sources
              */
-            while (flowRuntime.isRunning()) {
+            while (running && !cancelled) {
                 /*
                  * Continue to poll as long as the flow is running. other
                  * components could be generating messages which could block if
