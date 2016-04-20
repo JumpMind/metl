@@ -92,7 +92,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
     Model inputModel;
 
     String runWhen;
-    
+
     @Override
     protected void start() {
         super.start();
@@ -114,14 +114,16 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-        
+    public void handle(Message inputMessage, ISendMessageCallback callback,
+            boolean unitOfWorkBoundaryReached) {
+
         if (!(inputMessage instanceof ControlMessage)) {
             messagesToProcess.add(inputMessage);
         }
-        
+
         if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
-                || (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
+                || (!PER_UNIT_OF_WORK.equals(runWhen)
+                        && !(inputMessage instanceof ControlMessage))) {
             createXml(callback);
             messagesToProcess.clear();
         }
@@ -152,8 +154,8 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
     private void processMsgEntities(Stack<DocElement> parentStack, Message msg,
             Document generatedXml) {
-        
-        XMLOutputter xmlOutputter = new XMLOutputter();
+
+        boolean entityUsed = false;
         
         ArrayList<EntityData> inputRows = ((EntityDataMessage) msg).getPayload();
         // Every entity row in the message
@@ -165,40 +167,49 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                 String entityId = inputModel.getAttributeById(attribute.getKey()).getEntityId();
                 // deal with creation of a new entity record within the xml
                 if (entityId != null && !entityId.equalsIgnoreCase(lastEntityId)) {
-                    addModelEntityXml(parentStack, generatedXml, entityId);
-                    lastEntityId = entityId;
+                    entityUsed = addModelEntityXml(parentStack, generatedXml, entityId);
+                    if (entityUsed) {
+                        lastEntityId = entityId;
+                    }
                 }
                 addModelAttributeXml(parentStack, attribute.getKey(), attribute.getValue(),
                         generatedXml, entityId);
             }
             lastEntityId = null;
-            System.out.println(xmlOutputter.outputString(generatedXml));
+            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
         }
     }
 
-    private void addModelEntityXml(Stack<DocElement> parentStack, Document generatedXml,
+    private boolean addModelEntityXml(Stack<DocElement> parentStack, Document generatedXml,
             String entityId) {
 
         DocElement entityDocElement = entityAttributeDtls.get(entityId);
+        boolean entityUsed = false;
 
-        while (!parentStack.isEmpty() && parentStack.peek().level >= entityDocElement.level) {
-            parentStack.pop();
+        if (entityDocElement != null) {
+            entityUsed = true;
+            while (!parentStack.isEmpty() && parentStack.peek().level >= entityDocElement.level) {
+                parentStack.pop();
+            }
+
+            // TODO: this guys parent entity might be the last entity, not
+            // static
+            // data. What i have below works assuming the entities line up
+            // parent to child
+            // still needs work
+            if (parentStack.isEmpty() || parentStack.peek().level < entityDocElement.level - 1) {
+                fillStackWithStaticParentElements(parentStack, entityDocElement, generatedXml);
+            }
+
+            Element entityElementToAdd = entityDocElement.xmlElement.clone();
+            entityElementToAdd.removeContent();
+            removeAllAttributes(entityElementToAdd);
+            DocElement parentToAttach = parentStack.peek();
+            parentToAttach.xmlElement.addContent(entityElementToAdd);
+            parentStack.push(new DocElement(entityDocElement.level, entityElementToAdd, null,
+                    entityDocElement.xpath));
         }
-
-        // TODO: this guys parent entity might be the last entity, not static
-        // data.  What i have below works assuming the entities line up parent to child
-        // still needs work
-        if (parentStack.isEmpty() || parentStack.peek().level < entityDocElement.level - 1) {
-            fillStackWithStaticParentElements(parentStack, entityDocElement, generatedXml);
-        }
-
-        Element entityElementToAdd = entityDocElement.xmlElement.clone();
-        entityElementToAdd.removeContent();
-        removeAllAttributes(entityElementToAdd);
-        DocElement parentToAttach = parentStack.peek();
-        parentToAttach.xmlElement.addContent(entityElementToAdd);
-        parentStack.push(new DocElement(entityDocElement.level, entityElementToAdd, null,
-                entityDocElement.xpath));
+        return entityUsed;
     }
 
     private void fillStackWithStaticParentElements(Stack<DocElement> parentStack,
@@ -264,7 +275,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
         generatedDocNamespaces = removeNamespaces(generatedXml);
         templateNamespaces = removeNamespaces(templateDoc);
-        
+
         // we can be passed elements in the model that don't reside in the
         // template. If so, just ignore the field and do nothing
         if (templateDocElement != null) {
@@ -305,7 +316,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                 // the attribute doesn't hang directly off the entity
                 // we must find its parent in the existing doc or fill static
                 // content as appropriate
-                
+
                 // first get the parent element for this model attribute, and
                 // gets its xpath
                 XPathExpression<Element> expression = XPathFactory.instance()
@@ -318,11 +329,13 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                     // the template
                 }
 
-                //now look for parent elements in the generated xml until we find one
-                //or we hit the entity itself
+                // now look for parent elements in the generated xml until we
+                // find one
+                // or we hit the entity itself
                 boolean parentFound = false;
                 do {
-                    templateParentXPath = XPathHelper.getRelativePath(entityDocElement.xmlElement, templateParentElement);
+                    templateParentXPath = XPathHelper.getRelativePath(entityDocElement.xmlElement,
+                            templateParentElement);
                     expression = XPathFactory.instance().compile(templateParentXPath,
                             Filters.element());
                     matches = expression.evaluate(parentStack.peek().xmlElement);
@@ -335,21 +348,21 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
                     } else {
                         parentFound = true;
                     }
-                } while (parentFound == false);      
-                
-                //add every parent we couldn't find up to the entity level
+                } while (parentFound == false);
+
+                // add every parent we couldn't find up to the entity level
                 Element elementToAddTo = matches.get(0);
                 while (!parentsToAdd.isEmpty()) {
                     elementToAddTo.addContent(parentsToAdd.peek());
                     elementToAddTo = parentsToAdd.pop();
                 }
-                
-                //add our model attribute to the latest level
+
+                // add our model attribute to the latest level
                 if (newElement != null) {
                     elementToAddTo.addContent(newElement);
                 } else {
                     elementToAddTo.setAttribute(newAttribute);
-                }                
+                }
             }
         }
         restoreNamespaces(templateDoc, templateNamespaces);
