@@ -91,6 +91,8 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
 
     Model inputModel;
 
+    String runWhen;
+    
     @Override
     protected void start() {
         super.start();
@@ -103,6 +105,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         inputModel = getComponent().getInputModel();
         templateDoc = getTemplateDoc();
         entityAttributeDtls = fillEntityAttributeDetails(templateDoc);
+        runWhen = getComponent().get(RUN_WHEN, PER_MESSAGE);
     }
 
     @Override
