@@ -111,16 +111,16 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
     }
 
     @Override
-    public void handle(Message inputMessage, ISendMessageCallback callback,
-            boolean unitOfWorkBoundaryReached) {
-
-        if (inputMessage instanceof ControlMessage) {
+    public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
+        
+        if (!(inputMessage instanceof ControlMessage)) {
+            messagesToProcess.add(inputMessage);
+        }
+        
+        if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
+                || (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
             createXml(callback);
             messagesToProcess.clear();
-        } else if (inputMessage instanceof EntityDataMessage) {
-            messagesToProcess.add(inputMessage);
-        } else {
-            // todo log error, throw exception
         }
     }
 

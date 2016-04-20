@@ -50,7 +50,7 @@ public class Web extends AbstractComponentRuntime {
     
     public static final String PARAMETER_REPLACEMENT = "parameter.replacement";
     
-    String runWhen = PER_MESSAGE;
+    String runWhen;
 
     String relativePath;
     
@@ -74,9 +74,9 @@ public class Web extends AbstractComponentRuntime {
         bodyFrom = component.get(BODY_FROM, "Message");
         bodyText = component.get(BODY_TEXT);
         parameterReplacement = component.getBoolean(PARAMETER_REPLACEMENT, false);
-        runWhen = getComponent().get(RUN_WHEN, PER_UNIT_OF_WORK);
+        runWhen = getComponent().get(RUN_WHEN, PER_MESSAGE);
     }
-        
+    
     @Override
     public boolean supportsStartupMessages() {
         return true;
