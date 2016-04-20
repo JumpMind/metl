@@ -96,7 +96,8 @@ public class SftpDirectory implements IDirectory {
         ChannelSftp sftp = null;
         FileInfo fileInfo = null;
         try {
-            sftp = openConnectedChannel(CHANNEL_1);
+            // Get a reusable channel if the session is not auto closed.
+            sftp = (closeSession) ? openConnectedChannel() : openConnectedChannel(CHANNEL_1);
             sftp.cd(basePath);
         	if (!relativePath.equals(".") && !relativePath.equals("..")) {
             	@SuppressWarnings("rawtypes")
@@ -128,7 +129,8 @@ public class SftpDirectory implements IDirectory {
         ChannelSftp uploadSftp = null;
         InputStream inputStream = null;
         try {
-            uploadSftp = openConnectedChannel(CHANNEL_1);
+            // Get a reusable channel if the session is not auto closed.
+            uploadSftp = (closeSession) ? openConnectedChannel() : openConnectedChannel(CHANNEL_1);
             uploadSftp.cd(basePath);
             inputStream = getInputStream(fromFilePath, true);
             uploadSftp.put(inputStream, toFilePath);
@@ -150,7 +152,8 @@ public class SftpDirectory implements IDirectory {
     public void moveFile(String fromFilePath, String toFilePath, boolean closeSession) {
         ChannelSftp sftp = null;
         try {
-            sftp = openConnectedChannel(CHANNEL_1);
+            // Get a reusable channel if the session is not auto closed.
+            sftp = (closeSession) ? openConnectedChannel() : openConnectedChannel(CHANNEL_1);
             sftp.cd(basePath);
             sftp.rename(fromFilePath, toFilePath);
         } catch (Exception e) {
@@ -171,7 +174,8 @@ public class SftpDirectory implements IDirectory {
     public boolean renameFile(String fromFilePath, String toFilePath, boolean closeSession) {
         ChannelSftp sftp = null;
         try {
-            sftp = openConnectedChannel(CHANNEL_1);
+            // Get a reusable channel if the session is not auto closed.
+            sftp = (closeSession) ? openConnectedChannel() : openConnectedChannel(CHANNEL_1);
             sftp.cd(basePath);
             sftp.rename(fromFilePath, toFilePath);
             return true;
@@ -260,6 +264,28 @@ public class SftpDirectory implements IDirectory {
         return session;
     }
     
+    
+    /**
+     * Open and Connect a new SFTP channel.
+     * 
+     * @return a new channel.
+     * @throws JschException
+     */
+    protected ChannelSftp openConnectedChannel() throws JSchException {
+        Session session = openSession();
+        ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
+        channel.connect();
+        return channel;
+    }
+    
+    
+    /**
+     * Open and connect a reusable SFTP channel.
+     * 
+     * @param channelId is the ID of the reusable channel to open.
+     * @return a connected reusable channel.
+     * @throws JSchException
+     */
     protected ChannelSftp openConnectedChannel(int channelId) throws JSchException {
 
         Session session = openSession();
@@ -307,7 +333,8 @@ public class SftpDirectory implements IDirectory {
         String separator = null;
         List<FileInfo> fileInfoList =  new ArrayList<>();
         try {
-            sftp = openConnectedChannel(CHANNEL_1);
+            // Get a reusable channel if the session is not auto closed.
+            sftp = (closeSession) ? openConnectedChannel() : openConnectedChannel(CHANNEL_1);
             sftp.cd(basePath);
             for (String relativePath : relativePaths) {
             	if (!relativePath.equals(".") && !relativePath.equals("..")) {
@@ -351,7 +378,8 @@ public class SftpDirectory implements IDirectory {
         FileInfo fileInfo = new FileInfo(fromFilePath, false, new java.util.Date().getTime(), -1);
         InputStream inputStream = null;
         try {
-            uploadSftp = openConnectedChannel(CHANNEL_1);
+            // Get a reusable channel if the session is not auto closed.
+            uploadSftp = (closeSession) ? openConnectedChannel() : openConnectedChannel(CHANNEL_1);
             uploadSftp.cd(basePath);
             
             if (!toDirPath.endsWith("/")) {
@@ -378,7 +406,8 @@ public class SftpDirectory implements IDirectory {
         ChannelSftp sftp = null;
         FileInfo fileInfo = new FileInfo(fromFilePath, false, new java.util.Date().getTime(), -1);
         try {
-            sftp = openConnectedChannel(CHANNEL_1);
+            // Get a reusable channel if the session is not auto closed.
+            sftp = (closeSession) ? openConnectedChannel() : openConnectedChannel(CHANNEL_1);
             sftp.cd(basePath);
             if (!toDirPath.endsWith("/")) {
             	toDirPath += "/";
@@ -404,7 +433,8 @@ public class SftpDirectory implements IDirectory {
     	ChannelSftp sftp = null;
         try {
         	session = openSession();
-            sftp = openConnectedChannel(CHANNEL_IN);
+            // Get a reusable channel if the session is not auto closed.
+            sftp = (closeSession) ? openConnectedChannel() : openConnectedChannel(CHANNEL_IN);
             sftp.cd(basePath);
             if (mustExist && !fileExists(sftp, relativePath)) {
                 throw new IoException("Could not find endpoint %s that was configured as MUST EXIST",relativePath);
@@ -436,7 +466,8 @@ public class SftpDirectory implements IDirectory {
     	ChannelSftp sftp = null;
         try {
         	session = openSession();
-            sftp = openConnectedChannel(CHANNEL_OUT);
+            // Get a reusable channel if the session is not auto closed.
+            sftp = (closeSession) ? openConnectedChannel() : openConnectedChannel(CHANNEL_OUT);
             sftp.cd(basePath);
             createRelativePathDirectoriesIfNecessary(sftp, relativePath, mustExist);
             return new CloseableOutputStream(sftp.put(relativePath, ChannelSftp.OVERWRITE), session, sftp, closeSession);
@@ -484,7 +515,8 @@ public class SftpDirectory implements IDirectory {
     public boolean delete(String relativePath, boolean closeSession) {
     	ChannelSftp sftp = null;
         try {
-            sftp = openConnectedChannel(CHANNEL_1);
+            // Get a reusable channel if the session is not auto closed.
+            sftp = (closeSession) ? openConnectedChannel() : openConnectedChannel(CHANNEL_1);
             sftp.cd(basePath);
             sftp.rm(relativePath);
             return true;

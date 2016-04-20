@@ -13,3 +13,6 @@
 /test_vertex_rte.h2.db
 /test_vertex_rte.lock.db
 /working/
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
