@@ -269,7 +269,6 @@ public class SftpDirectory implements IDirectory {
      * Open and Connect a new SFTP channel.
      * 
      * @return a new channel.
-     * @throws JschException
      */
     protected ChannelSftp openConnectedChannel() throws JSchException {
         Session session = openSession();
@@ -284,7 +283,6 @@ public class SftpDirectory implements IDirectory {
      * 
      * @param channelId is the ID of the reusable channel to open.
      * @return a connected reusable channel.
-     * @throws JSchException
      */
     protected ChannelSftp openConnectedChannel(int channelId) throws JSchException {
 
