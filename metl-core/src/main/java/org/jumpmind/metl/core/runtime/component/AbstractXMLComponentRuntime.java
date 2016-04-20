@@ -54,7 +54,7 @@ abstract public class AbstractXMLComponentRuntime extends AbstractComponentRunti
 
     protected Map<Element, Namespace> removeNamespaces(Document document) {
         Map<Element, Namespace> namespaces = new HashMap<Element, Namespace>();
-        if (ignoreNamespace) {
+        if (ignoreNamespace && document.hasRootElement()) {
             namespaces.put(document.getRootElement(), document.getRootElement().getNamespace());
             document.getRootElement().setNamespace(null);
             for (Element el : document.getRootElement().getDescendants(new ElementFilter())) {
