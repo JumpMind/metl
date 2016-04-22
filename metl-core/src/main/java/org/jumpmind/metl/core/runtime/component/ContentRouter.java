@@ -38,7 +38,6 @@ import javax.script.ScriptException;
 
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Flow;
-import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -66,7 +65,7 @@ public class ContentRouter extends AbstractComponentRuntime {
 
     boolean onlyRouteFirstMatch;
 
-    long rowsPerMessage = 10000;
+    long rowsPerMessage = 1000;
     
     Set<String> targetStepsThatNeedControlMessages = new HashSet<>();
 

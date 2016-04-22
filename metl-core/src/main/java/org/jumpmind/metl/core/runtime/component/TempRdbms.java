@@ -34,7 +34,7 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
 
     public static String IN_MEMORY_DB = "in.memory.db";
 
-    int rowsPerMessage = 10000;
+    int rowsPerMessage = 1000;
 
     boolean inMemoryDb = true;
     

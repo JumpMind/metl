@@ -52,7 +52,7 @@ public class Deduper extends AbstractComponentRuntime {
 
     public final static String ATTRIBUTE_DEDUPE_ENABLED = "dedupe.enabled";
     
-    int rowsPerMessage = 10000;
+    int rowsPerMessage = 1000;
     
     String dedupeType = DEDUPE_ENTITY;
 

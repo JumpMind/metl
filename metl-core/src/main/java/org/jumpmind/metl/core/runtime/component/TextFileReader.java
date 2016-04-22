@@ -48,7 +48,7 @@ public class TextFileReader extends AbstractFileReader {
 
     public static final String SETTING_HEADER_LINES_TO_SKIP = "text.header.lines.to.skip";
 
-    int textRowsPerMessage = 10000;
+    int textRowsPerMessage = 1000;
 
     int textHeaderLinesToSkip;
 

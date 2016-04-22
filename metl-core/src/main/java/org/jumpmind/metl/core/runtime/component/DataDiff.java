@@ -76,7 +76,7 @@ public class DataDiff extends AbstractComponentRuntime {
 
     public final static String ATTRIBUTE_COMPARE_ENABLED = "compare.enabled";
 
-    int rowsPerMessage = 10000;
+    int rowsPerMessage = 1000;
 
     String sourceStep1Id;
 

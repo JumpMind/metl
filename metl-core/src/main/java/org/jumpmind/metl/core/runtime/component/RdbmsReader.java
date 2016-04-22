@@ -69,7 +69,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
 
     String runWhen = PER_UNIT_OF_WORK;
 
-    long rowsPerMessage = 10000;
+    long rowsPerMessage = 1000;
 
     boolean trimColumns = false;
 
