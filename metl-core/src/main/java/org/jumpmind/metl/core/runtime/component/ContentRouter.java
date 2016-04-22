@@ -117,8 +117,6 @@ public class ContentRouter extends AbstractComponentRuntime {
                 for (Route route : routes) {
                     try {
                         if (Boolean.TRUE.equals(scriptEngine.eval(route.getMatchExpression()))) {
-                            getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
-
                             ArrayList<EntityData> outboundPayload = outboundMessages.get(route.getTargetStepId());
                             if (outboundPayload == null) {
                                 outboundPayload = new ArrayList<EntityData>();
