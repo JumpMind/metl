@@ -37,10 +37,14 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.model.Flow;
+import org.jumpmind.metl.core.model.FlowStep;
+import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
@@ -78,6 +82,21 @@ public class ContentRouter extends AbstractComponentRuntime {
             try {
                 routes = new ObjectMapper().readValue(json, new TypeReference<List<Route>>() {
                 });
+                // Verify all routes are valid
+                for (Route route : routes) {
+                    boolean found = false;
+                    Flow flow = getFlow();
+                    List<FlowStepLink> stepLinks = flow.findFlowStepLinksWithSource(this.getFlowStepId());
+                    for (FlowStepLink flowStepLink : stepLinks) {
+                        if (flowStepLink.getTargetStepId().equals(route.getTargetStepId())) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        throw new MisconfiguredException("A route is no longer linked."); 
+                    }
+                }
             } catch (Exception e) {
                 throw new IoException(e);
             }
