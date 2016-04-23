@@ -1,0 +1,108 @@
+.diagram {
+	position: absolute;
+}
+
+.diagram-node-wrapper {
+    position: absolute;
+    z-index: 1;	
+}
+
+.diagram-node {
+	padding: 12px;
+	text-align: center;
+	border: 3px solid #2e6f9a;
+	box-shadow: 2px 2px 19px #e0e0e0;
+	-o-box-shadow: 2px 2px 19px #e0e0e0;
+	-webkit-box-shadow: 2px 2px 19px #e0e0e0;
+	-moz-box-shadow: 2px 2px 19px #e0e0e0;
+	-moz-border-radius: 8px;
+	border-radius: 8px;
+	opacity: 0.8;
+	filter: alpha(opacity = 80);
+	cursor: move;
+	background-color: white;
+	font-size: 11px;
+	-webkit-transition: background-color 0.25s ease-in;
+	-moz-transition: background-color 0.25s ease-in;
+	transition: background-color 0.25s ease-in;
+}
+
+.diagram-node-label {
+    word-wrap: break-word;
+    white-space: normal;
+    text-align:center;
+    width: 110px;
+    margin-left: -15px;
+    margin-top: 5px;
+    height: auto;
+}
+
+.diagram-node.selected {
+    border: 3px solid orange !important;
+}
+
+.diagram-node.DONE {
+    border: 3px solid green;
+}
+
+.diagram-node.ERROR {
+    border: 3px solid red;
+}
+
+.diagram-node.CANCELLED {
+    border: 3px solid red;
+}
+
+.diagram-node.ABANDONED {
+    border: 3px solid red;
+}
+
+.diagram-node.RUNNING {
+    border: 3px solid yellow;
+}
+
+.diagram-node.READY {
+    border: 3px solid blue;
+}
+
+.diagram-node.disabled {
+	opacity: 0.25;
+}
+
+.diagram ._jsPlumb_endpoint {
+	z-index: 3;
+}
+
+.diagram ._jsPlumb_overlay {
+    z-index: 2;
+}
+
+.endpointSourceLabel {
+	color: white;
+	background-color: #0072C6;
+    padding: 1px 6px 2px;
+    font-size: 12.025px;
+    font-weight: bold;
+    white-space: nowrap;
+    -webkit-border-radius: 9px;
+    -moz-border-radius: 9px;
+    border-radius: 9px;
+}
+
+
+.dragHover {
+	border: 2px solid orange;
+}
+
+path {
+	cursor: pointer;
+}
+
+.rubberband {
+	border: 2px solid orange;
+	display: none;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    z-index: 10;
+}

@@ -105,13 +105,24 @@ public class ButtonBar extends HorizontalLayout {
     }
 
     public Button addButton(String name, Resource icon, ClickListener clickListener) {
+        Button button = createButton(name, icon, clickListener);
+        bar.addComponent(button);
+        return button;
+    }
+
+    public Button addButtonRight(String name, Resource icon, ClickListener clickListener) {
+        Button button = createButton(name, icon, clickListener);
+        right.addComponent(button);
+        return button;
+    }
+    
+    public Button createButton(String name, Resource icon, ClickListener clickListener) {
         Button button = new Button(name);
         button.addStyleName(STYLE);
         button.setIcon(icon);
         if (clickListener != null) {
             button.addClickListener(clickListener);
         }
-        bar.addComponent(button);
         return button;
     }
 

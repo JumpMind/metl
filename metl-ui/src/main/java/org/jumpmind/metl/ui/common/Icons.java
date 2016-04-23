@@ -79,4 +79,6 @@ final public class Icons {
     
     public static final FontAwesome NOTIFICATION = FontAwesome.COMMENT;
     
+    public static final FontAwesome LIST = FontAwesome.LIST;
+    
 }

@@ -22,6 +22,14 @@ package org.jumpmind.metl.ui.common;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
+import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.ui.definition.XMLComponentUI;
+
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Label;
 
@@ -71,6 +79,30 @@ public final class UiUtils {
             endIndex = haystack.length();
         }
         return new int[] { startIndex, endIndex };
+    }
+    
+    public static String getBase64RepresentationOfImageForComponentType(String type, ApplicationContext context) {
+        String resourceName = getImageResourceNameForComponentType(type, context);
+        InputStream is = context.getClass().getResourceAsStream(resourceName);
+        if (is != null) {
+            try {
+                byte[] bytes = IOUtils.toByteArray(is);
+                return new String(Base64.encodeBase64(bytes));
+            } catch (IOException e) {
+                throw new IoException(e);
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public static String getImageResourceNameForComponentType(String type, ApplicationContext context) {
+        String icon = "/org/jumpmind/metl/core/runtime/component/metl-puzzle-48x48-color.png";
+        XMLComponentUI def = context.getUiFactory().getDefinition(type);
+        if (def != null && isNotBlank(def.getIconImage())) {
+            icon = def.getIconImage();
+        }
+        return icon;
     }
 
 }

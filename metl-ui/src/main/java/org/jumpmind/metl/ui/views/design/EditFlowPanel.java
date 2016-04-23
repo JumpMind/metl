@@ -46,6 +46,7 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.metl.ui.diagram.Diagram;
 import org.jumpmind.metl.ui.diagram.LinkEvent;
 import org.jumpmind.metl.ui.diagram.LinkSelectedEvent;
@@ -55,7 +56,7 @@ import org.jumpmind.metl.ui.diagram.NodeMovedEvent;
 import org.jumpmind.metl.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.metl.ui.views.DesignNavigator;
 import org.jumpmind.metl.ui.views.IFlowRunnable;
-import org.jumpmind.metl.ui.views.manage.ExecutionLogPanel;
+import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
@@ -359,7 +360,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true);
             String imageText = String.format(
                     "<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>",
-                    componentPalette.getBase64RepresentationOfImageForComponentType(type));
+                    UiUtils.getBase64RepresentationOfImageForComponentType(type,context));
 
             node.setText(imageText);
             node.setName(name);
@@ -429,7 +430,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
         String executionId = agentManager.getAgentRuntime(myDesignAgent).scheduleNow(deployment, flow.toFlowParametersAsString());
         if (executionId != null) {
-            ExecutionLogPanel logPanel = new ExecutionLogPanel(executionId, context, tabs, this);
+            ExecutionRunPanel logPanel = new ExecutionRunPanel(executionId, context, tabs, this);
             tabs.addCloseableTab(executionId, "Run " + flow.getName(), Icons.LOG, logPanel);
             logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
         }

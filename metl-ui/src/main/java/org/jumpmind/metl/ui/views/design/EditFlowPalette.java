@@ -20,24 +20,17 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.ComponentName;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.metl.ui.definition.XMLComponentUI;
+import org.jumpmind.metl.ui.common.UiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,32 +76,8 @@ public class EditFlowPalette extends VerticalLayout {
 
     }
 
-    protected String getBase64RepresentationOfImageForComponentType(String type) {
-        String resourceName = getImageResourceNameForComponentType(type);
-        InputStream is = getClass().getResourceAsStream(resourceName);
-        if (is != null) {
-            try {
-                byte[] bytes = IOUtils.toByteArray(is);
-                return new String(Base64.encodeBase64(bytes));
-            } catch (IOException e) {
-                throw new IoException(e);
-            }
-        } else {
-            return null;
-        }
-    }
-
-    protected String getImageResourceNameForComponentType(String type) {
-        String icon = "/org/jumpmind/metl/core/runtime/component/metl-puzzle-48x48-color.png";
-        XMLComponentUI def = context.getUiFactory().getDefinition(type);
-        if (def != null && isNotBlank(def.getIconImage())) {
-            icon = def.getIconImage();
-        }
-        return icon;
-    }
-
     protected ClassResource getImageResourceForComponentType(String type) {
-        return new ClassResource(getImageResourceNameForComponentType(type));
+        return new ClassResource(UiUtils.getImageResourceNameForComponentType(type,context));
     }
 
     protected void populateComponentPalette(String projectVersionId) {

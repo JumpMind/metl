@@ -40,6 +40,11 @@ public class Node implements Serializable {
     String id = UUID.randomUUID().toString();
     List<String> targetNodeIds = new ArrayList<String>();
     boolean enabled = true;
+    
+    long messagesRecieved = 0;
+    long messagesSent = 0;
+    long entitiesProcessed = 0;
+    String status = "READY";
 
 	public Node(String text) {
         this.text = text;
@@ -135,4 +140,36 @@ public class Node implements Serializable {
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
+
+    public long getMessagesRecieved() {
+        return messagesRecieved;
+    }
+
+    public void setMessagesRecieved(long messagesRecieved) {
+        this.messagesRecieved = messagesRecieved;
+    }
+
+    public long getMessagesSent() {
+        return messagesSent;
+    }
+
+    public void setMessagesSent(long messagesSent) {
+        this.messagesSent = messagesSent;
+    }
+
+    public long getEntitiesProcessed() {
+        return entitiesProcessed;
+    }
+
+    public void setEntitiesProcessed(long entitiesProcessed) {
+        this.entitiesProcessed = entitiesProcessed;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }
