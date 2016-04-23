@@ -28,10 +28,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.jumpmind.metl.core.model.Flow;
+import org.jumpmind.metl.core.model.FlowStep;
+import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
+import org.jumpmind.metl.core.runtime.component.ContentRouter.Route;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 
@@ -67,8 +72,10 @@ public class Lookup extends AbstractComponentRuntime {
         replacementKeyAttributeId = properties.get(REPLACEMENT_KEY_ATTRIBUTE);
         replacementValueAttributeId = properties.get(REPLACEMENT_VALUE_ATTRIBUTE);
 
-        if (isBlank(sourceStepId) || getFlow().findFlowStepWithId(sourceStepId) == null) {
-            throw new IllegalStateException("The source step must be specified");
+        FlowStepLink link = getFlow()
+                .findLinkBetweenSourceAndTarget(sourceStepId, this.getFlowStepId());
+        if (link == null) {
+            throw new MisconfiguredException("The lookup data source is missing."); 
         }
     }
 

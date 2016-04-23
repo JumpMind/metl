@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
+
 public class Flow extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
@@ -135,6 +137,16 @@ public class Flow extends AbstractObject {
             }
         }
         return links;
+    }
+    
+    public FlowStepLink findLinkBetweenSourceAndTarget(String sourceNodeId, String targetNodeId) {
+        for (FlowStepLink flowStepLink : flowStepLinks) {
+            if (flowStepLink.getTargetStepId().equals(targetNodeId)
+                    && flowStepLink.getSourceStepId().equals(sourceNodeId)) {
+                return flowStepLink;
+            }
+        }
+        return null;
     }
 
     public List<FlowStepLink> findFlowStepLinksWithTarget(String targetNodeId) {

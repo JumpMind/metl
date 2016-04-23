@@ -83,17 +83,10 @@ public class ContentRouter extends AbstractComponentRuntime {
                 });
                 // Verify all routes are valid
                 for (Route route : routes) {
-                    boolean found = false;
-                    Flow flow = getFlow();
-                    List<FlowStepLink> stepLinks = flow.findFlowStepLinksWithSource(this.getFlowStepId());
-                    for (FlowStepLink flowStepLink : stepLinks) {
-                        if (flowStepLink.getTargetStepId().equals(route.getTargetStepId())) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        throw new MisconfiguredException("A route is no longer linked."); 
+                    FlowStepLink link = getFlow()
+                            .findLinkBetweenSourceAndTarget(this.getFlowStepId(),route.getTargetStepId());
+                    if (link == null) {
+                        throw new MisconfiguredException("A route target step is not linked."); 
                     }
                 }
             } catch (Exception e) {
