@@ -166,10 +166,12 @@ public class AgentRuntime {
             this.flowExecutionScheduler.setThreadNamePrefix(namePrefix
                     + "-job-");
             /*
-             * Threads are not pre-created. Set this plenty big so we don't run
-             * out of threads
+             * Threads are not pre-created. Set this big enough for a typical flow but not too
+             * big since every agent gets their own pool. Additional threads can be obtained if
+             * the entire pool is used.
+             * A common Linux thread limit is 1024 per user.
              */
-            this.flowExecutionScheduler.setPoolSize(100);
+            this.flowExecutionScheduler.setPoolSize(20);
             this.flowExecutionScheduler.initialize();
 
             this.globalSettings = configurationService.findGlobalSettingsAsMap();
