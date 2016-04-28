@@ -173,7 +173,7 @@ public class HttpDirectory implements IDirectory {
     }
 
     @Override
-    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession) {
+    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession, boolean append) {
         return getOutputStream(relativePath, mustExist);
     }
 

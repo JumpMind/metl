@@ -40,7 +40,7 @@ public interface IDirectory {
     
     public OutputStream getOutputStream(String relativePath, boolean mustExist);
 
-    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession);
+    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession, boolean append);
     
     public void close();
     

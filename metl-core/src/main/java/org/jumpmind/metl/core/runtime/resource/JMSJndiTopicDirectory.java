@@ -79,7 +79,7 @@ public class JMSJndiTopicDirectory extends AbstractDirectory {
     }
 
     @Override
-    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession) {
+    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession, boolean append) {
         return new CloseableOutputStream(relativePath);
     }
 

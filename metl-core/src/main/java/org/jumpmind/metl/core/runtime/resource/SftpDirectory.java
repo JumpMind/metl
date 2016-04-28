@@ -455,11 +455,11 @@ public class SftpDirectory implements IDirectory {
 
     @Override
     public OutputStream getOutputStream(String relativePath, boolean mustExist) {
-        return getOutputStream(relativePath, mustExist, true);
+        return getOutputStream(relativePath, mustExist, true, false);
     }
 
     @Override
-    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession) {
+    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession, boolean append) {
     	Session session = null;
     	ChannelSftp sftp = null;
         try {

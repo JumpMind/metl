@@ -45,12 +45,16 @@ public class TextFileWriter extends AbstractFileWriter {
     public final static String DEFAULT_ENCODING = "UTF-8";
 
     public final static String SETTING_ENCODING = "encoding";
+    
+    public final static String SETTING_APPEND = "append";
 
     public static final String SETTING_TEXT_LINE_TERMINATOR = "text.line.terminator";
 
     String encoding;
 
     String lineTerminator;
+    
+    boolean append;
 
     BufferedWriter bufferedWriter = null;
 
@@ -59,7 +63,8 @@ public class TextFileWriter extends AbstractFileWriter {
     	init();
         TypedProperties properties = getTypedProperties();
         lineTerminator = properties.get(SETTING_TEXT_LINE_TERMINATOR);
-        encoding = properties.get(SETTING_ENCODING, DEFAULT_ENCODING);        
+        encoding = properties.get(SETTING_ENCODING, DEFAULT_ENCODING); 
+        append = properties.is(SETTING_APPEND, false);
         if (lineTerminator != null) {
             lineTerminator = StringEscapeUtils.unescapeJava(properties.get(SETTING_TEXT_LINE_TERMINATOR));
         }
@@ -118,7 +123,7 @@ public class TextFileWriter extends AbstractFileWriter {
 	    	String fileName = getFileName(inputMessage);
 	    	IDirectory streamable = initStream(fileName);
 	        log(LogLevel.INFO, String.format("Writing text file to resource: %s with name: %s", streamable.toString(), fileName));
-	       	bufferedWriter = initializeWriter(streamable.getOutputStream(fileName, mustExist));
+	       	bufferedWriter = initializeWriter(streamable.getOutputStream(fileName, mustExist, false, append));
     	}
     }
 
