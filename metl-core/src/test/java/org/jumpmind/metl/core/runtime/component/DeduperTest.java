@@ -42,7 +42,7 @@ public class DeduperTest extends AbstractComponentRuntimeTestSupport {
 		setupStart(new SettingsBuilder().build());
 		((Deduper) spy).start();
 		
-		Assert.assertEquals(10000, ((Deduper) spy).rowsPerMessage);
+		Assert.assertEquals(1000, ((Deduper) spy).rowsPerMessage);
 	}
 
 	@Test
