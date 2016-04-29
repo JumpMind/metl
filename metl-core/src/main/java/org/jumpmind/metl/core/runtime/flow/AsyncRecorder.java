@@ -29,6 +29,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.ExecutionStepLog;
 import org.jumpmind.metl.core.persist.IExecutionService;
@@ -84,7 +85,8 @@ public class AsyncRecorder implements Runnable {
                         logWriters.put(executionStepId, writer);                        
                     }
                     try {
-                        writer.writeRecord(new String[] { stepLog.getLevel(), FormatUtils.TIMESTAMP_FORMATTER.format(stepLog.getCreateTime()), stepLog.getLogText() });
+                        writer.writeRecord(new String[] { stepLog.getLevel(), FormatUtils.TIMESTAMP_FORMATTER.format(stepLog.getCreateTime()), 
+                                StringUtils.abbreviate(stepLog.getLogText(), 100000) });
                         writer.flush();
                     } catch (IOException e) {
                         writer.close();
