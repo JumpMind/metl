@@ -122,7 +122,7 @@
                required='false'
                type='integer'>
         <name>Rows/Msg</name>
-        <defaultValue>10000</defaultValue>
+        <defaultValue>1000</defaultValue>
       </setting>
       <setting id='in.memory.compare'
                required='true'
@@ -166,7 +166,7 @@
                required='false'
                type='integer'>
         <name>Rows/Msg</name>
-        <defaultValue>10000</defaultValue>
+        <defaultValue>1000</defaultValue>
       </setting>
     </settings>
   </component>
@@ -214,7 +214,7 @@
                required='true'
                type='integer'>
         <name>Rows/Msg</name>
-        <defaultValue>10000</defaultValue>
+        <defaultValue>1000</defaultValue>
       </setting>
       <setting id='only.route.first.match'
                required='false'
@@ -1060,7 +1060,7 @@
                required='false'
                type='integer'>
         <name>Rows/Msg</name>
-        <defaultValue>10000</defaultValue>
+        <defaultValue>1000</defaultValue>
       </setting>
       <setting id='in.memory.db'
                required='true'
@@ -1103,8 +1103,8 @@
       <setting id='rows.per.message'
                required='false'
                type='integer'>
-        <name>Rows / Msg</name>
-        <defaultValue>10000</defaultValue>
+        <name>Rows/Msg</name>
+        <defaultValue>1000</defaultValue>
       </setting>
       <setting id='control.message.on.text.send'
                required='false'
@@ -1154,8 +1154,8 @@
       <setting id='text.rows.per.message'
                required='false'
                type='integer'>
-        <name>Rows / Msg</name>
-        <defaultValue>10000</defaultValue>
+        <name>Rows/Msg</name>
+        <defaultValue>1000</defaultValue>
       </setting>
       <setting id='action.on.success'
                required='false'
