@@ -35,6 +35,7 @@ import java.util.Map;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
+import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
@@ -135,6 +136,7 @@ public abstract class AbstractComponentRuntimeTestSupport {
 		when(context.getManipulatedFlow()).thenReturn(flow);
 		when(flowStep.getComponent()).thenReturn(component);
 		when(flow.findFlowStepWithId(Mockito.anyString())).thenReturn(flowStep);
+		when(flow.findLinkBetweenSourceAndTarget(Mockito.anyString(), Mockito.anyString())).thenReturn(new FlowStepLink());
 		
 		component.setInputModel(inputModel);
 		component.setOutputModel(outputModel);
@@ -145,6 +147,7 @@ public abstract class AbstractComponentRuntimeTestSupport {
 	    doReturn(component).when((AbstractComponentRuntime) spy).getComponent();
 	    ((AbstractComponentRuntime) spy).setContext(context);
 	}
+	
 	public void setupStart(List<Setting> settings) {
 		Component component = new Component();
 		component.setSettings(settings);

@@ -613,7 +613,7 @@ public class StepRuntime implements Runnable {
             if (headerSettings != null) {
                 header.putAll(headerSettings);
             }
-            header.setSequenceNumber(statistics.getNumberOutboundMessages(ThreadUtils.getThreadNumber(threadCount)) + 1);
+            header.setSequenceNumber(statistics.getNumberOutboundMessages(ThreadUtils.getThreadNumber(threadCount)));
             return newMessage;
         }
 
