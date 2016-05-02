@@ -37,6 +37,7 @@ import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
+import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
@@ -160,6 +161,8 @@ public class Transformer extends AbstractComponentRuntime {
 			   log.debug("It took " + (totalTime/totalCalls) + "ms on average to call eval");
 			}
 						
+		} else if (inputMessage instanceof ControlMessage) {
+		        callback.sendControlMessage();
 		}
 	}
 }
