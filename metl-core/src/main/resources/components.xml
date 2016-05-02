@@ -773,15 +773,12 @@
     <name>RDBMS Reader</name>
     <className>org.jumpmind.metl.core.runtime.component.RdbmsReader</className>
     <description></description>
-    <extraUnitOfWorkOptions>
-      <extraUnitOfWorkOption>SQL Statement</extraUnitOfWorkOption>
-    </extraUnitOfWorkOptions>
     <settings>
       <setting id='sql'
                required='true'
                type='multiline_text'>
         <name>Sql</name>
-      </setting>
+      </setting> 
       <setting id='run.when'
                required='false'
                type='choice'>
@@ -793,6 +790,17 @@
           <choice>PER ENTITY</choice>
         </choices>
       </setting>
+      <setting id='unit.of.work'
+               required='false'
+               type='choice'>
+        <name>Unit of Work</name>
+        <defaultValue>COMPONENT LIFETIME</defaultValue>
+        <choices>
+          <choice>COMPONENT LIFETIME</choice>
+          <choice>SQL SCRIPT</choice>
+          <choice>SQL STATEMENT</choice>
+        </choices>
+      </setting>                 
       <setting id='rows.per.message'
                required='true'
                type='integer'>

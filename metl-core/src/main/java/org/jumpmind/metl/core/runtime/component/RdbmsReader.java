@@ -62,8 +62,16 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     public final static String MATCH_ON_COLUMN_NAME_ONLY = "match.on.column.name";
     
     public final static String PASS_INPUT_ROWS_THROUGH = "pass.input.rows.through";
-
+    
     public final static String RUN_WHEN = "run.when";
+    
+    public final static String UNIT_OF_WORK = "unit.of.work";
+
+    public static final String COMPONENT_LIFETIME = "PER UNIT OF WORK";
+    
+    public static final String SQL_SCRIPT = "SQL SCRIPT";
+    
+    public static final String SQL_STATEMENT = "SQL STATEMENT";    
 
     List<String> sqls;
 
@@ -80,6 +88,8 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     ChangeType entityChangeType = ChangeType.ADD;
 
     int rowReadDuringHandle;
+    
+    String unitOfWork = COMPONENT_LIFETIME;
 
     @Override
     protected void start() {
@@ -90,6 +100,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         matchOnColumnNameOnly = properties.is(MATCH_ON_COLUMN_NAME_ONLY, false);
         passInputRowsThrough = properties.is(PASS_INPUT_ROWS_THROUGH, false);
         runWhen = properties.get(RUN_WHEN, runWhen);
+        unitOfWork = properties.get(UNIT_OF_WORK, unitOfWork);
     }
 
     @Override
@@ -139,17 +150,26 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                 log(LogLevel.INFO, "Passing params: %s", paramMap);
                 resultSetToEntityDataConverter.setSqlToExecute(sqlToExecute);
                 template.query(sqlToExecute, paramMap, resultSetToEntityDataConverter);
+                if (unitOfWork.equalsIgnoreCase(SQL_STATEMENT)) {
+                    sendLeftOverRows(callback, outboundPayload);
+                    callback.sendControlMessage();
+                }
+            }
+            if (unitOfWork.equalsIgnoreCase(SQL_SCRIPT)) {
+                sendLeftOverRows(callback, outboundPayload);
+                callback.sendControlMessage();
             }
         }
-        if (outboundPayload != null && outboundPayload.size() > 0) {
-            callback.sendEntityDataMessage(null, outboundPayload);
-        } else if (inboundRecordCount >= 1) {
-        	//we should have sent data, but had none to send
-        	//send a control message
-        	callback.sendControlMessage();
-        }
+        sendLeftOverRows(callback, outboundPayload);
     }
 
+    private void sendLeftOverRows(final ISendMessageCallback callback, ArrayList<EntityData> outboundPayload) {
+        if (outboundPayload != null && outboundPayload.size() > 0) {
+            callback.sendEntityDataMessage(null, outboundPayload);
+            outboundPayload.clear();
+        } 
+    }
+    
     private ArrayList<String> getAttributeIds(String sql, ResultSetMetaData meta, Map<Integer, String> sqlEntityHints) throws SQLException {
         ArrayList<String> attributeIds = new ArrayList<String>();
         for (int i = 1; i <= meta.getColumnCount(); i++) {
