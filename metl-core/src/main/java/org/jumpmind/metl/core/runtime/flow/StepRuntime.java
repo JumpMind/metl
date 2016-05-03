@@ -673,6 +673,14 @@ public class StepRuntime implements Runnable {
                 }
             }
         }
+        
+        private void validateEntityData(ArrayList<EntityData> payload) {
+            for (EntityData entityData : payload) {
+                if (entityData.size() == 0) {
+                    throw new MisconfiguredException("The component attempted to send an empty entity record.");
+                }
+            }
+        }
 
         @Override
         public void sendShutdownMessage(boolean cancel) {
@@ -702,12 +710,13 @@ public class StepRuntime implements Runnable {
 
         @Override
         public void sendEntityDataMessage(Map<String, Serializable> messageHeaders, ArrayList<EntityData> payload, String... targetStepIds) {
+            validateEntityData(payload);
             payload = copy(payload);
             FlowStep flowStep = componentContext.getFlowStep();
             sendMessage(createMessage(new EntityDataMessage(flowStep.getId(), payload), messageHeaders), targetStepIds);
             contentMessagesSentCount++;
         }
-        
+
         @Override
         public void sendTextMessage(Map<String, Serializable> messageHeaders, String payload, String... targetStepIds) {
             ArrayList<String> messages = new ArrayList<>();
