@@ -311,15 +311,17 @@ public class StepRuntime implements Runnable {
             target.setCurrentInputMessage(threadNumber, inputMessage);
             componentRuntime.handle(inputMessage, target, unitOfWorkBoundaryReached);
 
-            if (unitOfWorkBoundaryReached && componentRuntime.getComponentDefintion().isAutoSendControlMessages()) {
+            boolean recursionDone = liveSourceStepIds.size() == 1 && liveSourceStepIds.contains(componentContext.getFlowStep().getId())
+                    && getActiveCountPlusQueueSize() == 1;
+            
+            if ((unitOfWorkBoundaryReached || recursionDone) && componentRuntime.getComponentDefintion().isAutoSendControlMessages()) {
                 verifyAndSendControlMessageToTargets(target, inputMessage);
             }
 
             /*
              * Detect shutdown condition
              */
-            if (startStep || (liveSourceStepIds.size() == 1 && liveSourceStepIds.contains(componentContext.getFlowStep().getId())
-                    && getActiveCountPlusQueueSize() == 1)) {
+            if (startStep || recursionDone) {
                 shutdown(threadNumber, target, false);
             }
         } catch (Exception ex) {

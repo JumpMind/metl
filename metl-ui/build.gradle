@@ -47,7 +47,7 @@ dependencies {
     compile project(":metl-core")
     compile group:"org.jumpmind.vaadin", name:"sqlexplorer-vaadin", version:"1.0.15-SNAPSHOT", changing:true
     compile "com.cybercom:spring-ui-scope:0.0.2"
-    compile "org.vaadin.addons:aceeditor:0.8.14"
+    //compile "org.vaadin.addons:aceeditor:0.8.14"
     compile "org.springframework:spring-webmvc:$springVersion"
     compile "org.peimari:maddon:1.20"
     compile "org.apache.poi:poi:3.11"
