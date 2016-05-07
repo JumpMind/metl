@@ -42,6 +42,7 @@ import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.Table;
 import org.jumpmind.metl.ui.views.IFlowRunnable;
+import org.jumpmind.vaadin.ui.common.AbbreviatorConverter;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ReadOnlyTextAreaDialog;
@@ -182,7 +183,7 @@ public class ExecutionLogPanel extends VerticalLayout implements IUiPanel, IBack
         logTable.addColumn("level", String.class).setHeaderCaption("Level").setWidth(110).setMaximumWidth(200);
         logTable.addColumn("createTime", Date.class).setHeaderCaption("Time").setWidth(120).setMaximumWidth(200).setRenderer(
                 new DateRenderer("%1$tk:%1$tM:%1$tS:%1$tL"));
-        logTable.addColumn("logText", String.class).setHeaderCaption("Message").setExpandRatio(1);        
+        logTable.addColumn("logText", String.class).setHeaderCaption("Message").setExpandRatio(1).setConverter(new AbbreviatorConverter(150));        
         logTable.setContainerDataSource(logContainer);
         logTable.setSizeFull();
         logTable.addItemClickListener(event -> logTableCellClicked(logTable, event));
