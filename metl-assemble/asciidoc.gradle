@@ -1,14 +1,6 @@
 
 
 apply plugin: 'org.asciidoctor.gradle.asciidoctor'
-apply plugin: 'docbook-reference'
-
-
-reference {
-    sourceDir = file("/../../metl-ui/asciidoc/docbook")
-    // Configure which files have ${} expanded
-    expandPlaceholders = '**/user-guide.xml'
-}
 
 task cleanAsciidocBuildDir {
     doFirst {
