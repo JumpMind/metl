@@ -108,7 +108,7 @@ public abstract class AbstractFileReader extends AbstractComponentRuntime {
                     info("The msgTarget file already exists.   Deleting it in order to archive a new file.");
                     FileUtils.deleteQuietly(targetFile);
                 }
-                info("Archiving %s tp %s", srcFile, destDir.getAbsolutePath());
+                info("Archiving %s to %s", srcFile, destDir.getAbsolutePath());
                 FileUtils.moveFileToDirectory(srcFile, destDir, true);
             } catch (IOException e) {
                 throw new IoException(e);
