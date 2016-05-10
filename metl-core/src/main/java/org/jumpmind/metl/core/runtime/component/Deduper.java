@@ -112,7 +112,7 @@ public class Deduper extends AbstractComponentRuntime {
 
                 if (DEDUPE_ATTRIBUTE.equals(dedupeType)) {
                 	for (String attributeId : dedupeKeyAttributeIdList) {
-                		key += (String) entityData.get(attributeId);
+                		key += entityData.get(attributeId);
                 	}
                 } else {
                 	key = entityData.toString();
