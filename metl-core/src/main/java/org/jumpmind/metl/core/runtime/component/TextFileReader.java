@@ -116,8 +116,8 @@ public class TextFileReader extends AbstractFileReader {
             } catch (IOException e) {
                 throw new IoException("Error reading from file " + e.getMessage());
             } finally {
+                // Closes the reader and the inStream.
                 IOUtils.closeQuietly(reader);
-                IOUtils.closeQuietly(inStream);
             }
 
             if (controlMessageOnEof) {

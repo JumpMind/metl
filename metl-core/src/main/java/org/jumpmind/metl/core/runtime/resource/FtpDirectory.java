@@ -219,8 +219,6 @@ public class FtpDirectory implements IDirectory {
             }
         } catch (Exception e) {
             throw new IoException(e);
-        } finally {
-            close(ftpClient);
         }
     }
 
