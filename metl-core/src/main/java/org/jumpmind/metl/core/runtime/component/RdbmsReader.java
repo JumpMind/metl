@@ -45,6 +45,7 @@ import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityData.ChangeType;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.properties.TypedProperties;
 import org.springframework.dao.DataAccessException;
@@ -172,6 +173,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     
     private ArrayList<String> getAttributeIds(String sql, ResultSetMetaData meta, Map<Integer, String> sqlEntityHints) throws SQLException {
         ArrayList<String> attributeIds = new ArrayList<String>();
+        boolean attributeFound = false;
         for (int i = 1; i <= meta.getColumnCount(); i++) {
             String columnName = meta.getColumnName(i);
             String tableName = meta.getTableName(i);
@@ -198,12 +200,21 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
                 attributeIds.addAll(getAttributeIds(columnName));
             } else {
                 if (StringUtils.isEmpty(tableName)) {
-                    throw new SQLException("Table name could not be determined from metadata or hints.  Please check column and hint.  "
+                    throw new MisconfiguredException("Table name could not be determined from metadata or hints.  Please check column and hint.  "
                             + "(Note to SQL-Server users: metadata may not be returned unless you append 'FOR BROWSE' to the end of your query "
                             + "or set 'useCursors=true' on the JDBC URL.)" + "Query column = " + i);
                 }
-                attributeIds.add(getAttributeId(tableName, columnName));
+                String attributeId = getAttributeId(tableName, columnName);
+                if (attributeId != null) {
+                    attributeFound = true;
+                }
+                attributeIds.add(attributeId);
             }
+        }
+        
+        if (!attributeFound) {
+            throw new MisconfiguredException("The SQL query results could not be mapped to an existing model entity.  Please verify table columns "
+                    + "and hints match the configured output model.");
         }
 
         return attributeIds;
