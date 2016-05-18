@@ -24,6 +24,7 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.security.ProtectionDomain;
+import java.util.Arrays;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -96,6 +97,7 @@ public class StartWebServer {
         pluginsDir.mkdirs();
         StringBuilder extraClasspath = new StringBuilder();
         File[] files = pluginsDir.listFiles();
+        Arrays.sort(files);
         for (File file : files) {
             if (file.isFile() && file.getName().endsWith(".jar")) {
                 extraClasspath.append(file.toURI().toURL().toExternalForm()).append(",");
