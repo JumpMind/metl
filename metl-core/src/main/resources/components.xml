@@ -1709,7 +1709,7 @@
             </setting>
         </settings>
     </component>  
-    <component category='PROCESSOR' id='HttpRequest' inputMessageType='none' inputOutputModelsMatch='true' outputMessageType='text' resourceCategory='none'>
+    <component category='SERVICE' id='HttpRequest' inputMessageType='none' inputOutputModelsMatch='true' outputMessageType='text' resourceCategory='none'>
         <name>Http Request</name>
         <className>org.jumpmind.metl.core.runtime.component.HttpRequest</className>
         <deploymentListenerClassName>org.jumpmind.metl.core.runtime.component.HttpRequestDeploymentListener</deploymentListenerClassName>
@@ -1731,7 +1731,7 @@
             </setting>           
         </settings>
     </component>
-    <component category='PROCESSOR' id='16170152-eee5-11e5-9ce9-5e5517507c66' inputMessageType='entity' inputOutputModelsMatch='true' outputMessageType='none' resourceCategory='none'>
+    <component category='SERVICE' id='16170152-eee5-11e5-9ce9-5e5517507c66' inputMessageType='entity' inputOutputModelsMatch='true' outputMessageType='none' resourceCategory='none'>
         <name>Entity Result</name>
         <className>org.jumpmind.metl.core.runtime.component.EntityResult</className>
         <description></description>
