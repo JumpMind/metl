@@ -40,8 +40,6 @@ public class Merger extends AbstractComponentRuntime {
 
     public final static String MERGE_ATTRIBUTE = "merge.attribute";
 
-    int rowsPerMessage = 1000;
-
     Map<Object, EntityData> mergedData = new LinkedHashMap<Object, EntityData>();
 
     List<String> attributesToMergeOn = new ArrayList<String>();
@@ -81,7 +79,7 @@ public class Merger extends AbstractComponentRuntime {
             ArrayList<EntityData> dataToSend = new ArrayList<EntityData>();
             Iterator<EntityData> itr = mergedData.values().iterator();
             while (itr.hasNext()) {
-                if (dataToSend.size() >= rowsPerMessage) {
+                if (dataToSend.size() >= properties.getInt(ROWS_PER_MESSAGE)) {
                     callback.sendEntityDataMessage(null, dataToSend);
                     dataToSend = new ArrayList<EntityData>();
                 }

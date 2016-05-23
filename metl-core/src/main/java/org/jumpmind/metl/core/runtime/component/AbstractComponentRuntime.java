@@ -77,6 +77,8 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     
     protected XMLComponent componentDefinition;   
     
+    protected TypedProperties properties;
+    
     @Override
     public void create(XMLComponent definition) {
         this.componentDefinition = definition;
@@ -91,6 +93,7 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     final public void start(int threadNumber, ComponentContext context) {
         this.context = context;
         this.threadNumber = threadNumber;
+        this.properties = getTypedProperties();
         start();
     }
     
