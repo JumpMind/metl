@@ -36,6 +36,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
@@ -195,6 +196,10 @@ public class ModelAttributeScriptHelper {
         return StringUtils.replace(text, searchString, replacement);
     }
 
+    public Date daysFromNow(int days) {
+        return DateUtils.addDays(new Date(), days);
+    }
+    
     public Date currentdate() {
         return new Date();
     }
