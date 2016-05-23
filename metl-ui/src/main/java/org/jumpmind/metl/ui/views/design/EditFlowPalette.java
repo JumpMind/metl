@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -118,7 +119,7 @@ public class EditFlowPalette extends VerticalLayout {
 
     protected void populateComponentTypesInComponentPalette(String projectVersionId) {
         Map<String, List<XMLComponent>> componentDefinitionsByCategory = context.getComponentFactory().getComponentDefinitionsByCategory();
-        for (String category : componentDefinitionsByCategory.keySet()) {
+        for (String category : new TreeSet<>(componentDefinitionsByCategory.keySet())) {
             List<XMLComponent> componentDefinitions = new ArrayList<XMLComponent>(componentDefinitionsByCategory.get(category));
             Collections.sort(componentDefinitions);
             VerticalLayout componentLayout = new VerticalLayout();
