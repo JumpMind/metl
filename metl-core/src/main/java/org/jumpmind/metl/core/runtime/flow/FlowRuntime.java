@@ -321,7 +321,8 @@ public class FlowRuntime {
         
         executionTracker.afterFlow();
         
-        if (allErrors.size() > 0) {            
+        // Check getAllErrors here to make sure any new errors are trapped from the flowCompleted methods
+        if (getAllErrors().size() > 0) {
             flowParameters.put("_errorText", getErrorText(allErrors));
             sendNotifications(Notification.EventType.FLOW_ERROR);    
         }
