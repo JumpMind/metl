@@ -173,6 +173,7 @@ public abstract class AbstractComponentRuntimeTestSupport {
 		when(flowStep.getComponent()).thenReturn(component);
 		
 		doReturn(eExecutionTracker).when((AbstractComponentRuntime) spy).getExecutionTracker();
+		doReturn(new TypedProperties()).when((AbstractComponentRuntime) spy).getTypedProperties();
 		
 		spy.start(0, context);
 		setupCalled = true;
