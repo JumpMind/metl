@@ -213,8 +213,8 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         }
         
         if (!attributeFound) {
-            throw new MisconfiguredException("The SQL query results could not be mapped to an existing model entity.  Please verify table columns "
-                    + "and hints match the configured output model.");
+            throw new MisconfiguredException(String.format("The SQL query results could not be mapped to an existing model entity.  Please verify table columns "
+                    + "and hints match the configured output model, '%s'. SQL: '%s')",getOutputModel().getName(),sql));
         }
 
         return attributeIds;
