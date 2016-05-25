@@ -239,7 +239,7 @@ public class AgentRuntime {
         AgentDeployment deployment = agent.getAgentDeploymentFor(flow);
         if (deployment == null) {
             deployment = new AgentDeployment(flow);
-            deployment.setStatus(DeploymentStatus.REQUEST_DEPLOY.name());
+            deployment.setStatus(DeploymentStatus.REQUEST_ENABLE.name());
             deployment.setAgentId(agent.getId());
             deployment.setFlow(flow);
 
@@ -334,7 +334,7 @@ public class AgentRuntime {
     private void deploy(final AgentDeployment deployment) {
         DeploymentStatus status = deployment.getDeploymentStatus();
         if (!status.equals(DeploymentStatus.DISABLED) && !status.equals(DeploymentStatus.REQUEST_DISABLE) &&
-                !status.equals(DeploymentStatus.REQUEST_UNDEPLOY)) {
+                !status.equals(DeploymentStatus.REQUEST_REMOVE)) {
             try {
                 log.info("Deploying '{}' to '{}'", deployment.getFlow().toString(), agent.getName());
     
@@ -546,9 +546,9 @@ public class AgentRuntime {
                 configurationService.refresh(agent);
                 for (AgentDeployment deployment : new HashSet<AgentDeployment>(agent.getAgentDeployments())) {
                     DeploymentStatus status = deployment.getDeploymentStatus();
-                    if (status.equals(DeploymentStatus.REQUEST_DEPLOY)) {
+                    if (status.equals(DeploymentStatus.REQUEST_ENABLE)) {
                         deploy(deployment);
-                    } else if (status.equals(DeploymentStatus.REQUEST_UNDEPLOY)) {
+                    } else if (status.equals(DeploymentStatus.REQUEST_REMOVE)) {
                         undeploy(deployment);
                     } else if (status.equals(DeploymentStatus.REQUEST_DISABLE)) {
                         stop(deployment);

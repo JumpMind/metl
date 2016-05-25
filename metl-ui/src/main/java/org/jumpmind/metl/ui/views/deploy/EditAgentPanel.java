@@ -82,6 +82,7 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -238,6 +239,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         table.setContainerDataSource(container);
         table.setVisibleColumns("name", "projectName", "type", "status", "logLevel", "startType", "startExpression");
         table.setColumnHeaders("Deployment", "Project", "Type", "Status", "Log Level", "Start Type", "Start Expression");
+        table.addGeneratedColumn("status", new StatusRenderer());
         table.addItemClickListener(new TableItemClickListener());
         table.addValueChangeListener(new TableValueChangeListener());
         table.setSortContainerPropertyId("type");
@@ -491,8 +493,8 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         for (AgentDeploymentSummary summary : selectedIds) {
             if (summary.isFlow()) {
                 AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
-                deployment.setStatus(DeploymentStatus.REQUEST_DEPLOY.name());
-                summary.setStatus(DeploymentStatus.REQUEST_DEPLOY.name());
+                deployment.setStatus(DeploymentStatus.REQUEST_ENABLE.name());
+                summary.setStatus(DeploymentStatus.REQUEST_ENABLE.name());
                 context.getConfigurationService().save(deployment);
                 updateItem(summary);
             }
@@ -517,11 +519,20 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         for (AgentDeploymentSummary summary : selectedIds) {
             if (summary.isFlow()) {
                 AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
-                deployment.setStatus(DeploymentStatus.REQUEST_UNDEPLOY.name());
-                summary.setStatus(DeploymentStatus.REQUEST_UNDEPLOY.name());
+                deployment.setStatus(DeploymentStatus.REQUEST_REMOVE.name());
+                summary.setStatus(DeploymentStatus.REQUEST_REMOVE.name());
                 context.getConfigurationService().save(deployment);
                 updateItem(summary);
             }
+        }
+    }
+    
+    class StatusRenderer implements ColumnGenerator {
+        private static final long serialVersionUID = 1L;
+        @Override
+        public Object generateCell(Table source, Object itemId, Object columnId) {            
+            String status = itemId != null ? ((AgentDeploymentSummary)itemId).getStatus() : null;
+            return status != null ? DeploymentStatus.valueOf(status).toString() : null;
         }
     }
 
