@@ -18,8 +18,6 @@ buildscript {
 
 apply plugin: 'co.riiid.gradle'
 
-version = version + "." + buildNumber
-
 github {
     owner = 'JumpMind'
     repo = 'metl'
