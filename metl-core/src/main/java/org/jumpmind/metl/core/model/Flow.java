@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.jumpmind.metl.core.runtime.MisconfiguredException;
-
 public class Flow extends AbstractObject {
 
     private static final long serialVersionUID = 1L;

@@ -149,8 +149,12 @@ public class DesignNavigator extends VerticalLayout {
     MenuItem closeProject;
 
     MenuItem exportProject;
+    
+    MenuItem exportFlow;
 
     MenuItem search;
+    
+    MenuItem exportMenu;
 
     FileDownloader fileDownloader;
 
@@ -190,7 +194,7 @@ public class DesignNavigator extends VerticalLayout {
     protected void setMenuItemsEnabled() {
         Object selected = treeTable.getValue();
 
-        editMenu.setEnabled(false);
+        editMenu.setEnabled(false);        
         newMenu.setEnabled(true);
         blank.setVisible(false);
         newFlow.setVisible(false);
@@ -228,7 +232,19 @@ public class DesignNavigator extends VerticalLayout {
         }
 
         closeProject.setEnabled(selected instanceof ProjectVersion);
-        exportProject.setEnabled(selected instanceof ProjectVersion);
+        
+        exportMenu.setEnabled(false);
+        exportProject.setEnabled(false);
+        exportFlow.setEnabled(false);
+        if (selected != null) {
+            if (selected instanceof ProjectVersion) {
+                exportProject.setEnabled(true);
+            }
+            if (selected instanceof FlowName) {
+                exportFlow.setEnabled(true);
+            }
+            exportMenu.setEnabled(selected instanceof ProjectVersion || selected instanceof FlowName);
+        }
 
         boolean deleteEnabled = false;
         deleteEnabled |= isDeleteButtonEnabled(treeTable.getValue());
@@ -259,7 +275,6 @@ public class DesignNavigator extends VerticalLayout {
         MenuItem projectMenu = leftMenuBar.addItem("Project", null);
         projectMenu.addItem("Manage", selectedItem -> viewProjects());
 
-        exportProject = projectMenu.addItem("Export", selectedItem ->  exportProject());
         closeProject = projectMenu.addItem("Close", selectedItem -> closeProject());
         blank = newMenu.addItem("", null);
         newFlow = newMenu.addItem("Flow", selectedItem -> addNewFlow());
@@ -271,6 +286,10 @@ public class DesignNavigator extends VerticalLayout {
         newWebResource = newMenu.addItem("Web Resource", selectedItem -> addNewHttpResource());
         newJMSResource = newMenu.addItem("JMS", selectedItem -> addNewJMSFileSystem());
 
+        exportMenu = leftMenuBar.addItem("Export", null);
+        exportFlow = exportMenu.addItem("Flow", selectedItem ->  exportFlow());
+        exportProject = exportMenu.addItem("Project", selectedItem ->  exportProject());
+        
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
 
@@ -654,7 +673,7 @@ public class DesignNavigator extends VerticalLayout {
                     sheet);
         }
     }
-
+    
     protected void viewProjects() {
         tabs.addCloseableTab("projectslist", "Manage Projects", Icons.PROJECT,
                 new ManageProjectsPanel(context, this));
@@ -665,29 +684,45 @@ public class DesignNavigator extends VerticalLayout {
         if (selected instanceof ProjectVersion) {
             ProjectVersion project = (ProjectVersion) selected;
             final String export = context.getConfigurationService().export(project);
-            StreamSource ss = new StreamSource() {
-                private static final long serialVersionUID = 1L;
-
-                public InputStream getStream() {
-                    try {
-                        return new ByteArrayInputStream(export.getBytes());
-                    } catch (Exception e) {
-                        log.error("Failed to export configuration", e);
-                        CommonUiUtils.notify("Failed to export configuration.", Type.ERROR_MESSAGE);
-                        return null;
-                    }
-
-                }
-            };
-            String datetime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-            StreamResource resource = new StreamResource(ss, String.format("%s-config-%s.sql",
-                    project.getName().toLowerCase().replaceAll(" ", "-"), datetime));
-            final String KEY = "export";
-            setResource(KEY, resource);
-            Page.getCurrent().open(ResourceReference.create(resource, this, KEY).getURL(), null);
+            
+            downloadExport(export, project.getName().toLowerCase().replaceAll(" ", "-"));
         }
     }
 
+    protected void exportFlow() {
+        Object selected = treeTable.getValue();
+        if (selected instanceof FlowName) {
+            FlowName flowName = (FlowName) selected;
+            Flow flow = context.getConfigurationService().findFlow(flowName.getId());
+            ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(flow.getProjectVersionId());
+            final String export = context.getConfigurationService().export(projectVersion, flow);            
+            downloadExport(export, flow.getName().toLowerCase().replaceAll(" ", "-"));
+        }        
+    }
+    
+    protected void downloadExport(final String export, String filename) {
+        
+        StreamSource ss = new StreamSource() {
+            private static final long serialVersionUID = 1L;
+
+            public InputStream getStream() {
+                try {
+                    return new ByteArrayInputStream(export.getBytes());
+                } catch (Exception e) {
+                    log.error("Failed to export configuration", e);
+                    CommonUiUtils.notify("Failed to export configuration.", Type.ERROR_MESSAGE);
+                    return null;
+                }
+            }
+        };
+        String datetime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        StreamResource resource = new StreamResource(ss, String.format("%s-config-%s.sql",
+                filename, datetime));
+        final String KEY = "export";
+        setResource(KEY, resource);
+        Page.getCurrent().open(ResourceReference.create(resource, this, KEY).getURL(), null);        
+    }
+    
     protected void closeProject() {
         Object selected = treeTable.getValue();
         if (selected instanceof ProjectVersion) {

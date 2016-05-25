@@ -23,7 +23,6 @@ package org.jumpmind.metl.core.model;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalUnit;
 import java.util.Date;
 
 public class ExecutionStep extends AbstractObject {

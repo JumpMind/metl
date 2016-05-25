@@ -185,6 +185,8 @@ public interface IConfigurationService {
     
     public String export(ProjectVersion projectVersion);
     
+    public String export(ProjectVersion projectVersion, Flow flow);
+    
     public String export(Agent agent);
     
     public boolean isUserLoginEnabled();

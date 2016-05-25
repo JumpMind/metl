@@ -145,6 +145,69 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
     }
     
     @Override
+    public String export(ProjectVersion projectVersion, Flow flow) {
+        
+        String componentIds = getComponentIds(flow);
+        
+        try {        
+            StringBuilder out = new StringBuilder();
+            
+            /* @formatter:off */
+            String[][] CONFIG = {
+                    {"COMPONENT", "WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0 AND ID IN (%5$s)"," ORDER BY ID",},
+                    {"COMPONENT_SETTING", "WHERE COMPONENT_ID IN (%5$s)"," ORDER BY ID",},
+                    {"COMPONENT_ENTITY_SETTING", "WHERE COMPONENT_ID IN (%5$s)"," ORDER BY ID",},
+                    {"COMPONENT_ATTRIBUTE_SETTING", "WHERE COMPONENT_ID IN (%5$s) AND ATTRIBUTE_ID in (SELECT ID FROM %1$s_MODEL_ATTRIBUTE WHERE ENTITY_ID IN (SELECT ID FROM %1$s_MODEL_ENTITY WHERE MODEL_ID IN (SELECT ID FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND DELETED=0)))"," ORDER BY ID",},
+                    {"FLOW", "WHERE ID='%4$s' AND PROJECT_VERSION_ID='%2$s' AND DELETED=0"," ORDER BY ID",},
+                    {"FLOW_PARAMETER", "WHERE FLOW_ID = '%4$s'"," ORDER BY ID",},
+                    {"FLOW_STEP", "WHERE FLOW_ID = '%4$s'"," ORDER BY ID",},
+                    {"FLOW_STEP_LINK", "WHERE SOURCE_STEP_ID IN (SELECT ID FROM %1$s_FLOW_STEP WHERE FLOW_ID = '%4$s')"," ORDER BY SOURCE_STEP_ID, TARGET_STEP_ID",},
+            };
+            /* @formatter:on */
+
+            String[] columnsToExclude = new String[4];
+            columnsToExclude[0] = "CREATE_TIME";
+            columnsToExclude[1] = "LAST_UPDATE_TIME";
+            columnsToExclude[2] = "CREATE_BY";
+            columnsToExclude[3] = "LAST_UPDATE_BY";            
+            
+            for (int i = CONFIG.length-1; i >= 0; i--) {
+                String[] entry = CONFIG[i];
+                out.append(String.format("DELETE FROM %s_%s %s;\n", tablePrefix, entry[0], String.format(
+                        entry[1],
+                        tablePrefix, projectVersion.getId(), projectVersion.getProjectId(),flow.getId(), componentIds)).replace("AND DELETED=0", ""));
+            }
+
+            for (int i = 0; i < CONFIG.length; i++) {
+                String[] entry = CONFIG[i];
+                out.append(export(entry[0], entry[1], entry[2], projectVersion, flow, componentIds, columnsToExclude));
+            }
+            
+            return out.toString();   
+        } catch (IOException e) {
+            throw new IoException(e);
+        }    
+    }
+    
+    protected String getComponentIds(Flow flow) {
+        
+        StringBuilder componentIds = new StringBuilder();
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> results = template.query(String.format("SELECT ID, SHARED FROM %1$s_COMPONENT WHERE ID IN (SELECT COMPONENT_ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%2$s')",tablePrefix,flow.getId()));
+        for (Row row : results) {
+            componentIds.append("'");
+            componentIds.append(row.get("ID"));
+            componentIds.append("'");
+            componentIds.append(",");
+            if (row.getString("SHARED").equals("1")) {
+                throw new UnsupportedOperationException("Cannot export flows that utilize shared components");           
+            }
+        }
+        componentIds.deleteCharAt(componentIds.length()-1);
+        return componentIds.toString();
+    }
+    
+    @Override
     public String export(ProjectVersion projectVersion) {
         try {
             StringBuilder out = new StringBuilder();
@@ -170,6 +233,12 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
             };
             /* @formatter:on */
 
+            String[] columnsToExclude = new String[4];
+            columnsToExclude[0] = "CREATE_TIME";
+            columnsToExclude[1] = "LAST_UPDATE_TIME";
+            columnsToExclude[2] = "CREATE_BY";
+            columnsToExclude[3] = "LAST_UPDATE_BY";            
+            
             for (int i = CONFIG.length-1; i >= 0; i--) {
                 String[] entry = CONFIG[i];
                 out.append(String.format("DELETE FROM %s_%s %s;\n", tablePrefix, entry[0], String.format(
@@ -179,7 +248,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
 
             for (int i = 0; i < CONFIG.length; i++) {
                 String[] entry = CONFIG[i];
-                out.append(export(entry[0], entry[1], entry[2], projectVersion));
+                out.append(export(entry[0], entry[1], entry[2], projectVersion, columnsToExclude));
             }
             
             return out.toString();   
@@ -200,7 +269,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                 .format("%s_%s", tablePrefix, table) });
     }
     
-    protected String export (String table, String where, String orderBy, ProjectVersion projectVersion) throws IOException {
+    protected String export (String table, String where, String orderBy, ProjectVersion projectVersion, String[] columnsToExclude) throws IOException {
         DbExport export = new DbExport(databasePlatform);        
         export.setWhereClause(String.format(
                 where + orderBy,
@@ -208,9 +277,23 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
         export.setFormat(Format.SQL);
         export.setUseQuotedIdentifiers(false);
         export.setNoCreateInfo(true);
+        export.setExcludeColumns(columnsToExclude);
         return export.exportTables(new String[] { String
                 .format("%s_%s", tablePrefix, table) });
     }
+ 
+    protected String export (String table, String where, String orderBy, ProjectVersion projectVersion, Flow flow, String componentIds, String[] columnsToExclude) throws IOException {
+        DbExport export = new DbExport(databasePlatform);        
+        export.setWhereClause(String.format(
+                where + orderBy,
+                tablePrefix, projectVersion.getId(), projectVersion.getProjectId(), flow.getId(), componentIds));
+        export.setFormat(Format.SQL);
+        export.setUseQuotedIdentifiers(false);
+        export.setNoCreateInfo(true);
+        export.setExcludeColumns(columnsToExclude);
+        return export.exportTables(new String[] { String
+                .format("%s_%s", tablePrefix, table) });
+    }    
     
     @Override
     public boolean isUserLoginEnabled() {
