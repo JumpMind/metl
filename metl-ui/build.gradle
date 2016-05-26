@@ -17,15 +17,6 @@ eclipse {
 
 war {
     archiveName="metl.war"
-    filesMatching("**/*.properties") {
-       filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [               
-         'version': version, 
-         'buildTime': new java.text.SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new java.util.Date()), 
-         'scmVersion' : gitVersion,
-         'scmBranch' : gitBranch 
-         ])
-    }
-    
     from {
         configurations.executableWar.collect {
             it.isDirectory() ? it : project.zipTree(it)

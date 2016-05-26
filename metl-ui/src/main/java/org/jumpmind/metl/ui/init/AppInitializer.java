@@ -39,9 +39,12 @@ import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.SqlScript;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.IAgentManager;
+import org.jumpmind.metl.core.util.DatabaseScriptContainer;
 import org.jumpmind.metl.core.util.LogUtils;
+import org.jumpmind.metl.core.util.VersionUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 import org.slf4j.LoggerFactory;
@@ -102,8 +105,21 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         IDatabasePlatform platform = ctx.getBean(IDatabasePlatform.class);
         IConfigurationService configurationService = ctx.getBean(IConfigurationService.class);
         boolean isInstalled = configurationService.isInstalled();
+        DatabaseScriptContainer dbUpgradeScripts = new DatabaseScriptContainer("/org/jumpmind/metl/core/upgrade", platform);
         ConfigDatabaseUpgrader dbUpgrader = ctx.getBean(ConfigDatabaseUpgrader.class);
+        String fromVersion = configurationService.getLastKnownVersion();
+        String toVersion = VersionUtils.getCurrentVersion();
+        if (fromVersion != null && !fromVersion.equals(toVersion)) {
+            dbUpgradeScripts.executePreInstallScripts(fromVersion, toVersion);
+        }
         dbUpgrader.upgrade();
+        if (fromVersion != null && !fromVersion.equals(toVersion)) {
+            dbUpgradeScripts.executePostInstallScripts(fromVersion, toVersion);            
+        } 
+
+        if (fromVersion == null || !fromVersion.equals(toVersion)) {
+            configurationService.save(new Version(toVersion));
+        }
         if (!isInstalled) {
             try {
                 LoggerFactory.getLogger(getClass()).info("Installing Metl samples");
@@ -112,7 +128,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             } catch (Exception e) {
                 LoggerFactory.getLogger(getClass()).error("Failed to install Metl samples", e);
             }
-        }
+        }        
         LoggerFactory.getLogger(getClass()).info("The configuration database has been initialized");
     }
 

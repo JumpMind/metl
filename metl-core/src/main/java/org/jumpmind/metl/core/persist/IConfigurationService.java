@@ -73,6 +73,8 @@ public interface IConfigurationService {
     
     public Flow findFlow(String id);
     
+    public String getLastKnownVersion();
+    
     public Model findModel(String id);
     
     public boolean isModelUsed(String id);

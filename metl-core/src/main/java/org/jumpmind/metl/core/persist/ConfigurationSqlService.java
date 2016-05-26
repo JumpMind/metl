@@ -300,5 +300,10 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         return template.queryForInt(String.format("select count(*) from %1$s_user where password is not null", tablePrefix)) > 0;
     }
+    
+    @Override
+    protected boolean doesTableExist(Class<?> clazz) {
+        return databasePlatform.getTableFromCache(tableName(clazz), false) != null;
+    }
 
 }
