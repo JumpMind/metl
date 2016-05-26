@@ -29,15 +29,17 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.websocket.server.ServerContainer;
+
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AllowSymLinkAliasChecker;
-import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.util.log.JavaUtilLog;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.Configuration.ClassList;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 
 public class StartWebServer {
     
@@ -91,7 +93,6 @@ public class StartWebServer {
         webapp.setContextPath("/metl");
         webapp.setWar(location.toExternalForm());        
         webapp.addAliasCheck(new AllowSymLinkAliasChecker());
-        webapp.addServlet(DefaultServlet.class, "/*");
         
         File pluginsDir = new File(locationDir, "plugins");
         pluginsDir.mkdirs();
@@ -106,6 +107,10 @@ public class StartWebServer {
         webapp.setExtraClasspath(extraClasspath.toString());
         
         server.setHandler(webapp);
+        
+        ServerContainer webSocketServer = WebSocketServerContainerInitializer.configureContext(webapp);
+        webSocketServer.setDefaultMaxSessionIdleTimeout(10000000); 
+        
         server.start();
 
         if (extraClasspath.length() > 0) {

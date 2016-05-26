@@ -163,7 +163,8 @@
         font: 12px/29px "Roboto", sans-serif;
         font-weight: bold;
     }
-    
+
+
     .v-contextmenu .gwt-MenuItem-selected, .v-filterselect-suggestpopup .gwt-MenuItem-selected {
         color: #474747;
         background-color: #DEDEDE;
@@ -178,9 +179,8 @@
         background-image: -webkit-linear-gradient(#DEDEDE, #E0E0E0);
         background-image: -moz-linear-gradient(#DEDEDE, #E0E0E0);
         background-image: linear-gradient(#DEDEDE, #E0E0E0);
-    }
-    
-    
+    }  
+ 
     .ace_marker-layer .errormarker {
         border-bottom: 2px dotted red;
         position: absolute;

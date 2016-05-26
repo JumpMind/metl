@@ -29,18 +29,17 @@ war {
 // vaadin.gwt.style = "PRETTY"
 vaadin.version = vaadinVersion
 vaadin.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
-vaadin.manageWidgetset = true
+vaadin.manageWidgetset = false
 vaadin.manageDependencies = false
 vaadin.push = true
 sourceSets.main.compileClasspath += [configurations.provided]
 
 dependencies {
     compile project(":metl-core")
-    compile (group:"org.jumpmind.vaadin", name:"sqlexplorer-vaadin", version:"1.0.15-SNAPSHOT", changing:true) {
+    compile (group:"org.jumpmind.vaadin", name:"sqlexplorer-vaadin", version:"1.2.108", changing:true) {
        exclude group:'org.jumpmind.symmetric'
     }
     compile "com.cybercom:spring-ui-scope:0.0.2"
-    //compile "org.vaadin.addons:aceeditor:0.8.14"
     compile "org.springframework:spring-webmvc:$springVersion"
     compile "org.peimari:maddon:1.20"
     compile "org.apache.poi:poi:3.11"
@@ -53,11 +52,20 @@ dependencies {
     compile "com.vaadin:vaadin-server:$vaadinVersion"    
     compile "com.vaadin:vaadin-push:$vaadinVersion"    
     compile "com.vaadin:vaadin-themes:$vaadinVersion"    
-    provided "com.vaadin:vaadin-client-compiler:$vaadinVersion"   
-    compile "javax.servlet:javax.servlet-api:$servletVersion"    
+    provided ("com.vaadin:vaadin-client-compiler:$vaadinVersion")  {
+       exclude group:'org.eclipse.jetty'
+    }
+
+    compile "javax.servlet:javax.servlet-api:$servletVersion"
+    compile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
+    provided "javax.servlet.jsp:jsp-api:$jspVersion"
+    provided "javax.websocket:javax.websocket-api:$webSocketVersion"
+        
     testCompile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
     testCompile "org.eclipse.jetty:jetty-jmx:$jettyVersion"
-    testCompile "org.eclipse.jetty:jetty-annotations:$jettyVersion"    
+    testCompile "org.eclipse.jetty:jetty-annotations:$jettyVersion"
+    testCompile "org.eclipse.jetty.websocket:javax-websocket-server-impl:$jettyVersion"
+    
     executableWar project(":metl-server")    
 }
 

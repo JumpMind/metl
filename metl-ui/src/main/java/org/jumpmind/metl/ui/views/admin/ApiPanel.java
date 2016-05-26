@@ -39,8 +39,9 @@ public class ApiPanel extends VerticalLayout implements IUiPanel {
 
     public ApiPanel(ApplicationContext context, TabbedPanel tabbedPanel) {   
         setSizeFull();
-        BrowserFrame e = new BrowserFrame(null, new ExternalResource(Page.getCurrent()
-                .getLocation().getPath().replace("/app", "/api.html")));
+        String url = Page.getCurrent()
+                .getLocation().getPath();
+        BrowserFrame e = new BrowserFrame(null, new ExternalResource(url.substring(0, url.lastIndexOf("/")) + "/api.html"));
         e.setSizeFull();
         addComponent(e);
     }

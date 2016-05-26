@@ -26,6 +26,14 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
         excludes(["**/AppWidgetSet.gwt.xml"])
     }
     
+    if (JavaVersion.current().isJava8Compatible()) {
+      allprojects {
+        tasks.withType(Javadoc) {
+          options.addStringOption('Xdoclint:none', '-quiet')
+        }
+      }
+    }    
+    
     repositories {
         // uncomment this if you want to use your local maven repository to test undelivered
         /// changes (like symmetricds changes)

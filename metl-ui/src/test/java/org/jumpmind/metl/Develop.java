@@ -24,14 +24,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.websocket.server.ServerContainer;
+
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.annotations.AnnotationConfiguration.ClassInheritanceMap;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.jetty.webapp.Configuration;
+import org.eclipse.jetty.webapp.Configuration.ClassList;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 
 public class Develop {
 
@@ -43,25 +46,15 @@ public class Develop {
         System.setProperty("org.jumpmind.metl.ui.init.config.dir","working");
         
         Server server = new Server(42000);
+        ClassList classlist = Configuration.ClassList.setServerDefault(server);
+        classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration", "org.eclipse.jetty.annotations.AnnotationConfiguration");
 
         WebAppContext webapp = new WebAppContext();
-        
-//        HashSessionManager sessionManager = new HashSessionManager();
-//        File storeDir = new File("working", "sessions");
-//        storeDir.mkdirs();
-//        sessionManager.setStoreDirectory(storeDir);
-//        sessionManager.setLazyLoad(true);
-//        sessionManager.setSavePeriod(5);
-//        sessionManager.setDeleteUnrestorableSessions(true);
-//        SessionHandler sessionHandler = new SessionHandler(sessionManager);
-//        webapp.setSessionHandler(sessionHandler);
-        
         webapp.setParentLoaderPriority(true);
         webapp.setConfigurationDiscovered(true);
         webapp.setContextPath("/metl");
         webapp.setWar("src/main/webapp");
         webapp.setResourceBase("src/main/webapp");
-        webapp.addServlet(DefaultServlet.class, "/*");
 
         ConcurrentHashMap<String, ConcurrentHashSet<String>> map = new ClassInheritanceMap();
         ConcurrentHashSet<String> set = new ConcurrentHashSet<>();
@@ -69,9 +62,11 @@ public class Develop {
         map.put("org.springframework.web.WebApplicationInitializer", set);
         webapp.setAttribute(AnnotationConfiguration.CLASS_INHERITANCE_MAP, map);
 
-        webapp.setConfigurations(new Configuration[] { new AnnotationConfiguration() });
-
         server.setHandler(webapp);
+        
+        ServerContainer webSocketServer = WebSocketServerContainerInitializer.configureContext(webapp);
+        webSocketServer.setDefaultMaxSessionIdleTimeout(10000000);        
+
         server.start();
         server.join();
 

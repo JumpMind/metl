@@ -35,6 +35,8 @@ import javax.servlet.ServletRegistration;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.atmosphere.container.JSR356AsyncSupport;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.SqlScript;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
@@ -82,10 +84,14 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         dispatcher.addMapping("/api/*");
         applicationContextRef.set(dispatchContext);
 
-        ServletRegistration.Dynamic vaadin = servletContext.addServlet("vaadin", new AppServlet());
-        vaadin.addMapping("/VAADIN/*", "/app/*");
-        vaadin.setInitParameter("beanName", "appUI");
+        ServletRegistration.Dynamic apidocs = servletContext.addServlet("apidocs", DefaultServlet.class);
+        apidocs.addMapping("/api.html");
+
+        ServletRegistration.Dynamic vaadin = servletContext.addServlet("vaadin", AppServlet.class);
         vaadin.setAsyncSupported(true);
+        vaadin.setInitParameter("org.atmosphere.cpr.asyncSupport", JSR356AsyncSupport.class.getName());
+        vaadin.setInitParameter("beanName", "appUI");
+        vaadin.addMapping("/*");     
     }
 
     @Override
