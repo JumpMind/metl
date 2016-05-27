@@ -29,6 +29,7 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
+import org.jumpmind.metl.core.persist.IImportExportService;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
@@ -47,6 +48,9 @@ public class ApplicationContext implements Serializable {
     @Autowired
     IConfigurationService configurationService;
 
+    @Autowired
+    IImportExportService importExportService;
+    
     @Autowired
     IExecutionService executionService;
 
@@ -77,6 +81,10 @@ public class ApplicationContext implements Serializable {
 
     public IConfigurationService getConfigurationService() {
         return configurationService;
+    }
+    
+    public IImportExportService getImportExportService() {
+        return importExportService;
     }
     
     public String getConfigDir() {

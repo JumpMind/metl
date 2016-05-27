@@ -205,4 +205,16 @@ public interface IConfigurationService {
     
     public GlobalSetting findGlobalSetting(String name);
     
+    public List<Component> findDependentSharedComponents(String flowId);
+    
+    public List<Model> findDependentModels(String flowId);
+    
+    public List<Resource> findDependentResources(String flowId);
+    
+    public List<Flow> findAffectedFlowsByModel(String modelId);
+    
+    public List<Flow> findAffectedFlowsByResource(String resourceId);
+    
+    public List<Flow> findAffectedFlowsByFlow(String flowId);
+    
 }

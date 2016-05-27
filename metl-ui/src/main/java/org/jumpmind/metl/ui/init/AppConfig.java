@@ -53,14 +53,16 @@ import org.jumpmind.metl.core.persist.ConfigurationSqlService;
 import org.jumpmind.metl.core.persist.ExecutionSqlService;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
+import org.jumpmind.metl.core.persist.IImportExportService;
+import org.jumpmind.metl.core.persist.ImportExportService;
 import org.jumpmind.metl.core.runtime.AgentManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFromXMLFactory;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
-import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMappingRegistry;
+import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.metl.core.util.EnvConstants;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.ui.views.IUIFactory;
@@ -104,6 +106,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     IDatabasePlatform databasePlatform;
 
     IConfigurationService configurationService;
+    
+    IImportExportService importExportService;
 
     IComponentRuntimeFactory componentFactory;
 
@@ -239,6 +243,16 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         return configurationService;
     }
 
+    @Bean
+    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
+    public IImportExportService importExportService() {
+        if (importExportService == null) {
+            importExportService = new ImportExportService(configDatabasePlatform(),
+                    persistenceManager(), tablePrefix());
+        }
+        return importExportService;
+    }
+    
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IExecutionService executionService() {

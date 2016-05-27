@@ -151,6 +151,8 @@ public class DesignNavigator extends VerticalLayout {
     MenuItem exportProject;
     
     MenuItem exportFlow;
+    
+    MenuItem exportModel;
 
     MenuItem search;
     
@@ -236,14 +238,18 @@ public class DesignNavigator extends VerticalLayout {
         exportMenu.setEnabled(false);
         exportProject.setEnabled(false);
         exportFlow.setEnabled(false);
+        exportModel.setEnabled(false);
         if (selected != null) {
             if (selected instanceof ProjectVersion) {
                 exportProject.setEnabled(true);
-            }
-            if (selected instanceof FlowName) {
+            } else if (selected instanceof FlowName) {
                 exportFlow.setEnabled(true);
+            } else if (selected instanceof ModelName) {
+                exportModel.setEnabled(true);
             }
-            exportMenu.setEnabled(selected instanceof ProjectVersion || selected instanceof FlowName);
+            
+            exportMenu.setEnabled(selected instanceof ProjectVersion || selected instanceof FlowName
+                    || selected instanceof ModelName);
         }
 
         boolean deleteEnabled = false;
@@ -287,8 +293,9 @@ public class DesignNavigator extends VerticalLayout {
         newJMSResource = newMenu.addItem("JMS", selectedItem -> addNewJMSFileSystem());
 
         exportMenu = leftMenuBar.addItem("Export", null);
-        exportFlow = exportMenu.addItem("Flow", selectedItem ->  exportFlow());
-        exportProject = exportMenu.addItem("Project", selectedItem ->  exportProject());
+        exportFlow = exportMenu.addItem("Flow", selectedItem -> exportFlow());
+        exportProject = exportMenu.addItem("Project", selectedItem -> exportProject());
+        exportModel = exportMenu.addItem("Model", selectedItem -> exportModel());
         
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
@@ -698,6 +705,21 @@ public class DesignNavigator extends VerticalLayout {
             final String export = context.getConfigurationService().export(projectVersion, flow);            
             downloadExport(export, flow.getName().toLowerCase().replaceAll(" ", "-"));
         }        
+    }
+    
+    protected void exportModel() {
+        Object selected = treeTable.getValue();
+        if (selected instanceof ModelName) {
+            ModelName modelName = (ModelName) selected;
+            Model model = context.getConfigurationService().findModel(modelName.getId());
+            ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(model.getProjectVersionId());
+            final String export = context.getImportExportService().export(projectVersion, model);            
+            downloadExport(export, model.getName().toLowerCase().replaceAll(" ", "-"));
+        }
+    }
+    
+    protected void exportSharedComponent() {
+        //TODO:
     }
     
     protected void downloadExport(final String export, String filename) {

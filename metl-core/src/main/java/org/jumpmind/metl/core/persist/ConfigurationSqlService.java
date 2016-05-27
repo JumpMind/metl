@@ -21,6 +21,7 @@
 package org.jumpmind.metl.core.persist;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
@@ -32,8 +33,10 @@ import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
+import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.io.data.DbExport;
 import org.jumpmind.symmetric.io.data.DbExport.Format;
@@ -301,4 +304,88 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
         return template.queryForInt(String.format("select count(*) from %1$s_user where password is not null", tablePrefix)) > 0;
     }
 
+    @Override
+    public List<Component> findDependentSharedComponents(String flowId) {
+
+        List<Component> sharedComponents = new ArrayList<Component>();
+        final String SHARED_COMPONENTS_BY_FLOW_SQL = "select distinct c.id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and c.shared=1";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(SHARED_COMPONENTS_BY_FLOW_SQL, tablePrefix, flowId));
+        for (Row row:ids) {
+            sharedComponents.add(this.findComponent(row.getString("id"), false));
+        }
+        return sharedComponents;
+    }
+
+    @Override
+    public List<Resource> findDependentResources(String flowId) {
+        
+        List<Resource> resources = new ArrayList<Resource>();
+        final String RESOURCES_BY_FLOW_SQL = "select distinct c.resource_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(RESOURCES_BY_FLOW_SQL, tablePrefix, flowId));
+        for (Row row:ids) {
+            resources.add(this.findResource(row.getString("id")));
+        }        
+        return resources;
+    }
+    
+    @Override
+    public List<Model> findDependentModels(String flowId) {
+        List<Model> models = new ArrayList<Model>();
+        final String MODELS_BY_FLOW_SQL = "select distinct model_id from  "
+                + "(select distinct output_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' union "
+                + " select distinct input_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s')";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(MODELS_BY_FLOW_SQL, tablePrefix, flowId));
+        for (Row row:ids) {
+            models.add(this.findModel(row.getString("id")));
+        }        
+        return models;        
+    }
+    
+    @Override
+    public List<Flow> findAffectedFlowsByFlow(String flowId) {
+        List<Flow> flows = new ArrayList<Flow>();
+        
+        final String AFFECTED_FLOWS_BY_FLOW_SQL = "select distinct flow_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id "
+                + "inner join %1$s_component_setting cs on cs.component_id = c.id "
+                + "where cs.name='flow.id' and cs.value = '%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(AFFECTED_FLOWS_BY_FLOW_SQL, tablePrefix, flowId));
+        for (Row row:ids) {
+            flows.add(this.findFlow(row.getString("id")));
+        }             
+        
+        return flows;
+    }
+    
+    @Override
+    public List<Flow> findAffectedFlowsByResource(String resourceId) {
+        List<Flow> flows = new ArrayList<Flow>();
+
+        final String AFFECTED_FLOWS_BY_RESOURCE_SQL = "select distinct flow_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id "
+                + "where c.resourceId = '%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(AFFECTED_FLOWS_BY_RESOURCE_SQL, tablePrefix, resourceId));
+        for (Row row:ids) {
+            flows.add(this.findFlow(row.getString("id")));
+        }             
+
+        return flows;
+    }
+    
+    @Override
+    public List<Flow> findAffectedFlowsByModel(String modelId) {
+        List<Flow> flows = new ArrayList<Flow>();
+
+        final String AFFECTED_FLOWS_BY_MODEL_SQL = "select distinct flow_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id "
+                + "where c.input_model_id = '%2$s' or c.output_model_id = '%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(AFFECTED_FLOWS_BY_MODEL_SQL, tablePrefix, modelId));
+        for (Row row:ids) {
+            flows.add(this.findFlow(row.getString("id")));
+        }      
+        return flows;        
+    }
 }
