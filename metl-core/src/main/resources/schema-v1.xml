@@ -520,5 +520,14 @@
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />
     </table>
+    
+    <table name="version" description="">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="name" type="VARCHAR" size="255" description="Name of the folder" />
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />        
+    </table>    
 
 </database>

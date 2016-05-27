@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.metl.core.model.AbstractObject;
+import org.jumpmind.metl.core.model.AbstractObjectCreateTimeDescSorter;
 import org.jumpmind.metl.core.model.AbstractObjectLastUpdateTimeDescSorter;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.Agent;
@@ -69,6 +70,7 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserGroup;
 import org.jumpmind.metl.core.model.UserSetting;
+import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.util.NameValue;
 import org.jumpmind.persist.IPersistenceManager;
 
@@ -1053,6 +1055,19 @@ abstract class AbstractConfigurationService extends AbstractService implements
             globalSettings.put(setting.getName(), setting.getValue());
         }
         return globalSettings;
+    }
+    
+    protected abstract boolean doesTableExist(Class<?> clazz);
+    
+    @Override
+    public String getLastKnownVersion() {
+        if (doesTableExist(Version.class)) {
+            List<Version> versions = persistenceManager.find(Version.class, null, null, tableName(Version.class));
+            AbstractObjectCreateTimeDescSorter.sort(versions);
+            return versions.size() > 0 ? versions.get(0).getName() : null;
+        } else {
+            return null;
+        }
     }
 
 }

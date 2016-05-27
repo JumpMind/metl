@@ -54,7 +54,7 @@ import org.jumpmind.metl.core.model.User;
 public interface IConfigurationService {
     
     public boolean isInstalled();
-    
+        
     public List<FolderName> findFoldersInProject(String projectVersionId);
     
     public List<ComponentName> findComponentsInProject(String projectVersionId);
@@ -72,6 +72,8 @@ public interface IConfigurationService {
     public Folder findFirstFolderWithName(String name, FolderType type);
     
     public Flow findFlow(String id);
+    
+    public String getLastKnownVersion();
     
     public Model findModel(String id);
     

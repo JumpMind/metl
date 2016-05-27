@@ -20,31 +20,25 @@
  */
 package org.jumpmind.metl.ui.views.admin;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
-import java.io.IOException;
 import java.util.Date;
-import java.util.Properties;
-
-import javax.servlet.ServletContext;
 
 import org.apache.commons.lang.time.FastDateFormat;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jumpmind.metl.core.runtime.AgentManager;
+import org.jumpmind.metl.core.util.VersionUtils;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.Table;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.VerticalLayout;
 
 public class AboutPanel extends VerticalLayout implements IUiPanel {
 
-    final Log log = LogFactory.getLog(getClass());
+    final Logger log = LoggerFactory.getLogger(getClass());
 
     private static final long serialVersionUID = 1L;
 
@@ -77,27 +71,10 @@ public class AboutPanel extends VerticalLayout implements IUiPanel {
         table.addContainerProperty("Value", String.class, null);
 
         int itemId = 0;
-        ServletContext context = VaadinServlet.getCurrent().getServletContext();
-        Properties properties = new Properties();
-        try {
-            properties.load(context.getResourceAsStream("/version.properties"));
-
-            table.addItem(new Object[] { "Application Version", properties.getProperty("appVersion") }, itemId++);
-
-            table.addItem(new Object[] { "Build Time", properties.getProperty("buildTime") }, itemId++);
-
-            table.addItem(new Object[] { "SCM Revision", properties.getProperty("scmVersion") }, itemId++);
-
-            String branch = properties.getProperty("scmBranch");
-            if (isNotBlank(branch) && branch.contains("/")) {
-                branch = branch.substring(branch.indexOf("/") + 1);
-            }
-
-            table.addItem(new Object[] { "SCM Branch", branch }, itemId++);
-
-        } catch (IOException e) {
-            log.error("Could not load version.properties", e);
-        }
+        table.addItem(new Object[] { "Application Version", VersionUtils.getCurrentVersion() }, itemId++);
+        table.addItem(new Object[] { "Build Time", VersionUtils.getBuildTime() }, itemId++);
+        table.addItem(new Object[] { "SCM Revision", VersionUtils.getScmVersion() }, itemId++);
+        table.addItem(new Object[] { "SCM Branch", VersionUtils.getScmBranch() }, itemId++);
 
         table.addItem(new Object[] { "Host Name", AppUtils.getHostName() }, itemId++);
         table.addItem(new Object[] { "IP Address", AppUtils.getIpAddress() }, itemId++);
@@ -106,9 +83,7 @@ public class AboutPanel extends VerticalLayout implements IUiPanel {
         table.addItem(new Object[] { "Used Heap", Long.toString(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) },
                 itemId++);
         table.addItem(new Object[] { "Heap Size", Long.toString(Runtime.getRuntime().maxMemory()) }, itemId++);
-        table.addItem(
-                new Object[] { "Last Restart", CommonUiUtils.formatDateTime(AgentManager.lastRestartTime) },
-                itemId++);
+        table.addItem(new Object[] { "Last Restart", CommonUiUtils.formatDateTime(AgentManager.lastRestartTime) }, itemId++);
 
         addComponent(table);
         setExpandRatio(table, 1);

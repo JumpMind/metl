@@ -14,6 +14,8 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
 	apply plugin: 'license'
 	apply plugin: 'maven'
 	
+	version = version + "." + buildNumber
+	
     sourceCompatibility=1.8
     targetCompatibility=1.8   
     
@@ -23,6 +25,14 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
         includes(["**/*.java", "**/*.properties", "**/*.xml"])
         excludes(["**/AppWidgetSet.gwt.xml"])
     }
+    
+    if (JavaVersion.current().isJava8Compatible()) {
+      allprojects {
+        tasks.withType(Javadoc) {
+          options.addStringOption('Xdoclint:none', '-quiet')
+        }
+      }
+    }    
     
     repositories {
         // uncomment this if you want to use your local maven repository to test undelivered
@@ -36,7 +46,8 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
         maven { url "http://www.soapui.org/repository/maven2" }
         maven { url "https://github.com/santhosh-tekuri/maven-repository/raw/master" }
         jcenter()        
-    }       
+    }     
+     
     
     configurations { deployerJars }
     configurations { testArtifacts.extendsFrom testRuntime }
@@ -78,7 +89,8 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
                        "Project-Artifact": project.name,                       
                        "Build-Version": version,
                        "Build-Time": new SimpleDateFormat("yyyyMMdd-HHmm").format(new Date()),
-                       "Build-Scm-Version": gitVersion)
+                       "Build-Scm-Version": gitVersion,
+                       "Build-Scm-Branch": gitBranch)
         }    
     }    
     

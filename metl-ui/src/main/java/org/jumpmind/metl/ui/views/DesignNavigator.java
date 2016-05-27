@@ -690,9 +690,8 @@ public class DesignNavigator extends VerticalLayout {
         Object selected = treeTable.getValue();
         if (selected instanceof ProjectVersion) {
             ProjectVersion project = (ProjectVersion) selected;
-            final String export = context.getConfigurationService().export(project);
-            
-            downloadExport(export, project.getName().toLowerCase().replaceAll(" ", "-"));
+            final String export = context.getConfigurationService().export(project);            
+            downloadExport(export, project.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-"));
         }
     }
 
@@ -703,7 +702,7 @@ public class DesignNavigator extends VerticalLayout {
             Flow flow = context.getConfigurationService().findFlow(flowName.getId());
             ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(flow.getProjectVersionId());
             final String export = context.getConfigurationService().export(projectVersion, flow);            
-            downloadExport(export, flow.getName().toLowerCase().replaceAll(" ", "-"));
+            downloadExport(export, flow.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-"));
         }        
     }
     

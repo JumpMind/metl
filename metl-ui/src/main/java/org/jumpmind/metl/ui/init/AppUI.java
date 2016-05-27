@@ -64,6 +64,7 @@ import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.shared.communication.PushMode;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -74,7 +75,7 @@ import com.vaadin.ui.VerticalLayout;
 @Theme("apptheme")
 @Title("Metl")
 @PreserveOnRefresh
-@Push
+@Push(value=PushMode.AUTOMATIC)
 public class AppUI extends UI implements LoginListener {
 
     private static final long serialVersionUID = 1L;
