@@ -41,55 +41,70 @@ public class TabbedPanel extends TabSheet {
     protected Map<String, Tab> tabsById = new HashMap<String, Tab>();
 
     protected Map<Component, String> contentToId = new HashMap<Component, String>();
-    
+
     protected List<CloseHandler> closeHandlers = new ArrayList<TabSheet.CloseHandler>();
-    
+
     protected IUiPanel selectedTab;
+
+    protected List<String> selectedOrder = new ArrayList<>();
+
+    boolean closing = false;
 
     public TabbedPanel() {
         setSizeFull();
         addStyleName(ValoTheme.TABSHEET_FRAMED);
 
-        addSelectedTabChangeListener(new SelectedTabChangeListener() {
-            private static final long serialVersionUID = 1L;
+        addSelectedTabChangeListener((event) -> {
+            Component selected = event.getTabSheet().getSelectedTab();
+            if (selectedTab != null) {
+                selectedTab.deselected();
+                selectedTab = null;
+            }
 
-            @Override
-            public void selectedTabChange(SelectedTabChangeEvent event) {
-                Component selected = event.getTabSheet().getSelectedTab();
-                if (selectedTab != null) {
-                    selectedTab.deselected();
-                    selectedTab = null;
-                }
-                
-                if (selected instanceof IUiPanel) {
-                    selectedTab = ((IUiPanel) selected); 
-                    selectedTab.selected();
-                    
-                }
+            if (selected instanceof IUiPanel) {
+                selectedTab = ((IUiPanel) selected);
+                selectedTab.selected();
+            }
+
+            String id = contentToId.get(selectedTab);
+            if (id != null && !closing) {
+                selectedOrder.add(id);
             }
         });
 
-        setCloseHandler(new CloseHandler() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void onTabClose(TabSheet tabsheet, Component tabContent) {
+        setCloseHandler((tabsheet, tabContent) -> {
+            String id = contentToId.get(tabContent);
+            try {
+                closing = true;
                 if (tabContent instanceof IUiPanel) {
                     if (((IUiPanel) tabContent).closing()) {
-                        closeTab(contentToId.get(tabContent));
+                        closeTab(id);
                     }
                     selectedTab = null;
                 } else {
-                    closeTab(contentToId.get(tabContent));
+                    closeTab(id);
                 }
-                
+
                 for (CloseHandler closeHandler : closeHandlers) {
-                    closeHandler.onTabClose(tabsheet, tabContent);                    
+                    closeHandler.onTabClose(tabsheet, tabContent);
+                }
+
+                while (selectedOrder.contains(id)) {
+                    selectedOrder.remove(id);
+                }
+            } finally {
+                closing = false;
+            }
+
+            if (selectedOrder.size() > 0) {
+                Tab selectNext = tabsById.get(selectedOrder.get(selectedOrder.size() - 1));
+                if (selectNext != null) {
+                    setSelectedTab(selectNext);
                 }
             }
         });
     }
-    
+
     public void addCloseHandler(CloseHandler handler) {
         this.closeHandlers.add(handler);
     }
@@ -114,11 +129,11 @@ public class TabbedPanel extends TabSheet {
         Tab tab = tabsById.get(id);
         if (tab == null) {
             component.setSizeFull();
+            contentToId.put(component, id);
             tab = addTab(component, caption, icon);
             tab.setClosable(true);
-            setSelectedTab(tab);
             tabsById.put(id, tab);
-            contentToId.put(component, id);
+            setSelectedTab(tab);
         } else {
             setSelectedTab(tab);
         }
