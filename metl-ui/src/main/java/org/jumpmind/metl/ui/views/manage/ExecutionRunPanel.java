@@ -313,10 +313,17 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         List<FlowStepLink> links = flow.getFlowStepLinks();
         List<Node> list = new ArrayList<Node>();
         
+        int activeSteps = 0;
+        for (FlowStep step : flowSteps) {
+            if (step.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true)) {
+                activeSteps++;
+            }
+        }
+        
         // If the execution steps don't match the flow steps, wait and try again.
         // The execution log steps may not be persisted yet.
         for (int i=0; i<5; i++) {
-            if (executionData.steps.size() == flowSteps.size()) {
+            if (executionData.steps.size() == activeSteps) {
                 break;
             } else {
                 AppUtils.sleep(200);

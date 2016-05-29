@@ -62,7 +62,7 @@
 }
 
 .diagram-node.READY {
-    border: 3px solid blue;
+    border: 3px solid #2e6f9a;
 }
 
 .diagram-node.disabled {
