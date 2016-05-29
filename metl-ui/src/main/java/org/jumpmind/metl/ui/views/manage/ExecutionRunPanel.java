@@ -341,14 +341,17 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
             node.setY(flowStep.getY());
 
             ExecutionStep executionStep = executionData.findExecutionStep(flowStep.getId());
-            if (executionStep != null) {
+            if (node.isEnabled() && executionStep != null) {
                 node.setEntitiesProcessed(executionStep.getEntitiesProcessed());
                 node.setMessagesRecieved(executionStep.getMessagesReceived());
                 node.setMessagesSent(executionStep.getMessagesProduced());
                 node.setStatus(executionStep.getExecutionStatus().toString());
                 node.setInputLabel(Long.toString(executionStep.getMessagesReceived()));
                 node.setOutputLabel(Long.toString(executionStep.getMessagesProduced()));
-            } else {               
+            } else if (!node.isEnabled()) {
+                node.setInputLabel("-");
+                node.setOutputLabel("-");
+            } else {
                 // Show the detail screen if the flow does not match the historical execution.
                 showDetails();
                 showDiagram.setEnabled(false);
