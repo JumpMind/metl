@@ -426,6 +426,8 @@
         <column name="status" type="VARCHAR" size="255" description="" />
         <column name="messages_received" type="INTEGER" default="0" required="true" />
         <column name="messages_produced" type="INTEGER" default="0" required="true" />
+        <column name="payload_received" type="INTEGER" default="0" required="true" />
+        <column name="payload_produced" type="INTEGER" default="0" required="true" />        
         <column name="entities_processed" type="INTEGER" default="0" required="true" />
         <column name="start_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="end_time" type="TIMESTAMP" description="Timestamp when this entry was created." />

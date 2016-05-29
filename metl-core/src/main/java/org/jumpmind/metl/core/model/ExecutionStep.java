@@ -26,33 +26,37 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class ExecutionStep extends AbstractObject {
-	
+
     private static final long serialVersionUID = 1L;
 
     private String executionId;
-    
+
     private int threadNumber = 0;
-    
+
     private String flowStepId;
-    
+
     private String componentName;
-    
+
     private String status;
-    
+
     private long messagesReceived;
-    
+
     private long messagesProduced;
-    
+
+    private long payloadReceived;
+
+    private long payloadProduced;
+
     private long entitiesProcessed;
-    
+
     private int approximateOrder;
-    
+
     private Date startTime;
-    
+
     private Date endTime;
-    
+
     private long handleDuration = 0;
-    
+
     public long getHandleDuration() {
         return handleDuration;
     }
@@ -64,7 +68,7 @@ public class ExecutionStep extends AbstractObject {
     public void incrementHandleDuration(long handleDuration) {
         this.handleDuration += handleDuration;
     }
-    
+
     public String getHandleDurationString() {
         LocalTime t = LocalTime.MIDNIGHT.plus(Duration.ofMillis(handleDuration));
         return DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(t);
@@ -73,11 +77,11 @@ public class ExecutionStep extends AbstractObject {
     public void setThreadNumber(int threadNumber) {
         this.threadNumber = threadNumber;
     }
-    
+
     public int getThreadNumber() {
         return threadNumber;
     }
-    
+
     @Override
     public void setName(String name) {
     }
@@ -87,88 +91,104 @@ public class ExecutionStep extends AbstractObject {
         return id;
     }
 
-	public String getExecutionId() {
-		return executionId;
-	}
+    public String getExecutionId() {
+        return executionId;
+    }
 
-	public void setExecutionId(String executionId) {
-		this.executionId = executionId;
-	}
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
+    }
 
-	public String getFlowStepId() {
-		return flowStepId;
-	}
+    public String getFlowStepId() {
+        return flowStepId;
+    }
 
-	public void setFlowStepId(String flowStepId) {
-		this.flowStepId = flowStepId;
-	}
+    public void setFlowStepId(String flowStepId) {
+        this.flowStepId = flowStepId;
+    }
 
-	public String getComponentName() {
-		return componentName;
-	}
+    public String getComponentName() {
+        return componentName;
+    }
 
-	public void setComponentName(String componentName) {
-		this.componentName = componentName;
-	}
-	
+    public void setComponentName(String componentName) {
+        this.componentName = componentName;
+    }
+
     public ExecutionStatus getExecutionStatus() {
         return status == null ? null : ExecutionStatus.valueOf(status);
     }
 
-	public String getStatus() {
-		return status;
-	}
+    public String getStatus() {
+        return status;
+    }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-	public long getMessagesReceived() {
-		return messagesReceived;
-	}
+    public long getMessagesReceived() {
+        return messagesReceived;
+    }
 
-	public void setMessagesReceived(long messagesReceived) {
-		this.messagesReceived = messagesReceived;
-	}
+    public void setMessagesReceived(long messagesReceived) {
+        this.messagesReceived = messagesReceived;
+    }
 
-	public long getMessagesProduced() {
-		return messagesProduced;
-	}
+    public long getMessagesProduced() {
+        return messagesProduced;
+    }
 
-	public void setMessagesProduced(long messagesProduced) {
-		this.messagesProduced = messagesProduced;
-	}
+    public void setMessagesProduced(long messagesProduced) {
+        this.messagesProduced = messagesProduced;
+    }
 
-	public Date getStartTime() {
-		return startTime;
-	}
+    public Date getStartTime() {
+        return startTime;
+    }
 
-	public void setStartTime(Date startTime) {
-		this.startTime = startTime;
-	}
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
 
-	public Date getEndTime() {
-		return endTime;
-	}
+    public Date getEndTime() {
+        return endTime;
+    }
 
-	public void setEndTime(Date endTime) {
-		this.endTime = endTime;
-	}
-	
-	public void setEntitiesProcessed(long entitiesProcessed) {
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    public void setEntitiesProcessed(long entitiesProcessed) {
         this.entitiesProcessed = entitiesProcessed;
     }
-	
-	public long getEntitiesProcessed() {
+
+    public long getEntitiesProcessed() {
         return entitiesProcessed;
     }
-	
-	public void setApproximateOrder(int approximateOrder) {
+
+    public void setApproximateOrder(int approximateOrder) {
         this.approximateOrder = approximateOrder;
     }
-	
-	public int getApproximateOrder() {
+
+    public int getApproximateOrder() {
         return approximateOrder;
+    }
+
+    public void setPayloadProduced(long payloadProduced) {
+        this.payloadProduced = payloadProduced;
+    }
+
+    public long getPayloadProduced() {
+        return payloadProduced;
+    }
+
+    public void setPayloadReceived(long payloadReceived) {
+        this.payloadReceived = payloadReceived;
+    }
+
+    public long getPayloadReceived() {
+        return payloadReceived;
     }
 
 }

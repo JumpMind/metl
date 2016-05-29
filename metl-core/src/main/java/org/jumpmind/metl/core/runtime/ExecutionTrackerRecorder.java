@@ -162,6 +162,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                 step.setEntitiesProcessed(stats.getNumberEntitiesProcessed(threadNumber));
                 step.setMessagesReceived(stats.getNumberInboundMessages(threadNumber));
                 step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
+                step.setPayloadProduced(stats.getNumberOutboundPayload(threadNumber));
+                step.setPayloadReceived(stats.getNumberInboundPayload(threadNumber));
                 lastStatUpdate.put(step, new Date());
             }
             step.setLastUpdateTime(new Date());
@@ -185,6 +187,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                 step.setEntitiesProcessed(stats.getNumberEntitiesProcessed(threadNumber));
                 step.setMessagesReceived(stats.getNumberInboundMessages(threadNumber));
                 step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
+                step.setPayloadProduced(stats.getNumberOutboundPayload(threadNumber));
+                step.setPayloadReceived(stats.getNumberInboundPayload(threadNumber));
                 lastStatUpdate.put(step, new Date());
             }
             step.setLastUpdateTime(new Date());
@@ -214,6 +218,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             step.setEntitiesProcessed(stats.getNumberEntitiesProcessed(threadNumber));
             step.setMessagesReceived(stats.getNumberInboundMessages(threadNumber));
             step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
+            step.setPayloadProduced(stats.getNumberOutboundPayload(threadNumber));
+            step.setPayloadReceived(stats.getNumberInboundPayload(threadNumber));
             lastStatUpdate.put(step, new Date());
         }
         step.setLastUpdateTime(new Date());

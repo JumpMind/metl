@@ -204,14 +204,15 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         stepTable.setMultiSelect(true);
         stepTable.setImmediate(true);
         stepTable.setSizeFull();
-        stepTable.setVisibleColumns(new Object[] { "componentName", "threadNumber", "status", "messagesReceived",
-                "messagesProduced", "entitiesProcessed", "startTime", "endTime", "handleDurationString" });
+        stepTable.setVisibleColumns(new Object[] { "componentName", "threadNumber", "status", "messagesReceived", "payloadReceived",
+                "messagesProduced", "payloadProduced", "startTime", "endTime", "handleDurationString" });
         stepTable.setColumnHeaders(new String[] { "Component Name", "Thread", "Status", "Msgs Recvd",
-                "Msgs Sent", "Entities Prcd", "Start", "End", "Run Duration" });
+                "Payload Recvd", "Msgs Sent", "Payload Sent", "Start", "End", "Run Duration" });
         stepTable.setColumnWidth("status", 100);
         stepTable.setColumnWidth("messagesReceived", 100);
         stepTable.setColumnWidth("messagesProduced", 100);
-        stepTable.setColumnWidth("entitiesProcessed", 100);
+        stepTable.setColumnWidth("payloadReceived", 100);
+        stepTable.setColumnWidth("payloadProduced", 100);
         stepTable.setColumnWidth("threadNumber", 100);
         stepTable.setColumnWidth("startTime", 100);
         stepTable.setColumnWidth("endTime", 100);

@@ -28,6 +28,8 @@ public class ComponentStatistics {
     private Map<Integer, Integer> numberInboundMessages = new HashMap<>();
     private Map<Integer, Integer> numberOutboundMessages = new HashMap<>();
     private Map<Integer, Integer> numberEntitiesProcessed = new HashMap<>();
+    private Map<Integer, Integer> numberInboundPayload = new HashMap<>();
+    private Map<Integer, Integer> numberOutboundPayload = new HashMap<>();
 
     public int getNumberInboundMessages(int thread) {
         Integer number = numberInboundMessages.get(thread);
@@ -70,5 +72,39 @@ public class ComponentStatistics {
 
     public void incrementNumberEntitiesProcessed(int thread, int count) {
         this.numberEntitiesProcessed.put(thread, getNumberEntitiesProcessed(thread)+count);
+    }
+    
+    public void setNumberInboundPayload(int thread, int numberInboundPayload) {
+        this.numberInboundPayload.put(thread, getNumberInboundPayload(thread)+1);
+    }
+
+    public int getNumberInboundPayload(int thread) {
+        Integer number = numberInboundPayload.get(thread);
+        return number != null ? number : 0;
+    }
+
+    public void incrementNumberInboundPayload(int thread) {
+        this.numberInboundPayload.put(thread, getNumberInboundPayload(thread)+1);
+    }
+
+    public void incrementNumberInboundPayload(int thread, int count) {
+        this.numberInboundPayload.put(thread, getNumberInboundPayload(thread)+count);
+    }
+    
+    public void setNumberOutboundPayload(int thread, int numberOutboundPayload) {
+        this.numberOutboundPayload.put(thread, getNumberOutboundPayload(thread)+1);
+    }
+
+    public int getNumberOutboundPayload(int thread) {
+        Integer number = numberOutboundPayload.get(thread);
+        return number != null ? number : 0;
+    }
+
+    public void incrementNumberOutboundPayload(int thread) {
+        this.numberOutboundPayload.put(thread, getNumberOutboundPayload(thread)+1);
+    }
+
+    public void incrementNumberOutboundPayload(int thread, int count) {
+        this.numberOutboundPayload.put(thread, getNumberOutboundPayload(thread)+count);
     }
 }

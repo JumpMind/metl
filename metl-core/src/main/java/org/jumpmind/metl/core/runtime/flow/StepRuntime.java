@@ -41,6 +41,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.runtime.BinaryMessage;
+import org.jumpmind.metl.core.runtime.ContentMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
@@ -297,6 +298,14 @@ public class StepRuntime implements Runnable {
         int threadNumber = ThreadUtils.getThreadNumber(threadCount);
         try {
             componentContext.getComponentStatistics().incrementInboundMessages(threadNumber);
+            if (inputMessage instanceof ContentMessage<?>) {
+                Object payload = ((ContentMessage<?>)inputMessage).getPayload();
+                if (payload instanceof Collection<?>) {
+                    componentContext.getComponentStatistics().incrementNumberInboundPayload(threadNumber, ((Collection<?>)payload).size());
+                } else if (payload != null) {
+                    componentContext.getComponentStatistics().incrementNumberInboundPayload(threadNumber);
+                }
+            }
             
             componentContext.getExecutionTracker().beforeHandle(threadNumber, componentContext);            
 
@@ -641,6 +650,15 @@ public class StepRuntime implements Runnable {
             ComponentStatistics statistics = componentContext.getComponentStatistics();
             int threadNumber = ThreadUtils.getThreadNumber(threadCount);
             statistics.incrementOutboundMessages(threadNumber);
+            if (message instanceof ContentMessage<?>) {
+                Object payload = ((ContentMessage<?>)message).getPayload();
+                if (payload instanceof Collection<?>) {
+                    componentContext.getComponentStatistics().incrementNumberOutboundPayload(threadNumber, ((Collection<?>)payload).size());
+                } else if (payload != null) {
+                    componentContext.getComponentStatistics().incrementNumberOutboundPayload(threadNumber);
+                }
+            }
+
             componentContext.getExecutionTracker().updateStatistics(threadNumber, componentContext);
 
             Component component = componentContext.getFlowStep().getComponent();
