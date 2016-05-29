@@ -88,31 +88,29 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
     private static final long serialVersionUID = 1L;
 
-    final protected Logger log = LoggerFactory.getLogger(getClass()); 
+    final protected Logger log = LoggerFactory.getLogger(getClass());
 
     IExecutionService executionService;
 
     VerticalSplitPanel splitPanel;
-    
+
     Table stepTable = new Table();
-    
+
     RunDiagram diagram;
 
     Panel flowPanel;
 
     AbstractLayout diagramLayout;
-    
+
     Flow flow;
 
     List<AbstractObject> selected = new ArrayList<AbstractObject>();
-    
+
     Grid logTable;
 
-    BeanContainer<String, ExecutionStep> stepContainer = new BeanContainer<String, ExecutionStep>(
-            ExecutionStep.class);
+    BeanContainer<String, ExecutionStep> stepContainer = new BeanContainer<String, ExecutionStep>(ExecutionStep.class);
 
-    BeanItemContainer<ExecutionStepLog> logContainer = new BeanItemContainer<ExecutionStepLog>(
-            ExecutionStepLog.class);
+    BeanItemContainer<ExecutionStepLog> logContainer = new BeanItemContainer<ExecutionStepLog>(ExecutionStepLog.class);
 
     Label flowLabel = new Label();
 
@@ -121,27 +119,27 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     Label startLabel = new Label();
 
     Label endLabel = new Label();
-    
+
     Button removeButton;
-    
+
     Button cancelButton;
-    
+
     Button rerunButton;
-    
+
     Button showDiagram;
-    
+
     Button showDetails;
 
     String executionId;
-    
+
     ApplicationContext context;
-    
+
     TabbedPanel parentTabSheet;
-    
+
     IFlowRunnable flowRunnable;
-    
+
     boolean lastDataRefreshWasDone = false;
-    
+
     List<SortOrder> lastSortOrder;
 
     public ExecutionRunPanel(String executionId, ApplicationContext context, TabbedPanel parentTabSheet, IFlowRunnable flowRunnable) {
@@ -150,22 +148,22 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         this.context = context;
         this.parentTabSheet = parentTabSheet;
         this.flowRunnable = flowRunnable;
-        
+
         Execution execution = executionService.findExecution(executionId);
         this.flow = context.getConfigurationService().findFlow(execution.getFlowId());
-        
+
         ButtonBar buttonBar = new ButtonBar();
-        
+
         rerunButton = buttonBar.addButton("Rerun", Icons.RUN, event -> rerun());
         rerunButton.setVisible(false);
         removeButton = buttonBar.addButton("Remove", Icons.DELETE, event -> remove());
         removeButton.setVisible(false);
         cancelButton = buttonBar.addButton("Cancel", Icons.CANCEL, event -> cancel());
-        
+
         showDiagram = buttonBar.addButtonRight("Show Diagram", Icons.FLOW, event -> showDiagram());
         showDiagram.setVisible(false);
         showDetails = buttonBar.addButtonRight("Show Details", Icons.LIST, event -> showDetails());
-        
+
         addComponent(buttonBar);
 
         HorizontalLayout header1 = new HorizontalLayout();
@@ -189,7 +187,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         addComponent(header2);
 
         stepContainer.setBeanIdProperty("id");
-        
+
         diagramLayout = new VerticalLayout();
         diagramLayout.setWidth(10000, Unit.PIXELS);
         diagramLayout.setHeight(10000, Unit.PIXELS);
@@ -204,10 +202,10 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         stepTable.setMultiSelect(true);
         stepTable.setImmediate(true);
         stepTable.setSizeFull();
-        stepTable.setVisibleColumns(new Object[] { "componentName", "threadNumber", "status", "messagesReceived", "payloadReceived",
+        stepTable.setVisibleColumns(new Object[] { "componentName", "threadNumber", "status", "payloadReceived", "messagesReceived",
                 "messagesProduced", "payloadProduced", "startTime", "endTime", "handleDurationString" });
-        stepTable.setColumnHeaders(new String[] { "Component Name", "Thread", "Status", "Msgs Recvd",
-                "Payload Recvd", "Msgs Sent", "Payload Sent", "Start", "End", "Run Duration" });
+        stepTable.setColumnHeaders(new String[] { "Component Name", "Thread", "Status", "Payload Recvd", "Msgs Recvd", "Msgs Sent",
+                "Payload Sent", "Start", "End", "Run Duration" });
         stepTable.setColumnWidth("status", 100);
         stepTable.setColumnWidth("messagesReceived", 100);
         stepTable.setColumnWidth("messagesProduced", 100);
@@ -224,7 +222,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
             List<ExecutionStepLog> logs = executionService.findExecutionStepLogs(executionStepIds);
             logContainer.addAll(logs);
         });
-        
+
         stepTable.addValueChangeListener(event -> {
             @SuppressWarnings("unchecked")
             Set<String> executionStepIds = (Set<String>) event.getProperty().getValue();
@@ -235,53 +233,51 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
         logTable = new Grid();
         logTable.addColumn("level", String.class).setHeaderCaption("Level").setWidth(110).setMaximumWidth(200);
-        logTable.addColumn("createTime", Date.class).setHeaderCaption("Time").setWidth(120).setMaximumWidth(200).setRenderer(
-                new DateRenderer("%1$tk:%1$tM:%1$tS:%1$tL"));
-        logTable.addColumn("logText", String.class).setHeaderCaption("Message").setExpandRatio(1);        
+        logTable.addColumn("createTime", Date.class).setHeaderCaption("Time").setWidth(120).setMaximumWidth(200)
+                .setRenderer(new DateRenderer("%1$tk:%1$tM:%1$tS:%1$tL"));
+        logTable.addColumn("logText", String.class).setHeaderCaption("Message").setExpandRatio(1);
         logTable.setContainerDataSource(logContainer);
         logTable.setSizeFull();
         logTable.addItemClickListener(event -> logTableCellClicked(logTable, event));
-        logTable.addSortListener(event -> {lastSortOrder = event.getSortOrder();});
-        
-        HeaderRow filteringHeader = logTable.appendHeaderRow();        
+        logTable.addSortListener(event -> {
+            lastSortOrder = event.getSortOrder();
+        });
+
+        HeaderRow filteringHeader = logTable.appendHeaderRow();
         HeaderCell logTextFilterCell = filteringHeader.getCell("logText");
         TextField filterField = new TextField();
         filterField.setInputPrompt("Filter");
         filterField.addStyleName(ValoTheme.TEXTFIELD_TINY);
         filterField.setWidth("100%");
-        
+
         // Update filter When the filter input is changed
         filterField.addTextChangeListener(change -> {
             // Can't modify filters so need to replace
             logContainer.removeContainerFilters("logText");
-            
+
             // (Re)create the filter if necessary
-            if (! change.getText().isEmpty())
-                logContainer.addContainerFilter(
-                    new SimpleStringFilter("logText",
-                        change.getText(), true, false));
+            if (!change.getText().isEmpty())
+                logContainer.addContainerFilter(new SimpleStringFilter("logText", change.getText(), true, false));
         });
         logTextFilterCell.setComponent(filterField);
-        
+
         HeaderCell levelFilterCell = filteringHeader.getCell("level");
         ComboBox levelFilter = new ComboBox();
         levelFilter.setWidth(8, Unit.EM);
         levelFilter.setNullSelectionAllowed(true);
         LogLevel[] levels = LogLevel.values();
         for (LogLevel logLevel : levels) {
-            levelFilter.addItem(logLevel.name());   
+            levelFilter.addItem(logLevel.name());
         }
         levelFilter.addValueChangeListener(change -> {
             logContainer.removeContainerFilters("level");
-            String text = (String)levelFilter.getValue();
+            String text = (String) levelFilter.getValue();
             if (isNotBlank(text)) {
-                logContainer.addContainerFilter(
-                    new SimpleStringFilter("level",
-                        text, true, false));
+                logContainer.addContainerFilter(new SimpleStringFilter("level", text, true, false));
             }
         });
         levelFilterCell.setComponent(levelFilter);
-        
+
         levelFilter.addStyleName(ValoTheme.COMBOBOX_TINY);
 
         splitPanel = new VerticalSplitPanel();
@@ -291,7 +287,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         splitPanel.setSizeFull();
         addComponent(splitPanel);
         setExpandRatio(splitPanel, 1.0f);
-        
+
         redrawFlow();
 
         context.getBackgroundRefresherService().register(this);
@@ -313,17 +309,18 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         List<FlowStep> flowSteps = flow.getFlowSteps();
         List<FlowStepLink> links = flow.getFlowStepLinks();
         List<Node> list = new ArrayList<Node>();
-        
+
         int activeSteps = 0;
         for (FlowStep step : flowSteps) {
             if (step.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true)) {
                 activeSteps++;
             }
         }
-        
-        // If the execution steps don't match the flow steps, wait and try again.
+
+        // If the execution steps don't match the flow steps, wait and try
+        // again.
         // The execution log steps may not be persisted yet.
-        for (int i=0; i<5; i++) {
+        for (int i = 0; i < 5; i++) {
             if (executionData.steps.size() == activeSteps) {
                 break;
             } else {
@@ -331,7 +328,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                 executionData = getExecutionData();
             }
         }
-        
+
         for (FlowStep flowStep : flowSteps) {
             Node node = new Node();
             String name = flowStep.getComponent().getName();
@@ -339,7 +336,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
             boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true);
             String imageText = String.format(
                     "<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>",
-                    UiUtils.getBase64RepresentationOfImageForComponentType(type,context));
+                    UiUtils.getBase64RepresentationOfImageForComponentType(type, context));
 
             node.setText(imageText);
             node.setName(name);
@@ -360,12 +357,13 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                 node.setInputLabel("-");
                 node.setOutputLabel("-");
             } else {
-                // Show the detail screen if the flow does not match the historical execution.
+                // Show the detail screen if the flow does not match the
+                // historical execution.
                 showDetails();
                 showDiagram.setEnabled(false);
                 showDiagram.setDescription("The flow has been modified since the execution. The flow cannot be viewed.");
             }
-            
+
             for (FlowStepLink link : links) {
                 if (link.getSourceStepId().equals(node.getId())) {
                     node.getTargetNodeIds().add(link.getTargetStepId());
@@ -377,7 +375,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         }
         return list;
     }
-    
+
     protected void logTableCellClicked(Grid logTable, ItemClickEvent event) {
         if (event.isDoubleClick()) {
             Object object = event.getPropertyId();
@@ -406,12 +404,12 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     @Override
     public void deselected() {
     }
-    
+
     protected void rerun() {
         parentTabSheet.closeTab(executionId);
         flowRunnable.runFlow();
     }
-    
+
     protected void remove() {
         ConfirmDialog.show("Delete Execution?", "Are you sure you want to delete this execution?", () -> {
             context.getExecutionService().deleteExecution(executionId);
@@ -454,17 +452,17 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     @Override
     public void onBackgroundUIRefresh(Object backgroundData) {
         if (backgroundData != null) {
-           refreshUI((ExecutionData) backgroundData);
+            refreshUI((ExecutionData) backgroundData);
         }
     }
 
     @SuppressWarnings("unchecked")
-    protected ExecutionData getExecutionData() {        
+    protected ExecutionData getExecutionData() {
         ExecutionData data = new ExecutionData();
         data.execution = executionService.findExecution(executionId);
         data.steps = executionService.findExecutionSteps(executionId);
         this.flow = context.getConfigurationService().findFlow(data.execution.getFlowId());
-        
+
         Set<String> selected = (Set<String>) stepTable.getValue();
         data.logs = executionService.findExecutionStepLogs(selected);
         return data;
@@ -476,7 +474,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         @Override
         public void componentEvent(Event e) {
             if (e instanceof NodeSelectedEvent) {
-                
+
                 NodeSelectedEvent event = (NodeSelectedEvent) e;
                 List<String> nodeIds = event.getNodeIds();
                 ExecutionData data = getExecutionData();
@@ -495,7 +493,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
             }
         }
     }
-    
+
     protected boolean isDone() {
         return ExecutionStatus.isDone(statusLabel.getValue());
     }
@@ -507,16 +505,13 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
             if (data.execution.getStatus() != null) {
                 if (data.execution.getStatus().equals(ExecutionStatus.ERROR.name())) {
                     statusLabel.setStyleName("error");
-                    statusLabel.setValue(FontAwesome.WARNING.getHtml() + " "
-                            + data.execution.getStatus());
+                    statusLabel.setValue(FontAwesome.WARNING.getHtml() + " " + data.execution.getStatus());
                 } else if (data.execution.getStatus().equals(ExecutionStatus.DONE.name())) {
                     statusLabel.setStyleName("done");
-                    statusLabel.setValue(FontAwesome.CHECK.getHtml() + " "
-                            + data.execution.getStatus());
+                    statusLabel.setValue(FontAwesome.CHECK.getHtml() + " " + data.execution.getStatus());
                 } else if (data.execution.getStatus().equals(ExecutionStatus.RUNNING.name())) {
                     statusLabel.setStyleName("running");
-                    statusLabel.setValue(FontAwesome.SPINNER.getHtml() + " "
-                            + data.execution.getStatus());
+                    statusLabel.setValue(FontAwesome.SPINNER.getHtml() + " " + data.execution.getStatus());
                 } else {
                     statusLabel.setStyleName("");
                     statusLabel.setValue(data.execution.getStatus());
@@ -524,12 +519,13 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
             }
             endLabel.setValue(formatDate(data.execution.getEndTime()));
 
-            // TODO: Be smarter about when we redraw the flow. 
-            // If we are looking at details, don't waste time updating the flow view.
+            // TODO: Be smarter about when we redraw the flow.
+            // If we are looking at details, don't waste time updating the flow
+            // view.
             redrawFlow();
-            
+
             @SuppressWarnings("unchecked")
-            Set<String> selected = (Set<String>)stepTable.getValue();
+            Set<String> selected = (Set<String>) stepTable.getValue();
             stepContainer.removeAllItems();
             stepContainer.addAll(data.steps);
             if (selected != null && selected.size() > 0) {
@@ -540,9 +536,8 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                 stepTable.setValue(selected);
             }
 
-            List<ExecutionStepLog> logMessages = new ArrayList<>(
-                    logContainer.getItemIds());
-            
+            List<ExecutionStepLog> logMessages = new ArrayList<>(logContainer.getItemIds());
+
             List<ExecutionStepLog> newLogMessages = new ArrayList<>(data.logs);
 
             for (ExecutionStepLog logMsg : logMessages) {
@@ -556,11 +551,11 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                 }
             }
         }
-        
+
         rerunButton.setVisible(isDone() && flowRunnable != null);
         removeButton.setVisible(isDone());
         cancelButton.setVisible(!isDone());
-        
+
         lastDataRefreshWasDone = isDone();
     }
 
@@ -576,7 +571,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         public Execution execution;
         public List<ExecutionStep> steps;
         public List<ExecutionStepLog> logs;
-        
+
         ExecutionStep findExecutionStep(String id) {
             ExecutionStep executionStep = null;
             for (ExecutionStep s : steps) {
@@ -590,13 +585,12 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     }
 
     public class ComponentNameColumnGenerator implements ColumnGenerator {
-        
+
         private static final long serialVersionUID = 1L;
 
         @SuppressWarnings("unchecked")
         public Object generateCell(com.vaadin.ui.Table source, Object itemId, Object columnId) {
-            BeanItem<ExecutionStepLog> logItem = (BeanItem<ExecutionStepLog>) source
-                    .getItem(itemId);
+            BeanItem<ExecutionStepLog> logItem = (BeanItem<ExecutionStepLog>) source.getItem(itemId);
             String executionStepId = (String) logItem.getItemProperty("executionStepId").getValue();
             BeanItem<ExecutionStep> stepItem = stepContainer.getItem(executionStepId);
             return new Label((String) stepItem.getItemProperty("componentName").getValue());
