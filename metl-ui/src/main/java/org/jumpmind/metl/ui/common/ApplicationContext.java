@@ -77,6 +77,8 @@ public class ApplicationContext implements Serializable {
 
     User user = new User();
     
+    boolean showRunDiagram = true;
+    
     List<ProjectVersion> openProjects = new ArrayList<ProjectVersion>();
 
     public IConfigurationService getConfigurationService() {
@@ -129,5 +131,9 @@ public class ApplicationContext implements Serializable {
         
     public IUIFactory getUiFactory() {
         return uiFactory;
+    }
+    
+    public void setShowRunDiagram(boolean showRunDiagram) {
+        this.showRunDiagram = showRunDiagram;
     }
 }

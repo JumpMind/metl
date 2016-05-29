@@ -25,6 +25,7 @@ public class UserSetting extends Setting {
     private static final long serialVersionUID = 1L;
     
     public static final String SETTING_CURRENT_PROJECT_ID_LIST = "current.project.ids";
+    public static final String SETTING_SHOW_RUN_DIAGRAM = "show.run.diagram";
 
     String userId;
     

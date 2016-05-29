@@ -37,6 +37,8 @@ import org.jumpmind.metl.core.model.ExecutionStepLog;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
+import org.jumpmind.metl.core.model.Setting;
+import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
@@ -161,7 +163,6 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         cancelButton = buttonBar.addButton("Cancel", Icons.CANCEL, event -> cancel());
 
         showDiagram = buttonBar.addButtonRight("Show Diagram", Icons.FLOW, event -> showDiagram());
-        showDiagram.setVisible(false);
         showDetails = buttonBar.addButtonRight("Show Details", Icons.LIST, event -> showDetails());
 
         addComponent(buttonBar);
@@ -195,6 +196,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         flowPanel = new Panel();
         flowPanel.setSizeFull();
         flowPanel.addStyleName(ValoTheme.PANEL_WELL);
+        
         flowPanel.setContent(diagramLayout);
 
         stepTable.setContainerDataSource(stepContainer);
@@ -288,8 +290,14 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         addComponent(splitPanel);
         setExpandRatio(splitPanel, 1.0f);
 
-        redrawFlow();
+        boolean showDiagram = context.getUser().getBoolean(UserSetting.SETTING_SHOW_RUN_DIAGRAM, true);
+        if (showDiagram) {
+            showDiagram();
+        } else {
+            showDetails();
+        }
 
+        redrawFlow();
         context.getBackgroundRefresherService().register(this);
     }
 
@@ -431,12 +439,19 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         showDiagram.setVisible(false);
         showDetails.setVisible(true);
         splitPanel.setFirstComponent(flowPanel);
+        Setting setting = context.getUser().findSetting(UserSetting.SETTING_SHOW_RUN_DIAGRAM);
+        setting.setValue("true");
+        context.getConfigurationService().save(setting);
     }
 
     protected void showDetails() {
         showDiagram.setVisible(true);
         showDetails.setVisible(false);
         splitPanel.setFirstComponent(stepTable);
+        Setting setting = context.getUser().findSetting(UserSetting.SETTING_SHOW_RUN_DIAGRAM);
+        setting.setValue("false");
+        context.getConfigurationService().save(setting);
+
     }
 
     @SuppressWarnings("unchecked")
