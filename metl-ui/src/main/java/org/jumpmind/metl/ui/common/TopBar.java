@@ -139,7 +139,7 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
 
     protected void openHelp(ClickEvent event) {
         String docUrl = Page.getCurrent().getLocation().toString();
-        docUrl = docUrl.substring(0, docUrl.indexOf("/app"));
+        docUrl = docUrl.substring(0, docUrl.lastIndexOf("/"));
         Page.getCurrent().open(docUrl + "/doc/html/user-guide.html", "doc");
     }
 

@@ -116,7 +116,7 @@ public class StartWebServer {
         if (extraClasspath.length() > 0) {
             getLogger().info("Adding extra classpath of: " + extraClasspath.toString());
         }
-        getLogger().info("To use Metl, navigate to http://localhost:" + PORT + "/metl/app");
+        getLogger().info("To use Metl, navigate to http://localhost:" + PORT + "/metl");
         
         server.join();
     }
