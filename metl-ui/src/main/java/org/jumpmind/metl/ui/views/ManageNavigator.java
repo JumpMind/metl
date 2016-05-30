@@ -33,6 +33,8 @@ import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderType;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.persist.IExecutionService;
+import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Icons;
 
 import com.vaadin.data.Property.ValueChangeListener;
@@ -55,16 +57,16 @@ import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 public class ManageNavigator extends Panel {
 
-    IConfigurationService configurationService;
-
     TreeTable treeTable;
 
     Folder agentsFolder;
 
     Folder flowsFolder;
+    
+    ApplicationContext context;
 
-    public ManageNavigator(FolderType folderType, IConfigurationService configurationService) {
-        this.configurationService = configurationService;
+    public ManageNavigator(FolderType folderType, ApplicationContext context) {
+        this.context = context;
 
         setSizeFull();
 
@@ -104,7 +106,7 @@ public class ManageNavigator extends Panel {
         treeTable.addItem(agentsFolder);
         treeTable.setItemIcon(agentsFolder, FontAwesome.FOLDER);
 
-        List<Folder> folders = configurationService.findFolders(null, FolderType.AGENT);
+        List<Folder> folders = context.getConfigurationService().findFolders(null, FolderType.AGENT);
         for (Folder folder : folders) {
             addChildFolder(folder, agentsFolder);
         }
@@ -209,6 +211,7 @@ public class ManageNavigator extends Panel {
     }
 
     protected void addAgentsToFolder(Folder folder) {
+        IConfigurationService configurationService = context.getConfigurationService();
         List<AgentName> agents = configurationService.findAgentsInFolder(folder);
         for (AgentName agent : agents) {
 
@@ -231,12 +234,17 @@ public class ManageNavigator extends Panel {
     }
 
     protected void addFlowsToFolder(Folder folder) {
+        IConfigurationService configurationService = context.getConfigurationService();
+        IExecutionService executionService = context.getExecutionService();
+        List<String> executedFlowIds = executionService.findExecutedFlowIds();
         List<FlowName> flows = configurationService.findFlows();
         for (FlowName flow : flows) {
-            treeTable.addItem(flow);
-            treeTable.setItemIcon(flow, Icons.FLOW);
-            treeTable.setParent(flow, folder);
-            treeTable.setChildrenAllowed(flow, false);
+            if (executedFlowIds.contains(flow.getId())) {
+                treeTable.addItem(flow);
+                treeTable.setItemIcon(flow, Icons.FLOW);
+                treeTable.setParent(flow, folder);
+                treeTable.setChildrenAllowed(flow, false);
+            }
         }
     }
 

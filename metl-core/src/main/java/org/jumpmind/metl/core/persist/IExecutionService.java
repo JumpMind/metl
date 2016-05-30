@@ -46,5 +46,7 @@ public interface IExecutionService {
     public void markAbandoned(String agentId);
     
     public void deleteExecution(String executionId);
+    
+    public List<String> findExecutedFlowIds();
     	
 }

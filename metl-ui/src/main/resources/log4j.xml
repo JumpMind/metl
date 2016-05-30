@@ -25,7 +25,7 @@
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
     <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d %5.5p [%30.30t] [%c] %m%n" />
+            <param name="ConversionPattern" value="%d %5.5p [%30.30t] %m%n" />
         </layout>
     </appender>
     <category name="org">
@@ -58,8 +58,9 @@
     <category name="org.atmosphere.cpr">
         <priority value="ERROR" />
     </category>
-    <category name="org.atmosphere.cpr">
-        <priority value="ERROR" />
+    <!-- read socket timeout is inevitable.  don't log it as an error -->
+    <category name="org.atmosphere.container.JSR356Endpoint">
+        <priority value="FATAL" />
     </category>
             
     <category name="com.vaadin.server.DefaultDeploymentConfiguration">

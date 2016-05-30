@@ -220,7 +220,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         split.setSizeFull();
         split.setSplitPosition(AppConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS, false);
 
-        manageNavigator = new ManageNavigator(FolderType.AGENT, context.getConfigurationService());
+        manageNavigator = new ManageNavigator(FolderType.AGENT, context);
         manageNavigator.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
                 refreshUI(getBackgroundData());

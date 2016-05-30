@@ -70,6 +70,12 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
         }
     }
     
+    public List<String> findExecutedFlowIds () {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        return template.query(String.format(
+                "select distinct flow_id from %1$s_execution", tablePrefix), new StringMapper());
+    }
+    
     public List<Execution> findExecutions(Map<String, Object> params, int limit) {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         StringBuilder whereClause = new StringBuilder();
