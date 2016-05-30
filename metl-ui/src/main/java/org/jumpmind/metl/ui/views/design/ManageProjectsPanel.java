@@ -256,7 +256,9 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         }
 
         for (Object s : selected) {
-            grid.select(s);
+            if (grid.getContainerDataSource().containsId(s)) {
+               grid.select(s);
+            }
         }
 
         setButtonsEnabled();
