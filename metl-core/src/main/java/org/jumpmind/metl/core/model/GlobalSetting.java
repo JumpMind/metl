@@ -23,6 +23,8 @@ package org.jumpmind.metl.core.model;
 public class GlobalSetting extends Setting {
 
     private static final long serialVersionUID = 1L;
+    
+    public static final String SYSTEM_TEXT = "system.text";
 
     @Override
     public String toString() {

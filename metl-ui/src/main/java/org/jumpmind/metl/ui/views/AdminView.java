@@ -30,6 +30,7 @@ import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.views.admin.AboutPanel;
 import org.jumpmind.metl.ui.views.admin.ApiPanel;
+import org.jumpmind.metl.ui.views.admin.GeneralSettingsPanel;
 import org.jumpmind.metl.ui.views.admin.GroupPanel;
 import org.jumpmind.metl.ui.views.admin.LoggingPanel;
 import org.jumpmind.metl.ui.views.admin.MailServerPanel;
@@ -105,6 +106,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         addItem("Users", Icons.USER);
         addItem("Groups", Icons.GROUP);
         addItem("REST", Icons.REST);
+        addItem("General Settings", Icons.SETTINGS);
         addItem("Mail Server", Icons.EMAIL);
         addItem("Notifications", Icons.NOTIFICATION);
         addItem("Logging", Icons.LOGGING);
@@ -148,6 +150,8 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                     panel = new GroupPanel(context, tabbedPanel);
                 } else if (id.equals("REST")) {
                     panel = new ApiPanel(context, tabbedPanel);
+                } else if (id.equals("General Settings")) {
+                    panel = new GeneralSettingsPanel(context, tabbedPanel);
                 } else if (id.equals("Mail Server")) {
                     panel = new MailServerPanel(context, tabbedPanel);
                 } else if (id.equals("Notifications")) {

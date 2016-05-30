@@ -21,6 +21,7 @@
 package org.jumpmind.metl.ui.common;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jumpmind.metl.core.model.GlobalSetting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,10 +38,11 @@ import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -47,7 +50,7 @@ import com.vaadin.ui.MenuBar.MenuItem;
 public class TopBar extends HorizontalLayout implements ViewChangeListener {
 
     private static final long serialVersionUID = 1L;
-    
+
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     MenuBar menuBar;
@@ -56,11 +59,13 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
 
     Map<String, MenuItem> viewToButtonMapping;
 
+    ApplicationContext context;
+
     List<MenuItem> categoryItems = new ArrayList<MenuBar.MenuItem>();
 
-    @SuppressWarnings("serial")
     public TopBar(ViewManager vm, ApplicationContext context) {
         setWidth(100, Unit.PERCENTAGE);
+        this.context = context;
         this.viewManager = vm;
         this.viewManager.addViewChangeListener(this);
 
@@ -71,15 +76,19 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
         addComponent(menuBar);
         setExpandRatio(menuBar, 1.0f);
 
+        String systemText = getGlobalSetting(GlobalSetting.SYSTEM_TEXT, "").getValue();
+        if (isNotBlank(systemText)) {
+            Button systemLabel = new Button(systemText, FontAwesome.WARNING);
+            systemLabel.setHtmlContentAllowed(true);
+            addComponent(systemLabel);
+        }
+
         Button helpButton = new Button("Help", FontAwesome.QUESTION_CIRCLE);
         helpButton.addClickListener(event -> openHelp(event));
         addComponent(helpButton);
 
         Button settingsButton = new Button(context.getUser().getLoginId(), FontAwesome.GEAR);
-        settingsButton.addClickListener(new ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-            }
+        settingsButton.addClickListener((event) -> {
         });
         addComponent(settingsButton);
 
@@ -95,17 +104,17 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
                 continue;
             }
             List<TopBarLink> links = menuItemsByCategory.get(category);
-            boolean needDefaultView = viewManager.getDefaultView() == null && links.size() > 0; 
+            boolean needDefaultView = viewManager.getDefaultView() == null && links.size() > 0;
             MenuItem categoryItem = null;
             if (links.size() > 1) {
                 categoryItem = menuBar.addItem(category.name(), null);
                 categoryItems.add(categoryItem);
             }
-            
+
             if (needDefaultView) {
                 viewManager.setDefaultView(links.get(0).id());
             }
-            
+
             for (final TopBarLink menuLink : links) {
                 Command command = new Command() {
 
@@ -130,7 +139,17 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
         }
         viewManager.navigateTo(viewManager.getDefaultView());
     }
-    
+
+    protected GlobalSetting getGlobalSetting(String name, String defaultValue) {
+        GlobalSetting setting = context.getConfigurationService().findGlobalSetting(name);
+        if (setting == null) {
+            setting = new GlobalSetting();
+            setting.setName(name);
+            setting.setValue(defaultValue);
+        }
+        return setting;
+    }
+
     protected void logout() {
         URI uri = Page.getCurrent().getLocation();
         VaadinSession.getCurrent().close();
