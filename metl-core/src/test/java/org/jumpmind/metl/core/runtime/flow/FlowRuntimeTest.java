@@ -31,8 +31,10 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.Notification;
-import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFromXMLFactory;
+import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.component.definition.ComponentXmlDefinitionFactory;
+import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
@@ -44,7 +46,8 @@ import org.junit.Test;
 
 public class FlowRuntimeTest {
 
-    IComponentRuntimeFactory componentFactory;
+    IComponentRuntimeFactory componentRuntimeFactory;
+    IComponentDefinitionFactory componentDefinitionFactory;
     IResourceFactory resourceFactory;
     ExecutorService threadService;
     
@@ -54,7 +57,8 @@ public class FlowRuntimeTest {
     @Before
     public void setup() throws Exception {
     	
-    	componentFactory = new ComponentRuntimeFromXMLFactory();
+        componentDefinitionFactory = new ComponentXmlDefinitionFactory();
+    	componentRuntimeFactory = new ComponentRuntimeFactory(componentDefinitionFactory);
     	resourceFactory = new ResourceFactory();
     	threadService = Executors.newFixedThreadPool(5);
     	
@@ -72,7 +76,7 @@ public class FlowRuntimeTest {
     	
     	Flow flow = createSimpleTwoStepNoOpFlow(folder);
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);	
-    	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
+    	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentRuntimeFactory, componentDefinitionFactory, resourceFactory, 
     			 threadService, null, null);
     	flowRuntime.start("", new HashMap<String, IResourceRuntime>(), agent, new ArrayList<Notification>(), new HashMap<String, String>());
     	flowRuntime.waitForFlowCompletion();
@@ -84,7 +88,7 @@ public class FlowRuntimeTest {
     public void singleSrcToTwoTarget() throws Exception {
     	Flow flow = createSrcToTwoTargetFlow(folder);
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
-    	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory, 
+    	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentRuntimeFactory, componentDefinitionFactory, resourceFactory, 
     			 threadService, null, null);
     	flowRuntime.start("", new HashMap<String, IResourceRuntime>(), agent, new ArrayList<Notification>(), new HashMap<String, String>());
     	flowRuntime.waitForFlowCompletion();
@@ -97,7 +101,7 @@ public class FlowRuntimeTest {
     public void twoSrcOneTarget() throws Exception {
         Flow flow = createTwoSrcToOneTargetFlow(folder);
         AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
-        FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory, resourceFactory
+        FlowRuntime flowRuntime = new FlowRuntime(deployment, componentRuntimeFactory, componentDefinitionFactory,  resourceFactory
                 , threadService, null, null);
         flowRuntime.start("", new HashMap<String, IResourceRuntime>(), agent, new ArrayList<Notification>(), new HashMap<String, String>());
         flowRuntime.waitForFlowCompletion();

@@ -60,6 +60,7 @@ import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.EntityResult;
+import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -83,7 +84,9 @@ public class FlowRuntime {
 
     Map<String, IResourceRuntime> resourceRuntimes = new HashMap<String, IResourceRuntime>();
 
-    IComponentRuntimeFactory componentFactory;
+    IComponentRuntimeFactory componentRuntimeFactory;
+    
+    IComponentDefinitionFactory componentDefinitionFactory;
 
     IResourceFactory resourceFactory;
 
@@ -105,11 +108,12 @@ public class FlowRuntime {
     
     IExecutionService executionService;    
     
-    public FlowRuntime(AgentDeployment deployment, IComponentRuntimeFactory componentFactory,
+    public FlowRuntime(AgentDeployment deployment, IComponentRuntimeFactory componentRuntimeFactory, IComponentDefinitionFactory componentDefinitionFactory,
             IResourceFactory resourceFactory, 
             ExecutorService threadService, IConfigurationService configurationService, IExecutionService executionService) {
         this.deployment = deployment;
-        this.componentFactory = componentFactory;
+        this.componentRuntimeFactory = componentRuntimeFactory;
+        this.componentDefinitionFactory = componentDefinitionFactory;
         this.resourceFactory = resourceFactory;
         this.threadService = threadService;
         this.configurationService = configurationService;
@@ -175,7 +179,7 @@ public class FlowRuntime {
             if (enabled) {
                 ComponentContext context = new ComponentContext(deployment, flowStep, manipulatedFlow, executionTracker, 
                         deployedResources, flowParameters, globalSettings);
-                StepRuntime stepRuntime = new StepRuntime(componentFactory, context, this);
+                StepRuntime stepRuntime = new StepRuntime(componentRuntimeFactory, componentDefinitionFactory, context, this);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
         }
@@ -243,7 +247,7 @@ public class FlowRuntime {
     
     protected Flow manipulateFlow(Flow flow) {
         for (FlowStep flowStep : new ArrayList<>(flow.getFlowSteps())) {
-            XMLComponent componentDefintion = componentFactory.getComonentDefinition(flowStep.getComponent().getType());
+            XMLComponent componentDefintion = componentDefinitionFactory.getDefinition(flowStep.getComponent().getType());
             if (isNotBlank(componentDefintion.getFlowManipulatorClassName())) {
                 try {
                     IFlowManipulator flowManipulator = (IFlowManipulator) Class.forName(componentDefintion.getFlowManipulatorClassName())

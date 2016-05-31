@@ -193,7 +193,7 @@ public class PropertySheet extends AbsoluteLayout {
 
             if (obj instanceof Component) {
                 Component component = (Component) obj;
-                XMLComponent componentDefintion = context.getComponentFactory().getComonentDefinition(component.getType());
+                XMLComponent componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getType());
                 addThreadCount(componentDefintion, formLayout, component);
                 addComponentShared(formLayout, component);      
             }
@@ -259,7 +259,7 @@ public class PropertySheet extends AbsoluteLayout {
     
     private boolean hasSetting(Component component, String setting) {
     	XMLComponent componentDefinition = 
-				context.getComponentFactory().getComonentDefinition(component.getType());
+				context.getComponentDefinitionFactory().getDefinition(component.getType());
 		return (componentDefinition.findXMLSetting(setting) != null);
     }
     
@@ -271,7 +271,7 @@ public class PropertySheet extends AbsoluteLayout {
     }
 
     protected void addComponentProperties(FormLayout formLayout, Component component) {
-        XMLComponent componentDefintion = context.getComponentFactory().getComonentDefinition(component.getType());
+        XMLComponent componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getType());
         addComponentName(formLayout, component);
         TextField textField = new TextField("Component Type");
         textField.setValue(componentDefintion.getName());
@@ -460,7 +460,7 @@ public class PropertySheet extends AbsoluteLayout {
     protected List<XMLSetting> buildSettings(Object obj) {
         if (obj instanceof Component) {
             Component component = (Component) obj;
-            XMLComponent definition = context.getComponentFactory().getComonentDefinition(component.getType());
+            XMLComponent definition = context.getComponentDefinitionFactory().getDefinition(component.getType());
             return definition.getSettings().getSetting();
         } else if (obj instanceof Resource) {
             Resource resource = (Resource) obj;

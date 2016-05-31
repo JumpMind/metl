@@ -57,8 +57,10 @@ import org.jumpmind.metl.core.persist.IImportExportService;
 import org.jumpmind.metl.core.persist.ImportExportService;
 import org.jumpmind.metl.core.runtime.AgentManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
-import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFromXMLFactory;
+import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.component.definition.ComponentXmlDefinitionFactory;
+import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMappingRegistry;
@@ -109,7 +111,9 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     
     IImportExportService importExportService;
 
-    IComponentRuntimeFactory componentFactory;
+    IComponentRuntimeFactory componentRuntimeFactory;
+    
+    IComponentDefinitionFactory componentDefinitionFactory;
 
     IResourceFactory resourceFactory;
 
@@ -262,14 +266,23 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         }
         return executionService;
     }
+    
+    @Bean
+    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
+    public IComponentDefinitionFactory componentDefinitionFactory() {
+        if (componentDefinitionFactory == null) {
+            componentDefinitionFactory = new ComponentXmlDefinitionFactory();
+        }
+        return componentDefinitionFactory;
+    }
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
-    public IComponentRuntimeFactory componentFactory() {
-        if (componentFactory == null) {
-            componentFactory = new ComponentRuntimeFromXMLFactory();
+    public IComponentRuntimeFactory componentRuntimeFactory() {
+        if (componentRuntimeFactory == null) {
+            componentRuntimeFactory = new ComponentRuntimeFactory(componentDefinitionFactory());
         }
-        return componentFactory;
+        return componentRuntimeFactory;
     }
     
     @Bean
@@ -294,7 +307,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IAgentManager agentManager() {
         IAgentManager agentManager = new AgentManager(configurationService(), executionService(),
-                componentFactory(), resourceFactory(), httpRequestMappingRegistry());
+                componentRuntimeFactory(), componentDefinitionFactory(), resourceFactory(), httpRequestMappingRegistry());
         return agentManager;
     }
     

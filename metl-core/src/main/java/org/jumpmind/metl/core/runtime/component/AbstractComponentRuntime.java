@@ -44,6 +44,7 @@ import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
@@ -53,23 +54,23 @@ import org.jumpmind.util.FormatUtils;
 
 abstract public class AbstractComponentRuntime extends AbstractRuntimeObject implements IComponentRuntime {
 
-    public final static String INBOUND_QUEUE_CAPACITY = "inbound.queue.capacity";     
+    public final static String INBOUND_QUEUE_CAPACITY = ComponentSettingsConstants.INBOUND_QUEUE_CAPACITY;   
     
-    public final static String ENABLED = "enabled";
+    public final static String ENABLED = ComponentSettingsConstants.ENABLED;
 
-    public final static String LOG_INPUT = "logInput";
+    public final static String LOG_INPUT = ComponentSettingsConstants.LOG_INPUT;
 
-    public final static String LOG_OUTPUT = "logOutput";
+    public final static String LOG_OUTPUT = ComponentSettingsConstants.LOG_OUTPUT;
     
-    public final static String ROWS_PER_MESSAGE = "rows.per.message";
+    public final static String ROWS_PER_MESSAGE = ComponentSettingsConstants.ROWS_PER_MESSAGE;
     
-    public final static String RUN_WHEN = "run.when";
+    public final static String RUN_WHEN = ComponentSettingsConstants.RUN_WHEN;
     
-    public static final String PER_UNIT_OF_WORK = "PER UNIT OF WORK";
+    public static final String PER_UNIT_OF_WORK = ComponentSettingsConstants.PER_UNIT_OF_WORK;
 
-    public static final String PER_MESSAGE = "PER MESSAGE";
+    public static final String PER_MESSAGE = ComponentSettingsConstants.PER_MESSAGE;
 
-    public static final String PER_ENTITY = "PER ENTITY";    
+    public static final String PER_ENTITY = ComponentSettingsConstants.PER_ENTITY;
 
     protected ComponentContext context;
     

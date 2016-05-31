@@ -51,7 +51,8 @@ import org.jumpmind.metl.core.persist.ConfigurationSqlService;
 import org.jumpmind.metl.core.persist.ExecutionSqlService;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
-import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFromXMLFactory;
+import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.component.definition.ComponentXmlDefinitionFactory;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMappingRegistry;
 import org.jumpmind.metl.core.util.LogUtils;
@@ -162,8 +163,9 @@ public class StandaloneFlowRunner {
             persistenceManager = new SqlPersistenceManager(databasePlatform);
             configurationService = new ConfigurationSqlService(databasePlatform, persistenceManager, "METL");
             executionService = new ExecutionSqlService(databasePlatform, persistenceManager, "METL", new StandardEnvironment());
+            ComponentXmlDefinitionFactory componentDefinitionFactory = new ComponentXmlDefinitionFactory();
             agentRuntime = new AgentRuntime(new Agent("test", AppUtils.getHostName()), configurationService, executionService,
-                    new ComponentRuntimeFromXMLFactory(), new ResourceFactory(), new HttpRequestMappingRegistry());
+                    new ComponentRuntimeFactory(componentDefinitionFactory), componentDefinitionFactory, new ResourceFactory(), new HttpRequestMappingRegistry());
             agentRuntime.start();
             URL configSqlScriptURL = null;
             File configSqlScriptFile = new File(configSqlScript);

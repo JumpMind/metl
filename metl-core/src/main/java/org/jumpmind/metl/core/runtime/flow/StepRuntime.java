@@ -57,6 +57,7 @@ import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.util.LogUtils;
@@ -97,7 +98,9 @@ public class StepRuntime implements Runnable {
 
     ComponentContext componentContext;
 
-    IComponentRuntimeFactory componentFactory;
+    IComponentRuntimeFactory componentRuntimeFactory;
+    
+    IComponentDefinitionFactory componentDefintionFactory;
 
     XMLComponent componentDefintion;
 
@@ -119,15 +122,16 @@ public class StepRuntime implements Runnable {
     
     int threadCount;
 
-    public StepRuntime(IComponentRuntimeFactory componentFactory, ComponentContext componentContext, FlowRuntime flowRuntime) {
+    public StepRuntime(IComponentRuntimeFactory componentFactory, IComponentDefinitionFactory componentDefinitionFactory, ComponentContext componentContext, FlowRuntime flowRuntime) {
         this.flowRuntime = flowRuntime;
         this.componentContext = componentContext;
         this.queueCapacity = componentContext.getFlowStep().getComponent().getInt(AbstractComponentRuntime.INBOUND_QUEUE_CAPACITY, 1000);
         this.inQueue = new LinkedBlockingQueue<Message>(queueCapacity);
         this.sourceStepRuntimeUnitOfWorkReceived = new HashMap<String, Boolean>();
         this.targetStepRuntimeUnitOfWorkSent = new HashSet<String>();
-        this.componentFactory = componentFactory;
-        this.componentDefintion = componentFactory.getComonentDefinition(getComponentType());
+        this.componentRuntimeFactory = componentFactory;
+        this.componentDefintionFactory = componentDefinitionFactory;
+        this.componentDefintion = componentDefintionFactory.getDefinition(getComponentType());
     }
 
     private String getComponentType() {
@@ -198,7 +202,7 @@ public class StepRuntime implements Runnable {
 
     protected void createComponentRuntime(int threadNumber) {
         String type = getComponentType();
-        IComponentRuntime componentRuntime = componentFactory.create(type);
+        IComponentRuntime componentRuntime = componentRuntimeFactory.create(type);
         componentRuntimeByThread.put(threadNumber, componentRuntime);
         if (sourceStepRuntimes.size() == 0 && !componentRuntime.supportsStartupMessages()) {
             throw new MisconfiguredException("%s must have an inbound connection from another component",

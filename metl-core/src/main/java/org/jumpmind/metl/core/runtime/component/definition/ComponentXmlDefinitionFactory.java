@@ -18,7 +18,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.core.runtime.component;
+package org.jumpmind.metl.core.runtime.component.definition;
+
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.ENABLED;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_INPUT;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_OUTPUT;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.INBOUND_QUEUE_CAPACITY;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,37 +39,17 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponents;
-import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
-import org.jumpmind.metl.core.runtime.component.definition.XMLSettings;
 import org.jumpmind.metl.core.util.AbstractXMLFactory;
 
-public class ComponentRuntimeFromXMLFactory extends AbstractXMLFactory implements IComponentRuntimeFactory {
+public class ComponentXmlDefinitionFactory extends AbstractXMLFactory implements IComponentDefinitionFactory {
 
     Map<String, XMLComponent> componentsById;
 
     Map<String, List<String>> componentIdsByCategory;
 
-    synchronized public IComponentRuntime create(String id) {
-        try {
-            XMLComponent definition = componentsById.get(id);
-            if (definition != null) {
-                IComponentRuntime component = (IComponentRuntime) Class.forName(definition.getClassName()).newInstance();
-                component.create(definition);
-                return component;
-            } else {
-                throw new IllegalStateException("Could not find a class associated with the component id of " + id);
-            }
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-    
-    synchronized public Map<String, List<XMLComponent>> getComponentDefinitionsByCategory() {
+    @Override
+    synchronized public Map<String, List<XMLComponent>> getDefinitionsByCategory() {
         Map<String, List<XMLComponent>> componentDefinitionsByCategory = new HashMap<>();
         Set<String> categories = componentIdsByCategory.keySet();
         for (String category : categories) {
@@ -78,14 +63,16 @@ public class ComponentRuntimeFromXMLFactory extends AbstractXMLFactory implement
         return componentDefinitionsByCategory;
     }
 
-    synchronized public Map<String, List<String>> getComponentTypesByCategory() {
+    @Override
+    synchronized public Map<String, List<String>> getTypesByCategory() {
         return componentIdsByCategory;
     }
 
-    synchronized public XMLComponent getComonentDefinition(String id) {
+    @Override
+    synchronized public XMLComponent getDefinition(String id) {
         return componentsById.get(id);
     }
-    
+
     @Override
     protected void reset() {
         componentIdsByCategory = new HashMap<String, List<String>>();
@@ -108,8 +95,8 @@ public class ComponentRuntimeFromXMLFactory extends AbstractXMLFactory implement
                     for (XMLComponent xmlComponent : componentList) {
                         String id = xmlComponent.getId();
                         if (componentsById.containsKey(id)) {
-                            log.warn("There was already a component registered under the id of {}.  Overwriting {} with {}", new Object[] {
-                                    id, componentsById.get(id).getClassName(), xmlComponent.getClassName() });
+                            log.warn("There was already a component registered under the id of {}.  Overwriting {} with {}",
+                                    new Object[] { id, componentsById.get(id).getClassName(), xmlComponent.getClassName() });
                         }
                         componentsById.put(id, xmlComponent);
 
@@ -130,11 +117,12 @@ public class ComponentRuntimeFromXMLFactory extends AbstractXMLFactory implement
                         if (xmlComponent.getSettings().getSetting() == null) {
                             xmlComponent.getSettings().setSetting(new ArrayList<XMLSetting>());
                         }
-                        
-                        xmlComponent.getSettings().getSetting().add(0, new XMLSetting(AbstractComponentRuntime.ENABLED, "Enabled", "true", Type.BOOLEAN, true));
-                        xmlComponent.getSettings().getSetting().add(new XMLSetting(AbstractComponentRuntime.LOG_INPUT, "Log Input", "false", Type.BOOLEAN, false));
-                        xmlComponent.getSettings().getSetting().add(new XMLSetting(AbstractComponentRuntime.LOG_OUTPUT, "Log Output", "false", Type.BOOLEAN, false));
-                        xmlComponent.getSettings().getSetting().add(new XMLSetting(AbstractComponentRuntime.INBOUND_QUEUE_CAPACITY, "Inbound Queue Capacity", "100", Type.INTEGER, true));
+
+                        xmlComponent.getSettings().getSetting().add(0, new XMLSetting(ENABLED, "Enabled", "true", Type.BOOLEAN, true));
+                        xmlComponent.getSettings().getSetting().add(new XMLSetting(LOG_INPUT, "Log Input", "false", Type.BOOLEAN, false));
+                        xmlComponent.getSettings().getSetting().add(new XMLSetting(LOG_OUTPUT, "Log Output", "false", Type.BOOLEAN, false));
+                        xmlComponent.getSettings().getSetting()
+                                .add(new XMLSetting(INBOUND_QUEUE_CAPACITY, "Inbound Queue Capacity", "100", Type.INTEGER, true));
                     }
                 }
             } finally {

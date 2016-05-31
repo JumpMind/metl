@@ -32,6 +32,7 @@ import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.persist.IImportExportService;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
 import org.jumpmind.metl.ui.views.IUIFactory;
@@ -55,7 +56,10 @@ public class ApplicationContext implements Serializable {
     IExecutionService executionService;
 
     @Autowired
-    IComponentRuntimeFactory componentFactory;
+    IComponentRuntimeFactory componentRuntimeFactory;
+    
+    @Autowired
+    IComponentDefinitionFactory componentDefinitionFactory;
     
     @Autowired
     IUIFactory uiFactory;
@@ -97,8 +101,12 @@ public class ApplicationContext implements Serializable {
         return executionService;
     }
 
-    public IComponentRuntimeFactory getComponentFactory() {
-        return componentFactory;
+    public IComponentRuntimeFactory getComponentRuntimeFactory() {
+        return componentRuntimeFactory;
+    }
+    
+    public IComponentDefinitionFactory getComponentDefinitionFactory() {
+        return componentDefinitionFactory;
     }
 
     public IResourceFactory getResourceFactory() {

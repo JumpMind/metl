@@ -41,6 +41,7 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerNoOp;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.component.definition.ComponentXmlDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.helpers.MessageAssert;
 import org.jumpmind.metl.core.runtime.component.helpers.PayloadTestHelper;
 import org.jumpmind.metl.core.utils.TestUtils;
@@ -67,7 +68,7 @@ public abstract class AbstractComponentRuntimeTestSupport {
 	public static String ENTITY_2_KEY_1 = "e2.col1";
 	public static String ENTITY_2_VALUE_1 = "val3";
 	
-	private ComponentRuntimeFromXMLFactory componentRuntimeFromXMLFactory;
+	private ComponentRuntimeFactory componentRuntimeFromXMLFactory;
 	
 	// Standard tests that should be implemented for all components
 	public abstract void testHandleStartupMessage();
@@ -78,9 +79,9 @@ public abstract class AbstractComponentRuntimeTestSupport {
 	
 	abstract protected String getComponentId();
 	
-	protected ComponentRuntimeFromXMLFactory getComponentRuntimeFromXMLFactory() {
+	protected ComponentRuntimeFactory getComponentRuntimeFromXMLFactory() {
 	    if (componentRuntimeFromXMLFactory == null) {
-	        componentRuntimeFromXMLFactory = new ComponentRuntimeFromXMLFactory();
+	        componentRuntimeFromXMLFactory = new ComponentRuntimeFactory(new ComponentXmlDefinitionFactory());
 	    }
 	    return componentRuntimeFromXMLFactory;
 	}

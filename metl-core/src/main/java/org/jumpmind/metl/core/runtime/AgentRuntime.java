@@ -57,6 +57,7 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.component.IComponentDeploymentListener;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
@@ -94,7 +95,9 @@ public class AgentRuntime {
     
     IConfigurationService configurationService;
 
-    IComponentRuntimeFactory componentFactory;
+    IComponentRuntimeFactory componentRuntimeFactory;
+    
+    IComponentDefinitionFactory componentDefinitionFactory;
 
     IExecutionService executionService;
 
@@ -109,12 +112,13 @@ public class AgentRuntime {
     IHttpRequestMappingRegistry httpRequestMappingRegistry;
 
     public AgentRuntime(Agent agent, IConfigurationService configurationService,
-            IExecutionService executionService, IComponentRuntimeFactory componentFactory,
+            IExecutionService executionService, IComponentRuntimeFactory componentFactory, IComponentDefinitionFactory componentDefinitionFactory,
             IResourceFactory resourceFactory, IHttpRequestMappingRegistry httpRequestMappingRegistry) {
         this.agent = agent;
+        this.componentDefinitionFactory = componentDefinitionFactory;
         this.executionService = executionService;
         this.configurationService = configurationService;
-        this.componentFactory = componentFactory;
+        this.componentRuntimeFactory = componentFactory;
         this.resourceFactory = resourceFactory;
         this.httpRequestMappingRegistry = httpRequestMappingRegistry;
     }
@@ -376,7 +380,7 @@ public class AgentRuntime {
         Flow flow = deployment.getFlow();
         List<FlowStep> steps = flow.getFlowSteps();
         for (FlowStep flowStep : steps) {
-            XMLComponent componentDefintion = componentFactory.getComonentDefinition(flowStep.getComponent().getType());
+            XMLComponent componentDefintion = componentDefinitionFactory.getDefinition(flowStep.getComponent().getType());
             if (componentDefintion != null && isNotBlank(componentDefintion.getDeploymentListenerClassName())) {
                 try {
                     IComponentDeploymentListener listener = (IComponentDeploymentListener)Class.forName(componentDefintion.getDeploymentListenerClassName()).newInstance();
@@ -403,7 +407,7 @@ public class AgentRuntime {
             deployment = configurationService.findAgentDeployment(deployment.getId());
             deployment.setFlow(configurationService.findFlow(deployment.getFlowId()));
         }
-        FlowRuntime flowRuntime = new FlowRuntime(deployment, componentFactory,
+        FlowRuntime flowRuntime = new FlowRuntime(deployment, componentRuntimeFactory, componentDefinitionFactory,
                 resourceFactory,
                 flowStepsExecutionThreads, configurationService, executionService);
         try {
@@ -508,7 +512,7 @@ public class AgentRuntime {
                 deployment = configurationService.findAgentDeployment(deployment.getId());
                 deployment.setFlow(configurationService.findFlow(deployment.getFlowId()));
             }
-            this.flowRuntime = new FlowRuntime(deployment, componentFactory,
+            this.flowRuntime = new FlowRuntime(deployment, componentRuntimeFactory, componentDefinitionFactory,
                     resourceFactory,
                     flowStepsExecutionThreads, configurationService, executionService);
             scheduledFlows.get(deployment).add(flowRuntime);

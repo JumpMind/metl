@@ -20,21 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.util.List;
-import java.util.Map;
-
-import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
-
 public interface IComponentRuntimeFactory {
 
     public IComponentRuntime create(String type);
-    
-    public Map<String, List<String>> getComponentTypesByCategory();
-    
-    public Map<String, List<XMLComponent>> getComponentDefinitionsByCategory();
-
-    public XMLComponent getComonentDefinition(String typeId);
-    
-    public void refresh();
 
 }

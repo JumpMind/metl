@@ -40,7 +40,7 @@ import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
-import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
@@ -369,7 +369,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             node.setX(flowStep.getX());
             node.setY(flowStep.getY());
 
-            XMLComponent definition = context.getComponentFactory().getComonentDefinition(type);
+            XMLComponent definition = context.getComponentDefinitionFactory().getDefinition(type);
             if (definition == null) {
                 throw new MisconfiguredException("Could not find the component defintion for a component of type '%s'", type);
             }
@@ -469,8 +469,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                     flow.getFlowStepLinks().add(new FlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
                     Component sourceComp = flow.findFlowStepWithId(event.getSourceNodeId()).getComponent();
                     Component targetComp = flow.findFlowStepWithId(event.getTargetNodeId()).getComponent();
-                    IComponentRuntimeFactory factory = context.getComponentFactory();
-                    XMLComponent sourceDefn = factory.getComonentDefinition(sourceComp.getType());
+                    IComponentDefinitionFactory factory = context.getComponentDefinitionFactory();
+                    XMLComponent sourceDefn = factory.getDefinition(sourceComp.getType());
 
                     if (targetComp.getInputModel() == null) {
                         if (sourceComp.getOutputModel() != null) {

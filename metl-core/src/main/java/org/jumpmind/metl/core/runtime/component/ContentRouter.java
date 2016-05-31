@@ -37,7 +37,6 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
