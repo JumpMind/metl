@@ -37,35 +37,45 @@ public class JMSJndiTopicDirectory extends AbstractDirectory {
 
     public JMSJndiTopicDirectory(TypedProperties properties) throws JMSException, NamingException {
         this.properties = properties;
+        initialize();
+    }
 
-        Hashtable<String, String> env = new Hashtable<String, String>();
-        {
-            env.put(Context.INITIAL_CONTEXT_FACTORY, properties.get(JMS.SETTING_INITIAL_CONTEXT_FACTORY));
-            env.put(Context.PROVIDER_URL, properties.get(JMS.SETTING_PROVIDER_URL));
-            String principal = properties.get(JMS.SETTING_SECURITY_PRINCIPAL);
-            if (isNotBlank(principal)) {
-                env.put(Context.SECURITY_PRINCIPAL, principal);
-            }
-            String credentials = properties.get(JMS.SETTING_SECURITY_CREDENTIALS);
-            if (isNotBlank(credentials)) {
-                env.put(Context.SECURITY_CREDENTIALS, credentials);
+    protected void initialize() {
+        if (connection == null) {
+            try {
+                Hashtable<String, String> env = new Hashtable<String, String>();
+                {
+                    env.put(Context.INITIAL_CONTEXT_FACTORY, properties.get(JMS.SETTING_INITIAL_CONTEXT_FACTORY));
+                    env.put(Context.PROVIDER_URL, properties.get(JMS.SETTING_PROVIDER_URL));
+                    String principal = properties.get(JMS.SETTING_SECURITY_PRINCIPAL);
+                    if (isNotBlank(principal)) {
+                        env.put(Context.SECURITY_PRINCIPAL, principal);
+                    }
+                    String credentials = properties.get(JMS.SETTING_SECURITY_CREDENTIALS);
+                    if (isNotBlank(credentials)) {
+                        env.put(Context.SECURITY_CREDENTIALS, credentials);
+                    }
+                }
+
+                Context ctx = new InitialContext(env);
+
+                TopicConnectionFactory cf = (TopicConnectionFactory) ctx.lookup(properties.get(JMS.SETTING_CONNECTION_FACTORY_NAME));
+
+                connection = cf.createTopicConnection();
+
+                session = (TopicSession) connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+                Topic topic = (Topic) ctx.lookup(properties.get(JMS.SETTING_TOPIC_NAME));
+
+                producer = session.createPublisher(topic);
+
+                connection.start();
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
-
-        Context ctx = new InitialContext(env);
-
-        TopicConnectionFactory cf = (TopicConnectionFactory) ctx.lookup(properties.get(JMS.SETTING_CONNECTION_FACTORY_NAME));
-
-        connection = cf.createTopicConnection();
-
-        session = (TopicSession) connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-        Topic topic = (Topic) ctx.lookup(properties.get(JMS.SETTING_TOPIC_NAME));
-
-        producer = session.createPublisher(topic);
-
-        connection.start();
-
     }
 
     @Override
@@ -89,6 +99,8 @@ public class JMSJndiTopicDirectory extends AbstractDirectory {
             try {
                 connection.close();
             } catch (JMSException e) {
+            } finally {
+                connection = null;
             }
         }
     }
@@ -108,6 +120,7 @@ public class JMSJndiTopicDirectory extends AbstractDirectory {
         @Override
         public void close() throws IOException {
             super.close();
+            initialize();
             String text = new String(toByteArray());
             try {
                 String msgType = properties.get(JMS.SETTING_MESSAGE_TYPE, JMS.MSG_TYPE_TEXT);
@@ -140,6 +153,7 @@ public class JMSJndiTopicDirectory extends AbstractDirectory {
                     producer.publish(jmsMsg);
                 }
             } catch (JMSException e) {
+                JMSJndiTopicDirectory.this.close();
                 throw new RuntimeException(e);
             }
         }
