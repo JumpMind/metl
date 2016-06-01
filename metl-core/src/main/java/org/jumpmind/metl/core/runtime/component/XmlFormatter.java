@@ -371,6 +371,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
         List<Object> matches = XPathFactory.instance().compile(xpath).evaluate(generatedXml.getRootElement());
         if (matches.size() == 0) {
             log(LogLevel.WARN, "XPath expression " + xpath + " did not find any matches");
+            return;
         }
         Object object = matches.get(0);
         if (object instanceof Element) {
