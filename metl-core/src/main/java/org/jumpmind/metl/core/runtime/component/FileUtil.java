@@ -166,7 +166,11 @@ public class FileUtil extends AbstractComponentRuntime {
             String tokenResolvedAppendToName = resolveParamsAndHeaders(appendToName, inputMessage);
             String targetFileName = getTargetFileName(targetPath, sourceFileInfo, tokenResolvedAppendToName);
 
-            if (overwrite ||(!overwrite && directory.listFile(targetFileName, false)==null)) {
+            if (overwrite && directory.listFile(targetFileName, false)!=null) {
+                directory.delete(targetFileName);
+            	directory.moveFile(sourceFileName, targetFileName, false);
+                movedFileName = targetFileName;
+            } else if (overwrite ||(!overwrite && directory.listFile(targetFileName, false)==null)) {
                 directory.moveFile(sourceFileName, targetFileName, false);
                 movedFileName = targetFileName;
             }
