@@ -50,7 +50,7 @@ public class Folder extends AbstractObject {
     
     public Folder(String id) {
     	this();
-        this.id = id;         
+        setId(id);       
     }
     
     public void makeVirtual() {
@@ -75,7 +75,7 @@ public class Folder extends AbstractObject {
 
     public boolean isParentOf(Folder folder) {
         return folder.getParentFolderId() != null
-                && folder.getParentFolderId().equals(id);
+                && folder.getParentFolderId().equals(getId());
     }
     
     public String getType() {

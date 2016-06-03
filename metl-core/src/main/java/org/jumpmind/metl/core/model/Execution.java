@@ -77,7 +77,7 @@ public class Execution extends AbstractObject {
     }
 
     public String getName() {
-        return id;
+        return getId();
     }
 
     public String getStatus() {

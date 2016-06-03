@@ -88,7 +88,7 @@ public class ExecutionStep extends AbstractObject {
 
     @Override
     public String getName() {
-        return id;
+        return getId();
     }
 
     public String getExecutionId() {

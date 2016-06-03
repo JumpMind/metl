@@ -32,14 +32,14 @@ public class ProjectVersion extends AbstractObject {
     
     String versionLabel;
 
-    boolean locked;
+    boolean readOnly;
 
     boolean archived;
     
     boolean deleted;
     
     public ProjectVersion(String id) {
-        this.id = id;
+        setId(id);
     }
     
     public ProjectVersion() {
@@ -100,12 +100,12 @@ public class ProjectVersion extends AbstractObject {
         return archived;
     }
 
-    public void setLocked(boolean locked) {
-        this.locked = locked;
+    public void setReadOnly(boolean locked) {
+        this.readOnly = locked;
     }
 
-    public boolean isLocked() {
-        return locked;
+    public boolean isReadOnly() {
+        return readOnly;
     }   
 
     public void setDeleted(boolean deleted) {

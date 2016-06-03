@@ -42,7 +42,7 @@ public class ExecutionStepLog extends AbstractObject implements Comparable<Execu
 
     @Override
     public String getName() {
-        return id;
+        return getId();
     }
 
 	public String getExecutionStepId() {

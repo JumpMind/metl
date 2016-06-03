@@ -66,7 +66,7 @@ public class Flow extends AbstractObject {
 
     public Flow(String id) {
         this();
-        this.id = id;
+        setId(id);
     }
 
     public void setFolder(Folder folder) {
@@ -360,41 +360,6 @@ public class Flow extends AbstractObject {
             }
         }
         return finalSteps;
-    }
-    
-    @Override
-    public AbstractObject copy() {
-        Flow newFlow = (Flow)super.copy();
-
-        newFlow.setFlowParameters(new ArrayList<FlowParameter>());
-        newFlow.setFlowStepLinks(new ArrayList<FlowStepLink>());
-        newFlow.setFlowSteps(new ArrayList<FlowStep>());
-        
-        Map<String, String> oldToNewFlowStepIds = new HashMap<String, String>();
-        for (FlowStep flowStep : flowSteps) {
-              String oldId = flowStep.getId();
-              flowStep = (FlowStep)flowStep.copy();
-              oldToNewFlowStepIds.put(oldId, flowStep.getId());
-              flowStep.setFlowId(newFlow.getId());
-              newFlow.getFlowSteps().add(flowStep);
-        }
-
-        for (FlowStepLink flowStepLink : flowStepLinks) {
-            String oldSourceStepId= flowStepLink.getSourceStepId();
-            String oldTargetStepId = flowStepLink.getTargetStepId();
-            flowStepLink = (FlowStepLink)flowStepLink.copy();
-            flowStepLink.setSourceStepId(oldToNewFlowStepIds.get(oldSourceStepId));
-            flowStepLink.setTargetStepId(oldToNewFlowStepIds.get(oldTargetStepId));
-            newFlow.getFlowStepLinks().add(flowStepLink);
-        }
-
-        
-        for (FlowParameter flowParameter : flowParameters) {
-            flowParameter = (FlowParameter)flowParameter.copy();
-            flowParameter.setFlowId(newFlow.getId());
-            newFlow.getFlowParameters().add(flowParameter);
-        }
-        return newFlow;
     }
 
     static public class XSorter implements Comparator<FlowStep> {

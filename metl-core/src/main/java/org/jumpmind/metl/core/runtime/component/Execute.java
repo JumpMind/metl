@@ -103,7 +103,7 @@ public class Execute extends AbstractComponentRuntime {
 				org.apache.tools.ant.taskdefs.Execute antTask = getAntTask(outputHandler);
 				antTask.setCommandline(commands);
 				info("About to execute: %s", ArrayUtils.toString(commands));
-				int code = antTask.execute();
+				int code = antTask.execute();				
 				String output = new String(os.toByteArray());
 				if (successCode == code || continueOnError) {
 					if (successCode == code) {
