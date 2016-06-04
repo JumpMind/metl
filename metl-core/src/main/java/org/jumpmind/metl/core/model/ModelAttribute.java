@@ -38,19 +38,11 @@ public class ModelAttribute extends AbstractObject {
     }
     
     public ModelAttribute(String id, String entityId, String name) {
-        this.id = id;
+        setId(id);
         setEntityId(entityId);
         this.name = name;
     }
-    
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
+    	
 	public void setEntityId(String entityId) {
         this.entityId = entityId;
     }

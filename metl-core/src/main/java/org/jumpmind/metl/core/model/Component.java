@@ -62,7 +62,7 @@ public class Component extends AbstractObjectWithSettings {
 
     public Component(String id) {
         this();
-        this.id = id;
+        setId(id);
     }
 
     public Component(Resource resource, Model inputModel, Model outputModel,
@@ -251,7 +251,7 @@ public class Component extends AbstractObjectWithSettings {
 
     @Override
     protected Setting createSettingData() {
-        return new ComponentSetting(id);
+        return new ComponentSetting(getId());
     }
 
     public void setProjectVersionId(String projectVersionId) {
@@ -316,35 +316,6 @@ public class Component extends AbstractObjectWithSettings {
             }
         }
         return names;
-    }
-	
-	
-    @Override
-    public AbstractObject copy() {
-        Component component = (Component) super.copy();
-        component.setEntitySettings(new ArrayList<ComponentEntitySetting>());
-        component.setAttributeSettings(new ArrayList<ComponentAttributeSetting>());
-        component.setSettings(new ArrayList<Setting>());
-
-        for (Setting setting : settings) {
-            ComponentSetting cSetting = (ComponentSetting) setting.copy();
-            cSetting.setComponentId(component.getId());
-            component.getSettings().add(cSetting);
-        }
-
-        for (ComponentAttributeSetting setting : attributeSettings) {
-            setting = (ComponentAttributeSetting) setting.copy();
-            setting.setComponentId(component.getId());
-            component.getAttributeSettings().add(setting);
-        }
-
-        for (ComponentEntitySetting setting : entitySettings) {
-            setting = (ComponentEntitySetting) setting.copy();
-            setting.setComponentId(component.getId());
-            component.getEntitySettings().add(setting);
-        }
-
-        return component;
     }
     
 }

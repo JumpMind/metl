@@ -262,7 +262,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         List<AbstractObject> copies = new ArrayList<AbstractObject>(selected.size());
         for (AbstractObject s : selected) {
 	        if (s instanceof FlowStep) {
-	            FlowStep copy = (FlowStep)s.copy();
+	            FlowStep copy = configurationService.copy((FlowStep)s);
 	            copy.setX(copy.getX() + 20);
 	            copy.setY(copy.getY() + 20);
 	            copy.setName(copy.getName() + " Copy");

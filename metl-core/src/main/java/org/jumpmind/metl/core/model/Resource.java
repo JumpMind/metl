@@ -42,7 +42,7 @@ public class Resource extends AbstractObjectWithSettings {
     }
 
     public Resource(String id) {
-        this.id = id;
+        setId(id);
     }
 
     public Resource(Folder folder, Setting... settings) {
@@ -88,7 +88,7 @@ public class Resource extends AbstractObjectWithSettings {
 
     @Override
     protected Setting createSettingData() {
-        return new ResourceSetting(id);
+        return new ResourceSetting(getId());
     }
 
     @Override

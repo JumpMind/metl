@@ -241,7 +241,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConfigurationService configurationService() {
         if (configurationService == null) {
-            configurationService = new ConfigurationSqlService(configDatabasePlatform(),
+            configurationService = new ConfigurationSqlService(componentDefinitionFactory(), configDatabasePlatform(),
                     persistenceManager(), tablePrefix());
         }
         return configurationService;

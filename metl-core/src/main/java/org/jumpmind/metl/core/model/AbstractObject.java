@@ -28,7 +28,7 @@ abstract public class AbstractObject implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
     
-    String id = UUID.randomUUID().toString();
+    private String id;
 
     Date createTime = new Date();
 
@@ -50,6 +50,9 @@ abstract public class AbstractObject implements Serializable, Cloneable {
     }
     
     public String getId() {
+        if (id == null) {
+            id = UUID.randomUUID().toString();
+        }
         return id;
     }
 
@@ -91,13 +94,13 @@ abstract public class AbstractObject implements Serializable, Cloneable {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return getId().hashCode();
     }
     
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof AbstractObject && obj.getClass().equals(getClass())) {
-            return id.equals(((AbstractObject)obj).getId());
+            return getId().equals(((AbstractObject)obj).getId());
         } else {
             return super.equals(obj);
         }            
@@ -108,13 +111,12 @@ abstract public class AbstractObject implements Serializable, Cloneable {
         return getName();
     }
     
-    public AbstractObject copy() {
+    public AbstractObject clone() {
         try {
-            AbstractObject clone = (AbstractObject)this.clone();
-            clone.setId(UUID.randomUUID().toString());
-            return clone;
+            return (AbstractObject)super.clone();
         } catch (CloneNotSupportedException e) {
             throw new IllegalStateException(e);
         }
     }
+    
 }

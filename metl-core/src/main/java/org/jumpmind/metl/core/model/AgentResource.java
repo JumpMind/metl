@@ -31,7 +31,7 @@ public class AgentResource extends Resource {
 
     @Override
     protected Setting createSettingData() {
-        return new AgentResourceSetting(id, agentId);
+        return new AgentResourceSetting(getId(), agentId);
     }
 
     public String getAgentId() {

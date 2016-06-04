@@ -53,7 +53,7 @@ public class User extends AbstractObjectWithSettings {
 
     @Override
     protected Setting createSettingData() {
-        return new UserSetting(id);
+        return new UserSetting(getId());
     }
 
     @Override

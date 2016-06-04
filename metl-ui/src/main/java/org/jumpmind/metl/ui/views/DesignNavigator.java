@@ -770,10 +770,11 @@ public class DesignNavigator extends VerticalLayout {
     }
     
     protected void copySelected() {
+        IConfigurationService configurationService = context.getConfigurationService();
         Object object = treeTable.getValue();
         if (object instanceof ModelName) {
-            Model oldModel = context.getConfigurationService().findModel(((ModelName)object).getId());
-            Model newModel = (Model)oldModel.copy();
+            Model oldModel = configurationService.findModel(((ModelName)object).getId());
+            Model newModel = configurationService.copy(oldModel);
             newModel.setName(newModel.getName() + " Copy");
             context.getConfigurationService().save(newModel);
             
@@ -787,8 +788,8 @@ public class DesignNavigator extends VerticalLayout {
             treeTable.setParent(model, treeTable.getParent(object));
             treeTable.setChildrenAllowed(model, false);
         } else if (object instanceof FlowName) {
-            Flow oldFlow = context.getConfigurationService().findFlow(((FlowName)object).getId());
-            Flow newFlow = (Flow)oldFlow.copy();
+            Flow oldFlow = configurationService.findFlow(((FlowName)object).getId());
+            Flow newFlow = configurationService.copy((Flow)oldFlow);
             newFlow.setName(newFlow.getName() + " Copy");
             context.getConfigurationService().save(newFlow);
             

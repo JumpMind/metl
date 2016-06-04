@@ -218,5 +218,11 @@ public interface IConfigurationService {
     public List<Flow> findAffectedFlowsByResource(String resourceId);
     
     public List<Flow> findAffectedFlowsByFlow(String flowId);
+
+    public FlowStep copy(FlowStep original);
+
+    public Flow copy(Flow original);
+
+    public Model copy(Model original);
     
 }

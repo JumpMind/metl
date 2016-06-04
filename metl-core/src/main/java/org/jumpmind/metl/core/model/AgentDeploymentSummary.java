@@ -53,7 +53,7 @@ public class AgentDeploymentSummary extends AbstractObject {
     }
 
     public void copy(AgentDeployment agentDeployment) {
-        id = agentDeployment.getId();
+        setId(agentDeployment.getId());
         name = agentDeployment.getName();
         type = TYPE_FLOW;
         status = agentDeployment.getStatus();
@@ -63,7 +63,7 @@ public class AgentDeploymentSummary extends AbstractObject {
     }
 
     public boolean isChanged(AgentDeploymentSummary o) {
-        return ! new EqualsBuilder().append(id, o.id).append(projectName, o.projectName).append(type, o.type).append(name, o.name).append(status, o.status)
+        return ! new EqualsBuilder().append(getId(), o.getId()).append(projectName, o.projectName).append(type, o.type).append(name, o.name).append(status, o.status)
             .append(logLevel, o.logLevel).append(startType, o.startType).append(startExpression, o.startExpression).isEquals();
     }
         

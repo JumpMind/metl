@@ -37,9 +37,9 @@ public class ModelEntity extends AbstractObject {
         modelAttributes = new ArrayList<ModelAttribute>();
     }
 
-    public ModelEntity(String Id, String name) {
+    public ModelEntity(String id, String name) {
         this();
-        this.id = Id;
+        setId(id);
         this.name = name;
     }
 
@@ -92,17 +92,17 @@ public class ModelEntity extends AbstractObject {
         return pksOnly;
     }
 
-    @Override
-    public AbstractObject copy() {
-        ModelEntity entity = (ModelEntity) super.copy();
-        entity.setModelAttributes(new ArrayList<ModelAttribute>());
-        for (ModelAttribute modelAttribute : modelAttributes) {
-            modelAttribute = (ModelAttribute) modelAttribute.copy();
-            modelAttribute.setEntityId(entity.getId());
-            entity.getModelAttributes().add(modelAttribute);
-        }
-
-        return entity;
-    }
+//    @Override
+//    public AbstractObject copy() {
+//        ModelEntity entity = (ModelEntity) super.copy();
+//        entity.setModelAttributes(new ArrayList<ModelAttribute>());
+//        for (ModelAttribute modelAttribute : modelAttributes) {
+//            modelAttribute = (ModelAttribute) modelAttribute.copy();
+//            modelAttribute.setEntityId(entity.getId());
+//            entity.getModelAttributes().add(modelAttribute);
+//        }
+//
+//        return entity;
+//    }
 
 }
