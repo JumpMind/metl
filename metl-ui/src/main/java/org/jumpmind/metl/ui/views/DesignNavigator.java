@@ -41,6 +41,7 @@ import org.jumpmind.metl.core.model.FolderName;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.User;
@@ -122,13 +123,27 @@ public class DesignNavigator extends VerticalLayout {
 
     AbstractObject itemBeingEdited;
 
-    MenuItem newMenu;
+    MenuItem fileMenu;
 
+    MenuItem newMenu;
+    
     MenuItem editMenu;
 
     MenuItem newFlow;
 
     MenuItem newModel;
+    
+    MenuItem newResource;
+    
+    MenuItem exportFlow;
+    
+    MenuItem exportModel;
+    
+    MenuItem exportProject;
+    
+    MenuItem exportResource;
+    
+    MenuItem importConfig;
 
     MenuItem newFileResource;
     
@@ -140,23 +155,13 @@ public class DesignNavigator extends VerticalLayout {
     
     MenuItem newJMSResource;
     
-    MenuItem newFtpResource;
-
-    MenuItem blank;    
+    MenuItem newFtpResource;    
 
     MenuItem delete;
 
     MenuItem closeProject;
-
-    MenuItem exportProject;
     
-    MenuItem exportFlow;
-    
-    MenuItem exportModel;
-
     MenuItem search;
-    
-    MenuItem exportMenu;
 
     FileDownloader fileDownloader;
 
@@ -197,8 +202,7 @@ public class DesignNavigator extends VerticalLayout {
         Object selected = treeTable.getValue();
 
         editMenu.setEnabled(false);        
-        newMenu.setEnabled(true);
-        blank.setVisible(false);
+        fileMenu.setEnabled(true);
         newFlow.setVisible(false);
         newModel.setVisible(false);
         newDataSource.setVisible(false);
@@ -221,12 +225,10 @@ public class DesignNavigator extends VerticalLayout {
                 newSSHResource.setVisible(true);
                 newFtpResource.setVisible(true);
             } else {
-                blank.setVisible(true);
-                newMenu.setEnabled(false);
+                fileMenu.setEnabled(false);
             }
         } else {
-            blank.setVisible(true);
-            newMenu.setEnabled(false);
+            fileMenu.setEnabled(false);
 
             if (selected != null && !(selected instanceof ProjectVersion)) {
                 editMenu.setEnabled(true);
@@ -235,10 +237,6 @@ public class DesignNavigator extends VerticalLayout {
 
         closeProject.setEnabled(selected instanceof ProjectVersion);
         
-        exportMenu.setEnabled(false);
-        exportProject.setEnabled(false);
-        exportFlow.setEnabled(false);
-        exportModel.setEnabled(false);
         if (selected != null) {
             if (selected instanceof ProjectVersion) {
                 exportProject.setEnabled(true);
@@ -246,10 +244,9 @@ public class DesignNavigator extends VerticalLayout {
                 exportFlow.setEnabled(true);
             } else if (selected instanceof ModelName) {
                 exportModel.setEnabled(true);
+            } else if (selected instanceof ResourceName) {
+                exportResource.setEnabled(true);
             }
-            
-            exportMenu.setEnabled(selected instanceof ProjectVersion || selected instanceof FlowName
-                    || selected instanceof ModelName);
         }
 
         boolean deleteEnabled = false;
@@ -266,10 +263,28 @@ public class DesignNavigator extends VerticalLayout {
         leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
         leftMenuBar.setWidth(100, Unit.PERCENTAGE);
 
-        newMenu = leftMenuBar.addItem("New", null);
+        fileMenu = leftMenuBar.addItem("File", null);
 
         editMenu = leftMenuBar.addItem("Edit", null);
+        
+        newMenu = fileMenu.addItem("New",null);
+        
+        newFlow = newMenu.addItem("Flow", selectedItem -> addNewFlow());
+        newModel = newMenu.addItem("Model", selectedItem -> addNewModel());
+        newDataSource = newMenu.addItem("Database", selectedItem -> addNewDatabase());       
+        newFtpResource = newMenu.addItem("FTP", selectedItem -> addNewFtpResource());
+        newFileResource = newMenu.addItem("Local File System", selectedItem -> addNewLocalFileSystem());        
+        newSSHResource = newMenu.addItem("Sftp", selectedItem -> addNewSSHFileSystem());        
+        newWebResource = newMenu.addItem("Web Resource", selectedItem -> addNewHttpResource());
+        newJMSResource = newMenu.addItem("JMS", selectedItem -> addNewJMSFileSystem());
 
+        exportFlow = fileMenu.addItem("Export Flow", seletedItem -> exportFlow());
+        exportModel = fileMenu.addItem("Export Model", selectedItem -> exportModel());
+        exportResource = fileMenu.addItem("Export Resource", selectedItem -> exportResource());
+        exportProject = fileMenu.addItem("Export Project", selectedItem -> exportProject());
+        
+        importConfig = fileMenu.addItem("Import", selecteItem -> importConfig());
+        
         editMenu.addItem("Open", selectedItem -> open(treeTable.getValue()));
 
         editMenu.addItem("Rename", selectedItem -> startEditingItem((AbstractObject) treeTable.getValue()));
@@ -282,21 +297,7 @@ public class DesignNavigator extends VerticalLayout {
         projectMenu.addItem("Manage", selectedItem -> viewProjects());
 
         closeProject = projectMenu.addItem("Close", selectedItem -> closeProject());
-        blank = newMenu.addItem("", null);
-        newFlow = newMenu.addItem("Flow", selectedItem -> addNewFlow());
-        newModel = newMenu.addItem("Model", selectedItem -> addNewModel());
-        newDataSource = newMenu.addItem("Database", selectedItem -> addNewDatabase());       
-        newFtpResource = newMenu.addItem("FTP", selectedItem -> addNewFtpResource());
-        newFileResource = newMenu.addItem("Local File System", selectedItem -> addNewLocalFileSystem());        
-        newSSHResource = newMenu.addItem("Sftp", selectedItem -> addNewSSHFileSystem());        
-        newWebResource = newMenu.addItem("Web Resource", selectedItem -> addNewHttpResource());
-        newJMSResource = newMenu.addItem("JMS", selectedItem -> addNewJMSFileSystem());
-
-        exportMenu = leftMenuBar.addItem("Export", null);
-        exportFlow = exportMenu.addItem("Flow", selectedItem -> exportFlow());
-        exportProject = exportMenu.addItem("Project", selectedItem -> exportProject());
-        exportModel = exportMenu.addItem("Model", selectedItem -> exportModel());
-        
+       
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
 
@@ -712,12 +713,23 @@ public class DesignNavigator extends VerticalLayout {
             ModelName modelName = (ModelName) selected;
             Model model = context.getConfigurationService().findModel(modelName.getId());
             ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(model.getProjectVersionId());
-            final String export = context.getImportExportService().export(projectVersion, model);            
+            final String export = context.getImportExportService().exportModel(projectVersion.getId(), model.getId());            
             downloadExport(export, model.getName().toLowerCase().replaceAll(" ", "-"));
         }
     }
     
-    protected void exportSharedComponent() {
+    protected void exportResource() {
+        Object selected = treeTable.getValue();
+        if (selected instanceof ResourceName) {
+            ResourceName resourceName = (ResourceName) selected;
+            Resource resource = context.getConfigurationService().findResource(resourceName.getId());
+            ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(resource.getProjectVersionId());
+            final String export = context.getImportExportService().exportModel(projectVersion.getId(), resource.getId());            
+            downloadExport(export, resource.getName().toLowerCase().replaceAll(" ", "-"));
+        }        
+    }
+    
+    protected void importConfig() {
         //TODO:
     }
     
@@ -737,7 +749,7 @@ public class DesignNavigator extends VerticalLayout {
             }
         };
         String datetime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        StreamResource resource = new StreamResource(ss, String.format("%s-config-%s.sql",
+        StreamResource resource = new StreamResource(ss, String.format("%s-config-%s.json",
                 filename, datetime));
         final String KEY = "export";
         setResource(KEY, resource);
