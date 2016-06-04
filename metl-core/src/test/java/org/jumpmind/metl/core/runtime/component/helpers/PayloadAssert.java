@@ -30,21 +30,22 @@ import org.junit.Assert;
 
 public class PayloadAssert extends Assert {
 	
-	public static void assertPayload(int callbackNumber, int messageNumber, Serializable expected, Serializable actual, boolean isPayloadXML) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+    public static void assertPayload(int callbackNumber, int messageNumber, Serializable expected, Serializable actual, boolean isPayloadXML) {
 		TestUtils.assertNullNotNull(expected, actual);
 		if (expected != null && actual != null) {
 			if (expected instanceof List && actual instanceof List) {
 				
-				assertEquals("Payloads are not the same size [callback " + callbackNumber + ", message " + messageNumber, ((List) expected).size(), ((List) actual).size());
+				assertEquals("Payloads are not the same size [callback " + callbackNumber + ", message " + messageNumber, ((List<?>) expected).size(), ((List<?>) actual).size());
 				
-				if (((List) expected).size() > 0 && ((List) actual).size() > 0) {
+				if (((List<?>) expected).size() > 0 && ((List<?>) actual).size() > 0) {
 					
 					// Check for EntityData list
-					if (((List) expected).get(0) instanceof EntityData && ((List) actual).get(0) instanceof EntityData) {
+					if (((List<?>) expected).get(0) instanceof EntityData && ((List<?>) actual).get(0) instanceof EntityData) {
 						
-						for (int i = 0; i < ((List) expected).size(); i++) {
-							EntityData expectedData = (EntityData) ((List) expected).get(i);
-							EntityData actualData = (EntityData) ((List) actual).get(i);
+						for (int i = 0; i < ((List<?>) expected).size(); i++) {
+							EntityData expectedData = (EntityData) ((List<?>) expected).get(i);
+							EntityData actualData = (EntityData) ((List<?>) actual).get(i);
 							
 							for (String key : expectedData.keySet()) {
 								assertTrue(printPayloadKeyNotFound(key, callbackNumber, messageNumber, i+1, (List)actual), 
