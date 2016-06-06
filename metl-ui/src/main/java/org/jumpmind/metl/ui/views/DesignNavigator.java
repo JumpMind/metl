@@ -57,6 +57,7 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.EnableFocusTextField;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.views.ImportDialog.IImportListener;
 import org.jumpmind.metl.ui.views.design.EditFlowPanel;
 import org.jumpmind.metl.ui.views.design.EditModelPanel;
 import org.jumpmind.metl.ui.views.design.ManageProjectsPanel;
@@ -133,7 +134,7 @@ public class DesignNavigator extends VerticalLayout {
 
     MenuItem newModel;
     
-    MenuItem newResource;
+    MenuItem exportMenu;
     
     MenuItem exportFlow;
     
@@ -145,6 +146,8 @@ public class DesignNavigator extends VerticalLayout {
     
     MenuItem importConfig;
 
+    MenuItem resourceMenu;
+    
     MenuItem newFileResource;
     
     MenuItem newSSHResource;
@@ -168,7 +171,7 @@ public class DesignNavigator extends VerticalLayout {
     HorizontalLayout searchBarLayout;
 
     VerticalLayout openProjectsLayout;
-
+    
     public DesignNavigator(ApplicationContext context, TabbedPanel tabs) {
         this.context = context;
         this.tabs = tabs;
@@ -201,106 +204,113 @@ public class DesignNavigator extends VerticalLayout {
     protected void setMenuItemsEnabled() {
         Object selected = treeTable.getValue();
 
-        editMenu.setEnabled(false);        
+        //file menu cleanup
         fileMenu.setEnabled(true);
-        newFlow.setVisible(false);
-        newModel.setVisible(false);
-        newDataSource.setVisible(false);
-        newSSHResource.setVisible(false);
-        newWebResource.setVisible(false);
-        newJMSResource.setVisible(false);
-        newFtpResource.setVisible(false);
-        newFileResource.setVisible(false);
-        if (selected instanceof FolderName) {
-            FolderName folder = (FolderName) selected;
-            if (folder.getName().equals("Flows") || folder.getName().equals("Tests")) {
-                newFlow.setVisible(true);
-            } else if (folder.getName().equals("Models")) {
-                newModel.setVisible(true);
-            } else if (folder.getName().equals("Resources")) {
-                newDataSource.setVisible(true);
-                newFileResource.setVisible(true);
-                newWebResource.setVisible(true);
-                newJMSResource.setVisible(true);
-                newSSHResource.setVisible(true);
-                newFtpResource.setVisible(true);
-            } else {
-                fileMenu.setEnabled(false);
-            }
-        } else {
-            fileMenu.setEnabled(false);
-
-            if (selected != null && !(selected instanceof ProjectVersion)) {
-                editMenu.setEnabled(true);
-            }
-        }
-
-        closeProject.setEnabled(selected instanceof ProjectVersion);
+        newMenu.setEnabled(false);
+        newFlow.setEnabled(false);
+        newModel.setEnabled(false);
+        resourceMenu.setEnabled(false);
+        //these will only be visible when resource menu is enabled
+        newDataSource.setEnabled(true);      
+        newFtpResource.setEnabled(true);
+        newFileResource.setEnabled(true);
+        newSSHResource.setEnabled(true);
+        newWebResource.setEnabled(true);
+        newJMSResource.setEnabled(true);
+        exportMenu.setEnabled(false);
+        exportProject.setEnabled(false);
+        exportFlow.setEnabled(false);
+        exportModel.setEnabled(false);
+        exportResource.setEnabled(false);
+        importConfig.setEnabled(true);
         
+        //edit menu cleanup
+        editMenu.setEnabled(false);
+        
+        //project menu cleanup
+        closeProject.setEnabled(false);
+
+        // enable based on selection
         if (selected != null) {
             if (selected instanceof ProjectVersion) {
+                closeProject.setEnabled(true);
+                exportMenu.setEnabled(true);
                 exportProject.setEnabled(true);
-            } else if (selected instanceof FlowName) {
-                exportFlow.setEnabled(true);
-            } else if (selected instanceof ModelName) {
-                exportModel.setEnabled(true);
-            } else if (selected instanceof ResourceName) {
-                exportResource.setEnabled(true);
+            } else if (selected instanceof FolderName) {
+                newMenu.setEnabled(true);
+                FolderName folder = (FolderName) selected;
+                if (folder.getName().equals("Flows") || folder.getName().equals("Tests")) {
+                    newFlow.setEnabled(true);
+                } else if (folder.getName().equals("Models")) {
+                    newModel.setEnabled(true);
+                } else if (folder.getName().equals("Resources")) {
+                    resourceMenu.setEnabled(true);
+                }
+            } else {
+                editMenu.setEnabled(true);
+                exportMenu.setEnabled(true);
+                if (selected instanceof FlowName) {
+                    exportFlow.setEnabled(true);
+                } else if (selected instanceof ModelName) {
+                    exportModel.setEnabled(true);
+                } else if (selected instanceof ResourceName) {
+                    exportResource.setEnabled(true);
+                }           
             }
         }
-
-        boolean deleteEnabled = false;
-        deleteEnabled |= isDeleteButtonEnabled(treeTable.getValue());
-        delete.setEnabled(deleteEnabled);
-
     }
 
     protected HorizontalLayout buildMenuBar() {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setWidth(100, Unit.PERCENTAGE);
-
+        
+        //left menu bar
         MenuBar leftMenuBar = new MenuBar();
         leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
         leftMenuBar.setWidth(100, Unit.PERCENTAGE);
 
+        //file menu
         fileMenu = leftMenuBar.addItem("File", null);
-
-        editMenu = leftMenuBar.addItem("Edit", null);
         
+        //file - new
         newMenu = fileMenu.addItem("New",null);
-        
         newFlow = newMenu.addItem("Flow", selectedItem -> addNewFlow());
         newModel = newMenu.addItem("Model", selectedItem -> addNewModel());
-        newDataSource = newMenu.addItem("Database", selectedItem -> addNewDatabase());       
-        newFtpResource = newMenu.addItem("FTP", selectedItem -> addNewFtpResource());
-        newFileResource = newMenu.addItem("Local File System", selectedItem -> addNewLocalFileSystem());        
-        newSSHResource = newMenu.addItem("Sftp", selectedItem -> addNewSSHFileSystem());        
-        newWebResource = newMenu.addItem("Web Resource", selectedItem -> addNewHttpResource());
-        newJMSResource = newMenu.addItem("JMS", selectedItem -> addNewJMSFileSystem());
+        
+        //file - new - resource
+        resourceMenu = newMenu.addItem("Resource", null);
+        newDataSource = resourceMenu.addItem("Database", selectedItem -> addNewDatabase());       
+        newFtpResource = resourceMenu.addItem("FTP", selectedItem -> addNewFtpResource());
+        newFileResource = resourceMenu.addItem("Local File System", selectedItem -> addNewLocalFileSystem());        
+        newSSHResource = resourceMenu.addItem("Sftp", selectedItem -> addNewSSHFileSystem());        
+        newWebResource = resourceMenu.addItem("Web Resource", selectedItem -> addNewHttpResource());
+        newJMSResource = resourceMenu.addItem("JMS", selectedItem -> addNewJMSFileSystem());
 
-        exportFlow = fileMenu.addItem("Export Flow", seletedItem -> exportFlow());
-        exportModel = fileMenu.addItem("Export Model", selectedItem -> exportModel());
-        exportResource = fileMenu.addItem("Export Resource", selectedItem -> exportResource());
-        exportProject = fileMenu.addItem("Export Project", selectedItem -> exportProject());
+        //file - export
+        exportMenu = fileMenu.addItem("Export", null);
+        exportFlow = exportMenu.addItem("Export Flow", seletedItem -> exportFlow());
+        exportModel = exportMenu.addItem("Export Model", selectedItem -> exportModel());
+        exportResource = exportMenu.addItem("Export Resource", selectedItem -> exportResource());
+        exportProject = exportMenu.addItem("Export Project", selectedItem -> exportProject());
         
-        importConfig = fileMenu.addItem("Import", selecteItem -> importConfig());
+        //file - import
+        importConfig = fileMenu.addItem("Import Config", selecteItem -> importConfig());
         
+        //edit menu
+        editMenu = leftMenuBar.addItem("Edit", null);
         editMenu.addItem("Open", selectedItem -> open(treeTable.getValue()));
-
-        editMenu.addItem("Rename", selectedItem -> startEditingItem((AbstractObject) treeTable.getValue()));
-        
-        editMenu.addItem("Copy", selectedItem ->  copySelected());
-        
+        editMenu.addItem("Rename", selectedItem -> startEditingItem((AbstractObject) treeTable.getValue()));        
+        editMenu.addItem("Copy", selectedItem ->  copySelected());        
         delete = editMenu.addItem("Remove", selectedItem -> handleDelete());
-
+        
+        //project menu
         MenuItem projectMenu = leftMenuBar.addItem("Project", null);
         projectMenu.addItem("Manage", selectedItem -> viewProjects());
-
         closeProject = projectMenu.addItem("Close", selectedItem -> closeProject());
        
+        //right menu
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
-
         search = rightMenuBar.addItem("", Icons.SEARCH, new Command() {
 
             @Override
@@ -317,7 +327,7 @@ public class DesignNavigator extends VerticalLayout {
 
         return layout;
     }
-
+    
     public void addProjectVersion(ProjectVersion projectVersion) {
         context.getOpenProjects().remove(projectVersion);
         context.getOpenProjects().add(projectVersion);
@@ -702,7 +712,7 @@ public class DesignNavigator extends VerticalLayout {
             FlowName flowName = (FlowName) selected;
             Flow flow = context.getConfigurationService().findFlow(flowName.getId());
             ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(flow.getProjectVersionId());
-            final String export = context.getConfigurationService().export(projectVersion, flow);            
+            final String export = context.getImportExportService().exportFlow(projectVersion.getId(), flow.getId());            
             downloadExport(export, flow.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-"));
         }        
     }
@@ -724,13 +734,13 @@ public class DesignNavigator extends VerticalLayout {
             ResourceName resourceName = (ResourceName) selected;
             Resource resource = context.getConfigurationService().findResource(resourceName.getId());
             ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(resource.getProjectVersionId());
-            final String export = context.getImportExportService().exportModel(projectVersion.getId(), resource.getId());            
+            final String export = context.getImportExportService().exportResource(projectVersion.getId(), resource.getId());            
             downloadExport(export, resource.getName().toLowerCase().replaceAll(" ", "-"));
         }        
     }
     
     protected void importConfig() {
-        //TODO:
+        ImportDialog.show("Import Config", "Click the import button to import your config", new ImportConfigurationListener());
     }
     
     protected void downloadExport(final String export, String filename) {
@@ -961,6 +971,23 @@ public class DesignNavigator extends VerticalLayout {
         }
     }
 
+    class ImportConfigurationListener implements IImportListener {
+
+        String dataToImport;
+        
+        public void setDataToImport(String dataToImport) {
+            this.dataToImport = dataToImport;
+        }
+        
+        @Override
+        public boolean onFinished() {
+            context.getImportExportService().importConfiguration(dataToImport);
+
+            return false;
+        }
+        
+    }
+    
     class DeleteFlowConfirmationListener implements IConfirmListener {
 
         FlowName toDelete;
@@ -1029,5 +1056,5 @@ public class DesignNavigator extends VerticalLayout {
             return true;
         }
     }
-
+    
 }

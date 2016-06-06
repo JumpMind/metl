@@ -1,9 +1,12 @@
 package org.jumpmind.metl.core.persist;
 
-import org.jumpmind.metl.core.model.Model;
-import org.jumpmind.metl.core.model.ProjectVersion;
-
 public interface IImportExportService {
 
-    public String export(ProjectVersion projectVersion, Model model);
+    public String exportModel(String projectVersionId, String modelId);
+    
+    public String exportResource(String projectVersionId, String resourceId);
+    
+    public String exportFlow(String projectVersionid, String flowId);
+    
+    public void importConfiguration(String dataToImport);
 }
