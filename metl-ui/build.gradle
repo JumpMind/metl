@@ -82,3 +82,4 @@ develop.dependsOn vaadinCompileWidgetset
 develop.dependsOn copyJavaDocsToWebapp
 //assemble.dependsOn generateDocs
 assemble.dependsOn copyJavaDocsToWebapp
+assemble.dependsOn(jar)
