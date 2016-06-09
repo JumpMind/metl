@@ -198,6 +198,7 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
             context.getConfigurationService().save(setting);
         } else if (setting != null && !StringUtils.equals(setting.getValue(), value)) {
             if (value == null) {
+                setting.setValue(value);
                 context.getConfigurationService().delete(setting);
             } else {
                 setting.setValue(value);
@@ -215,6 +216,7 @@ public class EditXmlParserPanel extends AbstractComponentEditPanel implements Te
             context.getConfigurationService().save(setting);
         } else if (setting != null && !StringUtils.equals(setting.getValue(), value)) {
             if (value == null) {
+                setting.setValue(value);
                 context.getConfigurationService().delete(setting);
             } else {
                 setting.setValue(value);
