@@ -17,12 +17,21 @@ eclipse {
 
 war {
     archiveName="metl.war"
+    jar.enabled = true
     from {
         configurations.executableWar.collect {
             it.isDirectory() ? it : project.zipTree(it)
         }
     }    
     manifest { attributes 'Main-Class': 'org.jumpmind.metl.Metl' }
+}
+
+configurations.archives.with {    
+    artifacts.remove artifacts.find { it.archiveTask.is war }
+}
+    
+artifacts {
+    archives jar
 }
 
 // Don't compress javascript

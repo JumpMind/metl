@@ -14,6 +14,7 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
 	apply plugin: 'license'
 	apply plugin: 'maven'
 	
+	buildNumber = 'dev'.equals(buildNumber) ?  ('dev' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
 	version = version + "." + buildNumber
 	
     sourceCompatibility=1.8
