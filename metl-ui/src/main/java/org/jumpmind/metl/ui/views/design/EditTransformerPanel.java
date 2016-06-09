@@ -23,6 +23,7 @@ package org.jumpmind.metl.ui.views.design;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -42,6 +43,7 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.Table;
@@ -56,14 +58,33 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
 
     TextField filterField;
 
+    AbstractSelect filterPopField;
+
     List<ComponentAttributeSetting> componentAttributes;
 
     BeanItemContainer<ComponentAttributeSetting> container = new BeanItemContainer<ComponentAttributeSetting>(
             ComponentAttributeSetting.class);
 
+    static final String SHOW_ALL = "Show All Entities";
+    static final String SHOW_POPULATED_ENTITIES = "Filter Populated Entites";
+
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
+
+        filterPopField = new ComboBox();
+        filterPopField.addItem(SHOW_ALL);
+        filterPopField.addItem(SHOW_POPULATED_ENTITIES);
+        filterPopField.setNullSelectionAllowed(false);
+        filterPopField.setImmediate(true);
+        filterPopField.setValue(SHOW_ALL);
+        filterPopField.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(ValueChangeEvent event) {
+                updateTable(filterField.getValue(),
+                        filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES));
+            }
+        });
+        buttonBar.addRight(filterPopField);
 
         filterField = buttonBar.addFilter();
         filterField.addTextChangeListener(new TextChangeListener() {
@@ -71,7 +92,8 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             @Override
             public void textChange(TextChangeEvent event) {
                 filterField.setValue(event.getText());
-                updateTable(event.getText());
+                updateTable(event.getText(),
+                        filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES));
             }
         });
 
@@ -171,23 +193,40 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             });
         }
 
-        updateTable(null);
+        updateTable(null, false);
 
     }
 
-    protected void updateTable(String filter) {
+    protected void updateTable(String filter, boolean filterPopulated) {
         if (componentAttributes != null) {
+            Model model = component.getInputModel();
+            Collection<String> entityNames = new ArrayList<>();
+
             filter = filter != null ? filter.toLowerCase() : null;
-            table.removeAllItems();
-            for (ComponentAttributeSetting componentAttribute : componentAttributes) {
-                Model model = component.getInputModel();
-                ModelAttribute attribute = model.getAttributeById(componentAttribute
-                        .getAttributeId());
-                ModelEntity entity = model.getEntityById(attribute.getEntityId());
-                if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)
-                        || attribute.getName().toLowerCase().contains(filter)) {
-                    table.addItem(componentAttribute);
-                }
+            if (model != null) {
+            	table.removeAllItems();
+            	// loop through the attributes with transforms to get a list of entities
+	            for (ComponentAttributeSetting componentAttribute : componentAttributes) {
+	                ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
+	                ModelEntity entity = model.getEntityById(attribute.getEntityId());
+	                if (componentAttribute.getValue() != null
+	                		&& !entityNames.contains(entity.getName())) {
+	                	entityNames.add(entity.getName());
+	                }
+	            }
+
+            	for (ComponentAttributeSetting componentAttribute : componentAttributes) {
+	                ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
+	                ModelEntity entity = model.getEntityById(attribute.getEntityId());
+	                
+	                boolean populated = !filterPopulated || entityNames.contains(entity.getName());
+	                if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)
+	                        || attribute.getName().toLowerCase().contains(filter)) {
+	                	if (populated) {
+	                		table.addItem(componentAttribute);
+	                	}
+	                }
+	            }
             }
         }
     }
