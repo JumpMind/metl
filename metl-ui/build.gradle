@@ -26,12 +26,14 @@ war {
     manifest { attributes 'Main-Class': 'org.jumpmind.metl.Metl' }
 }
 
-configurations.archives.with {    
-    artifacts.remove artifacts.find { it.archiveTask.is war }
-}
+if (publishJar) {
+    configurations.archives.with {    
+        artifacts.remove artifacts.find { it.archiveTask.is war }
+    }
     
-artifacts {
-    archives jar
+    artifacts {
+        archives jar
+    }
 }
 
 // Don't compress javascript
