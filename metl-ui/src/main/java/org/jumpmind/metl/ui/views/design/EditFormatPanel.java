@@ -181,7 +181,7 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
                 pos = endPos + 1;
             }
 
-        } else if (component.getType().equals(DelimitedFormatter.TYPE)) {
+        } else if (component.getType().equals(DelimitedFormatter.TYPE) || component.getType().equals(DelimitedParser.TYPE)) {
             int ordinal = 1;
             for (RecordFormat record : container.getItemIds()) {
                 if (record.getOrdinalSetting() != ordinal) {
