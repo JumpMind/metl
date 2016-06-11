@@ -136,14 +136,6 @@ public class DesignNavigator extends VerticalLayout {
     
     MenuItem exportMenu;
     
-    MenuItem exportFlow;
-    
-    MenuItem exportModel;
-    
-    MenuItem exportProject;
-    
-    MenuItem exportResource;
-    
     MenuItem importConfig;
 
     MenuItem resourceMenu;
@@ -218,10 +210,6 @@ public class DesignNavigator extends VerticalLayout {
         newWebResource.setEnabled(true);
         newJMSResource.setEnabled(true);
         exportMenu.setEnabled(false);
-        exportProject.setEnabled(false);
-        exportFlow.setEnabled(false);
-        exportModel.setEnabled(false);
-        exportResource.setEnabled(false);
         importConfig.setEnabled(true);
         
         //edit menu cleanup
@@ -235,7 +223,6 @@ public class DesignNavigator extends VerticalLayout {
             if (selected instanceof ProjectVersion) {
                 closeProject.setEnabled(true);
                 exportMenu.setEnabled(true);
-                exportProject.setEnabled(true);
             } else if (selected instanceof FolderName) {
                 newMenu.setEnabled(true);
                 FolderName folder = (FolderName) selected;
@@ -249,13 +236,6 @@ public class DesignNavigator extends VerticalLayout {
             } else {
                 editMenu.setEnabled(true);
                 exportMenu.setEnabled(true);
-                if (selected instanceof FlowName) {
-                    exportFlow.setEnabled(true);
-                } else if (selected instanceof ModelName) {
-                    exportModel.setEnabled(true);
-                } else if (selected instanceof ResourceName) {
-                    exportResource.setEnabled(true);
-                }           
             }
         }
     }
@@ -287,14 +267,10 @@ public class DesignNavigator extends VerticalLayout {
         newJMSResource = resourceMenu.addItem("JMS", selectedItem -> addNewJMSFileSystem());
 
         //file - export
-        exportMenu = fileMenu.addItem("Export", null);
-        exportFlow = exportMenu.addItem("Export Flow", seletedItem -> exportFlow());
-        exportModel = exportMenu.addItem("Export Model", selectedItem -> exportModel());
-        exportResource = exportMenu.addItem("Export Resource", selectedItem -> exportResource());
-        exportProject = exportMenu.addItem("Export Project", selectedItem -> exportProject());
+        exportMenu = fileMenu.addItem("Export", selectedItem -> export());
         
         //file - import
-        importConfig = fileMenu.addItem("Import Config", selecteItem -> importConfig());
+        importConfig = fileMenu.addItem("Import", selecteItem -> importConfig());
         
         //edit menu
         editMenu = leftMenuBar.addItem("Edit", null);
@@ -697,46 +673,31 @@ public class DesignNavigator extends VerticalLayout {
                 new ManageProjectsPanel(context, this));
     }
 
-    protected void exportProject() {
+    protected void export() {
         Object selected = treeTable.getValue();
         if (selected instanceof ProjectVersion) {
             ProjectVersion project = (ProjectVersion) selected;
             final String export = context.getConfigurationService().export(project);            
             downloadExport(export, project.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-"));
-        }
-    }
-
-    protected void exportFlow() {
-        Object selected = treeTable.getValue();
-        if (selected instanceof FlowName) {
+        } else if (selected instanceof FlowName) {
             FlowName flowName = (FlowName) selected;
             Flow flow = context.getConfigurationService().findFlow(flowName.getId());
             ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(flow.getProjectVersionId());
             final String export = context.getImportExportService().exportFlow(projectVersion.getId(), flow.getId());            
             downloadExport(export, flow.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-"));
-        }        
-    }
-    
-    protected void exportModel() {
-        Object selected = treeTable.getValue();
-        if (selected instanceof ModelName) {
+        } else if (selected instanceof ModelName) {
             ModelName modelName = (ModelName) selected;
             Model model = context.getConfigurationService().findModel(modelName.getId());
             ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(model.getProjectVersionId());
             final String export = context.getImportExportService().exportModel(projectVersion.getId(), model.getId());            
             downloadExport(export, model.getName().toLowerCase().replaceAll(" ", "-"));
-        }
-    }
-    
-    protected void exportResource() {
-        Object selected = treeTable.getValue();
-        if (selected instanceof ResourceName) {
+        } else if (selected instanceof ResourceName) {
             ResourceName resourceName = (ResourceName) selected;
             Resource resource = context.getConfigurationService().findResource(resourceName.getId());
             ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(resource.getProjectVersionId());
             final String export = context.getImportExportService().exportResource(projectVersion.getId(), resource.getId());            
             downloadExport(export, resource.getName().toLowerCase().replaceAll(" ", "-"));
-        }        
+        }                  
     }
     
     protected void importConfig() {
@@ -973,17 +934,10 @@ public class DesignNavigator extends VerticalLayout {
 
     class ImportConfigurationListener implements IImportListener {
 
-        String dataToImport;
-        
-        public void setDataToImport(String dataToImport) {
-            this.dataToImport = dataToImport;
-        }
-        
         @Override
-        public boolean onFinished() {
+        public void onFinished(String dataToImport) {
             context.getImportExportService().importConfiguration(dataToImport);
-
-            return false;
+            refresh();
         }
         
     }

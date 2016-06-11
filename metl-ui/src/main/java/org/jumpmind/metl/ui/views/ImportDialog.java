@@ -75,7 +75,8 @@ public class ImportDialog extends Window {
 
             public void uploadFinished(FinishedEvent event) {
                 String content = handler.getContent();   
-                //TODO: GET THIS BACK TO DESIGNNAVIGATOR SO IMPORTSERVICE CAN BE CALLED
+                importListener.onFinished(content);
+                UI.getCurrent().removeWindow(ImportDialog.this);
             }
         });
         layout.addComponent(buttonLayout);
@@ -89,7 +90,7 @@ public class ImportDialog extends Window {
     }
 
     public static interface IImportListener extends Serializable {
-        public boolean onFinished();
+        public void onFinished(String dataToImport);
     }
 
     class UploadHandler implements Receiver {

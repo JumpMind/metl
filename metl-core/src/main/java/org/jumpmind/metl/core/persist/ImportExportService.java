@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.jumpmind.db.model.Column;
 import org.jumpmind.db.model.Table;
 import org.jumpmind.db.platform.IDatabasePlatform;
@@ -24,36 +25,33 @@ public class ImportExportService extends AbstractService implements IImportExpor
     
     
     final String[][] MODEL_SQL = {
-            {"_MODEL","SELECT * FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND ID='%3$s' ORDER BY ID"},
-            {"_MODEL_ENTITY","SELECT * FROM %1$s_MODEL_ENTITY WHERE MODEL_ID='%3$s'"},
+            {"_MODEL","SELECT * FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND ID='%3$s' ORDER BY ID","ID"},
+            {"_MODEL_ENTITY","SELECT * FROM %1$s_MODEL_ENTITY WHERE MODEL_ID='%3$s'","ID"},
             {"_MODEL_ATTRIBUTE","SELECT * FROM %1$s_MODEL_ATTRIBUTE WHERE ENTITY_ID IN "
             + "(SELECT ID FROM %1$s_MODEL_ENTITY WHERE MODEL_ID IN "
-            + "(SELECT ID FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND ID='%3$s')) ORDER BY ID"}
+            + "(SELECT ID FROM %1$s_MODEL WHERE PROJECT_VERSION_ID='%2$s' AND ID='%3$s')) ORDER BY ID","ID"}
     };    
-    final String MODEL_PK = "ID";
     
     final String[][] RESOURCE_SQL = {
-            {"_RESOURCE","SELECT * FROM %1$s_RESOURCE WHERE PROJECT_VERSION_ID = '%2$s' AND ID='%3$s' ORDER BY ID"},
-            {"_RESOURCE_SETTING","SELECT * FROM %1$s_RESOURCE_SETTING WHERE RESOURCE_ID='%3$s' ORDER BY NAME"}
+            {"_RESOURCE","SELECT * FROM %1$s_RESOURCE WHERE PROJECT_VERSION_ID = '%2$s' AND ID='%3$s' ORDER BY ID","ID"},
+            {"_RESOURCE_SETTING","SELECT * FROM %1$s_RESOURCE_SETTING WHERE RESOURCE_ID='%3$s' ORDER BY NAME","RESOURCE_ID,NAME"}
     };
-    final String RESOURCE_PK = "ID";
     
     final String[][] FLOW_SQL = {
             {"_COMPONENT","SELECT * FROM %1$s_COMPONENT WHERE PROJECT_VERSION_ID='%2$s' AND ID IN "
-                    + "(SELECT DISTINCT COMPONENT_ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s') "},
+                    + "(SELECT DISTINCT COMPONENT_ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s') ", "ID"},
             {"_COMPONENT_SETTING","SELECT * FROM %1$s_COMPONENT_SETTING WHERE COMPONENT_ID IN "
-                    + "(SELECT DISTINCT COMPONENT_ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s')"},
+                    + "(SELECT DISTINCT COMPONENT_ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s')", "ID"},
             {"_COMPONENT_ENTITY_SETTING","SELECT * FROM %1$s_COMPONENT_ENTITY_SETTING WHERE COMPONENT_ID IN "
-                    + "(SELECT DISTINCT COMPONENT_ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s')"},
+                    + "(SELECT DISTINCT COMPONENT_ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s')", "ID"},
             {"_COMPONENT_ATTRIBUTE_SETTING","SELECT * FROM %1$s_COMPONENT_ATTRIBUTE_SETTING WHERE COMPONENT_ID IN "
-                    + "(SELECT DISTINCT COMPONENT_ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s')"},
-            {"_FLOW","SELECT * FROM %1$s_FLOW WHERE PROJECT_VERSION_ID='%2$s' AND ID='%3$s' ORDER BY ID"},
-            {"_FLOW_PARAMETER","SELECT * FROM %1$s_FLOW_PARAMETER WHERE FLOW_ID='%3$s'"},
-            {"_FLOW_STEP","SELECT * FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s'"},
+                    + "(SELECT DISTINCT COMPONENT_ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s')", "ID"},
+            {"_FLOW","SELECT * FROM %1$s_FLOW WHERE PROJECT_VERSION_ID='%2$s' AND ID='%3$s' ORDER BY ID", "ID"},
+            {"_FLOW_PARAMETER","SELECT * FROM %1$s_FLOW_PARAMETER WHERE FLOW_ID='%3$s'", "ID"},
+            {"_FLOW_STEP","SELECT * FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s'", "ID"},
             {"_FLOW_STEP_LINK","SELECT * FROM %1$s_FLOW_STEP_LINK WHERE SOURCE_STEP_ID IN "
-                    + "(SELECT DISTINCT ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s')"}            
+                    + "(SELECT DISTINCT ID FROM %1$s_FLOW_STEP WHERE FLOW_ID='%3$s')", "SOURCE_STEP_ID,TARGET_STEP_ID"}            
     };
-    final String FLOW_PK = "ID";
     
     private IDatabasePlatform databasePlatform;
     private String tablePrefix;
@@ -228,61 +226,52 @@ public class ImportExportService extends AbstractService implements IImportExpor
     private void importResourceConfiguration(ImportConfigData importData, ISqlTransaction transaction) {
         
         String projectVersionId = (String) importData.getResourceData().get(0).getTableData().get(0).get("PROJECT_VERSION_ID");
-        String resourceId = (String) importData.getModelData().get(0).getTableData().get(0).get(RESOURCE_PK);
-        ConfigData existingConfigData = getModelConfigData(projectVersionId, resourceId);
+        String resourceId = (String) importData.getResourceData().get(0).getTableData().get(0).get(RESOURCE_SQL[0][2]);
+        ConfigData existingConfigData = getResourceConfigData(projectVersionId, resourceId);
    
-        TableData existingResourceData = existingConfigData.resourceData.get(0);
-        TableData importResourceData = importData.resourceData.get(0);          
-        processConfigTableData(importData, existingResourceData, importResourceData, resourceId, transaction);
-        
-        TableData existingResourceSettingData = existingConfigData.resourceData.get(1);
-        TableData importResourceSettingData = importData.resourceData.get(1);                  
-        processConfigTableData(importData, existingResourceSettingData, importResourceSettingData, resourceId, transaction);        
-        
+        for (int i = 0; i <= RESOURCE_SQL.length-1; i++) {
+            TableData existingResourceData = existingConfigData.resourceData.get(i);
+            TableData importResourceData = importData.resourceData.get(i);          
+            processConfigTableData(importData, existingResourceData, importResourceData, RESOURCE_SQL[i][2], transaction);
+        }
     }
 
     private void importModelConfiguration(ImportConfigData importData, ISqlTransaction transaction) {
         
         String projectVersionId = (String) importData.getModelData().get(0).getTableData().get(0).get("PROJECT_VERSION_ID");
-        String modelId = (String) importData.getModelData().get(0).getTableData().get(0).get(MODEL_PK);
+        String modelId = (String) importData.getModelData().get(0).getTableData().get(0).get(MODEL_SQL[0][2]);
         ConfigData existingConfigData = getModelConfigData(projectVersionId, modelId);
      
-        TableData existingModelData = existingConfigData.modelData.get(0);
-        TableData importModelData = importData.modelData.get(0);          
-        processConfigTableData(importData, existingModelData, importModelData, modelId, transaction);
-        
-        TableData existingModelEntityData = existingConfigData.modelData.get(1);
-        TableData importModelEntityData = importData.modelData.get(1);                  
-        processConfigTableData(importData, existingModelEntityData, importModelEntityData, modelId, transaction);        
-
-        TableData existingModelAttributeData = existingConfigData.modelData.get(2);
-        TableData importModelAttributeData = importData.modelData.get(2);          
-        processConfigTableData(importData, existingModelAttributeData, importModelAttributeData, modelId, transaction);
+        for (int i = 0; i <= MODEL_SQL.length-1; i++) {
+            TableData existingModelData = existingConfigData.modelData.get(i);
+            TableData importModelData = importData.modelData.get(i);
+            processConfigTableData(importData, existingModelData, importModelData, MODEL_SQL[i][2], transaction);
+        }
     }
 
     private void importFlowConfiguration(ImportConfigData importData, ISqlTransaction transaction) {
 
-        String projectVersionId = (String) importData.getModelData().get(0).getTableData().get(0).get("PROJECT_VERSION_ID");
-        String flowId = (String) importData.getFlowData().get(0).getTableData().get(0).get(FLOW_PK);
+        String projectVersionId = (String) importData.getFlowData().get(4).getTableData().get(0).get("PROJECT_VERSION_ID");
+        String flowId = (String) importData.getFlowData().get(4).getTableData().get(0).get(FLOW_SQL[4][2]);
         ConfigData existingConfigData = getFlowConfigData(projectVersionId, flowId);
         
-        TableData existingComponentData = existingConfigData.flowData.get(0);
-        TableData importComponentData = importData.flowData.get(0);          
-        processConfigTableData(importData, existingComponentData, importComponentData, flowId, transaction);
-        
-        
+        for (int i = 0; i <= FLOW_SQL.length-1; i++) {
+            TableData existingFlowData = existingConfigData.flowData.get(i);
+            TableData importFlowData = importData.flowData.get(i);          
+            processConfigTableData(importData, existingFlowData, importFlowData, FLOW_SQL[i][2], transaction);
+        }
     }
         
-    private void processConfigTableData(ImportConfigData configData, TableData existingData, TableData importData, String key,
+    private void processConfigTableData(ImportConfigData configData, TableData existingData, TableData importData, String primaryKeyColumns,
             ISqlTransaction transaction) {
         
-        TableData inserts = findInserts(existingData, importData, key);
+        TableData inserts = findInserts(existingData, importData, primaryKeyColumns);
         processTableInserts(inserts, transaction);
         
-        TableData updates = findUpdates(existingData, importData, key);
+        TableData updates = findUpdates(existingData, importData, primaryKeyColumns);
         processTableUpdates(updates, transaction);
                 
-        TableData deletes = findDeletes(existingData, importData, key);
+        TableData deletes = findDeletes(existingData, importData, primaryKeyColumns);
         configData.deletesToProcess.put(importData.getTableName(), deletes);
     }
     
@@ -310,13 +299,14 @@ public class ImportExportService extends AbstractService implements IImportExpor
     }
 
     private void processTableDeletes(TableData deletes, ISqlTransaction transaction) {
-        Table table = databasePlatform.getTableFromCache(null, null, deletes.getTableName(), false);
-        excludeColumns(table);
-
-        DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.DELETE, table.getCatalog(), table.getSchema(), table.getName(), 
-                table.getPrimaryKeyColumns(), getUpdateColumns(table), null, null, true);        
-        for (LinkedCaseInsensitiveMap<Object> row : deletes.getTableData()) {
-            transaction.prepareAndExecute(stmt.getSql(),row);            
+        if (deletes != null) {
+            Table table = databasePlatform.getTableFromCache(null, null, deletes.getTableName(), false);
+            excludeColumns(table);
+            DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.DELETE, table.getCatalog(), table.getSchema(), table.getName(), 
+                    table.getPrimaryKeyColumns(), getUpdateColumns(table), null, null, true);
+            for (LinkedCaseInsensitiveMap<Object> row : deletes.getTableData()) {
+                    transaction.prepareAndExecute(stmt.getSql(),row);                    
+            }                
         }
     }    
     
@@ -353,15 +343,15 @@ public class ImportExportService extends AbstractService implements IImportExpor
         return configData;
     }
     
-    private TableData findInserts(TableData existingData, TableData newData, String pk) {
+    private TableData findInserts(TableData existingData, TableData newData, String primaryKeyColumns) {
 
         boolean found;        
         TableData inserts = new TableData(newData.tableName);
         for (LinkedCaseInsensitiveMap<Object> newRow : newData.getTableData()) {
-            String newPk = (String) newRow.get(pk);
+            String newPk = getPkDataAsString(newRow, primaryKeyColumns);
             found = false;
             for (LinkedCaseInsensitiveMap<Object> existingRow : existingData.getTableData()) {                
-                String existingPk = (String) existingRow.get(pk);                
+                String existingPk = getPkDataAsString(existingRow, primaryKeyColumns);                
                 if (newPk.equalsIgnoreCase(existingPk)) {
                     found=true;
                 }
@@ -373,15 +363,15 @@ public class ImportExportService extends AbstractService implements IImportExpor
         return inserts;
     }
     
-    private TableData findDeletes(TableData existingData, TableData newData, String pk) {
+    private TableData findDeletes(TableData existingData, TableData newData, String primaryKeyColumns) {
 
         boolean found;
         TableData deletes = new TableData(newData.tableName);
         for (LinkedCaseInsensitiveMap<Object> existingRow : existingData.getTableData()) {
-            String existingPk = (String) existingRow.get(pk);
+            String existingPk = getPkDataAsString(existingRow, primaryKeyColumns);
             found = false;
             for (LinkedCaseInsensitiveMap<Object> newRow : newData.getTableData()) {                
-                String newPk = (String) newRow.get(pk);                
+                String newPk = getPkDataAsString(newRow, primaryKeyColumns);                
                 if (newPk.equalsIgnoreCase(existingPk)) {
                     found=true;
                 }
@@ -393,26 +383,41 @@ public class ImportExportService extends AbstractService implements IImportExpor
         return deletes;
     }
     
-    private TableData findUpdates(TableData existingData, TableData newData, String pk) {
+    private TableData findUpdates(TableData existingData, TableData newData, String primaryKeyColumns) {
         
-        boolean found;        
+        boolean found;
+        String[] pkCols = StringUtils.split(primaryKeyColumns);
         TableData updates = new TableData(newData.tableName);
-        for (LinkedCaseInsensitiveMap<Object> newRow : newData.getTableData()) {
-            String newPk = (String) newRow.get(pk);
-            found = false;
-            for (LinkedCaseInsensitiveMap<Object> existingRow : existingData.getTableData()) {                
-                String existingPk = (String) existingRow.get(pk);                
-                if (newPk.equalsIgnoreCase(existingPk)) {
-                    found=true;
+        //if the pk is the entire record, don't do an update
+        if (existingData.rows.size() > 0 && pkCols.length+1 < existingData.rows.get(0).size()) {
+            for (LinkedCaseInsensitiveMap<Object> newRow : newData.getTableData()) {
+                String newPk = getPkDataAsString(newRow, primaryKeyColumns);
+                found = false;
+                for (LinkedCaseInsensitiveMap<Object> existingRow : existingData.getTableData()) {                
+                    String existingPk = getPkDataAsString(existingRow, primaryKeyColumns);               
+                    if (newPk.equalsIgnoreCase(existingPk)) {
+                        found=true;
+                    }
                 }
-            }
-            if (found) {
-                updates.getTableData().add(newRow);
+                if (found) {
+                    updates.getTableData().add(newRow);
+                }
             }
         }
         return updates;
     }
-    
+
+    private String getPkDataAsString(LinkedCaseInsensitiveMap<Object> row, String primaryKeyColumns) {
+        
+        StringBuilder pkDataAsString = new StringBuilder();
+        String[] pkCols = StringUtils.split(primaryKeyColumns,',');
+        for (int i=0;i<pkCols.length;i++) {
+            pkDataAsString.append(row.get(pkCols[i]));
+        }
+        
+        return pkDataAsString.toString();
+    }
+        
     static class TableData {
         
         String tableName;
