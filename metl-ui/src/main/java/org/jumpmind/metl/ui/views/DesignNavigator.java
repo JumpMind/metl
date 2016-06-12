@@ -677,7 +677,7 @@ public class DesignNavigator extends VerticalLayout {
         Object selected = treeTable.getValue();
         if (selected instanceof ProjectVersion) {
             ProjectVersion project = (ProjectVersion) selected;
-            final String export = context.getConfigurationService().export(project);            
+            final String export = context.getImportExportService().exportProject(project.getId());
             downloadExport(export, project.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-"));
         } else if (selected instanceof FlowName) {
             FlowName flowName = (FlowName) selected;

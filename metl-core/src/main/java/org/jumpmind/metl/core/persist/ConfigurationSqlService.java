@@ -327,11 +327,11 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
     public List<Resource> findDependentResources(String flowId) {
         
         List<Resource> resources = new ArrayList<Resource>();
-        final String RESOURCES_BY_FLOW_SQL = "select distinct c.resource_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s'";
+        final String RESOURCES_BY_FLOW_SQL = "select distinct c.resource_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and resource_id is not null";
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> ids = template.query(String.format(RESOURCES_BY_FLOW_SQL, tablePrefix, flowId));
         for (Row row:ids) {
-            resources.add(this.findResource(row.getString("id")));
+            resources.add(this.findResource(row.getString("resource_id")));
         }        
         return resources;
     }
@@ -340,15 +340,28 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
     public List<Model> findDependentModels(String flowId) {
         List<Model> models = new ArrayList<Model>();
         final String MODELS_BY_FLOW_SQL = "select distinct model_id from  "
-                + "(select distinct output_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' union "
-                + " select distinct input_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s')";
+                + "(select distinct output_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and output_model_id is not null union "
+                + " select distinct input_model_id as model_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id where fs.flow_id = '%2$s' and input_model_id is not null)";
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> ids = template.query(String.format(MODELS_BY_FLOW_SQL, tablePrefix, flowId));
         for (Row row:ids) {
-            models.add(this.findModel(row.getString("id")));
+            models.add(this.findModel(row.getString("model_id")));
         }        
         return models;        
     }
+    
+    @Override
+    public List<Flow> findDependentFlows(String projectVersionId) {
+        List<Flow> flows = new ArrayList<Flow>();
+        final String FLOWS_BY_PROJECT_SQL = "select distinct id from %1$s_flow where project_version_id =  '%2$s'";
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        List<Row> ids = template.query(String.format(FLOWS_BY_PROJECT_SQL, tablePrefix, projectVersionId));
+        for (Row row:ids) {
+            flows.add(this.findFlow(row.getString("id")));
+        }        
+        return flows;        
+    }
+    
     
     @Override
     public List<Flow> findAffectedFlowsByFlow(String flowId) {

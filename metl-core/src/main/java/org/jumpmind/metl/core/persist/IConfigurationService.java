@@ -213,6 +213,8 @@ public interface IConfigurationService {
     
     public List<Resource> findDependentResources(String flowId);
     
+    public List<Flow> findDependentFlows(String projectVersionId);
+    
     public List<Flow> findAffectedFlowsByModel(String modelId);
     
     public List<Flow> findAffectedFlowsByResource(String resourceId);
