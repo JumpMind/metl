@@ -1052,8 +1052,51 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     }
 
     @Override
+    public ProjectVersion saveNewVersion(String newVersionLabel, ProjectVersion original) {
+        Map<String, String> oldToNewUUIDMapping = new HashMap<>();
+        ProjectVersion newVersion = copyWithNewUUID(oldToNewUUIDMapping, original);
+        newVersion.setVersionLabel(newVersionLabel);
+        newVersion.setOrigVersionId(original.getId());
+        save(newVersion);
+
+        List<ModelName> models = findModelsInProject(original.getId());
+        for (ModelName modelName : models) {
+            Model newModel = copy (oldToNewUUIDMapping, findModel(modelName.getId()));
+            newModel.setProjectVersionId(newVersion.getId());
+            save(newModel);
+        }
+        
+        List<ResourceName> resources = findResourcesInProject(original.getId());
+        for (ResourceName resourceName : resources) {
+            Resource newResource = copy(oldToNewUUIDMapping, findResource(resourceName.getId()));
+            newResource.setProjectVersionId(newVersion.getId());
+            save(newResource);
+        }
+        
+        List<FlowName> testFlows = findFlowsInProject(original.getId(), true);
+        for (FlowName flowName : testFlows) {
+            Flow newFlow = copy(oldToNewUUIDMapping, findFlow(flowName.getId()));
+            newFlow.setProjectVersionId(newVersion.getId());
+            save(newFlow);
+        }
+        
+        List<FlowName> flows = findFlowsInProject(original.getId(), false);
+        for (FlowName flowName : flows) {
+            Flow newFlow = copy(oldToNewUUIDMapping, findFlow(flowName.getId()));
+            newFlow.setProjectVersionId(newVersion.getId());
+            save(newFlow);
+        }
+
+        return newVersion;
+    }
+
+    @Override
     public Flow copy(Flow original) {
         Map<String, String> oldToNewUUIDMapping = new HashMap<>();
+        return copy(oldToNewUUIDMapping, original);
+    }
+
+    protected Flow copy(Map<String, String> oldToNewUUIDMapping, Flow original) {
 
         Flow newFlow = copyWithNewUUID(oldToNewUUIDMapping, original);
 
@@ -1089,11 +1132,32 @@ abstract class AbstractConfigurationService extends AbstractService implements I
             massageValues(oldToNewUUIDMapping, flowStep.getComponent().getSettings());
             massageValues(oldToNewUUIDMapping, flowStep.getComponent().getAttributeSettings());
             massageValues(oldToNewUUIDMapping, flowStep.getComponent().getEntitySettings());
+
+            /**
+             * This step should only get a match if we are copying an entire
+             * project version because the model attributes will have been
+             * copied as well
+             */
+            for (ComponentAttributeSetting setting : flowStep.getComponent().getAttributeSettings()) {
+                String newUuid = oldToNewUUIDMapping.get(setting.getAttributeId());
+                if (isNotBlank(newUuid)) {
+                    setting.setAttributeId(newUuid);
+                }
+            }
+
+            /**
+             * This step should only get a match if we are copying an entire
+             * project version because the model entities will have been copied
+             * as well
+             */
+            for (ComponentEntitySetting setting : flowStep.getComponent().getEntitySettings()) {
+                String newUuid = oldToNewUUIDMapping.get(setting.getEntityId());
+                if (isNotBlank(newUuid)) {
+                    setting.setEntityId(newUuid);
+                }
+            }
+
         }
-
-        // TODO ComponentAttributeSetting map attribute ids
-
-        // TODO ComponentEntitySetting map entity ids
 
         return newFlow;
 
@@ -1108,14 +1172,25 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     public Model copy(Model original) {
         return copy(new HashMap<>(), original);
     }
+    
+    
+    protected Resource copy(Map<String, String> oldToNewUUIDMapping, Resource original) {
+        Resource newResource = copyWithNewUUID(oldToNewUUIDMapping, original);
+        newResource.setSettings(new ArrayList<>());
+        for (Setting setting : original.getSettings()) {
+            ResourceSetting cSetting = (ResourceSetting) copyWithNewUUID(oldToNewUUIDMapping, setting);
+            cSetting.setResourceId(newResource.getId());
+            newResource.getSettings().add(cSetting);
+        }
+        return newResource;
+    }    
 
     protected Model copy(Map<String, String> oldToNewUUIDMapping, Model original) {
-        Map<String, String> oldToNewEntityIds = new HashMap<>();
         Model newModel = copyWithNewUUID(oldToNewUUIDMapping, original);
         newModel.setModelEntities(new ArrayList<>());
         for (ModelEntity originalModelEntity : original.getModelEntities()) {
             ModelEntity newModelEntity = copyWithNewUUID(oldToNewUUIDMapping, originalModelEntity);
-            oldToNewEntityIds.put(originalModelEntity.getId(), newModelEntity.getId());
+            oldToNewUUIDMapping.put(originalModelEntity.getId(), newModelEntity.getId());
             newModelEntity.setModelId(newModel.getId());
             newModelEntity.setModelAttributes(new ArrayList<>());
             for (ModelAttribute originalAttribute : originalModelEntity.getModelAttributes()) {
@@ -1129,7 +1204,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         for (ModelEntity modelEntity : newModel.getModelEntities()) {
             List<ModelAttribute> attributes = modelEntity.getModelAttributes();
             for (ModelAttribute modelAttribute : attributes) {
-                modelAttribute.setTypeEntityId(oldToNewEntityIds.get(modelAttribute.getTypeEntityId()));
+                modelAttribute.setTypeEntityId(oldToNewUUIDMapping.get(modelAttribute.getTypeEntityId()));
             }
         }
         return newModel;

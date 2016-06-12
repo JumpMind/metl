@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jumpmind.metl.core.model.AbstractName;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.ComponentName;
@@ -127,35 +128,35 @@ public class DesignNavigator extends VerticalLayout {
     MenuItem fileMenu;
 
     MenuItem newMenu;
-    
+
     MenuItem editMenu;
 
     MenuItem newFlow;
 
     MenuItem newModel;
-    
+
     MenuItem exportMenu;
-    
+
     MenuItem importConfig;
 
     MenuItem resourceMenu;
-    
+
     MenuItem newFileResource;
-    
+
     MenuItem newSSHResource;
 
     MenuItem newDataSource;
-    
+
     MenuItem newWebResource;
-    
+
     MenuItem newJMSResource;
-    
-    MenuItem newFtpResource;    
+
+    MenuItem newFtpResource;
 
     MenuItem delete;
 
     MenuItem closeProject;
-    
+
     MenuItem search;
 
     FileDownloader fileDownloader;
@@ -163,7 +164,7 @@ public class DesignNavigator extends VerticalLayout {
     HorizontalLayout searchBarLayout;
 
     VerticalLayout openProjectsLayout;
-    
+
     public DesignNavigator(ApplicationContext context, TabbedPanel tabs) {
         this.context = context;
         this.tabs = tabs;
@@ -196,14 +197,14 @@ public class DesignNavigator extends VerticalLayout {
     protected void setMenuItemsEnabled() {
         Object selected = treeTable.getValue();
 
-        //file menu cleanup
+        // file menu cleanup
         fileMenu.setEnabled(true);
         newMenu.setEnabled(false);
         newFlow.setEnabled(false);
         newModel.setEnabled(false);
         resourceMenu.setEnabled(false);
-        //these will only be visible when resource menu is enabled
-        newDataSource.setEnabled(true);      
+        // these will only be visible when resource menu is enabled
+        newDataSource.setEnabled(true);
         newFtpResource.setEnabled(true);
         newFileResource.setEnabled(true);
         newSSHResource.setEnabled(true);
@@ -211,11 +212,11 @@ public class DesignNavigator extends VerticalLayout {
         newJMSResource.setEnabled(true);
         exportMenu.setEnabled(false);
         importConfig.setEnabled(true);
-        
-        //edit menu cleanup
+
+        // edit menu cleanup
         editMenu.setEnabled(false);
-        
-        //project menu cleanup
+
+        // project menu cleanup
         closeProject.setEnabled(false);
 
         // enable based on selection
@@ -243,48 +244,48 @@ public class DesignNavigator extends VerticalLayout {
     protected HorizontalLayout buildMenuBar() {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setWidth(100, Unit.PERCENTAGE);
-        
-        //left menu bar
+
+        // left menu bar
         MenuBar leftMenuBar = new MenuBar();
         leftMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
         leftMenuBar.setWidth(100, Unit.PERCENTAGE);
 
-        //file menu
+        // file menu
         fileMenu = leftMenuBar.addItem("File", null);
-        
-        //file - new
-        newMenu = fileMenu.addItem("New",null);
+
+        // file - new
+        newMenu = fileMenu.addItem("New", null);
         newFlow = newMenu.addItem("Flow", selectedItem -> addNewFlow());
         newModel = newMenu.addItem("Model", selectedItem -> addNewModel());
-        
-        //file - new - resource
+
+        // file - new - resource
         resourceMenu = newMenu.addItem("Resource", null);
-        newDataSource = resourceMenu.addItem("Database", selectedItem -> addNewDatabase());       
+        newDataSource = resourceMenu.addItem("Database", selectedItem -> addNewDatabase());
         newFtpResource = resourceMenu.addItem("FTP", selectedItem -> addNewFtpResource());
-        newFileResource = resourceMenu.addItem("Local File System", selectedItem -> addNewLocalFileSystem());        
-        newSSHResource = resourceMenu.addItem("Sftp", selectedItem -> addNewSSHFileSystem());        
+        newFileResource = resourceMenu.addItem("Local File System", selectedItem -> addNewLocalFileSystem());
+        newSSHResource = resourceMenu.addItem("Sftp", selectedItem -> addNewSSHFileSystem());
         newWebResource = resourceMenu.addItem("Web Resource", selectedItem -> addNewHttpResource());
         newJMSResource = resourceMenu.addItem("JMS", selectedItem -> addNewJMSFileSystem());
 
-        //file - export
+        // file - export
         exportMenu = fileMenu.addItem("Export", selectedItem -> export());
-        
-        //file - import
+
+        // file - import
         importConfig = fileMenu.addItem("Import", selecteItem -> importConfig());
-        
-        //edit menu
+
+        // edit menu
         editMenu = leftMenuBar.addItem("Edit", null);
         editMenu.addItem("Open", selectedItem -> open(treeTable.getValue()));
-        editMenu.addItem("Rename", selectedItem -> startEditingItem((AbstractObject) treeTable.getValue()));        
-        editMenu.addItem("Copy", selectedItem ->  copySelected());        
+        editMenu.addItem("Rename", selectedItem -> startEditingItem((AbstractObject) treeTable.getValue()));
+        editMenu.addItem("Copy", selectedItem -> copySelected());
         delete = editMenu.addItem("Remove", selectedItem -> handleDelete());
-        
-        //project menu
+
+        // project menu
         MenuItem projectMenu = leftMenuBar.addItem("Project", null);
         projectMenu.addItem("Manage", selectedItem -> viewProjects());
         closeProject = projectMenu.addItem("Close", selectedItem -> closeProject());
-       
-        //right menu
+
+        // right menu
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
         search = rightMenuBar.addItem("", Icons.SEARCH, new Command() {
@@ -303,7 +304,7 @@ public class DesignNavigator extends VerticalLayout {
 
         return layout;
     }
-    
+
     public void addProjectVersion(ProjectVersion projectVersion) {
         context.getOpenProjects().remove(projectVersion);
         context.getOpenProjects().add(projectVersion);
@@ -328,11 +329,9 @@ public class DesignNavigator extends VerticalLayout {
         table.setSelectable(true);
         table.setEditable(true);
         table.setContainerDataSource(new BeanItemContainer<AbstractObject>(AbstractObject.class));
-
         table.setTableFieldFactory(new DefaultFieldFactory() {
             @Override
-            public Field<?> createField(Container container, Object itemId, Object propertyId,
-                    Component uiContext) {
+            public Field<?> createField(Container container, Object itemId, Object propertyId, Component uiContext) {
                 return buildEditableNavigatorField(itemId);
             }
         });
@@ -395,6 +394,15 @@ public class DesignNavigator extends VerticalLayout {
 
             }
         });
+        table.addGeneratedColumn("name", (source, itemId, columnId) -> {
+            if (itemId instanceof ProjectVersion) {
+                ProjectVersion projectVersion = (ProjectVersion) itemId;
+                return String.format("%s (%s)", projectVersion.getProject().getName(), projectVersion.getVersionLabel());
+            } else if (itemId instanceof AbstractName) {
+                return ((AbstractName) itemId).getName();
+            }
+            return itemId;
+        });
 
         return table;
     }
@@ -447,8 +455,7 @@ public class DesignNavigator extends VerticalLayout {
             Object selected = itemBeingEdited;
             Method method = null;
             try {
-                method = configurationService.getClass().getMethod("save",
-                        itemBeingEdited.getClass());
+                method = configurationService.getClass().getMethod("save", itemBeingEdited.getClass());
             } catch (NoSuchMethodException e) {
             } catch (SecurityException e) {
             }
@@ -478,7 +485,7 @@ public class DesignNavigator extends VerticalLayout {
 
     public void refresh() {
         refreshOpenProjects();
-        
+
         setMenuItemsEnabled();
 
         if (treeTable.size() == 0) {
@@ -487,7 +494,7 @@ public class DesignNavigator extends VerticalLayout {
             if (openProjectsLayout != null) {
                 removeComponent(openProjectsLayout);
             }
-            
+
             openProjectsLayout = new VerticalLayout();
             openProjectsLayout.addStyleName(ValoTheme.LAYOUT_CARD);
             openProjectsLayout.setSizeFull();
@@ -514,16 +521,16 @@ public class DesignNavigator extends VerticalLayout {
                     break;
                 }
             }
-            
+
             if (add) {
                 if (openProjectsLayout != null) {
                     removeComponent(openProjectsLayout);
                 }
-                
+
                 addComponent(treeTable);
                 setExpandRatio(treeTable, 1);
             }
-            
+
             treeTable.refreshRowCache();
         }
     }
@@ -551,14 +558,16 @@ public class DesignNavigator extends VerticalLayout {
         for (ProjectVersion projectVersion : context.getOpenProjects()) {
             treeTable.addItem(projectVersion);
             treeTable.setItemIcon(projectVersion, Icons.PROJECT);
-            treeTable.setItemCaption(projectVersion, projectVersion.getProject().getName());
-            treeTable.setChildrenAllowed(projectVersion, true);            
+            treeTable.setItemCaption(projectVersion,
+                    String.format("%s (%s)", projectVersion.getProject().getName(), projectVersion.getVersionLabel()));
+            treeTable.setChildrenAllowed(projectVersion, true);
             addFlowsToFolder(addVirtualFolder("Flows", projectVersion), projectVersion, false);
             addFlowsToFolder(addVirtualFolder("Tests", projectVersion), projectVersion, true);
             addModelsToFolder(addVirtualFolder("Models", projectVersion), projectVersion);
             addResourcesToFolder(addVirtualFolder("Resources", projectVersion), projectVersion);
-            //TODO: determine if we want to show shared components here too...
-            //addSharedComponentsToFolder(addVirtualFolder("Shared Components", projectVersion), projectVersion);
+            // TODO: determine if we want to show shared components here too...
+            // addSharedComponentsToFolder(addVirtualFolder("Shared Components",
+            // projectVersion), projectVersion);
         }
     }
 
@@ -578,8 +587,7 @@ public class DesignNavigator extends VerticalLayout {
 
     protected void addResourcesToFolder(FolderName folder, ProjectVersion projectVersion) {
         IConfigurationService configurationService = context.getConfigurationService();
-        List<ResourceName> resources = configurationService.findResourcesInProject(projectVersion
-                .getId());
+        List<ResourceName> resources = configurationService.findResourcesInProject(projectVersion.getId());
         AbstractObjectNameBasedSorter.sort(resources);
         for (ResourceName resource : resources) {
             this.treeTable.setChildrenAllowed(folder, true);
@@ -599,18 +607,17 @@ public class DesignNavigator extends VerticalLayout {
 
     protected void addSharedComponentsToFolder(FolderName folder, ProjectVersion projectVersion) {
         IConfigurationService configurationService = context.getConfigurationService();
-        List<ComponentName> components = configurationService.findSharedComponentsInProject(projectVersion
-                .getId());
+        List<ComponentName> components = configurationService.findSharedComponentsInProject(projectVersion.getId());
         AbstractObjectNameBasedSorter.sort(components);
         for (ComponentName component : components) {
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(component);
             this.treeTable.setItemIcon(component, Icons.COMPONENT);
             this.treeTable.setParent(component, folder);
-            this.treeTable.setChildrenAllowed(component, false);         
+            this.treeTable.setChildrenAllowed(component, false);
         }
     }
-    
+
     protected void addFlowsToFolder(FolderName folder, ProjectVersion projectVersion, boolean test) {
         IConfigurationService configurationService = context.getConfigurationService();
         List<FlowName> flows = configurationService.findFlowsInProject(projectVersion.getId(), test);
@@ -646,8 +653,8 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected boolean isDeleteButtonEnabled(Object selected) {
-        return selected instanceof FlowName || selected instanceof FlowStep
-                || selected instanceof ModelName || selected instanceof ResourceName;
+        return selected instanceof FlowName || selected instanceof FlowStep || selected instanceof ModelName
+                || selected instanceof ResourceName;
     }
 
     public void open(Object item) {
@@ -661,51 +668,49 @@ public class DesignNavigator extends VerticalLayout {
             tabs.addCloseableTab(model.getId(), model.getName(), Icons.MODEL, editModel);
         } else if (item instanceof ResourceName) {
             ResourceName resource = (ResourceName) item;
-            PropertySheet sheet = new PropertySheet(context, tabs);            
+            PropertySheet sheet = new PropertySheet(context, tabs);
             sheet.setSource(context.getConfigurationService().findResource(resource.getId()));
-            tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item),
-                    sheet);
+            tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item), sheet);
         }
     }
-    
+
     protected void viewProjects() {
-        tabs.addCloseableTab("projectslist", "Manage Projects", Icons.PROJECT,
-                new ManageProjectsPanel(context, this));
+        tabs.addCloseableTab("projectslist", "Manage Projects", Icons.PROJECT, new ManageProjectsPanel(context, this));
     }
 
     protected void export() {
         Object selected = treeTable.getValue();
         if (selected instanceof ProjectVersion) {
             ProjectVersion project = (ProjectVersion) selected;
-            final String export = context.getConfigurationService().export(project);            
+            final String export = context.getConfigurationService().export(project);
             downloadExport(export, project.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-"));
         } else if (selected instanceof FlowName) {
             FlowName flowName = (FlowName) selected;
             Flow flow = context.getConfigurationService().findFlow(flowName.getId());
             ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(flow.getProjectVersionId());
-            final String export = context.getImportExportService().exportFlow(projectVersion.getId(), flow.getId());            
+            final String export = context.getImportExportService().exportFlow(projectVersion.getId(), flow.getId());
             downloadExport(export, flow.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-"));
         } else if (selected instanceof ModelName) {
             ModelName modelName = (ModelName) selected;
             Model model = context.getConfigurationService().findModel(modelName.getId());
             ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(model.getProjectVersionId());
-            final String export = context.getImportExportService().exportModel(projectVersion.getId(), model.getId());            
+            final String export = context.getImportExportService().exportModel(projectVersion.getId(), model.getId());
             downloadExport(export, model.getName().toLowerCase().replaceAll(" ", "-"));
         } else if (selected instanceof ResourceName) {
             ResourceName resourceName = (ResourceName) selected;
             Resource resource = context.getConfigurationService().findResource(resourceName.getId());
             ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(resource.getProjectVersionId());
-            final String export = context.getImportExportService().exportResource(projectVersion.getId(), resource.getId());            
+            final String export = context.getImportExportService().exportResource(projectVersion.getId(), resource.getId());
             downloadExport(export, resource.getName().toLowerCase().replaceAll(" ", "-"));
-        }                  
+        }
     }
-    
+
     protected void importConfig() {
         ImportDialog.show("Import Config", "Click the import button to import your config", new ImportConfigurationListener());
     }
-    
+
     protected void downloadExport(final String export, String filename) {
-        
+
         StreamSource ss = new StreamSource() {
             private static final long serialVersionUID = 1L;
 
@@ -720,17 +725,16 @@ public class DesignNavigator extends VerticalLayout {
             }
         };
         String datetime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        StreamResource resource = new StreamResource(ss, String.format("%s-config-%s.json",
-                filename, datetime));
+        StreamResource resource = new StreamResource(ss, String.format("%s-config-%s.json", filename, datetime));
         final String KEY = "export";
         setResource(KEY, resource);
-        Page.getCurrent().open(ResourceReference.create(resource, this, KEY).getURL(), null);        
+        Page.getCurrent().open(ResourceReference.create(resource, this, KEY).getURL(), null);
     }
-    
+
     protected void closeProject() {
         Object selected = treeTable.getValue();
         if (selected instanceof ProjectVersion) {
-            ProjectVersion projectVersion = (ProjectVersion)selected;
+            ProjectVersion projectVersion = (ProjectVersion) selected;
             context.getOpenProjects().remove(selected);
             User user = context.getUser();
             Setting setting = user.findSetting(UserSetting.SETTING_CURRENT_PROJECT_ID_LIST, projectVersion.getId());
@@ -739,16 +743,16 @@ public class DesignNavigator extends VerticalLayout {
             refresh();
         }
     }
-    
+
     protected void copySelected() {
         IConfigurationService configurationService = context.getConfigurationService();
         Object object = treeTable.getValue();
         if (object instanceof ModelName) {
-            Model oldModel = configurationService.findModel(((ModelName)object).getId());
+            Model oldModel = configurationService.findModel(((ModelName) object).getId());
             Model newModel = configurationService.copy(oldModel);
             newModel.setName(newModel.getName() + " Copy");
             context.getConfigurationService().save(newModel);
-            
+
             ModelName model = new ModelName();
             model.setName(newModel.getName());
             model.setProjectVersionId(newModel.getProjectVersionId());
@@ -759,11 +763,11 @@ public class DesignNavigator extends VerticalLayout {
             treeTable.setParent(model, treeTable.getParent(object));
             treeTable.setChildrenAllowed(model, false);
         } else if (object instanceof FlowName) {
-            Flow oldFlow = configurationService.findFlow(((FlowName)object).getId());
-            Flow newFlow = configurationService.copy((Flow)oldFlow);
+            Flow oldFlow = configurationService.findFlow(((FlowName) object).getId());
+            Flow newFlow = configurationService.copy((Flow) oldFlow);
             newFlow.setName(newFlow.getName() + " Copy");
             context.getConfigurationService().save(newFlow);
-            
+
             FlowName flow = new FlowName();
             flow.setName(newFlow.getName());
             flow.setProjectVersionId(newFlow.getProjectVersionId());
@@ -774,7 +778,7 @@ public class DesignNavigator extends VerticalLayout {
             treeTable.setItemIcon(flow, Icons.FLOW);
             treeTable.setParent(flow, treeTable.getParent(object));
             treeTable.setChildrenAllowed(flow, false);
-            
+
         }
     }
 
@@ -782,21 +786,18 @@ public class DesignNavigator extends VerticalLayout {
         Object object = treeTable.getValue();
         if (object instanceof FlowName) {
             FlowName flow = (FlowName) object;
-            ConfirmDialog.show("Delete Flow?",
-                    "Are you sure you want to delete the '" + flow.getName() + "' flow?",
+            ConfirmDialog.show("Delete Flow?", "Are you sure you want to delete the '" + flow.getName() + "' flow?",
                     new DeleteFlowConfirmationListener(flow));
         } else if (object instanceof ResourceName) {
             ResourceName resource = (ResourceName) object;
-            ConfirmDialog.show("Delete Resource?", "Are you sure you want to delete the '"
-                    + resource.getName() + "' resource?", new DeleteResourceConfirmationListener(
-                    resource));
+            ConfirmDialog.show("Delete Resource?", "Are you sure you want to delete the '" + resource.getName() + "' resource?",
+                    new DeleteResourceConfirmationListener(resource));
 
         } else if (object instanceof ModelName) {
             ModelName model = (ModelName) object;
             if (!context.getConfigurationService().isModelUsed(model.getId())) {
-                ConfirmDialog.show("Delete Model?",
-                    "Are you sure you want to delete the '" + model.getName() + "' model?",
-                    new DeleteModelConfirmationListener(model));
+                ConfirmDialog.show("Delete Model?", "Are you sure you want to delete the '" + model.getName() + "' model?",
+                        new DeleteModelConfirmationListener(model));
             } else {
                 CommonUiUtils.notify("The model is currently in use.  It cannot be deleted.", Type.WARNING_MESSAGE);
             }
@@ -840,7 +841,7 @@ public class DesignNavigator extends VerticalLayout {
     protected void addNewFlow() {
         Object selected = treeTable.getValue();
         if (selected instanceof FolderName) {
-            FolderName folder = (FolderName)selected;
+            FolderName folder = (FolderName) selected;
             treeTable.setChildrenAllowed(folder, true);
 
             ProjectVersion projectVersion = findProjectVersion();
@@ -849,7 +850,7 @@ public class DesignNavigator extends VerticalLayout {
             flow.setName("New Flow");
             flow.setTest(folder.getName().equals("Tests"));
             context.getConfigurationService().save(flow);
-                        
+
             treeTable.addItem(flow);
             treeTable.setItemIcon(flow, Icons.FLOW);
             treeTable.setParent(flow, folder);
@@ -870,19 +871,19 @@ public class DesignNavigator extends VerticalLayout {
     protected void addNewFtpResource() {
         addNewResource(Ftp.TYPE, "FTP Site", Icons.FILE_SYSTEM);
     }
-    
+
     protected void addNewLocalFileSystem() {
         addNewResource(LocalFile.TYPE, "Directory", Icons.FILE_SYSTEM);
     }
-    
+
     protected void addNewSSHFileSystem() {
         addNewResource(Sftp.TYPE, "SFTP Directory", Icons.FILE_SYSTEM);
     }
-    
+
     protected void addNewJMSFileSystem() {
         addNewResource(JMS.TYPE, "JMS", Icons.QUEUE);
     }
-    
+
     protected void addNewHttpResource() {
         addNewResource(Http.TYPE, "Http", Icons.WEB);
     }
@@ -939,9 +940,9 @@ public class DesignNavigator extends VerticalLayout {
             context.getImportExportService().importConfiguration(dataToImport);
             refresh();
         }
-        
+
     }
-    
+
     class DeleteFlowConfirmationListener implements IConfirmListener {
 
         FlowName toDelete;
@@ -1010,5 +1011,5 @@ public class DesignNavigator extends VerticalLayout {
             return true;
         }
     }
-    
+
 }

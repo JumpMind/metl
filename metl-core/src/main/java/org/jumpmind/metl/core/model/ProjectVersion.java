@@ -28,9 +28,11 @@ public class ProjectVersion extends AbstractObject {
     
     String description = "";
 
-    String origProjectId;
+    String origVersionId;
     
     String versionLabel;
+    
+    boolean workingVersion;
 
     boolean readOnly;
 
@@ -84,12 +86,12 @@ public class ProjectVersion extends AbstractObject {
         return project != null ? project.getId() : null;
     }
 
-    public void setOrigProjectId(String origProjectId) {
-        this.origProjectId = origProjectId;
+    public void setOrigVersionId(String origProjectId) {
+        this.origVersionId = origProjectId;
     }
 
-    public String getOrigProjectId() {
-        return origProjectId;
+    public String getOrigVersionId() {
+        return origVersionId;
     }
 
     public void setArchived(boolean archived) {
@@ -122,5 +124,13 @@ public class ProjectVersion extends AbstractObject {
     
     public String getDescription() {
         return description;
+    }
+    
+    public void setWorkingVersion(boolean workingVersion) {
+        this.workingVersion = workingVersion;
+    }
+    
+    public boolean isWorkingVersion() {
+        return workingVersion;
     }
 }

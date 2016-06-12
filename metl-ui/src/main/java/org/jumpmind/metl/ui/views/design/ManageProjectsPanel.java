@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -34,13 +35,15 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.FieldFactory;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.views.DesignNavigator;
-import org.jumpmind.vaadin.ui.common.CommonUiUtils;
+import org.jumpmind.metl.ui.views.UiConstants;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
-import org.jumpmind.vaadin.ui.common.ConfirmDialog.IConfirmListener;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.NotifyDialog;
+import org.jumpmind.vaadin.ui.common.PromptDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.data.Container.Indexed;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitEvent;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
@@ -57,6 +60,7 @@ import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
@@ -119,14 +123,14 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         grid.addColumn("name", String.class).setHeaderCaption("Name").setExpandRatio(2);
         grid.addColumn("description", String.class).setHeaderCaption("Description").setExpandRatio(1);
         grid.addColumn("version", String.class).setHeaderCaption("Version").setMaximumWidth(200);
-        grid.addColumn("createTime", Date.class).setHeaderCaption("Create Time").setWidth(185).setMaximumWidth(200).setEditable(false);
+        grid.addColumn("createTime", Date.class).setHeaderCaption("Create Time").setWidth(185).setMaximumWidth(200)
+                .setRenderer(new DateRenderer(UiConstants.DATE_FORMAT)).setEditable(false);
 
         grid.setContainerDataSource(gridContainer);
         grid.setEditorFieldFactory(new FieldFactory());
         grid.addSortListener(event -> {
             lastSortOrder = event.getSortOrder();
         });
-
         grid.addSelectionListener(event -> setButtonsEnabled());
         grid.addItemClickListener(event -> {
             if (!event.isDoubleClick()) {
@@ -186,6 +190,8 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         addComponent(grid);
         setExpandRatio(grid, 1);
 
+        setButtonsEnabled();
+
     }
 
     protected void sort() {
@@ -205,11 +211,12 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
     }
 
     protected void setButtonsEnabled() {
-        boolean selected = grid.getSelectionModel().getSelectedRows().size() > 0;
+        int numberSelected = grid.getSelectionModel().getSelectedRows().size();
+        boolean selected = numberSelected > 0;
         removeButton.setEnabled(selected);
         openProjectButton.setEnabled(selected);
         editButton.setEnabled(selected);
-        newVersionButton.setEnabled(selected);
+        newVersionButton.setEnabled(numberSelected == 1);
 
         boolean currentlyEditing = grid.getEditedItemId() != null;
         if (currentlyEditing) {
@@ -257,7 +264,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
         for (Object s : selected) {
             if (grid.getContainerDataSource().containsId(s)) {
-               grid.select(s);
+                grid.select(s);
             }
         }
 
@@ -275,7 +282,24 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
     }
 
     protected void newVersion() {
-        CommonUiUtils.notify("Not implemented.  Coming Soon.", Type.HUMANIZED_MESSAGE);
+        Collection<Object> selected = grid.getSelectedRows();
+        if (selected.size() == 1) {
+            IConfigurationService configurationService = context.getConfigurationService();
+            ProjectVersionItem item = (ProjectVersionItem) selected.iterator().next();
+            PromptDialog.prompt("New Version", String.format("Copying version '%s' of '%s'.  What do you want to name new version?",
+                    item.version.getVersionLabel(), item.project.getName()), (newVersionLabel) -> {
+                        if (StringUtils.isNotBlank(newVersionLabel)) {
+                            ProjectVersion newVersion = configurationService.saveNewVersion(newVersionLabel, item.version);
+                            Indexed indexed = grid.getContainerDataSource();
+                            indexed.addItemAfter(item, new ProjectVersionItem(item.project, newVersion));
+                            return true;
+                        } else {
+                            NotifyDialog.show("Please specify a version number", "Please specify a version number", null,
+                                    Type.WARNING_MESSAGE);
+                            return false;
+                        }
+                    });
+        }
     }
 
     protected void newProject() {
@@ -283,7 +307,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         Project project = new Project();
         project.setName("New Project");
         ProjectVersion version = new ProjectVersion();
-        version.setVersionLabel("1.0");
+        version.setVersionLabel("1.0.0");
         version.setProject(project);
         project.getProjectVersions().add(version);
         IConfigurationService configurationService = context.getConfigurationService();
@@ -295,22 +319,17 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
     }
 
     protected void removeProject() {
-        ConfirmDialog.show("Delete Project(s)?", "Are you sure you want to delete the selected project(s)?", new IConfirmListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public boolean onOk() {
-                Collection<Object> selected = grid.getSelectedRows();
-                for (Object object : selected) {
-                    ProjectVersionItem item = (ProjectVersionItem) object;
-                    grid.getContainerDataSource().removeItem(item);
-                    item.version.setDeleted(true);
-                    context.getConfigurationService().save(item.version);
-                }
-                sort();
-                setButtonsEnabled();
-                return true;
+        ConfirmDialog.show("Delete Project(s)?", "Are you sure you want to delete the selected project(s)?", () -> {
+            Collection<Object> selected = grid.getSelectedRows();
+            for (Object object : selected) {
+                ProjectVersionItem item = (ProjectVersionItem) object;
+                grid.getContainerDataSource().removeItem(item);
+                item.version.setDeleted(true);
+                context.getConfigurationService().save(item.version);
             }
+            sort();
+            setButtonsEnabled();
+            return true;
         });
     }
 
