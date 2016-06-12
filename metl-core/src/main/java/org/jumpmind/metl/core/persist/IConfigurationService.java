@@ -220,6 +220,8 @@ public interface IConfigurationService {
     public List<Flow> findAffectedFlowsByResource(String resourceId);
     
     public List<Flow> findAffectedFlowsByFlow(String flowId);
+    
+    public ProjectVersion saveNewVersion(String newVersionLabel, ProjectVersion original);
 
     public FlowStep copy(FlowStep original);
 
