@@ -117,7 +117,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         if (exportType.equals(ExportType.MODEL)) {
             exportData.getModelData().addAll(getConfigData(MODEL_SQL, projectVersionId, objectId)); 
         } else if (exportType.equals(ExportType.RESOURCE)) {
-            //exportData.getResourceData().addAll(getConfigData(RESOURCE_SQL, projectVersionId, objectId)); 
+            exportData.getResourceData().addAll(getConfigData(RESOURCE_SQL, projectVersionId, objectId)); 
         } else if (exportType.equals(ExportType.FLOW)) {
             exportData.getFlowData().addAll(getConfigData(FLOW_SQL, projectVersionId, objectId));
         } else if (exportType.equals(ExportType.PROJECT)) {
@@ -133,7 +133,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 exportData.getModelData().addAll(getConfigData(MODEL_SQL, projectVersionId, model.getId()));
             }
             for (Resource resource : resources) {
-                //exportData.getResourceData().addAll(getConfigData(RESOURCE_SQL, projectVersionId, resource.getId()));                
+                exportData.getResourceData().addAll(getConfigData(RESOURCE_SQL, projectVersionId, resource.getId()));                
             }
         }
                 
@@ -447,18 +447,18 @@ public class ImportExportService extends AbstractService implements IImportExpor
     
     static class ConfigData {
         
-        Map<String, TableData> resourceData = new HashMap<String, TableData>(); 
+        List<TableData> resourceData = new ArrayList<TableData>(); 
         List<TableData> modelData = new ArrayList<TableData>();
         List<TableData> flowData = new ArrayList<TableData>();
         
         public ConfigData() {            
         }
         
-        public Map<String, TableData> getResourceData() {
+        public List<TableData> getResourceData() {
             return resourceData;
         }
 
-        public void setResourceData(Map<String, TableData> resourceData) {
+        public void setResourceData(List<TableData> resourceData) {
             this.resourceData = resourceData;
         }
 
