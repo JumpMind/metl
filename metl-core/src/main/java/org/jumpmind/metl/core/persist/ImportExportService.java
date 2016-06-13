@@ -113,27 +113,30 @@ public class ImportExportService extends AbstractService implements IImportExpor
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         String outData;
         ConfigData exportData = new ConfigData();
+        initConfigData(exportData.getModelData(), MODEL_SQL);
+        initConfigData(exportData.getResourceData(), RESOURCE_SQL);
+        initConfigData(exportData.getFlowData(), FLOW_SQL);
     
         if (exportType.equals(ExportType.MODEL)) {
-            exportData.getModelData().addAll(getConfigData(MODEL_SQL, projectVersionId, objectId)); 
-        } else if (exportType.equals(ExportType.RESOURCE)) {
-            exportData.getResourceData().addAll(getConfigData(RESOURCE_SQL, projectVersionId, objectId)); 
-        } else if (exportType.equals(ExportType.FLOW)) {
-            exportData.getFlowData().addAll(getConfigData(FLOW_SQL, projectVersionId, objectId));
+            addConfigData(exportData.getModelData(), MODEL_SQL, projectVersionId, objectId);
+        } else if (exportType.equals(ExportType.RESOURCE)) {            
+            addConfigData(exportData.getResourceData(), RESOURCE_SQL, projectVersionId, objectId);
+        } else if (exportType.equals(ExportType.FLOW)) {            
+            addConfigData(exportData.getFlowData(), FLOW_SQL, projectVersionId, objectId);
         } else if (exportType.equals(ExportType.PROJECT)) {
             List<Flow> flows = configurationService.findDependentFlows(projectVersionId);
             Set<Model> models = new HashSet<Model>();
             Set<Resource> resources = new HashSet<Resource>();
             for (Flow flow : flows) {
                 models.addAll(configurationService.findDependentModels(flow.getId()));
-                resources.addAll(configurationService.findDependentResources(flow.getId()));
-                exportData.getFlowData().addAll(getConfigData(FLOW_SQL, projectVersionId, flow.getId()));
+                resources.addAll(configurationService.findDependentResources(flow.getId()));                
+                addConfigData(exportData.getFlowData(), FLOW_SQL,projectVersionId, flow.getId());
             }
             for (Model model : models) {
-                exportData.getModelData().addAll(getConfigData(MODEL_SQL, projectVersionId, model.getId()));
+                addConfigData(exportData.getModelData(),MODEL_SQL, projectVersionId, model.getId());
             }
             for (Resource resource : resources) {
-                exportData.getResourceData().addAll(getConfigData(RESOURCE_SQL, projectVersionId, resource.getId()));                
+                addConfigData(exportData.getResourceData(), RESOURCE_SQL, projectVersionId, resource.getId());
             }
         }
                 
@@ -146,30 +149,25 @@ public class ImportExportService extends AbstractService implements IImportExpor
         return outData;        
     }
     
-    private List<TableData> getConfigData(String[][] sqlElements, String projectVersionId, String modelId) {
-        
-        List<TableData> tableData = new ArrayList<TableData>();
+    private void addConfigData(List<TableData> tableData, String[][] sqlElements, String projectVersionId, String keyValue) {        
         
         for (int i = 0; i <= sqlElements.length-1; i++) {
             String[] entry = sqlElements[i];
             
-            tableData.add(getConfigTableData(tablePrefix + entry[0],
-                    String.format(entry[1],tablePrefix,projectVersionId, modelId)));            
+            tableData.get(i).rows.addAll(getConfigTableData(
+                    String.format(entry[1],tablePrefix,projectVersionId, keyValue)));
         }
-        return tableData;
     }
-    
-    private TableData getConfigTableData(String tableName, String sql) {
+
+    private List<Row> getConfigTableData(String sql) {
 
         ISqlTemplate template = databasePlatform.getSqlTemplate();
-        TableData tableData = new TableData(tableName);
         List<Row> rows = template.query(sql);
         excludeColumnData(rows);
-        tableData.rows.addAll(rows);
         
-        return tableData;
+        return rows;
     }
-    
+        
     private void excludeColumnData(List<Row> rows) {
         for (Row row : rows) {
             for (int i = 0; i < columnsToExclude.length; i++) {
@@ -190,13 +188,16 @@ public class ImportExportService extends AbstractService implements IImportExpor
         ImportConfigData importData = new ImportConfigData(configData);
         ISqlTransaction transaction = databasePlatform.getSqlTemplate().startSqlTransaction();  
         
-        if (importData.getResourceData().size() > 0) {
+        if (importData.getResourceData().size() > 0 &&
+                importData.getResourceData().get(0).rows.size() > 0) {
             importResourceConfiguration(importData, transaction);
         }
-        if (importData.getModelData().size() > 0) {
+        if (importData.getModelData().size() > 0 &&
+                importData.getModelData().get(0).rows.size() > 0) {
             importModelConfiguration(importData, transaction);
         }
-        if (importData.getFlowData().size() > 0) {
+        if (importData.getFlowData().size() > 0 &&
+                importData.getFlowData().get(0).rows.size() > 0) {
             importFlowConfiguration(importData, transaction);
         }                
         processDeletes(importData, transaction);
@@ -227,7 +228,9 @@ public class ImportExportService extends AbstractService implements IImportExpor
         
         String projectVersionId = (String) importData.getResourceData().get(0).getTableData().get(0).get("PROJECT_VERSION_ID");
         String resourceId = (String) importData.getResourceData().get(0).getTableData().get(0).get(RESOURCE_SQL[0][2]);
-        List<TableData> existingResourceData = getConfigData(RESOURCE_SQL, projectVersionId, resourceId);
+        List<TableData> existingResourceData = new ArrayList<TableData>();
+        initConfigData(existingResourceData, RESOURCE_SQL);
+        addConfigData(existingResourceData, RESOURCE_SQL, projectVersionId, resourceId);
    
         for (int i = 0; i <= RESOURCE_SQL.length-1; i++) {
             TableData importResourceData = importData.resourceData.get(i);          
@@ -239,7 +242,9 @@ public class ImportExportService extends AbstractService implements IImportExpor
         
         String projectVersionId = (String) importData.getModelData().get(0).getTableData().get(0).get("PROJECT_VERSION_ID");
         String modelId = (String) importData.getModelData().get(0).getTableData().get(0).get(MODEL_SQL[0][2]);
-        List<TableData> existingModelData = getConfigData(MODEL_SQL, projectVersionId, modelId);
+        List<TableData> existingModelData = new ArrayList<TableData>();
+        initConfigData(existingModelData, MODEL_SQL);        
+        addConfigData(existingModelData, MODEL_SQL, projectVersionId, modelId);
      
         for (int i = 0; i <= MODEL_SQL.length-1; i++) {
             TableData importModelData = importData.modelData.get(i);
@@ -251,7 +256,9 @@ public class ImportExportService extends AbstractService implements IImportExpor
 
         String projectVersionId = (String) importData.getFlowData().get(4).getTableData().get(0).get("PROJECT_VERSION_ID");
         String flowId = (String) importData.getFlowData().get(4).getTableData().get(0).get(FLOW_SQL[4][2]);
-        List<TableData> existingFlowData = getConfigData(FLOW_SQL, projectVersionId, flowId);
+        List<TableData> existingFlowData = new ArrayList<TableData>();
+        initConfigData(existingFlowData, FLOW_SQL);
+        addConfigData(existingFlowData, FLOW_SQL, projectVersionId, flowId);
         
         for (int i = 0; i <= FLOW_SQL.length-1; i++) {
             TableData importFlowData = importData.flowData.get(i);          
@@ -414,7 +421,14 @@ public class ImportExportService extends AbstractService implements IImportExpor
         
         return pkDataAsString.toString();
     }
-        
+
+    private void initConfigData(List<TableData> tableData, String[][] sqlElements) {
+        for (int i = 0; i <= sqlElements.length-1; i++) {
+            tableData.add(new TableData(tablePrefix + sqlElements[i][0]));
+        }
+    }
+    
+    
     static class TableData {
         
         String tableName;
@@ -451,7 +465,10 @@ public class ImportExportService extends AbstractService implements IImportExpor
         List<TableData> modelData = new ArrayList<TableData>();
         List<TableData> flowData = new ArrayList<TableData>();
         
-        public ConfigData() {            
+        public ConfigData() {   
+            resourceData = new ArrayList<TableData>();
+            modelData = new ArrayList<TableData>();
+            flowData = new ArrayList<TableData>();
         }
         
         public List<TableData> getResourceData() {
