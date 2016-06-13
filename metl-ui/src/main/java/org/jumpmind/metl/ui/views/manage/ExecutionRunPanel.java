@@ -52,6 +52,7 @@ import org.jumpmind.metl.ui.diagram.Node;
 import org.jumpmind.metl.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.metl.ui.diagram.RunDiagram;
 import org.jumpmind.metl.ui.views.IFlowRunnable;
+import org.jumpmind.metl.ui.views.UiConstants;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
@@ -236,7 +237,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         logTable = new Grid();
         logTable.addColumn("level", String.class).setHeaderCaption("Level").setWidth(110).setMaximumWidth(200);
         logTable.addColumn("createTime", Date.class).setHeaderCaption("Time").setWidth(120).setMaximumWidth(200)
-                .setRenderer(new DateRenderer("%1$tk:%1$tM:%1$tS:%1$tL"));
+                .setRenderer(new DateRenderer(UiConstants.DATE_FORMAT));
         logTable.addColumn("logText", String.class).setHeaderCaption("Message").setExpandRatio(1);
         logTable.setContainerDataSource(logContainer);
         logTable.setSizeFull();

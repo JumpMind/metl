@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jumpmind.metl.core.model.AbstractName;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.ComponentName;
@@ -331,8 +332,7 @@ public class DesignNavigator extends VerticalLayout {
 
         table.setTableFieldFactory(new DefaultFieldFactory() {
             @Override
-            public Field<?> createField(Container container, Object itemId, Object propertyId,
-                    Component uiContext) {
+            public Field<?> createField(Container container, Object itemId, Object propertyId, Component uiContext) {
                 return buildEditableNavigatorField(itemId);
             }
         });
@@ -395,6 +395,15 @@ public class DesignNavigator extends VerticalLayout {
 
             }
         });
+        table.addGeneratedColumn("name", (source, itemId, columnId) -> {
+            if (itemId instanceof ProjectVersion) {
+                ProjectVersion projectVersion = (ProjectVersion) itemId;
+                return String.format("%s (%s)", projectVersion.getProject().getName(), projectVersion.getVersionLabel());
+            } else if (itemId instanceof AbstractName) {
+                return ((AbstractName) itemId).getName();
+            }
+            return itemId;
+        });
 
         return table;
     }
@@ -447,8 +456,7 @@ public class DesignNavigator extends VerticalLayout {
             Object selected = itemBeingEdited;
             Method method = null;
             try {
-                method = configurationService.getClass().getMethod("save",
-                        itemBeingEdited.getClass());
+                method = configurationService.getClass().getMethod("save", itemBeingEdited.getClass());
             } catch (NoSuchMethodException e) {
             } catch (SecurityException e) {
             }
@@ -551,14 +559,16 @@ public class DesignNavigator extends VerticalLayout {
         for (ProjectVersion projectVersion : context.getOpenProjects()) {
             treeTable.addItem(projectVersion);
             treeTable.setItemIcon(projectVersion, Icons.PROJECT);
-            treeTable.setItemCaption(projectVersion, projectVersion.getProject().getName());
+            treeTable.setItemCaption(projectVersion,
+                    String.format("%s (%s)", projectVersion.getProject().getName(), projectVersion.getVersionLabel()));
             treeTable.setChildrenAllowed(projectVersion, true);            
             addFlowsToFolder(addVirtualFolder("Flows", projectVersion), projectVersion, false);
             addFlowsToFolder(addVirtualFolder("Tests", projectVersion), projectVersion, true);
             addModelsToFolder(addVirtualFolder("Models", projectVersion), projectVersion);
             addResourcesToFolder(addVirtualFolder("Resources", projectVersion), projectVersion);
             //TODO: determine if we want to show shared components here too...
-            //addSharedComponentsToFolder(addVirtualFolder("Shared Components", projectVersion), projectVersion);
+            // addSharedComponentsToFolder(addVirtualFolder("Shared Components",
+            // projectVersion), projectVersion);
         }
     }
 
@@ -578,8 +588,7 @@ public class DesignNavigator extends VerticalLayout {
 
     protected void addResourcesToFolder(FolderName folder, ProjectVersion projectVersion) {
         IConfigurationService configurationService = context.getConfigurationService();
-        List<ResourceName> resources = configurationService.findResourcesInProject(projectVersion
-                .getId());
+        List<ResourceName> resources = configurationService.findResourcesInProject(projectVersion.getId());
         AbstractObjectNameBasedSorter.sort(resources);
         for (ResourceName resource : resources) {
             this.treeTable.setChildrenAllowed(folder, true);
@@ -599,8 +608,7 @@ public class DesignNavigator extends VerticalLayout {
 
     protected void addSharedComponentsToFolder(FolderName folder, ProjectVersion projectVersion) {
         IConfigurationService configurationService = context.getConfigurationService();
-        List<ComponentName> components = configurationService.findSharedComponentsInProject(projectVersion
-                .getId());
+        List<ComponentName> components = configurationService.findSharedComponentsInProject(projectVersion.getId());
         AbstractObjectNameBasedSorter.sort(components);
         for (ComponentName component : components) {
             this.treeTable.setChildrenAllowed(folder, true);
@@ -646,8 +654,8 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected boolean isDeleteButtonEnabled(Object selected) {
-        return selected instanceof FlowName || selected instanceof FlowStep
-                || selected instanceof ModelName || selected instanceof ResourceName;
+        return selected instanceof FlowName || selected instanceof FlowStep || selected instanceof ModelName
+                || selected instanceof ResourceName;
     }
 
     public void open(Object item) {
@@ -663,14 +671,12 @@ public class DesignNavigator extends VerticalLayout {
             ResourceName resource = (ResourceName) item;
             PropertySheet sheet = new PropertySheet(context, tabs);            
             sheet.setSource(context.getConfigurationService().findResource(resource.getId()));
-            tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item),
-                    sheet);
+            tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item), sheet);
         }
     }
     
     protected void viewProjects() {
-        tabs.addCloseableTab("projectslist", "Manage Projects", Icons.PROJECT,
-                new ManageProjectsPanel(context, this));
+        tabs.addCloseableTab("projectslist", "Manage Projects", Icons.PROJECT, new ManageProjectsPanel(context, this));
     }
 
     protected void export() {
@@ -720,8 +726,7 @@ public class DesignNavigator extends VerticalLayout {
             }
         };
         String datetime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        StreamResource resource = new StreamResource(ss, String.format("%s-config-%s.json",
-                filename, datetime));
+        StreamResource resource = new StreamResource(ss, String.format("%s-config-%s.json", filename, datetime));
         final String KEY = "export";
         setResource(KEY, resource);
         Page.getCurrent().open(ResourceReference.create(resource, this, KEY).getURL(), null);        
@@ -782,20 +787,17 @@ public class DesignNavigator extends VerticalLayout {
         Object object = treeTable.getValue();
         if (object instanceof FlowName) {
             FlowName flow = (FlowName) object;
-            ConfirmDialog.show("Delete Flow?",
-                    "Are you sure you want to delete the '" + flow.getName() + "' flow?",
+            ConfirmDialog.show("Delete Flow?", "Are you sure you want to delete the '" + flow.getName() + "' flow?",
                     new DeleteFlowConfirmationListener(flow));
         } else if (object instanceof ResourceName) {
             ResourceName resource = (ResourceName) object;
-            ConfirmDialog.show("Delete Resource?", "Are you sure you want to delete the '"
-                    + resource.getName() + "' resource?", new DeleteResourceConfirmationListener(
-                    resource));
+            ConfirmDialog.show("Delete Resource?", "Are you sure you want to delete the '" + resource.getName() + "' resource?",
+                    new DeleteResourceConfirmationListener(resource));
 
         } else if (object instanceof ModelName) {
             ModelName model = (ModelName) object;
             if (!context.getConfigurationService().isModelUsed(model.getId())) {
-                ConfirmDialog.show("Delete Model?",
-                    "Are you sure you want to delete the '" + model.getName() + "' model?",
+                ConfirmDialog.show("Delete Model?", "Are you sure you want to delete the '" + model.getName() + "' model?",
                     new DeleteModelConfirmationListener(model));
             } else {
                 CommonUiUtils.notify("The model is currently in use.  It cannot be deleted.", Type.WARNING_MESSAGE);
