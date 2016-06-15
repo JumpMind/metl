@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.ui.views.admin;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -33,6 +35,7 @@ import org.jumpmind.vaadin.ui.common.IUiPanel;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.TwinColSelect;
@@ -57,6 +60,12 @@ public class GroupEditPanel extends VerticalLayout implements IUiPanel {
         nameField.addValueChangeListener(new NameChangeListener());
         layout.addComponent(nameField);
         nameField.focus();
+        
+        CheckBox readOnly = new CheckBox("Read Only");
+        readOnly.setImmediate(true);
+        readOnly.setValue(group.isReadOnly());
+        readOnly.addValueChangeListener(new ReadOnlyChangeListener());
+        layout.addComponent(readOnly);
         
         TwinColSelect privSelect = new TwinColSelect();
         for (Privilege priv : Privilege.values()) {
@@ -96,6 +105,15 @@ public class GroupEditPanel extends VerticalLayout implements IUiPanel {
     class NameChangeListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
             group.setName((String) event.getProperty().getValue());
+            if (isNotBlank(group.getName())) {
+                context.getConfigurationService().save(group);
+            }
+        }        
+    }
+    
+    class ReadOnlyChangeListener implements ValueChangeListener {
+        public void valueChange(ValueChangeEvent event) {
+            group.setReadOnly((Boolean) event.getProperty().getValue());
             context.getConfigurationService().save(group);
         }        
     }

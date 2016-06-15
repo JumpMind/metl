@@ -29,6 +29,8 @@ public class Group extends AbstractObject {
 
     String name;
     
+    boolean readOnly;
+    
     List<GroupPrivilege> groupPrivileges;
 
     public Group() {
@@ -48,6 +50,14 @@ public class Group extends AbstractObject {
     @Override
     public String getName() {
         return name;
+    }
+    
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+    }
+    
+    public boolean isReadOnly() {
+        return readOnly;
     }
 
     public List<GroupPrivilege> getGroupPrivileges() {

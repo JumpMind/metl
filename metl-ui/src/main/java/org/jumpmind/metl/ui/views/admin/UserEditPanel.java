@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.ui.views.admin;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +32,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserGroup;
+import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
@@ -48,17 +51,17 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
     protected static final String NOCHANGE = "******";
 
     ApplicationContext context;
-    
+
     User user;
-    
+
     Map<String, Group> groupsById;
-    
+
     Set<String> lastGroups;
-    
+
     public UserEditPanel(ApplicationContext context, User user) {
         this.context = context;
         this.user = user;
-        
+
         FormLayout form = new FormLayout();
         form.setSpacing(true);
 
@@ -96,11 +99,11 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
         groupSelect.setRightColumnCaption("Selected groups");
         groupSelect.addValueChangeListener(new GroupChangeListener());
         form.addComponent(groupSelect);
-        
+
         addComponent(form);
         setMargin(true);
     }
-    
+
     @Override
     public boolean closing() {
         return true;
@@ -114,24 +117,30 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
     public void selected() {
     }
 
+    protected void save(User user) {
+        if (isNotBlank(user.getName())) {
+            context.getConfigurationService().save(user);
+        }
+    }
+
     class NameChangeListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
             user.setName((String) event.getProperty().getValue());
-            context.getConfigurationService().save(user);            
+            save(user);
         }
     }
 
     class LoginChangeListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
             user.setLoginId((String) event.getProperty().getValue());
-            context.getConfigurationService().save(user);            
+            save(user);
         }
     }
 
     class PasswordChangeListener implements ValueChangeListener {
         public void valueChange(ValueChangeEvent event) {
-            user.setPassword(User.hashValue((String) event.getProperty().getValue()));   
-            context.getConfigurationService().save(user);            
+            user.setPassword(User.hashValue((String) event.getProperty().getValue()));
+            save(user);
         }
     }
 
@@ -139,24 +148,28 @@ public class UserEditPanel extends VerticalLayout implements IUiPanel {
         @SuppressWarnings("unchecked")
         public void valueChange(ValueChangeEvent event) {
             Set<String> groups = (Set<String>) event.getProperty().getValue();
-
+            IConfigurationService configurationService = context.getConfigurationService();
             for (String id : groups) {
                 if (!lastGroups.contains(id)) {
                     UserGroup userGroup = new UserGroup(user.getId(), id);
                     user.getGroups().add(groupsById.get(id));
-                    context.getConfigurationService().save(userGroup);
+                    if (configurationService.findUser(user.getId()) != null) {
+                        context.getConfigurationService().save(userGroup);
+                    }
                 }
             }
 
             for (String id : lastGroups) {
                 if (!groups.contains(id)) {
                     user.getGroups().remove(groupsById.get(id));
-                    context.getConfigurationService().delete(new UserGroup(user.getId(), id));
+                    if (configurationService.findUser(user.getId()) != null) {
+                        context.getConfigurationService().delete(new UserGroup(user.getId(), id));
+                    }
                 }
             }
 
             lastGroups = new HashSet<String>(groups);
-        }        
+        }
     }
 
 }
