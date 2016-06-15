@@ -659,7 +659,7 @@ public class DesignNavigator extends VerticalLayout {
             tabs.addCloseableTab(model.getId(), model.getName(), Icons.MODEL, editModel);
         } else if (item instanceof ResourceName) {
             ResourceName resource = (ResourceName) item;
-            ProjectVersion projectVersion = findProjectVersion();
+            ProjectVersion projectVersion = findProjectVersion(resource);
             PropertySheet sheet = new PropertySheet(context, tabs, projectVersion.isReadOnly());            
             sheet.setSource(context.getConfigurationService().findResource(resource.getId()));
             tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item),
@@ -782,6 +782,10 @@ public class DesignNavigator extends VerticalLayout {
 
     protected ProjectVersion findProjectVersion() {
         Object value = treeTable.getValue();
+        return findProjectVersion(value);
+    }
+    
+    protected ProjectVersion findProjectVersion(Object value) {
         while (!(value instanceof ProjectVersion) && value != null) {
             value = treeTable.getParent(value);
         }
