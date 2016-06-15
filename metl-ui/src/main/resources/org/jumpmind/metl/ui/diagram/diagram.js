@@ -7,7 +7,6 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
     var selectedColor = "orange";
     var diagramStart = {};
     var nodeStart = {};
-    var rubberbandDrawingActive = false;
     var ctrlPress = false;
     
     /**
@@ -63,7 +62,7 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
                 anchor : "RightMiddle",
                 uuid : "source-" + node.id,
                 maxConnections : -1,
-                isSource : true,
+                isSource : state.readOnly ? false : true,
                 overlays: [
                            [ "Label", {
                                id: "label",
@@ -84,7 +83,7 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
                     hoverClass : "hover",
                     activeClass : "active"
                 },
-                isTarget : true,
+                isTarget : state.readOnly ? false : true,
                 overlays: [
                            [ "Label", {
                                id: "label",
@@ -141,29 +140,30 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
             labelDiv.innerHTML = node.name;
             draggableDiv.appendChild(labelDiv);
 
-            parentDiv.appendChild(draggableDiv);
-            
-            instance.draggable(draggableDiv, {
-                constrain:true,
-                start : function(event) {
-                    nodeStart[event.el.firstChild.id] = $(event.el).position();
-                    event.el.dragging = true;
-                },
-                stop : function(event) {
-                    event.el.dragging = false;
-                    var start = nodeStart[event.el.firstChild.id];
-                    if(start != undefined && 
-                    		(start.left !== event.pos[0] || start.top !== event.pos[1])) {
-	                    self.onNodeMoved({
-	                        'id' : event.el.firstChild.id,
-	                        'x' : event.pos[0],
-	                        'y' : event.pos[1]
-	                    });
-                	}
-                },
-                grid : [10, 10],
-                snapThreshold : 10
-            });
+            parentDiv.appendChild(draggableDiv);            
+
+            if (!state.readOnly) {
+                instance.draggable(draggableDiv, {
+                    constrain : true,
+                    start : function(event) {
+                        nodeStart[event.el.firstChild.id] = $(event.el).position();
+                        event.el.dragging = true;
+                    },
+                    stop : function(event) {
+                        event.el.dragging = false;
+                        var start = nodeStart[event.el.firstChild.id];
+                        if (start != undefined && (start.left !== event.pos[0] || start.top !== event.pos[1])) {
+                            self.onNodeMoved({
+                                'id' : event.el.firstChild.id,
+                                'x' : event.pos[0],
+                                'y' : event.pos[1]
+                            });
+                        }
+                    },
+                    grid : [ 10, 10 ],
+                    snapThreshold : 10
+                });
+            }
 
             var selected = state.selectedNodeIds;
             for (var k = 0; k < selected.length; k++) {
@@ -175,60 +175,66 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
             
             self.addEndpoints(node, nodeDiv);
         }
+        
         for (j = 0; j < nodeList.length; j++) {
             for (i = 0; i < nodeList[j].targetNodeIds.length; i++) {
                 instance.connect({
                     uuids : [ "source-" + nodeList[j].id, "target-" + nodeList[j].targetNodeIds[i] ],
-                    editable : true
+                    editable : state.readOnly ? false : true
                 });
             }
-        }
-        instance.bind("beforeDrop", function(info) {
-            var source = info.connection.endpoints[0].getOverlay("label").label;
-            var target = info.dropEndpoint.getOverlay("label").label;
-            return source === target || source === '*' || target == '*';
-        });
-        instance.bind("connection", function(info, originalEvent) {
-            self.onConnection({
-                "sourceNodeId" : info.connection.sourceId,
-                "targetNodeId" : info.connection.targetId,
-                "removed" : false
+        }       
+
+        if (!state.readOnly) {
+            instance.bind("beforeDrop", function(info) {
+                var source = info.connection.endpoints[0].getOverlay("label").label;
+                var target = info.dropEndpoint.getOverlay("label").label;
+                return source === target || source === '*' || target == '*';
             });
-        });
-        instance.bind("connectionMoved", function(info, originalEvent) {
-            self.onConnectionMoved({
-                "sourceNodeId" : info.newSourceId,
-                "targetNodeId" : info.newTargetId,
-                "origSourceNodeId" : info.originalSourceId,
-                "origTargetNodeId" : info.originalTargetId
+            instance.bind("connection", function(info, originalEvent) {
+                self.onConnection({
+                    "sourceNodeId" : info.connection.sourceId,
+                    "targetNodeId" : info.connection.targetId,
+                    "removed" : false
+                });
             });
-        }); 
-        instance.bind("connectionDetached", function(info, originalEvent) {
-            self.onConnection({
-                "sourceNodeId" : info.connection.sourceId,
-                "targetNodeId" : info.connection.targetId,
-                "removed" : true
+            instance.bind("connectionMoved", function(info, originalEvent) {
+                self.onConnectionMoved({
+                    "sourceNodeId" : info.newSourceId,
+                    "targetNodeId" : info.newTargetId,
+                    "origSourceNodeId" : info.originalSourceId,
+                    "origTargetNodeId" : info.originalTargetId
+                });
             });
-        });
-        
-        instance.bind("mousedown", function(connection, originalEvent) {
-            originalEvent.stopImmediatePropagation();
-            unselectAllLinks();
-            $(".diagram-node").removeClass("selected");
-            state.selectedNodeId = null;
-            instance.detach(connection, {fireEvent:false});
-            connection = instance.connect({
-                uuids : [ "source-" + connection.sourceId, "target-" + connection.targetId ],
-                editable : true,
-                fireEvent:false
+            instance.bind("connectionDetached", function(info, originalEvent) {
+                self.onConnection({
+                    "sourceNodeId" : info.connection.sourceId,
+                    "targetNodeId" : info.connection.targetId,
+                    "removed" : true
+                });
             });
-            connection.toggleType("selected");
-            sendSelected();
-            self.onLinkSelected({
-                'sourceNodeId' : connection.sourceId,
-                'targetNodeId' : connection.targetId,
+
+            instance.bind("mousedown", function(connection, originalEvent) {
+                originalEvent.stopImmediatePropagation();
+                unselectAllLinks();
+                $(".diagram-node").removeClass("selected");
+                state.selectedNodeId = null;
+                instance.detach(connection, {
+                    fireEvent : false
+                });
+                connection = instance.connect({
+                    uuids : [ "source-" + connection.sourceId, "target-" + connection.targetId ],
+                    editable : true,
+                    fireEvent : false
+                });
+                connection.toggleType("selected");
+                sendSelected();
+                self.onLinkSelected({
+                    'sourceNodeId' : connection.sourceId,
+                    'targetNodeId' : connection.targetId,
+                });
             });
-        });
+        }        
         
         var rubberband = document.createElement('div');
         rubberband.id = "rubberband";
@@ -245,7 +251,9 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
         });
 
         $(parentDiv).click(diagramContainer_Click);
-        $(parentDiv).mousedown(diagramContainer_MouseDown);
+        if (!state.readOnly) {
+            $(parentDiv).mousedown(diagramContainer_MouseDown);
+        }
         $(parentDiv).mousemove(diagramContainer_MouseMove);
         $(parentDiv).mouseup(diagramContainer_MouseUp);
     };

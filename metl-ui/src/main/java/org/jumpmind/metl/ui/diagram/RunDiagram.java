@@ -25,7 +25,6 @@ import java.util.List;
 import com.vaadin.annotations.JavaScript;
 import com.vaadin.annotations.StyleSheet;
 import com.vaadin.ui.AbstractJavaScriptComponent;
-import com.vaadin.ui.JavaScriptFunction;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
@@ -45,29 +44,23 @@ public class RunDiagram extends AbstractJavaScriptComponent {
         setPrimaryStyleName("diagram");
         setId("run-diagram");
 
-        addFunction("onNodeSelected", new JavaScriptFunction() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void call(JsonArray arguments) {
-                DiagramState state = getState();
-                List<String> ids = state.selectedNodeIds;
-                ids.clear();
-                if (arguments.length() > 0) {
-                    Object obj = arguments.get(0);
-                    if (obj instanceof JsonObject) {
-                        JsonObject json = arguments.getObject(0);
-                        if (json.hasKey("nodes")) {
-                            JsonArray nodes = json.getArray("nodes");
-                            for (int i=0; i<nodes.length(); i++) {
-                                ids.add( nodes.getObject(i).getString("id") );
-                            }
+        addFunction("onNodeSelected", (arguments) -> {
+            DiagramState state = getState();
+            List<String> ids = state.selectedNodeIds;
+            ids.clear();
+            if (arguments.length() > 0) {
+                Object obj = arguments.get(0);
+                if (obj instanceof JsonObject) {
+                    JsonObject json = arguments.getObject(0);
+                    if (json.hasKey("nodes")) {
+                        JsonArray nodes = json.getArray("nodes");
+                        for (int i = 0; i < nodes.length(); i++) {
+                            ids.add(nodes.getObject(i).getString("id"));
                         }
                     }
                 }
-                fireEvent(new NodeSelectedEvent(RunDiagram.this, ids));
             }
+            fireEvent(new NodeSelectedEvent(RunDiagram.this, ids));
         });
 
     }

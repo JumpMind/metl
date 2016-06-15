@@ -183,16 +183,16 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
     protected HorizontalLayout buildButtonBar() {
         ButtonBar buttonBar = new ButtonBar();
-        runButton = buttonBar.addButton("Run", Icons.RUN);
-        runButton.addClickListener(new ClickListener() {
-
-            @Override
-            public void buttonClick(ClickEvent event) {
-                runFlow();
-            }
-        });
-
         if (!readOnly) {
+            runButton = buttonBar.addButton("Run", Icons.RUN);
+            runButton.addClickListener(new ClickListener() {
+
+                @Override
+                public void buttonClick(ClickEvent event) {
+                    runFlow();
+                }
+            });
+
             copyButton = buttonBar.addButton("Copy", FontAwesome.COPY);
             copyButton.addClickListener(new ClickListener() {
 
@@ -327,7 +327,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             diagramLayout.removeComponent(diagram);
         }
 
-        diagram = new Diagram();
+        diagram = new Diagram(readOnly);
         List<String> ids = new ArrayList<String>(selected.size());
         for (AbstractObject s : selected) {
             if (s instanceof FlowStep) {
