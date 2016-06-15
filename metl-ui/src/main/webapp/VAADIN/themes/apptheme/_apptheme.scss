@@ -52,7 +52,26 @@
   
   .v-selected .v-table-cell-content-project .v-icon {
      color: white;
+  }
+  
+  .v-table-cell-content-project .v-table-cell-wrapper {
+     font-weight: bold;
+  }
+  
+  .v-table-cell-content-project-read-only .v-table-cell-wrapper {
+     font-weight: bold;
+     color: gray;
   }  
+  
+  .v-selected .v-table-cell-content-project .v-table-cell-wrapper {
+     font-weight: bold;
+  }  
+  
+  .v-selected .v-table-cell-content-project-read-only .v-table-cell-wrapper {
+     font-weight: bold;
+     color: white;
+  }   
+    
   
   .centerAligned.v-button, .centerAligned.v-label {
     text-align: center; 

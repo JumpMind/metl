@@ -382,7 +382,8 @@ public class DesignNavigator extends VerticalLayout {
                     if (itemId instanceof FolderName) {
                         return "folder";
                     } else if (itemId instanceof ProjectVersion) {
-                        return "project";
+                        ProjectVersion version = (ProjectVersion)itemId;
+                        return version.isReadOnly() ? "project-read-only" : "project";
                     }
                 }
                 return null;
