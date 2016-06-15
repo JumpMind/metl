@@ -31,7 +31,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.jumpmind.metl.core.model.AbstractName;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.ComponentName;
