@@ -122,21 +122,18 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
         this.configurationService = context.getConfigurationService();
         this.flow = configurationService.findFlow(flowId);
-        readOnly = context.isReadOnly(configurationService.findProjectVersion(flow.getProjectVersionId()), Privilege.DESIGN);
+        this.readOnly = context.isReadOnly(configurationService.findProjectVersion(flow.getProjectVersionId()), Privilege.DESIGN);
         this.context = context;
         this.tabs = tabs;
         this.designNavigator = designNavigator;
 
         this.propertySheet = new PropertySheet(context, tabs, readOnly);
-        this.propertySheet.setListener(new IPropertySheetChangeListener() {
-            @Override
-            public void componentChanged(List<Component> components) {
-                List<FlowStep> steps = new ArrayList<FlowStep>();
-                for (Component c : components) {
-                    steps.add(EditFlowPanel.this.flow.findFlowStepWithComponentId(c.getId()));
-                }
-                refreshStepOnDiagram(steps);
+        this.propertySheet.setListener((components) -> {
+            List<FlowStep> steps = new ArrayList<FlowStep>();
+            for (Component c : components) {
+                steps.add(EditFlowPanel.this.flow.findFlowStepWithComponentId(c.getId()));
             }
+            refreshStepOnDiagram(steps);
         });
         this.propertySheet.setCaption("Property Sheet");
 
@@ -217,13 +214,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         }
 
         parametersButton = buttonBar.addButton("Parameters", FontAwesome.LIST_OL);
-        parametersButton.addClickListener(new ClickListener() {
-
-            @Override
-            public void buttonClick(ClickEvent event) {
-                new EditParametersWindow(context, flow).showAtSize(.75);
-            }
-        });
+        parametersButton.addClickListener((event) -> new EditParametersDialog(context, flow, readOnly).showAtSize(.75));
 
         return buttonBar;
     }

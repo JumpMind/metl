@@ -57,21 +57,21 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-class EditParametersWindow extends ResizableWindow implements ValueChangeListener {
+class EditParametersDialog extends ResizableWindow implements ValueChangeListener {
 
     ApplicationContext context;
-    
+
     Flow flow;
 
     BeanItemContainer<FlowParameter> container;
 
     Table table;
-    
+
     Button insertButton;
-    
+
     Button removeButton;
 
-    public EditParametersWindow(ApplicationContext context, Flow flow) {
+    public EditParametersDialog(ApplicationContext context, Flow flow, boolean readOnly) {
         super("Flow Parameters");
         this.context = context;
         this.flow = flow;
@@ -80,29 +80,33 @@ class EditParametersWindow extends ResizableWindow implements ValueChangeListene
         closeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
         closeButton.addClickListener(new CloseClickListener());
 
-        ButtonBar buttonBar = new ButtonBar();
-        buttonBar.addButton("Add", FontAwesome.PLUS, new AddClickListener());
-        insertButton = buttonBar.addButton("Insert", FontAwesome.CHEVRON_RIGHT, new InsertClickListener());
-        insertButton.setEnabled(false);
-        removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O, new RemoveClickListener());
-        removeButton.setEnabled(false);
-        addComponent(buttonBar);
+        if (!readOnly) {
+            ButtonBar buttonBar = new ButtonBar();
+            buttonBar.addButton("Add", FontAwesome.PLUS, new AddClickListener());
+            insertButton = buttonBar.addButton("Insert", FontAwesome.CHEVRON_RIGHT, new InsertClickListener());
+            insertButton.setEnabled(false);
+            removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O, new RemoveClickListener());
+            removeButton.setEnabled(false);
+            addComponent(buttonBar);
+        }
 
         table = new Table();
         table.setSizeFull();
         container = new BeanItemContainer<FlowParameter>(FlowParameter.class);
         table.setContainerDataSource(container);
-        table.setEditable(true);
         table.setSelectable(true);
         table.setSortEnabled(false);
-        table.setDragMode(TableDragMode.ROW);
-        table.setDropHandler(new TableDropHandler());
-        table.setTableFieldFactory(new EditFieldFactory());
+        if (!readOnly) {
+            table.setEditable(true);
+            table.setDragMode(TableDragMode.ROW);
+            table.setDropHandler(new TableDropHandler());
+            table.setTableFieldFactory(new EditFieldFactory());
+            table.addValueChangeListener(this);
+        }
         table.setVisibleColumns("position", "name", "defaultValue");
         table.setColumnHeaders("#", "Name", "Default Value");
         table.setColumnExpandRatio("name", .3f);
         table.setColumnExpandRatio("defaultValue", .6f);
-        table.addValueChangeListener(this);
         addComponent(table, 1);
 
         addComponent(buildButtonFooter(closeButton));
@@ -131,7 +135,7 @@ class EditParametersWindow extends ResizableWindow implements ValueChangeListene
         parameter.setPosition((index + 1));
         context.getConfigurationService().save(parameter);
         flow.getFlowParameters().add(parameter);
-        container.addItemAt(index, parameter);      
+        container.addItemAt(index, parameter);
         table.select(parameter);
         table.setCurrentPageFirstItemId(parameter);
     }
@@ -145,7 +149,7 @@ class EditParametersWindow extends ResizableWindow implements ValueChangeListene
             context.getConfigurationService().save(parameter);
         }
     }
-    
+
     class AddClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
             addItem(flow.getFlowParameters().size());
@@ -177,13 +181,13 @@ class EditParametersWindow extends ResizableWindow implements ValueChangeListene
 
     class CloseClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            EditParametersWindow.this.close();
+            EditParametersDialog.this.close();
         }
     }
 
     class EditFieldFactory implements TableFieldFactory {
-        public Field<?> createField(final Container dataContainer, final Object itemId,
-                final Object propertyId, com.vaadin.ui.Component uiContext) {
+        public Field<?> createField(final Container dataContainer, final Object itemId, final Object propertyId,
+                com.vaadin.ui.Component uiContext) {
             final FlowParameter parameter = (FlowParameter) itemId;
             final TextField textField = new ImmediateUpdateTextField(null) {
                 protected void save(String text) {
@@ -193,8 +197,8 @@ class EditParametersWindow extends ResizableWindow implements ValueChangeListene
             };
             textField.addFocusListener(new FocusListener() {
                 public void focus(FocusEvent event) {
-                    table.select(itemId);                    
-                }                
+                    table.select(itemId);
+                }
             });
             if (propertyId.equals("position")) {
                 textField.setReadOnly(true);
