@@ -68,7 +68,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
             IPersistenceManager persistenceManager, String tablePrefix,
             IConfigurationService configurationService) {
 
-        super(persistenceManager, tablePrefix);        
+        super(persistenceManager, tablePrefix);
         this.databasePlatform = databasePlatform;
         this.configurationService = configurationService;
         this.tablePrefix = tablePrefix;
@@ -80,117 +80,120 @@ public class ImportExportService extends AbstractService implements IImportExpor
         columnsToExclude[0] = "CREATE_TIME";
         columnsToExclude[1] = "LAST_UPDATE_TIME";
         columnsToExclude[2] = "CREATE_BY";
-        columnsToExclude[3] = "LAST_UPDATE_BY";          
+        columnsToExclude[3] = "LAST_UPDATE_BY";
     }
-    
+
     @Override
     public String exportModel(String projectVersionId, String modelId) {
 
         return exportConfig(ExportType.MODEL, projectVersionId, modelId);
     }
-    
+
     @Override
     public String exportResource(String projectVersionId, String resourceId) {
-        
+
         return exportConfig(ExportType.RESOURCE, projectVersionId, resourceId);
     }
-    
+
     @Override
     public String exportFlow(String projectVersionId, String flowId) {
-        
+
         return exportConfig(ExportType.FLOW, projectVersionId, flowId);
     }
-    
+
     @Override
     public String exportProject(String projectVersionId) {
-        
+
         return exportConfig(ExportType.PROJECT, projectVersionId, null);
     }
-    
+
     @Override
-    public String export(String projectVersionId, List<String> flowIds, List<String> modelIds, List<String> resourceIds) {
-        
+    public String export(String projectVersionId, List<String> flowIds, List<String> modelIds,
+            List<String> resourceIds) {
+
         ConfigData exportData = new ConfigData();
         initConfigData(exportData.getModelData(), MODEL_SQL);
         initConfigData(exportData.getResourceData(), RESOURCE_SQL);
         initConfigData(exportData.getFlowData(), FLOW_SQL);
 
         for (String flowId : flowIds) {
-            addConfigData(exportData.getFlowData(), FLOW_SQL,projectVersionId, flowId);
+            addConfigData(exportData.getFlowData(), FLOW_SQL, projectVersionId, flowId);
         }
         for (String modelId : modelIds) {
-            addConfigData(exportData.getModelData(),MODEL_SQL, projectVersionId, modelId);
+            addConfigData(exportData.getModelData(), MODEL_SQL, projectVersionId, modelId);
         }
         for (String resourceId : resourceIds) {
             addConfigData(exportData.getResourceData(), RESOURCE_SQL, projectVersionId, resourceId);
         }
-                
+
         return serializeExportToJson(exportData);
     }
-    
+
     @Override
     public void importConfiguration(String configDataString) {
 
-        ConfigData configData = deserializeConfigurationData(configDataString); 
+        ConfigData configData = deserializeConfigurationData(configDataString);
         importConfiguration(configData);
-    }  
-    
+    }
+
     private String exportConfig(ExportType exportType, String projectVersionId, String objectId) {
-        
+
         ConfigData exportData = new ConfigData();
         initConfigData(exportData.getModelData(), MODEL_SQL);
         initConfigData(exportData.getResourceData(), RESOURCE_SQL);
         initConfigData(exportData.getFlowData(), FLOW_SQL);
-    
+
         if (exportType.equals(ExportType.MODEL)) {
             addConfigData(exportData.getModelData(), MODEL_SQL, projectVersionId, objectId);
-        } else if (exportType.equals(ExportType.RESOURCE)) {            
+        } else if (exportType.equals(ExportType.RESOURCE)) {
             addConfigData(exportData.getResourceData(), RESOURCE_SQL, projectVersionId, objectId);
-        } else if (exportType.equals(ExportType.FLOW)) {            
+        } else if (exportType.equals(ExportType.FLOW)) {
             addConfigData(exportData.getFlowData(), FLOW_SQL, projectVersionId, objectId);
         } else if (exportType.equals(ExportType.PROJECT)) {
             List<Flow> flows = configurationService.findDependentFlows(projectVersionId);
             Set<Model> models = new HashSet<Model>();
             Set<Resource> resources = new HashSet<Resource>();
-            
+
             for (Flow flow : flows) {
                 models.addAll(configurationService.findDependentModels(flow.getId()));
-                resources.addAll(configurationService.findDependentResources(flow.getId()));                
-                addConfigData(exportData.getFlowData(), FLOW_SQL,projectVersionId, flow.getId());
+                resources.addAll(configurationService.findDependentResources(flow.getId()));
+                addConfigData(exportData.getFlowData(), FLOW_SQL, projectVersionId, flow.getId());
             }
             for (Model model : models) {
-                addConfigData(exportData.getModelData(),MODEL_SQL, projectVersionId, model.getId());
+                addConfigData(exportData.getModelData(), MODEL_SQL, projectVersionId,
+                        model.getId());
             }
             for (Resource resource : resources) {
-                addConfigData(exportData.getResourceData(), RESOURCE_SQL, projectVersionId, resource.getId());
+                addConfigData(exportData.getResourceData(), RESOURCE_SQL, projectVersionId,
+                        resource.getId());
             }
         }
         return serializeExportToJson(exportData);
     }
 
     private String serializeExportToJson(ConfigData exportData) {
-        
+
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         String outData;
 
         try {
             outData = mapper.writeValueAsString(exportData);
-        } catch (JsonProcessingException e) {            
+        } catch (JsonProcessingException e) {
             log.error(e.getMessage());
             throw new UnsupportedOperationException("Error processing export to json");
         }
         return outData;
     }
-    
-    
-    private void addConfigData(List<TableData> tableData, String[][] sqlElements, String projectVersionId, String keyValue) {        
-        
-        for (int i = 0; i <= sqlElements.length-1; i++) {
+
+    private void addConfigData(List<TableData> tableData, String[][] sqlElements,
+            String projectVersionId, String keyValue) {
+
+        for (int i = 0; i <= sqlElements.length - 1; i++) {
             String[] entry = sqlElements[i];
-            
+
             tableData.get(i).rows.addAll(getConfigTableData(
-                    String.format(entry[1],tablePrefix,projectVersionId, keyValue)));
+                    String.format(entry[1], tablePrefix, projectVersionId, keyValue)));
         }
     }
 
@@ -199,10 +202,10 @@ public class ImportExportService extends AbstractService implements IImportExpor
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> rows = template.query(sql);
         excludeColumnData(rows);
-        
+
         return rows;
     }
-        
+
     private void excludeColumnData(List<Row> rows) {
         for (Row row : rows) {
             for (int i = 0; i < columnsToExclude.length; i++) {
@@ -214,134 +217,164 @@ public class ImportExportService extends AbstractService implements IImportExpor
     private void importConfiguration(ConfigData configData) {
 
         ImportConfigData importData = new ImportConfigData(configData);
-        ISqlTransaction transaction = databasePlatform.getSqlTemplate().startSqlTransaction();  
-        
-        if (importData.getResourceData().size() > 0 &&
-                importData.getResourceData().get(0).rows.size() > 0) {
+        ISqlTransaction transaction = databasePlatform.getSqlTemplate().startSqlTransaction();
+
+        if (importData.getResourceData().size() > 0
+                && importData.getResourceData().get(0).rows.size() > 0) {
             importResourceConfiguration(importData, transaction);
         }
-        if (importData.getModelData().size() > 0 &&
-                importData.getModelData().get(0).rows.size() > 0) {
+        if (importData.getModelData().size() > 0
+                && importData.getModelData().get(0).rows.size() > 0) {
             importModelConfiguration(importData, transaction);
         }
-        if (importData.getFlowData().size() > 0 &&
-                importData.getFlowData().get(0).rows.size() > 0) {
+        if (importData.getFlowData().size() > 0
+                && importData.getFlowData().get(0).rows.size() > 0) {
             importFlowConfiguration(importData, transaction);
-        }                
+        }
         processDeletes(importData, transaction);
-        
+
         transaction.commit();
 
     }
-    
+
     private void processDeletes(ImportConfigData importData, ISqlTransaction transaction) {
-        
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_FLOW_STEP_LINK"), transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_FLOW_STEP"), transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_FLOW_PARAMETER"), transaction);
+
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_FLOW_STEP_LINK"),
+                transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_FLOW_STEP"),
+                transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_FLOW_PARAMETER"),
+                transaction);
         processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_FLOW"), transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_COMPONENT_ATTRIBUTE_SETTING"), transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_COMPONENT_ENTITY_SETTING"), transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_COMPONENT_SETTING"), transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_COMPONENT"), transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_RESOURCE_SETTING"), transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_RESOURCE"), transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_MODEL_ATTRIBUTE"), transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_MODEL_ENTITY"), transaction);
-        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_MODEL"), transaction);        
+        processTableDeletes(
+                importData.deletesToProcess.get(tablePrefix + "_COMPONENT_ATTRIBUTE_SETTING"),
+                transaction);
+        processTableDeletes(
+                importData.deletesToProcess.get(tablePrefix + "_COMPONENT_ENTITY_SETTING"),
+                transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_COMPONENT_SETTING"),
+                transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_COMPONENT"),
+                transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_RESOURCE_SETTING"),
+                transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_RESOURCE"),
+                transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_MODEL_ATTRIBUTE"),
+                transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_MODEL_ENTITY"),
+                transaction);
+        processTableDeletes(importData.deletesToProcess.get(tablePrefix + "_MODEL"), transaction);
     }
-    
-    
-    private void importResourceConfiguration(ImportConfigData importData, ISqlTransaction transaction) {
-        
-        String projectVersionId = (String) importData.getResourceData().get(0).getTableData().get(0).get("PROJECT_VERSION_ID");
+
+    private void importResourceConfiguration(ImportConfigData importData,
+            ISqlTransaction transaction) {
+
+        String projectVersionId = (String) importData.getResourceData().get(0).getTableData().get(0)
+                .get("PROJECT_VERSION_ID");
         List<TableData> existingResourceData = new ArrayList<TableData>();
         initConfigData(existingResourceData, RESOURCE_SQL);
-        for (LinkedCaseInsensitiveMap<Object> row : importData.getResourceData().get(0).getTableData()) {
-            addConfigData(existingResourceData, RESOURCE_SQL, projectVersionId, (String) row.get(RESOURCE_SQL[0][2]));            
-        }   
-        for (int i = 0; i <= RESOURCE_SQL.length-1; i++) {
-            TableData importResourceData = importData.resourceData.get(i);          
-            processConfigTableData(importData, existingResourceData.get(i), importResourceData, RESOURCE_SQL[i][2], transaction);
+        for (LinkedCaseInsensitiveMap<Object> row : importData.getResourceData().get(0)
+                .getTableData()) {
+            addConfigData(existingResourceData, RESOURCE_SQL, projectVersionId,
+                    (String) row.get(RESOURCE_SQL[0][2]));
+        }
+        for (int i = 0; i <= RESOURCE_SQL.length - 1; i++) {
+            TableData importResourceData = importData.resourceData.get(i);
+            processConfigTableData(importData, existingResourceData.get(i), importResourceData,
+                    RESOURCE_SQL[i][2], transaction);
         }
     }
-    
-    private void importModelConfiguration(ImportConfigData importData, ISqlTransaction transaction) {
-        
-        String projectVersionId = (String) importData.getModelData().get(0).getTableData().get(0).get("PROJECT_VERSION_ID");
+
+    private void importModelConfiguration(ImportConfigData importData,
+            ISqlTransaction transaction) {
+
+        String projectVersionId = (String) importData.getModelData().get(0).getTableData().get(0)
+                .get("PROJECT_VERSION_ID");
         List<TableData> existingModelData = new ArrayList<TableData>();
-        initConfigData(existingModelData, MODEL_SQL);        
-        for (LinkedCaseInsensitiveMap<Object> row : importData.getModelData().get(0).getTableData()) {
-            addConfigData(existingModelData, MODEL_SQL, projectVersionId, (String) row.get(MODEL_SQL[0][2]));            
-        }     
-        for (int i = 0; i <= MODEL_SQL.length-1; i++) {
+        initConfigData(existingModelData, MODEL_SQL);
+        for (LinkedCaseInsensitiveMap<Object> row : importData.getModelData().get(0)
+                .getTableData()) {
+            addConfigData(existingModelData, MODEL_SQL, projectVersionId,
+                    (String) row.get(MODEL_SQL[0][2]));
+        }
+        for (int i = 0; i <= MODEL_SQL.length - 1; i++) {
             TableData importModelData = importData.modelData.get(i);
-            processConfigTableData(importData, existingModelData.get(i), importModelData, MODEL_SQL[i][2], transaction);
+            processConfigTableData(importData, existingModelData.get(i), importModelData,
+                    MODEL_SQL[i][2], transaction);
         }
     }
 
     private void importFlowConfiguration(ImportConfigData importData, ISqlTransaction transaction) {
 
-        String projectVersionId = (String) importData.getFlowData().get(4).getTableData().get(0).get("PROJECT_VERSION_ID");
+        String projectVersionId = (String) importData.getFlowData().get(4).getTableData().get(0)
+                .get("PROJECT_VERSION_ID");
         List<TableData> existingFlowData = new ArrayList<TableData>();
         initConfigData(existingFlowData, FLOW_SQL);
-        for (LinkedCaseInsensitiveMap<Object> row : importData.getFlowData().get(4).getTableData()) {
-            addConfigData(existingFlowData, FLOW_SQL, projectVersionId, (String) row.get(FLOW_SQL[4][2]));            
-        }     
-        for (int i = 0; i <= FLOW_SQL.length-1; i++) {
-            TableData importFlowData = importData.flowData.get(i);          
-            processConfigTableData(importData, existingFlowData.get(i), importFlowData, FLOW_SQL[i][2], transaction);
+        for (LinkedCaseInsensitiveMap<Object> row : importData.getFlowData().get(4)
+                .getTableData()) {
+            addConfigData(existingFlowData, FLOW_SQL, projectVersionId,
+                    (String) row.get(FLOW_SQL[4][2]));
+        }
+        for (int i = 0; i <= FLOW_SQL.length - 1; i++) {
+            TableData importFlowData = importData.flowData.get(i);
+            processConfigTableData(importData, existingFlowData.get(i), importFlowData,
+                    FLOW_SQL[i][2], transaction);
         }
     }
-        
-    private void processConfigTableData(ImportConfigData configData, TableData existingData, TableData importData, String primaryKeyColumns,
-            ISqlTransaction transaction) {
-        
+
+    private void processConfigTableData(ImportConfigData configData, TableData existingData,
+            TableData importData, String primaryKeyColumns, ISqlTransaction transaction) {
+
         TableData inserts = findInserts(existingData, importData, primaryKeyColumns);
         processTableInserts(inserts, transaction);
-        
+
         TableData updates = findUpdates(existingData, importData, primaryKeyColumns);
         processTableUpdates(updates, transaction);
-                
+
         TableData deletes = findDeletes(existingData, importData, primaryKeyColumns);
         configData.deletesToProcess.put(importData.getTableName(), deletes);
     }
-    
+
     private void processTableInserts(TableData inserts, ISqlTransaction transaction) {
-        
-        Table table = databasePlatform.getTableFromCache(null, null, inserts.getTableName(), false);   
+
+        Table table = databasePlatform.getTableFromCache(null, null, inserts.getTableName(), false);
         excludeColumns(table);
 
-        DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.INSERT, table.getCatalog(), table.getSchema(), table.getName(), 
-                table.getPrimaryKeyColumns(), table.getColumns(), null, null, true);
+        DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.INSERT, table.getCatalog(),
+                table.getSchema(), table.getName(), table.getPrimaryKeyColumns(),
+                table.getColumns(), null, null, true);
         for (LinkedCaseInsensitiveMap<Object> row : inserts.getTableData()) {
-            transaction.prepareAndExecute(stmt.getSql(),row);
-        } 
+            transaction.prepareAndExecute(stmt.getSql(), row);
+        }
     }
-    
+
     private void processTableUpdates(TableData updates, ISqlTransaction transaction) {
         Table table = databasePlatform.getTableFromCache(null, null, updates.getTableName(), false);
         excludeColumns(table);
 
-        DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.UPDATE, table.getCatalog(), table.getSchema(), table.getName(), 
-                table.getPrimaryKeyColumns(), getUpdateColumns(table), null, null, true);
+        DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.UPDATE, table.getCatalog(),
+                table.getSchema(), table.getName(), table.getPrimaryKeyColumns(),
+                getUpdateColumns(table), null, null, true);
         for (LinkedCaseInsensitiveMap<Object> row : updates.getTableData()) {
             transaction.prepareAndExecute(stmt.getSql(), row);
-        }        
+        }
     }
 
     private void processTableDeletes(TableData deletes, ISqlTransaction transaction) {
         if (deletes != null) {
-            Table table = databasePlatform.getTableFromCache(null, null, deletes.getTableName(), false);
+            Table table = databasePlatform.getTableFromCache(null, null, deletes.getTableName(),
+                    false);
             excludeColumns(table);
-            DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.DELETE, table.getCatalog(), table.getSchema(), table.getName(), 
+            DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.DELETE,
+                    table.getCatalog(), table.getSchema(), table.getName(),
                     table.getPrimaryKeyColumns(), getUpdateColumns(table), null, null, true);
             for (LinkedCaseInsensitiveMap<Object> row : deletes.getTableData()) {
-                    transaction.prepareAndExecute(stmt.getSql(),row);                    
-            }                
+                transaction.prepareAndExecute(stmt.getSql(), row);
+            }
         }
-    }    
-    
+    }
+
     private Column[] getUpdateColumns(Table table) {
         ArrayList<Column> columns = new ArrayList<Column>();
         for (Column column : table.getColumns()) {
@@ -350,18 +383,18 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }
         return columns.toArray(new Column[0]);
     }
-    
+
     private void excludeColumns(Table table) {
         for (Column column : table.getColumns()) {
-            if (column.getName().equalsIgnoreCase(columnsToExclude[0]) ||
-                    column.getName().equalsIgnoreCase(columnsToExclude[1]) ||
-                    column.getName().equalsIgnoreCase(columnsToExclude[2]) ||
-                    column.getName().equalsIgnoreCase(columnsToExclude[3])) {
+            if (column.getName().equalsIgnoreCase(columnsToExclude[0])
+                    || column.getName().equalsIgnoreCase(columnsToExclude[1])
+                    || column.getName().equalsIgnoreCase(columnsToExclude[2])
+                    || column.getName().equalsIgnoreCase(columnsToExclude[3])) {
                 table.removeColumn(column);
             }
         }
     }
-    
+
     private ConfigData deserializeConfigurationData(String configDataString) {
 
         ObjectMapper mapper = new ObjectMapper();
@@ -374,18 +407,19 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }
         return configData;
     }
-    
-    private TableData findInserts(TableData existingData, TableData newData, String primaryKeyColumns) {
 
-        boolean found;        
+    private TableData findInserts(TableData existingData, TableData newData,
+            String primaryKeyColumns) {
+
+        boolean found;
         TableData inserts = new TableData(newData.tableName);
         for (LinkedCaseInsensitiveMap<Object> newRow : newData.getTableData()) {
             String newPk = getPkDataAsString(newRow, primaryKeyColumns);
             found = false;
-            for (LinkedCaseInsensitiveMap<Object> existingRow : existingData.getTableData()) {                
-                String existingPk = getPkDataAsString(existingRow, primaryKeyColumns);                
+            for (LinkedCaseInsensitiveMap<Object> existingRow : existingData.getTableData()) {
+                String existingPk = getPkDataAsString(existingRow, primaryKeyColumns);
                 if (newPk.equalsIgnoreCase(existingPk)) {
-                    found=true;
+                    found = true;
                 }
             }
             if (!found) {
@@ -394,18 +428,19 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }
         return inserts;
     }
-    
-    private TableData findDeletes(TableData existingData, TableData newData, String primaryKeyColumns) {
+
+    private TableData findDeletes(TableData existingData, TableData newData,
+            String primaryKeyColumns) {
 
         boolean found;
         TableData deletes = new TableData(newData.tableName);
         for (LinkedCaseInsensitiveMap<Object> existingRow : existingData.getTableData()) {
             String existingPk = getPkDataAsString(existingRow, primaryKeyColumns);
             found = false;
-            for (LinkedCaseInsensitiveMap<Object> newRow : newData.getTableData()) {                
-                String newPk = getPkDataAsString(newRow, primaryKeyColumns);                
+            for (LinkedCaseInsensitiveMap<Object> newRow : newData.getTableData()) {
+                String newPk = getPkDataAsString(newRow, primaryKeyColumns);
                 if (newPk.equalsIgnoreCase(existingPk)) {
-                    found=true;
+                    found = true;
                 }
             }
             if (!found) {
@@ -414,21 +449,22 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }
         return deletes;
     }
-    
-    private TableData findUpdates(TableData existingData, TableData newData, String primaryKeyColumns) {
-        
+
+    private TableData findUpdates(TableData existingData, TableData newData,
+            String primaryKeyColumns) {
+
         boolean found;
         String[] pkCols = StringUtils.split(primaryKeyColumns);
         TableData updates = new TableData(newData.tableName);
-        //if the pk is the entire record, don't do an update
-        if (existingData.rows.size() > 0 && pkCols.length+1 < existingData.rows.get(0).size()) {
+        // if the pk is the entire record, don't do an update
+        if (existingData.rows.size() > 0 && pkCols.length + 1 < existingData.rows.get(0).size()) {
             for (LinkedCaseInsensitiveMap<Object> newRow : newData.getTableData()) {
                 String newPk = getPkDataAsString(newRow, primaryKeyColumns);
                 found = false;
-                for (LinkedCaseInsensitiveMap<Object> existingRow : existingData.getTableData()) {                
-                    String existingPk = getPkDataAsString(existingRow, primaryKeyColumns);               
+                for (LinkedCaseInsensitiveMap<Object> existingRow : existingData.getTableData()) {
+                    String existingPk = getPkDataAsString(existingRow, primaryKeyColumns);
                     if (newPk.equalsIgnoreCase(existingPk)) {
-                        found=true;
+                        found = true;
                     }
                 }
                 if (found) {
@@ -439,32 +475,32 @@ public class ImportExportService extends AbstractService implements IImportExpor
         return updates;
     }
 
-    private String getPkDataAsString(LinkedCaseInsensitiveMap<Object> row, String primaryKeyColumns) {
-        
+    private String getPkDataAsString(LinkedCaseInsensitiveMap<Object> row,
+            String primaryKeyColumns) {
+
         StringBuilder pkDataAsString = new StringBuilder();
-        String[] pkCols = StringUtils.split(primaryKeyColumns,',');
-        for (int i=0;i<pkCols.length;i++) {
+        String[] pkCols = StringUtils.split(primaryKeyColumns, ',');
+        for (int i = 0; i < pkCols.length; i++) {
             pkDataAsString.append(row.get(pkCols[i]));
         }
-        
+
         return pkDataAsString.toString();
     }
 
     private void initConfigData(List<TableData> tableData, String[][] sqlElements) {
-        for (int i = 0; i <= sqlElements.length-1; i++) {
+        for (int i = 0; i <= sqlElements.length - 1; i++) {
             tableData.add(new TableData(tablePrefix + sqlElements[i][0]));
         }
     }
-    
-    
+
     static class TableData {
-        
+
         String tableName;
         List<LinkedCaseInsensitiveMap<Object>> rows = new ArrayList<LinkedCaseInsensitiveMap<Object>>();
-        
-        public TableData() {            
+
+        public TableData() {
         }
-        
+
         public TableData(String tableName) {
             this.tableName = tableName;
         }
@@ -484,21 +520,21 @@ public class ImportExportService extends AbstractService implements IImportExpor
         public void setTableData(List<LinkedCaseInsensitiveMap<Object>> tableData) {
             this.rows = tableData;
         }
-        
+
     }
-    
+
     static class ConfigData {
-        
-        List<TableData> resourceData = new ArrayList<TableData>(); 
+
+        List<TableData> resourceData = new ArrayList<TableData>();
         List<TableData> modelData = new ArrayList<TableData>();
         List<TableData> flowData = new ArrayList<TableData>();
-        
-        public ConfigData() {   
+
+        public ConfigData() {
             resourceData = new ArrayList<TableData>();
             modelData = new ArrayList<TableData>();
             flowData = new ArrayList<TableData>();
         }
-        
+
         public List<TableData> getResourceData() {
             return resourceData;
         }
@@ -522,19 +558,19 @@ public class ImportExportService extends AbstractService implements IImportExpor
         public void setFlowData(List<TableData> flowData) {
             this.flowData = flowData;
         }
-     
+
     }
-    
+
     static class ImportConfigData extends ConfigData {
-        
+
         public ImportConfigData(ConfigData configData) {
             this.resourceData = configData.resourceData;
             this.modelData = configData.modelData;
             this.flowData = configData.flowData;
             this.deletesToProcess = new HashMap<String, TableData>();
         }
-        
+
         Map<String, TableData> deletesToProcess;
-        
+
     }
 }
