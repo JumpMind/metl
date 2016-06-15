@@ -31,7 +31,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.jumpmind.metl.core.model.AbstractName;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.ComponentName;
@@ -394,15 +393,6 @@ public class DesignNavigator extends VerticalLayout {
                 return null;
 
             }
-        });
-        table.addGeneratedColumn("name", (source, itemId, columnId) -> {
-            if (itemId instanceof ProjectVersion) {
-                ProjectVersion projectVersion = (ProjectVersion) itemId;
-                return String.format("%s (%s)", projectVersion.getProject().getName(), projectVersion.getVersionLabel());
-            } else if (itemId instanceof AbstractName) {
-                return ((AbstractName) itemId).getName();
-            }
-            return itemId;
         });
 
         return table;
