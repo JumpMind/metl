@@ -49,6 +49,7 @@ import com.vaadin.data.fieldgroup.FieldGroup.CommitEvent;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.sort.SortOrder;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.converter.StringToBooleanConverter;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.data.sort.SortDirection;
@@ -61,6 +62,7 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.ui.renderers.HtmlRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
@@ -123,6 +125,17 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         grid.addColumn("name", String.class).setHeaderCaption("Name").setExpandRatio(2);
         grid.addColumn("description", String.class).setHeaderCaption("Description").setExpandRatio(1);
         grid.addColumn("version", String.class).setHeaderCaption("Version").setMaximumWidth(200);
+        grid.addColumn("readOnly", Boolean.class).setHeaderCaption("Read Only").setMaximumWidth(100).setRenderer(new HtmlRenderer(), new StringToBooleanConverter() {
+            private static final long serialVersionUID = 1L;
+
+            protected String getTrueString() {
+                return FontAwesome.CHECK_CIRCLE_O.getHtml(); 
+            };
+            
+            protected String getFalseString() {
+                return FontAwesome.CIRCLE_O.getHtml();
+            };
+        });
         grid.addColumn("createTime", Date.class).setHeaderCaption("Create Time").setWidth(185).setMaximumWidth(200)
                 .setRenderer(new DateRenderer(UiConstants.DATE_FORMAT)).setEditable(false);
 
@@ -164,11 +177,14 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
                 IConfigurationService configurationService = context.getConfigurationService();
                 configurationService.save(item.version);
                 configurationService.save(item.project);
-                /*
-                 * TODO once project versions are supported we'll need to update
-                 * other project version items because the name might have
-                 * changed
-                 */
+                @SuppressWarnings("unchecked")
+                Collection<ProjectVersionItem> items = (Collection<ProjectVersionItem>)grid.getContainerDataSource().getItemIds();
+                for (ProjectVersionItem projectVersion : items) {
+                    if (item.project.equals(projectVersion.project)) {
+                        projectVersion.project = item.project;
+                    }
+                }
+                grid.markAsDirty();
             }
         });
 
@@ -375,6 +391,14 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
         public Date getCreateTime() {
             return this.version.getCreateTime();
+        }
+        
+        public boolean isReadOnly() {
+            return this.version.isReadOnly();
+        }
+        
+        public void setReadOnly(boolean readOnly) {
+            this.version.setReadOnly(readOnly);
         }
 
         @Override

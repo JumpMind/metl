@@ -62,7 +62,7 @@ public class ProjectVersion extends AbstractObject {
 
     @Override
     public String getName() {
-        return project.getName();
+        return String.format("%s (%s)", project.getName(), versionLabel);
     }
 
     public void setProjectId(String projectId) {

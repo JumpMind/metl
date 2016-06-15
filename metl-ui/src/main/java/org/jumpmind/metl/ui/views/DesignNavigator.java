@@ -41,7 +41,6 @@ import org.jumpmind.metl.core.model.FolderName;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
-import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.User;
@@ -394,7 +393,6 @@ public class DesignNavigator extends VerticalLayout {
 
             }
         });
-
 
         return table;
     }
