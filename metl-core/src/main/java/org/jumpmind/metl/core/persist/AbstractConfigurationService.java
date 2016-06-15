@@ -25,6 +25,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1056,6 +1057,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         Map<String, String> oldToNewUUIDMapping = new HashMap<>();
         ProjectVersion newVersion = copyWithNewUUID(oldToNewUUIDMapping, original);
         newVersion.setVersionLabel(newVersionLabel);
+        newVersion.setCreateTime(new Date());
         newVersion.setOrigVersionId(original.getId());
         save(newVersion);
 

@@ -237,7 +237,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         logTable = new Grid();
         logTable.addColumn("level", String.class).setHeaderCaption("Level").setWidth(110).setMaximumWidth(200);
         logTable.addColumn("createTime", Date.class).setHeaderCaption("Time").setWidth(120).setMaximumWidth(200)
-                .setRenderer(new DateRenderer(UiConstants.DATE_FORMAT));
+                .setRenderer(new DateRenderer(UiConstants.TIME_FORMAT));
         logTable.addColumn("logText", String.class).setHeaderCaption("Message").setExpandRatio(1);
         logTable.setContainerDataSource(logContainer);
         logTable.setSizeFull();

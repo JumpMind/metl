@@ -129,15 +129,15 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
             private static final long serialVersionUID = 1L;
 
             protected String getTrueString() {
-                return FontAwesome.CHECK_CIRCLE_O.getHtml(); 
+                return FontAwesome.CHECK.getHtml(); 
             };
             
             protected String getFalseString() {
-                return FontAwesome.CIRCLE_O.getHtml();
+                return "";
             };
         });
         grid.addColumn("createTime", Date.class).setHeaderCaption("Create Time").setWidth(185).setMaximumWidth(200)
-                .setRenderer(new DateRenderer(UiConstants.DATE_FORMAT)).setEditable(false);
+                .setRenderer(new DateRenderer(UiConstants.DATETIME_FORMAT)).setEditable(false);
 
         grid.setContainerDataSource(gridContainer);
         grid.setEditorFieldFactory(new FieldFactory());
