@@ -659,7 +659,8 @@ public class DesignNavigator extends VerticalLayout {
             tabs.addCloseableTab(model.getId(), model.getName(), Icons.MODEL, editModel);
         } else if (item instanceof ResourceName) {
             ResourceName resource = (ResourceName) item;
-            PropertySheet sheet = new PropertySheet(context, tabs);            
+            ProjectVersion projectVersion = findProjectVersion();
+            PropertySheet sheet = new PropertySheet(context, tabs, projectVersion.isReadOnly());            
             sheet.setSource(context.getConfigurationService().findResource(resource.getId()));
             tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item), sheet);
         }

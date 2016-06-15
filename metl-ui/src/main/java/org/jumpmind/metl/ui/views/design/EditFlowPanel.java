@@ -35,6 +35,7 @@ import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderType;
+import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
@@ -88,6 +89,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     ApplicationContext context;
 
     Flow flow;
+    
+    ProjectVersion projectVersion;
 
     PropertySheet propertySheet;
 
@@ -118,12 +121,13 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     public EditFlowPanel(ApplicationContext context, String flowId, DesignNavigator designNavigator, TabbedPanel tabs) {
 
         this.configurationService = context.getConfigurationService();
-        this.flow = context.getConfigurationService().findFlow(flowId);
+        this.flow = configurationService.findFlow(flowId);
+        this.projectVersion = configurationService.findProjectVersion(flow.getProjectVersionId());
         this.context = context;
         this.tabs = tabs;
         this.designNavigator = designNavigator;
 
-        this.propertySheet = new PropertySheet(context, tabs);
+        this.propertySheet = new PropertySheet(context, tabs, projectVersion.isReadOnly());
         this.propertySheet.setListener(new IPropertySheetChangeListener() {
             	@Override
             	public void componentChanged(List<Component> components) {
@@ -246,7 +250,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     protected void refreshStepOnDiagram(List<FlowStep> steps) {
         List<String> ids = new ArrayList<String>(steps.size());
     	for (FlowStep step : steps) {
-	        context.getConfigurationService().refresh(step.getComponent(), true);
+    	    configurationService.refresh(step.getComponent(), true);
 	        ids.add(step.getId());
     	}
     	diagram.setNodes(getNodes());
@@ -258,7 +262,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     }
 
     protected void copySelected() {
-        IConfigurationService configurationService = context.getConfigurationService();
         List<AbstractObject> copies = new ArrayList<AbstractObject>(selected.size());
         for (AbstractObject s : selected) {
 	        if (s instanceof FlowStep) {
@@ -278,7 +281,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
     }
 
     protected void deleteSelected() {
-        IConfigurationService configurationService = context.getConfigurationService();
         Iterator<AbstractObject> iter = selected.iterator();
         while(iter.hasNext()) {
             AbstractObject s = iter.next();
@@ -402,7 +404,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         }
 
         if (myDesignAgent == null) {
-            IConfigurationService configurationService = context.getConfigurationService();
             Folder folder = configurationService.findFirstFolderWithName(DESIGN_FOLDER_NAME, FolderType.AGENT);
             if (folder == null) {
                 folder = new Folder();
@@ -440,7 +441,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
         @Override
         public void componentEvent(Event e) {
-            IConfigurationService configurationService = context.getConfigurationService();
             if (e instanceof NodeSelectedEvent) {
                 NodeSelectedEvent event = (NodeSelectedEvent) e;
                 List<String> nodeIds = event.getNodeIds();
