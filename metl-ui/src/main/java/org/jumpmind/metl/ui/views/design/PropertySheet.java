@@ -88,30 +88,33 @@ public class PropertySheet extends AbsoluteLayout {
     IPropertySheetChangeListener listener;
 
     Object value;
-    
+
     Panel panel;
-    
+
     Button editButton;
-    
+
     TabbedPanel tabs;
 
-    public PropertySheet(ApplicationContext context, TabbedPanel tabs) {
+    boolean readOnly;
+
+    public PropertySheet(ApplicationContext context, TabbedPanel tabs, boolean readOnly) {
         this.tabs = tabs;
         this.context = context;
-        
+        this.readOnly = readOnly;
+
         setSizeFull();
-                
+
         panel = new Panel();
         panel.setSizeFull();
         panel.addStyleName("noborder");
         addComponent(panel);
-        
+
         editButton = new Button("Component Editor");
         editButton.addClickListener(event -> openAdvancedEditor());
         addComponent(editButton, "right: 25px; top: 10px;");
 
     }
-    
+
     protected boolean hasAdvancedEditor() {
         FlowStep flowStep = getSingleFlowStep();
         if (flowStep != null) {
@@ -120,12 +123,12 @@ public class PropertySheet extends AbsoluteLayout {
             return definition != null && definition.getClassName() != null;
         } else {
             return false;
-        }        
+        }
     }
-    
+
     public void openAdvancedEditor() {
         FlowStep flowStep = getSingleFlowStep();
-        if (flowStep != null) {          
+        if (flowStep != null) {
             String type = flowStep.getComponent().getType();
             IComponentEditPanel panel = context.getUiFactory().create(type);
             if (panel != null) {
@@ -137,7 +140,7 @@ public class PropertySheet extends AbsoluteLayout {
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
             }
         }
-    }  
+    }
 
     public void setListener(IPropertySheetChangeListener listener) {
         this.listener = listener;
@@ -148,7 +151,7 @@ public class PropertySheet extends AbsoluteLayout {
     }
 
     @SuppressWarnings("unchecked")
-	public void setSource(Object obj) {
+    public void setSource(Object obj) {
         value = obj;
         editButton.setVisible(hasAdvancedEditor());
         FormLayout formLayout = new FormLayout();
@@ -157,16 +160,16 @@ public class PropertySheet extends AbsoluteLayout {
         formLayout.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
 
         if (obj != null) {
-        	
-        	if (obj instanceof List<?>) {
-        		List<Object> l = (List<Object>) obj;
-        		if (l.size()==1) {
-            		if (l.get(0) instanceof FlowStep) {
-            			obj = (FlowStep)l.get(0);
-            		}
-        		}
+
+            if (obj instanceof List<?>) {
+                List<Object> l = (List<Object>) obj;
+                if (l.size() == 1) {
+                    if (l.get(0) instanceof FlowStep) {
+                        obj = (FlowStep) l.get(0);
+                    }
+                }
             }
-        	
+
             if (obj instanceof FlowStep) {
                 obj = ((FlowStep) obj).getComponent();
             }
@@ -176,9 +179,9 @@ public class PropertySheet extends AbsoluteLayout {
                 context.getConfigurationService().refresh(component, true);
                 addComponentProperties(formLayout, component);
             }
-            
+
             if (obj instanceof Resource) {
-                Resource resource = (Resource)obj;
+                Resource resource = (Resource) obj;
                 addResourceProperties(formLayout, resource);
             }
 
@@ -195,9 +198,9 @@ public class PropertySheet extends AbsoluteLayout {
                 Component component = (Component) obj;
                 XMLComponent componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getType());
                 addThreadCount(componentDefintion, formLayout, component);
-                addComponentShared(formLayout, component);      
+                addComponentShared(formLayout, component);
             }
-            
+
             if (obj instanceof List<?>) {
                 addCommonComponentSettings(formLayout, obj);
             }
@@ -205,25 +208,25 @@ public class PropertySheet extends AbsoluteLayout {
         }
         panel.setContent(formLayout);
     }
-    
+
     @SuppressWarnings("unchecked")
     protected void addCommonComponentSettings(FormLayout formLayout, Object obj) {
         List<Object> list = (List<Object>) obj;
         List<Component> components = new ArrayList<Component>(list.size());
-        
+
         // Check if all selected components support the enabled property
         // TODO: Support more than the enable component.
-        //       Look for all common parameters.
+        // Look for all common parameters.
         boolean supportEnable = true;
         boolean enabled = true;
         for (Object o : list) {
             if (o instanceof FlowStep) {
-                Component component = ((FlowStep)o).getComponent();
+                Component component = ((FlowStep) o).getComponent();
                 if (!hasSetting(component, AbstractComponentRuntime.ENABLED)) {
                     supportEnable = false;
                     break;
                 }
-                if(enabled && !component.getBoolean(AbstractComponentRuntime.ENABLED, true)) {
+                if (enabled && !component.getBoolean(AbstractComponentRuntime.ENABLED, true)) {
                     enabled = false;
                 }
                 components.add(component);
@@ -232,42 +235,37 @@ public class PropertySheet extends AbsoluteLayout {
                 break;
             }
         }
-        
-        // Create the enabled field if all selected components support the enabled setting.
+
+        // Create the enabled field if all selected components support the
+        // enabled setting.
         if (components.size() != 0 && supportEnable) {
             final CheckBox checkBox = new CheckBox("Enabled");
             checkBox.setImmediate(true);
             checkBox.setRequired(true);
             checkBox.setValue(enabled);
-            checkBox.addValueChangeListener(new ValueChangeListener() {
-                private static final long serialVersionUID = 1L;
-    
-                @Override
-                public void valueChange(ValueChangeEvent event) {
-                    for (final Component component : components) {
-                        saveSetting(AbstractComponentRuntime.ENABLED, checkBox.getValue().toString(), component);
-                    }
-                    if (listener != null) {
-                        listener.componentChanged(components);
-                    }
+            checkBox.addValueChangeListener((event) -> {
+                for (final Component component : components) {
+                    saveSetting(AbstractComponentRuntime.ENABLED, checkBox.getValue().toString(), component);
+                }
+                if (listener != null) {
+                    listener.componentChanged(components);
                 }
             });
+            checkBox.setReadOnly(readOnly);
             formLayout.addComponent(checkBox);
         }
     }
 
-    
     private boolean hasSetting(Component component, String setting) {
-    	XMLComponent componentDefinition = 
-				context.getComponentDefinitionFactory().getDefinition(component.getType());
-		return (componentDefinition.findXMLSetting(setting) != null);
+        XMLComponent componentDefinition = context.getComponentDefinitionFactory().getDefinition(component.getType());
+        return (componentDefinition.findXMLSetting(setting) != null);
     }
-    
+
     protected void addResourceProperties(FormLayout formLayout, Resource resource) {
         TextField textField = new TextField("Resource Type");
         textField.setValue(resource.getType());
         textField.setReadOnly(true);
-        formLayout.addComponent(textField);        
+        formLayout.addComponent(textField);
     }
 
     protected void addComponentProperties(FormLayout formLayout, Component component) {
@@ -281,7 +279,7 @@ public class PropertySheet extends AbsoluteLayout {
         addInputModelCombo(componentDefintion, formLayout, component);
         addOutputModelCombo(componentDefintion, formLayout, component);
     }
-    
+
     protected void addThreadCount(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
         if (componentDefintion.isSupportsMultipleThreads()) {
             XMLSetting setting = new XMLSetting(StepRuntime.THREAD_COUNT, "Thread Count", "1", Type.INTEGER, true);
@@ -293,8 +291,8 @@ public class PropertySheet extends AbsoluteLayout {
         FlowStep step = getSingleFlowStep();
         if (step != null) {
             String projectVersionId = step.getComponent().getProjectVersionId();
-            if ((componentDefintion.getOutputMessageType() == MessageType.ENTITY || componentDefintion.getOutputMessageType() == MessageType.ANY)
-                    && !componentDefintion.isInputOutputModelsMatch()) {
+            if ((componentDefintion.getOutputMessageType() == MessageType.ENTITY
+                    || componentDefintion.getOutputMessageType() == MessageType.ANY) && !componentDefintion.isInputOutputModelsMatch()) {
                 final AbstractSelect combo = new ComboBox("Output Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
@@ -322,7 +320,7 @@ public class PropertySheet extends AbsoluteLayout {
                         setSource(value);
                     }
                 });
-
+                combo.setReadOnly(readOnly);
                 formLayout.addComponent(combo);
             }
         }
@@ -337,8 +335,8 @@ public class PropertySheet extends AbsoluteLayout {
                 component.setName(text);
                 context.getConfigurationService().save(component);
                 if (listener != null) {
-                	List<Component> components = new ArrayList<Component>(1);
-                	components.add(component);
+                    List<Component> components = new ArrayList<Component>(1);
+                    components.add(component);
                     listener.componentChanged(components);
                 }
             };
@@ -375,15 +373,17 @@ public class PropertySheet extends AbsoluteLayout {
                 context.getConfigurationService().save(component);
             }
         });
+        checkBox.setReadOnly(readOnly);
         formLayout.addComponent(checkBox);
 
     }
-    
+
     protected void addInputModelCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
         FlowStep step = getSingleFlowStep();
         if (step != null) {
             String projectVersionId = step.getComponent().getProjectVersionId();
-            if (componentDefintion.getInputMessageType() == MessageType.ENTITY || componentDefintion.getInputMessageType() == MessageType.ANY) {
+            if (componentDefintion.getInputMessageType() == MessageType.ENTITY
+                    || componentDefintion.getInputMessageType() == MessageType.ANY) {
                 final AbstractSelect combo = new ComboBox("Input Model");
                 combo.setImmediate(true);
                 combo.setNullSelectionAllowed(true);
@@ -414,7 +414,7 @@ public class PropertySheet extends AbsoluteLayout {
                         setSource(value);
                     }
                 });
-
+                combo.setReadOnly(readOnly);
                 formLayout.addComponent(combo);
             }
         }
@@ -425,8 +425,7 @@ public class PropertySheet extends AbsoluteLayout {
             log.info("null kaboom " + component.getName() + " " + component.getType());
         }
         FlowStep step = getSingleFlowStep();
-        if (componentDefintion.getResourceCategory() != null 
-                && componentDefintion.getResourceCategory() != ResourceCategory.NONE
+        if (componentDefintion.getResourceCategory() != null && componentDefintion.getResourceCategory() != ResourceCategory.NONE
                 && step != null) {
             final AbstractSelect resourcesCombo = new ComboBox("Resource");
             resourcesCombo.setImmediate(true);
@@ -465,7 +464,8 @@ public class PropertySheet extends AbsoluteLayout {
         } else if (obj instanceof Resource) {
             Resource resource = (Resource) obj;
             List<XMLSetting> xmlSettings = new ArrayList<XMLSetting>();
-            Map<String, SettingDefinition> resourceSettings = context.getResourceFactory().getSettingDefinitionsForResourceType(resource.getType());
+            Map<String, SettingDefinition> resourceSettings = context.getResourceFactory()
+                    .getSettingDefinitionsForResourceType(resource.getType());
             for (String key : resourceSettings.keySet()) {
                 SettingDefinition def = resourceSettings.get(key);
                 XMLSetting setting = new XMLSetting();
@@ -496,7 +496,7 @@ public class PropertySheet extends AbsoluteLayout {
         if (definition.isVisible()) {
             Component component = null;
             if (obj instanceof Component) {
-                component = (Component)obj;
+                component = (Component) obj;
             }
             String description = definition.getDescription();
             Type type = definition.getType();
@@ -512,7 +512,7 @@ public class PropertySheet extends AbsoluteLayout {
                     checkBox.setValue(obj.getBoolean(definition.getId(), defaultValue));
                     checkBox.setRequired(required);
                     checkBox.setDescription(description);
-                    
+
                     checkBox.addValueChangeListener(new ValueChangeListener() {
 
                         private static final long serialVersionUID = 1L;
@@ -521,13 +521,13 @@ public class PropertySheet extends AbsoluteLayout {
                         public void valueChange(ValueChangeEvent event) {
                             saveSetting(definition.getId(), checkBox.getValue().toString(), obj);
                             if (listener != null) {
-                            	List<Component> components = new ArrayList<Component>(1);
-                            	components.add((Component) obj);
+                                List<Component> components = new ArrayList<Component>(1);
+                                components.add((Component) obj);
                                 listener.componentChanged(components);
                             }
                         }
                     });
-                    
+                    checkBox.setReadOnly(readOnly);
                     formLayout.addComponent(checkBox);
                     break;
                 case CHOICE:
@@ -549,6 +549,7 @@ public class PropertySheet extends AbsoluteLayout {
                             saveSetting(definition.getId(), (String) choice.getValue(), obj);
                         }
                     });
+                    choice.setReadOnly(readOnly);
                     formLayout.addComponent(choice);
                     break;
                 case PASSWORD:
@@ -562,6 +563,7 @@ public class PropertySheet extends AbsoluteLayout {
                     passwordField.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
                     passwordField.setRequired(required);
                     passwordField.setDescription(description);
+                    passwordField.setReadOnly(readOnly);
                     formLayout.addComponent(passwordField);
                     break;
                 case INTEGER:
@@ -576,6 +578,7 @@ public class PropertySheet extends AbsoluteLayout {
                     integerField.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
                     integerField.setRequired(required);
                     integerField.setDescription(description);
+                    integerField.setReadOnly(readOnly);
                     formLayout.addComponent(integerField);
                     break;
                 case TEXT:
@@ -589,6 +592,7 @@ public class PropertySheet extends AbsoluteLayout {
                     textField.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
                     textField.setRequired(required);
                     textField.setDescription(description);
+                    textField.setReadOnly(readOnly);
                     formLayout.addComponent(textField);
                     break;
                 case SOURCE_STEP:
@@ -616,6 +620,7 @@ public class PropertySheet extends AbsoluteLayout {
                                 saveSetting(definition.getId(), (String) sourceStepsCombo.getValue(), obj);
                             }
                         });
+                        sourceStepsCombo.setReadOnly(readOnly);
                         formLayout.addComponent(sourceStepsCombo);
                     }
                     break;
@@ -644,15 +649,16 @@ public class PropertySheet extends AbsoluteLayout {
                                 saveSetting(definition.getId(), (String) combo.getValue(), obj);
                             }
                         });
+                        combo.setReadOnly(readOnly);
                         formLayout.addComponent(combo);
                     }
-                    break;       
+                    break;
                 case STREAMABLE_RESOURCE:
                     formLayout.addComponent(createResourceCombo(definition, obj, ResourceCategory.STREAMABLE));
                     break;
                 case DATASOURCE_RESOURCE:
                     formLayout.addComponent(createResourceCombo(definition, obj, ResourceCategory.DATASOURCE));
-                    break;                    
+                    break;
                 case ENTITY_COLUMN:
                     if (component != null) {
                         List<ModelEntity> entities = new ArrayList<ModelEntity>();
@@ -677,7 +683,7 @@ public class PropertySheet extends AbsoluteLayout {
                                 entityColumnCombo.setItemCaption(attribute.getId(), modelEntity.getName() + "." + attribute.getName());
                             }
                         }
-                        String currentValue  = obj.get(definition.getId());
+                        String currentValue = obj.get(definition.getId());
                         if (currentValue != null) {
                             entityColumnCombo.setValue(obj.get(definition.getId()));
                         }
@@ -692,6 +698,7 @@ public class PropertySheet extends AbsoluteLayout {
                                 saveSetting(definition.getId(), (String) entityColumnCombo.getValue(), obj);
                             }
                         });
+                        entityColumnCombo.setReadOnly(readOnly);
                         formLayout.addComponent(entityColumnCombo);
                     }
                     break;
@@ -713,6 +720,7 @@ public class PropertySheet extends AbsoluteLayout {
                             context.getConfigurationService().save(data);
                         }
                     });
+                    editor.setReadOnly(readOnly);
                     formLayout.addComponent(editor);
                     break;
                 case MULTILINE_TEXT:
@@ -728,6 +736,7 @@ public class PropertySheet extends AbsoluteLayout {
                     area.setRows(5);
                     area.setRequired(required);
                     area.setDescription(description);
+                    area.setReadOnly(readOnly);
                     formLayout.addComponent(area);
                     break;
                 default:
@@ -736,7 +745,7 @@ public class PropertySheet extends AbsoluteLayout {
             }
         }
     }
-    
+
     protected AbstractSelect createResourceCombo(XMLSetting definition, AbstractObjectWithSettings obj, ResourceCategory category) {
         FlowStep step = getSingleFlowStep();
         String projectVersionId = step.getComponent().getProjectVersionId();
@@ -757,7 +766,8 @@ public class PropertySheet extends AbsoluteLayout {
                 combo.setValue(obj.get(definition.getId()));
             }
         }
-        combo.addValueChangeListener(event->saveSetting(definition.getId(), (String) combo.getValue(), obj));
+        combo.addValueChangeListener(event -> saveSetting(definition.getId(), (String) combo.getValue(), obj));
+        combo.setReadOnly(readOnly);
         return combo;
     }
 
@@ -766,15 +776,15 @@ public class PropertySheet extends AbsoluteLayout {
         data.setValue(text);
         context.getConfigurationService().save(data);
     }
-    
+
     @SuppressWarnings("unchecked")
     protected FlowStep getSingleFlowStep() {
         FlowStep step = null;
         if (value instanceof List<?>) {
             List<Object> l = (List<Object>) value;
-            if (l.size()==1) {
+            if (l.size() == 1) {
                 if (l.get(0) instanceof FlowStep) {
-                    step = (FlowStep)l.get(0);
+                    step = (FlowStep) l.get(0);
                 }
             }
         }
