@@ -107,11 +107,36 @@ public class ImportExportService extends AbstractService implements IImportExpor
         return exportConfig(ExportType.PROJECT, projectVersionId, null);
     }
     
+    @Override
+    public String export(String projectVersionId, List<String> flowIds, List<String> modelIds, List<String> resourceIds) {
+        
+        ConfigData exportData = new ConfigData();
+        initConfigData(exportData.getModelData(), MODEL_SQL);
+        initConfigData(exportData.getResourceData(), RESOURCE_SQL);
+        initConfigData(exportData.getFlowData(), FLOW_SQL);
+
+        for (String flowId : flowIds) {
+            addConfigData(exportData.getFlowData(), FLOW_SQL,projectVersionId, flowId);
+        }
+        for (String modelId : modelIds) {
+            addConfigData(exportData.getModelData(),MODEL_SQL, projectVersionId, modelId);
+        }
+        for (String resourceId : resourceIds) {
+            addConfigData(exportData.getResourceData(), RESOURCE_SQL, projectVersionId, resourceId);
+        }
+                
+        return serializeExportToJson(exportData);
+    }
+    
+    @Override
+    public void importConfiguration(String configDataString) {
+
+        ConfigData configData = deserializeConfigurationData(configDataString); 
+        importConfiguration(configData);
+    }  
+    
     private String exportConfig(ExportType exportType, String projectVersionId, String objectId) {
         
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        String outData;
         ConfigData exportData = new ConfigData();
         initConfigData(exportData.getModelData(), MODEL_SQL);
         initConfigData(exportData.getResourceData(), RESOURCE_SQL);
@@ -127,6 +152,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
             List<Flow> flows = configurationService.findDependentFlows(projectVersionId);
             Set<Model> models = new HashSet<Model>();
             Set<Resource> resources = new HashSet<Resource>();
+            
             for (Flow flow : flows) {
                 models.addAll(configurationService.findDependentModels(flow.getId()));
                 resources.addAll(configurationService.findDependentResources(flow.getId()));                
@@ -139,15 +165,24 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 addConfigData(exportData.getResourceData(), RESOURCE_SQL, projectVersionId, resource.getId());
             }
         }
-                
+        return serializeExportToJson(exportData);
+    }
+
+    private String serializeExportToJson(ConfigData exportData) {
+        
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        String outData;
+
         try {
             outData = mapper.writeValueAsString(exportData);
         } catch (JsonProcessingException e) {            
             log.error(e.getMessage());
             throw new UnsupportedOperationException("Error processing export to json");
         }
-        return outData;        
+        return outData;
     }
+    
     
     private void addConfigData(List<TableData> tableData, String[][] sqlElements, String projectVersionId, String keyValue) {        
         
@@ -176,13 +211,6 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }
     }
 
-    @Override
-    public void importConfiguration(String configDataString) {
-
-        ConfigData configData = deserializeConfigurationData(configDataString); 
-        importConfiguration(configData);
-    }  
-    
     private void importConfiguration(ConfigData configData) {
 
         ImportConfigData importData = new ImportConfigData(configData);

@@ -268,10 +268,10 @@ public class DesignNavigator extends VerticalLayout {
         newJMSResource = resourceMenu.addItem("JMS", selectedItem -> addNewJMSFileSystem());
 
         //file - export
-        exportMenu = fileMenu.addItem("Export", selectedItem -> export());
+        exportMenu = fileMenu.addItem("Export...", selectedItem -> export());
         
         //file - import
-        importConfig = fileMenu.addItem("Import", selecteItem -> importConfig());
+        importConfig = fileMenu.addItem("Import...", selecteItem -> importConfig());
         
         //edit menu
         editMenu = leftMenuBar.addItem("Edit", null);
@@ -395,15 +395,7 @@ public class DesignNavigator extends VerticalLayout {
 
             }
         });
-        table.addGeneratedColumn("name", (source, itemId, columnId) -> {
-            if (itemId instanceof ProjectVersion) {
-                ProjectVersion projectVersion = (ProjectVersion) itemId;
-                return String.format("%s (%s)", projectVersion.getProject().getName(), projectVersion.getVersionLabel());
-            } else if (itemId instanceof AbstractName) {
-                return ((AbstractName) itemId).getName();
-            }
-            return itemId;
-        });
+
 
         return table;
     }
@@ -680,30 +672,8 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void export() {
-        Object selected = treeTable.getValue();
-        if (selected instanceof ProjectVersion) {
-            ProjectVersion project = (ProjectVersion) selected;
-            final String export = context.getImportExportService().exportProject(project.getId());
-            downloadExport(export, project.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-"));
-        } else if (selected instanceof FlowName) {
-            FlowName flowName = (FlowName) selected;
-            Flow flow = context.getConfigurationService().findFlow(flowName.getId());
-            ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(flow.getProjectVersionId());
-            final String export = context.getImportExportService().exportFlow(projectVersion.getId(), flow.getId());            
-            downloadExport(export, flow.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-"));
-        } else if (selected instanceof ModelName) {
-            ModelName modelName = (ModelName) selected;
-            Model model = context.getConfigurationService().findModel(modelName.getId());
-            ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(model.getProjectVersionId());
-            final String export = context.getImportExportService().exportModel(projectVersion.getId(), model.getId());            
-            downloadExport(export, model.getName().toLowerCase().replaceAll(" ", "-"));
-        } else if (selected instanceof ResourceName) {
-            ResourceName resourceName = (ResourceName) selected;
-            Resource resource = context.getConfigurationService().findResource(resourceName.getId());
-            ProjectVersion projectVersion = context.getConfigurationService().findProjectVersion(resource.getProjectVersionId());
-            final String export = context.getImportExportService().exportResource(projectVersion.getId(), resource.getId());            
-            downloadExport(export, resource.getName().toLowerCase().replaceAll(" ", "-"));
-        }                  
+
+        ExportDialog.show(context, treeTable.getValue());
     }
     
     protected void importConfig() {
@@ -1011,6 +981,5 @@ public class DesignNavigator extends VerticalLayout {
 
             return true;
         }
-    }
-    
+    }  
 }

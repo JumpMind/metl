@@ -1,5 +1,7 @@
 package org.jumpmind.metl.core.persist;
 
+import java.util.List;
+
 public interface IImportExportService {
 
     public String exportModel(String projectVersionId, String modelId);
@@ -11,4 +13,6 @@ public interface IImportExportService {
     public String exportProject(String projectVersionId);
     
     public void importConfiguration(String dataToImport);
+    
+    public String export(String projectVersionId, List<String> flowIds, List<String> modelIds, List<String> resoruceIds);
 }

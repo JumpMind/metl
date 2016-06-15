@@ -373,7 +373,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> ids = template.query(String.format(AFFECTED_FLOWS_BY_FLOW_SQL, tablePrefix, flowId));
         for (Row row:ids) {
-            flows.add(this.findFlow(row.getString("id")));
+            flows.add(this.findFlow(row.getString("flow_id")));
         }             
         
         return flows;
@@ -384,11 +384,11 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
         List<Flow> flows = new ArrayList<Flow>();
 
         final String AFFECTED_FLOWS_BY_RESOURCE_SQL = "select distinct flow_id from %1$s_flow_step fs inner join %1$s_component c on fs.component_id = c.id "
-                + "where c.resourceId = '%2$s'";
+                + "where c.resource_id = '%2$s'";
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> ids = template.query(String.format(AFFECTED_FLOWS_BY_RESOURCE_SQL, tablePrefix, resourceId));
         for (Row row:ids) {
-            flows.add(this.findFlow(row.getString("id")));
+            flows.add(this.findFlow(row.getString("flow_id")));
         }             
 
         return flows;
@@ -403,7 +403,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         List<Row> ids = template.query(String.format(AFFECTED_FLOWS_BY_MODEL_SQL, tablePrefix, modelId));
         for (Row row:ids) {
-            flows.add(this.findFlow(row.getString("id")));
+            flows.add(this.findFlow(row.getString("flow_id")));
         }      
         return flows;        
     }
