@@ -63,6 +63,15 @@ public class Group extends AbstractObject {
     public List<GroupPrivilege> getGroupPrivileges() {
         return groupPrivileges;
     }
+    
+    public boolean hasPrivilege(Privilege privilegeName) {
+        for (GroupPrivilege priv : groupPrivileges) {
+            if (privilegeName.name().equalsIgnoreCase(priv.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public void setGroupPrivileges(List<GroupPrivilege> groupPrivileges) {
         this.groupPrivileges = groupPrivileges;

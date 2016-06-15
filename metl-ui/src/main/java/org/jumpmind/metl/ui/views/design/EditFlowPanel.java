@@ -35,7 +35,7 @@ import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderType;
-import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
@@ -90,7 +90,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
     Flow flow;
 
-    ProjectVersion projectVersion;
+    boolean readOnly;
 
     PropertySheet propertySheet;
 
@@ -122,12 +122,12 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
         this.configurationService = context.getConfigurationService();
         this.flow = configurationService.findFlow(flowId);
-        this.projectVersion = configurationService.findProjectVersion(flow.getProjectVersionId());
+        readOnly = context.isReadOnly(configurationService.findProjectVersion(flow.getProjectVersionId()), Privilege.DESIGN);
         this.context = context;
         this.tabs = tabs;
         this.designNavigator = designNavigator;
 
-        this.propertySheet = new PropertySheet(context, tabs, projectVersion.isReadOnly());
+        this.propertySheet = new PropertySheet(context, tabs, readOnly);
         this.propertySheet.setListener(new IPropertySheetChangeListener() {
             @Override
             public void componentChanged(List<Component> components) {
@@ -195,7 +195,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             }
         });
 
-        if (!projectVersion.isReadOnly()) {
+        if (!readOnly) {
             copyButton = buttonBar.addButton("Copy", FontAwesome.COPY);
             copyButton.addClickListener(new ClickListener() {
 
@@ -344,7 +344,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             }
         }
 
-        if (!projectVersion.isReadOnly()) {
+        if (!readOnly) {
             delButton.setEnabled(ids.size() > 0);
             copyButton.setEnabled(ids.size() > 0);
         }
@@ -456,7 +456,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                     selected.add(flowStep);
                 }
                 propertySheet.setSource(selected);
-                if (!projectVersion.isReadOnly()) {
+                if (!readOnly) {
                     delButton.setEnabled(true);
                     copyButton.setEnabled(true);
                 }
@@ -500,8 +500,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                             sourceComp.setInputModel(targetComp.getInputModel());
                         }
                     }
-                    
-                    if (!projectVersion.isReadOnly()) {
+
+                    if (!readOnly) {
                         delButton.setEnabled(false);
                         copyButton.setEnabled(false);
                     }
@@ -514,8 +514,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                             redrawFlow();
                         }
                     }
-                    
-                    if (!projectVersion.isReadOnly()) {
+
+                    if (!readOnly) {
                         delButton.setEnabled(false);
                         copyButton.setEnabled(false);
                     }
@@ -524,7 +524,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
                 LinkSelectedEvent event = (LinkSelectedEvent) e;
                 selected = new ArrayList<AbstractObject>(1);
                 selected.add(flow.findFlowStepLink(event.getSourceNodeId(), event.getTargetNodeId()));
-                if (!projectVersion.isReadOnly()) {
+                if (!readOnly) {
                     delButton.setEnabled(true);
                     copyButton.setEnabled(true);
                 }

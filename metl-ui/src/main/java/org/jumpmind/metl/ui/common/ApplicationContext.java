@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
+import org.jumpmind.metl.core.model.Group;
+import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -143,5 +145,21 @@ public class ApplicationContext implements Serializable {
     
     public void setShowRunDiagram(boolean showRunDiagram) {
         this.showRunDiagram = showRunDiagram;
+    }
+    
+    public boolean isReadOnly(ProjectVersion projectVersion, Privilege privilege) {
+        boolean readOnly = projectVersion.isReadOnly();
+        if (!readOnly) {
+            List<Group> groups = user.getGroups();
+            for (Group group : groups) {
+                if (group.hasPrivilege(privilege) && !group.isReadOnly()) {
+                    readOnly = false;
+                    break;
+                } else {
+                    readOnly = true;
+                }
+            }
+        }
+        return readOnly;
     }
 }

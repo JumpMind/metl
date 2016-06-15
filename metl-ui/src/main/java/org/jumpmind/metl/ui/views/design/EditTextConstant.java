@@ -1,13 +1,6 @@
 package org.jumpmind.metl.ui.views.design;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.dbcp.BasicDataSource;
-import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Setting;
-import org.jumpmind.metl.core.runtime.component.RdbmsReader;
 import org.jumpmind.metl.core.runtime.component.TextConstant;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
