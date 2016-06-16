@@ -37,13 +37,16 @@ public abstract class AbstractComponentEditPanel extends VerticalLayout implemen
     protected PropertySheet propertySheet;
     
     protected XMLComponent componentDefinition;
+    
+    protected boolean readOnly;
 
     @Override
-    public void init(Component component, ApplicationContext context, PropertySheet propertySheet) {
+    public void init(boolean readOnly, Component component, ApplicationContext context, PropertySheet propertySheet) {
         this.component = component;
         this.context  = context;
         this.componentDefinition = context.getComponentDefinitionFactory().getDefinition(component.getType());
         this.propertySheet = propertySheet;
+        this.readOnly = readOnly;
         buildUI();
     }
     

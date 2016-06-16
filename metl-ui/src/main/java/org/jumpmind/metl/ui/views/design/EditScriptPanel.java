@@ -80,22 +80,26 @@ public class EditScriptPanel extends AbstractComponentEditPanel {
         select.addValueChangeListener(new ValueChangeListener() {
             @Override
             public void valueChange(ValueChangeEvent event) {
-                String key = (String) select.getValue();                
+                String key = (String) select.getValue();
+                editor.setReadOnly(false);
                 editor.setValue(EditScriptPanel.this.component.get(key, componentDefinition.findXMLSetting(key).getDefaultValue()));
+                editor.setReadOnly(readOnly);
             }
         });
         select.setValue(Script.HANDLE_SCRIPT);
         buttonBar.addLeft(select);
 
-        editor.addTextChangeListener(new TextChangeListener() {
+        if (!readOnly) {
+            editor.addTextChangeListener(new TextChangeListener() {
 
-            @Override
-            public void textChange(TextChangeEvent event) {
-                String key = (String) select.getValue();
-                EditScriptPanel.this.component.put(key, event.getText());
-                EditScriptPanel.this.context.getConfigurationService().save(EditScriptPanel.this.component.findSetting(key));
-            }
-        });
+                @Override
+                public void textChange(TextChangeEvent event) {
+                    String key = (String) select.getValue();
+                    EditScriptPanel.this.component.put(key, event.getText());
+                    EditScriptPanel.this.context.getConfigurationService().save(EditScriptPanel.this.component.findSetting(key));
+                }
+            });
+        }
 
         addComponent(editor);
         setExpandRatio(editor, 1);

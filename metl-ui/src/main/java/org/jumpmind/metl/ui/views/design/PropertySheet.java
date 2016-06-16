@@ -136,7 +136,7 @@ public class PropertySheet extends AbsoluteLayout {
                     Flow flow = context.getConfigurationService().findFlow(flowStep.getFlowId());
                     ((IFlowStepAware) panel).makeAwareOf(flowStep, flow);
                 }
-                panel.init(flowStep.getComponent(), context, this);
+                panel.init(readOnly, flowStep.getComponent(), context, this);
                 tabs.addCloseableTab(flowStep.getId(), flowStep.getName(), Icons.COMPONENT, panel);
             }
         }
