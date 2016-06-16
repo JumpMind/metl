@@ -34,11 +34,14 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.component.RdbmsReader;
 import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.sqlexplorer.IButtonBar;
 import org.jumpmind.vaadin.ui.sqlexplorer.IDb;
 import org.jumpmind.vaadin.ui.sqlexplorer.ISettingsProvider;
 import org.jumpmind.vaadin.ui.sqlexplorer.QueryPanel;
 import org.jumpmind.vaadin.ui.sqlexplorer.Settings;
+import org.vaadin.aceeditor.AceEditor;
+import org.vaadin.aceeditor.AceMode;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutAction.ModifierKey;
@@ -62,95 +65,108 @@ public class EditRdbmsReaderPanel extends AbstractComponentEditPanel {
     ExecuteSqlClickListener executeSqlClickListener;
 
     protected void buildUI() {
-        ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        if (!readOnly) {
+            ButtonBar buttonBar = new ButtonBar();
+            addComponent(buttonBar);
 
-        executeSqlClickListener = new ExecuteSqlClickListener();
+            executeSqlClickListener = new ExecuteSqlClickListener();
 
-        executeButton = buttonBar.addButton("Execute", FontAwesome.PLAY, executeSqlClickListener);
-        executeButton.setEnabled(false);
+            executeButton = buttonBar.addButton("Execute", FontAwesome.PLAY, executeSqlClickListener);
+            executeButton.setEnabled(false);
 
-        Resource resource = component.getResource();
+            Resource resource = component.getResource();
 
-        if (resource != null) {
-            resource.put(BasicDataSourcePropertyConstants.DB_POOL_INITIAL_SIZE, "2");
-            resource.put(BasicDataSourcePropertyConstants.DB_POOL_MAX_ACTIVE, "2");
-            resource.put(BasicDataSourcePropertyConstants.DB_POOL_MAX_IDLE, "2");
-            resource.put(BasicDataSourcePropertyConstants.DB_POOL_MIN_IDLE, "2");
-            Datasource dataSourceResource = (Datasource) context.getResourceFactory().create(resource, null);
-            DataSource dataSource = dataSourceResource.reference();
-            platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), false, false);
+            if (resource != null) {
+                resource.put(BasicDataSourcePropertyConstants.DB_POOL_INITIAL_SIZE, "2");
+                resource.put(BasicDataSourcePropertyConstants.DB_POOL_MAX_ACTIVE, "2");
+                resource.put(BasicDataSourcePropertyConstants.DB_POOL_MAX_IDLE, "2");
+                resource.put(BasicDataSourcePropertyConstants.DB_POOL_MIN_IDLE, "2");
+                Datasource dataSourceResource = (Datasource) context.getResourceFactory().create(resource, null);
+                DataSource dataSource = dataSourceResource.reference();
+                platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(dataSource, new SqlTemplateSettings(), false, false);
 
-            queryPanel = new QueryPanel(new IDb() {
+                queryPanel = new QueryPanel(new IDb() {
 
-                @Override
-                public IDatabasePlatform getPlatform() {
-                    return platform;
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public IDatabasePlatform getPlatform() {
+                        return platform;
+                    }
+
+                    @Override
+                    public String getName() {
+                        return "";
+                    }
+                }, new ISettingsProvider() {
+
+                    private static final long serialVersionUID = 1L;
+
+                    Settings settings = new Settings();
+
+                    @Override
+                    public void save(Settings settings) {
+                    }
+
+                    @Override
+                    public Settings load() {
+                        return settings;
+                    }
+
+                    @Override
+                    public Settings get() {
+                        return settings;
+                    }
+                }, new IButtonBar() {
+
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public void setRollbackButtonEnabled(boolean enabled) {
+                    }
+
+                    @Override
+                    public void setExecuteScriptButtonEnabled(boolean enabled) {
+                    }
+
+                    @Override
+                    public void setExecuteAtCursorButtonEnabled(boolean enabled) {
+                        executeButton.setEnabled(enabled);
+                    }
+
+                    @Override
+                    public void setCommitButtonEnabled(boolean enabled) {
+                    }
+                }, context.getUser().getLoginId());
+
+                queryPanel.appendSql(component.get(RdbmsReader.SQL));
+
+                queryPanel.addShortcutListener(new ShortcutListener("", KeyCode.ENTER, new int[] { ModifierKey.CTRL }) {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public void handleAction(Object sender, Object target) {
+                        executeSqlClickListener.buttonClick(new ClickEvent(executeButton));
+                    }
                 }
 
-                @Override
-                public String getName() {
-                    return "";
-                }
-            }, new ISettingsProvider() {
+                );
 
-                Settings settings = new Settings();
-
-                @Override
-                public void save(Settings settings) {
-                }
-
-                @Override
-                public Settings load() {
-                    return settings;
-                }
-
-                @Override
-                public Settings get() {
-                    return settings;
-                }
-            }, new IButtonBar() {
-
-                @Override
-                public void setRollbackButtonEnabled(boolean enabled) {
-                }
-
-                @Override
-                public void setExecuteScriptButtonEnabled(boolean enabled) {
-                }
-
-                @Override
-                public void setExecuteAtCursorButtonEnabled(boolean enabled) {
-                    executeButton.setEnabled(enabled);
-                }
-
-                @Override
-                public void setCommitButtonEnabled(boolean enabled) {
-                }
-            }, context.getUser().getLoginId());
-
-            queryPanel.appendSql(component.get(RdbmsReader.SQL));
-
-            queryPanel.addShortcutListener(new ShortcutListener("", KeyCode.ENTER, new int[] { ModifierKey.CTRL }) {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public void handleAction(Object sender, Object target) {
-                    executeSqlClickListener.buttonClick(new ClickEvent(executeButton));
-                }
+                addComponent(queryPanel);
+                setExpandRatio(queryPanel, 1);
+            } else {
+                Label label = new Label("Before configuring SQL you must select a data source");
+                addComponent(label);
+                setExpandRatio(label, 1);
             }
-
-            );
-
-            addComponent(queryPanel);
-            setExpandRatio(queryPanel, 1);
-
         } else {
-            Label label = new Label("Before configuring SQL you must select a data source");
-            addComponent(label);
-            setExpandRatio(label, 1);
+            AceEditor editor = CommonUiUtils.createAceEditor();
+            editor.setMode(AceMode.sql);
+            editor.setValue(component.get(RdbmsReader.SQL));
+            editor.setReadOnly(readOnly);
+            addComponent(editor);
+            setExpandRatio(editor, 1);
         }
-
     }
 
     protected void save() {

@@ -36,8 +36,6 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
 
 import com.vaadin.data.Container;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
@@ -179,10 +177,8 @@ public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
     private CheckBox createCheckBox(final AttributeSettings settings, final String key) {
         final CheckBox checkBox = new CheckBox();
         checkBox.setImmediate(true);
-        checkBox.addValueChangeListener(new ValueChangeListener() {
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
+        if (!readOnly) {
+            checkBox.addValueChangeListener((event) -> {
                 ComponentAttributeSetting setting = component.getSingleAttributeSetting(settings.getAttributeId(), key);
 
                 String oldValue = setting == null ? Boolean.TRUE.toString() : setting.getValue();
@@ -194,10 +190,10 @@ public class EditRdbmsWriterPanel extends AbstractComponentEditPanel {
                 if (!oldValue.equals(setting.getValue())) {
                     context.getConfigurationService().save(setting);
                 }
-            }
-        });
+            });
+        }
+        checkBox.setReadOnly(readOnly);
         return checkBox;
-
     }
 
     public static class AttributeSettings {

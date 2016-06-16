@@ -68,8 +68,10 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        Button testButton = buttonBar.addButton("Test", FontAwesome.FILE_CODE_O);
-        testButton.addClickListener(new TestClickListener());
+        if (!readOnly) {
+          Button testButton = buttonBar.addButton("Test", FontAwesome.FILE_CODE_O);
+          testButton.addClickListener(new TestClickListener());
+        }
 
         filterField = buttonBar.addFilter();
         filterField.addTextChangeListener(this);
@@ -105,8 +107,10 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
 
         addComponent(splitPanel);
         setExpandRatio(splitPanel, 1.0f);
+        
+        textArea.setReadOnly(readOnly);
+        editor.setReadOnly(readOnly);
 
-        updateTable(null);
     }
 
     @Override
@@ -124,13 +128,13 @@ public class EditXsltPanel extends AbstractComponentEditPanel implements TextCha
 
     @Override
     public void textChange(TextChangeEvent event) {
+        textArea.setReadOnly(false);
         filterField.setValue(event.getText());
         textArea.setValue(getSampleXml());
-        updateTable(event.getText());
+        textArea.setReadOnly(readOnly);
     }
 
-    protected void updateTable(String filter) {
-    }
+
 
     protected String getSampleXml() {
         Model model = component.getInputModel();
