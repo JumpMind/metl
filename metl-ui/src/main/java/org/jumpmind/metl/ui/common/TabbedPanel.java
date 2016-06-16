@@ -22,11 +22,13 @@ package org.jumpmind.metl.ui.common;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 
+import com.vaadin.addon.contextmenu.ContextMenu;
 import com.vaadin.server.Resource;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.TabSheet;
@@ -72,37 +74,98 @@ public class TabbedPanel extends TabSheet {
             }
         });
 
-        setCloseHandler((tabsheet, tabContent) -> {
-            String id = contentToId.get(tabContent);
-            try {
-                closing = true;
-                if (tabContent instanceof IUiPanel) {
-                    if (((IUiPanel) tabContent).closing()) {
-                        closeTab(id);
-                    }
-                    selectedTab = null;
-                } else {
+        setCloseHandler((tabsheet, tabContent) -> close(tabContent));
+
+        ContextMenu menu = new ContextMenu(this, true);
+        menu.addItem("Close", (selectedItem) -> close());
+        menu.addItem("Close Others", (selectedItem) -> closeOthers());
+        menu.addItem("Close To the Left", (selectedItem) -> closeToTheLeft());
+        menu.addItem("Close To the Right", (selectedItem) -> closeToTheRight());
+        menu.addSeparator();
+        menu.addItem("Close All", (selectedItem) -> closeAll());
+    }
+
+    protected void close(Component tabContent) {
+        String id = contentToId.get(tabContent);
+        try {
+            closing = true;
+            if (tabContent instanceof IUiPanel) {
+                if (((IUiPanel) tabContent).closing()) {
                     closeTab(id);
                 }
-
-                for (CloseHandler closeHandler : closeHandlers) {
-                    closeHandler.onTabClose(tabsheet, tabContent);
-                }
-
-                while (selectedOrder.contains(id)) {
-                    selectedOrder.remove(id);
-                }
-            } finally {
-                closing = false;
+                selectedTab = null;
+            } else {
+                closeTab(id);
             }
 
-            if (selectedOrder.size() > 0) {
-                Tab selectNext = tabsById.get(selectedOrder.get(selectedOrder.size() - 1));
-                if (selectNext != null) {
-                    setSelectedTab(selectNext);
-                }
+            for (CloseHandler closeHandler : closeHandlers) {
+                closeHandler.onTabClose(this, tabContent);
             }
-        });
+
+            while (selectedOrder.contains(id)) {
+                selectedOrder.remove(id);
+            }
+        } finally {
+            closing = false;
+        }
+
+        if (selectedOrder.size() > 0) {
+            Tab selectNext = tabsById.get(selectedOrder.get(selectedOrder.size() - 1));
+            if (selectNext != null) {
+                setSelectedTab(selectNext);
+            }
+        }
+    }
+
+    protected void close() {
+        close(getSelectedTab());
+    }
+
+    protected void closeAll() {
+        for(Component next : getChildren()) {
+            close(next);
+        }
+    }
+
+    protected void closeToTheLeft() {
+        Component selected = getSelectedTab();
+        for(Component next : getChildren()) {
+            if (!next.equals(selected)) {
+                close(next);
+            } else {
+                break;
+            }
+        }
+    }
+
+    protected void closeToTheRight() {
+        Component selected = getSelectedTab();
+        boolean closing = false;
+        for(Component next : getChildren()) {
+            if (next.equals(selected)) {
+                closing = true;
+            } else if (closing) {
+                close(next);
+            }
+        }
+    }
+
+    protected void closeOthers() {
+        Component selected = getSelectedTab();
+        for(Component next : getChildren()) {
+            if (!next.equals(selected)) {
+                close(next);
+            }
+        }
+    }
+    
+    protected List<Component> getChildren() {
+        List<Component> children = new ArrayList<>(getComponentCount());
+        Iterator<Component> i = iterator();
+        while (i.hasNext()) {
+            children.add(i.next());
+        }
+        return children;
     }
 
     public void addCloseHandler(CloseHandler handler) {
