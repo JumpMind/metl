@@ -20,8 +20,8 @@ import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.ui.common.ApplicationContext;
-import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
+import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,16 +32,16 @@ import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
 
-public class ExportDialog extends Window {
+public class ExportDialog extends ResizableWindow {
 
     final Logger log = LoggerFactory.getLogger(getClass());
     private static final long serialVersionUID = 1L;
@@ -53,7 +53,7 @@ public class ExportDialog extends Window {
     OptionGroup exportFlowGroup;
 
     public ExportDialog(ApplicationContext context, Object selectedElement) {
-
+        super("Export Configuration");
         this.context = context;
         this.flowMap = new HashMap<String, String>();
         this.modelMap = new HashMap<String, String>();
@@ -63,25 +63,19 @@ public class ExportDialog extends Window {
 
     private void initWindow(Object selectedItem) {
 
-        // button bar
-        ButtonBar buttonBar = new ButtonBar();
-        Button exportButton = new Button("Export");
-        exportButton.addClickListener(new ExportClickListener());
-        Button cancelButton = new Button("Cancel");
-        cancelButton.addClickListener(new CancelClickListener());
-        buttonBar.addComponent(cancelButton);
-        buttonBar.addComponent(exportButton);
-
-        // export panel
         Panel exportPanel = new Panel("Export and Dependencies");
+        exportPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
+        exportPanel.setSizeFull();
         VerticalLayout exportLayout = new VerticalLayout();
         exportLayout.setMargin(true);
         addSelectedAndDependentObjects(exportLayout, selectedItem);
         exportPanel.setContent(exportLayout);
 
-        // affected panel
         Panel affectedPanel = new Panel("Possible Affected Flows");
+        affectedPanel.setSizeFull();
+        exportPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
         VerticalLayout affectedLayout = new VerticalLayout();
+        affectedLayout.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
         affectedLayout.setMargin(true);
         addAffectedObjects(affectedLayout);
         affectedPanel.setContent(affectedLayout);
@@ -92,17 +86,11 @@ public class ExportDialog extends Window {
         splitPanel.setFirstComponent(exportPanel);
         splitPanel.setSecondComponent(affectedPanel);
 
-        // vertical layout for the page
-        VerticalLayout pageLayout = new VerticalLayout();
-        pageLayout.setCaption("Export Configuration");
-        pageLayout.addComponent(splitPanel);
-        pageLayout.addComponent(buttonBar);
-
-        // the window
-        setCaption("File Export");
+        addComponent(splitPanel, 1);
+        addComponent(buildButtonFooter(new Button("Export", new ExportClickListener()), buildCloseButton()));
+        
         setWidth(700, Unit.PIXELS);
         setHeight(500, Unit.PIXELS);
-        setContent(pageLayout);
 
     }
 
@@ -129,7 +117,6 @@ public class ExportDialog extends Window {
     }
 
     private void addSelectedAndDependentObjects(VerticalLayout layout, Object selected) {
-
         if (selected instanceof ProjectVersion) {
             ProjectVersion project = (ProjectVersion) selected;
             projectVersionId = project.getId();
@@ -158,6 +145,7 @@ public class ExportDialog extends Window {
 
         // flows
         exportFlowGroup = new OptionGroup("Flows");
+        exportFlowGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         exportFlowGroup.setMultiSelect(true);
         exportFlowGroup.addItems(flowMap.keySet());
         for (String key : flowMap.keySet()) {
@@ -168,6 +156,7 @@ public class ExportDialog extends Window {
 
         // models
         OptionGroup exportModelGroup = new OptionGroup("Models");
+        exportModelGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         exportModelGroup.setMultiSelect(true);
         exportModelGroup.addItems(modelMap.keySet());
         for (String key : modelMap.keySet()) {
@@ -177,6 +166,7 @@ public class ExportDialog extends Window {
 
         // resources
         OptionGroup exportResourceGroup = new OptionGroup("Resources");
+        exportResourceGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         exportResourceGroup.setMultiSelect(true);
         exportResourceGroup.addItems(resourceMap.keySet());
         for (String key : resourceMap.keySet()) {
