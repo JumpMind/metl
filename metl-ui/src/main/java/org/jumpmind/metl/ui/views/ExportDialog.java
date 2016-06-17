@@ -6,12 +6,11 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import org.jumpmind.metl.core.model.AbstractObjectNameBasedSorter;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Model;
@@ -19,6 +18,7 @@ import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
+import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
@@ -46,23 +46,19 @@ public class ExportDialog extends ResizableWindow {
     final Logger log = LoggerFactory.getLogger(getClass());
     private static final long serialVersionUID = 1L;
     private ApplicationContext context;
-    private Map<String, String> flowMap;
-    private Map<String, String> modelMap;
-    private Map<String, String> resourceMap;
-    private String projectVersionId;
     OptionGroup exportFlowGroup;
+    OptionGroup exportModelGroup;
+    OptionGroup exportResourceGroup;
+    VerticalLayout affectedLayout;
+    String projectVersionId;
 
     public ExportDialog(ApplicationContext context, Object selectedElement) {
         super("Export Configuration");
         this.context = context;
-        this.flowMap = new HashMap<String, String>();
-        this.modelMap = new HashMap<String, String>();
-        this.resourceMap = new HashMap<String, String>();
         initWindow(selectedElement);
     }
 
     private void initWindow(Object selectedItem) {
-
         Panel exportPanel = new Panel("Export and Dependencies");
         exportPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
         exportPanel.setSizeFull();
@@ -74,10 +70,9 @@ public class ExportDialog extends ResizableWindow {
         Panel affectedPanel = new Panel("Possible Affected Flows");
         affectedPanel.setSizeFull();
         exportPanel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
-        VerticalLayout affectedLayout = new VerticalLayout();
-        affectedLayout.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
+        affectedLayout = new VerticalLayout();
         affectedLayout.setMargin(true);
-        addAffectedObjects(affectedLayout);
+        updateAffectedObjects();
         affectedPanel.setContent(affectedLayout);
 
         // Split panel for Export and Affected
@@ -88,107 +83,120 @@ public class ExportDialog extends ResizableWindow {
 
         addComponent(splitPanel, 1);
         addComponent(buildButtonFooter(new Button("Export", new ExportClickListener()), buildCloseButton()));
-        
+
         setWidth(700, Unit.PIXELS);
         setHeight(500, Unit.PIXELS);
-
     }
 
-    private void addAffectedObjects(VerticalLayout layout) {
-
+    @SuppressWarnings("unchecked")
+    private void updateAffectedObjects() {
+        Set<String> flowIds = (Set<String>) exportFlowGroup.getValue();
+        Set<String> modelIds = (Set<String>) exportModelGroup.getValue();
+        affectedLayout.removeAllComponents();
         Set<Flow> flows = new HashSet<Flow>();
-        for (String flowId : flowMap.values()) {
-            flows.addAll(context.getConfigurationService().findAffectedFlowsByModel(flowId));
+        for (String flowId : flowIds) {
+            flows.addAll(context.getConfigurationService().findAffectedFlowsByFlow(flowId));
         }
-        for (String modelId : modelMap.values()) {
+        for (String modelId : modelIds) {
             flows.addAll(context.getConfigurationService().findAffectedFlowsByModel(modelId));
         }
 
         for (Flow flow : flows) {
             // only add flow to affected flows if its not already being exported
-            if (flowMap.get(flow.getName()) == null) {
-                layout.addComponent(new Label(" - " + flow.getName()));
+            if (!flowIds.contains(flow.getId())) {
+                affectedLayout.addComponent(new Label(" - " + flow.getName()));
             }
         }
-    }
-
-    private void flowChanged() {
-        // TODO:
     }
 
     private void addSelectedAndDependentObjects(VerticalLayout layout, Object selected) {
+        IConfigurationService configurationService = context.getConfigurationService();
+        FlowName selectedFlow = null;
+        ModelName selectedModel = null;
+        ResourceName selectedResource = null;
+        boolean allChecked = false;
         if (selected instanceof ProjectVersion) {
             ProjectVersion project = (ProjectVersion) selected;
             projectVersionId = project.getId();
-            List<Flow> flows = context.getConfigurationService()
-                    .findDependentFlows(project.getId());
-            for (Flow flow : flows) {
-                flowMap.put(flow.getName(), flow.getId());
-                addDependentModels(layout, flow.getId());
-                addDependentResources(layout, flow.getId());
-            }
+            allChecked = true;
         } else if (selected instanceof FlowName) {
-            FlowName flowName = (FlowName) selected;
-            projectVersionId = flowName.getProjectVersionId();
-            flowMap.put(flowName.getName(), flowName.getId());
-            addDependentModels(layout, flowName.getId());
-            addDependentResources(layout, flowName.getId());
+            selectedFlow = (FlowName) selected;
+            projectVersionId = selectedFlow.getProjectVersionId();
         } else if (selected instanceof ModelName) {
-            ModelName modelName = (ModelName) selected;
-            projectVersionId = modelName.getProjectVersionId();
-            modelMap.put(modelName.getName(), modelName.getId());
+            selectedModel = (ModelName) selected;
+            projectVersionId = selectedModel.getProjectVersionId();
         } else if (selected instanceof ResourceName) {
-            ResourceName resourceName = (ResourceName) selected;
-            projectVersionId = resourceName.getProjectVersionId();
-            resourceMap.put(resourceName.getName(), resourceName.getId());
+            selectedResource = (ResourceName) selected;
+            projectVersionId = selectedResource.getProjectVersionId();
         }
+        List<FlowName> allFlows = configurationService.findFlowsInProject(projectVersionId, false);
+        allFlows.addAll(configurationService.findFlowsInProject(projectVersionId, true));
+        AbstractObjectNameBasedSorter.sort(allFlows);
 
         // flows
         exportFlowGroup = new OptionGroup("Flows");
         exportFlowGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         exportFlowGroup.setMultiSelect(true);
-        exportFlowGroup.addItems(flowMap.keySet());
-        for (String key : flowMap.keySet()) {
-            exportFlowGroup.select(key);
+        for (FlowName key : allFlows) {
+            exportFlowGroup.addItem(key.getId());
+            exportFlowGroup.setItemCaption(key.getId(), key.getName());
+            if (allChecked || key.equals(selectedFlow)) {
+                exportFlowGroup.select(key.getId());
+            }
         }
-        exportFlowGroup.addValueChangeListener(selectedItem -> flowChanged());
+        exportFlowGroup.addValueChangeListener(selectedItem -> updateAffectedObjects());
         layout.addComponent(exportFlowGroup);
 
         // models
-        OptionGroup exportModelGroup = new OptionGroup("Models");
+        List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
+        AbstractObjectNameBasedSorter.sort(models);
+        exportModelGroup = new OptionGroup("Models");
         exportModelGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         exportModelGroup.setMultiSelect(true);
-        exportModelGroup.addItems(modelMap.keySet());
-        for (String key : modelMap.keySet()) {
-            exportModelGroup.select(key);
+        for (ModelName key : models) {
+            exportModelGroup.addItem(key.getId());
+            exportModelGroup.setItemCaption(key.getId(), key.getName());
+            if (allChecked || key.equals(selectedModel)) {
+                exportModelGroup.select(key.getId());
+            }
         }
         layout.addComponent(exportModelGroup);
 
         // resources
-        OptionGroup exportResourceGroup = new OptionGroup("Resources");
+        List<ResourceName> resources = configurationService.findResourcesInProject(projectVersionId);
+        AbstractObjectNameBasedSorter.sort(resources);
+        exportResourceGroup = new OptionGroup("Resources");
         exportResourceGroup.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
         exportResourceGroup.setMultiSelect(true);
-        exportResourceGroup.addItems(resourceMap.keySet());
-        for (String key : resourceMap.keySet()) {
-            exportResourceGroup.select(key);
+        for (ResourceName key : resources) {
+            exportResourceGroup.addItem(key.getId());
+            exportResourceGroup.setItemCaption(key.getId(), key.getName());
+            if (allChecked || key.equals(selectedResource)) {
+                exportResourceGroup.select(key.getId());
+            }
         }
         layout.addComponent(exportResourceGroup);
 
+        @SuppressWarnings("unchecked")
+        Set<String> flowIds = (Set<String>) exportFlowGroup.getValue();
+        for (String flowId : flowIds) {
+            addDependentModels(flowId);
+            addDependentResources(flowId);
+        }
+
     }
 
-    private void addDependentModels(VerticalLayout layout, String flowId) {
-
+    private void addDependentModels(String flowId) {
         List<Model> models = context.getConfigurationService().findDependentModels(flowId);
         for (Model model : models) {
-            modelMap.put(model.getName(), model.getId());
+            exportModelGroup.select(model.getId());
         }
     }
 
-    private void addDependentResources(VerticalLayout layout, String flowId) {
-
+    private void addDependentResources(String flowId) {
         List<Resource> resources = context.getConfigurationService().findDependentResources(flowId);
         for (Resource resource : resources) {
-            resourceMap.put(resource.getName(), resource.getId());
+            exportResourceGroup.select(resource.getId());
         }
     }
 
@@ -196,25 +204,17 @@ public class ExportDialog extends ResizableWindow {
         public void onFinished(String dataToImport);
     }
 
-    @SuppressWarnings("serial")
+    @SuppressWarnings({ "serial", "unchecked" })
     class ExportClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            String export = context.getImportExportService().export(projectVersionId,
-                    new ArrayList<String>(flowMap.values()),
-                    new ArrayList<String>(modelMap.values()),
-                    new ArrayList<String>(resourceMap.values()));
-            ProjectVersion project = context.getConfigurationService()
-                    .findProjectVersion(projectVersionId);
-            downloadExport(export,
-                    project.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-"));
+            Set<String> flowIds = (Set<String>) exportFlowGroup.getValue();
+            Set<String> modelIds = (Set<String>) exportModelGroup.getValue();
+            Set<String> resourceIds = (Set<String>) exportResourceGroup.getValue();
+            String export = context.getImportExportService().export(projectVersionId, new ArrayList<String>(flowIds),
+                    new ArrayList<String>(modelIds), new ArrayList<String>(resourceIds));
+            ProjectVersion project = context.getConfigurationService().findProjectVersion(projectVersionId);
+            downloadExport(export, project.getName().toLowerCase().replaceAll(" - ", " ").replaceAll(" ", "-"));
 
-        }
-    }
-
-    @SuppressWarnings("serial")
-    class CancelClickListener implements ClickListener {
-        public void buttonClick(ClickEvent event) {
-            UI.getCurrent().removeWindow(ExportDialog.this);
         }
     }
 
@@ -234,12 +234,10 @@ public class ExportDialog extends ResizableWindow {
             }
         };
         String datetime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        StreamResource resource = new StreamResource(ss,
-                String.format("%s-config-%s.json", filename, datetime));
+        StreamResource resource = new StreamResource(ss, String.format("%s-config-%s.json", filename, datetime));
         final String KEY = "export";
         setResource(KEY, resource);
         Page.getCurrent().open(ResourceReference.create(resource, this, KEY).getURL(), null);
-        // UI.getCurrent().removeWindow(ExportDialog.this);
     }
 
     public static void show(ApplicationContext context, Object selectedElement) {
