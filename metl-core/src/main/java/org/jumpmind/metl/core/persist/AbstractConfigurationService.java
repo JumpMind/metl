@@ -890,20 +890,26 @@ abstract class AbstractConfigurationService extends AbstractService implements I
 
     @Override
     public void save(FlowStep flowStep) {
+        save(flowStep, false);
+    }
+
+    protected void save(FlowStep flowStep, boolean newProjectVersion) {
         Component component = flowStep.getComponent();
-        if (!component.isShared()) {
-            save(component);
-        }
+        save(component);
         save((AbstractObject) flowStep);
     }
 
     @Override
     public void save(Flow flow) {
+        save(flow, false);
+    }
+
+    protected void save(Flow flow, boolean newProjectVersion) {
         save((AbstractObject) flow);
 
         List<FlowStep> flowSteps = flow.getFlowSteps();
         for (FlowStep flowStep : flowSteps) {
-            save(flowStep);
+            save(flowStep, newProjectVersion);
         }
 
         List<FlowStepLink> links = flow.getFlowStepLinks();
@@ -1054,7 +1060,8 @@ abstract class AbstractConfigurationService extends AbstractService implements I
 
     @Override
     public ProjectVersion saveNewVersion(String newVersionLabel, ProjectVersion original) {
-        Map<String, String> oldToNewUUIDMapping = new HashMap<>();
+        // TODO: Make transactional
+        Map<String, AbstractObject> oldToNewUUIDMapping = new HashMap<>();
         ProjectVersion newVersion = copyWithNewUUID(oldToNewUUIDMapping, original);
         newVersion.setVersionLabel(newVersionLabel);
         newVersion.setCreateTime(new Date());
@@ -1063,28 +1070,28 @@ abstract class AbstractConfigurationService extends AbstractService implements I
 
         List<ModelName> models = findModelsInProject(original.getId());
         for (ModelName modelName : models) {
-            Model newModel = copy (oldToNewUUIDMapping, findModel(modelName.getId()));
+            Model newModel = copy(oldToNewUUIDMapping, findModel(modelName.getId()));
             newModel.setProjectVersionId(newVersion.getId());
             save(newModel);
         }
-        
+
         List<ResourceName> resources = findResourcesInProject(original.getId());
         for (ResourceName resourceName : resources) {
             Resource newResource = copy(oldToNewUUIDMapping, findResource(resourceName.getId()));
             newResource.setProjectVersionId(newVersion.getId());
             save(newResource);
         }
-        
+
         List<FlowName> testFlows = findFlowsInProject(original.getId(), true);
         for (FlowName flowName : testFlows) {
-            Flow newFlow = copy(oldToNewUUIDMapping, findFlow(flowName.getId()));
+            Flow newFlow = copy(oldToNewUUIDMapping, findFlow(flowName.getId()), true);
             newFlow.setProjectVersionId(newVersion.getId());
-            save(newFlow);
+            save(newFlow, true);
         }
-        
+
         List<FlowName> flows = findFlowsInProject(original.getId(), false);
         for (FlowName flowName : flows) {
-            Flow newFlow = copy(oldToNewUUIDMapping, findFlow(flowName.getId()));
+            Flow newFlow = copy(oldToNewUUIDMapping, findFlow(flowName.getId()), true);
             newFlow.setProjectVersionId(newVersion.getId());
             save(newFlow);
         }
@@ -1094,14 +1101,12 @@ abstract class AbstractConfigurationService extends AbstractService implements I
 
     @Override
     public Flow copy(Flow original) {
-        Map<String, String> oldToNewUUIDMapping = new HashMap<>();
-        return copy(oldToNewUUIDMapping, original);
+        Map<String, AbstractObject> oldToNewUUIDMapping = new HashMap<>();
+        return copy(oldToNewUUIDMapping, original, false);
     }
 
-    protected Flow copy(Map<String, String> oldToNewUUIDMapping, Flow original) {
-
+    protected Flow copy(Map<String, AbstractObject> oldToNewUUIDMapping, Flow original, boolean newProjectVersion) {
         Flow newFlow = copyWithNewUUID(oldToNewUUIDMapping, original);
-
         newFlow.setFlowParameters(new ArrayList<FlowParameter>());
         newFlow.setFlowStepLinks(new ArrayList<FlowStepLink>());
         newFlow.setFlowSteps(new ArrayList<FlowStep>());
@@ -1109,7 +1114,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         Map<String, String> oldToNewFlowStepIds = new HashMap<String, String>();
         for (FlowStep flowStep : original.getFlowSteps()) {
             String oldId = flowStep.getId();
-            flowStep = copy(oldToNewUUIDMapping, flowStep);
+            flowStep = copy(oldToNewUUIDMapping, flowStep, newProjectVersion);
             oldToNewFlowStepIds.put(oldId, flowStep.getId());
             flowStep.setFlowId(newFlow.getId());
             newFlow.getFlowSteps().add(flowStep);
@@ -1141,9 +1146,9 @@ abstract class AbstractConfigurationService extends AbstractService implements I
              * copied as well
              */
             for (ComponentAttributeSetting setting : flowStep.getComponent().getAttributeSettings()) {
-                String newUuid = oldToNewUUIDMapping.get(setting.getAttributeId());
-                if (isNotBlank(newUuid)) {
-                    setting.setAttributeId(newUuid);
+                AbstractObject obj = oldToNewUUIDMapping.get(setting.getAttributeId());
+                if (obj != null) {
+                    setting.setAttributeId(obj.getId());
                 }
             }
 
@@ -1153,9 +1158,9 @@ abstract class AbstractConfigurationService extends AbstractService implements I
              * as well
              */
             for (ComponentEntitySetting setting : flowStep.getComponent().getEntitySettings()) {
-                String newUuid = oldToNewUUIDMapping.get(setting.getEntityId());
-                if (isNotBlank(newUuid)) {
-                    setting.setEntityId(newUuid);
+                AbstractObject obj = oldToNewUUIDMapping.get(setting.getEntityId());
+                if (obj != null) {
+                    setting.setEntityId(obj.getId());
                 }
             }
 
@@ -1167,16 +1172,15 @@ abstract class AbstractConfigurationService extends AbstractService implements I
 
     @Override
     public FlowStep copy(FlowStep original) {
-        return copy(new HashMap<>(), original);
+        return copy(new HashMap<>(), original, false);
     }
 
     @Override
     public Model copy(Model original) {
         return copy(new HashMap<>(), original);
     }
-    
-    
-    protected Resource copy(Map<String, String> oldToNewUUIDMapping, Resource original) {
+
+    protected Resource copy(Map<String, AbstractObject> oldToNewUUIDMapping, Resource original) {
         Resource newResource = copyWithNewUUID(oldToNewUUIDMapping, original);
         newResource.setSettings(new ArrayList<>());
         for (Setting setting : original.getSettings()) {
@@ -1185,14 +1189,14 @@ abstract class AbstractConfigurationService extends AbstractService implements I
             newResource.getSettings().add(cSetting);
         }
         return newResource;
-    }    
+    }
 
-    protected Model copy(Map<String, String> oldToNewUUIDMapping, Model original) {
+    protected Model copy(Map<String, AbstractObject> oldToNewUUIDMapping, Model original) {
         Model newModel = copyWithNewUUID(oldToNewUUIDMapping, original);
         newModel.setModelEntities(new ArrayList<>());
         for (ModelEntity originalModelEntity : original.getModelEntities()) {
             ModelEntity newModelEntity = copyWithNewUUID(oldToNewUUIDMapping, originalModelEntity);
-            oldToNewUUIDMapping.put(originalModelEntity.getId(), newModelEntity.getId());
+            oldToNewUUIDMapping.put(originalModelEntity.getId(), newModelEntity);
             newModelEntity.setModelId(newModel.getId());
             newModelEntity.setModelAttributes(new ArrayList<>());
             for (ModelAttribute originalAttribute : originalModelEntity.getModelAttributes()) {
@@ -1206,30 +1210,63 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         for (ModelEntity modelEntity : newModel.getModelEntities()) {
             List<ModelAttribute> attributes = modelEntity.getModelAttributes();
             for (ModelAttribute modelAttribute : attributes) {
-                modelAttribute.setTypeEntityId(oldToNewUUIDMapping.get(modelAttribute.getTypeEntityId()));
+                AbstractObject obj = oldToNewUUIDMapping.get(modelAttribute.getTypeEntityId());
+                if (obj != null) {
+                    modelAttribute.setTypeEntityId(obj.getId());
+                }
             }
         }
         return newModel;
     }
 
-    protected void massageValues(Map<String, String> oldToNewUUIDMapping, List<? extends Setting> settings) {
+    protected void massageValues(Map<String, AbstractObject> oldToNewUUIDMapping, List<? extends Setting> settings) {
         for (Setting setting : settings) {
-            setting.setValue(FormatUtils.replaceTokens(setting.getValue(), oldToNewUUIDMapping, false));
+            setting.setValue(FormatUtils.replaceTokens(setting.getValue(), toStringTokens(oldToNewUUIDMapping), false));
         }
     }
 
-    protected FlowStep copy(Map<String, String> oldToNewUUIDMapping, FlowStep original) {
+    protected Map<String, String> toStringTokens(Map<String, AbstractObject> oldToNewUUIDMapping) {
+        Map<String, String> oldToNew = new HashMap<>();
+        for (String old : oldToNewUUIDMapping.keySet()) {
+            oldToNew.put(old, oldToNewUUIDMapping.get(old).getId());
+        }
+        return oldToNew;
+    }
+
+    protected FlowStep copy(Map<String, AbstractObject> oldToNewUUIDMapping, FlowStep original, boolean newProjectVersion) {
         FlowStep flowStep = copyWithNewUUID(oldToNewUUIDMapping, original);
         Component component = original.getComponent();
         if (!component.isShared()) {
             component = copy(oldToNewUUIDMapping, component);
-            flowStep.setComponent(component);
+        } else if (newProjectVersion) {
+            Component newComponent = (Component) oldToNewUUIDMapping.get(component.getId());
+            if (newComponent != null) {
+                component = newComponent;
+            } else {
+                component = copy(oldToNewUUIDMapping, component);
+            }
         }
+        flowStep.setComponent(component);
         return flowStep;
     }
 
-    protected Component copy(Map<String, String> oldToNewUUIDMapping, Component original) {
+    protected Component copy(Map<String, AbstractObject> oldToNewUUIDMapping, Component original) {
         Component component = copyWithNewUUID(oldToNewUUIDMapping, original);
+        AbstractObject obj = oldToNewUUIDMapping.get(original.getInputModelId());
+        if (obj != null) {
+            component.setInputModelId(obj.getId());
+        }
+
+        obj = oldToNewUUIDMapping.get(original.getOutputModelId());
+        if (obj != null) {
+            component.setOutputModelId(obj.getId());
+        }
+
+        obj = oldToNewUUIDMapping.get(original.getResourceId());
+        if (obj != null) {
+            component.setResourceId(obj.getId());
+        }
+
         component.setEntitySettings(new ArrayList<ComponentEntitySetting>());
         component.setAttributeSettings(new ArrayList<ComponentAttributeSetting>());
         component.setSettings(new ArrayList<Setting>());
@@ -1256,10 +1293,10 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     }
 
     @SuppressWarnings("unchecked")
-    protected <T extends AbstractObject> T copyWithNewUUID(Map<String, String> oldToNewUUIDMapping, T original) {
+    protected <T extends AbstractObject> T copyWithNewUUID(Map<String, AbstractObject> oldToNewUUIDMapping, T original) {
         T copy = (T) original.clone();
         copy.setId(UUID.randomUUID().toString());
-        oldToNewUUIDMapping.put(original.getId(), copy.getId());
+        oldToNewUUIDMapping.put(original.getId(), copy);
         return copy;
     }
 
