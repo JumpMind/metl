@@ -41,12 +41,8 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.Table;
@@ -65,27 +61,21 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
     BeanItemContainer<Route> container = new BeanItemContainer<Route>(Route.class);
 
     protected void buildUI() {
-        ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        if (!readOnly) {
+            ButtonBar buttonBar = new ButtonBar();
+            addComponent(buttonBar);
 
-        addButton = buttonBar.addButton("Add", FontAwesome.PLUS);
-        addButton.addClickListener(new ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                table.addItem(new Route());
-            }
-        });
+            addButton = buttonBar.addButton("Add", FontAwesome.PLUS);
+            addButton.addClickListener((event) -> table.addItem(new Route()));
 
-        removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
-        removeButton.addClickListener(new ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
+            removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+            removeButton.addClickListener((event) -> {
                 if (table.getValue() != null) {
                     table.removeItem(table.getValue());
                     save();
                 }
-            }
-        });
+            });
+        }
 
         table.setContainerDataSource(container);
 
@@ -95,24 +85,16 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
         table.setSizeFull();
         table.setVisibleColumns(new Object[] { "matchExpression", "targetStepId" });
         table.setColumnHeaders(new String[] { "Expression", "Target Step" });
-        table.setTableFieldFactory(new EditFieldFactory());
-        table.setEditable(true);
-        table.addItemClickListener(new ItemClickListener() {
-
-            @Override
-            public void itemClick(ItemClickEvent event) {
-                if (table.getValue() != null) {
-                    table.setValue(null);
-                }
+        table.setTableFieldFactory(new EditFieldFactory());        
+        table.addItemClickListener((event) -> {
+            if (table.getValue() != null) {
+                table.setValue(null);
             }
         });
-        table.addValueChangeListener(new ValueChangeListener() {
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
-                removeButton.setEnabled(table.getValue() != null);
-            }
-        });
+        if (!readOnly) {
+            table.addValueChangeListener((event) -> removeButton.setEnabled(table.getValue() != null));
+            table.setEditable(true);
+        }
 
         addComponent(table);
         setExpandRatio(table, 1.0f);
@@ -187,7 +169,9 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
                 });
                 field = combo;
             }
-
+            if (field != null) {
+                field.setReadOnly(readOnly);
+            }
             return field;
         }
     }
