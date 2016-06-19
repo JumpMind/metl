@@ -53,23 +53,25 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
     MappingDiagram diagram;
 
     Button removeButton;
-    
+
     CheckBox srcMapFilter;
-    
+
     CheckBox dstMapFilter;
-    
+
     TextField srcTextFilter;
-    
+
     TextField dstTextFilter;
 
     protected void buildUI() {
-        ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
-        Button autoMapButton = buttonBar.addButton("Auto Map", FontAwesome.FLASH);
-        removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
-        removeButton.setEnabled(false);
-        autoMapButton.addClickListener(new AutoMapListener());
-        removeButton.addClickListener(new RemoveListener());
+        if (!readOnly) {
+            ButtonBar buttonBar = new ButtonBar();
+            addComponent(buttonBar);
+            Button autoMapButton = buttonBar.addButton("Auto Map", FontAwesome.FLASH);
+            removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+            removeButton.setEnabled(false);
+            autoMapButton.addClickListener(new AutoMapListener());
+            removeButton.addClickListener(new RemoveListener());
+        }
 
         HorizontalLayout titleHeader = new HorizontalLayout();
         titleHeader.setSpacing(true);
@@ -106,11 +108,11 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
         srcTextFilter.setTextChangeTimeout(200);
         srcTextFilter.addTextChangeListener(new FilterInputTextListener());
         srcFilterHeader.addComponent(srcTextFilter);
-        
+
         srcMapFilter = new CheckBox("Mapped Only");
         srcMapFilter.addValueChangeListener(new FilterSrcMapListener());
         srcFilterHeader.addComponent(srcMapFilter);
-        
+
         dstTextFilter = new TextField();
         dstTextFilter.setInputPrompt("Filter");
         dstTextFilter.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
@@ -120,15 +122,15 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
         dstTextFilter.setTextChangeTimeout(200);
         dstTextFilter.addTextChangeListener(new FilterOutputTextListener());
         dstFilterHeader.addComponent(dstTextFilter);
-        
+
         dstMapFilter = new CheckBox("Mapped Only");
         dstMapFilter.addValueChangeListener(new FilterDstMapListener());
         dstFilterHeader.addComponent(dstMapFilter);
-        
+
         Panel panel = new Panel();
         VerticalLayout vlay = new VerticalLayout();
         vlay.setSizeFull();
-        diagram = new MappingDiagram(context, component);
+        diagram = new MappingDiagram(context, component, readOnly);
         diagram.setSizeFull();
         vlay.addComponent(diagram);
         panel.setContent(vlay);
@@ -248,16 +250,16 @@ public class EditMappingPanel extends AbstractComponentEditPanel {
             diagram.filterOutputModel((String) event.getText(), dstMapFilter.getValue());
         }
     }
-    
+
     class FilterSrcMapListener implements ValueChangeListener {
-		public void valueChange(ValueChangeEvent event) {
-			diagram.filterInputModel(srcTextFilter.getValue(), (boolean) event.getProperty().getValue());
-		}
+        public void valueChange(ValueChangeEvent event) {
+            diagram.filterInputModel(srcTextFilter.getValue(), (boolean) event.getProperty().getValue());
+        }
     }
-    
+
     class FilterDstMapListener implements ValueChangeListener {
-		public void valueChange(ValueChangeEvent event) {
-			diagram.filterOutputModel(dstTextFilter.getValue(), (boolean) event.getProperty().getValue());
-		}
+        public void valueChange(ValueChangeEvent event) {
+            diagram.filterOutputModel(dstTextFilter.getValue(), (boolean) event.getProperty().getValue());
+        }
     }
 }

@@ -49,15 +49,19 @@ public class MappingDiagram extends AbstractJavaScriptComponent {
     String selectedSourceId;
     
     String selectedTargetId;
+    
+    boolean readOnly;
 
-	public MappingDiagram(ApplicationContext context, Component component) {
+	public MappingDiagram(ApplicationContext context, Component component, boolean readOnly) {
 		this.context = context;
 		this.component = component;
+		this.readOnly = readOnly;
         setPrimaryStyleName("mapping-diagram");
         setId("mapping-diagram");
 
         MappingDiagramState state = getState();
         state.component = component;
+        state.readOnly = readOnly;
         
         state.inputModel = component.getInputModel();
         if (state.inputModel != null) {
