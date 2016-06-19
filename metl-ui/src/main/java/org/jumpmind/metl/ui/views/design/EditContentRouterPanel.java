@@ -91,9 +91,9 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
                 table.setValue(null);
             }
         });
+        table.setEditable(true);
         if (!readOnly) {
             table.addValueChangeListener((event) -> removeButton.setEnabled(table.getValue() != null));
-            table.setEditable(true);
         }
 
         addComponent(table);
