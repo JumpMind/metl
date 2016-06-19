@@ -506,6 +506,7 @@ public class EditDataDiffPanel extends AbstractComponentEditPanel {
                 }
             }
         });
+        checkBox.setReadOnly(readOnly);
         return checkBox;
     }
 

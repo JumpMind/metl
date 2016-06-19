@@ -83,7 +83,6 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
     Set<EntitySettings> selectedItemIds;
     
     protected void buildUI() {
-
     	buildButtonBar();
     	buildEntityTable();
     	fillEntityContainer();
@@ -351,6 +350,7 @@ public class EditDeduperPanel extends AbstractComponentEditPanel {
                 }
             }
         });
+        checkBox.setReadOnly(readOnly);
         return checkBox;
     }
     
