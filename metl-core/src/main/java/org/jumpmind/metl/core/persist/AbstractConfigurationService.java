@@ -1221,15 +1221,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     protected void massageValues(Map<String, AbstractObject> oldToNewUUIDMapping, List<? extends Setting> settings) {
         Map<String,String> tokens = toStringTokens(oldToNewUUIDMapping);
         for (Setting setting : settings) {
-            boolean printafter = false;
-            if (setting.getValue() != null && setting.getValue().contains("cc7bd445-2222-42fa-b6c0-eb9a0ceb4926")) {
-                System.out.println("Before: " + setting.getValue());
-                printafter = true;
-            }
             setting.setValue(FormatUtils.replaceTokens(setting.getValue(), tokens, false));
-            if (printafter) {
-            System.out.println("After: " + setting.getValue());
-            }
         }
     }
 
