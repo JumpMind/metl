@@ -76,26 +76,28 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
     Set<RecordFormat> selectedItemIds;
 
     protected void buildUI() {
-        ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        if (!readOnly) {
+            ButtonBar buttonBar = new ButtonBar();
+            addComponent(buttonBar);
 
-        Button moveUpButton = buttonBar.addButton("Move Up", FontAwesome.ARROW_UP);
-        moveUpButton.addClickListener(new MoveUpClickListener());
+            Button moveUpButton = buttonBar.addButton("Move Up", FontAwesome.ARROW_UP);
+            moveUpButton.addClickListener(new MoveUpClickListener());
 
-        Button moveDownButton = buttonBar.addButton("Move Down", FontAwesome.ARROW_DOWN);
-        moveDownButton.addClickListener(new MoveDownClickListener());
+            Button moveDownButton = buttonBar.addButton("Move Down", FontAwesome.ARROW_DOWN);
+            moveDownButton.addClickListener(new MoveDownClickListener());
 
-        Button moveTopButton = buttonBar.addButton("Move Top", FontAwesome.ANGLE_DOUBLE_UP);
-        moveTopButton.addClickListener(new MoveTopClickListener());
+            Button moveTopButton = buttonBar.addButton("Move Top", FontAwesome.ANGLE_DOUBLE_UP);
+            moveTopButton.addClickListener(new MoveTopClickListener());
 
-        Button moveBottomButton = buttonBar.addButton("Move Bottom", FontAwesome.ANGLE_DOUBLE_DOWN);
-        moveBottomButton.addClickListener(new MoveBottomClickListener());
+            Button moveBottomButton = buttonBar.addButton("Move Bottom", FontAwesome.ANGLE_DOUBLE_DOWN);
+            moveBottomButton.addClickListener(new MoveBottomClickListener());
 
-        Button cutButton = buttonBar.addButton("Cut", FontAwesome.CUT);
-        cutButton.addClickListener(new CutClickListener());
+            Button cutButton = buttonBar.addButton("Cut", FontAwesome.CUT);
+            cutButton.addClickListener(new CutClickListener());
 
-        Button pasteButton = buttonBar.addButton("Paste", FontAwesome.PASTE);
-        pasteButton.addClickListener(new PasteClickListener());
+            Button pasteButton = buttonBar.addButton("Paste", FontAwesome.PASTE);
+            pasteButton.addClickListener(new PasteClickListener());
+        }
 
         table.setContainerDataSource(container);
 
@@ -115,8 +117,10 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
         table.setCellStyleGenerator(new TableCellStyleGenerator());
         table.setEditable(true);
         table.setMultiSelect(true);
-        table.setDragMode(TableDragMode.MULTIROW);
-        table.setDropHandler(new TableDropHandler());
+        if (!readOnly) {
+            table.setDragMode(TableDragMode.MULTIROW);
+            table.setDropHandler(new TableDropHandler());
+        }
         addComponent(table);
         setExpandRatio(table, 1.0f);
 
@@ -189,7 +193,7 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
                     needsRefreshed = true;
                 }
                 ordinal++;
-            }            
+            }
         }
         if (needsRefreshed) {
             RecordFormat record = getSelectedItem();
@@ -394,6 +398,10 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
             RecordFormat selected = getSelectedItem();
             if (selected == itemId && record.getFocusField() != null) {
                 record.getFocusField().focus();
+            }
+
+            if (field != null) {
+                field.setReadOnly(readOnly);
             }
             return field;
         }
