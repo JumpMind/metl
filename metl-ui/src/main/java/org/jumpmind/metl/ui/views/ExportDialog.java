@@ -82,10 +82,31 @@ public class ExportDialog extends ResizableWindow {
         splitPanel.setSecondComponent(affectedPanel);
 
         addComponent(splitPanel, 1);
-        addComponent(buildButtonFooter(new Button("Export", new ExportClickListener()), buildCloseButton()));
+        
+        Button selectAllLink = new Button("Select All");
+        selectAllLink.addStyleName(ValoTheme.BUTTON_LINK);
+        selectAllLink.addClickListener((event) -> selectAll());
+
+        Button selectNoneLink = new Button("Select None");
+        selectNoneLink.addStyleName(ValoTheme.BUTTON_LINK);
+        selectNoneLink.addClickListener((event) -> selectNone());
+        
+        addComponent(buildButtonFooter(new Button[] {selectAllLink, selectNoneLink}, new Button("Export", new ExportClickListener()), buildCloseButton()));
 
         setWidth(700, Unit.PIXELS);
         setHeight(500, Unit.PIXELS);
+    }
+    
+    private void selectAll() {
+        exportFlowGroup.setValue(exportFlowGroup.getContainerDataSource().getItemIds());
+        exportModelGroup.setValue(exportModelGroup.getContainerDataSource().getItemIds());
+        exportResourceGroup.setValue(exportResourceGroup.getContainerDataSource().getItemIds());
+    }
+    
+    private void selectNone() {
+        exportFlowGroup.setValue(null);
+        exportModelGroup.setValue(null);
+        exportResourceGroup.setValue(null);
     }
 
     @SuppressWarnings("unchecked")
