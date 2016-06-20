@@ -88,33 +88,38 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     Button removeButton;
 
     Button importButton;
-    
-    TextField filterField;
-    
-    ShortcutListener enterKeyListener;
 
-    public EditModelPanel(ApplicationContext context, String modelId) {
+    TextField filterField;
+
+    ShortcutListener enterKeyListener;
+    
+    boolean readOnly;
+
+    public EditModelPanel(ApplicationContext context, String modelId, boolean readOnly) {
         this.context = context;
         this.model = new Model(modelId);
+        this.readOnly = readOnly;
         context.getConfigurationService().refresh(model);
 
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        addEntityButton = buttonBar.addButton("Add Entity", FontAwesome.TABLE);
-        addEntityButton.addClickListener(new AddEntityClickListener());
+        if (!readOnly) {
+            addEntityButton = buttonBar.addButton("Add Entity", FontAwesome.TABLE);
+            addEntityButton.addClickListener(new AddEntityClickListener());
 
-        addAttributeButton = buttonBar.addButton("Add Attribute", FontAwesome.COLUMNS);
-        addAttributeButton.addClickListener(new AddAttributeClickListener());
-        
-        editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
-        editButton.addClickListener(new EditClickListener());
+            addAttributeButton = buttonBar.addButton("Add Attribute", FontAwesome.COLUMNS);
+            addAttributeButton.addClickListener(new AddAttributeClickListener());
 
-        removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
-        removeButton.addClickListener(new RemoveClickListener());
+            editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
+            editButton.addClickListener(new EditClickListener());
 
-        importButton = buttonBar.addButton("Import ...", FontAwesome.DOWNLOAD);
-        importButton.addClickListener(new ImportClickListener());
+            removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+            removeButton.addClickListener(new RemoveClickListener());
+
+            importButton = buttonBar.addButton("Import ...", FontAwesome.DOWNLOAD);
+            importButton.addClickListener(new ImportClickListener());
+        }
 
         filterField = buttonBar.addFilter();
         filterField.addTextChangeListener(new TextChangeListener() {
@@ -134,7 +139,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.addGeneratedColumn("name", new ColumnGenerator() {
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 final AbstractObject obj = (AbstractObject) itemId;
-                if (lastEditItemIds.contains(itemId)) {
+                if (lastEditItemIds.contains(itemId) && !readOnly) {
                     ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
                         protected void save(String text) {
                             obj.setName(text);
@@ -157,7 +162,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 if (itemId instanceof ModelAttribute) {
                     final ModelAttribute obj = (ModelAttribute) itemId;
-                    if (lastEditItemIds.contains(itemId)) {
+                    if (lastEditItemIds.contains(itemId) && !readOnly) {
                         final ComboBox cbox = new ComboBox();
                         cbox.setNullSelectionAllowed(false);
                         for (DataType dataType : DataType.values()) {
@@ -196,12 +201,12 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             }
         });
         treeTable.setColumnHeader("type", "Type");
-        
+
         treeTable.addGeneratedColumn("pk", new ColumnGenerator() {
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 if (itemId instanceof ModelAttribute) {
                     final ModelAttribute obj = (ModelAttribute) itemId;
-                    if (lastEditItemIds.contains(itemId)) {
+                    if (lastEditItemIds.contains(itemId) && !readOnly) {
                         final CheckBox cbox = new CheckBox();
                         cbox.setValue(obj.isPk());
                         cbox.setImmediate(true);
@@ -226,7 +231,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                     } else if (obj.isPk()) {
                         return new Label(FontAwesome.KEY.getHtml(), ContentMode.HTML);
                     }
-                } 
+                }
                 return null;
             }
         });
@@ -240,19 +245,19 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 lastEditItemIds = Collections.emptySet();
                 treeTable.refreshRowCache();
             }
-        };        
-        
+        };
+
         addComponent(treeTable);
         setExpandRatio(treeTable, 1.0f);
-        
+
         HorizontalLayout hlayout = new HorizontalLayout();
         addComponent(hlayout);
 
-        Button selectAllLink = new Button("Collapse All");
-        selectAllLink.addStyleName(ValoTheme.BUTTON_LINK);
-        selectAllLink.addStyleName(ValoTheme.BUTTON_SMALL);
-        hlayout.addComponent(selectAllLink);
-        selectAllLink.addClickListener(new ClickListener() {
+        Button collapseAll = new Button("Collapse All");
+        collapseAll.addStyleName(ValoTheme.BUTTON_LINK);
+        collapseAll.addStyleName(ValoTheme.BUTTON_SMALL);
+        hlayout.addComponent(collapseAll);
+        collapseAll.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {
                 for (Object itemId : treeTable.getItemIds()) {
                     treeTable.setCollapsed(itemId, true);
@@ -260,32 +265,35 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             }
         });
 
-        Button selectNoneLink = new Button("Expand All");
-        selectNoneLink.addStyleName(ValoTheme.BUTTON_LINK);
-        selectNoneLink.addStyleName(ValoTheme.BUTTON_SMALL);
-        hlayout.addComponent(selectNoneLink);
-        selectNoneLink.addClickListener(new ClickListener() {
+        Button expandAll = new Button("Expand All");
+        expandAll.addStyleName(ValoTheme.BUTTON_LINK);
+        expandAll.addStyleName(ValoTheme.BUTTON_SMALL);
+        hlayout.addComponent(expandAll);
+        expandAll.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {
                 for (Object itemId : treeTable.getItemIds()) {
                     treeTable.setCollapsed(itemId, false);
                 }
             }
         });
-        
+
         addAll("", model.getModelEntities());
+
         setButtonsEnabled();
     }
-    
+
     protected void togglePk(ModelAttribute a) {
         a.setPk(!a.isPk());
         context.getConfigurationService().save(a);
     }
-    
+
     public void setButtonsEnabled() {
-        Set<Object> selected = getSelectedItems();
-        addAttributeButton.setEnabled(selected.size() > 0);
-        removeButton.setEnabled(selected.size() > 0);
-        editButton.setEnabled(selected.size() > 0);
+        if (!readOnly) {
+            Set<Object> selected = getSelectedItems();
+            addAttributeButton.setEnabled(selected.size() > 0);
+            removeButton.setEnabled(selected.size() > 0);
+            editButton.setEnabled(selected.size() > 0);
+        }
     }
 
     @Override
@@ -327,7 +335,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
     protected void addAll(String filter, Collection<ModelEntity> modelEntityList) {
         filter = filter != null ? filter.toLowerCase() : null;
-        ArrayList<ModelEntity> filteredModelEntityList = new ArrayList<ModelEntity>(); 
+        ArrayList<ModelEntity> filteredModelEntityList = new ArrayList<ModelEntity>();
         for (ModelEntity modelEntity : modelEntityList) {
             boolean add = UiUtils.filterMatches(filter, modelEntity.getName());
             if (!add) {
@@ -419,8 +427,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             Set<Object> selectedIds = getSelectedItems();
 
             for (Object itemId : selectedIds) {
-                Collection<Object> children = (Collection<Object>) treeTable
-                        .getContainerDataSource().getChildren(itemId);
+                Collection<Object> children = (Collection<Object>) treeTable.getContainerDataSource().getChildren(itemId);
                 if (children != null) {
                     itemIds.addAll(children);
                 }
@@ -491,8 +498,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         public void itemClick(ItemClickEvent event) {
             if (event.isDoubleClick()) {
                 editSelectedItem();
-            } else if (System.currentTimeMillis() - lastClick > 1000
-                    && getSelectedItems().size() > 0) {
+            } else if (System.currentTimeMillis() - lastClick > 1000 && getSelectedItems().size() > 0) {
                 treeTable.setValue(null);
             }
             lastClick = System.currentTimeMillis();

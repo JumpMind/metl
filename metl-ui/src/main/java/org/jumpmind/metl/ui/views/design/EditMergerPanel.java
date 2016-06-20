@@ -192,6 +192,7 @@ public class EditMergerPanel extends AbstractComponentEditPanel {
                 }
             }
         });
+        checkBox.setReadOnly(readOnly);
         return checkBox;
 
     }

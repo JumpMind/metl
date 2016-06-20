@@ -36,6 +36,7 @@ import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FolderName;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelName;
+import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
@@ -656,12 +657,13 @@ public class DesignNavigator extends VerticalLayout {
             tabs.addCloseableTab(flow.getId(), flow.getName(), Icons.FLOW, flowLayout);
         } else if (item instanceof ModelName) {
             ModelName model = (ModelName) item;
-            EditModelPanel editModel = new EditModelPanel(context, model.getId());
+            ProjectVersion projectVersion = findProjectVersion(model);
+            EditModelPanel editModel = new EditModelPanel(context, model.getId(), context.isReadOnly(projectVersion, Privilege.DESIGN));
             tabs.addCloseableTab(model.getId(), model.getName(), Icons.MODEL, editModel);
         } else if (item instanceof ResourceName) {
             ResourceName resource = (ResourceName) item;
             ProjectVersion projectVersion = findProjectVersion(resource);
-            PropertySheet sheet = new PropertySheet(context, tabs, projectVersion.isReadOnly());            
+            PropertySheet sheet = new PropertySheet(context, tabs, context.isReadOnly(projectVersion, Privilege.DESIGN));            
             sheet.setSource(context.getConfigurationService().findResource(resource.getId()));
             tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item),
                     sheet);
