@@ -27,6 +27,8 @@ public class ModelAttribute extends AbstractObject {
     String entityId;    
 
     String name;
+    
+    String description;
 
     DataType type;
 
@@ -89,6 +91,14 @@ public class ModelAttribute extends AbstractObject {
 	
 	public boolean isPk() {
         return pk;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }

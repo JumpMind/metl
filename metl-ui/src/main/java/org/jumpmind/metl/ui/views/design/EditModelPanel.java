@@ -158,6 +158,45 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         });
         treeTable.setColumnHeader("name", "Name");
 
+        treeTable.addGeneratedColumn("description", new ColumnGenerator() {
+            public Object generateCell(Table source, Object itemId, Object columnId) {
+                if (itemId instanceof ModelAttribute) {
+                    final ModelAttribute obj = (ModelAttribute) itemId;
+                    if (lastEditItemIds.contains(itemId) && !readOnly) {
+                        ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
+                            protected void save(String text) {
+                                obj.setDescription(text);
+                                EditModelPanel.this.context.getConfigurationService().save(obj);
+                            };
+                        };
+                        t.setWidth(100, Unit.PERCENTAGE);
+                        t.setValue(obj.getDescription());
+                        return t;
+                    } else {
+                        return UiUtils.getName(filterField.getValue(), obj.getDescription());
+                    }
+                }
+                if (itemId instanceof ModelEntity) {
+                    final ModelEntity obj = (ModelEntity) itemId;
+                    if (lastEditItemIds.contains(itemId) && !readOnly) {
+                        ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
+                            protected void save(String text) {
+                                obj.setDescription(text);
+                                EditModelPanel.this.context.getConfigurationService().save(obj);
+                            };
+                        };
+                        t.setWidth(100, Unit.PERCENTAGE);                        
+                        t.setValue(obj.getDescription());
+                        return t;
+                    } else {
+                        return UiUtils.getName(filterField.getValue(), obj.getDescription());
+                    }
+                }
+                else return null;
+            }
+        });
+        treeTable.setColumnHeader("description", "Description");
+        
         treeTable.addGeneratedColumn("type", new ColumnGenerator() {
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 if (itemId instanceof ModelAttribute) {

@@ -32,6 +32,8 @@ public class ModelEntity extends AbstractObject {
     String modelId;
 
     String name;
+    
+    String description;
 
     public ModelEntity() {
         modelAttributes = new ArrayList<ModelAttribute>();
@@ -84,6 +86,14 @@ public class ModelEntity extends AbstractObject {
         this.name = name;
     }
     
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public boolean hasOnlyPrimaryKeys() {
         boolean pksOnly = true;
         for (ModelAttribute modelAttribute : modelAttributes) {
