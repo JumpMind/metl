@@ -259,8 +259,8 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         stepTable.setColumnWidth("payloadReceived", 100);
         stepTable.setColumnWidth("payloadProduced", 100);
         stepTable.setColumnWidth("threadNumber", 100);
-        stepTable.setColumnWidth("startTime", 150);
-        stepTable.setColumnWidth("endTime", 150);
+        stepTable.setColumnWidth("startTime", 170);
+        stepTable.setColumnWidth("endTime", 170);
         stepTable.setColumnExpandRatio("handleDurationString", 1);
         stepTable.addValueChangeListener(event -> {
             @SuppressWarnings("unchecked")
