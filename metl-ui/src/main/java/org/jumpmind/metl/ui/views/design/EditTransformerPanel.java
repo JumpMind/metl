@@ -21,6 +21,7 @@
 package org.jumpmind.metl.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,8 +66,9 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
     BeanItemContainer<ComponentAttributeSetting> container = new BeanItemContainer<ComponentAttributeSetting>(
             ComponentAttributeSetting.class);
 
-    static final String SHOW_ALL = "Show All Entities";
-    static final String SHOW_POPULATED_ENTITIES = "Filter Populated Entites";
+    static final String SHOW_ALL = "Show All";
+    static final String SHOW_POPULATED_ENTITIES = "Show Entities with Transforms";
+    static final String SHOW_POPULATED_ATTRIBUTES = "Show Attributes with Transforms";
 
     protected void buildUI() {
         ButtonBar buttonBar = new ButtonBar();
@@ -75,16 +77,17 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         filterPopField = new ComboBox();
         filterPopField.addItem(SHOW_ALL);
         filterPopField.addItem(SHOW_POPULATED_ENTITIES);
+        filterPopField.addItem(SHOW_POPULATED_ATTRIBUTES);
         filterPopField.setNullSelectionAllowed(false);
         filterPopField.setImmediate(true);
+        filterPopField.setWidth(20, Unit.EM);
         filterPopField.setValue(SHOW_ALL);
         filterPopField.addValueChangeListener(new ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
-                updateTable(filterField.getValue(),
-                        filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES));
+                updateTable(filterField.getValue());
             }
         });
-        buttonBar.addRight(filterPopField);
+        buttonBar.addLeft(filterPopField);
 
         filterField = buttonBar.addFilter();
         filterField.addTextChangeListener(new TextChangeListener() {
@@ -92,8 +95,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             @Override
             public void textChange(TextChangeEvent event) {
                 filterField.setValue(event.getText());
-                updateTable(event.getText(),
-                        filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES));
+                updateTable(event.getText());
             }
         });
 
@@ -193,11 +195,14 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
             });
         }
 
-        updateTable(null, false);
+        updateTable(null);
 
     }
 
-    protected void updateTable(String filter, boolean filterPopulated) {
+    protected void updateTable(String filter) {
+        boolean showPopulatedEntities = filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES);
+        boolean showPopulatedAttributes = filterPopField.getValue().equals(SHOW_POPULATED_ATTRIBUTES);
+    
         if (componentAttributes != null) {
             Model model = component.getInputModel();
             Collection<String> entityNames = new ArrayList<>();
@@ -209,7 +214,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
 	            for (ComponentAttributeSetting componentAttribute : componentAttributes) {
 	                ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
 	                ModelEntity entity = model.getEntityById(attribute.getEntityId());
-	                if (componentAttribute.getValue() != null
+	                if (isNotBlank(componentAttribute.getValue())
 	                		&& !entityNames.contains(entity.getName())) {
 	                	entityNames.add(entity.getName());
 	                }
@@ -219,7 +224,9 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
 	                ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
 	                ModelEntity entity = model.getEntityById(attribute.getEntityId());
 	                
-	                boolean populated = !filterPopulated || entityNames.contains(entity.getName());
+	                boolean populated = (showPopulatedEntities && entityNames.contains(entity.getName())) ||
+	                (showPopulatedAttributes && isNotBlank(componentAttribute.getValue())) || 
+	                (!showPopulatedAttributes && !showPopulatedEntities); 
 	                if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)
 	                        || attribute.getName().toLowerCase().contains(filter)) {
 	                	if (populated) {
