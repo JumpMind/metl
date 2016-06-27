@@ -151,7 +151,7 @@ public class ExecutionApi {
                 List<ExecutionStep> steps = executionService.findExecutionSteps(execution.getId());
                 for (ExecutionStep executionStep : steps) {
                     if (executionStep.getExecutionStatus() == ExecutionStatus.ERROR) {
-                        List<ExecutionStepLog> logs = executionService.findExecutionStepLogs(executionStep.getId());
+                        List<ExecutionStepLog> logs = executionService.findExecutionStepLogsInError(executionStep.getId());
                         for (ExecutionStepLog executionStepLog : logs) {
                             if (executionStepLog.getLogLevel() == LogLevel.ERROR) {
                                 result.setMessage(executionStepLog.getLogText());

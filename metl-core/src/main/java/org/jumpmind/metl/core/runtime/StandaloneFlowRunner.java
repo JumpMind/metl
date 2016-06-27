@@ -141,12 +141,10 @@ public class StandaloneFlowRunner {
         StringBuilder message = new StringBuilder("The flow failed with a status of ").append(execution.getStatus()).append(".  ");
         for (ExecutionStep executionStep : steps) {
             if (executionStep.getExecutionStatus() == ExecutionStatus.ERROR) {
-                List<ExecutionStepLog> logs = executionService.findExecutionStepLogs(executionStep.getId());
+                List<ExecutionStepLog> logs = executionService.findExecutionStepLogsInError(executionStep.getId());
                 message.append("'").append(executionStep.getComponentName()).append("'").append(" failed.  ");
                 for (ExecutionStepLog executionStepLog : logs) {
-                    if (executionStepLog.getLogLevel() == LogLevel.ERROR) {
-                        message.append(executionStepLog.getLogText());
-                    }
+                    message.append(executionStepLog.getLogText());
                 }
             }
         }

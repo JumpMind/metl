@@ -26,6 +26,7 @@ public class UserSetting extends Setting {
     
     public static final String SETTING_CURRENT_PROJECT_ID_LIST = "current.project.ids";
     public static final String SETTING_SHOW_RUN_DIAGRAM = "show.run.diagram";
+    public static final String SETTING_MAX_LOG_MESSAGE_TO_SHOW = "max.log.messages.to.show";
 
     String userId;
     

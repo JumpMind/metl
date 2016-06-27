@@ -38,10 +38,12 @@ public interface IExecutionService {
     public Execution findExecution(String id);
 
     public List<ExecutionStep> findExecutionSteps(String executionId);
-
-    public List<ExecutionStepLog> findExecutionStepLogs(String executionStepId);
     
-    public List<ExecutionStepLog> findExecutionStepLogs(Set<String> executionStepIds);
+    public List<ExecutionStepLog> findExecutionStepLogsInError(String executionStepId);
+
+    public List<ExecutionStepLog> findExecutionStepLogs(String executionStepId, int limit);
+    
+    public List<ExecutionStepLog> findExecutionStepLogs(Set<String> executionStepIds, int limit);
     
     public void markAbandoned(String agentId);
     
