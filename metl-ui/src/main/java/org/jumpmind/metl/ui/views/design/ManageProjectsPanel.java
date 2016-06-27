@@ -20,13 +20,13 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -51,13 +51,18 @@ import com.vaadin.data.sort.SortOrder;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.converter.StringToBooleanConverter;
 import com.vaadin.data.util.filter.SimpleStringFilter;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.HeaderCell;
 import com.vaadin.ui.Grid.HeaderRow;
 import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
@@ -70,20 +75,18 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
     private static final long serialVersionUID = 1L;
 
     final Logger log = LoggerFactory.getLogger(getClass());
+    
+    final static float ROW_EM = 2.4f;
 
     ApplicationContext context;
 
     DesignNavigator projectNavigator;
 
-    Grid grid;
+    Grid projectGrid;
 
-    BeanItemContainer<ProjectVersionItem> gridContainer;
-
-    Button openProjectButton;
+    BeanItemContainer<Project> gridContainer;
 
     Button newProjectButton;
-
-    Button newVersionButton;
 
     Button editButton;
 
@@ -99,71 +102,46 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        openProjectButton = buttonBar.addButton("Open Project", Icons.PROJECT);
-        openProjectButton.addClickListener(event -> open());
-
         newProjectButton = buttonBar.addButton("New Project", Icons.PROJECT);
         newProjectButton.addClickListener(event -> newProject());
 
-        newVersionButton = buttonBar.addButton("New Version", Icons.VERSION);
-        newVersionButton.addClickListener(event -> newVersion());
-        newVersionButton.setEnabled(false);
-        newVersionButton.setDescription("Not yet supported");
+        editButton = buttonBar.addButton("Edit Project", FontAwesome.EDIT);
+        editButton.addClickListener(event -> edit(projectGrid));
 
-        editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
-        editButton.addClickListener(event -> edit());
-
-        removeButton = buttonBar.addButton("Remove", Icons.DELETE);
+        removeButton = buttonBar.addButton("Remove Project", Icons.DELETE);
         removeButton.addClickListener(event -> removeProject());
 
-        gridContainer = new BeanItemContainer<>(ProjectVersionItem.class);
-        grid = new Grid();
-        grid.setSizeFull();
-        grid.setEditorEnabled(true);
-        grid.setSelectionMode(SelectionMode.MULTI);
+        gridContainer = new BeanItemContainer<>(Project.class);
+        projectGrid = new Grid();
+        projectGrid.setSizeFull();
+        projectGrid.setEditorEnabled(true);
+        projectGrid.setSelectionMode(SelectionMode.MULTI);
 
-        grid.addColumn("name", String.class).setHeaderCaption("Name").setExpandRatio(2);
-        grid.addColumn("description", String.class).setHeaderCaption("Description").setExpandRatio(1);
-        grid.addColumn("version", String.class).setHeaderCaption("Version").setMaximumWidth(200);
-        grid.addColumn("readOnly", Boolean.class).setHeaderCaption("Read Only").setMaximumWidth(100).setRenderer(new HtmlRenderer(), new StringToBooleanConverter() {
-            private static final long serialVersionUID = 1L;
-
-            protected String getTrueString() {
-                return FontAwesome.CHECK.getHtml(); 
-            };
-            
-            protected String getFalseString() {
-                return "";
-            };
-        });
-        grid.addColumn("createTime", Date.class).setHeaderCaption("Create Time").setWidth(185).setMaximumWidth(200)
+        projectGrid.addColumn("name", String.class).setHeaderCaption("Name").setExpandRatio(2);
+        projectGrid.addColumn("description", String.class).setHeaderCaption("Description").setExpandRatio(1);
+        projectGrid.addColumn("createTime", Date.class).setHeaderCaption("Create Time").setWidth(185).setMaximumWidth(200)
                 .setRenderer(new DateRenderer(UiConstants.DATETIME_FORMAT)).setEditable(false);
 
-        grid.setContainerDataSource(gridContainer);
-        grid.setEditorFieldFactory(new FieldFactory());
-        grid.addSortListener(event -> {
+        projectGrid.setContainerDataSource(gridContainer);
+        projectGrid.setEditorFieldFactory(new FieldFactory());
+        projectGrid.addSortListener(event -> {
             lastSortOrder = event.getSortOrder();
         });
-        grid.addSelectionListener(event -> setButtonsEnabled());
-        grid.addItemClickListener(event -> {
-            if (!event.isDoubleClick()) {
-                if (!event.isShiftKey()) {
-                    Collection<Object> all = grid.getSelectedRows();
-                    for (Object selected : all) {
-                        if (!selected.equals(event.getItemId())) {
-                            grid.deselect(selected);
-                        }
-                    }
-                }
-                if (grid.getSelectedRows().contains(event.getItemId())) {
-                    grid.deselect(event.getItemId());
-                } else {
-                    grid.select(event.getItemId());
-                }
+        projectGrid.addSelectionListener(event -> setButtonsEnabled());
+        projectGrid.addItemClickListener(new GridClickListener(projectGrid));
+        projectGrid.addSelectionListener((event) -> {
+            Set<Object> removed = event.getRemoved();
+            for (Object remove : removed) {
+                projectGrid.setDetailsVisible(remove, false);
             }
+            Set<Object> selected = event.getSelected();
+            for (Object select : selected) {
+                projectGrid.setDetailsVisible(select, true);
+            }
+
         });
 
-        grid.getEditorFieldGroup().addCommitHandler(new FieldGroup.CommitHandler() {
+        projectGrid.getEditorFieldGroup().addCommitHandler(new FieldGroup.CommitHandler() {
 
             private static final long serialVersionUID = 1L;
 
@@ -173,22 +151,14 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
             @Override
             public void postCommit(CommitEvent commitEvent) throws CommitException {
-                ProjectVersionItem item = (ProjectVersionItem) grid.getEditedItemId();
+                Project item = (Project) projectGrid.getEditedItemId();
                 IConfigurationService configurationService = context.getConfigurationService();
-                configurationService.save(item.version);
-                configurationService.save(item.project);
-                @SuppressWarnings("unchecked")
-                Collection<ProjectVersionItem> items = (Collection<ProjectVersionItem>)grid.getContainerDataSource().getItemIds();
-                for (ProjectVersionItem projectVersion : items) {
-                    if (item.project.equals(projectVersion.project)) {
-                        projectVersion.project = item.project;
-                    }
-                }
-                grid.markAsDirty();
+                configurationService.save(item);
+                projectGrid.markAsDirty();
             }
         });
 
-        HeaderRow filteringHeader = grid.appendHeaderRow();
+        HeaderRow filteringHeader = projectGrid.appendHeaderRow();
         HeaderCell logTextFilterCell = filteringHeader.getCell("name");
         TextField filterField = new TextField();
         filterField.setInputPrompt("Filter");
@@ -203,44 +173,135 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         });
         logTextFilterCell.setComponent(filterField);
 
-        addComponent(grid);
-        setExpandRatio(grid, 1);
+        projectGrid.setDetailsGenerator((rowReference) -> buildVersionGrid((Project) rowReference.getItemId()));
+
+        addComponent(projectGrid);
+        setExpandRatio(projectGrid, 1);
 
         setButtonsEnabled();
 
     }
 
+    protected Component buildVersionGrid(Project project) {
+        context.getConfigurationService().refresh(project);
+        List<ProjectVersion> versions = project.getProjectVersions();
+        BeanItemContainer<ProjectVersion> versionGridContainer = new BeanItemContainer<>(ProjectVersion.class);
+        Grid versionGrid = new Grid();
+
+        VerticalLayout layout = new VerticalLayout();
+        layout.setWidth(100, Unit.PERCENTAGE);
+        layout.setMargin(true);
+        layout.setSpacing(true);
+        HorizontalLayout buttons = new HorizontalLayout();
+        buttons.setSpacing(true);
+        Button openButton = new Button("Open", (event) -> {
+            Collection<Object> selected = versionGrid.getSelectedRows();
+            for (Object object : selected) {
+                projectNavigator.addProjectVersion(((ProjectVersion) object));
+            }
+        });
+        buttons.addComponent(openButton);        
+        Button newButton = new Button("New Version", (event) -> newVersion(versionGrid));
+        buttons.addComponent(newButton);
+        Button editButton  = new Button("Edit Version", (event) -> edit(versionGrid));
+        buttons.addComponent(editButton);
+        Button removeButton = new Button("Remove Version", (event) -> removeVersion(versionGrid));
+        buttons.addComponent(removeButton);
+        
+        openButton.setEnabled(false);
+        newButton.setEnabled(false);
+        removeButton.setEnabled(false);
+        editButton.setEnabled(false);
+        
+        layout.addComponent(buttons);
+
+        versionGrid.setWidth(100, Unit.PERCENTAGE);
+        versionGrid.setHeight(3+(versions.size()*ROW_EM), Unit.EM);
+        versionGrid.setEditorEnabled(true);
+        versionGrid.setSelectionMode(SelectionMode.MULTI);
+
+        versionGrid.addColumn("versionLabel", String.class).setHeaderCaption("Version").setExpandRatio(2);
+        versionGrid.addColumn("description", String.class).setHeaderCaption("Description").setExpandRatio(1);
+        versionGrid.addColumn("readOnly", Boolean.class).setHeaderCaption("Read Only").setMaximumWidth(100).setRenderer(new HtmlRenderer(),
+                new StringToBooleanConverter() {
+                    private static final long serialVersionUID = 1L;
+
+                    protected String getTrueString() {
+                        return FontAwesome.CHECK.getHtml();
+                    };
+
+                    protected String getFalseString() {
+                        return "";
+                    };
+                });
+        versionGrid.addColumn("createTime", Date.class).setHeaderCaption("Create Time").setWidth(185).setMaximumWidth(200)
+                .setRenderer(new DateRenderer(UiConstants.DATETIME_FORMAT)).setEditable(false);
+
+        versionGrid.setContainerDataSource(versionGridContainer);
+        versionGrid.setEditorFieldFactory(new FieldFactory());
+
+        versionGrid.getEditorFieldGroup().addCommitHandler(new FieldGroup.CommitHandler() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void preCommit(CommitEvent commitEvent) throws CommitException {
+            }
+
+            @Override
+            public void postCommit(CommitEvent commitEvent) throws CommitException {
+                ProjectVersion item = (ProjectVersion) versionGrid.getEditedItemId();
+                IConfigurationService configurationService = context.getConfigurationService();
+                configurationService.save(item);
+                projectGrid.markAsDirty();
+            }
+        });
+
+        versionGrid.addSelectionListener((event) -> { 
+            int numberSelected = versionGrid.getSelectedRows().size();
+            boolean currentlyEditing = projectGrid.getEditedItemId() != null;
+            boolean selected = numberSelected > 0 && !currentlyEditing;     
+            openButton.setEnabled(selected);
+            newButton.setEnabled(selected);
+            removeButton.setEnabled(selected);
+            editButton.setEnabled(selected);
+        });
+        versionGrid.addItemClickListener(new GridClickListener(versionGrid));
+        layout.addComponent(versionGrid);
+        layout.setExpandRatio(versionGrid, 1);
+        layout.addComponent(new Label(" "));
+        versionGridContainer.addAll(versions);
+        versionGrid.sort("versionLabel", SortDirection.DESCENDING);
+
+        return layout;
+    }
+
     protected void sort() {
         if (lastSortOrder == null) {
             lastSortOrder = new ArrayList<>();
-            lastSortOrder.add(new SortOrder("version", SortDirection.DESCENDING));
             lastSortOrder.add(new SortOrder("name", SortDirection.ASCENDING));
         }
-        grid.setSortOrder(lastSortOrder);
+        projectGrid.setSortOrder(lastSortOrder);
     }
 
     protected void deselectAll() {
-        Collection<Object> all = grid.getSelectedRows();
+        Collection<Object> all = projectGrid.getSelectedRows();
         for (Object selected : all) {
-            grid.deselect(selected);
+            projectGrid.deselect(selected);
         }
     }
 
     protected void setButtonsEnabled() {
-        int numberSelected = grid.getSelectionModel().getSelectedRows().size();
+        int numberSelected = projectGrid.getSelectionModel().getSelectedRows().size();
         boolean selected = numberSelected > 0;
         removeButton.setEnabled(selected);
-        openProjectButton.setEnabled(selected);
         editButton.setEnabled(selected);
-        newVersionButton.setEnabled(numberSelected == 1);
 
-        boolean currentlyEditing = grid.getEditedItemId() != null;
+        boolean currentlyEditing = projectGrid.getEditedItemId() != null;
         if (currentlyEditing) {
             removeButton.setEnabled(false);
-            openProjectButton.setEnabled(false);
             editButton.setEnabled(false);
             newProjectButton.setEnabled(false);
-            newVersionButton.setEnabled(false);
         }
     }
 
@@ -258,29 +319,19 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
     public void deselected() {
     }
 
-    protected void open() {
-        Collection<Object> selected = grid.getSelectedRows();
-        for (Object object : selected) {
-            projectNavigator.addProjectVersion(((ProjectVersionItem) object).version);
-        }
-    }
-
     protected void refresh() {
-        Collection<Object> selected = grid.getSelectedRows();
+        Collection<Object> selected = projectGrid.getSelectedRows();
         gridContainer.removeAllItems();
         IConfigurationService configurationService = context.getConfigurationService();
 
         List<Project> projects = configurationService.findProjects();
         for (Project project : projects) {
-            List<ProjectVersion> versions = project.getProjectVersions();
-            for (ProjectVersion version : versions) {
-                grid.getContainerDataSource().addItem(new ProjectVersionItem(project, version));
-            }
+            projectGrid.getContainerDataSource().addItem(project);
         }
 
         for (Object s : selected) {
-            if (grid.getContainerDataSource().containsId(s)) {
-                grid.select(s);
+            if (projectGrid.getContainerDataSource().containsId(s)) {
+                projectGrid.select(s);
             }
         }
 
@@ -290,24 +341,25 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     }
 
-    protected void edit() {
+    protected void edit(Grid grid) {
         Collection<Object> selected = grid.getSelectedRows();
         if (selected.size() > 0) {
             grid.editItem(selected.iterator().next());
         }
     }
 
-    protected void newVersion() {
+    protected void newVersion(Grid grid) {
         Collection<Object> selected = grid.getSelectedRows();
         if (selected.size() == 1) {
             IConfigurationService configurationService = context.getConfigurationService();
-            ProjectVersionItem item = (ProjectVersionItem) selected.iterator().next();
-            PromptDialog.prompt("New Version", String.format("Copying version '%s' of '%s'.  What do you want to name new version?",
-                    item.version.getVersionLabel(), item.project.getName()), (newVersionLabel) -> {
+            ProjectVersion originalVersion = (ProjectVersion) selected.iterator().next();
+            PromptDialog.prompt("New Version", String.format("Copying version '%s' of '%s'. What do you want to name new version?",
+                    originalVersion.getVersionLabel(), originalVersion.getProject().getName()), (newVersionLabel) -> {
                         if (StringUtils.isNotBlank(newVersionLabel)) {
-                            ProjectVersion newVersion = configurationService.saveNewVersion(newVersionLabel, item.version);
+                            ProjectVersion newVersion = configurationService.saveNewVersion(newVersionLabel, originalVersion);
                             Indexed indexed = grid.getContainerDataSource();
-                            indexed.addItemAfter(item, new ProjectVersionItem(item.project, newVersion));
+                            indexed.addItemAfter(originalVersion, newVersion);
+                            grid.setHeight(grid.getHeight()+ROW_EM, Unit.EM);
                             return true;
                         } else {
                             NotifyDialog.show("Please specify a version number", "Please specify a version number", null,
@@ -316,6 +368,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
                         }
                     });
         }
+
     }
 
     protected void newProject() {
@@ -329,19 +382,40 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         IConfigurationService configurationService = context.getConfigurationService();
         configurationService.save(project);
         configurationService.save(version);
-        ProjectVersionItem item = new ProjectVersionItem(project, version);
-        grid.getContainerDataSource().addItem(item);
-        grid.select(item);
+        projectGrid.getContainerDataSource().addItem(project);
+        projectGrid.select(project);
+        projectGrid.editItem(project);
+    }
+
+    protected void removeVersion(Grid grid) {
+        ConfirmDialog.show("Delete Version(s)?", "Are you sure you want to delete the selected version(s)?", () -> {
+            Collection<Object> selected = grid.getSelectedRows();
+            for (Object object : selected) {
+                ProjectVersion item = (ProjectVersion) object;
+                grid.getContainerDataSource().removeItem(item);
+                item.setDeleted(true);
+                context.getConfigurationService().save(item);
+            }
+            grid.setHeight(grid.getHeight()-(ROW_EM*selected.size()), Unit.EM);
+            sort();
+            setButtonsEnabled();
+            return true;
+        });
     }
 
     protected void removeProject() {
         ConfirmDialog.show("Delete Project(s)?", "Are you sure you want to delete the selected project(s)?", () -> {
-            Collection<Object> selected = grid.getSelectedRows();
+            Collection<Object> selected = projectGrid.getSelectedRows();
             for (Object object : selected) {
-                ProjectVersionItem item = (ProjectVersionItem) object;
-                grid.getContainerDataSource().removeItem(item);
-                item.version.setDeleted(true);
-                context.getConfigurationService().save(item.version);
+                Project item = (Project) object;
+                projectGrid.getContainerDataSource().removeItem(item);
+                item.setDeleted(true);
+                List<ProjectVersion> versions = item.getProjectVersions();
+                for (ProjectVersion version : versions) {
+                    version.setDeleted(true);
+                    context.getConfigurationService().save(version);
+                }
+                context.getConfigurationService().save(item);
             }
             sort();
             setButtonsEnabled();
@@ -349,72 +423,32 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         });
     }
 
-    public static class ProjectVersionItem implements Serializable {
-
+    class GridClickListener implements ItemClickListener {
         private static final long serialVersionUID = 1L;
+        Grid grid;
 
-        Project project;
-
-        ProjectVersion version;
-
-        public ProjectVersionItem() {
-        }
-
-        public ProjectVersionItem(Project project, ProjectVersion version) {
-            this.project = project;
-            this.version = version;
-        }
-
-        public String getName() {
-            return project.getName();
-        }
-
-        public void setName(String projectName) {
-            this.project.setName(projectName);
-        }
-
-        public String getVersion() {
-            return version.getVersionLabel();
-        }
-
-        public void setVersion(String version) {
-            this.version.setVersionLabel(version);
-        }
-
-        public String getDescription() {
-            return this.version.getDescription();
-        }
-
-        public void setDescription(String description) {
-            this.version.setDescription(description);
-        }
-
-        public Date getCreateTime() {
-            return this.version.getCreateTime();
-        }
-        
-        public boolean isReadOnly() {
-            return this.version.isReadOnly();
-        }
-        
-        public void setReadOnly(boolean readOnly) {
-            this.version.setReadOnly(readOnly);
+        public GridClickListener(Grid grid) {
+            this.grid = grid;
         }
 
         @Override
-        public int hashCode() {
-            return version.getId().hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof ProjectVersionItem) {
-                return ((ProjectVersionItem) obj).version.getId().equals(version.getId());
-            } else {
-                return false;
+        public void itemClick(ItemClickEvent event) {
+            if (!event.isDoubleClick()) {
+                if (!event.isShiftKey()) {
+                    Collection<Object> all = grid.getSelectedRows();
+                    for (Object selected : all) {
+                        if (!selected.equals(event.getItemId())) {
+                            grid.deselect(selected);
+                        }
+                    }
+                }
+                if (grid.getSelectedRows().contains(event.getItemId())) {
+                    grid.deselect(event.getItemId());
+                } else {
+                    grid.select(event.getItemId());
+                }
             }
         }
-
     }
 
 }

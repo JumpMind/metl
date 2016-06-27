@@ -128,6 +128,8 @@ public interface IConfigurationService {
     public AgentResource findAgentResource(String agentId, String resourceId);
     
     public void deleteFlow(Flow flow);
+    
+    public void refresh(Project project);
 
     public void refresh(Flow flow);
     

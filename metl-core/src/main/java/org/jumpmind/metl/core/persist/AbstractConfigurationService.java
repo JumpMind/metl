@@ -250,6 +250,20 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         }
         return projectVersion;
     }
+    
+    @Override
+    public void refresh(Project project) {
+        persistenceManager.refresh(project, null, null, tableName(Component.class));
+        Map<String,Object> params = new HashMap<>();
+        params.put("deleted", 0);
+        params.put("projectId", project.getId());
+        List<ProjectVersion> versions = persistenceManager.find(ProjectVersion.class, params, null, null,
+                tableName(ProjectVersion.class));
+        project.setProjectVersions(versions);    
+        for (ProjectVersion projectVersion : versions) {
+            projectVersion.setProject(project);
+        }
+    }
 
     @Override
     public List<Project> findProjects() {
@@ -1203,7 +1217,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
                 newAttribute.setEntityId(newModelEntity.getId());
                 newModelEntity.addModelAttribute(newAttribute);
             }
-            newModel.getModelEntities().add(originalModelEntity);
+            newModel.getModelEntities().add(newModelEntity);
         }
 
         for (ModelEntity modelEntity : newModel.getModelEntities()) {

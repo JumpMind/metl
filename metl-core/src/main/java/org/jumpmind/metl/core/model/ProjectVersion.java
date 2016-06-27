@@ -30,9 +30,7 @@ public class ProjectVersion extends AbstractObject {
 
     String origVersionId;
     
-    String versionLabel;
-    
-    boolean workingVersion;
+    String versionLabel;   
 
     boolean readOnly;
 
@@ -126,11 +124,4 @@ public class ProjectVersion extends AbstractObject {
         return description;
     }
     
-    public void setWorkingVersion(boolean workingVersion) {
-        this.workingVersion = workingVersion;
-    }
-    
-    public boolean isWorkingVersion() {
-        return workingVersion;
-    }
 }
