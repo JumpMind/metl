@@ -294,11 +294,11 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         boolean showDiagram = context.getUser().getBoolean(UserSetting.SETTING_SHOW_RUN_DIAGRAM, true);
         if (showDiagram) {
             showDiagram();
+            redrawFlow();
         } else {
             showDetails();
         }
 
-        redrawFlow();
         context.getBackgroundRefresherService().register(this);
     }
 
@@ -535,10 +535,9 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
             }
             endLabel.setValue(formatDate(data.execution.getEndTime()));
 
-            // TODO: Be smarter about when we redraw the flow.
-            // If we are looking at details, don't waste time updating the flow
-            // view.
-            redrawFlow();
+            if (showDetails.isVisible()) {
+                redrawFlow();
+            }
 
             @SuppressWarnings("unchecked")
             Set<String> selected = (Set<String>) stepTable.getValue();
