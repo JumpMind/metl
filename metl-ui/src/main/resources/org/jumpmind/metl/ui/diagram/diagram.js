@@ -175,6 +175,7 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
             
             self.addEndpoints(node, nodeDiv);
         }
+        selectAssociatedNodeLinks();
         
         for (j = 0; j < nodeList.length; j++) {
             for (i = 0; i < nodeList[j].targetNodeIds.length; i++) {
@@ -306,16 +307,9 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
     }
     
     function node_Click(event) {
+    	// Node click event logic is handled in node_mouseDown()
+    	// Prevent diagram click event from running
     	event.stopPropagation();
-        if(!ctrlPress
-        		&& (diagramStart.x === event.pageX && diagramStart.y === event.pageY)) {
-            instance.clearDragSelection();
-            instance.addToDragSelection(this.parentNode);
-            $(".diagram-node").removeClass("selected");
-            unselectAllLinks();
-            $(this).addClass("selected");
-            sendSelected();
-        }
     }
     
     function sendSelected() {
@@ -338,9 +332,28 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
     		instance.addToDragSelection(this.parentNode);
     		$(this).addClass("selected");
     		sendSelected();
+    		selectAssociatedNodeLinks();
     	}
     	diagramStart.x = event.pageX;
     	diagramStart.y = event.pageY;
+    }
+    
+    function selectAssociatedNodeLinks() {
+    	$( ".diagram-node.selected" ).each(function() {
+    		for (i = 0; i < state.nodes.length; i++) {
+				for (j = 0; j < state.nodes[i].targetNodeIds.length; j++) {
+					if (state.nodes[i].id == this.id
+							|| state.nodes[i].targetNodeIds[j] == this.id) {
+						connection = instance.connect({
+		                    uuids : [ "source-" + state.nodes[i].id, "target-" + state.nodes[i].targetNodeIds[j] ],
+		                    editable : true,
+		                    fireEvent : false
+		                });
+		                connection.toggleType("selected");
+	    			}
+				}
+    		}
+    	});
     }
 
     function diagramContainer_MouseDown(event) {
@@ -382,8 +395,10 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
     
     function diagramContainer_FindSelectedItem() {
         if($("#rubberband").is(":visible") !== true) { return; }
-        
+
         $(".diagram-node").removeClass("selected");
+        instance.clearDragSelection();
+        unselectAllLinks();
         var rubberbandOffset = getTopLeftOffset($("#rubberband")); 
 
         $(".diagram-node").each(function() {
@@ -394,6 +409,7 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
                 itemOffset.bottom < rubberbandOffset.bottom) 
             {
                 $(this).addClass("selected");
+                selectAssociatedNodeLinks();
                 instance.addToDragSelection(this.parentNode);
             }
         });
