@@ -68,11 +68,14 @@ public class FilePoller extends AbstractComponentRuntime {
     public final static String SETTING_MAX_FILES_TO_POLL = "max.files.to.poll";
     
     public final static String SETTING_MIN_FILES_TO_POLL = "min.files.to.poll";
-    
+
     public final static String SORT_NAME = "Name";
+    
     public final static String SORT_MODIFIED = "Last Modified";
 
     public final static String SETTING_FILE_SORT_ORDER = "file.sort.order";
+    
+    public final static String SETTING_FILE_SORT_DESCENDING = "file.sort.descending";
 
     @SettingDefinition(order = 70, type = Type.TEXT, label = "Relative Trigger File Path")
     public final static String SETTING_TRIGGER_FILE_PATH = "trigger.file.path";
@@ -102,6 +105,8 @@ public class FilePoller extends AbstractComponentRuntime {
     String archiveOnErrorPath;
     
     String fileSortOption = SORT_MODIFIED;
+    
+    boolean fileSortDescending = false;
     
     int filesPerMessage = 1000;
 
@@ -133,6 +138,7 @@ public class FilePoller extends AbstractComponentRuntime {
         maxFilesToPoll = properties.getInt(SETTING_MAX_FILES_TO_POLL);
         minFilesToPoll = properties.getInt(SETTING_MIN_FILES_TO_POLL);
         fileSortOption = properties.get(SETTING_FILE_SORT_ORDER, fileSortOption);
+        fileSortDescending = properties.is(SETTING_FILE_SORT_DESCENDING, fileSortDescending);
         runWhen = properties.get(RUN_WHEN, PER_UNIT_OF_WORK);        
         getFilePatternFromMessage = properties.is(SETTING_GET_FILE_PATTERN_FROM_MESSAGE);
         
@@ -267,7 +273,7 @@ public class FilePoller extends AbstractComponentRuntime {
                     filesToSend.add(matches.get(i));
                 }
 
-                Collections.sort(filesSent, (o1, o2) -> {
+                Collections.sort(filesToSend, (o1, o2) -> {
                     int cmpr = 0;
                     if (SORT_NAME.equals(fileSortOption)) {
                         cmpr = new String(o1.getRelativePath())
@@ -278,7 +284,10 @@ public class FilePoller extends AbstractComponentRuntime {
                     }
                     return cmpr;
                 });
-
+                if (fileSortDescending) {
+                    Collections.reverse(filesToSend);
+                }
+ 
                 ArrayList<String> filePaths = new ArrayList<>();
                 for (FileInfo file : filesToSend) {
                     log(LogLevel.INFO, "File polled: " + file.getRelativePath());

@@ -276,7 +276,7 @@
       <setting id='run.when'
                required='false'
                type='choice'>
-        <name>Run When</name>
+        <name>Run Whennn</name>
         <defaultValue>PER UNIT OF WORK</defaultValue>
         <choices>
           <choice>PER UNIT OF WORK</choice>
@@ -309,6 +309,12 @@
           <choice>Last Modified</choice>
           <choice>Name</choice>
         </choices>
+      </setting>
+      <setting id='file.sort.descending'
+               required='false'
+               type='boolean'>
+        <name>Sort Descending</name>
+        <defaultValue>false</defaultValue>
       </setting>
       <setting id='rows.per.message'
                required='false'
