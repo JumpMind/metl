@@ -282,11 +282,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
     private void importProjectConfiguration(ImportConfigData importData,
             ISqlTransaction transaction) {
 
-        String projectVersionId = (String) importData.getResourceData().get(1).getTableData().get(0)
+        String projectVersionId = (String) importData.getProjectData().get(1).getTableData().get(0)
                 .get("ID");
         List<TableData> existingProjectData = new ArrayList<TableData>();
         initConfigData(existingProjectData, PROJECT_SQL);
-        for (LinkedCaseInsensitiveMap<Object> row : importData.getResourceData().get(0)
+        for (LinkedCaseInsensitiveMap<Object> row : importData.getProjectData().get(0)
                 .getTableData()) {
             addConfigData(existingProjectData, PROJECT_SQL, projectVersionId,
                     (String) row.get(PROJECT_SQL[0][2]));
