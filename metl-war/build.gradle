@@ -1,0 +1,58 @@
+apply from: '../metl-assemble/common.gradle'
+
+apply plugin: 'fi.jasoft.plugin.vaadin'
+
+configurations {
+    executableWar
+}
+
+eclipse {
+    wtp {
+        component {
+            sourceDirs += file('src/test/resources')
+        }
+    }
+}
+
+war {
+    archiveName="metl.war"
+    jar.enabled = true
+    from {
+        configurations.executableWar.collect {
+            it.isDirectory() ? it : project.zipTree(it)
+        }
+    }    
+    manifest { attributes 'Main-Class': 'org.jumpmind.metl.Metl' }
+}
+
+// Don't compress javascript
+// vaadin.gwt.style = "PRETTY"
+vaadin.version = vaadinVersion
+vaadin.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
+vaadin.manageWidgetset = false
+vaadin.manageDependencies = false
+vaadin.push = true
+
+dependencies {
+    compile project(":metl-ui")
+    provided ("com.vaadin:vaadin-client-compiler:$vaadinVersion")  {
+       exclude group:'org.eclipse.jetty'
+    }    
+    executableWar project(":metl-server")    
+}
+
+task copyJavaDocsToWebapp(type: Copy) {    
+    dependsOn javadoc    
+    destinationDir = file("src/main/webapp/doc")
+    into('javadoc') {
+        from ("../metl-core/build/docs/javadoc") { include "**/*" }
+        from ("../metl-ui/build/docs/javadoc") { include "**/*" }
+    }    
+}
+
+develop.dependsOn vaadinCompileWidgetset
+//develop.dependsOn generateDocs
+//develop.dependsOn copyJavaDocsToWebapp
+//assemble.dependsOn generateDocs
+//assemble.dependsOn copyJavaDocsToWebapp
+assemble.dependsOn(jar)

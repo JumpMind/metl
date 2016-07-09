@@ -1,48 +1,5 @@
 apply from: '../metl-assemble/common.gradle'
 
-apply plugin: 'fi.jasoft.plugin.vaadin'
-
-configurations {
-    executableWar
-}
-
-eclipse {
-    wtp {
-        component {
-            sourceDirs += file('src/test/resources')
-        }
-    }
-}
-
-war {
-    archiveName="metl.war"
-    jar.enabled = true
-    from {
-        configurations.executableWar.collect {
-            it.isDirectory() ? it : project.zipTree(it)
-        }
-    }    
-    manifest { attributes 'Main-Class': 'org.jumpmind.metl.Metl' }
-}
-
-if (new Boolean(publishJar)) {
-    configurations.archives.with {    
-        artifacts.remove artifacts.find { it.archiveTask.is war }
-    }
-    
-    artifacts {
-        archives jar
-    }
-}
-
-// Don't compress javascript
-// vaadin.gwt.style = "PRETTY"
-vaadin.version = vaadinVersion
-vaadin.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
-vaadin.manageWidgetset = false
-vaadin.manageDependencies = false
-vaadin.push = true
-
 dependencies {
     compile project(":metl-core")
     compile (group:"org.jumpmind.vaadin", name:"sqlexplorer-vaadin", version:"1.2.109", changing:true) {
@@ -56,34 +13,14 @@ dependencies {
     compile "io.springfox:springfox-swagger-ui:$springfoxSwaggerVersion"
     compile ("org.reficio:soap-builder:$reficioSoapVersion") {
        exclude group:'com.googlecode.guava-osgi'
-    }
+    }    
     compile "jlibs:jlibs-xml:1.0"
     compile "com.vaadin:vaadin-server:$vaadinVersion"    
     compile "com.vaadin:vaadin-push:$vaadinVersion"    
     compile "com.vaadin:vaadin-themes:$vaadinVersion"    
-    provided ("com.vaadin:vaadin-client-compiler:$vaadinVersion")  {
-       exclude group:'org.eclipse.jetty'
-    }
-
     compile "javax.servlet:javax.servlet-api:$servletVersion"
     compile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
     provided "javax.servlet.jsp:jsp-api:$jspVersion"
     provided "javax.websocket:javax.websocket-api:$webSocketVersion"        
     
-    executableWar project(":metl-server")    
 }
-
-task copyJavaDocsToWebapp(type: Copy) {    
-    dependsOn javadoc    
-    destinationDir = file("src/main/webapp/doc")
-    into('javadoc') {
-        from ("../metl-core/build/docs/javadoc") { include "**/*" }
-    }    
-}
-
-develop.dependsOn vaadinCompileWidgetset
-//develop.dependsOn generateDocs
-develop.dependsOn copyJavaDocsToWebapp
-//assemble.dependsOn generateDocs
-assemble.dependsOn copyJavaDocsToWebapp
-assemble.dependsOn(jar)

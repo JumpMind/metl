@@ -53,8 +53,8 @@ public class Develop {
         webapp.setParentLoaderPriority(true);
         webapp.setConfigurationDiscovered(true);
         webapp.setContextPath("/metl");
-        webapp.setWar("../metl-ui/src/main/webapp");
-        webapp.setResourceBase("../metl-ui/src/main/webapp");
+        webapp.setWar("../metl-war/src/main/webapp");
+        webapp.setResourceBase("../metl-war/src/main/webapp");
 
         ConcurrentHashMap<String, ConcurrentHashSet<String>> map = new ClassInheritanceMap();
         ConcurrentHashSet<String> set = new ConcurrentHashSet<>();
