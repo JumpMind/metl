@@ -1,0 +1,5 @@
+apply from: '../metl-assemble/common.gradle'
+
+dependencies {
+    provided project(':metl-ui')    
+}

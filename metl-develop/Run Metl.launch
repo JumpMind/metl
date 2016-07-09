@@ -2,7 +2,7 @@
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <stringAttribute key="bad_container_name" value="/metl-ui/src/shortcuts"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/metl-ui/src/test/java/org/jumpmind/metl/Develop.java"/>
+<listEntry value="/metl-develop/src/test/java/org/jumpmind/metl/Develop.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
@@ -13,6 +13,6 @@
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.jumpmind.metl.Develop"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="metl-ui"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="metl-develop"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dorg.jumpmind.metl.ui.init.config.dir=~/.metl -Xmx1024m"/>
 </launchConfiguration>

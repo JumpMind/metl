@@ -34,8 +34,6 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import sun.net.www.protocol.file.FileURLConnection;
-
 abstract public class AbstractFactory<T> {
 
     @SuppressWarnings("unchecked")
@@ -118,7 +116,7 @@ abstract public class AbstractFactory<T> {
 
                     if (connection instanceof JarURLConnection) {
                         checkJarFile((JarURLConnection) connection, pckgname, classes);
-                    } else if (connection instanceof FileURLConnection) {
+                    } else {
                         try {
                             checkDirectory(new File(URLDecoder.decode(url.getPath(), "UTF-8")),
                                     pckgname, classes);
@@ -128,9 +126,7 @@ abstract public class AbstractFactory<T> {
                                             + " does not appear to be a valid package (Unsupported encoding)",
                                     ex);
                         }
-                    } else
-                        throw new ClassNotFoundException(pckgname + " (" + url.getPath()
-                                + ") does not appear to be a valid package");
+                    }
                 } catch (final IOException ioex) {
                     throw new ClassNotFoundException(
                             "IOException was thrown when trying to get all resources for "

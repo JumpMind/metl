@@ -100,39 +100,6 @@
     </settings>
   </component>
   <component category='PROCESSOR'
-             id='DataDiff'
-             inputMessageType='entity'
-             inputOutputModelsMatch='true'
-             outputMessageType='entity'
-             resourceCategory='none'>
-    <name>Model Data Diff</name>
-    <className>org.jumpmind.metl.core.runtime.component.DataDiff</className>
-    <settings>
-      <setting id='source.1'
-               required='true'
-               type='source_step'>
-        <name>Source of Old Version</name>
-      </setting>
-      <setting id='source.2'
-               required='true'
-               type='source_step'>
-        <name>Source of New Version</name>
-      </setting>
-      <setting id='rows.per.message'
-               required='false'
-               type='integer'>
-        <name>Rows/Msg</name>
-        <defaultValue>1000</defaultValue>
-      </setting>
-      <setting id='in.memory.compare'
-               required='true'
-               type='boolean'>
-        <name>In Memory Compare</name>
-        <defaultValue>true</defaultValue>
-      </setting>
-    </settings>
-  </component>
-  <component category='PROCESSOR'
              id='Deduper'
              inputMessageType='entity'
              inputOutputModelsMatch='true'
@@ -770,69 +737,6 @@
       </setting>        
     </settings>
   </component>
-  <component category='READER'
-             id='RDBMS Reader'
-             inputMessageType='any'
-             inputOutputModelsMatch='false'
-             outputMessageType='entity'
-             resourceCategory='datasource'>
-    <name>RDBMS Reader</name>
-    <className>org.jumpmind.metl.core.runtime.component.RdbmsReader</className>
-    <description></description>
-    <settings>
-      <setting id='sql'
-               required='true'
-               type='multiline_text'>
-        <name>Sql</name>
-      </setting> 
-      <setting id='run.when'
-               required='false'
-               type='choice'>
-        <name>Run When</name>
-        <defaultValue>PER UNIT OF WORK</defaultValue>
-        <choices>
-          <choice>PER UNIT OF WORK</choice>
-          <choice>PER MESSAGE</choice>
-          <choice>PER ENTITY</choice>
-        </choices>
-      </setting>
-      <setting id='unit.of.work'
-               required='false'
-               type='choice'>
-        <name>Unit of Work</name>
-        <defaultValue>COMPONENT LIFETIME</defaultValue>
-        <choices>
-          <choice>COMPONENT LIFETIME</choice>
-          <choice>SQL SCRIPT</choice>
-          <choice>SQL STATEMENT</choice>
-        </choices>
-      </setting>                 
-      <setting id='rows.per.message'
-               required='true'
-               type='integer'>
-        <name>Rows/Msg</name>
-        <defaultValue>1000</defaultValue>
-      </setting>
-      <setting id='trim.columns'
-               required='true'
-               type='boolean'>
-        <name>Trim Columns</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='match.on.column.name'
-               required='true'
-               type='boolean'>
-        <name>Match On Column Name</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-      <setting id='pass.input.rows.through'
-               required='true'
-               type='boolean'>
-        <name>Pass Input Rows Through</name>
-        <defaultValue>false</defaultValue>
-      </setting>
-    </settings>
-  </component>
   <component category='WRITER'
              id='RDBMS Writer'
              inputMessageType='entity'
@@ -990,29 +894,6 @@
       </setting>
     </settings>
   </component>
-  <component category='PROCESSOR'
-             id='Sorter'
-             inputMessageType='entity'
-             inputOutputModelsMatch='true'
-             outputMessageType='entity'
-             resourceCategory='none'>
-    <name>Sorter</name>
-    <className>org.jumpmind.metl.core.runtime.component.Sorter</className>
-    <description></description>
-    <settings>
-      <setting id='sort.attribute'
-               required='true'
-               type='text'>
-        <name>Sort Entity.Attribute</name>
-      </setting>
-      <setting id='rows.per.message'
-               required='false'
-               type='integer'>
-        <name>Rows/Msg</name>
-        <defaultValue>10</defaultValue>
-      </setting>
-    </settings>
-  </component>
   <component category='WRITER'
              id='Sql Executor'
              inputMessageType='any'
@@ -1044,43 +925,6 @@
       <setting id='sql'
                type='multiline_text'>
         <name>Sql</name>
-      </setting>
-    </settings>
-  </component>
-  <component category='PROCESSOR'
-             id='Temp RDBMS'
-             inputMessageType='entity'
-             outputMessageType='entity'
-             resourceCategory='none'>
-    <name>Temp RDBMS</name>
-    <className>org.jumpmind.metl.core.runtime.component.TempRdbms</className>
-    <settings>
-      <setting id='run.when'
-               required='false'
-               type='choice'>
-        <name>Run When</name>
-        <defaultValue>PER UNIT OF WORK</defaultValue>
-        <choices>
-          <choice>PER UNIT OF WORK</choice>
-          <choice>PER MESSAGE</choice>
-        </choices>
-      </setting>
-      <setting id='sql'
-               required='true'
-               type='multiline_text'>
-        <name>Sql</name>
-      </setting>
-      <setting id='rows.per.message'
-               required='false'
-               type='integer'>
-        <name>Rows/Msg</name>
-        <defaultValue>1000</defaultValue>
-      </setting>
-      <setting id='in.memory.db'
-               required='true'
-               type='boolean'>
-        <name>In Memory Db</name>
-        <defaultValue>true</defaultValue>
       </setting>
     </settings>
   </component>

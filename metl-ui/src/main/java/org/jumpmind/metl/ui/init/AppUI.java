@@ -21,6 +21,7 @@
 package org.jumpmind.metl.ui.init;
 
 import static org.jumpmind.metl.ui.common.AppConstants.DEFAULT_USER;
+import static org.jumpmind.metl.ui.common.AppConstants.DEFAULT_GROUP;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -174,7 +175,7 @@ public class AppUI extends UI implements LoginListener {
                 user = new User();
                 user.setLoginId(DEFAULT_USER);
                 appCtx.getConfigurationService().save(user);
-                Group group = new Group(DEFAULT_USER);
+                Group group = new Group(DEFAULT_GROUP);
                 user.getGroups().add(group);
                 appCtx.getConfigurationService().save(group);
                 for (Privilege priv : Privilege.values()) {

@@ -3,8 +3,7 @@ apply from: '../metl-assemble/common.gradle'
 apply plugin: 'fi.jasoft.plugin.vaadin'
 
 configurations {
-    executableWar 
-    provided
+    executableWar
 }
 
 eclipse {
@@ -43,7 +42,6 @@ vaadin.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
 vaadin.manageWidgetset = false
 vaadin.manageDependencies = false
 vaadin.push = true
-sourceSets.main.compileClasspath += [configurations.provided]
 
 dependencies {
     compile project(":metl-core")
@@ -70,12 +68,7 @@ dependencies {
     compile "javax.servlet:javax.servlet-api:$servletVersion"
     compile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
     provided "javax.servlet.jsp:jsp-api:$jspVersion"
-    provided "javax.websocket:javax.websocket-api:$webSocketVersion"
-        
-    testCompile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
-    testCompile "org.eclipse.jetty:jetty-jmx:$jettyVersion"
-    testCompile "org.eclipse.jetty:jetty-annotations:$jettyVersion"
-    testCompile "org.eclipse.jetty.websocket:javax-websocket-server-impl:$jettyVersion"
+    provided "javax.websocket:javax.websocket-api:$webSocketVersion"        
     
     executableWar project(":metl-server")    
 }

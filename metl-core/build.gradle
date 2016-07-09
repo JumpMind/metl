@@ -46,10 +46,10 @@ dependencies {
     compile  "org.apache.activemq:activemq-client:$activeMqVersion"
     compile "com.googlecode.json-simple:json-simple:1.1.1"
     compile "kxml2:kxml2:$kxmlVersion"  
-    testCompile "org.mockito:mockito-all:$mockitoVersion"
-    testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
-    testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"
-    testCompile "xmlunit:xmlunit:$xmlunitVersion"
+    compile group: 'org.apache.maven', name: 'maven-aether-provider', version: '3.3.9'
+    compile group: 'org.eclipse.aether', name: 'aether-transport-http', version: '1.1.0'
+    compile group: 'org.eclipse.aether', name: 'aether-transport-file', version: '1.1.0'
+    compile group: 'org.eclipse.aether', name: 'aether-connector-basic', version: '1.1.0'    
 
 }
 

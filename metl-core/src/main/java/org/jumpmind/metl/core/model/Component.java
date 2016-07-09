@@ -52,6 +52,8 @@ public class Component extends AbstractObjectWithSettings {
     String folderId;
 
     String rowId = UUID.randomUUID().toString();
+    
+    String implVersion;
 
     List<ComponentEntitySetting> entitySettings;
 
@@ -284,6 +286,14 @@ public class Component extends AbstractObjectWithSettings {
 
     public String getFolderId() {
         return folderId;
+    }
+    
+    public void setImplVersion(String implVersion) {
+        this.implVersion = implVersion;
+    }
+    
+    public String getImplVersion() {
+        return implVersion;
     }
 
 	public Row toRow(EntityData data, boolean qualifyWithEntityName, boolean input) {

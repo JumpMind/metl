@@ -28,4 +28,6 @@ final public class AppConstants {
     public static final float DEFAULT_LEFT_SPLIT = 300;
     
     public static final String DEFAULT_USER = "default user";
+    
+    public static final String DEFAULT_GROUP = "admin";
 }

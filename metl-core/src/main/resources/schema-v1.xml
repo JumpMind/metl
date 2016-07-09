@@ -169,7 +169,8 @@
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="row_id" type="CHAR" size="36" required="true" description="A unique identifier for this row across different versions" />
         <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />
-        <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>                        
+        <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>
+        <column name="impl_version" type="VARCHAR" size="255" description="The last know version of the component that was used to create the flow" />                        
         <column name="name" type="VARCHAR" size="255" required="true" description="A user defined name for the component" />
         <column name="type" type="VARCHAR" size="50" required="true" description="" />
         <column name="folder_id" type="CHAR" size="36" description="" />   
@@ -534,6 +535,28 @@
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />        
+    </table>
+    
+    <table name="plugin_repository" description="">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="name" type="VARCHAR" size="255" description="A name to call the repository" />
+        <column name="url" type="VARCHAR" size="255" description="Url for the repository" />
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />        
     </table>    
+    
+    <table name="plugin_artifact" description="">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="artifact_name" type="VARCHAR" size="255" description="" />
+        <column name="artifact_group" type="VARCHAR" size="255" description="" />
+        <column name="artifact_version" type="VARCHAR" size="255" description="" />
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />        
+    </table>    
+        
 
 </database>

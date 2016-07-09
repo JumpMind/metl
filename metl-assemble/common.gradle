@@ -3,7 +3,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import java.text.SimpleDateFormat
 import java.util.Date
 
-apply from: metlAssembleDir + '/asciidoc.gradle'
+    apply from: metlAssembleDir + '/asciidoc.gradle'
 
     group = 'org.jumpmind.metl'
         
@@ -50,13 +50,17 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
     }     
      
     
-    configurations { deployerJars }
-    configurations { testArtifacts.extendsFrom testRuntime }
-
-    configurations.all {
-        // check for updates every build
-        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    configurations { 
+        deployerJars
+        provided 
+        testArtifacts.extendsFrom testRuntime
+        all {
+            // check for updates every build
+            resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+        }    
     }
+    
+    sourceSets.main.compileClasspath += [configurations.provided]
     
     uploadArchives {
         repositories.mavenDeployer {
@@ -98,13 +102,21 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
     test {
         ignoreFailures true
     }
+    
+    dependencies {
+        testCompile "org.mockito:mockito-all:$mockitoVersion"
+        testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
+        testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"
+        testCompile "xmlunit:xmlunit:$xmlunitVersion"   
+    }    
 
     eclipse {
         classpath {
             downloadSources = true
             downloadJavadoc = false
+            plusConfigurations += [configurations.provided]
         }        
-    }
+    }   
     
     eclipse.project.file.withXml { provider ->
       ignoreDerivedResources(provider.asNode())
