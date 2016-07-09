@@ -25,15 +25,7 @@ import java.util.Date
         strictCheck true
         includes(["**/*.java", "**/*.properties", "**/*.xml"])
         excludes(["**/AppWidgetSet.gwt.xml"])
-    }
-    
-    if (JavaVersion.current().isJava8Compatible()) {
-      allprojects {
-        tasks.withType(Javadoc) {
-          options.addStringOption('Xdoclint:none', '-quiet')
-        }
-      }
-    }    
+    }     
     
     repositories {
         // uncomment this if you want to use your local maven repository to test undelivered
@@ -81,6 +73,16 @@ import java.util.Date
     }
     
     artifacts { archives sourcesJar }
+    
+    if (JavaVersion.current().isJava8Compatible()) {
+      allprojects {
+        tasks.withType(Javadoc) {
+          options.addStringOption('Xdoclint:none', '-quiet')
+          options.addStringOption("sourcepath", "")
+          classpath += [configurations.provided]
+        }
+      }
+    }       
 
     task deploy {
         description 'Shortcut for Maven users'

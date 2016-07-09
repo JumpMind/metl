@@ -28,7 +28,7 @@ war {
 // Don't compress javascript
 // vaadin.gwt.style = "PRETTY"
 vaadin.version = vaadinVersion
-vaadin.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
+//vaadin.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
 vaadin.manageWidgetset = false
 vaadin.manageDependencies = false
 vaadin.push = true
@@ -52,7 +52,7 @@ task copyJavaDocsToWebapp(type: Copy) {
 
 develop.dependsOn vaadinCompileWidgetset
 //develop.dependsOn generateDocs
-//develop.dependsOn copyJavaDocsToWebapp
+develop.dependsOn copyJavaDocsToWebapp
 //assemble.dependsOn generateDocs
-//assemble.dependsOn copyJavaDocsToWebapp
+assemble.dependsOn copyJavaDocsToWebapp
 assemble.dependsOn(jar)
