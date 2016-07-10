@@ -22,8 +22,9 @@ war {
             it.isDirectory() ? it : project.zipTree(it)
         }
     }    
+    from ('build') { include 'plugins/**/*' }
     manifest { attributes 'Main-Class': 'org.jumpmind.metl.Metl' }
-}
+}    
 
 // Don't compress javascript
 // vaadin.gwt.style = "PRETTY"
@@ -45,9 +46,15 @@ task copyJavaDocsToWebapp(type: Copy) {
     dependsOn javadoc    
     destinationDir = file("src/main/webapp/doc")
     into('javadoc') {
-        from ("../metl-core/build/docs/javadoc") { include "**/*" }
-        from ("../metl-ui/build/docs/javadoc") { include "**/*" }
+        from ('../metl-core/build/docs/javadoc') { include '**/*' }
+        from ('../metl-ui/build/docs/javadoc') { include '**/*' }
     }    
+}
+
+task addComponentPublishDependency {
+    rootProject.allprojects.findAll { it.name.startsWith('comp') }.each {
+        dependsOn ":$it.name:publishMavenJavaPublicationToMavenRepository"
+    }
 }
 
 develop.dependsOn vaadinCompileWidgetset
@@ -55,4 +62,5 @@ develop.dependsOn vaadinCompileWidgetset
 develop.dependsOn copyJavaDocsToWebapp
 //assemble.dependsOn generateDocs
 assemble.dependsOn copyJavaDocsToWebapp
+assemble.dependsOn addComponentPublishDependency
 assemble.dependsOn(jar)

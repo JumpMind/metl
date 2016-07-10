@@ -20,11 +20,19 @@
  */
 package org.jumpmind.metl;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,13 +50,13 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 
 public class StartWebServer {
-    
+
     public static final int PORT = 42000;
-    
+
     public static void main(String[] args) throws Exception {
         runWebServer();
     }
-    
+
     protected static void disableJettyLogging() {
         System.setProperty("org.eclipse.jetty.util.log.class", JavaUtilLog.class.getName());
         Logger.getLogger(JavaUtilLog.class.getName()).setLevel(Level.SEVERE);
@@ -62,38 +70,40 @@ public class StartWebServer {
     public static void runWebServer() throws Exception {
 
         disableJettyLogging();
-        
+
         System.out.println(IOUtils.toString(StartWebServer.class.getResource("/Metl.asciiart")));
 
         Server server = new Server(PORT);
-        
+
         ClassList classlist = Configuration.ClassList.setServerDefault(server);
         classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration", "org.eclipse.jetty.annotations.AnnotationConfiguration");
-        
-        MBeanContainer mbContainer = new MBeanContainer(
-                ManagementFactory.getPlatformMBeanServer());
+
+        MBeanContainer mbContainer = new MBeanContainer(ManagementFactory.getPlatformMBeanServer());
         server.addBean(mbContainer);
- 
+
         ProtectionDomain protectionDomain = StartWebServer.class.getProtectionDomain();
-        URL location = protectionDomain.getCodeSource().getLocation();    
-        File locationDir = new File(location.getFile()).getParentFile();
-        
+        URL location = protectionDomain.getCodeSource().getLocation();
+        File warFile = new File(location.getFile());
+        File locationDir = warFile.getParentFile();
+
+        extractPlugins(warFile);
+
         WebAppContext webapp = new WebAppContext();
-        
-//        HashSessionManager sessionManager = new HashSessionManager();
-//        File storeDir = new File(locationDir, "sessions");
-//        storeDir.mkdirs();
-//        sessionManager.setStoreDirectory(storeDir);
-//        sessionManager.setLazyLoad(true);
-//        sessionManager.setSavePeriod(5);
-//        sessionManager.setDeleteUnrestorableSessions(true);        
-//        SessionHandler sessionHandler = new SessionHandler(sessionManager);
-//        webapp.setSessionHandler(sessionHandler);
-        
+
+        // HashSessionManager sessionManager = new HashSessionManager();
+        // File storeDir = new File(locationDir, "sessions");
+        // storeDir.mkdirs();
+        // sessionManager.setStoreDirectory(storeDir);
+        // sessionManager.setLazyLoad(true);
+        // sessionManager.setSavePeriod(5);
+        // sessionManager.setDeleteUnrestorableSessions(true);
+        // SessionHandler sessionHandler = new SessionHandler(sessionManager);
+        // webapp.setSessionHandler(sessionHandler);
+
         webapp.setContextPath("/metl");
-        webapp.setWar(location.toExternalForm());        
+        webapp.setWar(location.toExternalForm());
         webapp.addAliasCheck(new AllowSymLinkAliasChecker());
-        
+
         File pluginsDir = new File(locationDir, "plugins");
         pluginsDir.mkdirs();
         StringBuilder extraClasspath = new StringBuilder();
@@ -105,22 +115,56 @@ public class StartWebServer {
             }
         }
         webapp.setExtraClasspath(extraClasspath.toString());
-        
+
         server.setHandler(webapp);
-        
+
         ServerContainer webSocketServer = WebSocketServerContainerInitializer.configureContext(webapp);
-        webSocketServer.setDefaultMaxSessionIdleTimeout(10000000); 
-        
+        webSocketServer.setDefaultMaxSessionIdleTimeout(10000000);
+
         server.start();
 
         if (extraClasspath.length() > 0) {
             getLogger().info("Adding extra classpath of: " + extraClasspath.toString());
         }
         getLogger().info("To use Metl, navigate to http://localhost:" + PORT + "/metl");
-        
+
         server.join();
     }
-    
+
+    private static void extractPlugins(File warFile) throws IOException {
+        JarFile z = new JarFile(warFile);
+        try {
+            Enumeration<JarEntry> entries = z.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                if (entry.getName().startsWith("plugins")) {
+                    File f = new File(entry.getName());
+                    if (entry.isDirectory()) {
+                        f.mkdirs();
+                    } else if (!f.exists()) {
+                        System.out.println("Extracting " + entry.getName());
+                        f.getParentFile().mkdirs();
+                        final InputStream is = z.getInputStream(entry);
+                        final OutputStream os = new BufferedOutputStream(new FileOutputStream(f));
+                        try {
+                            final byte buffer[] = new byte[4096];
+                            int readCount;
+                            while ((readCount = is.read(buffer)) > 0) {
+                                os.write(buffer, 0, readCount);
+                            }
+                        } finally {
+                            os.close();
+                            is.close();
+                        }
+                    }
+
+                }
+            }
+        } finally {
+            z.close();
+        }
+    }
+
     private final static Logger getLogger() {
         return Logger.getLogger(StartWebServer.class.getName());
     }

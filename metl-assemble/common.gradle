@@ -18,7 +18,23 @@ import java.util.Date
 	version = version + "." + buildNumber
 	
     sourceCompatibility=1.8
-    targetCompatibility=1.8   
+    targetCompatibility=1.8
+    
+    if (project.name.startsWith('comp')) {
+        apply plugin: 'maven-publish'
+        publishing {
+            publications {
+                mavenJava(MavenPublication) {
+                    from components.java
+                }
+            }
+            repositories {
+                maven {
+                    url "../metl-war/build/plugins"
+                }
+            }
+        }
+    }   
     
     license {
         header rootProject.file('HEADER')
