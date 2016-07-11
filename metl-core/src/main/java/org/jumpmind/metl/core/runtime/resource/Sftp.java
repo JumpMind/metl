@@ -42,7 +42,10 @@ public class Sftp extends AbstractResourceRuntime {
 
     // Password is not required since it can be blank.
     @SettingDefinition(type = Type.PASSWORD, order = 40, required = false, label="Password")
-    public static final String SFTP_PASSWORD = "sftp.password";    
+    public static final String SFTP_PASSWORD = "sftp.password";   
+    
+    @SettingDefinition(type = Type.TEXT, order = 45, required = false, label="Key File Location")
+    public static final String KEY_FILE_LOCATION = "key.file.location";       
     
     @SettingDefinition(order = 50, required = true, type = Type.TEXT, label = "Base Path")
     public final static String SFTP_BASE_PATH = "sftp.base.path";
@@ -62,6 +65,7 @@ public class Sftp extends AbstractResourceRuntime {
                 properties.getInt(SFTP_PORT),
                 properties.getProperty(SFTP_USER),
                 properties.getProperty(SFTP_PASSWORD),
+                properties.getProperty(KEY_FILE_LOCATION),
                 properties.getProperty(SFTP_BASE_PATH),                
                 properties.getInt(SFTP_CONNECTION_TIMEOUT),
                 properties.is(SFTP_MUST_EXIST));
