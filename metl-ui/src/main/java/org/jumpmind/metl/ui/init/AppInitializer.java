@@ -93,9 +93,9 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         dispatcher.addMapping("/api/*");
         applicationContextRef.set(dispatchContext);
 
-        ServletRegistration.Dynamic apidocs = servletContext.addServlet("apidocs", DefaultServlet.class);
-        apidocs.addMapping("/api.html", "/doc/*");
-
+        ServletRegistration.Dynamic apidocs = servletContext.addServlet("docs", DefaultServlet.class);
+        apidocs.addMapping("/api.html", "/doc/*", "/ace/*");
+        
         ServletRegistration.Dynamic vaadin = servletContext.addServlet("vaadin", AppServlet.class);
         vaadin.setAsyncSupported(true);
         vaadin.setInitParameter("org.atmosphere.cpr.asyncSupport", JSR356AsyncSupport.class.getName());
