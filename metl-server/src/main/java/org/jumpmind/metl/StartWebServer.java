@@ -20,19 +20,11 @@
  */
 package org.jumpmind.metl;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -86,8 +78,6 @@ public class StartWebServer {
         File warFile = new File(location.getFile());
         File locationDir = warFile.getParentFile();
 
-        extractPlugins(warFile);
-
         WebAppContext webapp = new WebAppContext();
 
         // HashSessionManager sessionManager = new HashSessionManager();
@@ -129,40 +119,6 @@ public class StartWebServer {
         getLogger().info("To use Metl, navigate to http://localhost:" + PORT + "/metl");
 
         server.join();
-    }
-
-    private static void extractPlugins(File warFile) throws IOException {
-        JarFile z = new JarFile(warFile);
-        try {
-            Enumeration<JarEntry> entries = z.entries();
-            while (entries.hasMoreElements()) {
-                JarEntry entry = entries.nextElement();
-                if (entry.getName().startsWith("plugins")) {
-                    File f = new File(entry.getName());
-                    if (entry.isDirectory()) {
-                        f.mkdirs();
-                    } else if (!f.exists()) {
-                        System.out.println("Extracting " + entry.getName());
-                        f.getParentFile().mkdirs();
-                        final InputStream is = z.getInputStream(entry);
-                        final OutputStream os = new BufferedOutputStream(new FileOutputStream(f));
-                        try {
-                            final byte buffer[] = new byte[4096];
-                            int readCount;
-                            while ((readCount = is.read(buffer)) > 0) {
-                                os.write(buffer, 0, readCount);
-                            }
-                        } finally {
-                            os.close();
-                            is.close();
-                        }
-                    }
-
-                }
-            }
-        } finally {
-            z.close();
-        }
     }
 
     private final static Logger getLogger() {

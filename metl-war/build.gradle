@@ -22,7 +22,7 @@ war {
             it.isDirectory() ? it : project.zipTree(it)
         }
     }    
-    from ('build') { include 'plugins/**/*' }
+    from ('build') { include 'plugins.zip' }
     manifest { attributes 'Main-Class': 'org.jumpmind.metl.Metl' }
 }    
 
@@ -51,16 +51,21 @@ task copyJavaDocsToWebapp(type: Copy) {
     }    
 }
 
-task addComponentPublishDependency {
+task zipPlugins (type:Zip) {
     rootProject.allprojects.findAll { it.name.startsWith('comp') }.each {
         dependsOn ":$it.name:publishMavenJavaPublicationToMavenRepository"
     }
+    
+    from ('build/plugins')
+    destinationDir file('build') 
+    archiveName 'plugins.zip'
 }
+
 
 develop.dependsOn vaadinCompileWidgetset
 //develop.dependsOn generateDocs
 develop.dependsOn copyJavaDocsToWebapp
 //assemble.dependsOn generateDocs
 assemble.dependsOn copyJavaDocsToWebapp
-assemble.dependsOn addComponentPublishDependency
+war.dependsOn zipPlugins
 assemble.dependsOn(jar)

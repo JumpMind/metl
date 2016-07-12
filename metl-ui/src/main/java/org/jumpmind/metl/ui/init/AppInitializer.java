@@ -22,10 +22,16 @@ package org.jumpmind.metl.ui.init;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.Properties;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -49,6 +55,7 @@ import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.VersionUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
@@ -91,13 +98,56 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         vaadin.setAsyncSupported(true);
         vaadin.setInitParameter("org.atmosphere.cpr.asyncSupport", JSR356AsyncSupport.class.getName());
         vaadin.setInitParameter("beanName", "appUI");
-        vaadin.addMapping("/*");     
+        vaadin.addMapping("/*");
+    }
+
+    protected void initPlugins(WebApplicationContext ctx) {
+        InputStream is = ctx.getServletContext().getResourceAsStream("/plugins.zip");
+        getLogger().info("is is " + is);
+        ZipInputStream zip = null;
+        try {
+            zip = new ZipInputStream(is);
+            ZipEntry entry = null;
+            File dir = new File(getConfigDir(false), "plugins");
+            for (entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+                File f = new File(dir, entry.getName());
+                if (!f.exists()) {
+                    if (entry.isDirectory()) {
+                        f.mkdirs();
+                    } else {
+                        getLogger().info("Extracting: " + f.getAbsolutePath());
+                        f.getParentFile().mkdirs();
+                        OutputStream os = new BufferedOutputStream(new FileOutputStream(f));
+                        try {
+                            final byte buffer[] = new byte[4096];
+                            int readCount;
+                            while ((readCount = zip.read(buffer)) > 0) {
+                                os.write(buffer, 0, readCount);
+                            }
+                        } finally {
+                            os.close();
+                        }
+                    }
+                }
+            }
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            IOUtils.closeQuietly(zip);
+        }
+    }
+
+    private Logger getLogger() {
+        return LoggerFactory.getLogger(getClass());
     }
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce.getServletContext());
         LogUtils.initLogging(getConfigDir(false), ctx);
+        initPlugins(ctx);
         initDatabase(ctx);
         initAgentRuntime(ctx);
     }
@@ -120,22 +170,22 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         }
         dbUpgrader.upgrade();
         if (fromVersion != null && !fromVersion.equals(toVersion)) {
-            dbUpgradeScripts.executePostInstallScripts(fromVersion, toVersion);            
-        } 
+            dbUpgradeScripts.executePostInstallScripts(fromVersion, toVersion);
+        }
 
         if (fromVersion == null || !fromVersion.equals(toVersion)) {
             configurationService.save(new Version(toVersion));
         }
         if (!isInstalled) {
             try {
-                LoggerFactory.getLogger(getClass()).info("Installing Metl samples");
-                new SqlScript(new InputStreamReader(getClass().getResourceAsStream("/metl-samples.sql")), platform.getSqlTemplate(), true, ";",
-                        null).execute();
+                getLogger().info("Installing Metl samples");
+                new SqlScript(new InputStreamReader(getClass().getResourceAsStream("/metl-samples.sql")), platform.getSqlTemplate(), true,
+                        ";", null).execute();
             } catch (Exception e) {
-                LoggerFactory.getLogger(getClass()).error("Failed to install Metl samples", e);
+                getLogger().error("Failed to install Metl samples", e);
             }
-        }        
-        LoggerFactory.getLogger(getClass()).info("The configuration database has been initialized");
+        }
+        getLogger().info("The configuration database has been initialized");
     }
 
     @Override
@@ -151,11 +201,11 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
                         + "where configuration files can be found:\n  -D" + SYS_CONFIG_DIR + "=/some/config/dir");
             }
         }
-        
+
         if (isBlank(System.getProperty("h2.baseDir"))) {
             System.setProperty("h2.baseDir", configDir);
         }
-        
+
         if (printInstructions) {
             System.out.println("");
             System.out.println("The current config directory is " + configDir);
@@ -174,7 +224,8 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             properties = new TypedProperties(configFile);
         } else {
             try {
-                System.out.println("Could not find the " + configFile.getAbsolutePath() + " configuration file.  A default version will be written.");
+                System.out.println(
+                        "Could not find the " + configFile.getAbsolutePath() + " configuration file.  A default version will be written.");
                 String propContent = IOUtils.toString(getClass().getResourceAsStream("/" + configFile.getName()));
                 propContent = FormatUtils.replaceToken(propContent, "configDir", configDir, true);
                 FileUtils.write(configFile, propContent);
