@@ -24,6 +24,8 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -97,8 +99,7 @@ abstract public class AbstractExecutionService extends AbstractService implement
             if (file.exists()) {
                 CsvReader reader = null;
                 try {
-                    reader = new CsvReader(file.getAbsolutePath());
-                    reader.setTextQualifier('"');
+                    reader = new CsvReader(file.getAbsolutePath(),'"',Charset.forName("UTF-8"));
                     long id = 1;
                     while (reader.readRecord()) {
                         if (limit > 0) {
