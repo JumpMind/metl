@@ -548,7 +548,7 @@
     </table>
     
     <table name="plugin_artifact" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="id" type="CHAR" size="255" required="true" primaryKey="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" description="" />
         <column name="group_name" type="VARCHAR" size="255" description="" />
         <column name="plugin_type" type="VARCHAR" size="255" description="" />
@@ -559,7 +559,7 @@
     </table>
     
     <table name="plugin_artifact_version" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="id" type="CHAR" size="255" required="true" primaryKey="true" description="A unique identifier" />
         <column name="name" required="true" type="VARCHAR" size="255" description="" />
         <column name="plugin_artifact_id" required="true" type="VARCHAR" size="255" description="" />
         <column name="enabled" type="BOOLEANINT" size="1" default="1" description="" />

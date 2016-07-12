@@ -45,6 +45,7 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Notification;
+import org.jumpmind.metl.core.model.PluginArtifact;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
@@ -150,6 +151,8 @@ public interface IConfigurationService {
     public void refresh(Group group);
 
     public void save(AgentDeployment agentDeployment);
+    
+    public void save (PluginArtifact artifact);
     
     public void save(Resource resource);
     

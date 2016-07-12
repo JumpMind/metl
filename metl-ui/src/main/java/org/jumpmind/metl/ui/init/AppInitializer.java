@@ -49,6 +49,7 @@ import org.jumpmind.db.util.ConfigDatabaseUpgrader;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.util.DatabaseScriptContainer;
 import org.jumpmind.metl.core.util.LogUtils;
@@ -139,6 +140,8 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
                 IOUtils.closeQuietly(zip);
             }
         }
+        
+        ctx.getBean(IPluginManager.class).init();
     }
 
     private Logger getLogger() {
@@ -149,8 +152,8 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     public void contextInitialized(ServletContextEvent sce) {
         WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce.getServletContext());
         LogUtils.initLogging(getConfigDir(false), ctx);
-        initPlugins(ctx);
         initDatabase(ctx);
+        initPlugins(ctx);        
         initAgentRuntime(ctx);
     }
 

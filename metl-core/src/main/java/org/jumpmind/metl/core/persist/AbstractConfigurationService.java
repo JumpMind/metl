@@ -63,6 +63,8 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Notification;
+import org.jumpmind.metl.core.model.PluginArtifact;
+import org.jumpmind.metl.core.model.PluginArtifactVersion;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
@@ -86,6 +88,16 @@ abstract class AbstractConfigurationService extends AbstractService implements I
             String tablePrefix) {
         super(persistenceManager, tablePrefix);
         this.componentDefinitionFactory = componentDefinitionFactory;
+    }
+    
+    public void save (PluginArtifact artifact) {
+        List<PluginArtifactVersion> versions = artifact.getPluginArtifactVersions();
+        if (versions != null) {
+            for (PluginArtifactVersion pluginArtifactVersion : versions) {
+                save((AbstractObject)pluginArtifactVersion);
+            }
+        }
+        save((AbstractObject)artifact);
     }
 
     @Override

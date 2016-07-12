@@ -17,6 +17,7 @@ import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.jumpmind.metl.core.model.PluginArtifact;
 import org.jumpmind.metl.core.model.PluginType;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.util.VersionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,17 +36,20 @@ public class PluginManager implements IPluginManager {
     public PluginManager(IConfigurationService configurationService, String localRepositoryPath) {
         this.configurationService = configurationService;
         this.localRepositoryPath = localRepositoryPath;
+    }
+    
+    public void init() {
         repositorySystem = newRepositorySystem();
         repositorySystemSession = newRepositorySystemSession(repositorySystem, localRepositoryPath);
         List<PluginArtifact> outOfTheBoxPlugins = getOutOfTheBoxPlugins();
         for (PluginArtifact pluginArtifact : outOfTheBoxPlugins) {
             configurationService.save(pluginArtifact);
-        }
+        }        
     }
     
     protected List<PluginArtifact> getOutOfTheBoxPlugins() {
         List<PluginArtifact> artifacts = new ArrayList<>();
-        artifacts.add(new PluginArtifact("comp-rdbms-reader", "org.jumpmind.metl", PluginType.COMPONENT));
+        artifacts.add(new PluginArtifact("comp-rdbms-reader", "org.jumpmind.metl", PluginType.COMPONENT, VersionUtils.getCurrentVersion()));
         return artifacts;
     }
 
