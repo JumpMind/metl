@@ -115,7 +115,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         projectGrid = new Grid();
         projectGrid.setSizeFull();
         projectGrid.setEditorEnabled(true);
-        projectGrid.setSelectionMode(SelectionMode.MULTI);
+        projectGrid.setSelectionMode(SelectionMode.SINGLE);
 
         projectGrid.addColumn("name", String.class).setHeaderCaption("Name").setExpandRatio(2);
         projectGrid.addColumn("description", String.class).setHeaderCaption("Description").setExpandRatio(1);

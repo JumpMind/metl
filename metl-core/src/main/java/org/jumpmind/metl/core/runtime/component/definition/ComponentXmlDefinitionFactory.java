@@ -39,6 +39,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.metl.core.util.AbstractXMLFactory;
 
@@ -47,6 +48,15 @@ public class ComponentXmlDefinitionFactory extends AbstractXMLFactory implements
     Map<String, XMLComponent> componentsById;
 
     Map<String, List<String>> componentIdsByCategory;
+    
+    IPluginManager pluginManager;
+    
+    public ComponentXmlDefinitionFactory() {
+    }
+    
+    public ComponentXmlDefinitionFactory(IPluginManager pluginManager) {
+        this.pluginManager = pluginManager;
+    }
 
     @Override
     synchronized public Map<String, List<XMLComponent>> getDefinitionsByCategory() {

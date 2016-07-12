@@ -53,6 +53,7 @@ import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.util.DatabaseScriptContainer;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.VersionUtils;
+import org.jumpmind.metl.ui.common.AppConstants;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 import org.slf4j.Logger;
@@ -108,7 +109,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             try {
                 zip = new ZipInputStream(is);
                 ZipEntry entry = null;
-                File dir = new File(getConfigDir(false), "plugins");
+                File dir = new File(getConfigDir(false), AppConstants.PLUGINS_DIR);
                 for (entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
                     File f = new File(dir, entry.getName());
                     if (!f.exists()) {
@@ -235,7 +236,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
                 throw new IoException(e);
             }
         }
-        properties.put("config.dir", configDir);
+        properties.put(AppConstants.PROP_CONFIG_DIR, configDir);
         return properties;
     }
 

@@ -30,4 +30,8 @@ final public class AppConstants {
     public static final String DEFAULT_USER = "default user";
     
     public static final String DEFAULT_GROUP = "admin";
+    
+    public static final String PLUGINS_DIR = "plugins";
+    
+    public static final String PROP_CONFIG_DIR = "config.dir";
 }

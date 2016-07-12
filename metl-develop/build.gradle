@@ -10,4 +10,5 @@ dependencies {
     testCompile "org.eclipse.jetty:jetty-jmx:$jettyVersion"
     testCompile "org.eclipse.jetty:jetty-annotations:$jettyVersion"
     testCompile "org.eclipse.jetty.websocket:javax-websocket-server-impl:$jettyVersion"   
+    testCompile project(path: ':metl-core', configuration: 'testArtifacts') 
 }

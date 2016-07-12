@@ -3,4 +3,5 @@ apply from: '../metl-assemble/common.gradle'
 dependencies {
     provided project(':metl-ui')
     compile project(':comp-rdbms-reader')
+    testCompile project(path: ':metl-core', configuration: 'testArtifacts') 
 }

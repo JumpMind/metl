@@ -1,5 +1,6 @@
 apply from: '../metl-assemble/common.gradle'
 
 dependencies {
-    provided project(':metl-ui')    
+    provided project(':metl-ui')   
+    testCompile project(path: ':metl-core', configuration: 'testArtifacts') 
 }

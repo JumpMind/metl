@@ -88,7 +88,13 @@ import java.util.Date
         from sourceSets.main.allSource
     }
     
-    artifacts { archives sourcesJar }
+    task testJar(type: Jar) {
+        classifier "test"
+        from sourceSets.test.output
+    }    
+    
+    artifacts { archives sourcesJar 
+                testArtifacts testJar  }
     
     if (JavaVersion.current().isJava8Compatible()) {
       allprojects {
