@@ -234,4 +234,6 @@ public interface IConfigurationService {
 
     public Model copy(Model original);
     
+    public List<PluginArtifact> findPluginArtifacts();
+    
 }

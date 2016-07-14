@@ -21,9 +21,9 @@
 package org.jumpmind.metl.core.runtime.component.definition;
 
 import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.ENABLED;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.INBOUND_QUEUE_CAPACITY;
 import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_INPUT;
 import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_OUTPUT;
-import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.INBOUND_QUEUE_CAPACITY;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,6 +39,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.model.PluginArtifactVersion;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.metl.core.util.AbstractXMLFactory;
@@ -49,13 +50,12 @@ public class ComponentXmlDefinitionFactory extends AbstractXMLFactory implements
 
     Map<String, List<String>> componentIdsByCategory;
     
-    IPluginManager pluginManager;
-    
     public ComponentXmlDefinitionFactory() {
+        super(null);
     }
     
     public ComponentXmlDefinitionFactory(IPluginManager pluginManager) {
-        this.pluginManager = pluginManager;
+        super(pluginManager);
     }
 
     @Override
@@ -89,8 +89,8 @@ public class ComponentXmlDefinitionFactory extends AbstractXMLFactory implements
         componentsById = new HashMap<String, XMLComponent>();
     }
 
-    @SuppressWarnings("unchecked")
-    protected void loadComponentsForClassloader(ClassLoader classLoader) {
+    @Override
+    protected void loadComponentsForClassloader(PluginArtifactVersion pluginArtifactVersion, ClassLoader classLoader) {
         try {
             JAXBContext jc = JAXBContext.newInstance(XMLComponents.class.getPackage().getName());
             Unmarshaller unmarshaller = jc.createUnmarshaller();
@@ -99,6 +99,7 @@ public class ComponentXmlDefinitionFactory extends AbstractXMLFactory implements
             try {
                 for (InputStream inputStream : componentXmls) {
                     InputStreamReader reader = new InputStreamReader(inputStream);
+                    @SuppressWarnings("unchecked")
                     JAXBElement<XMLComponents> root = (JAXBElement<XMLComponents>) unmarshaller.unmarshal(reader);
                     XMLComponents components = root.getValue();
                     List<XMLComponent> componentList = components.getComponent();

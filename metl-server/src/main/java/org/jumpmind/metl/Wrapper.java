@@ -54,8 +54,8 @@ public class Wrapper {
             	System.exit(-1);
             }
         }
-        System.out.println("Calling WrapperHelper with parameters:  applHomeDir==>" + appHomeDir + ", configFile ==>" + 
-                appHomeDir + "/" + configFileName + " jarfile==> " + 
+        System.out.println("Calling WrapperHelper with parameters:  applHomeDir==> " + appHomeDir + ", configFile ==>" + 
+                appHomeDir + File.separator + configFileName + " jarfile==> " + 
         		jarFileName);
         WrapperHelper.run(args, appHomeDir, appHomeDir + File.separator + configFileName,
         		jarFileName);

@@ -34,6 +34,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.model.PluginArtifactVersion;
 import org.jumpmind.metl.core.util.AbstractXMLFactory;
 import org.jumpmind.metl.ui.definition.XMLComponentUI;
 import org.jumpmind.metl.ui.definition.XMLUI;
@@ -42,6 +43,10 @@ import org.jumpmind.metl.ui.views.design.IComponentEditPanel;
 public class UIXMLFactory extends AbstractXMLFactory implements IUIFactory {
 
     protected Map<String, XMLComponentUI> componentUisByComponentId;
+    
+    public UIXMLFactory() {
+        super(null);
+    }
     
     synchronized public XMLComponentUI getDefinition(String componentId) {
         return componentUisByComponentId.get(componentId);
@@ -69,7 +74,7 @@ public class UIXMLFactory extends AbstractXMLFactory implements IUIFactory {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void loadComponentsForClassloader(ClassLoader classLoader) {
+    protected void loadComponentsForClassloader(PluginArtifactVersion pluginArtifactVersion, ClassLoader classLoader) {
         try {
             JAXBContext jc = JAXBContext.newInstance(XMLUI.class.getPackage().getName());
             Unmarshaller unmarshaller = jc.createUnmarshaller();

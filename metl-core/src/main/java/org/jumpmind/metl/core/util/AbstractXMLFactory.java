@@ -27,9 +27,12 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.model.PluginArtifactVersion;
+import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,19 +40,29 @@ abstract public class AbstractXMLFactory {
     
     protected final Logger log = LoggerFactory.getLogger(getClass());
     
-    public AbstractXMLFactory() {
+    protected IPluginManager pluginManager;
+    
+    public AbstractXMLFactory(IPluginManager pluginManager) {
         refresh();
     }
     
     synchronized public void refresh() {
         reset();
-        loadComponentsForClassloader(getClass().getClassLoader());
-        // TODO in the future load from other resources
+        
+        loadComponentsForClassloader(null, getClass().getClassLoader());
+        
+        if (pluginManager != null) {
+            Map<PluginArtifactVersion, ClassLoader> plugins = pluginManager.getPlugins();
+            Set<PluginArtifactVersion> pluginArtifactVersions = plugins.keySet();
+            for (PluginArtifactVersion pluginArtifactVersion : pluginArtifactVersions) {
+                loadComponentsForClassloader(pluginArtifactVersion, plugins.get(pluginArtifactVersion));
+            }
+        }
     }
     
     abstract protected void reset();
 
-    abstract protected void loadComponentsForClassloader(ClassLoader classLoader);
+    abstract protected void loadComponentsForClassloader(PluginArtifactVersion pluginArtifactVersion, ClassLoader classLoader);
     
     protected List<InputStream> loadResources(final String name, final ClassLoader classLoader) {
         try {

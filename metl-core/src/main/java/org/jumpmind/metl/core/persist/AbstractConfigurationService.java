@@ -90,6 +90,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         this.componentDefinitionFactory = componentDefinitionFactory;
     }
     
+    @Override
     public void save (PluginArtifact artifact) {
         List<PluginArtifactVersion> versions = artifact.getPluginArtifactVersions();
         if (versions != null) {
@@ -98,6 +99,18 @@ abstract class AbstractConfigurationService extends AbstractService implements I
             }
         }
         save((AbstractObject)artifact);
+    }
+    
+    @Override
+    public List<PluginArtifact> findPluginArtifacts() {
+        List<PluginArtifact> artifacts = find(PluginArtifact.class, null, PluginArtifact.class);
+        for (PluginArtifact pluginArtifact : artifacts) {
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("pluginArtifactId", pluginArtifact.getId());
+            List<PluginArtifactVersion> versions = find(PluginArtifactVersion.class, params, PluginArtifactVersion.class);
+            pluginArtifact.setPluginArtifactVersions(versions);
+        }
+        return artifacts;
     }
 
     @Override
