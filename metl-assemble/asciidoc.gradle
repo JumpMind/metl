@@ -5,7 +5,7 @@ apply plugin: 'org.asciidoctor.gradle.asciidoctor'
 task cleanAsciidocBuildDir {
     doFirst {
         delete "$buildDir/../../metl-ui/working/asciidoc"
-        delete "$buildDir/../../metl-ui/src/main/webapp/doc/html"
+        delete "$buildDir/../../metl-web/src/main/webapp/doc/html"
     }
 }
 
@@ -42,7 +42,7 @@ task generateDocs(type: Copy) {
     
     dependsOn asciidoctor
     
-    destinationDir = file("$buildDir/../../metl-ui/src/main/webapp/doc/html")
+    destinationDir = file("$buildDir/../../metl-war/src/main/webapp/doc/html")
 
     from ("$buildDir/src/asciidoc/html5") { include "user-guide.html" }
     filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
@@ -63,7 +63,7 @@ task publishDoc {
             todir: "$publishUser:$publishPassword@$publishServer:~/www/doc/$majorMinorVersion",
             trust: 'true',
             verbose: 'true') {
-            fileset(dir: "$buildDir/../../metl-ui/src/main/webapp/doc/html") { include(name: '**/**')
+            fileset(dir: "$buildDir/../../metl-war/src/main/webapp/doc/html") { include(name: '**/**')
             }
         }
     }

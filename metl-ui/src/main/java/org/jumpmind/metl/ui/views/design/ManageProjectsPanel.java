@@ -194,7 +194,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         layout.setSpacing(true);
         HorizontalLayout buttons = new HorizontalLayout();
         buttons.setSpacing(true);
-        Button openButton = new Button("Open", (event) -> {
+        Button openButton = new Button("Open Version", (event) -> {
             Collection<Object> selected = versionGrid.getSelectedRows();
             for (Object object : selected) {
                 projectNavigator.addProjectVersion(((ProjectVersion) object));

@@ -57,6 +57,7 @@ import org.jumpmind.metl.ui.views.ImportDialog.IImportListener;
 import org.jumpmind.metl.ui.views.design.EditFlowPanel;
 import org.jumpmind.metl.ui.views.design.EditModelPanel;
 import org.jumpmind.metl.ui.views.design.ManageProjectsPanel;
+import org.jumpmind.metl.ui.views.design.ProjectSettingsPanel;
 import org.jumpmind.metl.ui.views.design.PropertySheet;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
@@ -65,13 +66,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.data.Container;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.FieldEvents.FocusEvent;
 import com.vaadin.event.FieldEvents.FocusListener;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FileDownloader;
@@ -95,10 +92,6 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.ColumnHeaderMode;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.Tree.CollapseEvent;
-import com.vaadin.ui.Tree.CollapseListener;
-import com.vaadin.ui.Tree.ExpandEvent;
-import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -333,19 +326,8 @@ public class DesignNavigator extends VerticalLayout {
         });
         table.setVisibleColumns(new Object[] { "name" });
         table.setColumnExpandRatio("name", 1);
-        table.addValueChangeListener(new ValueChangeListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
-                selectionChanged();
-            }
-        });
-        table.addItemClickListener(new ItemClickListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void itemClick(ItemClickEvent event) {
+        table.addValueChangeListener((event) -> selectionChanged());
+        table.addItemClickListener((event) -> {
                 if (event.getButton() == MouseButton.LEFT) {
                     if (event.isDoubleClick()) {
                         abortEditingItem();
@@ -356,23 +338,16 @@ public class DesignNavigator extends VerticalLayout {
                         }
                     }
                 }
-            }
         });
-        table.addExpandListener(new ExpandListener() {
-            @Override
-            public void nodeExpand(ExpandEvent event) {
+        table.addExpandListener((event) -> {
                 if (event.getItemId() instanceof FolderName) {
                     table.setItemIcon(event.getItemId(), Icons.FOLDER_OPEN);
                 }
-            }
         });
-        table.addCollapseListener(new CollapseListener() {
-            @Override
-            public void nodeCollapse(CollapseEvent event) {
+        table.addCollapseListener((event) -> {
                 if (event.getItemId() instanceof FolderName) {
                     table.setItemIcon(event.getItemId(), Icons.FOLDER_CLOSED);
                 }
-            }
         });
         table.setCellStyleGenerator(new CellStyleGenerator() {
             private static final long serialVersionUID = 1L;
@@ -525,7 +500,6 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void refreshOpenProjects() {
-
         Iterator<ProjectVersion> i = context.getOpenProjects().iterator();
         while (i.hasNext()) {
             ProjectVersion projectVersion = i.next();
@@ -547,17 +521,23 @@ public class DesignNavigator extends VerticalLayout {
         for (ProjectVersion projectVersion : context.getOpenProjects()) {
             treeTable.addItem(projectVersion);
             treeTable.setItemIcon(projectVersion, Icons.PROJECT);
-            treeTable.setItemCaption(projectVersion, String.format("%s (%s)",
-                    projectVersion.getProject().getName(), projectVersion.getVersionLabel()));
+            treeTable.setItemCaption(projectVersion, projectVersion.getName());
             treeTable.setChildrenAllowed(projectVersion, true);
+            addProjectSetting(projectVersion);
             addFlowsToFolder(addVirtualFolder("Flows", projectVersion), projectVersion, false);
             addFlowsToFolder(addVirtualFolder("Tests", projectVersion), projectVersion, true);
             addModelsToFolder(addVirtualFolder("Models", projectVersion), projectVersion);
             addResourcesToFolder(addVirtualFolder("Resources", projectVersion), projectVersion);
-            // TODO: determine if we want to show shared components here too...
-            // addSharedComponentsToFolder(addVirtualFolder("Shared Components",
-            // projectVersion), projectVersion);
         }
+    }
+    
+    protected void addProjectSetting(ProjectVersion projectVersion) {
+        SettingsObject settings = new SettingsObject(projectVersion);
+        treeTable.addItem(settings);
+        treeTable.setItemIcon(settings, Icons.SETTINGS);
+        treeTable.setItemCaption(settings, "Settings");
+        treeTable.setParent(settings, projectVersion);
+        treeTable.setChildrenAllowed(settings, false);
     }
 
     protected FolderName addVirtualFolder(String name, ProjectVersion projectVersion) {
@@ -651,7 +631,11 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     public void open(Object item) {
-        if (item instanceof FlowName) {
+        if (item instanceof SettingsObject) {
+            SettingsObject settings = (SettingsObject)item;
+            ProjectVersion projectVersion = settings.getProjectVersion();
+            tabs.addCloseableTab(settings.getId(), "Settings for " + projectVersion.getName(), Icons.SETTINGS, new ProjectSettingsPanel(projectVersion, context, this));   
+        } else if (item instanceof FlowName) {
             FlowName flow = (FlowName) item;
             EditFlowPanel flowLayout = new EditFlowPanel(context, flow.getId(), this, tabs);
             tabs.addCloseableTab(flow.getId(), flow.getName(), Icons.FLOW, flowLayout);
@@ -974,6 +958,29 @@ public class DesignNavigator extends VerticalLayout {
             treeTable.setCollapsed(parent, false);
 
             return true;
+        }
+    }
+    
+    class SettingsObject extends AbstractObject {
+        
+        ProjectVersion projectVersion;
+        
+        public SettingsObject(ProjectVersion projectVersion) {
+            setId("Settings:"+projectVersion.getId());
+            this.projectVersion = projectVersion;
+        }
+        
+        @Override
+        public String getName() {
+            return "Settings";
+        }
+        
+        @Override
+        public void setName(String name) {
+        }
+        
+        public ProjectVersion getProjectVersion() {
+            return projectVersion;
         }
     }
 }

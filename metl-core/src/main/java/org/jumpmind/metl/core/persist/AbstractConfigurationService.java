@@ -92,13 +92,13 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     
     @Override
     public void save (PluginArtifact artifact) {
+        save((AbstractObject)artifact);
         List<PluginArtifactVersion> versions = artifact.getPluginArtifactVersions();
         if (versions != null) {
             for (PluginArtifactVersion pluginArtifactVersion : versions) {
                 save((AbstractObject)pluginArtifactVersion);
             }
-        }
-        save((AbstractObject)artifact);
+        }        
     }
     
     @Override
