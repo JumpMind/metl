@@ -147,6 +147,8 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     boolean lastDataRefreshWasDone = false;
 
     List<SortOrder> lastSortOrder;
+    
+    Label status;
 
     public ExecutionRunPanel(String executionId, ApplicationContext context, TabbedPanel parentTabSheet, IFlowRunnable flowRunnable) {
         this.executionService = context.getExecutionService();
@@ -268,6 +270,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
             logContainer.removeAllItems();
             List<ExecutionStepLog> logs = executionService.findExecutionStepLogs(executionStepIds, getMaxToShow());
             logContainer.addAll(logs);
+            updateStatus();
         });
 
         stepTable.addValueChangeListener(event -> {
@@ -276,6 +279,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
             logContainer.removeAllItems();
             List<ExecutionStepLog> logs = executionService.findExecutionStepLogs(executionStepIds, getMaxToShow());
             logContainer.addAll(logs);
+            updateStatus();
         });
 
         logTable = new Grid();
@@ -326,10 +330,24 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         levelFilterCell.setComponent(levelFilter);
 
         levelFilter.addStyleName(ValoTheme.COMBOBOX_TINY);
+        
+        VerticalLayout logLayout = new VerticalLayout();
+        logLayout.setSizeFull();
+        logLayout.addComponent(logTable);
+        logLayout.setExpandRatio(logTable, 1);
+        
+        HorizontalLayout statusBar = new HorizontalLayout();
+        statusBar.addStyleName(ValoTheme.PANEL_WELL);
+        statusBar.setMargin(new MarginInfo(true, true, true, true));
+        statusBar.setWidth(100, Unit.PERCENTAGE);
+
+        status = new Label("", ContentMode.HTML);
+        statusBar.addComponent(status);
+        logLayout.addComponent(statusBar);
 
         splitPanel = new VerticalSplitPanel();
         splitPanel.setFirstComponent(flowPanel);
-        splitPanel.setSecondComponent(logTable);
+        splitPanel.setSecondComponent(logLayout);
         splitPanel.setSplitPosition(50f);
         splitPanel.setSizeFull();
         addComponent(splitPanel);
@@ -557,7 +575,17 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                 logContainer.removeAllItems();
                 List<ExecutionStepLog> logs = executionService.findExecutionStepLogs(stepIds, getMaxToShow());
                 logContainer.addAll(logs);
+                updateStatus();
             }
+        }
+    }
+    
+    protected void updateStatus() {
+        boolean max = logContainer.getItemIds().size() >= getMaxToShow();
+        if (max) {
+            status.setValue("<span style='color:red'>Displaying only " + logContainer.getItemIds().size() + " messages.  Adjust max number of log message to show more.</span>");
+        } else {
+            status.setValue("<span>Displaying " + logContainer.getItemIds().size() + " messages</span>");
         }
     }
 
@@ -615,6 +643,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                 if (lastSortOrder != null) {
                     logTable.setSortOrder(lastSortOrder);
                 }
+                updateStatus();
             }
         }
 
