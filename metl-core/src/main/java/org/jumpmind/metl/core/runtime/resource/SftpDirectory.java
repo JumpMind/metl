@@ -54,6 +54,7 @@ public class SftpDirectory implements IDirectory {
     protected String user;
     protected String password;
     protected String basePath;
+    protected String keyFileLocation;
     protected Integer connectionTimeout;
     protected boolean mustExist;
     protected ThreadLocal<Session> threadSession;
@@ -71,6 +72,7 @@ public class SftpDirectory implements IDirectory {
             Integer port,
             String user,
             String password,
+            String keyFileLocation,
             String basePath, 
             Integer connectionTimeout,
             boolean mustExist) {
@@ -82,6 +84,7 @@ public class SftpDirectory implements IDirectory {
         this.basePath = basePath;
         this.connectionTimeout = connectionTimeout;
         this.mustExist = mustExist;
+        this.keyFileLocation = keyFileLocation;
         this.threadSession = new ThreadLocal<Session>();
         this.threadChannels = new ThreadLocal<Map<Integer, ChannelSftp>>();
     }
@@ -242,8 +245,13 @@ public class SftpDirectory implements IDirectory {
         JSch jsch=new JSch();
         Session session = null;
         try {
+            if (StringUtils.isNotEmpty(keyFileLocation)) {
+                jsch.addIdentity(keyFileLocation);
+            }
             session = jsch.getSession(user, server, port);
-            session.setPassword(password.getBytes());
+            if (StringUtils.isNotEmpty(password)) {
+                session.setPassword(password.getBytes());
+            }
             java.util.Properties config = new java.util.Properties();
             config.put("StrictHostKeyChecking", "no");
             session.setConfig(config);
@@ -307,8 +315,13 @@ public class SftpDirectory implements IDirectory {
         JSch jsch=new JSch();
         Session session = null;
         try {
+            if (StringUtils.isNotEmpty(keyFileLocation)) {
+                jsch.addIdentity(keyFileLocation);
+            }
             session = jsch.getSession(user, server, port);
-            session.setPassword(password.getBytes());
+            if (StringUtils.isNotEmpty(password)) {
+                session.setPassword(password.getBytes());
+            }
             java.util.Properties config = new java.util.Properties();
             config.put("StrictHostKeyChecking", "no");
             session.setConfig(config);

@@ -53,10 +53,10 @@ include::design/components/processors/xml-formatter.asciidoc[]
 include::design/components/processors/xslt-processor.asciidoc[]
 
 ==== Writers
-include::design/components/readers/rdbms-writer.asciidoc[]
-include::design/components/readers/sql-executor.asciidoc[]
-include::design/components/readers/text-file-writer.asciidoc[]
-include::design/components/readers/zip.asciidoc[]
+include::design/components/writers/rdbms-writer.asciidoc[]
+include::design/components/writers/sql-executor.asciidoc[]
+include::design/components/writers/text-file-writer.asciidoc[]
+include::design/components/writers/zip.asciidoc[]
 
 ==== Controls
 include::design/components/controls/gate.asciidoc[]

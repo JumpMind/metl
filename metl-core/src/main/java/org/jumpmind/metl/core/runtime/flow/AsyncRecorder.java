@@ -22,6 +22,7 @@ package org.jumpmind.metl.core.runtime.flow;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -80,8 +81,7 @@ public class AsyncRecorder implements Runnable {
                     CsvWriter writer = logWriters.get(executionStepId);
                     if (writer == null) {
                         File logFile = new File(LogUtils.getLogDir(), executionStepId + ".log");
-                        writer = new CsvWriter(logFile.getAbsolutePath());
-                        writer.setTextQualifier('"');
+                        writer = new CsvWriter(logFile.getAbsolutePath(),'"',Charset.forName("UTF-8"));
                         logWriters.put(executionStepId, writer);                        
                     }
                     try {

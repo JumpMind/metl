@@ -1,5 +1,7 @@
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.properties.TypedProperties;
@@ -32,6 +34,9 @@ public abstract class AbstractFileWriter extends AbstractComponentRuntime {
     	String fileName = null;
     	if (getFileNameFromMessage) {
     		String objFileName = inputMessage.getHeader().getAsStrings().get(fileNameFromMessageProperty);
+    		if (isNotBlank(relativePathAndFile)) {
+    		    objFileName = relativePathAndFile + objFileName;
+    		}
 			if (objFileName == null || ((String) objFileName).length() == 0) {
 				throw new RuntimeException("Configuration determines that the file name should be in "
 						+ "the message header but was not.  Verify the property " + 

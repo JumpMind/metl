@@ -128,7 +128,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
 
     private EntityData processInputRow(Message inputMessage, String inputRow) throws IOException {
 
-        CsvReader csvReader = new CsvReader(new ByteArrayInputStream(inputRow.getBytes()), Charset.forName(encoding));
+        CsvReader csvReader = new CsvReader(new ByteArrayInputStream(inputRow.getBytes(Charset.forName(encoding))), Charset.forName(encoding));
         csvReader.setDelimiter(delimiter.charAt(0));
         if (isNotBlank(quoteCharacter)) {
             csvReader.setTextQualifier(quoteCharacter.charAt(0));
