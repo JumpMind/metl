@@ -257,6 +257,8 @@ public class FilePoller extends AbstractComponentRuntime {
         List<FileInfo> matches = new ArrayList<>();
         
         ArrayList<FileInfo> filesToSend = new ArrayList<FileInfo>();
+        
+        ArrayList<FileInfo> filesToSort = new ArrayList<FileInfo>();
 
         for (String patternToPoll : filePatternsToPoll) {
 
@@ -268,12 +270,11 @@ public class FilePoller extends AbstractComponentRuntime {
             }
 
             if (matches.size() >= minFilesToPoll) {
-                for (int i = 0; i < matches.size() && i < maxFilesToPoll; i++) {
-                    filesSent.add(matches.get(i));
-                    filesToSend.add(matches.get(i));
+                for (int i = 0; i < matches.size(); i++) {
+                    filesToSort.add(matches.get(i));
                 }
 
-                Collections.sort(filesToSend, (o1, o2) -> {
+                Collections.sort(filesToSort, (o1, o2) -> {
                     int cmpr = 0;
                     if (SORT_NAME.equals(fileSortOption)) {
                         cmpr = new String(o1.getRelativePath())
@@ -285,9 +286,14 @@ public class FilePoller extends AbstractComponentRuntime {
                     return cmpr;
                 });
                 if (fileSortDescending) {
-                    Collections.reverse(filesToSend);
+                    Collections.reverse(filesToSort);
                 }
- 
+                
+                for (int i=0;i<filesToSort.size() && i<maxFilesToPoll;i++) {
+                    filesSent.add(filesToSort.get(i));
+                    filesToSend.add(filesToSort.get(i));
+                }                
+                
                 ArrayList<String> filePaths = new ArrayList<>();
                 for (FileInfo file : filesToSend) {
                     log(LogLevel.INFO, "File polled: " + file.getRelativePath());
@@ -306,6 +312,7 @@ public class FilePoller extends AbstractComponentRuntime {
                 callback.sendShutdownMessage(true);
             }
             matches.clear();
+            filesToSort.clear();
             filesToSend.clear();
         }
     }
