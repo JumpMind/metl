@@ -28,6 +28,7 @@ import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.ISqlRowMapper;
 import org.jumpmind.db.sql.ISqlTemplate;
 import org.jumpmind.db.sql.Row;
+import org.jumpmind.db.sql.mapper.StringMapper;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
@@ -37,7 +38,6 @@ import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
-import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.symmetric.io.data.DbExport;
 import org.jumpmind.symmetric.io.data.DbExport.Format;
@@ -46,9 +46,9 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
 
     IDatabasePlatform databasePlatform;
 
-    public ConfigurationSqlService( IComponentDefinitionFactory componentDefinitionFactory, IDatabasePlatform databasePlatform,
+    public ConfigurationSqlService(IDatabasePlatform databasePlatform,
             IPersistenceManager persistenceManager, String tablePrefix) {
-        super(componentDefinitionFactory, persistenceManager, tablePrefix);
+        super(persistenceManager, tablePrefix);
         this.databasePlatform = databasePlatform;
     }
     
@@ -65,6 +65,12 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                         String.format(
                                 "select count(*) from %1$s_agent_deployment where flow_id = ? ",
                                 tablePrefix), flow.getId()) > 0;
+    }
+    
+    @Override
+    public List<String> findAllProjectVersionIds() {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        return template.query(String.format("select id from %1$s_project_version where deleted=0", tablePrefix), new StringMapper());
     }
 
     public List<AgentDeploymentSummary> findAgentDeploymentSummary(String agentId) {

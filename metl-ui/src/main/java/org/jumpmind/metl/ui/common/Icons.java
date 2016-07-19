@@ -27,6 +27,12 @@ final public class Icons {
     private Icons() {
     }
     
+    public static final FontAwesome UPDATE = FontAwesome.CLOCK_O;
+    
+    public static final FontAwesome UPLOAD = FontAwesome.UPLOAD;
+    
+    public static final FontAwesome REFRESH = FontAwesome.REFRESH;
+    
     public static final FontAwesome FOLDER_OPEN = FontAwesome.FOLDER_OPEN;
     
     public static final FontAwesome FOLDER_CLOSED = FontAwesome.FOLDER;

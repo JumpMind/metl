@@ -45,9 +45,9 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Notification;
-import org.jumpmind.metl.core.model.PluginArtifact;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.User;
@@ -55,6 +55,8 @@ import org.jumpmind.metl.core.model.User;
 public interface IConfigurationService {
     
     public boolean isInstalled();
+    
+    public List<ProjectVersionComponentPlugin> findProjectVersionComponentPlugin(String projectVersionId);
         
     public List<FolderName> findFoldersInProject(String projectVersionId);
     
@@ -149,10 +151,10 @@ public interface IConfigurationService {
     public void refresh(User user);
     
     public void refresh(Group group);
+    
+    public void save(ProjectVersionComponentPlugin projectVersionComponentPlugin);    
 
     public void save(AgentDeployment agentDeployment);
-    
-    public void save (PluginArtifact artifact);
     
     public void save(Resource resource);
     
@@ -188,6 +190,8 @@ public interface IConfigurationService {
     
     public ProjectVersion findProjectVersion(String projectVersionId);
 
+    public List<String> findAllProjectVersionIds();
+    
     public List<Project> findProjects();
     
     public String export(ProjectVersion projectVersion);
@@ -233,7 +237,5 @@ public interface IConfigurationService {
     public Flow copy(Flow original);
 
     public Model copy(Model original);
-    
-    public List<PluginArtifact> findPluginArtifacts();
     
 }

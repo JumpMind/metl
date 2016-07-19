@@ -131,7 +131,8 @@ public class StepRuntime implements Runnable {
         this.targetStepRuntimeUnitOfWorkSent = new HashSet<String>();
         this.componentRuntimeFactory = componentFactory;
         this.componentDefintionFactory = componentDefinitionFactory;
-        this.componentDefintion = componentDefintionFactory.getDefinition(getComponentType());
+        this.componentDefintion = componentDefintionFactory.getDefinition(componentContext.getFlowStep().getComponent().getProjectVersionId(), 
+                getComponentType());
     }
 
     private String getComponentType() {
@@ -202,7 +203,7 @@ public class StepRuntime implements Runnable {
 
     protected void createComponentRuntime(int threadNumber) {
         String type = getComponentType();
-        IComponentRuntime componentRuntime = componentRuntimeFactory.create(type);
+        IComponentRuntime componentRuntime = componentRuntimeFactory.create(componentContext.getFlowStep().getComponent().getProjectVersionId(), type);
         componentRuntimeByThread.put(threadNumber, componentRuntime);
         if (sourceStepRuntimes.size() == 0 && !componentRuntime.supportsStartupMessages()) {
             throw new MisconfiguredException("%s must have an inbound connection from another component",

@@ -25,13 +25,18 @@ import static org.jumpmind.metl.core.runtime.component.definition.ComponentSetti
 import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_INPUT;
 import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_OUTPUT;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -39,27 +44,87 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.model.PluginArtifactVersion;
+import org.jumpmind.metl.core.model.Plugin;
+import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
+import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
-import org.jumpmind.metl.core.util.AbstractXMLFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ComponentXmlDefinitionFactory extends AbstractXMLFactory implements IComponentDefinitionFactory {
+public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactory {
+
+    final Logger logger = LoggerFactory.getLogger(getClass());
+
+    static Set<Plugin> outOfTheBox = new TreeSet<>();
+
+    static {
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-rdbms-reader", null));
+    }
 
     Map<String, XMLComponent> componentsById;
 
     Map<String, List<String>> componentIdsByCategory;
-    
+
+    IConfigurationService configurationService;
+
+    IPluginManager pluginManager;
+
     public ComponentXmlDefinitionFactory() {
-        super(null);
     }
-    
-    public ComponentXmlDefinitionFactory(IPluginManager pluginManager) {
-        super(pluginManager);
+
+    public ComponentXmlDefinitionFactory(IConfigurationService configurationService, IPluginManager pluginManager) {
+        this.configurationService = configurationService;
+        this.pluginManager = pluginManager;
     }
 
     @Override
-    synchronized public Map<String, List<XMLComponent>> getDefinitionsByCategory() {
+    public void init() {
+        List<String> projectVersionIds = configurationService.findAllProjectVersionIds();
+        for (String projectVersionId : projectVersionIds) {
+            List<ProjectVersionComponentPlugin> pvcps = configurationService.findProjectVersionComponentPlugin(projectVersionId);
+            for (Plugin ootbp : outOfTheBox) {
+                boolean matched = false;
+                for (ProjectVersionComponentPlugin pvcp : pvcps) {
+                    if (pvcp.matches(ootbp)) {
+                        matched = true;
+                        String latestVersion = pluginManager.getLatestLocalVersion(pvcp.getArtifactGroup(), pvcp.getArtifactName());
+                        if (!pvcp.getArtifactVersion().equals(latestVersion)) {
+                            if (!pvcp.isPinVersion()) {
+                                logger.info("Upgrading from %s:%s:%s to %s", pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
+                                pvcp.setArtifactVersion(latestVersion);
+                            } else {
+                                logger.info("Not upgrading from %s:%s:%s to %s because the version is pinned", pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
+                                pvcp.setLatestArtifactVersion(latestVersion);
+                            }
+                            configurationService.save(pvcp);
+                        }
+                    }
+                }
+
+                if (!matched) {
+                    String latestVersion = pluginManager.getLatestLocalVersion(ootbp.getArtifactGroup(), ootbp.getArtifactName());
+                    ClassLoader classLoader = pluginManager.getClassLoader(ootbp.getArtifactGroup(), ootbp.getArtifactName(), latestVersion);
+                    loadComponentsForClassloader(classLoader);
+                    
+                    ProjectVersionComponentPlugin plugin = new ProjectVersionComponentPlugin();
+                    plugin.setProjectVersionId(projectVersionId);
+                    plugin.setArtifactGroup(ootbp.getArtifactGroup());
+                    plugin.setArtifactName(ootbp.getArtifactName());
+                    
+                    plugin.setArtifactVersion(latestVersion);
+                    plugin.setLatestArtifactVersion(latestVersion);
+                    logger.info("Registering plugin %s:%s:%s", plugin.getArtifactGroup(), plugin.getArtifactName(), plugin.getArtifactVersion());
+                    configurationService.save(plugin);
+                }
+
+            }
+        }
+
+    }
+
+    @Override
+    synchronized public Map<String, List<XMLComponent>> getDefinitionsByCategory(String projectVersionId) {
         Map<String, List<XMLComponent>> componentDefinitionsByCategory = new HashMap<>();
         Set<String> categories = componentIdsByCategory.keySet();
         for (String category : categories) {
@@ -73,24 +138,21 @@ public class ComponentXmlDefinitionFactory extends AbstractXMLFactory implements
         return componentDefinitionsByCategory;
     }
 
-    @Override
     synchronized public Map<String, List<String>> getTypesByCategory() {
         return componentIdsByCategory;
     }
 
     @Override
-    synchronized public XMLComponent getDefinition(String id) {
+    synchronized public XMLComponent getDefinition(String projectVersionId, String id) {
         return componentsById.get(id);
     }
 
-    @Override
     protected void reset() {
         componentIdsByCategory = new HashMap<String, List<String>>();
         componentsById = new HashMap<String, XMLComponent>();
     }
 
-    @Override
-    protected void loadComponentsForClassloader(PluginArtifactVersion pluginArtifactVersion, ClassLoader classLoader) {
+    protected void loadComponentsForClassloader(ClassLoader classLoader) {
         try {
             JAXBContext jc = JAXBContext.newInstance(XMLComponents.class.getPackage().getName());
             Unmarshaller unmarshaller = jc.createUnmarshaller();
@@ -106,7 +168,7 @@ public class ComponentXmlDefinitionFactory extends AbstractXMLFactory implements
                     for (XMLComponent xmlComponent : componentList) {
                         String id = xmlComponent.getId();
                         if (componentsById.containsKey(id)) {
-                            log.warn("There was already a component registered under the id of {}.  Overwriting {} with {}",
+                            logger.warn("There was already a component registered under the id of {}.  Overwriting {} with {}",
                                     new Object[] { id, componentsById.get(id).getClassName(), xmlComponent.getClassName() });
                         }
                         componentsById.put(id, xmlComponent);
@@ -143,6 +205,25 @@ public class ComponentXmlDefinitionFactory extends AbstractXMLFactory implements
 
             }
         } catch (Exception e) {
+            throw new IoException(e);
+        }
+    }
+
+    protected List<InputStream> loadResources(final String name, final ClassLoader classLoader) {
+        try {
+            Set<URL> urls = new HashSet<>();
+            final List<InputStream> list = new ArrayList<InputStream>();
+            final Enumeration<URL> systemResources = (classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader)
+                    .getResources(name);
+            while (systemResources.hasMoreElements()) {
+                URL url = systemResources.nextElement();
+                if (!urls.contains(url)) {
+                    list.add(url.openStream());
+                    urls.add(url);
+                }
+            }
+            return list;
+        } catch (IOException e) {
             throw new IoException(e);
         }
     }

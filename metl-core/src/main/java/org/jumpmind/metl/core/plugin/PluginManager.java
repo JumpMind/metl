@@ -1,39 +1,23 @@
 package org.jumpmind.metl.core.plugin;
 
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
-import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
-import org.eclipse.aether.graph.Dependency;
-import org.eclipse.aether.graph.DependencyFilter;
 import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
-import org.eclipse.aether.resolution.ArtifactResult;
-import org.eclipse.aether.resolution.DependencyRequest;
+import org.eclipse.aether.resolution.VersionRangeRequest;
+import org.eclipse.aether.resolution.VersionRangeResolutionException;
+import org.eclipse.aether.resolution.VersionRangeResult;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
-import org.eclipse.aether.util.artifact.JavaScopes;
-import org.eclipse.aether.util.filter.DependencyFilterUtils;
-import org.jumpmind.metl.core.model.PluginArtifact;
-import org.jumpmind.metl.core.model.PluginArtifactVersion;
-import org.jumpmind.metl.core.model.PluginType;
-import org.jumpmind.metl.core.persist.IConfigurationService;
-import org.jumpmind.metl.core.util.VersionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,75 +27,86 @@ public class PluginManager implements IPluginManager {
 
     String localRepositoryPath;
 
-    IConfigurationService configurationService;
-
     RepositorySystem repositorySystem;
 
     RepositorySystemSession repositorySystemSession;
 
-    Map<PluginArtifactVersion, ClassLoader> plugins;
-
-    public PluginManager(IConfigurationService configurationService, String localRepositoryPath) {
-        this.configurationService = configurationService;
+    public PluginManager(String localRepositoryPath) {
         this.localRepositoryPath = localRepositoryPath;
     }
 
+    @Override
     public void init() {
         repositorySystem = newRepositorySystem();
         repositorySystemSession = newRepositorySystemSession(repositorySystem, localRepositoryPath);
-        List<PluginArtifact> outOfTheBoxPlugins = getOutOfTheBoxPlugins();
-        for (PluginArtifact pluginArtifact : outOfTheBoxPlugins) {
-            configurationService.save(pluginArtifact);
-        }
+    }
+    
+    @Override
+    public ClassLoader getClassLoader(String artifactGroup, String artifactName, String artifactVersion) {
+        return null;
     }
 
     @Override
-    synchronized public Map<PluginArtifactVersion, ClassLoader> getPlugins() {
-        if (plugins == null) {
-            reload();
+    public String getLatestLocalVersion(String artifactGroup, String artifactName) {
+        String latestVersion = null;
+        try {
+            VersionRangeRequest rangeRequest = new VersionRangeRequest();
+            rangeRequest.setArtifact(new DefaultArtifact(String.format("%s:%s:[0,)", artifactGroup, artifactName)));
+            RemoteRepository repo = new RemoteRepository.Builder("local", "default", localRepositoryPath).build();
+            rangeRequest.setRepositories(Arrays.asList(repo));
+            VersionRangeResult rangeResult = repositorySystem.resolveVersionRange(repositorySystemSession, rangeRequest);
+            if (rangeResult != null && rangeResult.getHighestVersion() != null) {
+                latestVersion = rangeResult.getHighestVersion().toString();
+            }
+        } catch (VersionRangeResolutionException e) {
+            logger.error("", e);
         }
-        return plugins;
+        return latestVersion;
     }
 
     @Override
     synchronized public void reload() {
-        plugins = new HashMap<>();
-        List<PluginArtifact> list = configurationService.findPluginArtifacts();
-        for (PluginArtifact pluginArtifact : list) {
-            List<PluginArtifactVersion> versions = pluginArtifact.getPluginArtifactVersions();
-            for (PluginArtifactVersion pluginArtifactVersion : versions) {
-                try {
-                    Artifact artifact = new DefaultArtifact(pluginArtifactVersion.getId());
-                    DependencyFilter classpathFlter = DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE);
-
-                    CollectRequest collectRequest = new CollectRequest();
-                    collectRequest.setRoot(new Dependency(artifact, JavaScopes.COMPILE));
-                    List<RemoteRepository> remoteRepositories = Arrays
-                            .asList(new RemoteRepository.Builder("jumpmind", "default", "http://maven.jumpmind.com/repo").build());
-                    collectRequest.setRepositories(remoteRepositories);
-
-                    DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, classpathFlter);
-
-                    List<ArtifactResult> artifactResults = repositorySystem.resolveDependencies(repositorySystemSession, dependencyRequest)
-                            .getArtifactResults();
-
-                    List<URL> artifactUrls = new ArrayList<URL>();
-                    for (ArtifactResult artRes : artifactResults) {
-                        artifactUrls.add(artRes.getArtifact().getFile().toURI().toURL());
-                    }
-                    plugins.put(pluginArtifactVersion,
-                            new URLClassLoader(artifactUrls.toArray(new URL[artifactUrls.size()]), getClass().getClassLoader()));
-                } catch (Exception e) {
-                    logger.error("Failed to resolve dependency: " + pluginArtifactVersion.getId(), e);
-                }
-            }
-        }
-    }
-
-    protected List<PluginArtifact> getOutOfTheBoxPlugins() {
-        List<PluginArtifact> artifacts = new ArrayList<>();
-        artifacts.add(new PluginArtifact("comp-rdbms-reader", "org.jumpmind.metl", PluginType.COMPONENT, VersionUtils.getCurrentVersion()));
-        return artifacts;
+        // plugins = new HashMap<>();
+        // List<PluginArtifact> list =
+        // configurationService.findPluginArtifacts();
+        // for (PluginArtifact pluginArtifact : list) {
+        // List<PluginArtifactVersion> versions =
+        // pluginArtifact.getPluginArtifactVersions();
+        // for (PluginArtifactVersion pluginArtifactVersion : versions) {
+        // try {
+        // Artifact artifact = new
+        // DefaultArtifact(pluginArtifactVersion.getId());
+        // DependencyFilter classpathFlter =
+        // DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE);
+        //
+        // CollectRequest collectRequest = new CollectRequest();
+        // collectRequest.setRoot(new Dependency(artifact, JavaScopes.COMPILE));
+        // List<RemoteRepository> remoteRepositories = Arrays
+        // .asList(new RemoteRepository.Builder("jumpmind", "default",
+        // "http://maven.jumpmind.com/repo").build());
+        // collectRequest.setRepositories(remoteRepositories);
+        //
+        // DependencyRequest dependencyRequest = new
+        // DependencyRequest(collectRequest, classpathFlter);
+        //
+        // List<ArtifactResult> artifactResults =
+        // repositorySystem.resolveDependencies(repositorySystemSession,
+        // dependencyRequest)
+        // .getArtifactResults();
+        //
+        // List<URL> artifactUrls = new ArrayList<URL>();
+        // for (ArtifactResult artRes : artifactResults) {
+        // artifactUrls.add(artRes.getArtifact().getFile().toURI().toURL());
+        // }
+        // plugins.put(pluginArtifactVersion,
+        // new URLClassLoader(artifactUrls.toArray(new
+        // URL[artifactUrls.size()]), getClass().getClassLoader()));
+        // } catch (Exception e) {
+        // logger.error("Failed to resolve dependency: " +
+        // pluginArtifactVersion.getId(), e);
+        // }
+        // }
+        // }
     }
 
     private static RepositorySystem newRepositorySystem() {

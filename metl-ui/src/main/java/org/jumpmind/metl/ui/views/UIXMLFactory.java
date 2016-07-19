@@ -34,7 +34,6 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.model.PluginArtifactVersion;
 import org.jumpmind.metl.core.util.AbstractXMLFactory;
 import org.jumpmind.metl.ui.definition.XMLComponentUI;
 import org.jumpmind.metl.ui.definition.XMLUI;
@@ -74,7 +73,7 @@ public class UIXMLFactory extends AbstractXMLFactory implements IUIFactory {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void loadComponentsForClassloader(PluginArtifactVersion pluginArtifactVersion, ClassLoader classLoader) {
+    protected void loadComponentsForClassloader(ClassLoader classLoader) {
         try {
             JAXBContext jc = JAXBContext.newInstance(XMLUI.class.getPackage().getName());
             Unmarshaller unmarshaller = jc.createUnmarshaller();

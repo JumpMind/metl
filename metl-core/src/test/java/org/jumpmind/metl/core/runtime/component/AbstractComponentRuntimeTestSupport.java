@@ -87,7 +87,7 @@ public abstract class AbstractComponentRuntimeTestSupport {
 	}
 	
 	public IComponentRuntime getComponentSpy() {
-	    return Mockito.spy(getComponentRuntimeFromXMLFactory().create(getComponentId()));
+	    return Mockito.spy(getComponentRuntimeFromXMLFactory().create(flow.getProjectVersionId(), getComponentId()));
 	}
 	
 	IComponentRuntime spy;

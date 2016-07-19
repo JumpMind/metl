@@ -63,10 +63,9 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Notification;
-import org.jumpmind.metl.core.model.PluginArtifact;
-import org.jumpmind.metl.core.model.PluginArtifactVersion;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.ResourceSetting;
@@ -75,42 +74,14 @@ import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserGroup;
 import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.model.Version;
-import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.util.NameValue;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.util.FormatUtils;
 
 abstract class AbstractConfigurationService extends AbstractService implements IConfigurationService {
 
-    IComponentDefinitionFactory componentDefinitionFactory;
-
-    AbstractConfigurationService(IComponentDefinitionFactory componentDefinitionFactory, IPersistenceManager persistenceManager,
-            String tablePrefix) {
+    AbstractConfigurationService(IPersistenceManager persistenceManager, String tablePrefix) {
         super(persistenceManager, tablePrefix);
-        this.componentDefinitionFactory = componentDefinitionFactory;
-    }
-    
-    @Override
-    public void save (PluginArtifact artifact) {
-        save((AbstractObject)artifact);
-        List<PluginArtifactVersion> versions = artifact.getPluginArtifactVersions();
-        if (versions != null) {
-            for (PluginArtifactVersion pluginArtifactVersion : versions) {
-                save((AbstractObject)pluginArtifactVersion);
-            }
-        }        
-    }
-    
-    @Override
-    public List<PluginArtifact> findPluginArtifacts() {
-        List<PluginArtifact> artifacts = find(PluginArtifact.class, null, PluginArtifact.class);
-        for (PluginArtifact pluginArtifact : artifacts) {
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("pluginArtifactId", pluginArtifact.getId());
-            List<PluginArtifactVersion> versions = find(PluginArtifactVersion.class, params, PluginArtifactVersion.class);
-            pluginArtifact.setPluginArtifactVersions(versions);
-        }
-        return artifacts;
     }
 
     @Override
@@ -275,16 +246,22 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         }
         return projectVersion;
     }
-    
+
+    @Override
+    public List<ProjectVersionComponentPlugin> findProjectVersionComponentPlugin(String projectVersionId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("projectVersionId", projectVersionId);
+        return find(ProjectVersionComponentPlugin.class, params);
+    }
+
     @Override
     public void refresh(Project project) {
         persistenceManager.refresh(project, null, null, tableName(Component.class));
-        Map<String,Object> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("deleted", 0);
         params.put("projectId", project.getId());
-        List<ProjectVersion> versions = persistenceManager.find(ProjectVersion.class, params, null, null,
-                tableName(ProjectVersion.class));
-        project.setProjectVersions(versions);    
+        List<ProjectVersion> versions = persistenceManager.find(ProjectVersion.class, params, null, null, tableName(ProjectVersion.class));
+        project.setProjectVersions(versions);
         for (ProjectVersion projectVersion : versions) {
             projectVersion.setProject(project);
         }
@@ -964,6 +941,12 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     }
 
     @Override
+    public void save(ProjectVersionComponentPlugin projectVersionComponentPlugin) {
+        projectVersionComponentPlugin.setLastUpdateTime(new Date());
+        persistenceManager.save(projectVersionComponentPlugin, null, null, tableName(projectVersionComponentPlugin.getClass()));
+    }
+
+    @Override
     public void delete(Model model) {
         model.setDeleted(true);
         save((AbstractObject) model);
@@ -1258,7 +1241,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     }
 
     protected void massageValues(Map<String, AbstractObject> oldToNewUUIDMapping, List<? extends Setting> settings) {
-        Map<String,String> tokens = toStringTokens(oldToNewUUIDMapping);
+        Map<String, String> tokens = toStringTokens(oldToNewUUIDMapping);
         for (Setting setting : settings) {
             setting.setValue(FormatUtils.replaceTokens(setting.getValue(), tokens, false));
         }

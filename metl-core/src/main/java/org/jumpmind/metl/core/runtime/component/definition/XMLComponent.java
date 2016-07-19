@@ -30,16 +30,14 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
-import org.jumpmind.metl.core.model.PluginArtifactVersion;
-
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "component", propOrder = {})
 public class XMLComponent implements Serializable, Comparable<XMLComponent> {
 
     private static final long serialVersionUID = 1L;
     
-    protected PluginArtifactVersion pluginArtifactVersion;
-
+    protected ClassLoader classLoader;
+    
     @XmlType
     @XmlEnum(String.class)
     public enum MessageType {
@@ -115,6 +113,17 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
 
     @XmlElement
     protected XMLSettings settings;
+    
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+    
+    public ClassLoader getClassLoader() {
+        if (classLoader == null) {
+            classLoader = getClass().getClassLoader();
+        }
+        return classLoader;
+    }
 
     public String getName() {
         return name;
@@ -250,14 +259,6 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
     
     public String getDeploymentListenerClassName() {
         return deploymentListenerClassName;
-    }
-
-    public void setPluginArtifactVersion(PluginArtifactVersion pluginArtifactVersion) {
-        this.pluginArtifactVersion = pluginArtifactVersion;
-    }
-    
-    public PluginArtifactVersion getPluginArtifactVersion() {
-        return pluginArtifactVersion;
     }
     
 }

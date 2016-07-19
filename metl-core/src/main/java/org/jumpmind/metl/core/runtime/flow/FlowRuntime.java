@@ -247,7 +247,7 @@ public class FlowRuntime {
     
     protected Flow manipulateFlow(Flow flow) {
         for (FlowStep flowStep : new ArrayList<>(flow.getFlowSteps())) {
-            XMLComponent componentDefintion = componentDefinitionFactory.getDefinition(flowStep.getComponent().getType());
+            XMLComponent componentDefintion = componentDefinitionFactory.getDefinition(flow.getProjectVersionId(), flowStep.getComponent().getType());
             if (isNotBlank(componentDefintion.getFlowManipulatorClassName())) {
                 try {
                     IFlowManipulator flowManipulator = (IFlowManipulator) Class.forName(componentDefintion.getFlowManipulatorClassName())

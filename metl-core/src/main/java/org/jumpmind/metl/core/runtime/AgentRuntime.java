@@ -380,7 +380,7 @@ public class AgentRuntime {
         Flow flow = deployment.getFlow();
         List<FlowStep> steps = flow.getFlowSteps();
         for (FlowStep flowStep : steps) {
-            XMLComponent componentDefintion = componentDefinitionFactory.getDefinition(flowStep.getComponent().getType());
+            XMLComponent componentDefintion = componentDefinitionFactory.getDefinition(flow.getProjectVersionId(), flowStep.getComponent().getType());
             if (componentDefintion != null && isNotBlank(componentDefintion.getDeploymentListenerClassName())) {
                 try {
                     IComponentDeploymentListener listener = (IComponentDeploymentListener)Class.forName(componentDefintion.getDeploymentListenerClassName()).newInstance();

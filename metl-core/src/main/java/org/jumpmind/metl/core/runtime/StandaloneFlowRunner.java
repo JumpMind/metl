@@ -160,7 +160,7 @@ public class StandaloneFlowRunner {
             new ConfigDatabaseUpgrader("/schema.xml", databasePlatform, true, "METL").upgrade();
             persistenceManager = new SqlPersistenceManager(databasePlatform);
             ComponentXmlDefinitionFactory componentDefinitionFactory = new ComponentXmlDefinitionFactory();
-            configurationService = new ConfigurationSqlService(componentDefinitionFactory, databasePlatform, persistenceManager, "METL");
+            configurationService = new ConfigurationSqlService(databasePlatform, persistenceManager, "METL");
             executionService = new ExecutionSqlService(databasePlatform, persistenceManager, "METL", new StandardEnvironment());
             agentRuntime = new AgentRuntime(new Agent("test", AppUtils.getHostName()), configurationService, executionService,
                     new ComponentRuntimeFactory(componentDefinitionFactory), componentDefinitionFactory, new ResourceFactory(), new HttpRequestMappingRegistry());

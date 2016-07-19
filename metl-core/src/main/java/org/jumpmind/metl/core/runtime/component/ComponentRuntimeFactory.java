@@ -31,9 +31,10 @@ public class ComponentRuntimeFactory implements IComponentRuntimeFactory {
         this.componentDefinitionFactory = componentDefinitionFactory;
     }
 
-    synchronized public IComponentRuntime create(String id) {
+    @Override
+    synchronized public IComponentRuntime create(String projectVersionId, String id) {
         try {
-            XMLComponent definition = componentDefinitionFactory.getDefinition(id);
+            XMLComponent definition = componentDefinitionFactory.getDefinition(projectVersionId, id);
             if (definition != null) {
                 IComponentRuntime component = (IComponentRuntime) Class.forName(definition.getClassName()).newInstance();
                 component.create(definition);

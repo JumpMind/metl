@@ -51,6 +51,7 @@ import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
+import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.util.DatabaseScriptContainer;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.VersionUtils;
@@ -142,6 +143,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         }
         
         ctx.getBean(IPluginManager.class).init();
+        ctx.getBean(IComponentDefinitionFactory.class).init();
     }
 
     private Logger getLogger() {

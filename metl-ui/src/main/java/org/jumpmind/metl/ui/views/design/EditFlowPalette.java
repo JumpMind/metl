@@ -87,7 +87,7 @@ public class EditFlowPalette extends VerticalLayout {
     }
 
     protected void populateComponentTypesInComponentPalette(String projectVersionId) {
-        Map<String, List<XMLComponent>> componentDefinitionsByCategory = context.getComponentDefinitionFactory().getDefinitionsByCategory();
+        Map<String, List<XMLComponent>> componentDefinitionsByCategory = context.getComponentDefinitionFactory().getDefinitionsByCategory(projectVersionId);
         for (String category : new TreeSet<>(componentDefinitionsByCategory.keySet())) {
             List<XMLComponent> componentDefinitions = new ArrayList<XMLComponent>(componentDefinitionsByCategory.get(category));
             Collections.sort(componentDefinitions);

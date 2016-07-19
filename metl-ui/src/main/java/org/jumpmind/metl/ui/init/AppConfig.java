@@ -238,7 +238,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConfigurationService configurationService() {
         if (configurationService == null) {
-            configurationService = new ConfigurationSqlService(componentDefinitionFactory(), configDatabasePlatform(), persistenceManager(),
+            configurationService = new ConfigurationSqlService(configDatabasePlatform(), persistenceManager(),
                     tablePrefix());
         }
         return configurationService;
@@ -262,22 +262,22 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         }
         return executionService;
     }
-    
+
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IPluginManager pluginManager() {
         if (pluginManager == null) {
             String localPluginDir = String.format("%s/%s", env.getProperty(AppConstants.PROP_CONFIG_DIR), AppConstants.PLUGINS_DIR);
-            pluginManager = new PluginManager(configurationService(), localPluginDir);
+            pluginManager = new PluginManager(localPluginDir);
         }
         return pluginManager;
-    }    
+    }
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IComponentDefinitionFactory componentDefinitionFactory() {
         if (componentDefinitionFactory == null) {
-            componentDefinitionFactory = new ComponentXmlDefinitionFactory(pluginManager());
+            componentDefinitionFactory = new ComponentXmlDefinitionFactory(configurationService(), pluginManager());
         }
         return componentDefinitionFactory;
     }

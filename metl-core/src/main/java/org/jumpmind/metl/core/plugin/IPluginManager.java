@@ -1,14 +1,12 @@
 package org.jumpmind.metl.core.plugin;
 
-import java.util.Map;
-
-import org.jumpmind.metl.core.model.PluginArtifactVersion;
-
 public interface IPluginManager {
     
     public void init();
-
-    public Map<PluginArtifactVersion, ClassLoader> getPlugins();
     
+    public String getLatestLocalVersion(String artifactGroup, String artifactName);
+    
+    public ClassLoader getClassLoader(String artifactGroup, String artifactName, String artifactVersion);
+
     public void reload();
 }

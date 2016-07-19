@@ -5,10 +5,10 @@ import java.util.Map;
 
 public interface IComponentDefinitionFactory {
 
-    XMLComponent getDefinition(String id);
+    public void init();
+    
+    XMLComponent getDefinition(String projectVersionId, String id);
 
-    Map<String, List<String>> getTypesByCategory();
-
-    Map<String, List<XMLComponent>> getDefinitionsByCategory();
+    Map<String, List<XMLComponent>> getDefinitionsByCategory(String projectVersionId);
 
 }

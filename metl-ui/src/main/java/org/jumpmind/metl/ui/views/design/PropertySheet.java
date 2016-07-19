@@ -196,7 +196,7 @@ public class PropertySheet extends AbsoluteLayout {
 
             if (obj instanceof Component) {
                 Component component = (Component) obj;
-                XMLComponent componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getType());
+                XMLComponent componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(), component.getType());
                 addThreadCount(componentDefintion, formLayout, component);
                 addComponentShared(formLayout, component);
             }
@@ -257,7 +257,7 @@ public class PropertySheet extends AbsoluteLayout {
     }
 
     private boolean hasSetting(Component component, String setting) {
-        XMLComponent componentDefinition = context.getComponentDefinitionFactory().getDefinition(component.getType());
+        XMLComponent componentDefinition = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(), component.getType());
         return (componentDefinition.findXMLSetting(setting) != null);
     }
 
@@ -269,7 +269,7 @@ public class PropertySheet extends AbsoluteLayout {
     }
 
     protected void addComponentProperties(FormLayout formLayout, Component component) {
-        XMLComponent componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getType());
+        XMLComponent componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(), component.getType());
         addComponentName(formLayout, component);
         TextField textField = new TextField("Component Type");
         textField.setValue(componentDefintion.getName());
@@ -459,7 +459,7 @@ public class PropertySheet extends AbsoluteLayout {
     protected List<XMLSetting> buildSettings(Object obj) {
         if (obj instanceof Component) {
             Component component = (Component) obj;
-            XMLComponent definition = context.getComponentDefinitionFactory().getDefinition(component.getType());
+            XMLComponent definition = context.getComponentDefinitionFactory().getDefinition(component.getProjectVersionId(), component.getType());
             return definition.getSettings().getSetting();
         } else if (obj instanceof Resource) {
             Resource resource = (Resource) obj;
