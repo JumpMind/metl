@@ -39,7 +39,7 @@ public final class UiUtils {
     }
 
     public static Label getName(String filter, String name) {
-        if (filter != null && isNotBlank(filter)) {
+        if (isNotBlank(filter) && isNotBlank(name)) {
             int[] startEndIndex = getFilterMatchRange(filter, name);
             if (startEndIndex[0] != -1) {
                 String pre = startEndIndex[0] < name.length() ? name.substring(0, startEndIndex[0]) : "";
