@@ -47,7 +47,7 @@ sourceSets.main.compileClasspath += [configurations.provided]
 
 dependencies {
     compile project(":metl-core")
-    compile (group:"org.jumpmind.vaadin", name:"sqlexplorer-vaadin", version:"1.2.109", changing:true) {
+    compile (group:"org.jumpmind.vaadin", name:"sqlexplorer-vaadin", version:"1.2.115", changing:true) {
        exclude group:'org.jumpmind.symmetric'
     }
     compile "com.cybercom:spring-ui-scope:0.0.2"
