@@ -1,6 +1,7 @@
 package org.jumpmind.metl.core.persist;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,6 +40,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
     final static Integer MODEL_IDX = new Integer(0);
     final static Integer RESOURCE_IDX = new Integer(0);
     final static Integer FLOW_IDX = new Integer(4);
+    
+    final static Integer CREATE_TIME_IDX = new Integer(0);
+    final static Integer LAST_UPDATE_TIME_IDX = new Integer(1);
+    final static Integer CREATE_BY_IDX = new Integer(2);
+    final static Integer LAST_UPDATE_BY_IDX = new Integer(3);
     
     final String[][] PROJECT_SQL = {
             {"_PROJECT","SELECT * FROM %1$s_PROJECT WHERE ID IN (SELECT PROJECT_ID FROM %1$s_PROJECT_VERSION WHERE ID='%2$s')","ID"},
@@ -93,10 +99,10 @@ public class ImportExportService extends AbstractService implements IImportExpor
 
     private void setColumnsToExclude() {
         columnsToExclude = new String[4];
-        columnsToExclude[0] = "CREATE_TIME";
-        columnsToExclude[1] = "LAST_UPDATE_TIME";
-        columnsToExclude[2] = "CREATE_BY";
-        columnsToExclude[3] = "LAST_UPDATE_BY";
+        columnsToExclude[CREATE_TIME_IDX] = "CREATE_TIME";
+        columnsToExclude[LAST_UPDATE_TIME_IDX] = "LAST_UPDATE_TIME";
+        columnsToExclude[CREATE_BY_IDX] = "CREATE_BY";
+        columnsToExclude[LAST_UPDATE_BY_IDX] = "LAST_UPDATE_BY";
     }
 
     @Override
@@ -418,7 +424,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         try {
             Table table = databasePlatform.getTableFromCache(null, null, inserts.getTableName(),
                     false);
-            excludeColumns(table);
+            excludeInsertColumns(table);
             DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.INSERT,
                     table.getCatalog(), table.getSchema(), table.getName(),
                     table.getPrimaryKeyColumns(), table.getColumns(), null, null, true);
@@ -427,6 +433,9 @@ public class ImportExportService extends AbstractService implements IImportExpor
             while (itr.hasNext()) {
                 String key = itr.next();
                 LinkedCaseInsensitiveMap<Object> row = inserts.getTableData().get(key);
+                Date createTime = new Date();
+                row.put("CREATE_TIME", createTime);
+                row.put("LAST_UPDATE_TIME", createTime);
                 transaction.prepareAndExecute(stmt.getSql(), row);
             }              
         } catch (Exception e) {
@@ -436,7 +445,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
 
     private void processTableUpdates(TableData updates, ISqlTransaction transaction) {
         Table table = databasePlatform.getTableFromCache(null, null, updates.getTableName(), false);
-        excludeColumns(table);
+        excludeUpdateColumns(table);
         DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.UPDATE, table.getCatalog(),
                 table.getSchema(), table.getName(), table.getPrimaryKeyColumns(),
                 getUpdateColumns(table), null, null, true);
@@ -445,6 +454,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
         while (itr.hasNext()) {
             String key = itr.next();
             LinkedCaseInsensitiveMap<Object> row = updates.getTableData().get(key);
+            row.put("LAST_UPDATE_TIME", new Date());
             transaction.prepareAndExecute(stmt.getSql(), row);
         }              
     }
@@ -453,7 +463,6 @@ public class ImportExportService extends AbstractService implements IImportExpor
         if (deletes != null) {
             Table table = databasePlatform.getTableFromCache(null, null, deletes.getTableName(),
                     false);
-            excludeColumns(table);
             DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.DELETE,
                     table.getCatalog(), table.getSchema(), table.getName(),
                     table.getPrimaryKeyColumns(), getUpdateColumns(table), null, null, true);
@@ -476,17 +485,26 @@ public class ImportExportService extends AbstractService implements IImportExpor
         return columns.toArray(new Column[0]);
     }
 
-    private void excludeColumns(Table table) {
+    private void excludeInsertColumns(Table table) {
         for (Column column : table.getColumns()) {
-            if (column.getName().equalsIgnoreCase(columnsToExclude[0])
-                    || column.getName().equalsIgnoreCase(columnsToExclude[1])
-                    || column.getName().equalsIgnoreCase(columnsToExclude[2])
-                    || column.getName().equalsIgnoreCase(columnsToExclude[3])) {
+            if (column.getName().equalsIgnoreCase(columnsToExclude[CREATE_BY_IDX])
+                    || column.getName().equalsIgnoreCase(columnsToExclude[LAST_UPDATE_BY_IDX])) {
                 table.removeColumn(column);
             }
         }
     }
 
+    private void excludeUpdateColumns(Table table) {
+        for (Column column : table.getColumns()) {
+            if (column.getName().equalsIgnoreCase(columnsToExclude[CREATE_BY_IDX])
+                    || column.getName().equalsIgnoreCase(columnsToExclude[LAST_UPDATE_BY_IDX])
+                    || column.getName().equalsIgnoreCase(columnsToExclude[CREATE_TIME_IDX])) {
+                table.removeColumn(column);
+            }
+        }
+    }
+    
+    
     private ConfigData deserializeConfigurationData(String configDataString) {
 
         ObjectMapper mapper = new ObjectMapper();
@@ -517,10 +535,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 String existingPk = existingRowItr.next();
                 if (newPk.equalsIgnoreCase(existingPk)) {
                     found = true;
+                    break;
                 }
-                if (!found) {
-                    inserts.getTableData().put(newPk, newRow);
-                }
+            }
+            if (!found) {
+                inserts.getTableData().put(newPk, newRow);
             }
         }        
         return inserts;
@@ -543,6 +562,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 String newPk = newRowItr.next();
                 if (newPk.equalsIgnoreCase(existingPk)) {
                     found = true;
+                    break;
                 }
             }
             if (!found) {
@@ -580,6 +600,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
                     String existingPk = existingRowItr.next();
                     if (newPk.equalsIgnoreCase(existingPk)) {
                         found = true;
+                        break;
                     }
                 }
                 if (found) {
