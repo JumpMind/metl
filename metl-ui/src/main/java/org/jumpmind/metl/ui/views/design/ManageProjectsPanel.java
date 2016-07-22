@@ -407,18 +407,23 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
     }
 
     protected void removeVersion(VerticalLayout layout, Grid grid) {
-        ConfirmDialog.show("Delete Version(s)?",
-                "Are you sure you want to delete the selected version(s)?", () -> {
-                    ProjectVersion item = (ProjectVersion) grid.getSelectedRow();
-                    grid.getContainerDataSource().removeItem(item);
-                    item.setDeleted(true);
-                    context.getConfigurationService().save(item);
-                    sort();
-                    setButtonsEnabled();
-                    this.projectGrid.deselect(item.getProject());
-                    this.projectGrid.select(item.getProject());
-                    return true;
-                });
+        if (grid.getContainerDataSource().size() > 1) {
+            ConfirmDialog.show("Delete Version(s)?",
+                    "Are you sure you want to delete the selected version(s)?", () -> {
+                        ProjectVersion item = (ProjectVersion) grid.getSelectedRow();
+                        grid.getContainerDataSource().removeItem(item);
+                        item.setDeleted(true);
+                        context.getConfigurationService().save(item);
+                        sort();
+                        setButtonsEnabled();
+                        this.projectGrid.deselect(item.getProject());
+                        this.projectGrid.select(item.getProject());
+                        return true;
+                    });
+        } else {
+            NotifyDialog.show("Can't delete", "A project requires at least one version", null,
+                    Type.HUMANIZED_MESSAGE);
+        }
     }
 
     protected void removeProject() {
