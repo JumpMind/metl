@@ -1,23 +1,34 @@
 package org.jumpmind.metl.core.plugin;
 
-import java.util.Arrays;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
+import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.graph.DependencyFilter;
 import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.repository.LocalRepository;
-import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactResult;
+import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResolutionException;
 import org.eclipse.aether.resolution.VersionRangeResult;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
+import org.eclipse.aether.transport.classpath.ClasspathTransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
+import org.eclipse.aether.util.artifact.JavaScopes;
+import org.eclipse.aether.util.filter.DependencyFilterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,10 +51,47 @@ public class PluginManager implements IPluginManager {
         repositorySystem = newRepositorySystem();
         repositorySystemSession = newRepositorySystemSession(repositorySystem, localRepositoryPath);
     }
-    
+
     @Override
     public ClassLoader getClassLoader(String artifactGroup, String artifactName, String artifactVersion) {
-        return null;
+        try {
+            Artifact artifact = new DefaultArtifact(String.format("%s:%s:%s", artifactGroup, artifactName, artifactVersion));
+            DependencyFilter classpathFlter = DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE);
+
+            CollectRequest collectRequest = new CollectRequest();
+            collectRequest.setRoot(new Dependency(artifact, JavaScopes.COMPILE));
+
+            DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, classpathFlter);
+
+            List<ArtifactResult> artifactResults = repositorySystem.resolveDependencies(repositorySystemSession, dependencyRequest)
+                    .getArtifactResults();
+
+            List<URL> artifactUrls = new ArrayList<URL>();
+            for (ArtifactResult artRes : artifactResults) {
+                artifactUrls.add(artRes.getArtifact().getFile().toURI().toURL());
+            }
+
+            return new URLClassLoader(artifactUrls.toArray(new URL[artifactUrls.size()]), getClass().getClassLoader());
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public void deploy (String artifactGroup, String artifactName, String artifactVersion, String filePath) {
+//        Artifact jarArtifact = new DefaultArtifact(artifactGroup, artifactName, "jar", artifactVersion);
+//        jarArtifact = jarArtifact.setFile(new File( filePath ));
+//
+//        RemoteRepository distRepo =
+//            new RemoteRepository.Builder( "org.eclipse.aether.examples", "default",
+//                                  new File( "target/dist-repo" ).toURI().toString() ).build();
+//
+//        DeployRequest deployRequest = new DeployRequest();
+//        deployRequest.addArtifact( jarArtifact );
+//        deployRequest.setRepository( distRepo );
+//
+//        repositorySystem.deploy( repositorySystemSession, deployRequest );
     }
 
     @Override
@@ -51,9 +99,7 @@ public class PluginManager implements IPluginManager {
         String latestVersion = null;
         try {
             VersionRangeRequest rangeRequest = new VersionRangeRequest();
-            rangeRequest.setArtifact(new DefaultArtifact(String.format("%s:%s:[0,)", artifactGroup, artifactName)));
-            RemoteRepository repo = new RemoteRepository.Builder("local", "default", localRepositoryPath).build();
-            rangeRequest.setRepositories(Arrays.asList(repo));
+            rangeRequest.setArtifact(new DefaultArtifact(artifactGroup, artifactName, "jar", "[0,)"));
             VersionRangeResult rangeResult = repositorySystem.resolveVersionRange(repositorySystemSession, rangeRequest);
             if (rangeResult != null && rangeResult.getHighestVersion() != null) {
                 latestVersion = rangeResult.getHighestVersion().toString();
@@ -114,6 +160,7 @@ public class PluginManager implements IPluginManager {
         locator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
         locator.addService(TransporterFactory.class, FileTransporterFactory.class);
         locator.addService(TransporterFactory.class, HttpTransporterFactory.class);
+        locator.addService(TransporterFactory.class, ClasspathTransporterFactory.class);
 
         locator.setErrorHandler(new DefaultServiceLocator.ErrorHandler() {
             @Override
@@ -130,7 +177,6 @@ public class PluginManager implements IPluginManager {
 
         LocalRepository localRepo = new LocalRepository(localRepositoryPath);
         session.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(session, localRepo));
-
         session.setTransferListener(new ConsoleTransferListener());
         session.setRepositoryListener(new ConsoleRepositoryListener());
 

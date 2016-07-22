@@ -111,7 +111,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             try {
                 zip = new ZipInputStream(is);
                 ZipEntry entry = null;
-                File dir = new File(getConfigDir(false), AppConstants.PLUGINS_DIR);
+                File dir = new File(getConfigDir(false), AppConstants.PLUGINS_DIR + "/extracted");
                 for (entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
                     File f = new File(dir, entry.getName());
                     if (!f.exists()) {

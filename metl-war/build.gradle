@@ -51,6 +51,16 @@ task copyJavaDocsToWebapp(type: Copy) {
     }    
 }
 
+task copyPluginsForDevelopment (type:Copy) {
+    rootProject.allprojects.findAll { it.name.startsWith('comp') }.each {
+        dependsOn ":$it.name:publishMavenJavaPublicationToMavenRepository"
+    }
+    
+   from ('build/plugins')
+   destinationDir file('../metl-develop/working/plugins')
+   rename 'maven-metadata.xml(.*)', 'maven-metadata-local.xml$1'
+}
+
 task zipPlugins (type:Zip) {
     rootProject.allprojects.findAll { it.name.startsWith('comp') }.each {
         dependsOn ":$it.name:publishMavenJavaPublicationToMavenRepository"
@@ -63,9 +73,8 @@ task zipPlugins (type:Zip) {
 
 
 develop.dependsOn vaadinCompileWidgetset
-//develop.dependsOn generateDocs
 develop.dependsOn copyJavaDocsToWebapp
-//assemble.dependsOn generateDocs
 assemble.dependsOn copyJavaDocsToWebapp
+develop.dependsOn copyPluginsForDevelopment
 war.dependsOn zipPlugins
 assemble.dependsOn(jar)

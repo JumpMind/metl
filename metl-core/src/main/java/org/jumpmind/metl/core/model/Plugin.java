@@ -112,6 +112,11 @@ public class Plugin implements Serializable, Comparable<Plugin> {
         return true;
     }
     
+    @Override
+    public String toString() {
+        return String.format("%s:%s:%s", artifactGroup, artifactName, artifactVersion);
+    }
+    
     
 
 }

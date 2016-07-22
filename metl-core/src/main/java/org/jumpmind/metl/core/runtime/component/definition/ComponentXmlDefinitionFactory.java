@@ -49,6 +49,7 @@ import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
+import org.jumpmind.metl.core.util.VersionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,20 +67,27 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
 
     Map<String, List<String>> componentIdsByCategory;
 
+    Map<String, List<XMLComponent>> componentsByPluginId;
+
     IConfigurationService configurationService;
 
     IPluginManager pluginManager;
 
     public ComponentXmlDefinitionFactory() {
+        componentsById = new HashMap<>();
+        componentsByPluginId = new HashMap<>();
+        componentIdsByCategory = new HashMap<>();
     }
 
     public ComponentXmlDefinitionFactory(IConfigurationService configurationService, IPluginManager pluginManager) {
+        this();
         this.configurationService = configurationService;
         this.pluginManager = pluginManager;
     }
 
     @Override
     public void init() {
+        loadComponentsForClassloader("org.jumpmind.metl:metl-core:" + VersionUtils.getCurrentVersion(), getClass().getClassLoader());
         List<String> projectVersionIds = configurationService.findAllProjectVersionIds();
         for (String projectVersionId : projectVersionIds) {
             List<ProjectVersionComponentPlugin> pvcps = configurationService.findProjectVersionComponentPlugin(projectVersionId);
@@ -91,10 +99,12 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                         String latestVersion = pluginManager.getLatestLocalVersion(pvcp.getArtifactGroup(), pvcp.getArtifactName());
                         if (!pvcp.getArtifactVersion().equals(latestVersion)) {
                             if (!pvcp.isPinVersion()) {
-                                logger.info("Upgrading from %s:%s:%s to %s", pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
+                                logger.info("Upgrading from %s:%s:%s to %s", pvcp.getArtifactGroup(), pvcp.getArtifactName(),
+                                        pvcp.getArtifactVersion(), latestVersion);
                                 pvcp.setArtifactVersion(latestVersion);
                             } else {
-                                logger.info("Not upgrading from %s:%s:%s to %s because the version is pinned", pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
+                                logger.info("Not upgrading from %s:%s:%s to %s because the version is pinned", pvcp.getArtifactGroup(),
+                                        pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
                                 pvcp.setLatestArtifactVersion(latestVersion);
                             }
                             configurationService.save(pvcp);
@@ -104,18 +114,29 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
 
                 if (!matched) {
                     String latestVersion = pluginManager.getLatestLocalVersion(ootbp.getArtifactGroup(), ootbp.getArtifactName());
-                    ClassLoader classLoader = pluginManager.getClassLoader(ootbp.getArtifactGroup(), ootbp.getArtifactName(), latestVersion);
-                    loadComponentsForClassloader(classLoader);
-                    
-                    ProjectVersionComponentPlugin plugin = new ProjectVersionComponentPlugin();
-                    plugin.setProjectVersionId(projectVersionId);
-                    plugin.setArtifactGroup(ootbp.getArtifactGroup());
-                    plugin.setArtifactName(ootbp.getArtifactName());
-                    
-                    plugin.setArtifactVersion(latestVersion);
-                    plugin.setLatestArtifactVersion(latestVersion);
-                    logger.info("Registering plugin %s:%s:%s", plugin.getArtifactGroup(), plugin.getArtifactName(), plugin.getArtifactVersion());
-                    configurationService.save(plugin);
+                    if (latestVersion != null) {
+                        ClassLoader classLoader = pluginManager.getClassLoader(ootbp.getArtifactGroup(), ootbp.getArtifactName(),
+                                latestVersion);
+                        String pluginId = toPluginId(ootbp.getArtifactGroup(), ootbp.getArtifactName(), latestVersion);
+                        loadComponentsForClassloader(pluginId, classLoader);
+
+                        List<XMLComponent> components = componentsByPluginId.get(pluginId);
+                        for (XMLComponent xmlComponent : components) {
+                            ProjectVersionComponentPlugin plugin = new ProjectVersionComponentPlugin();
+                            plugin.setProjectVersionId(projectVersionId);
+                            plugin.setComponentTypeId(xmlComponent.getId());
+                            plugin.setArtifactGroup(ootbp.getArtifactGroup());
+                            plugin.setArtifactName(ootbp.getArtifactName());
+
+                            plugin.setArtifactVersion(latestVersion);
+                            plugin.setLatestArtifactVersion(latestVersion);
+                            logger.info("Registering component {} plugin {}", xmlComponent.getId(), pluginId);
+                            configurationService.save(plugin);
+                        }
+
+                    } else {
+                        logger.warn("Could not find a registered plugin for {}:{}", ootbp.getArtifactGroup(), ootbp.getArtifactName());
+                    }
                 }
 
             }
@@ -148,11 +169,16 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
     }
 
     protected void reset() {
-        componentIdsByCategory = new HashMap<String, List<String>>();
-        componentsById = new HashMap<String, XMLComponent>();
+        componentsByPluginId = new HashMap<>();
+        componentIdsByCategory = new HashMap<>();
+        componentsById = new HashMap<>();
     }
 
-    protected void loadComponentsForClassloader(ClassLoader classLoader) {
+    protected String toPluginId(String artifactGroup, String artifactName, String artifactVersion) {
+        return String.format("%s:%s:%s", artifactGroup, artifactName, artifactVersion);
+    }
+
+    protected void loadComponentsForClassloader(String pluginId, ClassLoader classLoader) {
         try {
             JAXBContext jc = JAXBContext.newInstance(XMLComponents.class.getPackage().getName());
             Unmarshaller unmarshaller = jc.createUnmarshaller();
@@ -167,35 +193,48 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                     List<XMLComponent> componentList = components.getComponent();
                     for (XMLComponent xmlComponent : componentList) {
                         String id = xmlComponent.getId();
-                        if (componentsById.containsKey(id)) {
-                            logger.warn("There was already a component registered under the id of {}.  Overwriting {} with {}",
-                                    new Object[] { id, componentsById.get(id).getClassName(), xmlComponent.getClassName() });
-                        }
-                        componentsById.put(id, xmlComponent);
+                        if (!componentsById.containsKey(id)) {
+                            xmlComponent.setClassLoader(classLoader);
+                            componentsById.put(id, xmlComponent);
 
-                        List<String> ids = componentIdsByCategory.get(xmlComponent.getCategory());
-                        if (ids == null) {
-                            ids = new ArrayList<String>();
-                            componentIdsByCategory.put(xmlComponent.getCategory(), ids);
-                        }
+                            List<XMLComponent> componentsForPluginId = componentsByPluginId.get(pluginId);
+                            if (componentsForPluginId == null) {
+                                componentsForPluginId = new ArrayList<>();
+                                componentsByPluginId.put(pluginId, componentsForPluginId);
+                            }
+                            componentsForPluginId.add(xmlComponent);
+                            
+                            logger.info("Registering '{}' with an id of '{}' for plugin {}", xmlComponent.getName(), id, pluginId);
 
-                        if (!ids.contains(xmlComponent.getId())) {
-                            ids.add(xmlComponent.getId());
-                        }
+                            List<String> ids = componentIdsByCategory.get(xmlComponent.getCategory());
+                            if (ids == null) {
+                                ids = new ArrayList<String>();
+                                componentIdsByCategory.put(xmlComponent.getCategory(), ids);
+                            }
 
-                        if (xmlComponent.getSettings() == null) {
-                            xmlComponent.setSettings(new XMLSettings());
-                        }
+                            if (!ids.contains(xmlComponent.getId())) {
+                                ids.add(xmlComponent.getId());
+                            }
 
-                        if (xmlComponent.getSettings().getSetting() == null) {
-                            xmlComponent.getSettings().setSetting(new ArrayList<XMLSetting>());
-                        }
+                            if (xmlComponent.getSettings() == null) {
+                                xmlComponent.setSettings(new XMLSettings());
+                            }
 
-                        xmlComponent.getSettings().getSetting().add(0, new XMLSetting(ENABLED, "Enabled", "true", Type.BOOLEAN, true));
-                        xmlComponent.getSettings().getSetting().add(new XMLSetting(LOG_INPUT, "Log Input", "false", Type.BOOLEAN, false));
-                        xmlComponent.getSettings().getSetting().add(new XMLSetting(LOG_OUTPUT, "Log Output", "false", Type.BOOLEAN, false));
-                        xmlComponent.getSettings().getSetting()
-                                .add(new XMLSetting(INBOUND_QUEUE_CAPACITY, "Inbound Queue Capacity", "100", Type.INTEGER, true));
+                            if (xmlComponent.getSettings().getSetting() == null) {
+                                xmlComponent.getSettings().setSetting(new ArrayList<XMLSetting>());
+                            }
+
+                            xmlComponent.getSettings().getSetting().add(0, new XMLSetting(ENABLED, "Enabled", "true", Type.BOOLEAN, true));
+                            xmlComponent.getSettings().getSetting().add(new XMLSetting(LOG_INPUT, "Log Input", "false", Type.BOOLEAN, false));
+                            xmlComponent.getSettings().getSetting()
+                                    .add(new XMLSetting(LOG_OUTPUT, "Log Output", "false", Type.BOOLEAN, false));
+                            xmlComponent.getSettings().getSetting()
+                                    .add(new XMLSetting(INBOUND_QUEUE_CAPACITY, "Inbound Queue Capacity", "100", Type.INTEGER, true));
+                        } else {
+                            if (!getClass().getClassLoader().equals(componentsById.get(id).getClassLoader())) {
+                               logger.info("There was already a component registered under the id of {} with the name {}", new Object[] { id, xmlComponent.getName() });
+                            }
+                        }
                     }
                 }
             } finally {
@@ -204,8 +243,10 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                 }
 
             }
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            throw new IoException(e);
+            throw new RuntimeException(e);
         }
     }
 
