@@ -199,7 +199,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
             }
         });
         buttons.addComponent(openButton);
-        Button newButton = new Button("New Version", (event) -> newVersion(layout, versionGrid));
+        Button newButton = new Button("New Version", (event) -> newProjectVersion(layout, versionGrid));
         buttons.addComponent(newButton);
         Button editButton = new Button("Edit Version", (event) -> edit(versionGrid));
         buttons.addComponent(editButton);
@@ -352,7 +352,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         }
     }
 
-    protected void newVersion(VerticalLayout layout, Grid grid) {
+    protected void newProjectVersion(VerticalLayout layout, Grid grid) {
         Collection<Object> selected = grid.getSelectedRows();
         if (selected.size() == 1) {
             IConfigurationService configurationService = context.getConfigurationService();
@@ -366,6 +366,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
                         if (StringUtils.isNotBlank(newVersionLabel)) {
                             ProjectVersion newVersion = configurationService
                                     .saveNewVersion(newVersionLabel, originalVersion);
+                            context.getComponentDefinitionFactory().refresh(newVersion.getId());
                             Indexed indexed = grid.getContainerDataSource();
                             indexed.addItemAfter(originalVersion, newVersion);
                             this.projectGrid.deselect(originalVersion.getProject());

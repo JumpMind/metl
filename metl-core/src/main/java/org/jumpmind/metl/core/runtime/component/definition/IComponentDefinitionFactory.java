@@ -7,6 +7,8 @@ public interface IComponentDefinitionFactory {
 
     public void refresh();
     
+    public void refresh(String projectVersionId);
+    
     XMLComponent getDefinition(String projectVersionId, String id);
 
     Map<String, List<XMLComponent>> getDefinitionsByCategory(String projectVersionId);

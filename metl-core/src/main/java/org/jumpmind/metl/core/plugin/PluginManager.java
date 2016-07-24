@@ -3,7 +3,9 @@ package org.jumpmind.metl.core.plugin;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
@@ -42,6 +44,8 @@ public class PluginManager implements IPluginManager {
 
     RepositorySystemSession repositorySystemSession;
 
+    Map<String, ClassLoader> plugins = new HashMap<>();
+
     public PluginManager(String localRepositoryPath) {
         this.localRepositoryPath = localRepositoryPath;
     }
@@ -53,45 +57,63 @@ public class PluginManager implements IPluginManager {
     }
 
     @Override
-    public ClassLoader getClassLoader(String artifactGroup, String artifactName, String artifactVersion) {
-        try {
-            Artifact artifact = new DefaultArtifact(String.format("%s:%s:%s", artifactGroup, artifactName, artifactVersion));
-            DependencyFilter classpathFlter = DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE);
-
-            CollectRequest collectRequest = new CollectRequest();
-            collectRequest.setRoot(new Dependency(artifact, JavaScopes.COMPILE));
-
-            DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, classpathFlter);
-
-            List<ArtifactResult> artifactResults = repositorySystem.resolveDependencies(repositorySystemSession, dependencyRequest)
-                    .getArtifactResults();
-
-            List<URL> artifactUrls = new ArrayList<URL>();
-            for (ArtifactResult artRes : artifactResults) {
-                artifactUrls.add(artRes.getArtifact().getFile().toURI().toURL());
-            }
-
-            return new URLClassLoader(artifactUrls.toArray(new URL[artifactUrls.size()]), getClass().getClassLoader());
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public void refresh() {
+        plugins = new HashMap<>();
     }
-    
-    public void deploy (String artifactGroup, String artifactName, String artifactVersion, String filePath) {
-//        Artifact jarArtifact = new DefaultArtifact(artifactGroup, artifactName, "jar", artifactVersion);
-//        jarArtifact = jarArtifact.setFile(new File( filePath ));
-//
-//        RemoteRepository distRepo =
-//            new RemoteRepository.Builder( "org.eclipse.aether.examples", "default",
-//                                  new File( "target/dist-repo" ).toURI().toString() ).build();
-//
-//        DeployRequest deployRequest = new DeployRequest();
-//        deployRequest.addArtifact( jarArtifact );
-//        deployRequest.setRepository( distRepo );
-//
-//        repositorySystem.deploy( repositorySystemSession, deployRequest );
+
+    @Override
+    public String toPluginId(String artifactGroup, String artifactName, String artifactVersion) {
+        return String.format("%s:%s:%s", artifactGroup, artifactName, artifactVersion);
+    }
+
+    @Override
+    public ClassLoader getClassLoader(String artifactGroup, String artifactName, String artifactVersion) {
+        String pluginId = toPluginId(artifactGroup, artifactName, artifactVersion);
+        ClassLoader classLoader = plugins.get(pluginId);
+        if (classLoader == null) {
+            try {
+                Artifact artifact = new DefaultArtifact(pluginId);
+                DependencyFilter classpathFlter = DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE);
+
+                CollectRequest collectRequest = new CollectRequest();
+                collectRequest.setRoot(new Dependency(artifact, JavaScopes.COMPILE));
+
+                DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, classpathFlter);
+
+                List<ArtifactResult> artifactResults = repositorySystem.resolveDependencies(repositorySystemSession, dependencyRequest)
+                        .getArtifactResults();
+
+                List<URL> artifactUrls = new ArrayList<URL>();
+                for (ArtifactResult artRes : artifactResults) {
+                    artifactUrls.add(artRes.getArtifact().getFile().toURI().toURL());
+                }
+
+                classLoader = new URLClassLoader(artifactUrls.toArray(new URL[artifactUrls.size()]), getClass().getClassLoader());
+                plugins.put(pluginId, classLoader);
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return classLoader;
+    }
+
+    public void deploy(String artifactGroup, String artifactName, String artifactVersion, String filePath) {
+        // Artifact jarArtifact = new DefaultArtifact(artifactGroup,
+        // artifactName, "jar", artifactVersion);
+        // jarArtifact = jarArtifact.setFile(new File( filePath ));
+        //
+        // RemoteRepository distRepo =
+        // new RemoteRepository.Builder( "org.eclipse.aether.examples",
+        // "default",
+        // new File( "target/dist-repo" ).toURI().toString() ).build();
+        //
+        // DeployRequest deployRequest = new DeployRequest();
+        // deployRequest.addArtifact( jarArtifact );
+        // deployRequest.setRepository( distRepo );
+        //
+        // repositorySystem.deploy( repositorySystemSession, deployRequest );
     }
 
     @Override
@@ -110,7 +132,6 @@ public class PluginManager implements IPluginManager {
         return latestVersion;
     }
 
-    @Override
     synchronized public void reload() {
         // plugins = new HashMap<>();
         // List<PluginArtifact> list =

@@ -126,7 +126,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
     IHttpRequestMappingRegistry httpRequestMappingRegistry;
 
-    PluginManager pluginManager;
+    IPluginManager pluginManager;
 
     IUIFactory uiFactory;
 
