@@ -87,9 +87,12 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
         this.configurationService = configurationService;
         this.pluginManager = pluginManager;
     }
-
+    
     @Override
-    public void init() {
+    synchronized public void init() {
+        componentsById = new HashMap<>();
+        componentsByPluginId = new HashMap<>();
+        componentIdsByCategory = new HashMap<>();
         loadComponentsForClassloader("org.jumpmind.metl:metl-core:" + VersionUtils.getCurrentVersion(), getClass().getClassLoader());
         List<String> projectVersionIds = configurationService.findAllProjectVersionIds();
         for (String projectVersionId : projectVersionIds) {
@@ -112,16 +115,17 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                             }
                             configurationService.save(pvcp);
                         }
+                        
+                        load(pvcp.getArtifactGroup(), pvcp.getArtifactName(),
+                                pvcp.getArtifactVersion());
                     }
                 }
 
                 if (!matched) {
                     String latestVersion = pluginManager.getLatestLocalVersion(ootbp.getArtifactGroup(), ootbp.getArtifactName());
                     if (latestVersion != null) {
-                        ClassLoader classLoader = pluginManager.getClassLoader(ootbp.getArtifactGroup(), ootbp.getArtifactName(),
+                        String pluginId = load(ootbp.getArtifactGroup(), ootbp.getArtifactName(),
                                 latestVersion);
-                        String pluginId = toPluginId(ootbp.getArtifactGroup(), ootbp.getArtifactName(), latestVersion);
-                        loadComponentsForClassloader(pluginId, classLoader);
 
                         List<XMLComponent> components = componentsByPluginId.get(pluginId);
                         for (XMLComponent xmlComponent : components) {
@@ -143,6 +147,13 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
             }
         }
 
+    }
+    
+    protected String load(String artifactGroup, String artifactName, String artifactVersion) {
+        ClassLoader classLoader = pluginManager.getClassLoader(artifactGroup, artifactName, artifactVersion);
+        String pluginId = toPluginId(artifactGroup, artifactName, artifactVersion);
+        loadComponentsForClassloader(pluginId, classLoader);
+        return pluginId;
     }
 
     @Override

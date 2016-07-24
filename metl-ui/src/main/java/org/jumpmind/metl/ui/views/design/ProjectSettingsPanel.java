@@ -26,7 +26,7 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Icons;
-import org.jumpmind.metl.ui.common.PreCommitHandler;
+import org.jumpmind.metl.ui.common.PostCommitHandler;
 import org.jumpmind.metl.ui.views.DesignNavigator;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
@@ -92,7 +92,7 @@ public class ProjectSettingsPanel extends VerticalLayout implements IUiPanel {
                 .setEditable(false);
         componentPluginsGridContainer = new BeanItemContainer<>(ProjectVersionComponentPlugin.class);
         componentPluginsGrid.setContainerDataSource(componentPluginsGridContainer);
-        componentPluginsGrid.getEditorFieldGroup().addCommitHandler(new PreCommitHandler(() -> {
+        componentPluginsGrid.getEditorFieldGroup().addCommitHandler(new PostCommitHandler(() -> {
             ProjectVersionComponentPlugin item = (ProjectVersionComponentPlugin) componentPluginsGrid.getEditedItemId();
             IConfigurationService configurationService = context.getConfigurationService();
             configurationService.save(item);

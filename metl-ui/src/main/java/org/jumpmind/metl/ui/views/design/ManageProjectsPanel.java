@@ -34,7 +34,7 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.FieldFactory;
 import org.jumpmind.metl.ui.common.Icons;
-import org.jumpmind.metl.ui.common.PreCommitHandler;
+import org.jumpmind.metl.ui.common.PostCommitHandler;
 import org.jumpmind.metl.ui.views.DesignNavigator;
 import org.jumpmind.metl.ui.views.UiConstants;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
@@ -145,7 +145,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
         });
 
-        projectGrid.getEditorFieldGroup().addCommitHandler(new PreCommitHandler(() -> {
+        projectGrid.getEditorFieldGroup().addCommitHandler(new PostCommitHandler(() -> {
                 Project item = (Project) projectGrid.getEditedItemId();
                 IConfigurationService configurationService = context.getConfigurationService();
                 configurationService.save(item);
