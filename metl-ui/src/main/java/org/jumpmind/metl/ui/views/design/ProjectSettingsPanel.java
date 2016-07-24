@@ -73,7 +73,10 @@ public class ProjectSettingsPanel extends VerticalLayout implements IUiPanel {
 
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
-        buttonBar.addButton("Refresh", Icons.REFRESH);
+        buttonBar.addButton("Refresh All", Icons.REFRESH, (event) -> {
+            context.getComponentDefinitionFactory().refresh();
+            populateContainer();
+        });
         buttonBar.addButton("Update", Icons.UPDATE);
         buttonBar.addButton("Upload", Icons.UPLOAD);
 

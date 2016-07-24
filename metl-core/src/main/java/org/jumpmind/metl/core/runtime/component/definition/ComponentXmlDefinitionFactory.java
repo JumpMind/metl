@@ -87,68 +87,68 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
         this.configurationService = configurationService;
         this.pluginManager = pluginManager;
     }
-    
+
     @Override
-    synchronized public void init() {
+    synchronized public void refresh() {
         componentsById = new HashMap<>();
         componentsByPluginId = new HashMap<>();
         componentIdsByCategory = new HashMap<>();
         loadComponentsForClassloader("org.jumpmind.metl:metl-core:" + VersionUtils.getCurrentVersion(), getClass().getClassLoader());
-        List<String> projectVersionIds = configurationService.findAllProjectVersionIds();
-        for (String projectVersionId : projectVersionIds) {
-            List<ProjectVersionComponentPlugin> pvcps = configurationService.findProjectVersionComponentPlugin(projectVersionId);
-            for (Plugin ootbp : outOfTheBox) {
-                boolean matched = false;
-                for (ProjectVersionComponentPlugin pvcp : pvcps) {
-                    if (pvcp.matches(ootbp)) {
-                        matched = true;
-                        String latestVersion = pluginManager.getLatestLocalVersion(pvcp.getArtifactGroup(), pvcp.getArtifactName());
-                        if (!pvcp.getArtifactVersion().equals(latestVersion)) {
-                            if (!pvcp.isPinVersion()) {
-                                logger.info("Upgrading from {}:{}:{} to {}", pvcp.getArtifactGroup(), pvcp.getArtifactName(),
-                                        pvcp.getArtifactVersion(), latestVersion);
-                                pvcp.setArtifactVersion(latestVersion);
-                            } else {
-                                logger.info("Not upgrading from {}:{}:{} to {} because the version is pinned", pvcp.getArtifactGroup(),
-                                        pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
-                                pvcp.setLatestArtifactVersion(latestVersion);
+        if (pluginManager != null && configurationService != null) {
+            List<String> projectVersionIds = configurationService.findAllProjectVersionIds();
+            for (String projectVersionId : projectVersionIds) {
+                List<ProjectVersionComponentPlugin> pvcps = configurationService.findProjectVersionComponentPlugin(projectVersionId);
+                for (Plugin ootbp : outOfTheBox) {
+                    boolean matched = false;
+                    for (ProjectVersionComponentPlugin pvcp : pvcps) {
+                        if (pvcp.matches(ootbp)) {
+                            matched = true;
+                            String latestVersion = pluginManager.getLatestLocalVersion(pvcp.getArtifactGroup(), pvcp.getArtifactName());
+                            if (!pvcp.getArtifactVersion().equals(latestVersion)) {
+                                if (!pvcp.isPinVersion()) {
+                                    logger.info("Upgrading from {}:{}:{} to {}", pvcp.getArtifactGroup(), pvcp.getArtifactName(),
+                                            pvcp.getArtifactVersion(), latestVersion);
+                                    pvcp.setArtifactVersion(latestVersion);
+                                } else {
+                                    logger.info("Not upgrading from {}:{}:{} to {} because the version is pinned", pvcp.getArtifactGroup(),
+                                            pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
+                                    pvcp.setLatestArtifactVersion(latestVersion);
+                                }
+                                configurationService.save(pvcp);
                             }
-                            configurationService.save(pvcp);
+
+                            load(pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion());
                         }
-                        
-                        load(pvcp.getArtifactGroup(), pvcp.getArtifactName(),
-                                pvcp.getArtifactVersion());
                     }
-                }
 
-                if (!matched) {
-                    String latestVersion = pluginManager.getLatestLocalVersion(ootbp.getArtifactGroup(), ootbp.getArtifactName());
-                    if (latestVersion != null) {
-                        String pluginId = load(ootbp.getArtifactGroup(), ootbp.getArtifactName(),
-                                latestVersion);
+                    if (!matched) {
+                        String latestVersion = pluginManager.getLatestLocalVersion(ootbp.getArtifactGroup(), ootbp.getArtifactName());
+                        if (latestVersion != null) {
+                            String pluginId = load(ootbp.getArtifactGroup(), ootbp.getArtifactName(), latestVersion);
 
-                        List<XMLComponent> components = componentsByPluginId.get(pluginId);
-                        for (XMLComponent xmlComponent : components) {
-                            ProjectVersionComponentPlugin plugin = new ProjectVersionComponentPlugin();
-                            plugin.setProjectVersionId(projectVersionId);
-                            plugin.setComponentTypeId(xmlComponent.getId());
-                            plugin.setArtifactGroup(ootbp.getArtifactGroup());
-                            plugin.setArtifactName(ootbp.getArtifactName());
-                            plugin.setArtifactVersion(latestVersion);
-                            plugin.setLatestArtifactVersion(latestVersion);
-                            configurationService.save(plugin);
+                            List<XMLComponent> components = componentsByPluginId.get(pluginId);
+                            for (XMLComponent xmlComponent : components) {
+                                ProjectVersionComponentPlugin plugin = new ProjectVersionComponentPlugin();
+                                plugin.setProjectVersionId(projectVersionId);
+                                plugin.setComponentTypeId(xmlComponent.getId());
+                                plugin.setArtifactGroup(ootbp.getArtifactGroup());
+                                plugin.setArtifactName(ootbp.getArtifactName());
+                                plugin.setArtifactVersion(latestVersion);
+                                plugin.setLatestArtifactVersion(latestVersion);
+                                configurationService.save(plugin);
+                            }
+
+                        } else {
+                            logger.warn("Could not find a registered plugin for {}:{}", ootbp.getArtifactGroup(), ootbp.getArtifactName());
                         }
-
-                    } else {
-                        logger.warn("Could not find a registered plugin for {}:{}", ootbp.getArtifactGroup(), ootbp.getArtifactName());
                     }
-                }
 
+                }
             }
         }
 
     }
-    
+
     protected String load(String artifactGroup, String artifactName, String artifactVersion) {
         ClassLoader classLoader = pluginManager.getClassLoader(artifactGroup, artifactName, artifactVersion);
         String pluginId = toPluginId(artifactGroup, artifactName, artifactVersion);
@@ -215,7 +215,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                                 componentsByPluginId.put(pluginId, componentsForPluginId);
                             }
                             componentsForPluginId.add(xmlComponent);
-                            
+
                             logger.info("Registering '{}' with an id of '{}' for plugin {}", xmlComponent.getName(), id, pluginId);
 
                             List<String> ids = componentIdsByCategory.get(xmlComponent.getCategory());
@@ -244,7 +244,8 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                                     .add(new XMLSetting(INBOUND_QUEUE_CAPACITY, "Inbound Queue Capacity", "100", Type.INTEGER, true));
                         } else {
                             if (!getClass().getClassLoader().equals(componentsById.get(id).getClassLoader())) {
-                               logger.info("There was already a component registered under the id of {} with the name {}", new Object[] { id, xmlComponent.getName() });
+                                logger.info("There was already a component registered under the id of {} with the name {}",
+                                        new Object[] { id, xmlComponent.getName() });
                             }
                         }
                     }

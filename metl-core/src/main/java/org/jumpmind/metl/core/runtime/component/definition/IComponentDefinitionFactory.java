@@ -5,7 +5,7 @@ import java.util.Map;
 
 public interface IComponentDefinitionFactory {
 
-    public void init();
+    public void refresh();
     
     XMLComponent getDefinition(String projectVersionId, String id);
 

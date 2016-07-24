@@ -143,7 +143,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         }
         
         ctx.getBean(IPluginManager.class).init();
-        ctx.getBean(IComponentDefinitionFactory.class).init();
+        ctx.getBean(IComponentDefinitionFactory.class).refresh();
     }
 
     private Logger getLogger() {

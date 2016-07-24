@@ -32,6 +32,7 @@ import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.persist.IImportExportService;
+import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
@@ -47,6 +48,9 @@ import org.springframework.context.annotation.Scope;
 public class ApplicationContext implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    
+    @Autowired
+    IPluginManager pluginManager;
 
     @Autowired
     IConfigurationService configurationService;
@@ -141,6 +145,10 @@ public class ApplicationContext implements Serializable {
         
     public IUIFactory getUiFactory() {
         return uiFactory;
+    }
+    
+    public IPluginManager getPluginManager() {
+        return pluginManager;
     }
     
     public void setShowRunDiagram(boolean showRunDiagram) {
