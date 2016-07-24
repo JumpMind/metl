@@ -49,11 +49,11 @@ public abstract class AbstractFileWriter extends AbstractComponentRuntime {
     	return fileName;
     }
     
-    protected IDirectory initStream(String fileName) {
-    	
+    protected IDirectory initStream(String fileName) {    	
         IDirectory streamable = (IDirectory) getResourceReference();
-        streamable.delete(fileName);
-        
+        if (!append) {
+            streamable.delete(fileName);
+        }        
         return streamable;
     }
 }
