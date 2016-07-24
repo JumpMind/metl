@@ -34,6 +34,7 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.FieldFactory;
 import org.jumpmind.metl.ui.common.Icons;
+import org.jumpmind.metl.ui.common.PreCommitHandler;
 import org.jumpmind.metl.ui.views.DesignNavigator;
 import org.jumpmind.metl.ui.views.UiConstants;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
@@ -144,22 +145,12 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
         });
 
-        projectGrid.getEditorFieldGroup().addCommitHandler(new FieldGroup.CommitHandler() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void preCommit(CommitEvent commitEvent) throws CommitException {
-            }
-
-            @Override
-            public void postCommit(CommitEvent commitEvent) throws CommitException {
+        projectGrid.getEditorFieldGroup().addCommitHandler(new PreCommitHandler(() -> {
                 Project item = (Project) projectGrid.getEditedItemId();
                 IConfigurationService configurationService = context.getConfigurationService();
                 configurationService.save(item);
                 projectGrid.markAsDirty();
-            }
-        });
+        }));
 
         HeaderRow filteringHeader = projectGrid.appendHeaderRow();
         HeaderCell logTextFilterCell = filteringHeader.getCell("name");

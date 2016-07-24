@@ -13,8 +13,12 @@ public class Plugin implements Serializable, Comparable<Plugin> {
     public Plugin() {
     }
     
+    public Plugin(String artifactGroup, String artifactName) {
+        this(artifactGroup, artifactName, null);
+    }
+    
     public Plugin(String artifactGroup, String artifactName, String artifactVersion) {
-        super();
+        this();
         this.artifactName = artifactName;
         this.artifactGroup = artifactGroup;
         this.artifactVersion = artifactVersion;

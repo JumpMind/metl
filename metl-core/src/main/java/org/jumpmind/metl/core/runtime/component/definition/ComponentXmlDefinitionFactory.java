@@ -60,7 +60,10 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
     static Set<Plugin> outOfTheBox = new TreeSet<>();
 
     static {
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-rdbms-reader", null));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-rdbms-reader"));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-data-diff"));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-sorter"));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-temp-rdbms"));
     }
 
     Map<String, XMLComponent> componentsById;
@@ -99,11 +102,11 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                         String latestVersion = pluginManager.getLatestLocalVersion(pvcp.getArtifactGroup(), pvcp.getArtifactName());
                         if (!pvcp.getArtifactVersion().equals(latestVersion)) {
                             if (!pvcp.isPinVersion()) {
-                                logger.info("Upgrading from %s:%s:%s to %s", pvcp.getArtifactGroup(), pvcp.getArtifactName(),
+                                logger.info("Upgrading from {}:{}:{} to {}", pvcp.getArtifactGroup(), pvcp.getArtifactName(),
                                         pvcp.getArtifactVersion(), latestVersion);
                                 pvcp.setArtifactVersion(latestVersion);
                             } else {
-                                logger.info("Not upgrading from %s:%s:%s to %s because the version is pinned", pvcp.getArtifactGroup(),
+                                logger.info("Not upgrading from {}:{}:{} to {} because the version is pinned", pvcp.getArtifactGroup(),
                                         pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
                                 pvcp.setLatestArtifactVersion(latestVersion);
                             }
@@ -127,10 +130,8 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                             plugin.setComponentTypeId(xmlComponent.getId());
                             plugin.setArtifactGroup(ootbp.getArtifactGroup());
                             plugin.setArtifactName(ootbp.getArtifactName());
-
                             plugin.setArtifactVersion(latestVersion);
                             plugin.setLatestArtifactVersion(latestVersion);
-                            logger.info("Registering component {} plugin {}", xmlComponent.getId(), pluginId);
                             configurationService.save(plugin);
                         }
 

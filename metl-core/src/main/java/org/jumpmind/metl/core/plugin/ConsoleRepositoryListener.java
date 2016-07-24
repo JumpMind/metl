@@ -1,7 +1,5 @@
 package org.jumpmind.metl.core.plugin;
 
-import java.io.PrintStream;
-
 import org.eclipse.aether.AbstractRepositoryListener;
 import org.eclipse.aether.RepositoryEvent;
 import org.slf4j.Logger;
@@ -14,82 +12,75 @@ public class ConsoleRepositoryListener extends AbstractRepositoryListener {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private PrintStream out;
-
     public ConsoleRepositoryListener() {
-        this(null);
-    }
-
-    public ConsoleRepositoryListener(PrintStream out) {
-        this.out = (out != null) ? out : System.out;
     }
 
     public void artifactDeployed(RepositoryEvent event) {
-        out.println("Deployed " + event.getArtifact() + " to " + event.getRepository());
+        logger.info("Deployed " + event.getArtifact() + " to " + event.getRepository());
     }
 
     public void artifactDeploying(RepositoryEvent event) {
-        out.println("Deploying " + event.getArtifact() + " to " + event.getRepository());
+        logger.info("Deploying " + event.getArtifact() + " to " + event.getRepository());
     }
 
     public void artifactDescriptorInvalid(RepositoryEvent event) {
-        out.println("Invalid artifact descriptor for " + event.getArtifact() + ": " + event.getException().getMessage());
+        logger.info("Invalid artifact descriptor for " + event.getArtifact() + ": " + event.getException().getMessage());
     }
 
     public void artifactDescriptorMissing(RepositoryEvent event) {
-        out.println("Missing artifact descriptor for " + event.getArtifact());
+        logger.info("Missing artifact descriptor for " + event.getArtifact());
     }
 
     public void artifactInstalled(RepositoryEvent event) {
-        out.println("Installed " + event.getArtifact() + " to " + event.getFile());
+        logger.info("Installed " + event.getArtifact() + " to " + event.getFile());
     }
 
     public void artifactInstalling(RepositoryEvent event) {
-        out.println("Installing " + event.getArtifact() + " to " + event.getFile());
+        logger.info("Installing " + event.getArtifact() + " to " + event.getFile());
     }
 
     public void artifactResolved(RepositoryEvent event) {
-        out.println("Resolved artifact " + event.getArtifact() + " from " + event.getRepository());
+        logger.info("Resolved artifact " + event.getArtifact() + " from " + event.getRepository());
     }
 
     public void artifactDownloading(RepositoryEvent event) {
-        out.println("Downloading artifact " + event.getArtifact() + " from " + event.getRepository());
+        logger.info("Downloading artifact " + event.getArtifact() + " from " + event.getRepository());
     }
 
     public void artifactDownloaded(RepositoryEvent event) {
-        out.println("Downloaded artifact " + event.getArtifact() + " from " + event.getRepository());
+        logger.info("Downloaded artifact " + event.getArtifact() + " from " + event.getRepository());
     }
 
     public void artifactResolving(RepositoryEvent event) {
-        out.println("Resolving artifact " + event.getArtifact());
+        logger.info("Resolving artifact " + event.getArtifact());
     }
 
     public void metadataDeployed(RepositoryEvent event) {
-        out.println("Deployed " + event.getMetadata() + " to " + event.getRepository());
+        logger.info("Deployed " + event.getMetadata() + " to " + event.getRepository());
     }
 
     public void metadataDeploying(RepositoryEvent event) {
-        out.println("Deploying " + event.getMetadata() + " to " + event.getRepository());
+        logger.info("Deploying " + event.getMetadata() + " to " + event.getRepository());
     }
 
     public void metadataInstalled(RepositoryEvent event) {
-        out.println("Installed " + event.getMetadata() + " to " + event.getFile());
+        logger.info("Installed " + event.getMetadata() + " to " + event.getFile());
     }
 
     public void metadataInstalling(RepositoryEvent event) {
-        out.println("Installing " + event.getMetadata() + " to " + event.getFile());
+        logger.info("Installing " + event.getMetadata() + " to " + event.getFile());
     }
 
     public void metadataInvalid(RepositoryEvent event) {
-        out.println("Invalid metadata " + event.getMetadata());
+        logger.info("Invalid metadata " + event.getMetadata());
     }
 
     public void metadataResolved(RepositoryEvent event) {
-        out.println("Resolved metadata " + event.getMetadata() + " from " + event.getRepository());
+        logger.info("Resolved metadata " + event.getMetadata() + " from " + event.getRepository());
     }
 
     public void metadataResolving(RepositoryEvent event) {
-        out.println("Resolving metadata " + event.getMetadata() + " from " + event.getRepository());
+        logger.info("Resolving metadata " + event.getMetadata() + " from " + event.getRepository());
     }
 
 }
