@@ -29,8 +29,33 @@ github {
     body = """# Metl Release
     ${version}
 """
-    assets = [
-            '../metl-ui/build/libs/metl.war',
-            '../metl-ui/src/main/webapp/doc/html/user-guide.html'
-    ]
+}
+
+task publishMetl {
+    dependsOn githubRelease
+	description = 'Publish software to SourceForge website'
+    doLast {
+        ant.taskdef(name: 'scp', classname: 'org.apache.tools.ant.taskdefs.optional.ssh.Scp',
+        classpath: configurations.sshAntTask.asPath)
+
+        println "Publishing user-guide.html distribution to source forge"
+        ant.scp(
+            todir: "$sourceforgeUser:$sourceforgePassword@frs.sourceforge.net:/home/frs/project/metl/$version",
+            trust: 'true',
+            verbose: 'true') {
+            fileset(dir: '../metl-ui/src/main/webapp/doc/html') {
+                include(name: 'user-guide.html')
+            }
+        }
+
+        println "Publishing war distribution to source forge"
+        ant.scp(
+            todir: "$sourceforgeUser:$sourceforgePassword@frs.sourceforge.net:/home/frs/project/metl/$version",
+            trust: 'true',
+            verbose: 'true') {
+            fileset(dir:             '../metl-ui/build/libs') { 
+                include(name: 'metl.war')
+            }
+        }
+    }
 }

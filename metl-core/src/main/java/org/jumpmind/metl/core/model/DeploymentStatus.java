@@ -21,7 +21,7 @@
 package org.jumpmind.metl.core.model;
 
 public enum DeploymentStatus {
-    DEPLOYED("Deployed"), DISABLED("Disabled"), REQUEST_ENABLE("Enabling"), REQUEST_REMOVE("Removing"), REQUEST_DISABLE("Disabling"), ERROR("Error");
+    DEPLOYED("Deployed"), DISABLED("Disabled"), REQUEST_ENABLE("Enabling"), REQUEST_REMOVE("Removing"), REQUEST_DISABLE("Disabling"), REQUEST_REENABLE("Renabling"), ERROR("Error");
     
     String name;
     
