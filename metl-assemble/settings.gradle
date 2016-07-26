@@ -1,1 +1,1 @@
-includeFlat 'metl-server', 'metl-core',  'metl-ui', 'comp-rdbms-reader', 'comp-sorter', 'comp-data-diff', 'comp-temp-rdbms', 'metl-war', 'metl-develop'
+includeFlat 'metl-server', 'metl-core',  'metl-ui', 'comp-abstract', 'comp-rdbms-reader', 'comp-sorter', 'comp-data-diff', 'comp-temp-rdbms', 'metl-war', 'metl-develop'

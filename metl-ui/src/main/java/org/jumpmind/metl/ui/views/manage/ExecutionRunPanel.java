@@ -404,7 +404,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
             boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true);
             String imageText = String.format(
                     "<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>",
-                    UiUtils.getBase64RepresentationOfImageForComponentType(type, context));
+                    UiUtils.getBase64RepresentationOfImageForComponentType(flow.getProjectVersionId(), type, context));
 
             node.setText(imageText);
             node.setName(name);

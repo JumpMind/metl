@@ -359,7 +359,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true);
             String imageText = String.format(
                     "<img style=\"display: block; margin-left: auto; margin-right: auto\" src=\"data:image/png;base64,%s\"/>",
-                    UiUtils.getBase64RepresentationOfImageForComponentType(type, context));
+                    UiUtils.getBase64RepresentationOfImageForComponentType(flow.getProjectVersionId(), type, context));
 
             node.setText(imageText);
             node.setName(name);
@@ -368,7 +368,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             node.setX(flowStep.getX());
             node.setY(flowStep.getY());
 
-            XMLComponent definition = context.getComponentDefinitionFactory().getDefinition(flowStep.getComponentId(), type);
+            XMLComponent definition = context.getComponentDefinitionFactory().getDefinition(flow.getProjectVersionId(), type);
             if (definition == null) {
                 throw new MisconfiguredException("Could not find the component defintion for a component of type '%s'", type);
             }

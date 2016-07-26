@@ -47,10 +47,6 @@ import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.properties.TypedProperties;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-/**
- * This is in the process of moving to comp-abstract
- */
-@Deprecated
 abstract public class AbstractRdbmsComponentRuntime extends AbstractComponentRuntime {
 
     public final static String SQL = "sql";

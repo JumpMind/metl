@@ -68,9 +68,6 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
 
     Map<String, Map<String, XMLComponent>> componentsByProjectVersionIdById;
 
-    // TODO this should probably go away
-    Map<String, List<String>> componentIdsByCategory;
-
     Map<String, List<XMLComponent>> componentsByPluginId;
 
     IConfigurationService configurationService;
@@ -80,7 +77,6 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
     public ComponentXmlDefinitionFactory() {
         componentsByProjectVersionIdById = new HashMap<>();
         componentsByPluginId = new HashMap<>();
-        componentIdsByCategory = new HashMap<>();
     }
 
     public ComponentXmlDefinitionFactory(IConfigurationService configurationService, IPluginManager pluginManager) {
@@ -94,7 +90,6 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
         pluginManager.refresh();
         componentsByProjectVersionIdById = new HashMap<>();
         componentsByPluginId = new HashMap<>();
-        componentIdsByCategory = new HashMap<>();
         if (pluginManager != null && configurationService != null) {
             List<String> projectVersionIds = configurationService.findAllProjectVersionIds();
             for (String projectVersionId : projectVersionIds) {
@@ -155,9 +150,12 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                     logger.warn("Could not find a registered plugin for {}:{}", ootbp.getArtifactGroup(), ootbp.getArtifactName());
                 }
             }
-
         }
+    }
 
+    @Override
+    public List<XMLComponent> getDefinitions(String projectVersionId) {
+        return new ArrayList<>(componentsByProjectVersionIdById.get(projectVersionId).values());
     }
 
     protected String load(String projectVersionId, String artifactGroup, String artifactName, String artifactVersion) {
@@ -171,35 +169,42 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
         return pluginId;
     }
 
-    @Override
-    synchronized public Map<String, List<XMLComponent>> getDefinitionsByCategory(String projectVersionId) {
-        Map<String, List<XMLComponent>> componentDefinitionsByCategory = new HashMap<>();
-        Map<String, XMLComponent> componentsById = componentsByProjectVersionIdById.get(projectVersionId);
-        Set<String> categories = componentIdsByCategory.keySet();
-        for (String category : categories) {
-            List<XMLComponent> list = new ArrayList<>();
-            componentDefinitionsByCategory.put(category, list);
-            List<String> types = componentIdsByCategory.get(category);
-            for (String type : types) {
-                list.add(componentsById.get(type));
-            }
-        }
-        return componentDefinitionsByCategory;
-    }
+    // @Override
+    // synchronized public Map<String, List<XMLComponent>>
+    // getDefinitionsByCategory(String projectVersionId) {
+    // Map<String, List<XMLComponent>> componentDefinitionsByCategory = new
+    // HashMap<>();
+    // Map<String, XMLComponent> componentsById =
+    // componentsByProjectVersionIdById.get(projectVersionId);
+    // Set<String> categories = componentIdsByCategory.keySet();
+    // for (String category : categories) {
+    // List<XMLComponent> list = new ArrayList<>();
+    // componentDefinitionsByCategory.put(category, list);
+    // List<String> types = componentIdsByCategory.get(category);
+    // for (String type : types) {
+    // list.add(componentsById.get(type));
+    // }
+    // }
+    // return componentDefinitionsByCategory;
+    // }
 
-    synchronized public Map<String, List<String>> getTypesByCategory() {
-        return componentIdsByCategory;
-    }
+//    synchronized public Map<String, List<String>> getTypesByCategory() {
+//        return componentIdsByCategory;
+//    }
 
     @Override
     synchronized public XMLComponent getDefinition(String projectVersionId, String id) {
         Map<String, XMLComponent> componentsById = componentsByProjectVersionIdById.get(projectVersionId);
-        return componentsById.get(id);
+        if (componentsById != null) {
+            return componentsById.get(id);
+        } else {
+            logger.warn("Could not find components for project version of {}", projectVersionId);
+            return null;
+        }
     }
 
     protected void reset() {
         componentsByPluginId = new HashMap<>();
-        componentIdsByCategory = new HashMap<>();
         componentsByProjectVersionIdById = new HashMap<>();
     }
 
@@ -235,16 +240,6 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
 
                             logger.info("Registering '{}' with an id of '{}' for plugin {} for project {}", xmlComponent.getName(), id,
                                     pluginId, projectVersionId);
-
-                            List<String> ids = componentIdsByCategory.get(xmlComponent.getCategory());
-                            if (ids == null) {
-                                ids = new ArrayList<String>();
-                                componentIdsByCategory.put(xmlComponent.getCategory(), ids);
-                            }
-
-                            if (!ids.contains(xmlComponent.getId())) {
-                                ids.add(xmlComponent.getId());
-                            }
 
                             if (xmlComponent.getSettings() == null) {
                                 xmlComponent.setSettings(new XMLSettings());

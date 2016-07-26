@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry path="bin" kind="output"/>
+	<classpathentry path="src/main/java" kind="src"/>
+	<classpathentry path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8/" kind="con"/>
+	<classpathentry path="/metl-core" kind="src"/>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.mockito/mockito-all/1.9.5/79a8984096fc6591c1e3690e07d41be506356fa5/mockito-all-1.9.5.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.mockito/mockito-all/1.9.5/b8086d4e4daa361fc746abea62f77a2ae55d3ed9/mockito-all-1.9.5-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.powermock/powermock-api-mockito/1.5.3/6cc08029e935e62f562bd52bbdcf597d7384cfd8/powermock-api-mockito-1.5.3.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.powermock/powermock-api-mockito/1.5.3/9c511da018314e7224fc1389df16a8d8d8ec91d8/powermock-api-mockito-1.5.3-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.powermock/powermock-module-junit4/1.5.3/a5805e52f332dc360c18bcd67ceb4d86319314d1/powermock-module-junit4-1.5.3.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.powermock/powermock-module-junit4/1.5.3/d5b87a208f8ea10949ad407b5f8585f83c002d30/powermock-module-junit4-1.5.3-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/xmlunit/xmlunit/1.6/adcae0aff916681dacd2b490e193f1119cd964a9/xmlunit-1.6.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/xmlunit/xmlunit/1.6/34acf07af6538d2b9ef1925267e74b498cc340bd/xmlunit-1.6-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.powermock/powermock-api-support/1.5.3/6633780632d5e2cb045c9d04dfe8edbdda81a007/powermock-api-support-1.5.3.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.powermock/powermock-api-support/1.5.3/7145f5dc50cb7f3cb63bad6695bec1e4fc9d536b/powermock-api-support-1.5.3-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/junit/junit/4.11/4e031bb61df09069aeb2bffb4019e7a5034a4ee0/junit-4.11.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/junit/junit/4.11/28e0ad201304e4a4abf999ca0570b7cffc352c3c/junit-4.11-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.powermock/powermock-module-junit4-common/1.5.3/18d54a57879a3e5069380fcc8f7501083c93e170/powermock-module-junit4-common-1.5.3.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.powermock/powermock-module-junit4-common/1.5.3/40b3cbcffaf09e25f3b04d6e9082cffe29eb0a9/powermock-module-junit4-common-1.5.3-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.21/139535a69a4239db087de9bab0bee568bf8e0b70/slf4j-api-1.7.21.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.21/f285ac123f201fb4b028bac556928d7cf527ef48/slf4j-api-1.7.21-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.slf4j/jul-to-slf4j/1.7.21/2f22c882ffa479d1e9ff4eb0e8e2c29f2a0871ed/jul-to-slf4j-1.7.21.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.slf4j/jul-to-slf4j/1.7.21/5f537a1ecb32fe3173a95f3c2c233f35f250faef/jul-to-slf4j-1.7.21-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.slf4j/jcl-over-slf4j/1.7.21/331b564a3a42f002a0004b039c1c430da89062cd/jcl-over-slf4j-1.7.21.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.slf4j/jcl-over-slf4j/1.7.21/c565ca9c1239b38fe4a70e4101086c4e880f6358/jcl-over-slf4j-1.7.21-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-log4j12/1.7.21/7238b064d1aba20da2ac03217d700d91e02460fa/slf4j-log4j12-1.7.21.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-log4j12/1.7.21/16b1333786ea93d16bff6fb0f5e3b82716d1b008/slf4j-log4j12-1.7.21-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.springframework/spring-context/4.3.1.RELEASE/254b02ed3f07fb847801fadc69eb1d99018d6004/spring-context-4.3.1.RELEASE.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.springframework/spring-context/4.3.1.RELEASE/4ca82b74dd9220203d96e8e63914c842e599d574/spring-context-4.3.1.RELEASE-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jumpmind.symmetric/symmetric-util/3.8.x-SNAPSHOT/4c58095ba9161d33cd442c661de2f1936d52ef90/symmetric-util-3.8.x-SNAPSHOT.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jumpmind.symmetric/symmetric-util/3.8.x-SNAPSHOT/ae5c409da2ac61b89cb42918586ba7d4800cede5/symmetric-util-3.8.x-SNAPSHOT-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jumpmind.symmetric/symmetric-db/3.8.x-SNAPSHOT/8389b38205d1df9730a6f54a5edf9f2bdf57e725/symmetric-db-3.8.x-SNAPSHOT.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jumpmind.symmetric/symmetric-db/3.8.x-SNAPSHOT/5c07444625e6452a62572bf3fc34dc5fc4cf6a62/symmetric-db-3.8.x-SNAPSHOT-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jumpmind.symmetric/symmetric-jdbc/3.8.x-SNAPSHOT/28aa0340b51aadec6ce2cba74706fbdbf6489494/symmetric-jdbc-3.8.x-SNAPSHOT.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jumpmind.symmetric/symmetric-jdbc/3.8.x-SNAPSHOT/59e812ad931a188b4528e8ca92961db81d4a51e1/symmetric-jdbc-3.8.x-SNAPSHOT-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jumpmind.symmetric/symmetric-io/3.8.x-SNAPSHOT/d03e6f3533fe27d9073644ce653fc4f2a078679e/symmetric-io-3.8.x-SNAPSHOT.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jumpmind.symmetric/symmetric-io/3.8.x-SNAPSHOT/821547e7dbf2b23350e8ff9b5691f89d8f4ca1a2/symmetric-io-3.8.x-SNAPSHOT-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jumpmind.symmetric/symmetric-core/3.8.x-SNAPSHOT/9a24247307baff18a26e8ed4b2e067d365521c46/symmetric-core-3.8.x-SNAPSHOT.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jumpmind.symmetric/symmetric-core/3.8.x-SNAPSHOT/1832f59c1b4289dbe0a7bec57e0aaf56ec25bbf/symmetric-core-3.8.x-SNAPSHOT-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-lang/commons-lang/2.6/ce1edb914c94ebc388f086c6827e8bdeec71ac2/commons-lang-2.6.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-lang/commons-lang/2.6/67313d715fbf0ea4fd0bdb69217fb77f807a8ce5/commons-lang-2.6-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-dbcp/commons-dbcp/1.4/30be73c965cc990b153a100aaaaafcf239f82d39/commons-dbcp-1.4.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-dbcp/commons-dbcp/1.4/9b076ff231434d5403be6599a1347019b12c0def/commons-dbcp-1.4-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-io/commons-io/2.4/b1b6ea3b7e4aa4f492509a4952029cd8e48019ad/commons-io-2.4.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-io/commons-io/2.4/f2d8698c46d1167ff24b06a840a87d91a02db891/commons-io-2.4-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-net/commons-net/3.3/cd0d5510908225f76c5fe5a3f1df4fa44866f81e/commons-net-3.3.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-net/commons-net/3.3/ccfa0721eae567b3c47cfaf3cca20e2491362bf6/commons-net-3.3-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/jaxen/jaxen/1.1.4/8c06a96cf9150ded75c28b7087ed821a93270c41/jaxen-1.1.4.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/jaxen/jaxen/1.1.4/1d4014377e8ac4a8f5631d2607e4a633ca1f32b5/jaxen-1.1.4-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/javax.mail/mail/1.4.7/9add058589d5d85adeb625859bf2c5eeaaedf12d/mail-1.4.7.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/javax.mail/mail/1.4.7/bb76e5678cdb3e7488bb5578a8461e82fba5fe36/mail-1.4.7-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jdom/jdom2/2.0.5/2001db51c131e555bafdb77fc52af6a9408c505e/jdom2-2.0.5.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jdom/jdom2/2.0.5/769f3cca4ce92088288be3d0238ef96ef787e82f/jdom2-2.0.5-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/javax.el/javax.el-api/3.0.0/60a59edc89f93d57541da31ee1c83428ab1cdcb3/javax.el-api-3.0.0.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/javax.el/javax.el-api/3.0.0/47e51cd2f414ff54840b250985c3bce6f6e9d389/javax.el-api-3.0.0-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/com.h2database/h2/1.4.192/1106492605db135523d2817881cdf029d9292afa/h2-1.4.192.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/com.h2database/h2/1.4.192/af6d933f4d5a49fc87e606296cd1bbc40e832374/h2-1.4.192-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jumpmind.symmetric.jdbc/postgresql/9.2-1002-jdbc4/65b528162f7cf20b4d44bc31a446724e217ba35b/postgresql-9.2-1002-jdbc4.jar" kind="lib">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/net.sourceforge.jtds/jtds/1.3.1/1527f2fc2f040898625370a1687d902aa0743bcc/jtds-1.3.1.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/net.sourceforge.jtds/jtds/1.3.1/6857ae4c370307c0e3a6273ac92872264ff682e9/jtds-1.3.1-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/net.sf.jt400/jt400/8.4/9405a72dec8f97695e4c0f53f0806d4a6cd6a310/jt400-8.4.jar" kind="lib">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpmime/4.3.2/3202421d9425ced69919b282afa644e7ef0e8fef/httpmime-4.3.2.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpmime/4.3.2/ab36bd1a7095d8dabd3a0df055114fa8b84236c5/httpmime-4.3.2-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jumpmind.symmetric.schemaspy/schemaspy/5.0.0/6666f6861e63a6f3061cd68e402cea9b094d1e98/schemaspy-5.0.0.jar" kind="lib">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.codehaus.groovy/groovy-all/2.4.7/c5371aaa20bcdca1175d9477fc0811f4fd99b68a/groovy-all-2.4.7.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.codehaus.groovy/groovy-all/2.4.7/467466f42be9d5bf1680cf71b5c4d31ad959dc36/groovy-all-2.4.7-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.5.2/2b4dd13fbe6f8c6b146d4c3b7fd70862f136802d/jackson-databind-2.5.2.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.5.2/f63d6280787700bbe1dda4880f63c34f36a7fcd/jackson-databind-2.5.2-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/com.jcraft/jsch/0.1.52/4988681cd939d45f88cb56a0806ad4064e621d1c/jsch-0.1.52.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/com.jcraft/jsch/0.1.52/32d6be13bc23e86715a158b0893d2cae08ab9ef8/jsch-0.1.52-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.ant/ant/1.9.7/3b2a10512ee6537d3852c9b693a0284dcab5de68/ant-1.9.7.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.ant/ant/1.9.7/c8c6f25c99bc5fcb1acb13f09f11d0045bedc256/ant-1.9.7-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/sshtools/j2ssh-ant/0.2.9/ebef32955c9ed79611d8e114e1657f900e0939e3/j2ssh-ant-0.2.9.jar" kind="lib">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/javax.jms/javax.jms-api/2.0.1/5faaa3864ff6025ce69809b60d65bda3e358610c/javax.jms-api-2.0.1.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/javax.jms/javax.jms-api/2.0.1/ede7852f95a985b71f57361e855dfc605da6679f/javax.jms-api-2.0.1-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.activemq/activemq-client/5.13.2/bc66297bbb254df63a197ffe978765eca5947863/activemq-client-5.13.2.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.activemq/activemq-client/5.13.2/ad4005d3e746a632abe61c7f8db0934ca069bd41/activemq-client-5.13.2-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/com.googlecode.json-simple/json-simple/1.1.1/c9ad4a0850ab676c5c64461a05ca524cdfff59f1/json-simple-1.1.1.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/com.googlecode.json-simple/json-simple/1.1.1/15bba08e3a239d54b68209c001f9c911559d2fed/json-simple-1.1.1-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-aether-provider/3.3.9/29e8e7122f7a166ea53785cd75af0ef9d4d848d4/maven-aether-provider-3.3.9.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-aether-provider/3.3.9/b4fb6632c420e1d83a6fb27be4e8c88cd25bb7e6/maven-aether-provider-3.3.9-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-transport-http/1.1.0/5beffae29e88251ac419bf96dd1426babdb6a66f/aether-transport-http-1.1.0.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-transport-http/1.1.0/314cf29f68c2e541804f260aa7caf95a821cb207/aether-transport-http-1.1.0-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-transport-file/1.1.0/5c257319ccba22a02fa583c3946bfcbb47638bc8/aether-transport-file-1.1.0.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-transport-file/1.1.0/be73c50bc1157733b8a93839b71e242b47aa3e0b/aether-transport-file-1.1.0-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-transport-classpath/1.1.0/c7aa771baef2c9dfb20bed368033971490848e39/aether-transport-classpath-1.1.0.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-transport-classpath/1.1.0/2935a1ad1607e7c3255b472a0d7169011ff58f2b/aether-transport-classpath-1.1.0-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-connector-basic/1.1.0/f5c784bdd704ff64166c086eb6b31e2784c87b66/aether-connector-basic-1.1.0.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-connector-basic/1.1.0/e57437db619ba4ba3bd9570fee1c7dbbeb3d3092/aether-connector-basic-1.1.0-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.powermock/powermock-core/1.5.3/b5dedcacb8c3936e381ab37d892b100c4e3a1c42/powermock-core-1.5.3.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.powermock/powermock-core/1.5.3/48752864b9a90e6ce6468683b66ee7cdb56943e0/powermock-core-1.5.3-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.powermock/powermock-reflect/1.5.3/ba1d1c96be687beb152ccea769a622cb12dc48d7/powermock-reflect-1.5.3.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.powermock/powermock-reflect/1.5.3/48ca24d9ddf2c2c7b168b32f009489b83b0f5553/powermock-reflect-1.5.3-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest-core/1.3/42a25dc3219429f0e5d060061f71acb49bf010a0/hamcrest-core-1.3.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest-core/1.3/1dc37250fbc78e23a65a67fbbaf71d2e9cbc3c0b/hamcrest-core-1.3-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/log4j/log4j/1.2.17/5af35056b4d257e4b64b9e8069c0746e8b08629f/log4j-1.2.17.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/log4j/log4j/1.2.17/677abe279b68c5e7490d6d50c6951376238d7d3e/log4j-1.2.17-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.springframework/spring-aop/4.3.1.RELEASE/9d7222291b640bb238781e79d6b6a62840ecd820/spring-aop-4.3.1.RELEASE.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.springframework/spring-aop/4.3.1.RELEASE/9ddaa5a8fe17f2f2017489f8a3677103b2e206e/spring-aop-4.3.1.RELEASE-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.springframework/spring-beans/4.3.1.RELEASE/4bdfad34241497243bd5d6e434f3a48c822377e0/spring-beans-4.3.1.RELEASE.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.springframework/spring-beans/4.3.1.RELEASE/9ac4e26014aafe807d727c0289a7bb6a92c03ec3/spring-beans-4.3.1.RELEASE-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.springframework/spring-core/4.3.1.RELEASE/8f9dee8b2ea55785b4ec9d3fbac16c0df424493d/spring-core-4.3.1.RELEASE.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.springframework/spring-core/4.3.1.RELEASE/eea89b3ee508a581595fd12dbe4f52043e8e886c/spring-core-4.3.1.RELEASE-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.springframework/spring-expression/4.3.1.RELEASE/cda94fb45005824bbb9582efe0632265acbbc7fc/spring-expression-4.3.1.RELEASE.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.springframework/spring-expression/4.3.1.RELEASE/6dc26b8950c6b31b0a6f1b74ad2e3edf1f1e1271/spring-expression-4.3.1.RELEASE-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/bouncycastle/bcprov-jdk15/140/83933f3f3312473afbe42a232392b3feffaadc36/bcprov-jdk15-140.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/bouncycastle/bcprov-jdk15/140/43217b0b1c389cde149f9009345f59662ee62a3d/bcprov-jdk15-140-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/net.sf.kxml/kxml2/2.3.0/ccbc77a5fd907ef863c29f3596c6f54ffa4e9442/kxml2-2.3.0.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/net.sf.kxml/kxml2/2.3.0/309cd2cff7260e465792fda3dcbb063b730d8050/kxml2-2.3.0-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-beanutils/commons-beanutils/1.9.2/7a87d845ad3a155297e8f67d9008f4c1e5656b71/commons-beanutils-1.9.2.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-beanutils/commons-beanutils/1.9.2/53746de93a0b30f346c082074a40c01a6cebdfa7/commons-beanutils-1.9.2-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.springframework/spring-jdbc/4.2.6.RELEASE/16075bfb0901a5b89c5be975365ff09b2df04abb/spring-jdbc-4.2.6.RELEASE.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.springframework/spring-jdbc/4.2.6.RELEASE/cc5a35a0a11b038fef88a97323734a0ea0215da6/spring-jdbc-4.2.6.RELEASE-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.beanshell/bsh/2.0b5/fdc2ab6ae8b53e0d4761b296c116df747cd85199/bsh-2.0b5.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.beanshell/bsh/2.0b5/99337ee4d907acc995c6f853e177097e5a6f06a/bsh-2.0b5-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jumpmind.symmetric/symmetric-csv/3.8.x-SNAPSHOT/fb37f89399ce33be8c31646f8a1fa5003f7042e7/symmetric-csv-3.8.x-SNAPSHOT.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.jumpmind.symmetric/symmetric-csv/3.8.x-SNAPSHOT/acc22b1ce8c673a901a4e09c157635029b170c47/symmetric-csv-3.8.x-SNAPSHOT-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/net.sourceforge.jeval/jeval/0.9.4/584be0ac1655138c7bb513aeb5043b5c39039af4/jeval-0.9.4.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/net.sourceforge.jeval/jeval/0.9.4/a7e72628b87c37a8c1acee5521596f5c2dc30bdc/jeval-0.9.4-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-fileupload/commons-fileupload/1.3/c89e540e4a12cb034fb973e12135839b5de9a87e/commons-fileupload-1.3.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-fileupload/commons-fileupload/1.3/fc5dcb277589b169c7a10966782ca49d57a4be86/commons-fileupload-1.3-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.5.0/a2a55a3375bc1cef830ca426d68d2ea22961190e/jackson-annotations-2.5.0.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.5.0/88b177349b719fe0636b50889687b9ed036bfd89/jackson-annotations-2.5.0-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.5.1/e2a00ad1d7e540ec395e9296a34da484c8888d4d/jackson-core-2.5.1.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.5.1/4e5efde4b46995149e5e5bddf052730063ad47fa/jackson-core-2.5.1-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.ant/ant-launcher/1.9.7/224857a490283e72da13ffe3082dea62c558ec76/ant-launcher-1.9.7.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.ant/ant-launcher/1.9.7/74cef5ca08d158fa5dc0d31a40a75c893ca00e6e/ant-launcher-1.9.7-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.geronimo.specs/geronimo-jms_1.1_spec/1.1.1/c872b46c601d8dc03633288b81269f9e42762cea/geronimo-jms_1.1_spec-1.1.1.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.geronimo.specs/geronimo-jms_1.1_spec/1.1.1/c45b919f5434f9c33c546af9e6dfc5e1466b4b3e/geronimo-jms_1.1_spec-1.1.1-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.fusesource.hawtbuf/hawtbuf/1.11/8f0e50ad8bea37b84b698ec40cce09e47714a63e/hawtbuf-1.11.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.fusesource.hawtbuf/hawtbuf/1.11/8218f5081b357c4c79a426bae93933584ed59f0d/hawtbuf-1.11-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.geronimo.specs/geronimo-j2ee-management_1.1_spec/1.0.1/5372615b0c04c1913c95c34a0414cef720ca2855/geronimo-j2ee-management_1.1_spec-1.0.1.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.geronimo.specs/geronimo-j2ee-management_1.1_spec/1.0.1/3d3b34584f4137c4ab7db496bceb5d75704f7354/geronimo-j2ee-management_1.1_spec-1.0.1-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-model/3.3.9/6efde8cbcb4de4c47f7e9c2a3ab2806022b5c70f/maven-model-3.3.9.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-model/3.3.9/590902cc3f932ced5ce51282b74bf62571a82c14/maven-model-3.3.9-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-model-builder/3.3.9/e2055f9adb9f3c9a93e6b36fffe79781a785de2d/maven-model-builder-3.3.9.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-model-builder/3.3.9/f05f8839f69f3a02d38558a4b11a8ae9827689dc/maven-model-builder-3.3.9-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-repository-metadata/3.3.9/6850232b35e504057d67bde11efddebf6271e1ce/maven-repository-metadata-3.3.9.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-repository-metadata/3.3.9/b40e69094173f699ee941158b425867173157c2/maven-repository-metadata-3.3.9-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-impl/1.0.2.v20150114/f147539e6e60dfbda9ef7f6d750066170f61b7a1/aether-impl-1.0.2.v20150114.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-impl/1.0.2.v20150114/89833da3565840d06428f6c163ff2d7e315620b7/aether-impl-1.0.2.v20150114-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-component-annotations/1.6/1a34a4e12b5fded8c548a568f463dfee21500927/plexus-component-annotations-1.6.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-component-annotations/1.6/5941351d88ecc8d022b8af1e3289d12225d64311/plexus-component-annotations-1.6-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-utils/3.0.22/764f26e0ab13a87c48fe55f525dfb6a133b7a92f/plexus-utils-3.0.22.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-utils/3.0.22/cf8b05bbaac563b52c02d396dfe4233a4dbae7bd/plexus-utils-3.0.22-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.4/5fe28b9518e58819180a43a850fbc0dd24b7c050/commons-lang3-3.4.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.4/b49dafc9cfef24c356827f322e773e7c26725dd2/commons-lang3-3.4-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.javassist/javassist/3.18.1-GA/d9a09f7732226af26bf99f19e2cffe0ae219db5b/javassist-3.18.1-GA.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.javassist/javassist/3.18.1-GA/d8d089f3a8845cce22d3006e02ab1403dd73b5b6/javassist-3.18.1-GA-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.objenesis/objenesis/2.1/87c0ea803b69252868d09308b4618f766f135a96/objenesis-2.1.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.objenesis/objenesis/2.1/611a57d836e2c320d59f9851d4ad587f3c8472e/objenesis-2.1-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.springframework/spring-tx/4.2.6.RELEASE/ba7502c0644414748b1eeb65b4193b05d335a110/spring-tx-4.2.6.RELEASE.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.springframework/spring-tx/4.2.6.RELEASE/fef17193bb0cc68cd6eaca5f16b0711f9b67b2b/spring-tx-4.2.6.RELEASE-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-interpolation/1.21/f92de59d295f16868001644acc21720f3ec9eb15/plexus-interpolation-1.21.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-interpolation/1.21/ec18e4d93661b15baf6868a8596b0a12f2678b0d/plexus-interpolation-1.21-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-artifact/3.3.9/f43afa184555fbc6e36b3334b17246c39b30f6e/maven-artifact-3.3.9.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-artifact/3.3.9/dccabdddd892d97f181788c63d30f10df9cc85d/maven-artifact-3.3.9-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-builder-support/3.3.9/a96f29da7623c0e1db9824f628548fe8181f6dd0/maven-builder-support-3.3.9.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-builder-support/3.3.9/69a1a10167df7e2172fd07c0a7c3d46dfdfb8d1d/maven-builder-support-3.3.9-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/com.google.guava/guava/18.0/cce0823396aa693798f8882e64213b1772032b09/guava-18.0.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/com.google.guava/guava/18.0/ad97fe8faaf01a3d3faacecd58e8fa6e78a973ca/guava-18.0-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-pool/commons-pool/1.5.4/75b6e20c596ed2945a259cea26d7fadd298398e6/commons-pool-1.5.4.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-pool/commons-pool/1.5.4/3e226507788e09f02eef641e868624fb823af6e6/commons-pool-1.5.4-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/javax.activation/activation/1.1/e6cb541461c2834bdea3eb920f1884d1eb508b50/activation-1.1.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/javax.activation/activation/1.1/3697e9f67a2ed7ac5f589cff30f21173299440/activation-1.1-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.6/b7f0fc8f61ecadeb3695f0b9464755eee44374d4/commons-codec-1.6.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.6/61e9f9d11fe3e12ec62f633006e99d75fd7f19c8/commons-codec-1.6-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-api/1.1.0/5dd291e788f50dfb48822dab29defc16ad70860/aether-api-1.1.0.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-api/1.1.0/5ea203196f2ff6554ed381a71db4287f371e5b48/aether-api-1.1.0-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-spi/1.1.0/a532baa7b965d2893ceace03e804b1882f448052/aether-spi-1.1.0.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-spi/1.1.0/9764241b7b96d9ee93961e9c4a4ac182e5030b9e/aether-spi-1.1.0-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-util/1.1.0/d0f84ba994f0133580e8b957a44593eaa03d42cd/aether-util-1.1.0.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.eclipse.aether/aether-util/1.1.0/dafe37ecbf804d2d0e366d2caca8b672a10bc31d/aether-util-1.1.0-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpclient/4.3.5/9783d89b8eea20a517a4afc5f979bd2882b54c44/httpclient-4.3.5.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpclient/4.3.5/9351922abd5e659dcbacb1d38b81d8069bac797b/httpclient-4.3.5-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.2/4bfc12adfe4842bf07b657f0369c4cb522955686/commons-logging-1.2.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.2/ecf26c7507d67782a3bbd148d170b31dfad001aa/commons-logging-1.2-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-collections/commons-collections/3.2.1/761ea405b9b37ced573d2df0d1e3a4e0f9edc668/commons-collections-3.2.1.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/commons-collections/commons-collections/3.2.1/fa095ef874374e5b2a11f8b06c26a5d68c7cb3a4/commons-collections-3.2.1-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.3.2/31fbbff1ddbf98f3aa7377c94d33b0447c646b6e/httpcore-4.3.2.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.3.2/4809f38359edeea9487f747e09aa58ec8d3a54c5/httpcore-4.3.2-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/junit/junit/4.10/e4f1766ce7404a08f45d859fb9c226fc9e41a861/junit-4.10.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/junit/junit/4.10/6c98d6766e72d5575f96c9479d1c1d3b865c6e25/junit-4.10-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry path="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest-core/1.1/860340562250678d1a344907ac75754e259cdb14/hamcrest-core-1.1.jar" kind="lib" sourcepath="/Users/cshenso/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest-core/1.1/2ccf1154d1a8936042a8a742dc3e611d02ac7213/hamcrest-core-1.1-sources.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+</classpath>

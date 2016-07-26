@@ -1,7 +1,6 @@
 package org.jumpmind.metl.core.runtime.component.definition;
 
 import java.util.List;
-import java.util.Map;
 
 public interface IComponentDefinitionFactory {
 
@@ -10,7 +9,8 @@ public interface IComponentDefinitionFactory {
     public void refresh(String projectVersionId);
     
     XMLComponent getDefinition(String projectVersionId, String id);
-
-    Map<String, List<XMLComponent>> getDefinitionsByCategory(String projectVersionId);
+    
+    List<XMLComponent> getDefinitions(String projectVersionId);
+    
 
 }

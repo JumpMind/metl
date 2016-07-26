@@ -1,5 +1,7 @@
 apply from: '../metl-assemble/common.gradle'
 
+version = "1.0.0" + buildNumber
+
 dependencies {
     provided project(':metl-ui')
     compile project(':comp-rdbms-reader')

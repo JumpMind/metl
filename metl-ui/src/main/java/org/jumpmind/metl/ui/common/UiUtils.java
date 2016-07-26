@@ -81,8 +81,8 @@ public final class UiUtils {
         return new int[] { startIndex, endIndex };
     }
     
-    public static String getBase64RepresentationOfImageForComponentType(String type, ApplicationContext context) {
-        String resourceName = getImageResourceNameForComponentType(type, context);
+    public static String getBase64RepresentationOfImageForComponentType(String projectVersionId, String type, ApplicationContext context) {
+        String resourceName = getImageResourceNameForComponentType(projectVersionId, type, context);
         InputStream is = context.getClass().getResourceAsStream(resourceName);
         if (is != null) {
             try {
@@ -96,7 +96,7 @@ public final class UiUtils {
         }
     }
 
-    public static String getImageResourceNameForComponentType(String type, ApplicationContext context) {
+    public static String getImageResourceNameForComponentType(String projectVersionId, String type, ApplicationContext context) {
         String icon = "/org/jumpmind/metl/core/runtime/component/metl-puzzle-48x48-color.png";
         XMLComponentUI def = context.getUiFactory().getDefinition(type);
         if (def != null && isNotBlank(def.getIconImage())) {
