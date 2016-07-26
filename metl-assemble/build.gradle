@@ -18,6 +18,19 @@ buildscript {
 
 apply plugin: 'co.riiid.gradle'
 
+repositories {
+    mavenCentral()
+}
+
+
+configurations {
+    sshAntTask
+}
+
+dependencies {
+    sshAntTask 'org.apache.ant:ant-jsch:1.7.1', 'jsch:jsch:0.1.29'
+}
+
 github {
     owner = 'JumpMind'
     repo = 'metl'
