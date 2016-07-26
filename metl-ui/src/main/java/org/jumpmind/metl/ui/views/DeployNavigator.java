@@ -148,7 +148,8 @@ public class DeployNavigator extends VerticalLayout {
         }
 
         treeTable.removeAllItems();
-        List<Folder> folders = context.getConfigurationService().findFolders(null, FolderType.AGENT);
+        List<Folder> folders = context.getConfigurationService().findFolders(null,
+                FolderType.AGENT);
         for (Folder folder : folders) {
             addChildren(folder);
         }
@@ -465,7 +466,7 @@ public class DeployNavigator extends VerticalLayout {
         boolean showNewFolder = itemBeingEdited == null
                 && (selected == null || selectedFolder != null);
         newFolder.setEnabled(showNewFolder);
-        newAgent.setEnabled(selectedFolder != null && !selectedFolder.getName().startsWith("<"));
+        newAgent.setEnabled(selectedFolder == null || !selectedFolder.getName().startsWith("<"));
 
         delete.setEnabled(isDeleteButtonEnabled(selected));
     }
@@ -493,9 +494,8 @@ public class DeployNavigator extends VerticalLayout {
                                     context.getConfigurationService().delete(folder);
                                 } catch (Exception ex) {
                                     log.error("", ex);
-                                    CommonUiUtils.notify(
-                                            "Could not delete the \"" + folder.getName()
-                                                    + "\" folder", Type.WARNING_MESSAGE);
+                                    CommonUiUtils.notify("Could not delete the \""
+                                            + folder.getName() + "\" folder", Type.WARNING_MESSAGE);
                                 }
                             }
                             refresh();
@@ -530,19 +530,16 @@ public class DeployNavigator extends VerticalLayout {
 
     protected void addAgent() {
         Folder folder = getSelectedFolder();
-        if (folder != null) {
-            Agent agent = new Agent();
-            agent.setName("New Agent");
-            agent.setFolder(folder);
-            agent.setHost(AppUtils.getHostName());
-            context.getConfigurationService().save(agent);
-            context.getAgentManager().refresh(agent);
-            AgentName name = new AgentName(agent);
-            addAgent(folder, name);
-            expand(folder, name);
-            startEditingItem(name);
-        }
-
+        Agent agent = new Agent();
+        agent.setName("New Agent");
+        agent.setFolder(folder);
+        agent.setHost(AppUtils.getHostName());
+        context.getConfigurationService().save(agent);
+        context.getAgentManager().refresh(agent);
+        AgentName name = new AgentName(agent);
+        addAgent(folder, name);
+        expand(folder, name);
+        startEditingItem(name);
     }
 
     protected void addAgent(Folder folder, AgentName agent) {
