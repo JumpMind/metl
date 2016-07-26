@@ -1,3 +1,6 @@
+import java.text.SimpleDateFormat
+import java.util.Date
+
 buildscript {
     repositories {
         jcenter()
@@ -15,6 +18,9 @@ buildscript {
         classpath 'co.riiid:gradle-github-plugin:0.3.1'
     }
 }
+
+buildNumber = 'dev'.equals(buildNumber) ?  ('dev' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
+version = version + "." + buildNumber
 
 apply plugin: 'co.riiid.gradle'
 
@@ -50,25 +56,20 @@ task publishMetl {
     doLast {
         ant.taskdef(name: 'scp', classname: 'org.apache.tools.ant.taskdefs.optional.ssh.Scp',
         classpath: configurations.sshAntTask.asPath)
+        def targetScpSite = "$sourceforgeUser:$sourceforgePassword@frs.sourceforge.net:/home/frs/project/metl";
 
         println "Publishing user-guide.html distribution to source forge"
         ant.scp(
-            todir: "$sourceforgeUser:$sourceforgePassword@frs.sourceforge.net:/home/frs/project/metl/$version",
             trust: 'true',
-            verbose: 'true') {
-            fileset(dir: '../metl-ui/src/main/webapp/doc/html') {
-                include(name: 'user-guide.html')
-            }
-        }
-
+            verbose: 'true',
+            localFile: '../metl-ui/src/main/webapp/doc/html/user-guide.html',
+            remoteTofile: "${targetScpSite}/user-guide-${version}.html")
+ 
         println "Publishing war distribution to source forge"
         ant.scp(
-            todir: "$sourceforgeUser:$sourceforgePassword@frs.sourceforge.net:/home/frs/project/metl/$version",
             trust: 'true',
-            verbose: 'true') {
-            fileset(dir:             '../metl-ui/build/libs') { 
-                include(name: 'metl.war')
-            }
-        }
+            verbose: 'true',
+            localFile: '../metl-ui/build/libs/metl.war',
+            remoteTofile: "${targetScpSite}/metl-${version}.war")
     }
 }
