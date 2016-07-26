@@ -206,7 +206,7 @@ public class AgentRuntime {
             List<AgentDeployment> deployments = new ArrayList<AgentDeployment>(
                     agent.getAgentDeployments());
             for (AgentDeployment deployment : deployments) {
-                stop(deployment);
+                stop(deployment, null);
             }
 
             agent.setAgentStatus(AgentStatus.STOPPED);
@@ -459,7 +459,7 @@ public class AgentRuntime {
             return executionId;
     }
 
-    protected void stop(AgentDeployment deployment) {
+    protected void stop(AgentDeployment deployment, DeploymentStatus nextStatus) {
         ScheduledFuture<?> future = scheduledDeployments.get(deployment);
         if (future != null) {
             future.cancel(true);
@@ -479,6 +479,12 @@ public class AgentRuntime {
 	            }
 	        }
         }
+        
+        if (nextStatus != null) {
+            deployment.setStatus(nextStatus.name());
+            configurationService.save(deployment);
+        }
+
     }
     
     public Collection<IResourceRuntime> getDeployedResources() {
@@ -487,7 +493,7 @@ public class AgentRuntime {
 
     public synchronized void undeploy(AgentDeployment deployment) {
         doComponentDeploymentEvent(deployment, (l, f, s, c) -> l.onUndeploy(agent, deployment, f, s, c));
-        stop(deployment);
+        stop(deployment, null);
         configurationService.delete(deployment);
         agent.getAgentDeployments().remove(deployment);
         scheduledFlows.remove(deployment);
@@ -555,9 +561,9 @@ public class AgentRuntime {
                     } else if (status.equals(DeploymentStatus.REQUEST_REMOVE)) {
                         undeploy(deployment);
                     } else if (status.equals(DeploymentStatus.REQUEST_DISABLE)) {
-                        stop(deployment);
-                        deployment.setStatus(DeploymentStatus.DISABLED.name());
-                        configurationService.save(deployment);
+                        stop(deployment, DeploymentStatus.DISABLED);
+                    } else if (status.equals(DeploymentStatus.REQUEST_REENABLE)) {
+                        stop(deployment, DeploymentStatus.REQUEST_ENABLE);
                     } else {
                         deployResources(deployment.getFlow());
                     }

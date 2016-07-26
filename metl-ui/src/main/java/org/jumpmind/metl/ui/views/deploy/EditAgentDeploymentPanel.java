@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentDeploymentParameter;
+import org.jumpmind.metl.core.model.DeploymentStatus;
 import org.jumpmind.metl.core.model.StartType;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -124,6 +125,11 @@ public class EditAgentDeploymentPanel extends VerticalSplitPanel implements IUiP
     
     @Override
     public boolean closing() {
+        AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(agentDeployment.getId());
+        if (deployment.getStatus().equals(DeploymentStatus.DEPLOYED.name())) {
+            deployment.setStatus(DeploymentStatus.REQUEST_REENABLE.name());
+            context.getConfigurationService().save(deployment);
+        }
         return true;
     }
 
