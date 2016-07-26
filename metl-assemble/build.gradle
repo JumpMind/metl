@@ -32,10 +32,6 @@ github {
 }
 
 task publishMetl {
-    dependsOn clean 
-    dependsOn generateDoc 
-    dependsOn assemble 
-    dependsOn deploy
     dependsOn githubRelease
 	description = 'Publish software to SourceForge website'
     doLast {
