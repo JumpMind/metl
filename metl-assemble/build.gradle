@@ -1,3 +1,6 @@
+import java.text.SimpleDateFormat
+import java.util.Date
+
 buildscript {
     repositories {
         jcenter()
@@ -16,7 +19,23 @@ buildscript {
     }
 }
 
+buildNumber = 'dev'.equals(buildNumber) ?  ('dev' + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())) : buildNumber
+version = version + "." + buildNumber
+
 apply plugin: 'co.riiid.gradle'
+
+repositories {
+    mavenCentral()
+}
+
+
+configurations {
+    sshAntTask
+}
+
+dependencies {
+    sshAntTask 'org.apache.ant:ant-jsch:1.7.1', 'jsch:jsch:0.1.29'
+}
 
 github {
     owner = 'JumpMind'
@@ -26,8 +45,8 @@ github {
     targetCommitish = 'master'
     name = version
     prerelease = false
-    body = """# Metl Release
-    ${version}
+    body = """
+    <a href='https://sourceforge.net/projects/metl/files/metl-${version}.war' rel='nofollow'><img alt='Download Metl' src='https://a.fsdn.com/con/app/sf-download-button'></a>    
 """
 }
 
@@ -37,25 +56,20 @@ task publishMetl {
     doLast {
         ant.taskdef(name: 'scp', classname: 'org.apache.tools.ant.taskdefs.optional.ssh.Scp',
         classpath: configurations.sshAntTask.asPath)
+        def targetScpSite = "$sourceforgeUser:$sourceforgePassword@frs.sourceforge.net:/home/frs/project/metl";
 
         println "Publishing user-guide.html distribution to source forge"
         ant.scp(
-            todir: "$sourceforgeUser:$sourceforgePassword@frs.sourceforge.net:/home/frs/project/metl/$version",
             trust: 'true',
-            verbose: 'true') {
-            fileset(dir: '../metl-ui/src/main/webapp/doc/html') {
-                include(name: 'user-guide.html')
-            }
-        }
-
+            verbose: 'true',
+            localFile: '../metl-ui/src/main/webapp/doc/html/user-guide.html',
+            remoteTofile: "${targetScpSite}/user-guide-${version}.html")
+ 
         println "Publishing war distribution to source forge"
         ant.scp(
-            todir: "$sourceforgeUser:$sourceforgePassword@frs.sourceforge.net:/home/frs/project/metl/$version",
             trust: 'true',
-            verbose: 'true') {
-            fileset(dir:             '../metl-ui/build/libs') { 
-                include(name: 'metl.war')
-            }
-        }
+            verbose: 'true',
+            localFile: '../metl-ui/build/libs/metl.war',
+            remoteTofile: "${targetScpSite}/metl-${version}.war")
     }
 }
