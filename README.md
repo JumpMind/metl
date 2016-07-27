@@ -1,4 +1,4 @@
-This is the development site for Metl.  To run the latest and greatest use the following instructions.  The latest milestone release and/or Users Guide can be downloaded here:
+This is the development site for Metl.  To run the latest and greatest use the following instructions.  The latest  release can be downloaded here:
 
 <a href="https://sourceforge.net/projects/metl/files/latest/download" rel="nofollow"><img alt="Download Metl" src="https://a.fsdn.com/con/app/sf-download-button"></a>
 
