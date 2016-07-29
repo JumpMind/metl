@@ -70,8 +70,6 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTargetDetails;
 import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
@@ -185,31 +183,16 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         ButtonBar buttonBar = new ButtonBar();
         if (!readOnly) {
             runButton = buttonBar.addButton("Run", Icons.RUN);
-            runButton.addClickListener(new ClickListener() {
-
-                @Override
-                public void buttonClick(ClickEvent event) {
-                    runFlow();
-                }
-            });
+            runButton.addClickListener((event)->runFlow());
+            
+            Button selectAllButton = buttonBar.addButton("Select All", FontAwesome.CROSSHAIRS);
+            selectAllButton.addClickListener((event)->selectAll());
 
             copyButton = buttonBar.addButton("Copy", FontAwesome.COPY);
-            copyButton.addClickListener(new ClickListener() {
-
-                @Override
-                public void buttonClick(ClickEvent event) {
-                    copySelected();
-                }
-            });
+            copyButton.addClickListener((event)->copySelected());
 
             delButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
-            delButton.addClickListener(new ClickListener() {
-
-                @Override
-                public void buttonClick(ClickEvent event) {
-                    deleteSelected();
-                }
-            });
+            delButton.addClickListener((event)->deleteSelected());
             delButton.setEnabled(false);
         }
 
@@ -217,6 +200,15 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         parametersButton.addClickListener((event) -> new EditParametersDialog(context, flow, readOnly).showAtSize(.75));
 
         return buttonBar;
+    }
+    
+    protected void selectAll() {
+        selected = new ArrayList<>();
+        for (FlowStep step : flow.getFlowSteps()) {
+            selected.add(step);
+        }
+        propertySheet.setSource(selected);
+        redrawFlow();
     }
 
     protected Button createToolButton(String name, Resource icon) {
