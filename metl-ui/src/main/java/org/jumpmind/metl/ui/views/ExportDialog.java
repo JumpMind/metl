@@ -3,6 +3,7 @@ package org.jumpmind.metl.ui.views;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -246,7 +247,7 @@ public class ExportDialog extends ResizableWindow {
 
             public InputStream getStream() {
                 try {
-                    return new ByteArrayInputStream(export.getBytes());
+                    return new ByteArrayInputStream(export.getBytes(Charset.forName("utf-8")));
                 } catch (Exception e) {
                     log.error("Failed to export configuration", e);
                     CommonUiUtils.notify("Failed to export configuration.", Type.ERROR_MESSAGE);
