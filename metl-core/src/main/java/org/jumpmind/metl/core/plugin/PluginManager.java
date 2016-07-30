@@ -1,7 +1,6 @@
 package org.jumpmind.metl.core.plugin;
 
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +30,7 @@ import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
+import org.jumpmind.metl.core.util.ChildFirstURLClassLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,22 +73,20 @@ public class PluginManager implements IPluginManager {
         if (classLoader == null) {
             try {
                 Artifact artifact = new DefaultArtifact(pluginId);
-                DependencyFilter classpathFlter = DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE);
 
-                CollectRequest collectRequest = new CollectRequest();
-                collectRequest.setRoot(new Dependency(artifact, JavaScopes.COMPILE));
-
-                DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, classpathFlter);
-
-                List<ArtifactResult> artifactResults = repositorySystem.resolveDependencies(repositorySystemSession, dependencyRequest)
-                        .getArtifactResults();
+                List<ArtifactResult> artifactResults = new ArrayList<>();
+                artifactResults.addAll(collectDependencies(artifact, JavaScopes.COMPILE));
+                artifactResults.addAll(collectDependencies(artifact, JavaScopes.RUNTIME));
 
                 List<URL> artifactUrls = new ArrayList<URL>();
                 for (ArtifactResult artRes : artifactResults) {
-                    artifactUrls.add(artRes.getArtifact().getFile().toURI().toURL());
+                    URL url = artRes.getArtifact().getFile().toURI().toURL();
+                    if (!artifactUrls.contains(url)) {
+                        artifactUrls.add(0, url);
+                    }
                 }
 
-                classLoader = new URLClassLoader(artifactUrls.toArray(new URL[artifactUrls.size()]), getClass().getClassLoader());
+                classLoader = new ChildFirstURLClassLoader(artifactUrls.toArray(new URL[artifactUrls.size()]), getClass().getClassLoader());
                 plugins.put(pluginId, classLoader);
             } catch (RuntimeException e) {
                 throw e;
@@ -97,6 +95,36 @@ public class PluginManager implements IPluginManager {
             }
         }
         return classLoader;
+    }
+
+    protected List<ArtifactResult> merge(List<ArtifactResult>[] results) {
+        List<ArtifactResult> merged = new ArrayList<>();
+        for (List<ArtifactResult> artifactResults : results) {
+            for (ArtifactResult artifactResult : artifactResults) {
+                if (!merged.contains(artifactResult)) {
+                    merged.add(artifactResult);
+                }
+            }
+        }
+        return merged;
+    }
+
+    protected List<ArtifactResult> collectDependencies(Artifact artifact, String scope) {
+        try {
+            DependencyFilter classpathFlter = DependencyFilterUtils.classpathFilter(scope);
+
+            CollectRequest collectRequest = new CollectRequest();
+            collectRequest.setRoot(new Dependency(artifact, scope));
+
+            DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, classpathFlter);
+
+            return repositorySystem.resolveDependencies(repositorySystemSession, dependencyRequest).getArtifactResults();
+
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void deploy(String artifactGroup, String artifactName, String artifactVersion, String filePath) {
