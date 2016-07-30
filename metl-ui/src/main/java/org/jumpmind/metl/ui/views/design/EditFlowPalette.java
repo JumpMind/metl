@@ -22,6 +22,7 @@ package org.jumpmind.metl.ui.views.design;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,8 +32,8 @@ import org.jumpmind.metl.ui.common.UiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.server.ClassResource;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
@@ -99,9 +100,16 @@ public class EditFlowPalette extends VerticalLayout {
 
     }
 
-    protected ClassResource getImageResourceForComponentType(String projectVersionId, XMLComponent componentDefinition) {
-        return new ClassResource(componentDefinition.getClass(),
-                UiUtils.getImageResourceNameForComponentType(projectVersionId, componentDefinition.getId(), context));
+    protected StreamResource getImageResourceForComponentType(String projectVersionId, XMLComponent componentDefinition) {
+        StreamResource.StreamSource source = new StreamResource.StreamSource() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public InputStream getStream() {
+                return UiUtils.getComponentImageInputStream(projectVersionId, componentDefinition.getId(), context);
+            }
+        };
+        return new StreamResource(source, componentDefinition.getId());
     }
 
     protected void populateComponentPalette() {
@@ -111,13 +119,13 @@ public class EditFlowPalette extends VerticalLayout {
         for (XMLComponent definition : componentDefinitions) {
             if (isBlank(filterText) || definition.getName().toLowerCase().contains(filterText)
                     || definition.getCategory().toLowerCase().contains(filterText)) {
-                ClassResource icon = getImageResourceForComponentType(projectVersionId, definition);
+                StreamResource icon = getImageResourceForComponentType(projectVersionId, definition);
                 addItemToFlowPanelSection(definition.getName(), definition.getId(), componentLayout, icon, null);
             }
         }
     }
 
-    protected void addItemToFlowPanelSection(String labelName, String componentType, VerticalLayout componentLayout, ClassResource icon,
+    protected void addItemToFlowPanelSection(String labelName, String componentType, VerticalLayout componentLayout, StreamResource icon,
             String componentId) {
 
         FlowPaletteItem paletteItem = new FlowPaletteItem(labelName);

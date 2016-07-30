@@ -55,24 +55,24 @@ import org.slf4j.LoggerFactory;
 
 public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactory {
 
-    final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    static Set<Plugin> outOfTheBox = new TreeSet<>();
+    protected static Set<Plugin> outOfTheBox = new TreeSet<>();
 
     static {
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-rdbms-reader"));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-data-diff"));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-sorter"));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-temp-rdbms"));
-    }
-
+    }    
+    
     Map<String, Map<String, XMLComponent>> componentsByProjectVersionIdById;
 
     Map<String, List<XMLComponent>> componentsByPluginId;
 
-    IConfigurationService configurationService;
+    protected IConfigurationService configurationService;
 
-    IPluginManager pluginManager;
+    protected IPluginManager pluginManager;
 
     public ComponentXmlDefinitionFactory() {
         componentsByProjectVersionIdById = new HashMap<>();
@@ -294,5 +294,4 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
             throw new IoException(e);
         }
     }
-
 }

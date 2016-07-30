@@ -38,7 +38,7 @@ import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
-import org.jumpmind.metl.ui.views.IUIFactory;
+import org.jumpmind.metl.ui.views.IComponentDefinitionPlusUIFactory;
 import org.jumpmind.vaadin.ui.common.UiComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -68,7 +68,7 @@ public class ApplicationContext implements Serializable {
     IComponentDefinitionFactory componentDefinitionFactory;
     
     @Autowired
-    IUIFactory uiFactory;
+    IComponentDefinitionPlusUIFactory uiFactory;
 
     @Autowired
     IResourceFactory resourceFactory;
@@ -143,7 +143,7 @@ public class ApplicationContext implements Serializable {
         return configDatabasePlatform;
     }
         
-    public IUIFactory getUiFactory() {
+    public IComponentDefinitionPlusUIFactory getUiFactory() {
         return uiFactory;
     }
     

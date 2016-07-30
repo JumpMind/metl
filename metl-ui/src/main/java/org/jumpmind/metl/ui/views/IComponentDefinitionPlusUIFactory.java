@@ -20,15 +20,14 @@
  */
 package org.jumpmind.metl.ui.views;
 
+import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.ui.definition.XMLComponentUI;
 import org.jumpmind.metl.ui.views.design.IComponentEditPanel;
 
-public interface IUIFactory {
+public interface IComponentDefinitionPlusUIFactory extends IComponentDefinitionFactory {
     
-    public XMLComponentUI getDefinition(String componentId);
+    public XMLComponentUI getUiDefinition(String projectVersionId, String componentId);
 
-    public IComponentEditPanel create(String componentId);
-    
-    public void refresh();
+    public IComponentEditPanel createUiPanel(String projectVersionId, String componentId);    
     
 }

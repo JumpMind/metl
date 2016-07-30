@@ -1,5 +1,6 @@
 package org.jumpmind.metl.core.util;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 
@@ -27,6 +28,24 @@ public class ChildFirstURLClassLoader extends URLClassLoader {
             }
         }
         return loaded;
+    }
+    
+    @Override
+    public URL getResource(String name) {
+        URL url = super.getResource(name);
+        if (url == null) {
+            url = realParent.getResource(name);
+        }
+        return url;
+    }
+    
+    @Override
+    public InputStream getResourceAsStream(String name) {
+        InputStream is = super.getResourceAsStream(name);
+        if (is == null) {
+            is = realParent.getResourceAsStream(name);
+        }
+        return is;
     }
 
 }

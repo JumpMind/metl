@@ -34,46 +34,36 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
-import org.jumpmind.metl.core.util.AbstractXMLFactory;
+import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.plugin.IPluginManager;
+import org.jumpmind.metl.core.runtime.component.definition.ComponentXmlDefinitionFactory;
 import org.jumpmind.metl.ui.definition.XMLComponentUI;
 import org.jumpmind.metl.ui.definition.XMLUI;
 import org.jumpmind.metl.ui.views.design.IComponentEditPanel;
 
-public class UIXMLFactory extends AbstractXMLFactory implements IUIFactory {
+public class ComponentXmlDefinitionPlusUIFactory extends ComponentXmlDefinitionFactory implements IComponentDefinitionPlusUIFactory {
 
-    protected Map<String, XMLComponentUI> componentUisByComponentId;
-    
-    public UIXMLFactory() {
-        super(null);
-    }
-    
-    synchronized public XMLComponentUI getDefinition(String componentId) {
-        return componentUisByComponentId.get(componentId);
+    protected Map<String, Map<String, XMLComponentUI>> uisByProjectVersionIdByComponentId;
+
+    public ComponentXmlDefinitionPlusUIFactory(IConfigurationService configurationService, IPluginManager pluginManager) {
+        super(configurationService, pluginManager);
     }
 
-    public IComponentEditPanel create(String componentId) {
-        try {
-            XMLComponentUI ui = getDefinition(componentId);
-            if (ui != null && isNotBlank(ui.getClassName())) {
-                return (IComponentEditPanel) Class.forName(ui.getClassName()).newInstance();
-            } else {
-                return null;
-            }
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-    
     @Override
-    protected void reset() {
-        componentUisByComponentId = new HashMap<String, XMLComponentUI>();
+    public void refresh() {
+        uisByProjectVersionIdByComponentId = new HashMap<>();
+        super.refresh();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void loadComponentsForClassloader(ClassLoader classLoader) {
+    protected void loadComponentsForClassloader(String projectVersionId, String pluginId, ClassLoader classLoader) {
+        super.loadComponentsForClassloader(projectVersionId, pluginId, classLoader);
+        Map<String, XMLComponentUI> componentsById = uisByProjectVersionIdByComponentId.get(projectVersionId);
+        if (componentsById == null) {
+            componentsById = new HashMap<>();
+            uisByProjectVersionIdByComponentId.put(projectVersionId, componentsById);
+        }
         try {
             JAXBContext jc = JAXBContext.newInstance(XMLUI.class.getPackage().getName());
             Unmarshaller unmarshaller = jc.createUnmarshaller();
@@ -86,7 +76,8 @@ public class UIXMLFactory extends AbstractXMLFactory implements IUIFactory {
                     XMLUI ui = root.getValue();
                     List<XMLComponentUI> componentUis = ui.getComponentUis();
                     for (XMLComponentUI xmlComponentUI : componentUis) {
-                        componentUisByComponentId.put(xmlComponentUI.getComponentId(), xmlComponentUI);
+                        xmlComponentUI.setClassLoader(classLoader);
+                        componentsById.put(xmlComponentUI.getComponentId(), xmlComponentUI);
                     }
                 }
             } finally {
@@ -97,6 +88,33 @@ public class UIXMLFactory extends AbstractXMLFactory implements IUIFactory {
             }
         } catch (Exception e) {
             throw new IoException(e);
+        }
+    }
+
+    @Override
+    public IComponentEditPanel createUiPanel(String projectVersionId, String componentId) {
+        try {
+            XMLComponentUI ui = getUiDefinition(projectVersionId, componentId);
+            if (ui != null && isNotBlank(ui.getClassName())) {
+                return (IComponentEditPanel) Class.forName(ui.getClassName(), true, ui.getClassLoader()).newInstance();
+            } else {
+                return null;
+            }
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public XMLComponentUI getUiDefinition(String projectVersionId, String componentId) {
+        Map<String, XMLComponentUI> componentsById = uisByProjectVersionIdByComponentId.get(projectVersionId);
+        if (componentsById != null) {
+            return componentsById.get(componentId);
+        } else {
+            logger.warn("Could not find components for project version of {}", projectVersionId);
+            return null;
         }
     }
 

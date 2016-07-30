@@ -61,8 +61,6 @@ import org.jumpmind.metl.core.runtime.AgentManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
-import org.jumpmind.metl.core.runtime.component.definition.ComponentXmlDefinitionFactory;
-import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMappingRegistry;
@@ -70,8 +68,8 @@ import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.metl.core.util.EnvConstants;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.ui.common.AppConstants;
-import org.jumpmind.metl.ui.views.IUIFactory;
-import org.jumpmind.metl.ui.views.UIXMLFactory;
+import org.jumpmind.metl.ui.views.ComponentXmlDefinitionPlusUIFactory;
+import org.jumpmind.metl.ui.views.IComponentDefinitionPlusUIFactory;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.security.SecurityServiceFactory;
@@ -116,8 +114,6 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
     IComponentRuntimeFactory componentRuntimeFactory;
 
-    IComponentDefinitionFactory componentDefinitionFactory;
-
     IResourceFactory resourceFactory;
 
     IPersistenceManager persistenceManager;
@@ -128,7 +124,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
     IPluginManager pluginManager;
 
-    IUIFactory uiFactory;
+    IComponentDefinitionPlusUIFactory componentDefinitionPlusUIFactory;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -238,8 +234,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConfigurationService configurationService() {
         if (configurationService == null) {
-            configurationService = new ConfigurationSqlService(configDatabasePlatform(), persistenceManager(),
-                    tablePrefix());
+            configurationService = new ConfigurationSqlService(configDatabasePlatform(), persistenceManager(), tablePrefix());
         }
         return configurationService;
     }
@@ -275,29 +270,20 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
-    public IComponentDefinitionFactory componentDefinitionFactory() {
-        if (componentDefinitionFactory == null) {
-            componentDefinitionFactory = new ComponentXmlDefinitionFactory(configurationService(), pluginManager());
-        }
-        return componentDefinitionFactory;
-    }
-
-    @Bean
-    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IComponentRuntimeFactory componentRuntimeFactory() {
         if (componentRuntimeFactory == null) {
-            componentRuntimeFactory = new ComponentRuntimeFactory(componentDefinitionFactory());
+            componentRuntimeFactory = new ComponentRuntimeFactory(componentDefinitionPlusUIFactory());
         }
         return componentRuntimeFactory;
     }
 
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
-    public IUIFactory uiFactory() {
-        if (uiFactory == null) {
-            uiFactory = new UIXMLFactory();
+    public IComponentDefinitionPlusUIFactory componentDefinitionPlusUIFactory() {
+        if (componentDefinitionPlusUIFactory == null) {
+            componentDefinitionPlusUIFactory = new ComponentXmlDefinitionPlusUIFactory(configurationService(), pluginManager());
         }
-        return uiFactory;
+        return componentDefinitionPlusUIFactory;
     }
 
     @Bean
@@ -313,7 +299,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IAgentManager agentManager() {
         IAgentManager agentManager = new AgentManager(configurationService(), executionService(), componentRuntimeFactory(),
-                componentDefinitionFactory(), resourceFactory(), httpRequestMappingRegistry());
+                componentDefinitionPlusUIFactory(), resourceFactory(), httpRequestMappingRegistry());
         return agentManager;
     }
 

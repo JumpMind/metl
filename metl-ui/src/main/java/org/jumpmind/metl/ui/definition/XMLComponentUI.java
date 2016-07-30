@@ -33,6 +33,8 @@ import javax.xml.bind.annotation.XmlType;
 public class XMLComponentUI implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    
+    protected ClassLoader classLoader;
 
     @XmlAttribute(required = true)
     protected String id;
@@ -76,6 +78,14 @@ public class XMLComponentUI implements Serializable {
 
     public String getId() {
         return id;
+    }
+    
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+    
+    public ClassLoader getClassLoader() {
+        return classLoader;
     }
 
 }
