@@ -1124,6 +1124,12 @@ abstract class AbstractConfigurationService extends AbstractService implements I
             newFlow.setProjectVersionId(newVersion.getId());
             save(newFlow);
         }
+        
+        List<ProjectVersionComponentPlugin> projectVersionComponentPlugins = findProjectVersionComponentPlugin(original.getId());
+        for (ProjectVersionComponentPlugin projectVersionComponentPlugin : projectVersionComponentPlugins) {
+            projectVersionComponentPlugin.setProjectVersionId(newVersion.getId());
+            save(projectVersionComponentPlugin);
+        }
 
         return newVersion;
     }

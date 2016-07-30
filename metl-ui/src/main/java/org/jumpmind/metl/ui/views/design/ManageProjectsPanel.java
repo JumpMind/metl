@@ -365,7 +365,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
                     (newVersionLabel) -> {
                         if (StringUtils.isNotBlank(newVersionLabel)) {
                             ProjectVersion newVersion = configurationService
-                                    .saveNewVersion(newVersionLabel, originalVersion);
+                                    .saveNewVersion(newVersionLabel, originalVersion);      
                             context.getComponentDefinitionFactory().refresh(newVersion.getId());
                             Indexed indexed = grid.getContainerDataSource();
                             indexed.addItemAfter(originalVersion, newVersion);
@@ -393,6 +393,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         IConfigurationService configurationService = context.getConfigurationService();
         configurationService.save(project);
         configurationService.save(version);
+        context.getComponentDefinitionFactory().refresh(version.getId());
         projectGrid.getContainerDataSource().addItem(project);
         projectGrid.select(project);
         projectGrid.editItem(project);
