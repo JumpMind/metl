@@ -48,7 +48,8 @@ public class ImportExportService extends AbstractService implements IImportExpor
     
     final String[][] PROJECT_SQL = {
             {"_PROJECT","SELECT * FROM %1$s_PROJECT WHERE ID IN (SELECT PROJECT_ID FROM %1$s_PROJECT_VERSION WHERE ID='%2$s') ORDER BY ID","ID"},
-            {"_PROJECT_VERSION","SELECT * FROM %1$s_PROJECT_VERSION WHERE ID='%2$s' ORDER BY ID","ID"}
+            {"_PROJECT_VERSION","SELECT * FROM %1$s_PROJECT_VERSION WHERE ID='%2$s' ORDER BY ID","ID"},
+            {"_PROJECT_VERSION_COMPONENT_PLUGIN","SELECT * FROM %1$s_PROJECT_VERSION_COMPONENT_PLUGIN WHERE PROJECT_VERSION_ID='%2$s' ORDER BY PROJECT_VERSION_ID","PROJECT_VERSION_ID"}
     };
     
     final String[][] MODEL_SQL = {

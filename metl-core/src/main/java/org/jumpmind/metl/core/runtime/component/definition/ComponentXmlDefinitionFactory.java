@@ -36,7 +36,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -57,7 +56,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    protected static Set<Plugin> outOfTheBox = new TreeSet<>();
+    protected static List<Plugin> outOfTheBox = new ArrayList<>();
 
     static {
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-rdbms-reader"));
@@ -132,9 +131,6 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                     String pluginId = load(projectVersionId, ootbp.getArtifactGroup(), ootbp.getArtifactName(), latestVersion);
 
                     List<XMLComponent> components = componentsByPluginId.get(pluginId);
-                    if (components == null) {
-                        System.out.print("help!");
-                    }
                     for (XMLComponent xmlComponent : components) {
                         ProjectVersionComponentPlugin plugin = new ProjectVersionComponentPlugin();
                         plugin.setProjectVersionId(projectVersionId);
@@ -227,18 +223,17 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                     List<XMLComponent> componentList = components.getComponent();
                     for (XMLComponent xmlComponent : componentList) {
                         String id = xmlComponent.getId();
+                        List<XMLComponent> componentsForPluginId = componentsByPluginId.get(pluginId);
+                        if (componentsForPluginId == null) {
+                            componentsForPluginId = new ArrayList<>();
+                            componentsByPluginId.put(pluginId, componentsForPluginId);
+                        }
+                        componentsForPluginId.add(xmlComponent);
+                        
                         if (!componentsById.containsKey(id)) {
                             xmlComponent.setClassLoader(classLoader);
                             componentsById.put(id, xmlComponent);
-
-                            List<XMLComponent> componentsForPluginId = componentsByPluginId.get(pluginId);
-                            if (componentsForPluginId == null) {
-                                componentsForPluginId = new ArrayList<>();
-                                componentsByPluginId.put(pluginId, componentsForPluginId);
-                            }
-                            componentsForPluginId.add(xmlComponent);
-
-                            logger.info("Registering '{}' with an id of '{}' for plugin {} for project {}", xmlComponent.getName(), id,
+                            logger.info("Registering '{}' with an id of '{}' for plugin '{}' for project '{}'", xmlComponent.getName(), id,
                                     pluginId, projectVersionId);
 
                             if (xmlComponent.getSettings() == null) {
@@ -257,8 +252,8 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                                     .add(new XMLSetting(INBOUND_QUEUE_CAPACITY, "Inbound Queue Capacity", "100", Type.INTEGER, true));
                         } else {
                             if (!getClass().getClassLoader().equals(componentsById.get(id).getClassLoader())) {
-                                logger.info("There was already a component registered under the id of {} with the name {}",
-                                        new Object[] { id, xmlComponent.getName() });
+                                logger.info("There was already a component registered under the id of '{}' with the name '{}' from another plugin.  Not loading it for the plugin '{}'",
+                                        new Object[] { id, xmlComponent.getName(), pluginId });
                             }
                         }
                     }
