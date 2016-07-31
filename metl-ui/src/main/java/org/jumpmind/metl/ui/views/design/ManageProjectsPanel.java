@@ -199,18 +199,18 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
             }
         });
         buttons.addComponent(openButton);
-        Button newButton = new Button("New Version", (event) -> newProjectVersion(layout, versionGrid));
-        buttons.addComponent(newButton);
-        Button editButton = new Button("Edit Version", (event) -> edit(versionGrid));
-        buttons.addComponent(editButton);
-        Button removeButton = new Button("Remove Version",
+        Button versionNewButton = new Button("New Version", (event) -> newProjectVersion(layout, versionGrid));
+        buttons.addComponent(versionNewButton);
+        Button versionEditButton = new Button("Edit Version", (event) -> edit(versionGrid));
+        buttons.addComponent(versionEditButton);
+        Button versionRemoveButton = new Button("Remove Version",
                 (event) -> removeVersion(layout, versionGrid));
-        buttons.addComponent(removeButton);
+        buttons.addComponent(versionRemoveButton);
 
         openButton.setEnabled(false);
-        newButton.setEnabled(false);
-        removeButton.setEnabled(false);
-        editButton.setEnabled(false);
+        versionNewButton.setEnabled(false);
+        versionRemoveButton.setEnabled(false);
+        versionEditButton.setEnabled(false);
 
         layout.addComponent(buttons);
 
@@ -266,9 +266,11 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
             boolean currentlyEditing = projectGrid.getEditedItemId() != null;
             boolean selected = numberSelected > 0 && !currentlyEditing;
             openButton.setEnabled(selected);
-            newButton.setEnabled(selected);
-            removeButton.setEnabled(selected);
-            editButton.setEnabled(selected);
+            versionNewButton.setEnabled(selected);
+            versionRemoveButton.setEnabled(selected);
+            versionEditButton.setEnabled(selected);
+            removeButton.setEnabled(!selected);
+            editButton.setEnabled(!selected);
         });
         versionGrid.addItemClickListener(new GridClickListener(versionGrid));
         layout.addComponent(versionGrid);
@@ -295,7 +297,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         }
     }
 
-    protected void setButtonsEnabled() {
+    protected void setButtonsEnabled() {        
         int numberSelected = projectGrid.getSelectionModel().getSelectedRows().size();
         boolean selected = numberSelected > 0;
         removeButton.setEnabled(selected);
