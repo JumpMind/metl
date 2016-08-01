@@ -63,6 +63,7 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Notification;
+import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
@@ -82,6 +83,11 @@ abstract class AbstractConfigurationService extends AbstractService implements I
 
     AbstractConfigurationService(IPersistenceManager persistenceManager, String tablePrefix) {
         super(persistenceManager, tablePrefix);
+    }
+    
+    @Override
+    public List<PluginRepository> findPluginRepositories() {
+        return find(PluginRepository.class, null, PluginRepository.class);
     }
 
     @Override
@@ -248,15 +254,20 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     }
 
     @Override
-    public List<ProjectVersionComponentPlugin> findProjectVersionComponentPlugin(String projectVersionId) {
+    public List<ProjectVersionComponentPlugin> findProjectVersionComponentPlugins(String projectVersionId) {
         Map<String, Object> params = new HashMap<>();
         params.put("projectVersionId", projectVersionId);
         return find(ProjectVersionComponentPlugin.class, params);
     }
+    
+    @Override
+    public void refresh(PluginRepository pluginRepository) {
+        persistenceManager.refresh(pluginRepository, null, null, tableName(PluginRepository.class));
+    }
 
     @Override
     public void refresh(Project project) {
-        persistenceManager.refresh(project, null, null, tableName(Component.class));
+        persistenceManager.refresh(project, null, null, tableName(Project.class));
         Map<String, Object> params = new HashMap<>();
         params.put("deleted", 0);
         params.put("projectId", project.getId());
@@ -1125,7 +1136,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
             save(newFlow);
         }
         
-        List<ProjectVersionComponentPlugin> projectVersionComponentPlugins = findProjectVersionComponentPlugin(original.getId());
+        List<ProjectVersionComponentPlugin> projectVersionComponentPlugins = findProjectVersionComponentPlugins(original.getId());
         for (ProjectVersionComponentPlugin projectVersionComponentPlugin : projectVersionComponentPlugins) {
             projectVersionComponentPlugin.setProjectVersionId(newVersion.getId());
             save(projectVersionComponentPlugin);

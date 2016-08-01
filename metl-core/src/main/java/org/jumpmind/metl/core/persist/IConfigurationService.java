@@ -45,6 +45,7 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Notification;
+import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
@@ -56,7 +57,7 @@ public interface IConfigurationService {
     
     public boolean isInstalled();
     
-    public List<ProjectVersionComponentPlugin> findProjectVersionComponentPlugin(String projectVersionId);
+    public List<ProjectVersionComponentPlugin> findProjectVersionComponentPlugins(String projectVersionId);
         
     public List<FolderName> findFoldersInProject(String projectVersionId);
     
@@ -89,6 +90,8 @@ public interface IConfigurationService {
     public List<User> findUsersByGroup(String groupId);
     
     public List<User> findUsers();
+    
+    public List<PluginRepository> findPluginRepositories();
     
     public Group findGroup(String id);
 
@@ -131,6 +134,8 @@ public interface IConfigurationService {
     public AgentResource findAgentResource(String agentId, String resourceId);
     
     public void deleteFlow(Flow flow);
+    
+    public void refresh(PluginRepository pluginRepository);
     
     public void refresh(Project project);
 

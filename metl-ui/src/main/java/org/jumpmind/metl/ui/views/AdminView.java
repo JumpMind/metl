@@ -35,6 +35,7 @@ import org.jumpmind.metl.ui.views.admin.GroupPanel;
 import org.jumpmind.metl.ui.views.admin.LoggingPanel;
 import org.jumpmind.metl.ui.views.admin.MailServerPanel;
 import org.jumpmind.metl.ui.views.admin.NotificationPanel;
+import org.jumpmind.metl.ui.views.admin.PluginRepositoriesPanel;
 import org.jumpmind.metl.ui.views.admin.UserPanel;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
@@ -107,6 +108,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         addItem("Groups", Icons.GROUP);
         addItem("REST", Icons.REST);
         addItem("General Settings", Icons.SETTINGS);
+        addItem("Plugin Repositories", Icons.DATABASE);
         addItem("Mail Server", Icons.EMAIL);
         addItem("Notifications", Icons.NOTIFICATION);
         addItem("Logging", Icons.LOGGING);
@@ -158,6 +160,8 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                     panel = new NotificationPanel(context, tabbedPanel);
                 } else if (id.equals("Logging")) {
                     panel = new LoggingPanel(context, tabbedPanel);
+                } else if (id.equals("Plugin Repositories")) {
+                    panel = new PluginRepositoriesPanel(context, tabbedPanel);                    
                 } else if (id.equals("About")) {
                     panel = new AboutPanel(context, tabbedPanel);
                 }

@@ -101,7 +101,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
     public void refresh(String projectVersionId) {
         loadComponentsForClassloader(projectVersionId, "org.jumpmind.metl:metl-core:" + VersionUtils.getCurrentVersion(),
                 getClass().getClassLoader());
-        List<ProjectVersionComponentPlugin> pvcps = configurationService.findProjectVersionComponentPlugin(projectVersionId);
+        List<ProjectVersionComponentPlugin> pvcps = configurationService.findProjectVersionComponentPlugins(projectVersionId);
         for (Plugin ootbp : outOfTheBox) {
             boolean matched = false;
             for (ProjectVersionComponentPlugin pvcp : pvcps) {

@@ -113,7 +113,7 @@ public class ProjectSettingsPanel extends VerticalLayout implements IUiPanel {
 
     protected void populateContainer() {
         componentPluginsGridContainer.removeAllItems();
-        componentPluginsGridContainer.addAll(context.getConfigurationService().findProjectVersionComponentPlugin(projectVersion.getId()));
+        componentPluginsGridContainer.addAll(context.getConfigurationService().findProjectVersionComponentPlugins(projectVersion.getId()));
         componentPluginsGrid.setHeightByRows(componentPluginsGridContainer.size());
     }
 
