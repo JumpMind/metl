@@ -43,7 +43,7 @@ import org.jumpmind.properties.TypedProperties;
 
 public class FixedLengthFormatter extends AbstractComponentRuntime {
 
-    public static final String TYPE = "Format Fixed";
+    public final static String TYPE = "Format Fixed";
 
     public final static String FIXED_LENGTH_FORMATTER_WRITE_HEADER = "fixed.length.formatter.header";
 
@@ -51,6 +51,8 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
     public final static String FIXED_LENGTH_FORMATTER_ATTRIBUTE_LENGTH = "fixed.length.formatter.attribute.length";
     public final static String FIXED_LENGTH_FORMATTER_ATTRIBUTE_FORMAT_FUNCTION = "fixed.length.formatter.attribute.format.function";
 
+    public final static String PAD_CHAR = " ";
+    
     /* settings */
     boolean useHeader;
 
@@ -85,7 +87,12 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
                 for (AttributeFormat attr : attributesList) {
                     if (attr.getAttribute() != null) {
                         String name = attr.getAttribute().getName();
-                        String paddedValue = StringUtils.pad(name != null ? name.toString() : "", attr.getLength(), " ", true);
+                        if (name != null) {
+                            name = StringUtils.trim(name, true, true, PAD_CHAR);
+                        } else {
+                            name = "";
+                        }
+                        String paddedValue = StringUtils.pad(name, attr.getLength(), PAD_CHAR, true);
                         stringBuilder.append(paddedValue);
                     }
                 }
@@ -111,7 +118,12 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
                 value = ModelAttributeScriptHelper.eval(inputMessage, context, attribute.getAttribute(), value, attribute.getEntity(),
                         inputRow, attribute.getFormatFunction());
             }
-            String paddedValue = StringUtils.pad(value != null ? value.toString() : "", attribute.getLength(), " ", true);
+            if (value != null) {
+                value = StringUtils.trim(value.toString(), true, true, PAD_CHAR);
+            } else {
+                value = "";
+            }
+            String paddedValue = StringUtils.pad(value.toString(), attribute.getLength(), PAD_CHAR, true);
             stringBuilder.append(paddedValue);
         }
         return stringBuilder.toString();
