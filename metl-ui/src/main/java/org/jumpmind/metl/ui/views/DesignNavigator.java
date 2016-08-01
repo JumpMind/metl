@@ -672,14 +672,18 @@ public class DesignNavigator extends VerticalLayout {
         Object selected = treeTable.getValue();
         if (selected instanceof ProjectVersion) {
             ProjectVersion projectVersion = (ProjectVersion) selected;
-            context.getOpenProjects().remove(selected);
-            User user = context.getUser();
-            Setting setting = user.findSetting(UserSetting.SETTING_CURRENT_PROJECT_ID_LIST,
-                    projectVersion.getId());
-            user.getSettings().remove(setting);
-            context.getConfigurationService().delete(setting);
-            refresh();
+            closeProjectVersion(projectVersion);
         }
+    }
+    
+    public void closeProjectVersion(ProjectVersion projectVersion) {
+        context.getOpenProjects().remove(projectVersion);
+        User user = context.getUser();
+        Setting setting = user.findSetting(UserSetting.SETTING_CURRENT_PROJECT_ID_LIST,
+                projectVersion.getId());
+        user.getSettings().remove(setting);
+        context.getConfigurationService().delete(setting);
+        refresh();
     }
 
     protected void copySelected() {

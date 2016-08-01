@@ -82,7 +82,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
 
     ApplicationContext context;
 
-    DesignNavigator projectNavigator;
+    DesignNavigator designNavigator;
 
     Grid projectGrid;
 
@@ -99,7 +99,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
     public ManageProjectsPanel(ApplicationContext context, DesignNavigator projectNavigator) {
         this.setSizeFull();
         this.context = context;
-        this.projectNavigator = projectNavigator;
+        this.designNavigator = projectNavigator;
 
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
@@ -195,7 +195,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         Button openButton = new Button("Open Version", (event) -> {
             Collection<Object> selected = versionGrid.getSelectedRows();
             for (Object object : selected) {
-                projectNavigator.addProjectVersion(((ProjectVersion) object));
+                designNavigator.addProjectVersion(((ProjectVersion) object));
             }
         });
         buttons.addComponent(openButton);
@@ -405,14 +405,15 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
         if (grid.getContainerDataSource().size() > 1) {
             ConfirmDialog.show("Delete Version(s)?",
                     "Are you sure you want to delete the selected version(s)?", () -> {
-                        ProjectVersion item = (ProjectVersion) grid.getSelectedRow();
-                        grid.getContainerDataSource().removeItem(item);
-                        item.setDeleted(true);
-                        context.getConfigurationService().save(item);
+                        ProjectVersion version = (ProjectVersion) grid.getSelectedRow();
+                        grid.getContainerDataSource().removeItem(version);
+                        version.setDeleted(true);
+                        context.getConfigurationService().save(version);
                         sort();
                         setButtonsEnabled();
-                        this.projectGrid.deselect(item.getProject());
-                        this.projectGrid.select(item.getProject());
+                        this.projectGrid.deselect(version.getProject());
+                        this.projectGrid.select(version.getProject());
+                        designNavigator.closeProjectVersion(version);
                         return true;
                     });
         } else {
@@ -433,6 +434,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
                         for (ProjectVersion version : versions) {
                             version.setDeleted(true);
                             context.getConfigurationService().save(version);
+                            designNavigator.closeProjectVersion(version);
                         }
                         context.getConfigurationService().save(item);
                     }
@@ -440,7 +442,7 @@ public class ManageProjectsPanel extends VerticalLayout implements IUiPanel {
                     setButtonsEnabled();
                     return true;
                 });
-    }
+    }        
 
     class GridClickListener implements ItemClickListener {
         private static final long serialVersionUID = 1L;
