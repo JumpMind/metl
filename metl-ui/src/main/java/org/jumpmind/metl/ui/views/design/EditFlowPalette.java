@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
+import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.UiUtils;
@@ -39,6 +40,7 @@ import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.DragStartMode;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
@@ -59,18 +61,24 @@ public class EditFlowPalette extends VerticalLayout {
     String filterText;
 
     String projectVersionId;
+    
+    List<ProjectVersionComponentPlugin> projectVersionComponentPlugins;
 
     public EditFlowPalette(EditFlowPanel designFlowLayout, ApplicationContext context, String projectVersionId) {
         this.context = context;
         this.designFlowLayout = designFlowLayout;
         this.projectVersionId = projectVersionId;
+        this.projectVersionComponentPlugins = context.getConfigurationService().findProjectVersionComponentPlugins(projectVersionId);
 
         setHeight(100, Unit.PERCENTAGE);
         setWidth(150, Unit.PIXELS);
 
-        setMargin(new MarginInfo(true, false, false, false));
-
+        HorizontalLayout top = new HorizontalLayout();
+        top.setMargin(new MarginInfo(false, true, false, false));
+        addComponent(top);
+        
         TextField filterField = new TextField();
+        filterField.setWidth(100, Unit.PERCENTAGE);
         filterField.setInputPrompt("Filter");
         filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
         filterField.setIcon(FontAwesome.SEARCH);
@@ -81,7 +89,7 @@ public class EditFlowPalette extends VerticalLayout {
             filterText = event.getText().toLowerCase();
             populateComponentPalette();
         });
-        addComponent(filterField);
+        top.addComponent(filterField);
 
         Panel panel = new Panel();
         panel.setSizeFull();
@@ -111,14 +119,25 @@ public class EditFlowPalette extends VerticalLayout {
         };
         return new StreamResource(source, componentDefinition.getId());
     }
+    
+    protected boolean enabled(String type) {
+        boolean enabled = true;
+        for (ProjectVersionComponentPlugin projectVersionComponentPlugin : projectVersionComponentPlugins) {
+            if (projectVersionComponentPlugin.getComponentTypeId().equals(type)) {
+                enabled = projectVersionComponentPlugin.isEnabled();
+                break;
+            }
+        }
+        return enabled;
+    }
 
     protected void populateComponentPalette() {
         componentLayout.removeAllComponents();
         List<XMLComponent> componentDefinitions = context.getComponentDefinitionFactory().getDefinitions(projectVersionId);
         Collections.sort(componentDefinitions);
         for (XMLComponent definition : componentDefinitions) {
-            if (isBlank(filterText) || definition.getName().toLowerCase().contains(filterText)
-                    || definition.getCategory().toLowerCase().contains(filterText)) {
+            if (enabled(definition.getId()) && (isBlank(filterText) || definition.getName().toLowerCase().contains(filterText)
+                    || definition.getCategory().toLowerCase().contains(filterText))) {
                 StreamResource icon = getImageResourceForComponentType(projectVersionId, definition);
                 addItemToFlowPanelSection(definition.getName(), definition.getId(), componentLayout, icon, null);
             }

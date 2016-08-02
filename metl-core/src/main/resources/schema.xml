@@ -185,7 +185,6 @@
         <column name="row_id" type="CHAR" size="36" required="true" description="A unique identifier for this row across different versions" />
         <column name="project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />
         <column name="deleted" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this row has been deleted."/>
-        <column name="impl_version" type="VARCHAR" size="255" description="The last know version of the component that was used to create the flow" />                        
         <column name="name" type="VARCHAR" size="255" required="true" description="A user defined name for the component" />
         <column name="type" type="VARCHAR" size="50" required="true" description="" />
         <column name="folder_id" type="CHAR" size="36" description="" />   
