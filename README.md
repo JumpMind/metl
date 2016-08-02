@@ -2,6 +2,8 @@ This is the development site for Metl.  To run the latest and greatest use the f
 
 <a href="https://sourceforge.net/projects/metl/files/latest/download" rel="nofollow"><img alt="Download Metl" src="https://a.fsdn.com/con/app/sf-download-button"></a>
 
+Please use the forum for general discussion and questions.  It is location here: https://sourceforge.net/p/metl/discussion/general/
+
 Metl is a simple, web-based integration platform that allows for several different styles of data integration including messaging, file based Extract/Transform/Load (ETL), and remote procedure invocation via Web Services. 
 
 Metl was built to solve fairly simple day to day integration tasks without the need for custom coding, heavy infrastructure or high costs. It can be deployed in the cloud or in an internal data center, and was built to allow developers to extend it to fit their needs by writing their own components that can be included and leveraged by the existing Metl infrastructure.
