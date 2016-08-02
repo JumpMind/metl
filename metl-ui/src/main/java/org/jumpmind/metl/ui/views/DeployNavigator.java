@@ -153,6 +153,11 @@ public class DeployNavigator extends VerticalLayout {
         for (Folder folder : folders) {
             addChildren(folder);
         }
+        
+        List<AgentName> agents = context.getConfigurationService().findAgentsInFolder(null);
+        for (AgentName agent : agents) {
+            addAgent(null, agent);
+        }
 
         for (Object object : expandedItems) {
             treeTable.setCollapsed(object, false);
