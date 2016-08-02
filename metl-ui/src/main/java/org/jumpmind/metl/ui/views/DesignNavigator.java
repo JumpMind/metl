@@ -57,7 +57,7 @@ import org.jumpmind.metl.ui.views.ImportDialog.IImportListener;
 import org.jumpmind.metl.ui.views.design.EditFlowPanel;
 import org.jumpmind.metl.ui.views.design.EditModelPanel;
 import org.jumpmind.metl.ui.views.design.ManageProjectsPanel;
-import org.jumpmind.metl.ui.views.design.ProjectSettingsPanel;
+import org.jumpmind.metl.ui.views.design.ProjectVersionSettingsPanel;
 import org.jumpmind.metl.ui.views.design.PropertySheet;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
@@ -634,7 +634,7 @@ public class DesignNavigator extends VerticalLayout {
         if (item instanceof SettingsObject) {
             SettingsObject settings = (SettingsObject)item;
             ProjectVersion projectVersion = settings.getProjectVersion();
-            tabs.addCloseableTab(settings.getId(), "Settings for " + projectVersion.getName(), Icons.SETTINGS, new ProjectSettingsPanel(projectVersion, context, this));   
+            tabs.addCloseableTab(settings.getId(), "Settings for " + projectVersion.getName(), Icons.SETTINGS, new ProjectVersionSettingsPanel(projectVersion, context, this));   
         } else if (item instanceof FlowName) {
             FlowName flow = (FlowName) item;
             EditFlowPanel flowLayout = new EditFlowPanel(context, flow.getId(), this, tabs);

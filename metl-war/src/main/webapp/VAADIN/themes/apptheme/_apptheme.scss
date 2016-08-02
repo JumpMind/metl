@@ -2,6 +2,26 @@
 	
   @include valo;
   
+   .v-filterselect-suggestpopup [class$="status"] {
+       display: none;
+   }
+
+   .v-filterselect-suggestpopup div[class*="page"] {
+       opacity: .60;
+       filter: alpha(opacity=60) ;
+       -webkit-transform: scale(1.0);
+       -moz-transform: scale(1.0);
+       -ms-transform: scale(1.0);
+       -o-transform: scale(1.0);
+       transform: scale(1.0);
+       background-color: #0072C6;
+       color: #FFFFFF;
+   }
+
+   .v-filterselect-suggestpopup div[class*="page"]:hover {
+       background: rgba(0, 114, 198, 1.0);
+   }  
+    
   .highlight {
     background-color: #FCEE89;
    } 
@@ -32,6 +52,10 @@
   .v-table-cell-content-folder .v-icon {
      color: #fbe37a;
      text-shadow: 1px 1px 1px #bb9d7f;
+  }
+  
+  .warn {
+     color: orange;  
   }
   
   .done .v-icon {

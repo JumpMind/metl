@@ -32,17 +32,23 @@ import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.GeneratedPropertyContainer;
+import com.vaadin.data.util.PropertyValueGenerator;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.renderers.HtmlRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class ProjectSettingsPanel extends VerticalLayout implements IUiPanel {
+public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
 
     private static final long serialVersionUID = 1L;
 
@@ -58,21 +64,24 @@ public class ProjectSettingsPanel extends VerticalLayout implements IUiPanel {
 
     BeanItemContainer<ProjectVersionComponentPlugin> componentPluginsGridContainer;
 
-    public ProjectSettingsPanel(ProjectVersion projectVersion, ApplicationContext context, DesignNavigator projectNavigator) {
+    public ProjectVersionSettingsPanel(ProjectVersion projectVersion, ApplicationContext context, DesignNavigator projectNavigator) {
         this.setSizeFull();
         this.context = context;
         this.projectNavigator = projectNavigator;
         this.projectVersion = projectVersion;
+        
+        VerticalLayout content = new VerticalLayout();
+        setContent(content);
 
         HorizontalLayout componentHeaderWrapper = new HorizontalLayout();
         componentHeaderWrapper.setMargin(new MarginInfo(false, false, false, true));
         Label componentHeader = new Label("Component Plugin Settings");
         componentHeader.addStyleName(ValoTheme.LABEL_H3);
         componentHeaderWrapper.addComponent(componentHeader);
-        addComponent(componentHeaderWrapper);
+        content.addComponent(componentHeaderWrapper);
 
         ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        content.addComponent(buttonBar);
         buttonBar.addButton("Refresh All", Icons.REFRESH, (event) -> {
             context.getComponentDefinitionFactory().refresh();
             populateContainer();
@@ -86,26 +95,63 @@ public class ProjectSettingsPanel extends VerticalLayout implements IUiPanel {
         componentPluginsGrid.setEditorEnabled(true);
         componentPluginsGrid.setWidth(100, Unit.PERCENTAGE);
         componentPluginsGrid.addColumn("componentTypeId", String.class).setHeaderCaption("Type").setEditable(false);
+        componentPluginsGrid.addColumn("pluginId", String.class).setHeaderCaption("Plugin").setEditable(false);
         componentPluginsGrid.addColumn("enabled", Boolean.class).setHeaderCaption("Enabled").setWidth(75);
         componentPluginsGrid.addColumn("pinVersion", Boolean.class).setHeaderCaption("Pin Version").setWidth(95);
         final double VERSION_WIDTH = 190;
         componentPluginsGrid.addColumn("artifactVersion", String.class).setHeaderCaption("Version").setWidth(VERSION_WIDTH)
                 .setEditable(false);
-        componentPluginsGrid.addColumn("latestArtifactVersion", String.class).setHeaderCaption("Latest Version").setWidth(VERSION_WIDTH)
-                .setEditable(false);
+        componentPluginsGrid.addColumn("updatesAvailable", String.class).setHeaderCaption("").setWidth(55)
+                .setEditable(false).setRenderer(new HtmlRenderer());
+        
         componentPluginsGridContainer = new BeanItemContainer<>(ProjectVersionComponentPlugin.class);
-        componentPluginsGrid.setContainerDataSource(componentPluginsGridContainer);
+        GeneratedPropertyContainer gpcontainer =
+                new GeneratedPropertyContainer(componentPluginsGridContainer);
+        gpcontainer.addGeneratedProperty("pluginId",
+                new PropertyValueGenerator<String>() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public String getValue(Item item, Object itemId,
+                                        Object propertyId) {
+                    ProjectVersionComponentPlugin plugin = (ProjectVersionComponentPlugin)itemId;
+                    return String.format("%s:%s", plugin.getArtifactGroup(), plugin.getArtifactName());
+                }
+
+                @Override
+                public Class<String> getType() {
+                    return String.class;
+                }
+            });
+        gpcontainer.addGeneratedProperty("updatesAvailable",
+                new PropertyValueGenerator<String>() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public String getValue(Item item, Object itemId,
+                                        Object propertyId) {
+                    ProjectVersionComponentPlugin plugin = (ProjectVersionComponentPlugin)itemId;
+                    return !plugin.getArtifactVersion().equals(plugin.getLatestArtifactVersion()) ? "<span class='warn' title='Updates Available'>" + FontAwesome.WARNING.getHtml() + "</span>" : "";
+                }
+
+                @Override
+                public Class<String> getType() {
+                    return String.class;
+                }
+            });        
+        componentPluginsGrid.setContainerDataSource(gpcontainer);
+        
         componentPluginsGrid.getEditorFieldGroup().addCommitHandler(new PostCommitHandler(() -> {
             ProjectVersionComponentPlugin item = (ProjectVersionComponentPlugin) componentPluginsGrid.getEditedItemId();
             IConfigurationService configurationService = context.getConfigurationService();
             configurationService.save(item);
             componentPluginsGrid.markAsDirty();
         }));
-        addComponent(componentPluginsGrid);
+        content.addComponent(componentPluginsGrid);
 
         VerticalLayout spacer = new VerticalLayout();
-        addComponent(spacer);
-        setExpandRatio(spacer, 1);
+        content.addComponent(spacer);
+        content.setExpandRatio(spacer, 1);
 
         populateContainer();
 
