@@ -45,6 +45,7 @@ import org.eclipse.jetty.servlet.DefaultServlet;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IImportExportService;
@@ -190,6 +191,9 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             } catch (Exception e) {
                 getLogger().error("Failed to install Metl samples", e);
             }
+            
+            configurationService.save(new PluginRepository("default", "http://maven.jumpmind.com/repo"));
+            
         }
         getLogger().info("The configuration database has been initialized");
     }

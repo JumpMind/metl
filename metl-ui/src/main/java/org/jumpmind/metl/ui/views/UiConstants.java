@@ -9,6 +9,6 @@ final public class UiConstants {
     
     public static final String DATETIME_FORMAT = "%1$tY-%1$tm-%1$td %1$tk:%1$tM";
     
-    public static final int DATETIME_WIDTH_PIXELS = 120;
+    public static final int DATETIME_WIDTH_PIXELS = 150;
     
 }

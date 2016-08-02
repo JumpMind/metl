@@ -8,6 +8,11 @@ public class PluginRepository extends AbstractObject {
     
     protected String name;
     
+    public PluginRepository(String name, String url) {        
+        this.name = name;
+        this.url = url;
+    }
+    
     public PluginRepository() {
     }
 

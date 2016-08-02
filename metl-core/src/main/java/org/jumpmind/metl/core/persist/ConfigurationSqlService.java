@@ -36,6 +36,7 @@ import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
+import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.persist.IPersistenceManager;
@@ -55,6 +56,19 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
     @Override
     public boolean isInstalled() {
         return databasePlatform.getTableFromCache(tableName(Component.class), false) != null;
+    }
+    
+    @Override
+    public List<Plugin> findActivePlugins() {
+        ISqlTemplate template = databasePlatform.getSqlTemplate();
+        return template.query(String.format(
+                "select distinct artifact_group, artifact_name from %1$s_project_version_component_plugin",
+                tablePrefix), 
+                new ISqlRowMapper<Plugin>() {
+                    public Plugin mapRow(Row row) {
+                        return new Plugin(row.getString("artifact_group"), row.getString("artifact_name"));
+                    }
+                });
     }
 
     @Override

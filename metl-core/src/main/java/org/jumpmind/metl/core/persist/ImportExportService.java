@@ -318,9 +318,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }
         
         for (int i = 0; i <= PROJECT_SQL.length - 1; i++) {
-            TableData importProjectData = importData.projectData.get(i);
-            processConfigTableData(importData, existingProjectData.get(i), importProjectData,
+            if (importData.projectData.size() > i) {
+                TableData importProjectData = importData.projectData.get(i);
+                processConfigTableData(importData, existingProjectData.get(i), importProjectData,
                     PROJECT_SQL[i][KEY_COLUMNS], transaction);
+            }
         }   
     }
 

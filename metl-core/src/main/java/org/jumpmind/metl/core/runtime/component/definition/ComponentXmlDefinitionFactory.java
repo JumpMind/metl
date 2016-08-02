@@ -113,6 +113,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                             logger.info("Upgrading from {}:{}:{} to {}", pvcp.getArtifactGroup(), pvcp.getArtifactName(),
                                     pvcp.getArtifactVersion(), latestVersion);
                             pvcp.setArtifactVersion(latestVersion);
+                            pvcp.setLatestArtifactVersion(latestVersion);
                         } else {
                             logger.info("Not upgrading from {}:{}:{} to {} because the version is pinned", pvcp.getArtifactGroup(),
                                     pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);

@@ -45,6 +45,7 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Notification;
+import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
@@ -92,6 +93,8 @@ public interface IConfigurationService {
     public List<User> findUsers();
     
     public List<PluginRepository> findPluginRepositories();
+    
+    public List<Plugin> findActivePlugins();
     
     public Group findGroup(String id);
 
