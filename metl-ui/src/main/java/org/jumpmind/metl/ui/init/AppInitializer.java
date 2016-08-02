@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
@@ -44,11 +43,11 @@ import org.apache.commons.io.IOUtils;
 import org.atmosphere.container.JSR356AsyncSupport;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.jumpmind.db.platform.IDatabasePlatform;
-import org.jumpmind.db.sql.SqlScript;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.persist.IImportExportService;
 import org.jumpmind.metl.core.plugin.IPluginManager;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
@@ -185,9 +184,9 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         }
         if (!isInstalled) {
             try {
-                getLogger().info("Installing Metl samples");
-                new SqlScript(new InputStreamReader(getClass().getResourceAsStream("/metl-samples.sql")), platform.getSqlTemplate(), true,
-                        ";", null).execute();
+                IImportExportService importExportService = ctx.getBean(IImportExportService.class);
+                LoggerFactory.getLogger(getClass()).info("Installing Metl samples");
+                importExportService.importConfiguration(IOUtils.toString(getClass().getResourceAsStream("/metl-samples.json")));
             } catch (Exception e) {
                 getLogger().error("Failed to install Metl samples", e);
             }
