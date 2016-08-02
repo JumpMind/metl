@@ -42,8 +42,12 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.aether.util.version.GenericVersionScheme;
+import org.eclipse.aether.version.InvalidVersionSpecificationException;
+import org.eclipse.aether.version.Version;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Plugin;
+import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.plugin.IPluginManager;
@@ -63,8 +67,8 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-data-diff"));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-sorter"));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-temp-rdbms"));
-    }    
-    
+    }
+
     Map<String, Map<String, XMLComponent>> componentsByProjectVersionIdById;
 
     Map<String, List<XMLComponent>> componentsByPluginId;
@@ -101,35 +105,51 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
     public void refresh(String projectVersionId) {
         loadComponentsForClassloader(projectVersionId, "org.jumpmind.metl:metl-core:" + VersionUtils.getCurrentVersion(),
                 getClass().getClassLoader());
+        List<PluginRepository> remoteRepostiories = configurationService.findPluginRepositories();
         List<ProjectVersionComponentPlugin> pvcps = configurationService.findProjectVersionComponentPlugins(projectVersionId);
+        GenericVersionScheme versionScheme = new GenericVersionScheme();
         for (Plugin ootbp : outOfTheBox) {
             boolean matched = false;
             for (ProjectVersionComponentPlugin pvcp : pvcps) {
                 if (pvcp.matches(ootbp)) {
-                    matched = true;
-                    String latestVersion = pluginManager.getLatestLocalVersion(pvcp.getArtifactGroup(), pvcp.getArtifactName());
-                    if (!pvcp.getArtifactVersion().equals(latestVersion)) {
-                        if (!pvcp.isPinVersion()) {
-                            logger.info("Upgrading from {}:{}:{} to {}", pvcp.getArtifactGroup(), pvcp.getArtifactName(),
-                                    pvcp.getArtifactVersion(), latestVersion);
-                            pvcp.setArtifactVersion(latestVersion);
-                            pvcp.setLatestArtifactVersion(latestVersion);
+                    try {
+                        matched = true;
+                        String latestVersion = pluginManager.getLatestLocalVersion(pvcp.getArtifactGroup(), pvcp.getArtifactName());
+                        Version version = versionScheme.parseVersion(latestVersion);
+                        if (!pvcp.getArtifactVersion().equals(latestVersion)) {
+                            Version previousVersion = versionScheme.parseVersion(pvcp.getArtifactVersion());
+                            if (previousVersion.compareTo(version) == -1) {
+                                if (!pvcp.isPinVersion()) {
+                                    logger.info("Upgrading from {}:{}:{} to {}", pvcp.getArtifactGroup(), pvcp.getArtifactName(),
+                                            pvcp.getArtifactVersion(), latestVersion);
+                                    pvcp.setArtifactVersion(latestVersion);
+                                    pvcp.setLatestArtifactVersion(latestVersion);
+                                } else {
+                                    logger.info("Not upgrading from {}:{}:{} to {} because the version is pinned", pvcp.getArtifactGroup(),
+                                            pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
+                                    pvcp.setLatestArtifactVersion(latestVersion);
+                                }
+                                configurationService.save(pvcp);
+                            }
                         } else {
-                            logger.info("Not upgrading from {}:{}:{} to {} because the version is pinned", pvcp.getArtifactGroup(),
-                                    pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
-                            pvcp.setLatestArtifactVersion(latestVersion);
+                            logger.info(
+                                    "The latest version in the local repository was older than the configured version.  The configured version was {}:{}:{}.  "
+                                    + "The latest version is {}",
+                                    pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
                         }
-                        configurationService.save(pvcp);
-                    }
 
-                    load(projectVersionId, pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion());
+                        load(projectVersionId, pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(), remoteRepostiories);
+
+                    } catch (InvalidVersionSpecificationException e) {
+                        logger.error("", e);
+                    }
                 }
             }
 
             if (!matched) {
                 String latestVersion = pluginManager.getLatestLocalVersion(ootbp.getArtifactGroup(), ootbp.getArtifactName());
                 if (latestVersion != null) {
-                    String pluginId = load(projectVersionId, ootbp.getArtifactGroup(), ootbp.getArtifactName(), latestVersion);
+                    String pluginId = load(projectVersionId, ootbp.getArtifactGroup(), ootbp.getArtifactName(), latestVersion, remoteRepostiories);
 
                     List<XMLComponent> components = componentsByPluginId.get(pluginId);
                     for (XMLComponent xmlComponent : components) {
@@ -155,8 +175,8 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
         return new ArrayList<>(componentsByProjectVersionIdById.get(projectVersionId).values());
     }
 
-    protected String load(String projectVersionId, String artifactGroup, String artifactName, String artifactVersion) {
-        ClassLoader classLoader = pluginManager.getClassLoader(artifactGroup, artifactName, artifactVersion);
+    protected String load(String projectVersionId, String artifactGroup, String artifactName, String artifactVersion, List<PluginRepository> pluginRepository) {
+        ClassLoader classLoader = pluginManager.getClassLoader(artifactGroup, artifactName, artifactVersion, pluginRepository);
         String pluginId = pluginManager.toPluginId(artifactGroup, artifactName, artifactVersion);
         if (classLoader != null) {
             loadComponentsForClassloader(projectVersionId, pluginId, classLoader);
@@ -185,9 +205,9 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
     // return componentDefinitionsByCategory;
     // }
 
-//    synchronized public Map<String, List<String>> getTypesByCategory() {
-//        return componentIdsByCategory;
-//    }
+    // synchronized public Map<String, List<String>> getTypesByCategory() {
+    // return componentIdsByCategory;
+    // }
 
     @Override
     synchronized public XMLComponent getDefinition(String projectVersionId, String id) {
@@ -230,7 +250,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                             componentsByPluginId.put(pluginId, componentsForPluginId);
                         }
                         componentsForPluginId.add(xmlComponent);
-                        
+
                         if (!componentsById.containsKey(id)) {
                             xmlComponent.setClassLoader(classLoader);
                             componentsById.put(id, xmlComponent);
@@ -253,7 +273,8 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                                     .add(new XMLSetting(INBOUND_QUEUE_CAPACITY, "Inbound Queue Capacity", "100", Type.INTEGER, true));
                         } else {
                             if (!getClass().getClassLoader().equals(componentsById.get(id).getClassLoader())) {
-                                logger.info("There was already a component registered under the id of '{}' with the name '{}' from another plugin.  Not loading it for the plugin '{}'",
+                                logger.info(
+                                        "There was already a component registered under the id of '{}' with the name '{}' from another plugin.  Not loading it for the plugin '{}'",
                                         new Object[] { id, xmlComponent.getName(), pluginId });
                             }
                         }

@@ -18,6 +18,7 @@ import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.DependencyFilter;
 import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.repository.LocalRepository;
+import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.VersionRangeRequest;
@@ -30,6 +31,7 @@ import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
+import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.util.ChildFirstURLClassLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +69,7 @@ public class PluginManager implements IPluginManager {
     }
 
     @Override
-    public ClassLoader getClassLoader(String artifactGroup, String artifactName, String artifactVersion) {
+    public ClassLoader getClassLoader(String artifactGroup, String artifactName, String artifactVersion, List<PluginRepository> remoteRepositories) {
         String pluginId = toPluginId(artifactGroup, artifactName, artifactVersion);
         ClassLoader classLoader = plugins.get(pluginId);
         if (classLoader == null) {
@@ -75,8 +77,8 @@ public class PluginManager implements IPluginManager {
                 Artifact artifact = new DefaultArtifact(pluginId);
 
                 List<ArtifactResult> artifactResults = new ArrayList<>();
-                artifactResults.addAll(collectDependencies(artifact, JavaScopes.COMPILE));
-                artifactResults.addAll(collectDependencies(artifact, JavaScopes.RUNTIME));
+                artifactResults.addAll(collectDependencies(artifact, JavaScopes.COMPILE, remoteRepositories));
+                artifactResults.addAll(collectDependencies(artifact, JavaScopes.RUNTIME, remoteRepositories));
 
                 List<URL> artifactUrls = new ArrayList<URL>();
                 for (ArtifactResult artRes : artifactResults) {
@@ -88,10 +90,9 @@ public class PluginManager implements IPluginManager {
 
                 classLoader = new ChildFirstURLClassLoader(artifactUrls.toArray(new URL[artifactUrls.size()]), getClass().getClassLoader());
                 plugins.put(pluginId, classLoader);
-            } catch (RuntimeException e) {
-                throw e;
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                logger.warn("Failed to get class loader for {}:{}:{}", artifactGroup, artifactName, artifactVersion);
+                logger.error("", e);
             }
         }
         return classLoader;
@@ -109,12 +110,17 @@ public class PluginManager implements IPluginManager {
         return merged;
     }
 
-    protected List<ArtifactResult> collectDependencies(Artifact artifact, String scope) {
+    protected List<ArtifactResult> collectDependencies(Artifact artifact, String scope, List<PluginRepository> remoteRepositories) {
         try {
             DependencyFilter classpathFlter = DependencyFilterUtils.classpathFilter(scope);
 
             CollectRequest collectRequest = new CollectRequest();
             collectRequest.setRoot(new Dependency(artifact, scope));
+
+            for (PluginRepository pluginRepository : remoteRepositories) {
+                collectRequest.addRepository(
+                        new RemoteRepository.Builder(pluginRepository.getName(), "default", pluginRepository.getUrl()).build());
+            }     
 
             DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, classpathFlter);
 
