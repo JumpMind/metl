@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
+import java.util.Collection;
+
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.ProjectVersionComponentPlugin;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -39,6 +41,7 @@ import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.grid.HeightMode;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
@@ -63,6 +66,14 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
     Grid componentPluginsGrid;
 
     BeanItemContainer<ProjectVersionComponentPlugin> componentPluginsGridContainer;
+    
+    Button updateButton;
+    
+    Button addButton;
+    
+    Button pinButton;
+    
+    Button unpinButton;
 
     public ProjectVersionSettingsPanel(ProjectVersion projectVersion, ApplicationContext context, DesignNavigator projectNavigator) {
         this.setSizeFull();
@@ -82,12 +93,10 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
 
         ButtonBar buttonBar = new ButtonBar();
         content.addComponent(buttonBar);
-        buttonBar.addButton("Refresh All", Icons.REFRESH, (event) -> {
-            context.getComponentDefinitionFactory().refresh();
-            populateContainer();
-        });
-        buttonBar.addButton("Update", Icons.UPDATE);
-        buttonBar.addButton("Upload", Icons.UPLOAD);
+        addButton = buttonBar.addButton("Add", FontAwesome.PLUS, (event)->add());
+        updateButton = buttonBar.addButton("Update", Icons.UPDATE, (event)->update());        
+        pinButton =  buttonBar.addButton("Pin", FontAwesome.CHECK_CIRCLE_O, (event)->pin(true));
+        unpinButton = buttonBar.addButton("Unpin", FontAwesome.CIRCLE_O, (event)->pin(false));
 
         componentPluginsGrid = new Grid();
         componentPluginsGrid.setSelectionMode(SelectionMode.MULTI);
@@ -103,6 +112,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
                 .setEditable(false);
         componentPluginsGrid.addColumn("updatesAvailable", String.class).setHeaderCaption("").setWidth(55)
                 .setEditable(false).setRenderer(new HtmlRenderer());
+        componentPluginsGrid.addSelectionListener((event) -> setButtonsEnabled());
         
         componentPluginsGridContainer = new BeanItemContainer<>(ProjectVersionComponentPlugin.class);
         GeneratedPropertyContainer gpcontainer =
@@ -153,10 +163,60 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
         content.addComponent(spacer);
         content.setExpandRatio(spacer, 1);
 
+        refresh();
+        
         populateContainer();
+        
+        setButtonsEnabled();        
 
     }
-
+    
+    protected void setButtonsEnabled() {
+        Collection<Object> selectedRows = componentPluginsGrid.getSelectedRows();
+        boolean updatesAvailable = false;
+        for (Object object : selectedRows) {
+            ProjectVersionComponentPlugin plugin = (ProjectVersionComponentPlugin)object;
+            updatesAvailable |= plugin.isUpdateAvailable();
+        }
+        boolean selected = selectedRows.size() > 0;
+        updateButton.setEnabled(updatesAvailable);        
+        pinButton.setEnabled(selected);
+        unpinButton.setEnabled(selected);
+    }
+    
+    protected void refresh() {
+        context.getComponentDefinitionFactory().refresh();
+        populateContainer();
+    }
+    
+    protected void add() {
+        
+    }
+    
+    protected void update() {
+        Collection<Object> selectedRows = componentPluginsGrid.getSelectedRows();
+        for (Object object : selectedRows) {
+            ProjectVersionComponentPlugin plugin = (ProjectVersionComponentPlugin)object;
+            if (plugin.isUpdateAvailable()) {
+                plugin.setArtifactVersion(plugin.getLatestArtifactVersion());
+                context.getConfigurationService().save(plugin);
+            }            
+        }    
+        refresh();
+        populateContainer();
+        
+    }
+    
+    protected void pin(boolean value) {
+        Collection<Object> selectedRows = componentPluginsGrid.getSelectedRows();
+        for (Object object : selectedRows) {
+            ProjectVersionComponentPlugin plugin = (ProjectVersionComponentPlugin)object;
+            plugin.setPinVersion(value);
+            context.getConfigurationService().save(plugin);
+        }        
+        populateContainer();
+    }
+    
     protected void populateContainer() {
         componentPluginsGridContainer.removeAllItems();
         componentPluginsGridContainer.addAll(context.getConfigurationService().findProjectVersionComponentPlugins(projectVersion.getId()));

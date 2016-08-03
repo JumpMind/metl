@@ -130,15 +130,16 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                                     pvcp.setLatestArtifactVersion(latestVersion);
                                 }
                                 configurationService.save(pvcp);
+                            } else {
+                                logger.info(
+                                        "The latest version in the local repository was older than the configured version.  The configured version was {}:{}:{}.  "
+                                                + "The latest version is {}",
+                                        pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
                             }
-                        } else {
-                            logger.info(
-                                    "The latest version in the local repository was older than the configured version.  The configured version was {}:{}:{}.  "
-                                    + "The latest version is {}",
-                                    pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(), latestVersion);
                         }
 
-                        load(projectVersionId, pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(), remoteRepostiories);
+                        load(projectVersionId, pvcp.getArtifactGroup(), pvcp.getArtifactName(), pvcp.getArtifactVersion(),
+                                remoteRepostiories);
 
                     } catch (InvalidVersionSpecificationException e) {
                         logger.error("", e);
@@ -149,7 +150,8 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
             if (!matched) {
                 String latestVersion = pluginManager.getLatestLocalVersion(ootbp.getArtifactGroup(), ootbp.getArtifactName());
                 if (latestVersion != null) {
-                    String pluginId = load(projectVersionId, ootbp.getArtifactGroup(), ootbp.getArtifactName(), latestVersion, remoteRepostiories);
+                    String pluginId = load(projectVersionId, ootbp.getArtifactGroup(), ootbp.getArtifactName(), latestVersion,
+                            remoteRepostiories);
 
                     List<XMLComponent> components = componentsByPluginId.get(pluginId);
                     for (XMLComponent xmlComponent : components) {
@@ -175,7 +177,8 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
         return new ArrayList<>(componentsByProjectVersionIdById.get(projectVersionId).values());
     }
 
-    protected String load(String projectVersionId, String artifactGroup, String artifactName, String artifactVersion, List<PluginRepository> pluginRepository) {
+    protected String load(String projectVersionId, String artifactGroup, String artifactName, String artifactVersion,
+            List<PluginRepository> pluginRepository) {
         ClassLoader classLoader = pluginManager.getClassLoader(artifactGroup, artifactName, artifactVersion, pluginRepository);
         String pluginId = pluginManager.toPluginId(artifactGroup, artifactName, artifactVersion);
         if (classLoader != null) {

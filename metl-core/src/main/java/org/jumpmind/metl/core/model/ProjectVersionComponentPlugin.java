@@ -3,9 +3,15 @@ package org.jumpmind.metl.core.model;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.eclipse.aether.util.version.GenericVersionScheme;
+import org.eclipse.aether.version.InvalidVersionSpecificationException;
+import org.eclipse.aether.version.Version;
+
 public class ProjectVersionComponentPlugin extends Plugin implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    
+    static final GenericVersionScheme versionScheme = new GenericVersionScheme(); 
 
     String projectVersionId;
     String componentTypeId;
@@ -98,6 +104,20 @@ public class ProjectVersionComponentPlugin extends Plugin implements Serializabl
 
     public void setLastUpdateBy(String lastUpdateBy) {
         this.lastUpdateBy = lastUpdateBy;
+    }
+    
+    public boolean isUpdateAvailable() {
+        try {
+            if (latestArtifactVersion != null && artifactVersion != null) {
+                Version latest = versionScheme.parseVersion(latestArtifactVersion);
+                Version current = versionScheme.parseVersion(artifactVersion);
+                return current.compareTo(latest) < 0;
+            } else {
+                return false;
+            }
+        } catch (InvalidVersionSpecificationException e) {            
+            return false;
+        }
     }
 
     public void setEnabled(boolean enabled) {
