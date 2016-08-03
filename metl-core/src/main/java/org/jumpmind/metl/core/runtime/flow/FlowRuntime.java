@@ -307,7 +307,7 @@ public class FlowRuntime {
      */
     public void waitForFlowCompletion() {
         while (isRunning()) {
-            AppUtils.sleep(5000);
+            AppUtils.sleep(5);
         }        
     }
     
