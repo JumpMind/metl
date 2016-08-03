@@ -57,9 +57,9 @@ import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
+import org.jumpmind.metl.core.runtime.component.HttpResponse;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
-import org.jumpmind.metl.core.runtime.component.EntityResult;
 import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
@@ -130,11 +130,11 @@ public class FlowRuntime {
         for (StepRuntime stepRuntime : steps) {
             List<IComponentRuntime> runtimes = stepRuntime.getComponentRuntimes();
             for (IComponentRuntime runtime : runtimes) {
-                if (runtime instanceof EntityResult) {
+                if (runtime instanceof HttpResponse) {
                     if (response == null) {
                         response = new ArrayList<>();
                     }
-                    response.addAll(((EntityResult)runtime).getResponse());
+                    response.addAll(((HttpResponse)runtime).getResponse());
                 }
             }
         }
@@ -307,7 +307,7 @@ public class FlowRuntime {
      */
     public void waitForFlowCompletion() {
         while (isRunning()) {
-            AppUtils.sleep(5000);
+            AppUtils.sleep(5);
         }        
     }
     

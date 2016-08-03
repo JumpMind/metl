@@ -155,7 +155,7 @@
     <component-ui id="Union UI" componentId="Union">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-union-48x48-color.png</iconImage>
     </component-ui>
-    <component-ui id="Entity Result UI" componentId="16170152-eee5-11e5-9ce9-5e5517507c66">
-        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-entity-result-48x48-color.png</iconImage>
+    <component-ui id="Http Response UI" componentId="16170152-eee5-11e5-9ce9-5e5517507c66">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
     </component-ui>      
 </ui>
