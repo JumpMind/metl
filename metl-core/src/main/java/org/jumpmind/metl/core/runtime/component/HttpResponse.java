@@ -14,11 +14,11 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.util.FormatUtils;
 
-public class EntityResult extends AbstractComponentRuntime {
+public class HttpResponse extends AbstractComponentRuntime {
 
     ArrayList<EntityRow> response;
 
-    public EntityResult() {
+    public HttpResponse() {
     }
 
     @Override

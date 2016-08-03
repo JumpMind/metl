@@ -21,7 +21,10 @@ public class HttpRequest extends AbstractComponentRuntime {
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         String requestPayload = getComponentContext().getFlowParameters().get(REQUEST_PAYLOAD);
+        
         if (isNotBlank(requestPayload)) {
+            //TODO: today this is never executed on a get method because the REQUEST_PAYLOAD parameter is never set.
+            //should we always send a text message to the next component?
             ArrayList<String> payload = new ArrayList<>(1);
             payload.add(requestPayload);
             callback.sendTextMessage(inputMessage.getHeader(), payload);

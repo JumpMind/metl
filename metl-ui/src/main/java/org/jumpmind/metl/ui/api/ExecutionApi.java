@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.ui.api;
 
+import java.io.BufferedReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
@@ -45,6 +46,7 @@ import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.LogLevel;
+import org.jumpmind.metl.core.runtime.component.HttpRequest;
 import org.jumpmind.metl.core.runtime.web.HttpMethod;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMapping;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
@@ -72,7 +74,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @Api(value = "Execution API", description = "This is the API for Metl")
 @Controller
 public class ExecutionApi {
-    
+      
     static final String WS = "/ws";
     
     final Logger log = LoggerFactory.getLogger(getClass());
@@ -93,11 +95,28 @@ public class ExecutionApi {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public final ArrayList<EntityRow> get(HttpServletRequest req) throws Exception {
+        return executeFlow(req, null);
+    }
+
+    @ApiIgnore
+    @RequestMapping(value = WS + "/**", method = RequestMethod.PUT)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public final void put(HttpServletRequest req) throws Exception {     
+        String payload = getRequestPayload(req);
+        executeFlow(req, payload);
+    }    
+    
+    private ArrayList<EntityRow> executeFlow(HttpServletRequest req, String payload) throws Exception {
+        
         String restOfTheUrl = ((String) req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).substring(WS.length());
-        HttpRequestMapping mapping = requestRegistry.findBestMatch(HttpMethod.GET, restOfTheUrl);
+        HttpRequestMapping mapping = requestRegistry.findBestMatch(HttpMethod.valueOf(req.getMethod()), restOfTheUrl);
         if (mapping != null) {
             Map<String, String> params = toObjectMap(req);
             params.putAll(patternMatcher.extractUriTemplateVariables(mapping.getPath(), restOfTheUrl));
+            if (payload != null) {
+                params.put(HttpRequest.REQUEST_PAYLOAD, payload.toString());
+            }
             AgentDeployment deployment = mapping.getDeployment();
             AgentRuntime agentRuntime = agentManager.getAgentRuntime(deployment.getAgentId());
             return agentRuntime.execute(deployment, params);
@@ -105,7 +124,18 @@ public class ExecutionApi {
             throw new CouldNotFindDeploymentException("Could not find a deployed web request that matches " + restOfTheUrl);
         }
     }
+    
+    private String getRequestPayload(HttpServletRequest req) throws Exception {
 
+        BufferedReader in = req.getReader();
+        String currentLine = null;
+        StringBuffer content = new StringBuffer();;
+        while ((currentLine = in.readLine()) != null) {
+            content.append(currentLine);
+        }
+        return content.toString();
+    }
+    
     @ApiOperation(value = "Invoke a flow that is deployed to an agent by name")
     @RequestMapping(value = "/agents/{agentName}/deployments/{deploymentName}/invoke", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
