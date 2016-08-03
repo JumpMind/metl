@@ -41,7 +41,6 @@ import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentDeploymentParameter;
 import org.jumpmind.metl.core.model.AgentParameter;
-import org.jumpmind.metl.core.model.EntityRow;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.FlowStep;
@@ -124,17 +123,14 @@ public class FlowRuntime {
         return deployment;
     }
     
-    public ArrayList<EntityRow> getEntityResult() {
-        ArrayList<EntityRow> response = null;
+    public Object getResult() {
+        Object response = null;
         Collection<StepRuntime> steps = stepRuntimes.values();
         for (StepRuntime stepRuntime : steps) {
             List<IComponentRuntime> runtimes = stepRuntime.getComponentRuntimes();
             for (IComponentRuntime runtime : runtimes) {
                 if (runtime instanceof HttpResponse) {
-                    if (response == null) {
-                        response = new ArrayList<>();
-                    }
-                    response.addAll(((HttpResponse)runtime).getResponse());
+                    response = ((HttpResponse)runtime).getResponse();
                 }
             }
         }

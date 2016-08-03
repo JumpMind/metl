@@ -11,27 +11,30 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.util.FormatUtils;
 
 public class HttpResponse extends AbstractComponentRuntime {
 
-    ArrayList<EntityRow> response;
-
+    Object response;
+    
     public HttpResponse() {
     }
 
     @Override
     protected void start() {
         if (getInputModel() == null) {
-            throw new IllegalStateException("An entity response component must have an input model defined");
+            response = new StringBuilder();
+        } else {
+            response = new ArrayList<>();
         }
-        response = new ArrayList<>();
     }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (inputMessage instanceof EntityDataMessage) {
+            ArrayList<EntityRow> entityResponse = (ArrayList<EntityRow>) response;
             EntityDataMessage entityMessage = (EntityDataMessage) inputMessage;
             ArrayList<EntityData> payload = entityMessage.getPayload();
             if (payload != null) {
@@ -43,7 +46,7 @@ public class HttpResponse extends AbstractComponentRuntime {
                             if (entityData.containsKey(attribute.getId())) {
                                 if (row == null) {
                                     row = new EntityRow(entity.getName(), new HashMap<>(entity.getModelAttributes().size()));
-                                    response.add(row);
+                                    entityResponse.add(row);
                                 }
                                 String stringValue = null;
                                 Object value = entityData.get(attribute.getId());
@@ -58,11 +61,20 @@ public class HttpResponse extends AbstractComponentRuntime {
                     }
                 }
             }
+        } else if (inputMessage instanceof TextMessage) {
+            TextMessage textMessage = (TextMessage) inputMessage;
+            StringBuilder textResponse = (StringBuilder) response;
+            textResponse.append(textMessage.getTextFromPayload());
         }
     }
 
-    public ArrayList<EntityRow> getResponse() {
-        return response;
+    public Object getResponse() {
+        if (response instanceof StringBuilder) {
+            StringBuilder builder = (StringBuilder) response;
+            return builder.toString();
+        } else {
+            return response;
+        }
     }
 
     @Override

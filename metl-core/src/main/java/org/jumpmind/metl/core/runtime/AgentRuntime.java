@@ -44,7 +44,6 @@ import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentDeploymentParameter;
 import org.jumpmind.metl.core.model.AgentStatus;
 import org.jumpmind.metl.core.model.DeploymentStatus;
-import org.jumpmind.metl.core.model.EntityRow;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.FlowStep;
@@ -399,7 +398,7 @@ public class AgentRuntime {
     	return scheduleNow(deployment, null);
     }
     
-    public ArrayList<EntityRow> execute(AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
+    public Object execute(AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
         log.info("Executing '{}' on '{}' for now", new Object[] {
                 deployment.getName(), agent.getName() });
         String executionId = createExecutionId();
@@ -425,11 +424,10 @@ public class AgentRuntime {
         
         List<Throwable> errors = flowRuntime.getAllErrors();
         if (errors.size() == 0) {
-            ArrayList<EntityRow> entities = flowRuntime.getEntityResult();
-            if (entities != null) {
-                return entities;
+            Object response = flowRuntime.getResult();
+            if (response != null) {
+                return response;
             } else {
-                // TODO maybe in the future also check to see if there was a TextResult
                 return null;
             }
         } else {
