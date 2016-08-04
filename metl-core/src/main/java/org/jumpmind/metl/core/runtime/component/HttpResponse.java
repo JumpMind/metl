@@ -15,7 +15,7 @@ import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.util.FormatUtils;
 
-public class HttpResponse extends AbstractComponentRuntime {
+public class HttpResponse extends AbstractComponentRuntime implements IHasResults {
 
     Object response;
     
@@ -30,10 +30,11 @@ public class HttpResponse extends AbstractComponentRuntime {
             response = new ArrayList<>();
         }
     }
-
+    
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (inputMessage instanceof EntityDataMessage) {
+            @SuppressWarnings("unchecked")
             ArrayList<EntityRow> entityResponse = (ArrayList<EntityRow>) response;
             EntityDataMessage entityMessage = (EntityDataMessage) inputMessage;
             ArrayList<EntityData> payload = entityMessage.getPayload();
@@ -67,11 +68,24 @@ public class HttpResponse extends AbstractComponentRuntime {
             textResponse.append(textMessage.getTextFromPayload());
         }
     }
+    
+    @Override
+    public Results getResults() {
+        return new Results(getResponse(), getContentType());
+    }
+    
+    private String getContentType() {
+        if (response instanceof CharSequence) {
+            // content type only means anything if we are providing the output in string format
+            return properties.get("content.type");
+        } else {
+            return null;
+        }
+    }
 
-    public Object getResponse() {
-        if (response instanceof StringBuilder) {
-            StringBuilder builder = (StringBuilder) response;
-            return builder.toString();
+    private Object getResponse() {
+        if (response instanceof CharSequence) {
+            return response.toString();
         } else {
             return response;
         }

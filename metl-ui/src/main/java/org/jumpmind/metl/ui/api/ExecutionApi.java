@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.ui.api;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.BufferedReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
@@ -45,6 +47,7 @@ import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.component.HttpRequest;
+import org.jumpmind.metl.core.runtime.component.Results;
 import org.jumpmind.metl.core.runtime.web.HttpMethod;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMapping;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
@@ -92,21 +95,38 @@ public class ExecutionApi {
     @RequestMapping(value = WS + "/**", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final Object get(HttpServletRequest req) throws Exception {
-        return executeFlow(req, null);
+    public final Object get(HttpServletRequest req, HttpServletResponse res) throws Exception {
+        return executeFlow(req, null, res);
     }
 
     @ApiIgnore
     @RequestMapping(value = WS + "/**", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final Object put(HttpServletRequest req) throws Exception {     
+    public final Object put(HttpServletRequest req, HttpServletResponse res) throws Exception {     
         String payload = getRequestPayload(req);
-        return executeFlow(req, payload);
-    }    
+        return executeFlow(req, payload, res);
+    }
     
-    private Object executeFlow(HttpServletRequest req, String payload) throws Exception {
-        
+    @ApiIgnore
+    @RequestMapping(value = WS + "/**", method = RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public final Object delete(HttpServletRequest req, HttpServletResponse res) throws Exception {     
+        String payload = getRequestPayload(req);
+        return executeFlow(req, payload, res);
+    }    
+
+    @ApiIgnore
+    @RequestMapping(value = WS + "/**", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public final Object post(HttpServletRequest req, HttpServletResponse res) throws Exception {     
+        String payload = getRequestPayload(req);
+        return executeFlow(req, payload, res);
+    }
+    
+    private Object executeFlow(HttpServletRequest req, String payload, HttpServletResponse res) throws Exception {        
         String restOfTheUrl = ((String) req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).substring(WS.length());
         HttpRequestMapping mapping = requestRegistry.findBestMatch(HttpMethod.valueOf(req.getMethod()), restOfTheUrl);
         if (mapping != null) {
@@ -117,14 +137,18 @@ public class ExecutionApi {
             }
             AgentDeployment deployment = mapping.getDeployment();
             AgentRuntime agentRuntime = agentManager.getAgentRuntime(deployment.getAgentId());
-            return agentRuntime.execute(deployment, params);
+            Results results = agentRuntime.execute(deployment, params);
+            String contentType = results.getContentType();
+            if (isNotBlank(contentType)) {
+                res.setContentType(contentType);
+            }
+            return results.getValue();
         } else {
             throw new CouldNotFindDeploymentException("Could not find a deployed web request that matches " + restOfTheUrl);
         }
     }
     
     private String getRequestPayload(HttpServletRequest req) throws Exception {
-
         BufferedReader in = req.getReader();
         String currentLine = null;
         StringBuffer content = new StringBuffer();;

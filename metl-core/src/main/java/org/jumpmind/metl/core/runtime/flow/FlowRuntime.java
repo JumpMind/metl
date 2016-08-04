@@ -56,9 +56,10 @@ import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
-import org.jumpmind.metl.core.runtime.component.HttpResponse;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.component.IHasResults;
+import org.jumpmind.metl.core.runtime.component.Results;
 import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
@@ -123,14 +124,14 @@ public class FlowRuntime {
         return deployment;
     }
     
-    public Object getResult() {
-        Object response = null;
+    public Results getResult() {
+        Results response = null;
         Collection<StepRuntime> steps = stepRuntimes.values();
         for (StepRuntime stepRuntime : steps) {
             List<IComponentRuntime> runtimes = stepRuntime.getComponentRuntimes();
             for (IComponentRuntime runtime : runtimes) {
-                if (runtime instanceof HttpResponse) {
-                    response = ((HttpResponse)runtime).getResponse();
+                if (runtime instanceof IHasResults) {
+                    response = ((IHasResults)runtime).getResults();
                 }
             }
         }

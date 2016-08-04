@@ -56,6 +56,7 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.component.IComponentDeploymentListener;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
+import org.jumpmind.metl.core.runtime.component.Results;
 import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
@@ -398,7 +399,7 @@ public class AgentRuntime {
     	return scheduleNow(deployment, null);
     }
     
-    public Object execute(AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
+    public Results execute(AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
         log.info("Executing '{}' on '{}' for now", new Object[] {
                 deployment.getName(), agent.getName() });
         String executionId = createExecutionId();
@@ -424,12 +425,7 @@ public class AgentRuntime {
         
         List<Throwable> errors = flowRuntime.getAllErrors();
         if (errors.size() == 0) {
-            Object response = flowRuntime.getResult();
-            if (response != null) {
-                return response;
-            } else {
-                return null;
-            }
+            return flowRuntime.getResult();
         } else {
             for (Throwable throwable : errors) {
                 if (throwable instanceof Exception) {

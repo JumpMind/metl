@@ -35,7 +35,7 @@ public class ComponentRuntimeFactory implements IComponentRuntimeFactory {
         try {
             XMLComponent definition = componentDefinitionFactory.getDefinition(id);
             if (definition != null) {
-                IComponentRuntime component = (IComponentRuntime) Class.forName(definition.getClassName()).newInstance();
+                IComponentRuntime component = (IComponentRuntime) Class.forName(definition.getClassName().trim()).newInstance();
                 component.create(definition);
                 return component;
             } else {
