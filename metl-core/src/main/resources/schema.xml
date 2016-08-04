@@ -559,6 +559,17 @@
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />        
+    </table>
+    
+    <table name="plugin" description="">
+        <column name="artifact_name" primaryKey="true" type="VARCHAR" size="255" description="" />
+        <column name="artifact_group" primaryKey="true" type="VARCHAR" size="255" description="" />
+        <column name="artifact_version" primaryKey="true" type="VARCHAR" size="255" description="" />
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />        
     </table>                    
+                        
 
 </database>
