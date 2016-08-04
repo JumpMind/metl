@@ -24,7 +24,6 @@ import java.io.BufferedReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +36,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.DeploymentStatus;
-import org.jumpmind.metl.core.model.EntityRow;
 import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.ExecutionStep;
@@ -94,7 +92,7 @@ public class ExecutionApi {
     @RequestMapping(value = WS + "/**", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final ArrayList<EntityRow> get(HttpServletRequest req) throws Exception {
+    public final Object get(HttpServletRequest req) throws Exception {
         return executeFlow(req, null);
     }
 
@@ -102,12 +100,12 @@ public class ExecutionApi {
     @RequestMapping(value = WS + "/**", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final void put(HttpServletRequest req) throws Exception {     
+    public final Object put(HttpServletRequest req) throws Exception {     
         String payload = getRequestPayload(req);
-        executeFlow(req, payload);
+        return executeFlow(req, payload);
     }    
     
-    private ArrayList<EntityRow> executeFlow(HttpServletRequest req, String payload) throws Exception {
+    private Object executeFlow(HttpServletRequest req, String payload) throws Exception {
         
         String restOfTheUrl = ((String) req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).substring(WS.length());
         HttpRequestMapping mapping = requestRegistry.findBestMatch(HttpMethod.valueOf(req.getMethod()), restOfTheUrl);
