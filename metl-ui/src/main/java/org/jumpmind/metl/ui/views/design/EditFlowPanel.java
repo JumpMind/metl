@@ -31,6 +31,7 @@ import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentStartMode;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.Flow;
+import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Folder;
@@ -221,6 +222,8 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
     @Override
     public boolean closing() {
+        FlowName flowName = new FlowName(flow);
+        configurationService.save(flowName);
         return true;
     }
 

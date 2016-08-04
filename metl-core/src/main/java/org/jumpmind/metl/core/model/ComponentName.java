@@ -26,12 +26,22 @@ public class ComponentName extends AbstractName {
     
     String type;
     
+    boolean shared;
+    
     public void setType(String type) {
         this.type = type;
     }
     
     public String getType() {
         return type;
+    }
+    
+    public boolean isShared() {
+        return shared;
+    }
+    
+    public void setShared(boolean shared) {
+        this.shared = shared;
     }
 
 }
