@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import static org.jumpmind.metl.core.runtime.component.ComponentTypeIdConstants.*;
 
 public class Flow extends AbstractObject {
 
@@ -52,6 +53,8 @@ public class Flow extends AbstractObject {
     boolean deleted = false;
     
     boolean test = false;
+    
+    boolean webService = false;
 
     public Flow() {
         this.flowSteps = new ArrayList<FlowStep>();
@@ -67,6 +70,20 @@ public class Flow extends AbstractObject {
     public Flow(String id) {
         this();
         setId(id);
+    }
+    
+    public void setWebService(boolean webService) {
+        this.webService = webService;
+    }
+    
+    public boolean isWebService() {
+        for (FlowStep flowStep : flowSteps) {
+            if (HTTP_REQUEST.equals(flowStep.getComponent().getType())) {
+                webService = true;
+                break;
+            }
+        }
+        return webService;
     }
 
     public void setFolder(Folder folder) {

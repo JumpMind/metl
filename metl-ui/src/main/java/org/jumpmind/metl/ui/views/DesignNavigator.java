@@ -598,7 +598,7 @@ public class DesignNavigator extends VerticalLayout {
         for (FlowName flow : flows) {
             this.treeTable.setChildrenAllowed(folder, true);
             this.treeTable.addItem(flow);
-            this.treeTable.setItemIcon(flow, Icons.FLOW);
+            this.treeTable.setItemIcon(flow, flow.isWebService() ? Icons.WEB : Icons.FLOW);
             this.treeTable.setParent(flow, folder);
             this.treeTable.setChildrenAllowed(flow, false);
         }

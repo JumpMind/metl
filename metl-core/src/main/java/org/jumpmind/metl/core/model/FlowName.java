@@ -26,12 +26,39 @@ public class FlowName extends AbstractName {
     
     private boolean test;
     
+    private boolean webService;
+    
+    public FlowName(Flow flow) {
+        this.test = flow.isTest();
+        this.webService = flow.isWebService();
+        this.name = flow.getName();
+        this.setId(flow.getId());
+        this.rowId = flow.getRowId();
+        this.createTime = flow.getCreateTime();
+        this.createBy = flow.getCreateBy();
+        this.lastUpdateBy = flow.getLastUpdateBy();
+        this.lastUpdateTime = flow.getLastUpdateTime();
+        this.projectVersionId = flow.getProjectVersionId();
+        this.deleted = flow.isDeleted();
+    }
+    
+    public FlowName() {
+    }    
+    
     public void setTest(boolean test) {
         this.test = test;
     }
     
     public boolean isTest() {
         return test;
+    }
+    
+    public void setWebService(boolean webService) {
+        this.webService = webService;
+    }
+    
+    public boolean isWebService() {
+        return webService;
     }
     
 }
