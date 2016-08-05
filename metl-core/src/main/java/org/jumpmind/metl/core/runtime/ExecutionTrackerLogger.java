@@ -45,9 +45,9 @@ public class ExecutionTrackerLogger implements IExecutionTracker {
     }
 
     @Override
-    public void beforeFlow(String executionId) {
+    public void beforeFlow(String executionId, Map<String, String> flowParameters) {
         this.executionId = executionId;
-        String msg = String.format("[%s] Flow started for deployment: %s", executionId, deployment.getName());
+        String msg = String.format("[%s] Flow started for deployment: %s with parameters: %s", executionId, deployment.getName(), flowParameters);
         log.info(msg);
     }
 

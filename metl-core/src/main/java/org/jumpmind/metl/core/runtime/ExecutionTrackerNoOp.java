@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime;
 
+import java.util.Map;
+
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 
 public class ExecutionTrackerNoOp implements IExecutionTracker {
@@ -39,7 +41,7 @@ public class ExecutionTrackerNoOp implements IExecutionTracker {
     }
 
     @Override
-    public void beforeFlow(String executionId) {
+    public void beforeFlow(String executionId, Map<String, String> flowParameters) {
         this.executionId = executionId;
     }
 

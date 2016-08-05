@@ -167,7 +167,7 @@ public class FlowRuntime {
         
         Flow manipulatedFlow = manipulateFlow(deployment.getFlow());
 
-        executionTracker.beforeFlow(executionId);
+        executionTracker.beforeFlow(executionId, flowParameters);
         sendNotifications(Notification.EventType.FLOW_START);
 
         /* create a step runtime for every component in the flow */

@@ -22,7 +22,6 @@ package org.jumpmind.metl.ui.api;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.io.BufferedReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
@@ -60,6 +59,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -103,8 +103,7 @@ public class ExecutionApi {
     @RequestMapping(value = WS + "/**", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final Object put(HttpServletRequest req, HttpServletResponse res) throws Exception {     
-        String payload = getRequestPayload(req);
+    public final Object put(HttpServletRequest req, HttpServletResponse res, @RequestBody String payload) throws Exception {     
         return executeFlow(req, payload, res);
     }
     
@@ -112,8 +111,7 @@ public class ExecutionApi {
     @RequestMapping(value = WS + "/**", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final Object delete(HttpServletRequest req, HttpServletResponse res) throws Exception {     
-        String payload = getRequestPayload(req);
+    public final Object delete(HttpServletRequest req, HttpServletResponse res, @RequestBody String payload) throws Exception {     
         return executeFlow(req, payload, res);
     }    
 
@@ -121,8 +119,7 @@ public class ExecutionApi {
     @RequestMapping(value = WS + "/**", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final Object post(HttpServletRequest req, HttpServletResponse res) throws Exception {     
-        String payload = getRequestPayload(req);
+    public final Object post(HttpServletRequest req, HttpServletResponse res, @RequestBody String payload) throws Exception {     
         return executeFlow(req, payload, res);
     }
     
@@ -130,10 +127,15 @@ public class ExecutionApi {
         String restOfTheUrl = ((String) req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).substring(WS.length());
         HttpRequestMapping mapping = requestRegistry.findBestMatch(HttpMethod.valueOf(req.getMethod()), restOfTheUrl);
         if (mapping != null) {
-            Map<String, String> params = toObjectMap(req);
+            Map<String, String> params = toMap(req);
             params.putAll(patternMatcher.extractUriTemplateVariables(mapping.getPath(), restOfTheUrl));
-            if (payload != null) {
+            if (isNotBlank(payload)) {
                 params.put(HttpRequest.REQUEST_PAYLOAD, payload.toString());
+            }
+            Enumeration<String> headerNames = req.getHeaderNames();
+            while (headerNames.hasMoreElements()) {
+                String headerName = headerNames.nextElement();
+                params.put(headerName, req.getHeader(headerName));                
             }
             AgentDeployment deployment = mapping.getDeployment();
             AgentRuntime agentRuntime = agentManager.getAgentRuntime(deployment.getAgentId());
@@ -146,16 +148,6 @@ public class ExecutionApi {
         } else {
             throw new CouldNotFindDeploymentException("Could not find a deployed web request that matches " + restOfTheUrl);
         }
-    }
-    
-    private String getRequestPayload(HttpServletRequest req) throws Exception {
-        BufferedReader in = req.getReader();
-        String currentLine = null;
-        StringBuffer content = new StringBuffer();;
-        while ((currentLine = in.readLine()) != null) {
-            content.append(currentLine);
-        }
-        return content.toString();
     }
     
     @ApiOperation(value = "Invoke a flow that is deployed to an agent by name")
@@ -180,7 +172,7 @@ public class ExecutionApi {
                         foundDeployment = true;
                         if (agentDeployment.getDeploymentStatus() == DeploymentStatus.DEPLOYED) {
                             AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent);
-                            String executionId = agentRuntime.scheduleNow(agentDeployment, toObjectMap(req));
+                            String executionId = agentRuntime.scheduleNow(agentDeployment, toMap(req));
                             boolean done = false;
                             do {
                                 execution = executionService.findExecution(executionId);
@@ -235,7 +227,7 @@ public class ExecutionApi {
         }
     }
 
-    protected Map<String, String> toObjectMap(HttpServletRequest req) {
+    protected Map<String, String> toMap(HttpServletRequest req) {
         Map<String, String> params = new HashMap<String, String>();
         Enumeration<String> names = req.getParameterNames();
         while (names.hasMoreElements()) {
