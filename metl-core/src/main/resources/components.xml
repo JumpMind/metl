@@ -1581,9 +1581,16 @@
             </setting>           
         </settings>
     </component>
-    <component category='SERVICE' id='16170152-eee5-11e5-9ce9-5e5517507c66' inputMessageType='any' inputOutputModelsMatch='true' outputMessageType='none' resourceCategory='none'>
+    <component category='SERVICE' id='16170152-eee5-11e5-9ce9-5e5517507c66'
+        inputMessageType='any' inputOutputModelsMatch='true'
+        outputMessageType='none' resourceCategory='none'>
         <name>Http Response</name>
         <className>org.jumpmind.metl.core.runtime.component.HttpResponse</className>
         <description></description>
+        <settings>
+            <setting id='content.type' required='false' type='text'>
+                <name>Content Type</name>
+            </setting>
+        </settings>
     </component>  
 </components>
