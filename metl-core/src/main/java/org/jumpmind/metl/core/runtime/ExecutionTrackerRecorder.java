@@ -63,8 +63,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     }
 
     @Override
-    public void beforeFlow(String executionId) {
-        super.beforeFlow(executionId);
+    public void beforeFlow(String executionId, Map<String, String> flowParameters) {
+        super.beforeFlow(executionId, flowParameters);
         this.steps = new HashMap<String, ExecutionStep>();
         this.startTime = new Date();
         this.recorder.record(getExecution());

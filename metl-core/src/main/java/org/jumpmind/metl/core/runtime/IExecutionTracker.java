@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime;
 
+import java.util.Map;
+
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 
 public interface IExecutionTracker {
@@ -34,7 +36,7 @@ public interface IExecutionTracker {
     
     public void flowStepFinished(int threadNumber, ComponentContext context, Throwable error, boolean cancelled);
     
-    public void beforeFlow(String executionId);
+    public void beforeFlow(String executionId, Map<String, String> flowParameters);
     
     public void afterFlow();
     
