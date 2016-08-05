@@ -123,30 +123,42 @@ public class ExecutionApi {
         return executeFlow(req, payload, res);
     }
     
-    private Object executeFlow(HttpServletRequest req, String payload, HttpServletResponse res) throws Exception {        
-        String restOfTheUrl = ((String) req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).substring(WS.length());
-        HttpRequestMapping mapping = requestRegistry.findBestMatch(HttpMethod.valueOf(req.getMethod()), restOfTheUrl);
+    private Object executeFlow(HttpServletRequest req, String payload, HttpServletResponse res)
+            throws Exception {
+        String requestType = req.getMethod();
+        String restOfTheUrl = ((String) req
+                .getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE))
+                        .substring(WS.length());
+        HttpRequestMapping mapping = requestRegistry.findBestMatch(HttpMethod.valueOf(requestType),
+                restOfTheUrl);
         if (mapping != null) {
             Map<String, String> params = toMap(req);
-            params.putAll(patternMatcher.extractUriTemplateVariables(mapping.getPath(), restOfTheUrl));
+            params.putAll(
+                    patternMatcher.extractUriTemplateVariables(mapping.getPath(), restOfTheUrl));
             if (isNotBlank(payload)) {
                 params.put(HttpRequest.REQUEST_PAYLOAD, payload.toString());
             }
             Enumeration<String> headerNames = req.getHeaderNames();
             while (headerNames.hasMoreElements()) {
                 String headerName = headerNames.nextElement();
-                params.put(headerName, req.getHeader(headerName));                
+                params.put(headerName, req.getHeader(headerName));
             }
             AgentDeployment deployment = mapping.getDeployment();
             AgentRuntime agentRuntime = agentManager.getAgentRuntime(deployment.getAgentId());
             Results results = agentRuntime.execute(deployment, params);
-            String contentType = results.getContentType();
-            if (isNotBlank(contentType)) {
-                res.setContentType(contentType);
+            if (results != null) {
+                String contentType = results.getContentType();
+                if (isNotBlank(contentType)) {
+                    res.setContentType(contentType);
+                }
+                return results.getValue();
+            } else {
+                return null;
             }
-            return results.getValue();
         } else {
-            throw new CouldNotFindDeploymentException("Could not find a deployed web request that matches " + restOfTheUrl);
+            throw new CouldNotFindDeploymentException(
+                    "Could not find a deployed web request that matches " + restOfTheUrl
+                            + " for an HTTP " + requestType);
         }
     }
     
