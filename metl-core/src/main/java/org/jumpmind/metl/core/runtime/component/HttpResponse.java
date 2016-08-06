@@ -11,6 +11,7 @@ import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.runtime.EntityDataMessage;
 import org.jumpmind.metl.core.runtime.Message;
+import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.util.FormatUtils;
@@ -34,6 +35,9 @@ public class HttpResponse extends AbstractComponentRuntime implements IHasResult
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (inputMessage instanceof EntityDataMessage) {
+            if (getInputModel() == null) {
+                throw new MisconfiguredException("If an Http Response component receives an entity message type, it must have an input model specified.");
+            }
             @SuppressWarnings("unchecked")
             ArrayList<EntityRow> entityResponse = (ArrayList<EntityRow>) response;
             EntityDataMessage entityMessage = (EntityDataMessage) inputMessage;
@@ -63,6 +67,9 @@ public class HttpResponse extends AbstractComponentRuntime implements IHasResult
                 }
             }
         } else if (inputMessage instanceof TextMessage) {
+            if (getInputModel() != null) {
+                throw new MisconfiguredException("If an Http Response component receives a text message, it must NOT have an input model specified");
+            }
             TextMessage textMessage = (TextMessage) inputMessage;
             StringBuilder textResponse = (StringBuilder) response;
             textResponse.append(textMessage.getTextFromPayload());
