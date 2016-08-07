@@ -5,9 +5,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.AntPathMatcher;
 
 public class HttpRequestMappingRegistry implements IHttpRequestMappingRegistry {
+
+    final Logger log = LoggerFactory.getLogger(getClass());
 
     AntPathMatcher patternMatcher = new AntPathMatcher();
     
@@ -18,6 +22,7 @@ public class HttpRequestMappingRegistry implements IHttpRequestMappingRegistry {
         Set<HttpRequestMapping> mappings = mappingsByHttpMethod.get(method);
         if (mappings != null) {
             for (HttpRequestMapping httpRequestMapping : mappings) {
+                log.info(String.format("Found available uri: %s",httpRequestMapping.getPath()));
                 if (patternMatcher.match(httpRequestMapping.getPath(), path)) {
                     return httpRequestMapping;
                 }

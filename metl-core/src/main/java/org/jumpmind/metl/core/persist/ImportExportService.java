@@ -439,6 +439,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
                 Date createTime = new Date();
                 row.put("CREATE_TIME", createTime);
                 row.put("LAST_UPDATE_TIME", createTime);
+                useDefaultsForMissingRequiredColumns(table, row);                
                 transaction.prepareAndExecute(stmt.getSql(), row);
             }              
         } catch (Exception e) {
@@ -447,21 +448,35 @@ public class ImportExportService extends AbstractService implements IImportExpor
     }
 
     private void processTableUpdates(TableData updates, ISqlTransaction transaction) {
-        Table table = databasePlatform.getTableFromCache(null, null, updates.getTableName(), false);
-        excludeUpdateColumns(table);
-        DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.UPDATE, table.getCatalog(),
-                table.getSchema(), table.getName(), table.getPrimaryKeyColumns(),
-                getUpdateColumns(table), null, null, true);
-        
-        Iterator<String> itr = updates.getTableData().keySet().iterator();
-        while (itr.hasNext()) {
-            String key = itr.next();
-            LinkedCaseInsensitiveMap<Object> row = updates.getTableData().get(key);
-            row.put("LAST_UPDATE_TIME", new Date());
-            transaction.prepareAndExecute(stmt.getSql(), row);
-        }              
+        try {
+            Table table = databasePlatform.getTableFromCache(null, null, updates.getTableName(), false);
+            excludeUpdateColumns(table);
+            DmlStatement stmt = databasePlatform.createDmlStatement(DmlType.UPDATE, table.getCatalog(),
+                    table.getSchema(), table.getName(), table.getPrimaryKeyColumns(),
+                    getUpdateColumns(table), null, null, true);
+            
+            Iterator<String> itr = updates.getTableData().keySet().iterator();
+            while (itr.hasNext()) {
+                String key = itr.next();
+                LinkedCaseInsensitiveMap<Object> row = updates.getTableData().get(key);
+                row.put("LAST_UPDATE_TIME", new Date());
+                useDefaultsForMissingRequiredColumns(table, row);                
+                transaction.prepareAndExecute(stmt.getSql(), row);
+            }
+        } catch (Exception e) {
+            log.error("Error importing the configuration " + e.getMessage());                
+        }
     }
 
+    private void useDefaultsForMissingRequiredColumns(Table table,LinkedCaseInsensitiveMap<Object> row) {
+        
+        for (Column column : table.getColumnsAsList()) {
+            if (!row.containsKey(column.getName())) {
+                row.put(column.getName(), column.getDefaultValue());
+            }
+        }
+    }
+    
     private void processTableDeletes(TableData deletes, ISqlTransaction transaction) {
         if (deletes != null) {
             Table table = databasePlatform.getTableFromCache(null, null, deletes.getTableName(),
