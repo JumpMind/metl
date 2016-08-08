@@ -75,9 +75,9 @@ import springfox.documentation.annotations.ApiIgnore;
 @Api(value = "Execution API", description = "This is the API for Metl")
 @Controller
 public class ExecutionApi {
-      
+
     static final String WS = "/ws";
-    
+
     final Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired
@@ -88,7 +88,7 @@ public class ExecutionApi {
 
     @Autowired
     IHttpRequestMappingRegistry requestRegistry;
-    
+
     AntPathMatcher patternMatcher = new AntPathMatcher();
 
     @ApiIgnore
@@ -103,32 +103,38 @@ public class ExecutionApi {
     @RequestMapping(value = WS + "/**", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final Object put(HttpServletRequest req, HttpServletResponse res, @RequestBody String payload) throws Exception {     
+    public final Object put(HttpServletRequest req, HttpServletResponse res,
+            @RequestBody String payload) throws Exception {
         return executeFlow(req, payload, res);
     }
-    
+
     @ApiIgnore
     @RequestMapping(value = WS + "/**", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final Object delete(HttpServletRequest req, HttpServletResponse res, @RequestBody String payload) throws Exception {     
+    public final Object delete(HttpServletRequest req, HttpServletResponse res,
+            @RequestBody String payload) throws Exception {
         return executeFlow(req, payload, res);
-    }    
+    }
 
     @ApiIgnore
     @RequestMapping(value = WS + "/**", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final Object post(HttpServletRequest req, HttpServletResponse res, @RequestBody String payload) throws Exception {     
+    public final Object post(HttpServletRequest req, HttpServletResponse res,
+            @RequestBody String payload) throws Exception {
         return executeFlow(req, payload, res);
     }
-    
+
     private Object executeFlow(HttpServletRequest req, String payload, HttpServletResponse res)
             throws Exception {
+
         String requestType = req.getMethod();
         String restOfTheUrl = ((String) req
                 .getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE))
                         .substring(WS.length());
+        log.info(String.format("Attempting to find a service uri match for %s with request type %s",
+                restOfTheUrl, requestType));
         HttpRequestMapping mapping = requestRegistry.findBestMatch(HttpMethod.valueOf(requestType),
                 restOfTheUrl);
         if (mapping != null) {
@@ -161,12 +167,13 @@ public class ExecutionApi {
                             + " for an HTTP " + requestType);
         }
     }
-    
+
     @ApiOperation(value = "Invoke a flow that is deployed to an agent by name")
     @RequestMapping(value = "/agents/{agentName}/deployments/{deploymentName}/invoke", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public final ExecutionResults invoke(@ApiParam(value = "The name of the agent to use") @PathVariable("agentName") String agentName,
+    public final ExecutionResults invoke(
+            @ApiParam(value = "The name of the agent to use") @PathVariable("agentName") String agentName,
             @ApiParam(value = "The name of the flow deployment to invoke") @PathVariable("deploymentName") String deploymentName,
             HttpServletRequest req) {
         agentName = decode(agentName);
@@ -184,11 +191,13 @@ public class ExecutionApi {
                         foundDeployment = true;
                         if (agentDeployment.getDeploymentStatus() == DeploymentStatus.DEPLOYED) {
                             AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent);
-                            String executionId = agentRuntime.scheduleNow(agentDeployment, toMap(req));
+                            String executionId = agentRuntime.scheduleNow(agentDeployment,
+                                    toMap(req));
                             boolean done = false;
                             do {
                                 execution = executionService.findExecution(executionId);
-                                done = execution != null && ExecutionStatus.isDone(execution.getExecutionStatus());
+                                done = execution != null
+                                        && ExecutionStatus.isDone(execution.getExecutionStatus());
                                 if (!done) {
                                     AppUtils.sleep(5000);
                                 }
@@ -201,13 +210,14 @@ public class ExecutionApi {
         }
 
         if (execution != null) {
-            ExecutionResults result = new ExecutionResults(execution.getId(), execution.getStatus(), execution.getStartTime(),
-                    execution.getEndTime());
+            ExecutionResults result = new ExecutionResults(execution.getId(), execution.getStatus(),
+                    execution.getStartTime(), execution.getEndTime());
             if (execution.getExecutionStatus() == ExecutionStatus.ERROR) {
                 List<ExecutionStep> steps = executionService.findExecutionSteps(execution.getId());
                 for (ExecutionStep executionStep : steps) {
                     if (executionStep.getExecutionStatus() == ExecutionStatus.ERROR) {
-                        List<ExecutionStepLog> logs = executionService.findExecutionStepLogsInError(executionStep.getId());
+                        List<ExecutionStepLog> logs = executionService
+                                .findExecutionStepLogsInError(executionStep.getId());
                         for (ExecutionStepLog executionStepLog : logs) {
                             if (executionStepLog.getLogLevel() == LogLevel.ERROR) {
                                 result.setMessage(executionStepLog.getLogText());
@@ -225,7 +235,8 @@ public class ExecutionApi {
             } else if (!foundDeployment) {
                 msg = String.format("Could not find a deployment name '%s'", deploymentName);
             } else {
-                msg = String.format("Found deployment '%s', but it was not enabled", deploymentName);
+                msg = String.format("Found deployment '%s', but it was not enabled",
+                        deploymentName);
             }
             throw new CouldNotFindDeploymentException(msg);
         }
