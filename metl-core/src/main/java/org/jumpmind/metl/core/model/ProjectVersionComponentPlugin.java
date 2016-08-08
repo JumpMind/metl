@@ -1,7 +1,6 @@
 package org.jumpmind.metl.core.model;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.InvalidVersionSpecificationException;
@@ -18,10 +17,6 @@ public class ProjectVersionComponentPlugin extends Plugin implements Serializabl
     String latestArtifactVersion;
     boolean enabled = true;
     boolean pinVersion = false;
-    Date createTime = new Date();
-    String createBy;
-    Date lastUpdateTime = new Date();
-    String lastUpdateBy;
 
     public ProjectVersionComponentPlugin() {
     }
@@ -72,38 +67,6 @@ public class ProjectVersionComponentPlugin extends Plugin implements Serializabl
 
     public void setLatestArtifactVersion(String latestArtifactVersion) {
         this.latestArtifactVersion = latestArtifactVersion;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public String getCreateBy() {
-        return createBy;
-    }
-
-    public void setCreateBy(String createBy) {
-        this.createBy = createBy;
-    }
-
-    public Date getLastUpdateTime() {
-        return lastUpdateTime;
-    }
-
-    public void setLastUpdateTime(Date lastUpdateTime) {
-        this.lastUpdateTime = lastUpdateTime;
-    }
-
-    public String getLastUpdateBy() {
-        return lastUpdateBy;
-    }
-
-    public void setLastUpdateBy(String lastUpdateBy) {
-        this.lastUpdateBy = lastUpdateBy;
     }
     
     public boolean isUpdateAvailable() {

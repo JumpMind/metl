@@ -263,7 +263,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     public IPluginManager pluginManager() {
         if (pluginManager == null) {
             String localPluginDir = String.format("%s/%s", env.getProperty(AppConstants.PROP_CONFIG_DIR), AppConstants.PLUGINS_DIR);
-            pluginManager = new PluginManager(localPluginDir);
+            pluginManager = new PluginManager(localPluginDir, configurationService());
         }
         return pluginManager;
     }

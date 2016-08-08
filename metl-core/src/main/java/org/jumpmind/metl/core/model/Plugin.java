@@ -1,6 +1,7 @@
 package org.jumpmind.metl.core.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class Plugin implements Serializable, Comparable<Plugin> {
 
@@ -9,6 +10,11 @@ public class Plugin implements Serializable, Comparable<Plugin> {
     String artifactName;
     String artifactGroup;
     String artifactVersion;
+    Date createTime = new Date();
+    String createBy;
+    Date lastUpdateTime = new Date();
+    String lastUpdateBy;
+    
 
     public Plugin() {
     }
@@ -62,6 +68,40 @@ public class Plugin implements Serializable, Comparable<Plugin> {
         return artifactVersion;
     }
     
+    
+    
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(String createBy) {
+        this.createBy = createBy;
+    }
+
+    public Date getLastUpdateTime() {
+        return lastUpdateTime;
+    }
+
+    public void setLastUpdateTime(Date lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
+    }
+
+    public String getLastUpdateBy() {
+        return lastUpdateBy;
+    }
+
+    public void setLastUpdateBy(String lastUpdateBy) {
+        this.lastUpdateBy = lastUpdateBy;
+    }
+
     @Override
     public int compareTo(Plugin o) {
         int value = 0;

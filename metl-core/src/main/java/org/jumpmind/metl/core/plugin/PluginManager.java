@@ -3,8 +3,10 @@ package org.jumpmind.metl.core.plugin;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
@@ -31,7 +33,11 @@ import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
+import org.eclipse.aether.util.version.GenericVersionScheme;
+import org.eclipse.aether.version.Version;
+import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
+import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.util.ChildFirstURLClassLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +45,8 @@ import org.slf4j.LoggerFactory;
 public class PluginManager implements IPluginManager {
 
     final static Logger logger = LoggerFactory.getLogger(PluginManager.class);
+    
+    List<Plugin> outOfTheBox = new ArrayList<>();
 
     String localRepositoryPath;
 
@@ -47,20 +55,98 @@ public class PluginManager implements IPluginManager {
     RepositorySystemSession repositorySystemSession;
 
     Map<String, ClassLoader> plugins = new HashMap<>();
+    
+    IConfigurationService configurationService;
 
-    public PluginManager(String localRepositoryPath) {
+    public PluginManager(String localRepositoryPath, IConfigurationService configurationService) {
         this.localRepositoryPath = localRepositoryPath;
+        this.configurationService = configurationService;
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-rdbms-reader"));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-data-diff"));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-sorter"));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-temp-rdbms"));        
     }
-
+    
     @Override
     public void init() {
         repositorySystem = newRepositorySystem();
         repositorySystemSession = newRepositorySystemSession(repositorySystem, localRepositoryPath);
     }
+    
+    @Override
+    public List<Plugin> getOutOfTheBox() {
+        return outOfTheBox;
+    }
+    
+    @Override
+    public boolean isNewer(Plugin first, Plugin second) {
+        try {
+            GenericVersionScheme versionScheme = new GenericVersionScheme();
+            Version firstVersion = versionScheme.parseVersion(first.getArtifactVersion());
+            Version secondVersion = versionScheme.parseVersion(second.getArtifactVersion());
+            return firstVersion.compareTo(secondVersion) > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     @Override
     public void refresh() {
         plugins = new HashMap<>();
+        checkForNewOutOfTheBoxVersions();
+        checkForNewConfiguredVersions();
+        loadAll();
+    }
+    
+    protected void loadAll() {
+        List<Plugin> existing = configurationService.findPlugins();
+        List<PluginRepository> repositories = configurationService.findPluginRepositories();
+        for (Plugin plugin : existing) {
+            getClassLoader(plugin.getArtifactGroup(), plugin.getArtifactName(), plugin.getArtifactVersion(), repositories);
+        }
+    }
+    
+    protected void checkForNewOutOfTheBoxVersions() {
+        checkForNewerVersion(outOfTheBox);
+    }
+    
+    protected void checkForNewConfiguredVersions() {
+        checkForNewerVersion(configurationService.findActivePlugins());
+    }
+    
+    protected void checkForNewerVersion(List<Plugin> listToCheck) {
+        Set<String> checked = new HashSet<>();
+        for (Plugin plugin : listToCheck) {
+            String id = String.format("%s:%s", plugin.getArtifactGroup(), plugin.getArtifactName());
+            if (!checked.contains(id)) {
+                List<Plugin> existing = configurationService.findPlugins();
+                String latestVersion = getLatestLocalVersion(plugin.getArtifactGroup(), plugin.getArtifactName());
+                Plugin potentialNewVersion = new Plugin(plugin.getArtifactGroup(), plugin.getArtifactName(), latestVersion);
+                boolean matched = false;
+                for (Plugin existingPlugin : existing) {                    
+                    if (existingPlugin.matches(potentialNewVersion)) {
+                        matched = true;
+                        break;
+                    }
+              }
+                if (!matched) {
+                    logger.info("Found a new version of {}.  Recording it", potentialNewVersion);
+                    configurationService.save(potentialNewVersion);
+                }
+                checked.add(id);
+            }
+        }
+    }
+    
+    protected boolean isOutOfTheBox(Plugin plugin) {
+        boolean matched =false;
+        for (Plugin ootbp : outOfTheBox) {
+            if (plugin.matches(ootbp.getArtifactGroup(), ootbp.getArtifactName())) {
+                matched = true;
+                break;
+            }
+        }
+        return matched;
     }
 
     @Override

@@ -63,6 +63,7 @@ import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
 import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Notification;
+import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
@@ -83,6 +84,13 @@ abstract class AbstractConfigurationService extends AbstractService implements I
 
     AbstractConfigurationService(IPersistenceManager persistenceManager, String tablePrefix) {
         super(persistenceManager, tablePrefix);
+    }
+    
+    @Override
+    public List<Plugin> findPlugins() {
+        List<Plugin> plugins = find(Plugin.class, null, Plugin.class);
+        Collections.sort(plugins);
+        return plugins;
     }
     
     @Override
@@ -956,6 +964,12 @@ abstract class AbstractConfigurationService extends AbstractService implements I
             save(parm);
         }
 
+    }
+    
+    @Override
+    public void save(Plugin plugin) {
+        plugin.setLastUpdateTime(new Date());
+        persistenceManager.save(plugin, null, null, tableName(Plugin.class));        
     }
 
     @Override

@@ -96,6 +96,8 @@ public interface IConfigurationService {
     
     public List<Plugin> findActivePlugins();
     
+    public List<Plugin> findPlugins();
+    
     public Group findGroup(String id);
 
     public List<Group> findGroups();
@@ -159,6 +161,8 @@ public interface IConfigurationService {
     public void refresh(User user);
     
     public void refresh(Group group);
+    
+    public void save(Plugin plugin);
     
     public void save(ProjectVersionComponentPlugin projectVersionComponentPlugin);    
 

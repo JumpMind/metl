@@ -60,15 +60,6 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    protected static List<Plugin> outOfTheBox = new ArrayList<>();
-
-    static {
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-rdbms-reader"));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-data-diff"));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-sorter"));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-temp-rdbms"));
-    }
-
     Map<String, Map<String, XMLComponent>> componentsByProjectVersionIdById;
 
     Map<String, List<XMLComponent>> componentsByPluginId;
@@ -108,7 +99,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
         List<PluginRepository> remoteRepostiories = configurationService.findPluginRepositories();
         List<ProjectVersionComponentPlugin> pvcps = configurationService.findProjectVersionComponentPlugins(projectVersionId);
         GenericVersionScheme versionScheme = new GenericVersionScheme();
-        for (Plugin ootbp : outOfTheBox) {
+        for (Plugin ootbp : pluginManager.getOutOfTheBox()) {
             boolean matched = false;
             for (ProjectVersionComponentPlugin pvcp : pvcps) {
                 if (pvcp.matches(ootbp)) {

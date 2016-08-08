@@ -70,7 +70,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                     }
                 });
     }
-
+    
     @Override
     public boolean isDeployed(Flow flow) {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
