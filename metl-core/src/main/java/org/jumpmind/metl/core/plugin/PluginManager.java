@@ -266,50 +266,6 @@ public class PluginManager implements IPluginManager {
         return latestVersion;
     }
 
-    synchronized public void reload() {
-        // plugins = new HashMap<>();
-        // List<PluginArtifact> list =
-        // configurationService.findPluginArtifacts();
-        // for (PluginArtifact pluginArtifact : list) {
-        // List<PluginArtifactVersion> versions =
-        // pluginArtifact.getPluginArtifactVersions();
-        // for (PluginArtifactVersion pluginArtifactVersion : versions) {
-        // try {
-        // Artifact artifact = new
-        // DefaultArtifact(pluginArtifactVersion.getId());
-        // DependencyFilter classpathFlter =
-        // DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE);
-        //
-        // CollectRequest collectRequest = new CollectRequest();
-        // collectRequest.setRoot(new Dependency(artifact, JavaScopes.COMPILE));
-        // List<RemoteRepository> remoteRepositories = Arrays
-        // .asList(new RemoteRepository.Builder("jumpmind", "default",
-        // "http://maven.jumpmind.com/repo").build());
-        // collectRequest.setRepositories(remoteRepositories);
-        //
-        // DependencyRequest dependencyRequest = new
-        // DependencyRequest(collectRequest, classpathFlter);
-        //
-        // List<ArtifactResult> artifactResults =
-        // repositorySystem.resolveDependencies(repositorySystemSession,
-        // dependencyRequest)
-        // .getArtifactResults();
-        //
-        // List<URL> artifactUrls = new ArrayList<URL>();
-        // for (ArtifactResult artRes : artifactResults) {
-        // artifactUrls.add(artRes.getArtifact().getFile().toURI().toURL());
-        // }
-        // plugins.put(pluginArtifactVersion,
-        // new URLClassLoader(artifactUrls.toArray(new
-        // URL[artifactUrls.size()]), getClass().getClassLoader()));
-        // } catch (Exception e) {
-        // logger.error("Failed to resolve dependency: " +
-        // pluginArtifactVersion.getId(), e);
-        // }
-        // }
-        // }
-    }
-
     private static RepositorySystem newRepositorySystem() {
         DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
         locator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);

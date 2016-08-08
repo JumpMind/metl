@@ -79,7 +79,7 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
 
         moveDownButton = buttonBar.addButton("Move Down", FontAwesome.ARROW_DOWN, new MoveDownListener());
 
-        removeButton = buttonBar.addButton("Purge Unused", FontAwesome.TRASH_O, new RemoveClickListener());
+        removeButton = buttonBar.addButton("Purge Unused", FontAwesome.TRASH_O, new PurgeUnusedClickListener());
 
         container = new BeanItemContainer<Plugin>(Plugin.class);
 
@@ -99,6 +99,9 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
 
         addComponent(table);
         setExpandRatio(table, 1.0f);
+
+        context.getPluginManager().refresh();
+
         refresh();
     }
 
@@ -205,15 +208,21 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
         }
     }
 
-    class RemoveClickListener implements ClickListener {
+    class PurgeUnusedClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
             IConfigurationService configurationService = context.getConfigurationService();
             List<Plugin> plugins = configurationService.findUnusedPlugins();
             for (Plugin plugin : plugins) {
-                configurationService.delete(plugin);     
-                context.getPluginManager().delete(plugin.getArtifactGroup(), plugin.getArtifactName(), plugin.getArtifactVersion());
+                configurationService.delete(plugin);
+                /*
+                 * Before enabling this need to figure out logic to calculate if
+                 * the plug-in is required by other plug-ins that ARE currently
+                 * referenced
+                 */
+                // context.getPluginManager().delete(plugin.getArtifactGroup(),
+                // plugin.getArtifactName(), plugin.getArtifactVersion());
             }
-            
+
             if (plugins.size() > 0) {
                 refresh();
             }
