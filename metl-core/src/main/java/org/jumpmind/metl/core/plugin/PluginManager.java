@@ -1,5 +1,6 @@
 package org.jumpmind.metl.core.plugin;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
 import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.Version;
+import org.h2.store.fs.FileUtils;
 import org.jumpmind.metl.core.model.Plugin;
 import org.jumpmind.metl.core.model.PluginRepository;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -61,10 +63,10 @@ public class PluginManager implements IPluginManager {
     public PluginManager(String localRepositoryPath, IConfigurationService configurationService) {
         this.localRepositoryPath = localRepositoryPath;
         this.configurationService = configurationService;
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-rdbms-reader"));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-data-diff"));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-sorter"));
-        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-temp-rdbms"));        
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-rdbms-reader", 1));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-data-diff", 2));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-sorter", 3));
+        outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-temp-rdbms", 4));
     }
     
     @Override
@@ -121,10 +123,10 @@ public class PluginManager implements IPluginManager {
             if (!checked.contains(id)) {
                 List<Plugin> existing = configurationService.findPlugins();
                 String latestVersion = getLatestLocalVersion(plugin.getArtifactGroup(), plugin.getArtifactName());
-                Plugin potentialNewVersion = new Plugin(plugin.getArtifactGroup(), plugin.getArtifactName(), latestVersion);
+                Plugin potentialNewVersion = new Plugin(plugin.getArtifactGroup(), plugin.getArtifactName(), latestVersion, plugin.getLoadOrder());
                 boolean matched = false;
                 for (Plugin existingPlugin : existing) {                    
-                    if (existingPlugin.matches(potentialNewVersion)) {
+                    if (existingPlugin.equals(potentialNewVersion)) {
                         matched = true;
                         break;
                     }
@@ -152,6 +154,18 @@ public class PluginManager implements IPluginManager {
     @Override
     public String toPluginId(String artifactGroup, String artifactName, String artifactVersion) {
         return String.format("%s:%s:%s", artifactGroup, artifactName, artifactVersion);
+    }
+    
+    @Override
+    public void delete(String artifactGroup, String artifactName, String artifactVersion) {
+        String pluginId = toPluginId(artifactGroup, artifactName, artifactVersion);
+                Artifact artifact = new DefaultArtifact(pluginId);
+        File file = new File(localRepositoryPath, repositorySystemSession.getLocalRepositoryManager().getPathForLocalArtifact(artifact));
+        File dir = file.getParentFile();
+        if (dir.exists() && dir.isDirectory()) {
+            logger.info("Attempting to delete {} at {}", pluginId, dir);
+            FileUtils.deleteRecursive(dir.getPath(), true);
+        }
     }
 
     @Override

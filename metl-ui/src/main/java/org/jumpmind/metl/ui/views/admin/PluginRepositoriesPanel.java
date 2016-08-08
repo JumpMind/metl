@@ -66,7 +66,7 @@ public class PluginRepositoriesPanel extends VerticalLayout implements IUiPanel 
         ButtonBar buttonBar = new ButtonBar();
         addComponent(buttonBar);
 
-        newButton = buttonBar.addButton("New", FontAwesome.PLUS);
+        newButton = buttonBar.addButton("Add", FontAwesome.PLUS);
         newButton.addClickListener(new NewClickListener());
 
         editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);

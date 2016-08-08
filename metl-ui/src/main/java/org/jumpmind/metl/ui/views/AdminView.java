@@ -36,6 +36,7 @@ import org.jumpmind.metl.ui.views.admin.LoggingPanel;
 import org.jumpmind.metl.ui.views.admin.MailServerPanel;
 import org.jumpmind.metl.ui.views.admin.NotificationPanel;
 import org.jumpmind.metl.ui.views.admin.PluginRepositoriesPanel;
+import org.jumpmind.metl.ui.views.admin.PluginsPanel;
 import org.jumpmind.metl.ui.views.admin.UserPanel;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.UiComponent;
@@ -109,6 +110,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         addItem("REST", Icons.REST);
         addItem("General Settings", Icons.SETTINGS);
         addItem("Plugin Repositories", Icons.DATABASE);
+        addItem("Plugins", Icons.COMPONENT);
         addItem("Mail Server", Icons.EMAIL);
         addItem("Notifications", Icons.NOTIFICATION);
         addItem("Logging", Icons.LOGGING);
@@ -164,6 +166,8 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                     panel = new PluginRepositoriesPanel(context, tabbedPanel);                    
                 } else if (id.equals("About")) {
                     panel = new AboutPanel(context, tabbedPanel);
+                } else if (id.equals("Plugins")) {
+                    panel = new PluginsPanel(context, tabbedPanel);
                 }
                 tabbedPanel.addCloseableTab(id, id, table.getItemIcon(id), panel);
             }

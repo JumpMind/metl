@@ -96,6 +96,8 @@ public interface IConfigurationService {
     
     public List<Plugin> findActivePlugins();
     
+    public List<Plugin> findUnusedPlugins();
+    
     public List<Plugin> findPlugins();
     
     public Group findGroup(String id);
@@ -205,11 +207,7 @@ public interface IConfigurationService {
     public List<String> findAllProjectVersionIds();
     
     public List<Project> findProjects();
-    
-    public String export(ProjectVersion projectVersion);
-    
-    public String export(ProjectVersion projectVersion, Flow flow);
-    
+       
     public String export(Agent agent);
     
     public boolean isUserLoginEnabled();
@@ -249,5 +247,7 @@ public interface IConfigurationService {
     public Flow copy(Flow original);
 
     public Model copy(Model original);
-    
+
+    public void delete(Plugin plugin);
+
 }

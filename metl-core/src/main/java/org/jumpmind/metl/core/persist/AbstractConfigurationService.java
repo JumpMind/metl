@@ -711,6 +711,11 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         agent.setDeleted(true);
         save((AbstractObject) agent);
     }
+    
+    @Override
+    public void delete(Plugin plugin) {
+        persistenceManager.delete(plugin, null, null, tableName(Plugin.class));
+    }
 
     @Override
     public boolean delete(FlowStepLink link) {

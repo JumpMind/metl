@@ -7,6 +7,7 @@ public class Plugin implements Serializable, Comparable<Plugin> {
 
     private static final long serialVersionUID = 1L;
 
+    int loadOrder;
     String artifactName;
     String artifactGroup;
     String artifactVersion;
@@ -18,18 +19,23 @@ public class Plugin implements Serializable, Comparable<Plugin> {
 
     public Plugin() {
     }
-    
-    public Plugin(String artifactGroup, String artifactName) {
-        this(artifactGroup, artifactName, null);
-    }
-    
+        
     public Plugin(String artifactGroup, String artifactName, String artifactVersion) {
         this();
         this.artifactName = artifactName;
         this.artifactGroup = artifactGroup;
         this.artifactVersion = artifactVersion;
     }
+        
+    public Plugin(String artifactGroup, String artifactName, String artifactVersion, int loadOrder) {
+        this(artifactGroup, artifactName, artifactVersion);
+        this.loadOrder = loadOrder;
+    }
     
+    public Plugin(String artifactGroup, String artifactName, int loadOrder) {
+        this(artifactGroup, artifactName, null, loadOrder);
+    }
+
     public boolean matches(Plugin plugin) {
         return matches(plugin.getArtifactGroup(), plugin.getArtifactName());
     }
@@ -68,7 +74,13 @@ public class Plugin implements Serializable, Comparable<Plugin> {
         return artifactVersion;
     }
     
+    public int getLoadOrder() {
+        return loadOrder;
+    }
     
+    public void setLoadOrder(int loadOrder) {
+        this.loadOrder = loadOrder;
+    }
     
     public Date getCreateTime() {
         return createTime;

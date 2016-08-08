@@ -21,4 +21,6 @@ public interface IPluginManager {
 
     boolean isNewer(Plugin first, Plugin second);
 
+    void delete(String artifactGroup, String artifactName, String artifactVersion);
+
 }

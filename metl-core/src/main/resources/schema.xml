@@ -566,6 +566,7 @@
         <column name="artifact_name" primaryKey="true" required="true"  type="VARCHAR" size="255" description="" />
         <column name="artifact_group" primaryKey="true" required="true" type="VARCHAR" size="255" description="" />
         <column name="artifact_version" primaryKey="true" required="true" type="VARCHAR" size="255" description="" />
+        <column name="load_order" type="INTEGER" default="1" required="true" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />

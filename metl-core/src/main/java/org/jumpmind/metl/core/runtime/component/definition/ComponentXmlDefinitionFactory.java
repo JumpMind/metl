@@ -99,10 +99,10 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
         List<PluginRepository> remoteRepostiories = configurationService.findPluginRepositories();
         List<ProjectVersionComponentPlugin> pvcps = configurationService.findProjectVersionComponentPlugins(projectVersionId);
         GenericVersionScheme versionScheme = new GenericVersionScheme();
-        for (Plugin ootbp : pluginManager.getOutOfTheBox()) {
+        for (Plugin configuredPlugin : configurationService.findActivePlugins()) {
             boolean matched = false;
             for (ProjectVersionComponentPlugin pvcp : pvcps) {
-                if (pvcp.matches(ootbp)) {
+                if (pvcp.matches(configuredPlugin)) {
                     try {
                         matched = true;
                         String latestVersion = pluginManager.getLatestLocalVersion(pvcp.getArtifactGroup(), pvcp.getArtifactName());
@@ -139,9 +139,9 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
             }
 
             if (!matched) {
-                String latestVersion = pluginManager.getLatestLocalVersion(ootbp.getArtifactGroup(), ootbp.getArtifactName());
+                String latestVersion = pluginManager.getLatestLocalVersion(configuredPlugin.getArtifactGroup(), configuredPlugin.getArtifactName());
                 if (latestVersion != null) {
-                    String pluginId = load(projectVersionId, ootbp.getArtifactGroup(), ootbp.getArtifactName(), latestVersion,
+                    String pluginId = load(projectVersionId, configuredPlugin.getArtifactGroup(), configuredPlugin.getArtifactName(), latestVersion,
                             remoteRepostiories);
 
                     List<XMLComponent> components = componentsByPluginId.get(pluginId);
@@ -149,15 +149,15 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
                         ProjectVersionComponentPlugin plugin = new ProjectVersionComponentPlugin();
                         plugin.setProjectVersionId(projectVersionId);
                         plugin.setComponentTypeId(xmlComponent.getId());
-                        plugin.setArtifactGroup(ootbp.getArtifactGroup());
-                        plugin.setArtifactName(ootbp.getArtifactName());
+                        plugin.setArtifactGroup(configuredPlugin.getArtifactGroup());
+                        plugin.setArtifactName(configuredPlugin.getArtifactName());
                         plugin.setArtifactVersion(latestVersion);
                         plugin.setLatestArtifactVersion(latestVersion);
                         configurationService.save(plugin);
                     }
 
                 } else {
-                    logger.warn("Could not find a registered plugin for {}:{}", ootbp.getArtifactGroup(), ootbp.getArtifactName());
+                    logger.warn("Could not find a registered plugin for {}:{}", configuredPlugin.getArtifactGroup(), configuredPlugin.getArtifactName());
                 }
             }
         }
