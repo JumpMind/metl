@@ -104,7 +104,7 @@ public class ExecutionApi {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public final Object put(HttpServletRequest req, HttpServletResponse res,
-            @RequestBody String payload) throws Exception {
+            @RequestBody(required=false) String payload) throws Exception {
         return executeFlow(req, payload, res);
     }
 
@@ -113,7 +113,7 @@ public class ExecutionApi {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public final Object delete(HttpServletRequest req, HttpServletResponse res,
-            @RequestBody String payload) throws Exception {
+            @RequestBody(required=false) String payload) throws Exception {
         return executeFlow(req, payload, res);
     }
 
@@ -122,7 +122,7 @@ public class ExecutionApi {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public final Object post(HttpServletRequest req, HttpServletResponse res,
-            @RequestBody String payload) throws Exception {
+            @RequestBody(required=false) String payload) throws Exception {
         return executeFlow(req, payload, res);
     }
 
