@@ -4,14 +4,12 @@ import java.util.Date
 buildscript {
     repositories {
         jcenter()
-        maven { url 'http://repo.spring.io/plugins-release' }
         mavenCentral()
     }
 
     dependencies {
     	classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
         classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.6'
-        classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
         classpath 'fi.jasoft.plugin:gradle-vaadin-plugin:0.10.2'
         classpath 'com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2'
         classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'      

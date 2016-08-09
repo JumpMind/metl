@@ -23,7 +23,9 @@ package org.jumpmind.metl.ui.init;
 import static org.jumpmind.metl.ui.common.AppConstants.DEFAULT_USER;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -154,7 +156,16 @@ public class AppUI extends UI implements LoginListener {
                 } else if (Boolean.class.isAssignableFrom(sourceType)) {
                     return new StringToBooleanConverter();
                 } else if (Date.class.isAssignableFrom(sourceType)) {
-                    return new StringToDateConverter();
+                    return new StringToDateConverter() {
+                        protected DateFormat getFormat(Locale locale) {
+                            if (locale == null) {
+                                locale = Locale.getDefault();
+                            }
+                            DateFormat f = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                            f.setLenient(false);
+                            return f;
+                        }
+                    };
                 } else {
                     return null;
                 }
