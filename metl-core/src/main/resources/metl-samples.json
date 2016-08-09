@@ -1524,7 +1524,7 @@
         "FOLDER_ID" : null,
         "SHARED" : 0,
         "INPUT_MODEL_ID" : null,
-        "OUTPUT_MODEL_ID" : "678f4d12-beb7-441d-9a35-5de63b7f9e06",
+        "OUTPUT_MODEL_ID" : null,
         "RESOURCE_ID" : null
       },
       "cb39fcdd-058d-4319-b0c2-6c9a20992a60" : {
@@ -2363,7 +2363,7 @@
         "ID" : "a470ba60-e573-4b3d-9a44-6eb5744f752c",
         "COMPONENT_ID" : "341fe3e5-2814-4f99-8b11-441c00deb547",
         "NAME" : "path",
-        "VALUE" : "/person/getAll"
+        "VALUE" : "person/getAll"
       },
       "e4771548-e0cd-42ce-a33a-f389514388d4" : {
         "ID" : "e4771548-e0cd-42ce-a33a-f389514388d4",
