@@ -1351,6 +1351,12 @@
                type='text'>
         <name>Param Name For Msg Based File Name</name>
       </setting>
+      <setting id='empty.file'
+               required='true'
+               type='boolean'>
+        <name>Empty File On No Input</name>
+        <defaultValue>true</defaultValue>
+      </setting>
     </settings>
   </component>
   <component category='WRITER'
