@@ -52,5 +52,4 @@ public class EntityRow implements Serializable {
         }
         return entityData;
     }   
-
 }

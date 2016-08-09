@@ -25,6 +25,8 @@ public class HttpRequest extends AbstractComponentRuntime {
     public static final String PATH = "path";
 
     public static final String HTTP_METHOD = "http.method";
+    
+    public static final String PAYLOAD_FORMAT = "payload.format";
 
     public HttpRequest() {
     }

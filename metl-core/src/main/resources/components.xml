@@ -1754,6 +1754,14 @@
             <setting id='content.type' required='false' type='text'>
                 <name>Content Type</name>
             </setting>
+            <setting id='payload.format' required='false' type='choice'>
+                <name>Payload Format</name>
+                <defaultValue>BY_INBOUND_ROW</defaultValue>
+                <choices>
+                    <choice>BY_INBOUND_ROW</choice>
+                    <choice>BY_TABLE</choice>
+                </choices>
+            </setting>            
         </settings>
     </component>  
 </components>
