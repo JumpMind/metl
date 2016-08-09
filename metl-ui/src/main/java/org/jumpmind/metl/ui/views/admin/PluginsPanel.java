@@ -42,6 +42,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
@@ -103,6 +104,10 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
         context.getPluginManager().refresh();
 
         refresh();
+    }
+    
+    public List<Plugin> getPlugins() {
+        return plugins;
     }
 
     @Override
@@ -205,6 +210,8 @@ public class PluginsPanel extends VerticalLayout implements IUiPanel {
 
     class AddClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
+            PluginsPanelAddDialog dialog = new PluginsPanelAddDialog(context, PluginsPanel.this);
+            UI.getCurrent().addWindow(dialog);
         }
     }
 
