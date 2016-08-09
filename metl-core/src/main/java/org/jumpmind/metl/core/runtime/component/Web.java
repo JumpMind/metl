@@ -20,11 +20,15 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
+import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -93,7 +97,7 @@ public class Web extends AbstractComponentRuntime {
 			if (bodyFrom.equals("Message") && inputMessage instanceof TextMessage) {
 				inputPayload = ((TextMessage)inputMessage).getPayload();
 			} else {
-				inputPayload.add(bodyText);
+    		    inputPayload.add(bodyText);
 			}
 
 			if (inputPayload != null) {
@@ -103,17 +107,32 @@ public class Web extends AbstractComponentRuntime {
 						if (parameterReplacement) {
 							requestContent = resolveParamsAndHeaders(requestContent, inputMessage);
 						}
-						HttpOutputStream os = (HttpOutputStream) streamable.getOutputStream(relativePath, false);
-						BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, DEFAULT_CHARSET));
-						try {
-							writer.write(requestContent);
-						} finally {
-							writer.close();
-							String response = os.getResponse();
-							if (response != null) {
-								outputPayload.add(response);
-							}
-						}
+						
+                        if (isNotBlank(requestContent)) {
+                            HttpOutputStream os = (HttpOutputStream) streamable
+                                    .getOutputStream(relativePath, false);
+                            BufferedWriter writer = new BufferedWriter(
+                                    new OutputStreamWriter(os, DEFAULT_CHARSET));
+                            try {
+                                writer.write(requestContent);
+                            } finally {
+                                writer.close();
+                                String response = os.getResponse();
+                                if (response != null) {
+                                    outputPayload.add(response);
+                                }
+                            }
+                        } else {
+                            InputStream is = streamable.getInputStream(relativePath, false);
+                            try {
+                                String response = IOUtils.toString(is);
+                                if (response != null) {
+                                    outputPayload.add(response);
+                                }
+                            } finally {
+                                IOUtils.closeQuietly(is);
+                            }
+                        }
 					}
 
 					if (outputPayload.size() > 0) {
