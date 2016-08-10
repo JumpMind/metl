@@ -41,6 +41,7 @@ import org.jumpmind.metl.core.runtime.component.FixedLengthFormatter;
 import org.jumpmind.metl.core.runtime.component.FixedLengthParser;
 import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;
 import org.jumpmind.metl.ui.common.ButtonBar;
+import org.jumpmind.vaadin.ui.common.ExportDialog;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -65,6 +66,7 @@ import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.TableDragMode;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 
 @SuppressWarnings("serial")
 public class EditFormatPanel extends AbstractComponentEditPanel {
@@ -76,8 +78,8 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
     Set<RecordFormat> selectedItemIds;
 
     protected void buildUI() {
+        ButtonBar buttonBar = new ButtonBar();
         if (!readOnly) {
-            ButtonBar buttonBar = new ButtonBar();
             addComponent(buttonBar);
 
             Button moveUpButton = buttonBar.addButton("Move Up", FontAwesome.ARROW_UP);
@@ -98,6 +100,8 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
             Button pasteButton = buttonBar.addButton("Paste", FontAwesome.PASTE);
             pasteButton.addClickListener(new PasteClickListener());
         }
+        
+        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e)->export());
 
         table.setContainerDataSource(container);
 
@@ -155,6 +159,12 @@ public class EditFormatPanel extends AbstractComponentEditPanel {
         saveTransformSettings();
     }
 
+    protected void export() {
+        String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
+        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, component.getName());
+        UI.getCurrent().addWindow(dialog);
+    }
+    
     @SuppressWarnings("unchecked")
     protected Set<RecordFormat> getSelectedItems() {
         return (Set<RecordFormat>) table.getValue();
