@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.jumpmind.metl.core.runtime.EntityData;
+
 public class EntityTable implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -33,4 +35,15 @@ public class EntityTable implements Serializable {
         this.rows = rows;
     }
     
+    public EntityData toEntityData(Model model) {
+        
+        EntityData entityData = new EntityData();
+        ModelEntity entity = model.getEntityByName(name);
+        for (Map<String, String> row:rows) {
+            for (Map.Entry<String, String> entry : row.entrySet()) {
+                entityData.put(entity.getModelAttributeByName(entry.getKey()).getId(),entry.getValue());
+            }
+        }
+        return entityData;
+    }   
 }

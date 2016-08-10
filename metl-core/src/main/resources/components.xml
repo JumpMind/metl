@@ -1741,7 +1741,15 @@
                 <name>Path</name>
                 <defaultValue>/$(_agentName)/$(_deploymentName)/$(_versionName)</defaultValue>
                 <description></description>
-            </setting>           
+            </setting>    
+            <setting id='payload.format' required='false' type='choice'>
+                <name>Payload Format</name>
+                <defaultValue>BY_INBOUND_ROW</defaultValue>
+                <choices>
+                    <choice>BY_INBOUND_ROW</choice>
+                    <choice>BY_TABLE</choice>
+                </choices>
+            </setting>            
         </settings>
     </component>
     <component category='SERVICE' id='16170152-eee5-11e5-9ce9-5e5517507c66'
