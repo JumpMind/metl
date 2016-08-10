@@ -128,14 +128,15 @@ public class ContentRouter extends AbstractComponentRuntime {
                     try {
                         if (Boolean.TRUE.equals(scriptEngine.eval(route.getMatchExpression()))) {
                             ArrayList<EntityData> outboundPayload = outboundMessages.get(route.getTargetStepId());
-                            if (outboundPayload == null) {
-                                outboundPayload = new ArrayList<EntityData>();
-                                outboundMessages.put(route.getTargetStepId(), outboundPayload);
-                            }
-                            if (outboundPayload.size() >= rowsPerMessage) {
+                            if (outboundPayload != null && outboundPayload.size() >= rowsPerMessage) {
                                 outboundMessages.remove(route.getTargetStepId());
                                 callback.sendEntityDataMessage(null, outboundPayload, route.getTargetStepId());
                                 targetStepsThatNeedControlMessages.add(route.getTargetStepId());
+                                outboundPayload = null;
+                            }
+                            if (outboundPayload == null) {
+                                outboundPayload = new ArrayList<EntityData>();
+                                outboundMessages.put(route.getTargetStepId(), outboundPayload);
                             }
                             outboundPayload.add(entityData.copy());
                             if (onlyRouteFirstMatch) {
