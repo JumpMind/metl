@@ -43,6 +43,8 @@ import org.jumpmind.metl.core.model.DeploymentStatus;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FlowParameter;
+import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
@@ -360,12 +362,12 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         Set<AgentDeploymentSummary> selectedIds = getSelectedItems();
         for (AgentDeploymentSummary summary : selectedIds) {
             if (summary.isFlow()) {
-                if (summary.getStatus().equals(DeploymentStatus.DEPLOYED.name())
+                if (summary.getStatus().equals(DeploymentStatus.ENABLED.name())
                         || summary.getStatus().equals(DeploymentStatus.DISABLED.name())
                         || summary.getStatus().equals(DeploymentStatus.ERROR.name())) {
                     canRemove = true;
                 }
-                if (summary.getStatus().equals(DeploymentStatus.DEPLOYED.name())) {
+                if (summary.getStatus().equals(DeploymentStatus.ENABLED.name())) {
                     canDisable = true;
                     if (summary.isFlow()) {
                         canRun = true;
@@ -418,8 +420,11 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
 
         public void selected(Collection<FlowName> flowCollection) {
             for (FlowName flowName : flowCollection) {
-                Flow flow = context.getConfigurationService().findFlow(flowName.getId());
+                IConfigurationService configurationService = context.getConfigurationService();
+                Flow flow = configurationService.findFlow(flowName.getId());
+                ProjectVersion projectVersion = configurationService.findProjectVersion(flow.getProjectVersionId());
                 AgentDeployment deployment = new AgentDeployment();
+                deployment.setProjectVersion(projectVersion);
                 deployment.setAgentId(agent.getId());
                 deployment.setFlow(flow);
                 deployment.setName(getName(flow.getName()));

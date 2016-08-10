@@ -189,7 +189,7 @@ public class ExecutionApi {
                 for (AgentDeployment agentDeployment : deployments) {
                     if (agentDeployment.getName().equals(deploymentName)) {
                         foundDeployment = true;
-                        if (agentDeployment.getDeploymentStatus() == DeploymentStatus.DEPLOYED) {
+                        if (agentDeployment.getDeploymentStatus() == DeploymentStatus.ENABLED) {
                             AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent);
                             String executionId = agentRuntime.scheduleNow(agentDeployment,
                                     toMap(req));

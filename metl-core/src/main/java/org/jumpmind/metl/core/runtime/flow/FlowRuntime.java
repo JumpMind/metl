@@ -290,6 +290,7 @@ public class FlowRuntime {
         Date date = new Date();
         params.put("_agentName", agent.getName());
         params.put("_deploymentName", agentDeployment.getName());
+        params.put("_versionName", agentDeployment.getProjectVersion().getVersionLabel());
         params.put("_flowName", agentDeployment.getFlow().getName());
         params.put("_host", agent.getHost());
         params.put("_date", DateFormatUtils.format(date, DATE_FORMAT));

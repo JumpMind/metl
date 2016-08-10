@@ -364,7 +364,7 @@ public class AgentRuntime {
                     scheduledDeployments.put(deployment, future);
                 }
     
-                deployment.setStatus(DeploymentStatus.DEPLOYED.name());
+                deployment.setStatus(DeploymentStatus.ENABLED.name());
                 deployment.setMessage("");
                 log.info("Flow '{}' has been deployed", deployment.getFlow().getName());
             } catch (Exception e) {

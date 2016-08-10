@@ -1739,7 +1739,7 @@
             </setting>
             <setting id='path' required='true' type='text'>
                 <name>Path</name>
-                <defaultValue>/$(_agentName)/$(_flowName)</defaultValue>
+                <defaultValue>/$(_agentName)/$(_deploymentName)/$(_versionName)</defaultValue>
                 <description></description>
             </setting>           
         </settings>
