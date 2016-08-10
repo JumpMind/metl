@@ -33,4 +33,11 @@ public enum DeploymentStatus {
     public String toString() {
         return name;
     }
+    
+    public static String massage(String status) {
+        if (status != null && status.equals("DEPLOYED")) {
+            status = DeploymentStatus.ENABLED.name();
+        }  
+        return status;
+    }
 }

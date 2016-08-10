@@ -91,10 +91,7 @@ public class AgentDeployment extends AbstractObject {
     }
 
     public void setStatus(String status) {
-        if (status != null && status.equals("DEPLOYED")) {
-            status = DeploymentStatus.ENABLED.name();
-        }   
-        this.status = status;
+        this.status = DeploymentStatus.massage(status);
     }
 
     public void setMessage(String errorMessage) {
