@@ -48,6 +48,8 @@ public class TextFileWriter extends AbstractFileWriter {
     
     public final static String SETTING_APPEND = "append";
 
+    public final static String SETTING_EMPTY_FILE = "empty.file";
+
     public static final String SETTING_TEXT_LINE_TERMINATOR = "text.line.terminator";
 
     String encoding;
@@ -55,6 +57,10 @@ public class TextFileWriter extends AbstractFileWriter {
     String lineTerminator;
     
     boolean append;
+    
+    boolean emptyFile;
+    
+    boolean inputDataReceived = false;
 
     BufferedWriter bufferedWriter = null;
 
@@ -65,6 +71,7 @@ public class TextFileWriter extends AbstractFileWriter {
         lineTerminator = properties.get(SETTING_TEXT_LINE_TERMINATOR);
         encoding = properties.get(SETTING_ENCODING, DEFAULT_ENCODING); 
         append = properties.is(SETTING_APPEND, false);
+        emptyFile = properties.is(SETTING_EMPTY_FILE, false);
         if (lineTerminator != null) {
             lineTerminator = StringEscapeUtils.unescapeJava(properties.get(SETTING_TEXT_LINE_TERMINATOR));
         }
@@ -81,31 +88,34 @@ public class TextFileWriter extends AbstractFileWriter {
         if (getResourceRuntime() == null) {
             throw new IllegalStateException("The msgTarget resource has not been configured.  Please choose a resource.");
         }
-
-        if (inputMessage instanceof ContentMessage<?>) {
+        if ((unitOfWorkBoundaryReached && inputDataReceived == false && emptyFile == true) ||
+        		(inputMessage instanceof ContentMessage<?>)) {
+        	inputDataReceived = true;
 	        initStreamAndWriter(inputMessage);
 	        
-	        try {
-	            Object payload = ((ContentMessage<?>)inputMessage).getPayload();
-	            if (payload instanceof ArrayList) {
-	                ArrayList<?> recs = (ArrayList<?>) payload;
-	                for (Object rec : recs) {
-	                    bufferedWriter.write(rec != null ? rec.toString() : "");
-	                    if (lineTerminator != null) {
-	                        bufferedWriter.write(lineTerminator);
-	                    } else {
-	                        bufferedWriter.newLine();
-	                    }
-	                }
-	                bufferedWriter.flush();
-	
-	            } else if (payload instanceof String) {
-	                bufferedWriter.write((String) payload);
-	            } else {
-	                bufferedWriter.write("");
-	            }
-	        } catch (IOException e) {
-	            throw new IoException(e);
+	        if (inputMessage instanceof ContentMessage<?>) {
+		        try {
+		            Object payload = ((ContentMessage<?>)inputMessage).getPayload();
+		            if (payload instanceof ArrayList) {
+		                ArrayList<?> recs = (ArrayList<?>) payload;
+		                for (Object rec : recs) {
+		                    bufferedWriter.write(rec != null ? rec.toString() : "");
+		                    if (lineTerminator != null) {
+		                        bufferedWriter.write(lineTerminator);
+		                    } else {
+		                        bufferedWriter.newLine();
+		                    }
+		                }
+		                bufferedWriter.flush();
+		
+		            } else if (payload instanceof String) {
+		                bufferedWriter.write((String) payload);
+		            } else {
+		                bufferedWriter.write("");
+		            }
+		        } catch (IOException e) {
+		            throw new IoException(e);
+		        }
 	        }
         }
         

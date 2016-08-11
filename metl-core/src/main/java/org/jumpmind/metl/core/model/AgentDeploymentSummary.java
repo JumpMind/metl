@@ -88,7 +88,7 @@ public class AgentDeploymentSummary extends AbstractObject {
     }
 
     public void setStatus(String status) {
-        this.status = status;
+        this.status = DeploymentStatus.massage(status);
     }
 
     public String getLogLevel() {

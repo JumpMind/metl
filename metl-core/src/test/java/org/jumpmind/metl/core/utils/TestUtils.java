@@ -40,6 +40,7 @@ import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.runtime.component.NoOp;
@@ -110,6 +111,9 @@ public class TestUtils {
 
     public static AgentDeployment createAgentDeployment(String name, Agent agent, Flow flow) {
         AgentDeployment deployment = new AgentDeployment(flow);
+        ProjectVersion projectVersion = new ProjectVersion();
+        projectVersion.setVersionLabel("1.0");
+        deployment.setProjectVersion(projectVersion);
         deployment.setAgentId(agent.getId());
         deployment.setCreateBy("Test");
         deployment.setCreateTime(new Date());

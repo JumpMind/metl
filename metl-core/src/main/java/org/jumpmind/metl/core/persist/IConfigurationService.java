@@ -148,8 +148,6 @@ public interface IConfigurationService {
 
     public void refresh(Flow flow);
     
-    public void refresh(AgentDeployment deployment);
-    
     public void refresh(ProjectVersion projectVersion);
     
     public void refresh(Agent agent);

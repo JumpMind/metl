@@ -324,6 +324,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         return findAgents(params);
     }
 
+    // TODO this should return agent name as it doesn't fill out deployments
     @Override
     public List<Agent> findAgents() {
         return persistenceManager.find(Agent.class, null, null, tableName(Agent.class));
@@ -391,8 +392,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         List<AgentDeployment> list = new ArrayList<>(deployments.size());
         agent.setAgentDeployments(list);
         for (AgentDeployment agentDeployment : deployments) {
-            refreshAgentDeploymentRelations(agentDeployment);
-            refresh(agentDeployment.getFlow());
+            refreshAgentDeploymentRelations(agentDeployment, true);
             /* If the flow has been deleted out from under the deployment, then don't add it */
             if (isNotBlank(agentDeployment.getFlow().getProjectVersionId()) || agentDeployment.getFlow().isDeleted()) {
                 list.add(agentDeployment);
@@ -402,23 +402,29 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         }
     }
 
-    protected void refreshAgentDeploymentRelations(AgentDeployment agentDeployment) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("agentDeploymentId", agentDeployment.getId());
-        agentDeployment.setAgentDeploymentParameters(
-                persistenceManager.find(AgentDeploymentParameter.class, params, null, null, tableName(AgentDeploymentParameter.class)));
+    protected void refreshAgentDeploymentRelations(AgentDeployment agentDeployment,
+            boolean refreshFlow) {
+        if (agentDeployment != null) {
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("agentDeploymentId", agentDeployment.getId());
+            agentDeployment.setAgentDeploymentParameters(
+                    persistenceManager.find(AgentDeploymentParameter.class, params, null, null,
+                            tableName(AgentDeploymentParameter.class)));
+            if (refreshFlow) {
+                refresh(agentDeployment.getFlow());
+            }
+            if (isNotBlank(agentDeployment.getFlow().getProjectVersionId())) {
+                ProjectVersion projectVersion = findProjectVersion(
+                        agentDeployment.getFlow().getProjectVersionId());
+                agentDeployment.setProjectVersion(projectVersion);
+            }
+        }
     }
 
     @Override
     public AgentDeployment findAgentDeployment(String id) {
         AgentDeployment agentDeployment = findOne(AgentDeployment.class, new NameValue("id", id));
-        if (agentDeployment != null) {
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("agentDeploymentId", agentDeployment.getId());
-            List<AgentDeploymentParameter> deploymentParams = persistenceManager.find(AgentDeploymentParameter.class, params, null, null,
-                    tableName(AgentDeploymentParameter.class));
-            agentDeployment.setAgentDeploymentParameters(deploymentParams);
-        }
+        refreshAgentDeploymentRelations(agentDeployment, true);
         return agentDeployment;
     }
 
@@ -426,8 +432,9 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     public List<AgentDeployment> findAgentDeploymentsFor(Flow flow) {
         List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class, new NameValue("flowId", flow.getId()), null, null,
                 tableName(AgentDeployment.class));
-        for (AgentDeployment deployment : deployments) {
-            deployment.setFlow(flow);
+        for (AgentDeployment agentDeployment : deployments) {
+            agentDeployment.setFlow(flow);
+            refreshAgentDeploymentRelations(agentDeployment, false);
         }
         return deployments;
     }
@@ -786,12 +793,6 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     public void refresh(Flow flow) {
         refresh((AbstractObject) flow);
         refreshFlowRelations(flow);
-    }
-
-    @Override
-    public void refresh(AgentDeployment deployment) {
-        refresh((AbstractObject) deployment);
-        refreshAgentDeploymentRelations(deployment);
     }
 
     @Override

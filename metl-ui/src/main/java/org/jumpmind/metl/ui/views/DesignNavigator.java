@@ -116,6 +116,8 @@ public class DesignNavigator extends VerticalLayout {
     MenuItem editMenu;
 
     MenuItem newFlow;
+    
+    MenuItem newTestFlow;
 
     MenuItem newModel;
 
@@ -139,7 +141,7 @@ public class DesignNavigator extends VerticalLayout {
 
     MenuItem delete;
 
-    MenuItem closeProject;
+    MenuItem closeProjectMenu;
 
     MenuItem search;
 
@@ -181,47 +183,22 @@ public class DesignNavigator extends VerticalLayout {
     protected void setMenuItemsEnabled() {
         Object selected = treeTable.getValue();
 
-        // file menu cleanup
-        fileMenu.setEnabled(true);
         newMenu.setEnabled(false);
-        newFlow.setEnabled(false);
-        newModel.setEnabled(false);
-        resourceMenu.setEnabled(false);
-        // these will only be visible when resource menu is enabled
-        newDataSource.setEnabled(true);
-        newFtpResource.setEnabled(true);
-        newFileResource.setEnabled(true);
-        newSSHResource.setEnabled(true);
-        newWebResource.setEnabled(true);
-        newJMSResource.setEnabled(true);
         exportMenu.setEnabled(false);
-        importConfig.setEnabled(true);
-
-        // edit menu cleanup
         editMenu.setEnabled(false);
-
-        // project menu cleanup
-        closeProject.setEnabled(false);
+        closeProjectMenu.setEnabled(false);
 
         // enable based on selection
         if (selected != null) {
-            if (selected instanceof ProjectVersion) {
-                closeProject.setEnabled(true);
+            newMenu.setEnabled(true);
+
+            if (!(selected instanceof FolderName)) {
+                closeProjectMenu.setEnabled(true);
                 exportMenu.setEnabled(true);
-            } else if (selected instanceof FolderName) {
-                newMenu.setEnabled(true);
-                FolderName folder = (FolderName) selected;
-                if (folder.getName().equals("Flows") || folder.getName().equals("Tests")) {
-                    newFlow.setEnabled(true);
-                } else if (folder.getName().equals("Models")) {
-                    newModel.setEnabled(true);
-                } else if (folder.getName().equals("Resources")) {
-                    resourceMenu.setEnabled(true);
+                if (!(selected instanceof ProjectVersion)) {
+                    editMenu.setEnabled(true);
                 }
-            } else {
-                editMenu.setEnabled(true);
-                exportMenu.setEnabled(true);
-            }
+            } 
         }
     }
 
@@ -239,7 +216,8 @@ public class DesignNavigator extends VerticalLayout {
 
         // file - new
         newMenu = fileMenu.addItem("New", null);
-        newFlow = newMenu.addItem("Flow", selectedItem -> addNewFlow());
+        newFlow = newMenu.addItem("Flow", selectedItem -> addNewFlow(false));
+        newTestFlow = newMenu.addItem("Test Flow", selectedItem -> addNewFlow(true));
         newModel = newMenu.addItem("Model", selectedItem -> addNewModel());
 
         // file - new - resource
@@ -269,7 +247,7 @@ public class DesignNavigator extends VerticalLayout {
         // project menu
         MenuItem projectMenu = leftMenuBar.addItem("Project", null);
         projectMenu.addItem("Manage", selectedItem -> viewProjects());
-        closeProject = projectMenu.addItem("Close", selectedItem -> closeProject());
+        closeProjectMenu = projectMenu.addItem("Close", selectedItem -> closeProject());
 
         // right menu
         MenuBar rightMenuBar = new MenuBar();
@@ -787,18 +765,19 @@ public class DesignNavigator extends VerticalLayout {
             return null;
         }
     }
+    
+    
 
-    protected void addNewFlow() {
-        Object selected = treeTable.getValue();
-        if (selected instanceof FolderName) {
-            FolderName folder = (FolderName) selected;
+    protected void addNewFlow(boolean testFlow) {
+        FolderName folder = findFolderWithName(testFlow ? "Tests" : "Flows");
+        if (folder != null) {
             treeTable.setChildrenAllowed(folder, true);
 
             ProjectVersion projectVersion = findProjectVersion();
             FlowName flow = new FlowName();
             flow.setProjectVersionId(projectVersion.getId());
             flow.setName("New Flow");
-            flow.setTest(folder.getName().equals("Tests"));
+            flow.setTest(testFlow);
             context.getConfigurationService().save(flow);
 
             treeTable.addItem(flow);

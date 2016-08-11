@@ -21,7 +21,7 @@
 package org.jumpmind.metl.core.model;
 
 public enum DeploymentStatus {
-    DEPLOYED("Deployed"), DISABLED("Disabled"), REQUEST_ENABLE("Enabling"), REQUEST_REMOVE("Removing"), REQUEST_DISABLE("Disabling"), REQUEST_REENABLE("Renabling"), ERROR("Error");
+    ENABLED("Enabled"), DISABLED("Disabled"), REQUEST_ENABLE("Enabling"), REQUEST_REMOVE("Removing"), REQUEST_DISABLE("Disabling"), REQUEST_REENABLE("Renabling"), ERROR("Error");
     
     String name;
     
@@ -32,5 +32,12 @@ public enum DeploymentStatus {
     @Override
     public String toString() {
         return name;
+    }
+    
+    public static String massage(String status) {
+        if (status != null && status.equals("DEPLOYED")) {
+            status = DeploymentStatus.ENABLED.name();
+        }  
+        return status;
     }
 }

@@ -192,7 +192,7 @@ public class HttpDirectory implements IDirectory {
             httpUrlConnection.setReadTimeout(timeout);
             httpUrlConnection.setRequestMethod(httpMethod);
             httpUrlConnection.setDoOutput(true);
-            httpUrlConnection.setDoInput(true);
+            httpUrlConnection.setDoInput(true);            
             return httpUrlConnection;
         } catch (Exception e) {
             throw new IoException(e);

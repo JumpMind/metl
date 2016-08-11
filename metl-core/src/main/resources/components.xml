@@ -1195,6 +1195,12 @@
                type='text'>
         <name>Param Name For Msg Based File Name</name>
       </setting>
+      <setting id='empty.file'
+               required='true'
+               type='boolean'>
+        <name>Empty File On No Input</name>
+        <defaultValue>true</defaultValue>
+      </setting>
     </settings>
   </component>
   <component category='WRITER'
@@ -1577,8 +1583,17 @@
             </setting>
             <setting id='path' required='true' type='text'>
                 <name>Path</name>
+                <defaultValue>/$(_agentName)/$(_deploymentName)/$(_versionName)</defaultValue>
                 <description></description>
-            </setting>           
+            </setting>    
+            <setting id='payload.format' required='false' type='choice'>
+                <name>Payload Format</name>
+                <defaultValue>BY_INBOUND_ROW</defaultValue>
+                <choices>
+                    <choice>BY_INBOUND_ROW</choice>
+                    <choice>BY_TABLE</choice>
+                </choices>
+            </setting>            
         </settings>
     </component>
     <component category='SERVICE' id='16170152-eee5-11e5-9ce9-5e5517507c66'
@@ -1591,6 +1606,14 @@
             <setting id='content.type' required='false' type='text'>
                 <name>Content Type</name>
             </setting>
+            <setting id='payload.format' required='false' type='choice'>
+                <name>Payload Format</name>
+                <defaultValue>BY_INBOUND_ROW</defaultValue>
+                <choices>
+                    <choice>BY_INBOUND_ROW</choice>
+                    <choice>BY_TABLE</choice>
+                </choices>
+            </setting>            
         </settings>
     </component>  
 </components>

@@ -48,6 +48,8 @@ public class AgentDeployment extends AbstractObject {
     String startExpression;
     
     List<AgentDeploymentParameter> agentDeploymentParameters;
+    
+    ProjectVersion projectVersion;
 
     public AgentDeployment() {
         agentDeploymentParameters = new ArrayList<AgentDeploymentParameter>();
@@ -89,7 +91,7 @@ public class AgentDeployment extends AbstractObject {
     }
 
     public void setStatus(String status) {
-        this.status = status;
+        this.status = DeploymentStatus.massage(status);
     }
 
     public void setMessage(String errorMessage) {
@@ -163,6 +165,14 @@ public class AgentDeployment extends AbstractObject {
     
     public List<AgentDeploymentParameter> getAgentDeploymentParameters() {
         return agentDeploymentParameters;
+    }
+    
+    public void setProjectVersion(ProjectVersion projectVersion) {
+        this.projectVersion = projectVersion;
+    }
+    
+    public ProjectVersion getProjectVersion() {
+        return projectVersion;
     }
 
     @Override

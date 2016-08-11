@@ -104,7 +104,7 @@ public class ExecutionApi {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public final Object put(HttpServletRequest req, HttpServletResponse res,
-            @RequestBody String payload) throws Exception {
+            @RequestBody(required=false) String payload) throws Exception {
         return executeFlow(req, payload, res);
     }
 
@@ -113,7 +113,7 @@ public class ExecutionApi {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public final Object delete(HttpServletRequest req, HttpServletResponse res,
-            @RequestBody String payload) throws Exception {
+            @RequestBody(required=false) String payload) throws Exception {
         return executeFlow(req, payload, res);
     }
 
@@ -122,7 +122,7 @@ public class ExecutionApi {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public final Object post(HttpServletRequest req, HttpServletResponse res,
-            @RequestBody String payload) throws Exception {
+            @RequestBody(required=false) String payload) throws Exception {
         return executeFlow(req, payload, res);
     }
 
@@ -189,7 +189,7 @@ public class ExecutionApi {
                 for (AgentDeployment agentDeployment : deployments) {
                     if (agentDeployment.getName().equals(deploymentName)) {
                         foundDeployment = true;
-                        if (agentDeployment.getDeploymentStatus() == DeploymentStatus.DEPLOYED) {
+                        if (agentDeployment.getDeploymentStatus() == DeploymentStatus.ENABLED) {
                             AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent);
                             String executionId = agentRuntime.scheduleNow(agentDeployment,
                                     toMap(req));
