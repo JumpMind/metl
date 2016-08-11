@@ -99,7 +99,7 @@ public class ComponentXmlDefinitionFactory implements IComponentDefinitionFactor
         List<PluginRepository> remoteRepostiories = configurationService.findPluginRepositories();
         List<ProjectVersionComponentPlugin> pvcps = configurationService.findProjectVersionComponentPlugins(projectVersionId);
         GenericVersionScheme versionScheme = new GenericVersionScheme();
-        for (Plugin configuredPlugin : configurationService.findActivePlugins()) {
+        for (Plugin configuredPlugin : configurationService.findPlugins()) {
             boolean matched = false;
             for (ProjectVersionComponentPlugin pvcp : pvcps) {
                 if (pvcp.matches(configuredPlugin)) {

@@ -13,6 +13,8 @@ public interface IPluginManager {
     
     public String toPluginId(String artifactGroup, String artifactName, String artifactVersion);
     
+    public List<String> getAvailableVersions(String artifactGroup, String artifactName, List<PluginRepository> remoteRepositories);
+    
     public String getLatestLocalVersion(String artifactGroup, String artifactName);
     
     public ClassLoader getClassLoader(String artifactGroup, String artifactName, String artifactVersion, List<PluginRepository> remoteRepositories);

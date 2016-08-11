@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 public class PluginManager implements IPluginManager {
 
     final static Logger logger = LoggerFactory.getLogger(PluginManager.class);
-    
+
     List<Plugin> outOfTheBox = new ArrayList<>();
 
     String localRepositoryPath;
@@ -57,7 +57,7 @@ public class PluginManager implements IPluginManager {
     RepositorySystemSession repositorySystemSession;
 
     Map<String, ClassLoader> plugins = new HashMap<>();
-    
+
     IConfigurationService configurationService;
 
     public PluginManager(String localRepositoryPath, IConfigurationService configurationService) {
@@ -68,18 +68,18 @@ public class PluginManager implements IPluginManager {
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-sorter", 3));
         outOfTheBox.add(new Plugin("org.jumpmind.metl", "comp-temp-rdbms", 4));
     }
-    
+
     @Override
     public void init() {
         repositorySystem = newRepositorySystem();
         repositorySystemSession = newRepositorySystemSession(repositorySystem, localRepositoryPath);
     }
-    
+
     @Override
     public List<Plugin> getOutOfTheBox() {
         return outOfTheBox;
     }
-    
+
     @Override
     public boolean isNewer(Plugin first, Plugin second) {
         try {
@@ -99,7 +99,7 @@ public class PluginManager implements IPluginManager {
         checkForNewConfiguredVersions();
         loadAll();
     }
-    
+
     protected void loadAll() {
         List<Plugin> existing = configurationService.findPlugins();
         List<PluginRepository> repositories = configurationService.findPluginRepositories();
@@ -107,15 +107,40 @@ public class PluginManager implements IPluginManager {
             getClassLoader(plugin.getArtifactGroup(), plugin.getArtifactName(), plugin.getArtifactVersion(), repositories);
         }
     }
-    
+
+    @Override
+    public List<String> getAvailableVersions(String artifactGroup, String artifactName, List<PluginRepository> remoteRepositories) {
+        List<String> versions = new ArrayList<>();
+        try {
+            VersionRangeRequest rangeRequest = new VersionRangeRequest();
+            rangeRequest.setArtifact(new DefaultArtifact(artifactGroup, artifactName, "jar", "[0,)"));
+            if (remoteRepositories != null) {
+                for (PluginRepository pluginRepository : remoteRepositories) {
+                    rangeRequest.addRepository(
+                            new RemoteRepository.Builder(pluginRepository.getName(), "default", pluginRepository.getUrl()).build());
+                }
+            }
+            VersionRangeResult rangeResult = repositorySystem.resolveVersionRange(repositorySystemSession, rangeRequest);
+            if (rangeResult != null) {
+                List<Version> versionList = rangeResult.getVersions();
+                for (Version version : versionList) {
+                    versions.add(version.toString());
+                }
+            }
+        } catch (VersionRangeResolutionException e) {
+            logger.error("", e);
+        }
+        return versions;
+    }
+
     protected void checkForNewOutOfTheBoxVersions() {
         checkForNewerVersion(outOfTheBox);
     }
-    
+
     protected void checkForNewConfiguredVersions() {
         checkForNewerVersion(configurationService.findActivePlugins());
     }
-    
+
     protected void checkForNewerVersion(List<Plugin> listToCheck) {
         Set<String> checked = new HashSet<>();
         for (Plugin plugin : listToCheck) {
@@ -123,14 +148,15 @@ public class PluginManager implements IPluginManager {
             if (!checked.contains(id)) {
                 List<Plugin> existing = configurationService.findPlugins();
                 String latestVersion = getLatestLocalVersion(plugin.getArtifactGroup(), plugin.getArtifactName());
-                Plugin potentialNewVersion = new Plugin(plugin.getArtifactGroup(), plugin.getArtifactName(), latestVersion, plugin.getLoadOrder());
+                Plugin potentialNewVersion = new Plugin(plugin.getArtifactGroup(), plugin.getArtifactName(), latestVersion,
+                        plugin.getLoadOrder());
                 boolean matched = false;
-                for (Plugin existingPlugin : existing) {                    
+                for (Plugin existingPlugin : existing) {
                     if (existingPlugin.equals(potentialNewVersion)) {
                         matched = true;
                         break;
                     }
-              }
+                }
                 if (!matched) {
                     logger.info("Found a new version of {}.  Recording it", potentialNewVersion);
                     configurationService.save(potentialNewVersion);
@@ -139,9 +165,9 @@ public class PluginManager implements IPluginManager {
             }
         }
     }
-    
+
     protected boolean isOutOfTheBox(Plugin plugin) {
-        boolean matched =false;
+        boolean matched = false;
         for (Plugin ootbp : outOfTheBox) {
             if (plugin.matches(ootbp.getArtifactGroup(), ootbp.getArtifactName())) {
                 matched = true;
@@ -155,11 +181,11 @@ public class PluginManager implements IPluginManager {
     public String toPluginId(String artifactGroup, String artifactName, String artifactVersion) {
         return String.format("%s:%s:%s", artifactGroup, artifactName, artifactVersion);
     }
-    
+
     @Override
     public void delete(String artifactGroup, String artifactName, String artifactVersion) {
         String pluginId = toPluginId(artifactGroup, artifactName, artifactVersion);
-                Artifact artifact = new DefaultArtifact(pluginId);
+        Artifact artifact = new DefaultArtifact(pluginId);
         File file = new File(localRepositoryPath, repositorySystemSession.getLocalRepositoryManager().getPathForLocalArtifact(artifact));
         File dir = file.getParentFile();
         if (dir.exists() && dir.isDirectory()) {
@@ -169,7 +195,8 @@ public class PluginManager implements IPluginManager {
     }
 
     @Override
-    public ClassLoader getClassLoader(String artifactGroup, String artifactName, String artifactVersion, List<PluginRepository> remoteRepositories) {
+    public ClassLoader getClassLoader(String artifactGroup, String artifactName, String artifactVersion,
+            List<PluginRepository> remoteRepositories) {
         String pluginId = toPluginId(artifactGroup, artifactName, artifactVersion);
         ClassLoader classLoader = plugins.get(pluginId);
         if (classLoader == null) {
@@ -220,7 +247,7 @@ public class PluginManager implements IPluginManager {
             for (PluginRepository pluginRepository : remoteRepositories) {
                 collectRequest.addRepository(
                         new RemoteRepository.Builder(pluginRepository.getName(), "default", pluginRepository.getUrl()).build());
-            }     
+            }
 
             DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, classpathFlter);
 

@@ -220,7 +220,7 @@ public class ProjectVersionSettingsPanel extends Panel implements IUiPanel {
     protected void populateContainer() {
         componentPluginsGridContainer.removeAllItems();
         componentPluginsGridContainer.addAll(context.getConfigurationService().findProjectVersionComponentPlugins(projectVersion.getId()));
-        componentPluginsGrid.setHeightByRows(componentPluginsGridContainer.size());
+        componentPluginsGrid.setHeightByRows(componentPluginsGridContainer.size() > 0 ? componentPluginsGridContainer.size() : 1);
     }
 
     public ProjectVersion getProjectVersion() {
