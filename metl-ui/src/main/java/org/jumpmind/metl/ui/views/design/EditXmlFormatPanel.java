@@ -45,6 +45,7 @@ import org.jumpmind.metl.core.runtime.component.XmlFormatter;
 import org.jumpmind.metl.core.runtime.component.XmlParser;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.views.design.ImportXmlTemplateWindow.ImportXmlListener;
+import org.jumpmind.vaadin.ui.common.ExportDialog;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import org.vaadin.aceeditor.AceEditor;
 import org.vaadin.aceeditor.AceMode;
@@ -96,6 +97,8 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
         Button importButton = buttonBar.addButton("Import Template", FontAwesome.DOWNLOAD);
         importButton.addClickListener(new ImportTemplateClickListener());
 
+        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e)->export());
+        
         filterPopField = new ComboBox();
         filterPopField.addItem(SHOW_ALL);
         filterPopField.addItem(SHOW_POPULATED_ENTITIES);
@@ -130,6 +133,12 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel implements Te
         updateTable(null,false);
         saveXPathSettings();
         buildXpathChoices();
+    }
+
+    protected void export() {
+        String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
+        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, component.getName());
+        UI.getCurrent().addWindow(dialog);
     }
 
     @Override
