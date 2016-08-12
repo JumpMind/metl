@@ -36,11 +36,14 @@ import org.jumpmind.metl.core.model.ModelEntitySorter;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
+import org.jumpmind.metl.ui.views.design.EditFormatPanel.RecordFormat;
+import org.jumpmind.vaadin.ui.common.ExportDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.FieldEvents.BlurEvent;
 import com.vaadin.event.FieldEvents.BlurListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
@@ -72,7 +75,9 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     ApplicationContext context;
 
     TreeTable treeTable = new TreeTable();
-
+    
+    Table table = new Table();
+    
     Model model;
 
     Set<Object> lastEditItemIds = Collections.emptySet();
@@ -94,7 +99,9 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     ShortcutListener enterKeyListener;
     
     boolean readOnly;
-
+    
+    BeanItemContainer<Record> container = new BeanItemContainer<Record>(Record.class);
+    
     public EditModelPanel(ApplicationContext context, String modelId, boolean readOnly) {
         this.context = context;
         this.model = new Model(modelId);
@@ -120,6 +127,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             importButton = buttonBar.addButton("Import ...", FontAwesome.DOWNLOAD);
             importButton.addClickListener(new ImportClickListener());
         }
+
+        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e)->export());
 
         filterField = buttonBar.addFilter();
         filterField.addTextChangeListener(new TextChangeListener() {
@@ -319,6 +328,18 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         addAll("", model.getModelEntities());
 
         setButtonsEnabled();
+
+        table.setContainerDataSource(container);
+        table.setVisibleColumns(new Object[] { "entityName", "attributeName", "description", "type", "pk" });
+        table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Description", "Type", "PK" });
+    }
+
+    protected void export() {
+    	table.removeAllItems();
+    	updateExportTable(filterField.getValue(), model.getModelEntities());
+    	String fileNamePrefix = model.getName().toLowerCase().replace(' ', '-');
+        ExportDialog dialog = new ExportDialog(table, fileNamePrefix, model.getName());
+        UI.getCurrent().addWindow(dialog);
     }
 
     protected void togglePk(ModelAttribute a) {
@@ -393,6 +414,29 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         }
     }
 
+    protected void updateExportTable(String filter, Collection<ModelEntity> modelEntityList) {
+        filter = filter != null ? filter.toLowerCase() : null;
+        ArrayList<ModelEntity> filteredModelEntityList = new ArrayList<ModelEntity>();
+        for (ModelEntity modelEntity : modelEntityList) {
+            boolean add = UiUtils.filterMatches(filter, modelEntity.getName());
+            if (!add) {
+                for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
+                    add |= UiUtils.filterMatches(filter, modelAttribute.getName());
+                }
+            }
+            if (add) {
+                filteredModelEntityList.add(modelEntity);
+            }
+        }
+
+        Collections.sort(filteredModelEntityList, new ModelEntitySorter());
+        for (ModelEntity modelEntity : filteredModelEntityList) {
+            for (ModelAttribute modelAttribute : modelEntity.getModelAttributes()) {
+                table.addItem(new Record(modelEntity, modelAttribute));
+            }
+        }
+    }
+
     protected void addModelEntity(ModelEntity modelEntity) {
         treeTable.addItem(modelEntity);
         treeTable.setItemIcon(modelEntity, FontAwesome.TABLE);
@@ -410,6 +454,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     protected void editSelectedItem() {
         lastEditItemIds = getSelectedItems();
         treeTable.refreshRowCache();
+        table.refreshRowCache();
     }
 
     class AddEntityClickListener implements ClickListener {
@@ -552,4 +597,78 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         }
     }
 
+    public class Record {
+        ModelEntity modelEntity;
+
+        ModelAttribute modelAttribute;
+
+        String entityName = "";
+        
+        String attributeName = "";
+        
+        String description = "";
+
+        String type = "";
+
+        String pk = "";
+
+        public Record(ModelEntity modelEntity, ModelAttribute modelAttribute) {
+            this.modelEntity = modelEntity;
+            this.modelAttribute = modelAttribute;
+
+            if (modelEntity != null) {
+                this.entityName = modelEntity.getName();
+            }
+
+            if (modelAttribute != null) {
+                this.attributeName = modelAttribute.getName();
+                this.description = modelAttribute.getDescription();
+                this.type = modelAttribute.getType();
+                this.pk = modelAttribute.isPk()?"PK":"";
+            }
+        }
+
+        public int hashCode() {
+            return modelEntity.hashCode() + modelAttribute.hashCode();
+        }
+
+        public boolean equals(Object obj) {
+            if (obj instanceof RecordFormat) {
+                return hashCode() == ((RecordFormat) obj).hashCode();
+            }
+            return super.equals(obj);
+        }
+
+        public String getEntityName() {
+            return modelEntity.getName();
+        }
+
+        public String getAttributeName() {
+            return modelAttribute.getName();
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getPk() {
+            return pk;
+        }
+
+        public void setPk(String pk) {
+            this.pk = pk;
+        }
+    }    
 }
