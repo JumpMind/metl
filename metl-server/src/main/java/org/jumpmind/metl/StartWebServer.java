@@ -100,7 +100,6 @@ public class StartWebServer {
     }
 
     public static void runWebServer() throws Exception {
-
         disableJettyLogging();
 
         System.out.println(IOUtils.toString(StartWebServer.class.getResource("/Metl.asciiart")));
@@ -149,9 +148,6 @@ public class StartWebServer {
 
         server.start();
 
-        getLogger()
-                .info("To use Metl, navigate to http://localhost:" + DEFAULT_HTTP_PORT + "/metl");
-
         server.join();
     }
 
@@ -176,6 +172,9 @@ public class StartWebServer {
             http.setPort(httpPort);
             http.setHost(httpHostBindName);
             connectors.add(http);
+            
+            getLogger()
+            .info(String.format("Metl can be reached on http://%s:%d/metl", httpHostBindName != null ? httpHostBindName : "localhost", httpPort ));
         }
 
         if (httpsEnabled) {
@@ -218,6 +217,10 @@ public class StartWebServer {
             https.setPort(httpsPort);
             https.setHost(httpsHostBindName);
             connectors.add(https);
+            
+            getLogger()
+            .info(String.format("Metl can be reached on https://%s:%d/metl", httpsHostBindName != null ? httpsHostBindName : "localhost", httpsPort ));
+
         }
 
         return connectors.toArray(new Connector[connectors.size()]);
