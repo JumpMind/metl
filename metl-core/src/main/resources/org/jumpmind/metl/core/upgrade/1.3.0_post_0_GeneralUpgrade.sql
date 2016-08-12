@@ -8,3 +8,5 @@ select random_uuid() as ID
      , null as LAST_UPDATE_BY
      , CURRENT_TIMESTAMP() as LAST_UPDATE_TIME
 from METL_COMPONENT where type = 'Text File Writer';
+
+update METL_COMPONENT set OUTPUT_MODEL_ID=INPUT_MODEL_ID where type='Transformer' and INPUT_MODEL_ID != OUTPUT_MODEL_ID;
