@@ -28,3 +28,4 @@
 /targetdb.trace.db
 /metl-dev.h2.db
 .DS_Store
+/security/
