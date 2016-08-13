@@ -37,6 +37,8 @@ import org.jumpmind.metl.core.runtime.component.ModelAttributeScriptHelper;
 import org.jumpmind.metl.core.runtime.component.Transformer;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
+import org.jumpmind.metl.ui.views.design.EditFormatPanel.RecordFormat;
+import org.jumpmind.vaadin.ui.common.ExportDialog;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -44,6 +46,7 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
@@ -51,11 +54,14 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TableFieldFactory;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 
 @SuppressWarnings("serial")
 public class EditTransformerPanel extends AbstractComponentEditPanel {
 
     Table table = new Table();
+    
+    Table exportTable = new Table();
 
     TextField filterField;
 
@@ -65,6 +71,7 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
 
     BeanItemContainer<ComponentAttributeSetting> container = new BeanItemContainer<ComponentAttributeSetting>(
             ComponentAttributeSetting.class);
+    BeanItemContainer<Record> exportContainer = new BeanItemContainer<Record>(Record.class);
 
     static final String SHOW_ALL = "Show All";
     static final String SHOW_POPULATED_ENTITIES = "Show Entities with Transforms";
@@ -89,6 +96,8 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         });
         buttonBar.addLeft(filterPopField);
 
+        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e)->export());
+        
         filterField = buttonBar.addFilter();
         filterField.addTextChangeListener(new TextChangeListener() {
 
@@ -196,7 +205,10 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         }
 
         updateTable(null);
-
+        
+        exportTable.setContainerDataSource(exportContainer);
+        exportTable.setVisibleColumns(new Object[] { "entityName", "attributeName", "value" });
+        exportTable.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Transform" });
     }
 
     protected void updateTable(String filter) {
@@ -238,6 +250,53 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         }
     }
 
+    protected void export() {
+    	exportTable.removeAllItems();
+    	updateExportTable(filterField.getValue());
+        String fileNamePrefix = component.getName().toLowerCase().replace(' ', '-');
+        ExportDialog dialog = new ExportDialog(exportTable, fileNamePrefix, component.getName());
+        UI.getCurrent().addWindow(dialog);
+    }
+
+    protected void updateExportTable(String filter) {
+        boolean showPopulatedEntities = filterPopField.getValue().equals(SHOW_POPULATED_ENTITIES);
+        boolean showPopulatedAttributes = filterPopField.getValue().equals(SHOW_POPULATED_ATTRIBUTES);
+    
+        if (componentAttributes != null) {
+            Model model = component.getInputModel();
+            Collection<String> entityNames = new ArrayList<>();
+
+            filter = filter != null ? filter.toLowerCase() : null;
+            if (model != null) {
+            	exportTable.removeAllItems();
+            	// loop through the attributes with transforms to get a list of entities
+	            for (ComponentAttributeSetting componentAttribute : componentAttributes) {
+	                ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
+	                ModelEntity entity = model.getEntityById(attribute.getEntityId());
+	                if (isNotBlank(componentAttribute.getValue())
+	                		&& !entityNames.contains(entity.getName())) {
+	                	entityNames.add(entity.getName());
+	                }
+	            }
+
+            	for (ComponentAttributeSetting componentAttribute : componentAttributes) {
+	                ModelAttribute attribute = model.getAttributeById(componentAttribute.getAttributeId());
+	                ModelEntity entity = model.getEntityById(attribute.getEntityId());
+	                
+	                boolean populated = (showPopulatedEntities && entityNames.contains(entity.getName())) ||
+	                (showPopulatedAttributes && isNotBlank(componentAttribute.getValue())) || 
+	                (!showPopulatedAttributes && !showPopulatedEntities); 
+	                if (isBlank(filter) || entity.getName().toLowerCase().contains(filter)
+	                        || attribute.getName().toLowerCase().contains(filter)) {
+	                	if (populated) {
+	                		exportTable.addItem(new Record(entity, attribute));
+	                	}
+	                }
+	            }
+            }
+        }
+    }
+    
     class EditFieldFactory implements TableFieldFactory {
         public Field<?> createField(final Container dataContainer, final Object itemId,
                 final Object propertyId, com.vaadin.ui.Component uiContext) {
@@ -269,4 +328,60 @@ public class EditTransformerPanel extends AbstractComponentEditPanel {
         }
     }
 
+    public class Record {
+        ModelEntity modelEntity;
+
+        ModelAttribute modelAttribute;
+
+        String entityName = "";
+        
+        String attributeName = "";
+        
+        String value = "";
+
+        public Record(ModelEntity modelEntity, ModelAttribute modelAttribute) {
+            this.modelEntity = modelEntity;
+            this.modelAttribute = modelAttribute;
+
+            if (modelEntity != null) {
+                this.entityName = modelEntity.getName();
+            }
+
+            if (modelAttribute != null) {
+                this.attributeName = modelAttribute.getName();
+                ComponentAttributeSetting setting = component.getSingleAttributeSetting(modelAttribute.getId(),
+                		Transformer.TRANSFORM_EXPRESSION);
+                if (setting != null) {
+                    this.value = setting.getValue();
+                }
+            }
+        }
+
+        public int hashCode() {
+            return modelEntity.hashCode() + modelAttribute.hashCode();
+        }
+
+        public boolean equals(Object obj) {
+            if (obj instanceof RecordFormat) {
+                return hashCode() == ((RecordFormat) obj).hashCode();
+            }
+            return super.equals(obj);
+        }
+
+        public String getEntityName() {
+            return modelEntity.getName();
+        }
+
+        public String getAttributeName() {
+            return modelAttribute.getName();
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+    }    
 }
