@@ -1743,7 +1743,7 @@
                 <description></description>
             </setting>    
             <setting id='payload.format' required='false' type='choice'>
-                <name>Payload Format</name>
+                <name>Automatic Payload Format</name>
                 <defaultValue>BY_INBOUND_ROW</defaultValue>
                 <choices>
                     <choice>BY_INBOUND_ROW</choice>
@@ -1763,7 +1763,7 @@
                 <name>Content Type</name>
             </setting>
             <setting id='payload.format' required='false' type='choice'>
-                <name>Payload Format</name>
+                <name>Automatic Payload Format</name>
                 <defaultValue>BY_INBOUND_ROW</defaultValue>
                 <choices>
                     <choice>BY_INBOUND_ROW</choice>
