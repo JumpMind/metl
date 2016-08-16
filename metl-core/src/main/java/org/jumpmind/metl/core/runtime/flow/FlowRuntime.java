@@ -350,6 +350,7 @@ public class FlowRuntime {
                 sb.append(ExceptionUtils.getStackTrace(error)).append("\n");
             } else {
                 sb.append("\n...and ").append(allErrors.size() - 10).append(" more errors...");
+                break;
             }
         }
         return sb.toString();
