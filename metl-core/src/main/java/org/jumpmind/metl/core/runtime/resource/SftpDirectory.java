@@ -108,7 +108,8 @@ public class SftpDirectory implements IDirectory {
 	            for (Object object : list) {
 	                LsEntry entry = (LsEntry)object;
 	                if (!entry.getFilename().equals(".") && !entry.getFilename().equals("..")) {
-	                	fileInfo = new FileInfo(relativePath, entry.getAttrs().isDir(), entry.getAttrs().getMTime(), entry.getAttrs().getSize());
+	                	long updateTime = entry.getAttrs().getMTime();
+	                	fileInfo = new FileInfo(relativePath, entry.getAttrs().isDir(), updateTime * 1000, entry.getAttrs().getSize());
 	                }
 	            }
         	}
@@ -363,7 +364,8 @@ public class SftpDirectory implements IDirectory {
 		            for (Object object : list) {
 		                LsEntry entry = (LsEntry)object;
 		                if (!entry.getFilename().equals(".") && !entry.getFilename().equals("..")) {
-	                        fileInfoList.add(new FileInfo(relativePath + separator + entry.getFilename(), entry.getAttrs().isDir(), entry.getAttrs().getMTime(), entry.getAttrs().getSize()));
+		                	long updateTime = entry.getAttrs().getMTime();
+	                        fileInfoList.add(new FileInfo(relativePath + separator + entry.getFilename(), entry.getAttrs().isDir(), updateTime * 1000, entry.getAttrs().getSize()));
 		                }
 		            }
             	}
