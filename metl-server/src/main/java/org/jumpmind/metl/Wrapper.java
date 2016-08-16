@@ -36,7 +36,7 @@ import org.jumpmind.symmetric.wrapper.WrapperHelper;
 public class Wrapper {
 
     protected static final String SYS_CONFIG_DIR = "org.jumpmind.metl.ui.init.config.dir";
-    protected static final String METL_HOME = "SYM_HOME";
+    protected static final String METL_HOME = "METL_HOME";
     
     public static void runServiceWrapper(String[] args) throws Exception {
 
@@ -95,6 +95,10 @@ public class Wrapper {
             configDir = System.getProperty(SYS_CONFIG_DIR);
             if (isBlank(configDir)) {
                 configDir = System.getenv(METL_HOME);
+                if (isBlank(configDir)) {
+                    /* If METL_HOME is not set, fall back to SYM_HOME for backwards compatibility */
+                    configDir = System.getenv("SYM_HOME");
+                }
                 if (isBlank(configDir)) {
                     configDir = System.getProperty("user.home") + "/.metl";
                     if (printInstructions) {
