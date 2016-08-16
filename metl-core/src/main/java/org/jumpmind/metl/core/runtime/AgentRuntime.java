@@ -48,6 +48,7 @@ import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Notification;
+import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.SettingDefinition;
@@ -85,8 +86,6 @@ public class AgentRuntime {
 
     boolean stopping = false;
 
-    Map<AgentDeployment, List<FlowRuntime>> scheduledFlows = Collections.synchronizedMap(new HashMap<>());
-
     Map<AgentDeployment, ScheduledFuture<?>> scheduledDeployments = Collections.synchronizedMap(new HashMap<>());
 
     Map<String, IResourceRuntime> deployedResources = Collections.synchronizedMap(new HashMap<>());
@@ -110,6 +109,8 @@ public class AgentRuntime {
     ScheduledFuture<?> agentRequestHandler;
     
     IHttpRequestMappingRegistry httpRequestMappingRegistry;
+    
+    Map<AgentDeployment, List<FlowRuntime>> runningFlows = Collections.synchronizedMap(new HashMap<>());
 
     public AgentRuntime(Agent agent, IConfigurationService configurationService,
             IExecutionService executionService, IComponentRuntimeFactory componentFactory, IComponentDefinitionFactory componentDefinitionFactory,
@@ -125,7 +126,7 @@ public class AgentRuntime {
     
     public boolean cancel(String executionId) {
         boolean cancelled = false;
-        Collection<List<FlowRuntime>> runtimes = scheduledFlows.values();
+        Collection<List<FlowRuntime>> runtimes = runningFlows.values();
         for (List<FlowRuntime> list : runtimes) {
             for (FlowRuntime flowRuntime : list) {
                 if (executionId.equals(flowRuntime.getExecutionId())) {
@@ -242,9 +243,11 @@ public class AgentRuntime {
     public synchronized AgentDeployment deploy(Flow flow, Map<String, String> parameters) {
         AgentDeployment deployment = agent.getAgentDeploymentFor(flow);
         if (deployment == null) {
+            ProjectVersion projectVersion = configurationService.findProjectVersion(flow.getProjectVersionId());
             deployment = new AgentDeployment(flow);
             deployment.setStatus(DeploymentStatus.REQUEST_ENABLE.name());
             deployment.setAgentId(agent.getId());
+            deployment.setProjectVersion(projectVersion);
             deployment.setFlow(flow);
 
             List<FlowParameter> defaultParameters = flow.getFlowParameters();
@@ -344,10 +347,6 @@ public class AgentRuntime {
     
                 deployResources(deployment.getFlow());
 
-                if (scheduledFlows.get(deployment) == null) {
-                    scheduledFlows.put(deployment, Collections.synchronizedList(new ArrayList<FlowRuntime>()));
-                }
-                
                 doComponentDeploymentEvent(deployment, (l, f, s, c) -> l.onDeploy(agent, deployment, f, s, c));
 
                 if (deployment.asStartType() == StartType.ON_DEPLOY) {
@@ -360,7 +359,7 @@ public class AgentRuntime {
                                     new CronSequenceGenerator(cron).next(new Date()) });
     
                     ScheduledFuture<?> future = this.flowExecutionScheduler.schedule(
-                            new FlowRunner(deployment, UUID.randomUUID().toString()), new CronTrigger(cron));
+                            new FlowRunner(deployment), new CronTrigger(cron));
                     scheduledDeployments.put(deployment, future);
                 }
     
@@ -405,49 +404,20 @@ public class AgentRuntime {
         String executionId = createExecutionId();
         if (agent.isAutoRefresh()) {
             deployment = configurationService.findAgentDeployment(deployment.getId());
+            configurationService.refreshAgentParameters(agent);
         }
-        FlowRuntime flowRuntime = new FlowRuntime(deployment, componentRuntimeFactory, componentDefinitionFactory,
+        FlowRuntime flowRuntime = new FlowRuntime(executionId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
                 resourceFactory,
-                flowStepsExecutionThreads, configurationService, executionService);
-        try {
-            flowRuntime.start(executionId, deployedResources, agent, null, globalSettings, runtimeParameters);
-        } catch (Exception ex) {
-            if (ex instanceof RuntimeException) {
-                throw (RuntimeException)ex;
-            } else {
-                throw new RuntimeException(ex);
-            }
-        } finally {
-            flowRuntime.waitForFlowCompletion();
-            flowRuntime.notifyStepsTheFlowIsComplete();
-        }        
-        
-        List<Throwable> errors = flowRuntime.getAllErrors();
-        if (errors.size() == 0) {
-            return flowRuntime.getResult();
-        } else {
-            for (Throwable throwable : errors) {
-                if (throwable instanceof Exception) {
-                    throw (Exception)throwable;
-                } else if (throwable instanceof Error) {
-                    throw (Error)throwable;
-                } else {
-                    throw new RuntimeException(throwable);
-                }
-            }
-            throw new Exception(flowRuntime.getErrorText(errors));
-        }
-    }
-    
-    private final String createExecutionId() {
-        return UUID.randomUUID().toString();
+                flowStepsExecutionThreads, configurationService, executionService, deployedResources, null, globalSettings, runtimeParameters);
+        flowRuntime.start();
+        return flowRuntime.execute();
     }
 
     public String scheduleNow(AgentDeployment deployment, Map<String, String> runtimeParameters) {
             log.info("Scheduling '{}' on '{}' for now", new Object[] {
                     deployment.getName(), agent.getName() });
             String executionId = createExecutionId();
-            this.flowExecutionScheduler.schedule(new FlowRunner(deployment, executionId, runtimeParameters),
+            this.flowExecutionScheduler.schedule(new FlowRunner(deployment, runtimeParameters, executionId),
                     new Date());
             return executionId;
     }
@@ -459,7 +429,7 @@ public class AgentRuntime {
             scheduledDeployments.remove(future);
         }
 
-        List<FlowRuntime> flowRuntimes = scheduledFlows.get(deployment);
+        List<FlowRuntime> flowRuntimes = runningFlows.get(deployment);
         if (flowRuntimes != null) {
 	        for (FlowRuntime flowRuntime : flowRuntimes) {
 	            if (flowRuntime != null) {
@@ -489,32 +459,55 @@ public class AgentRuntime {
         stop(deployment, null);
         configurationService.delete(deployment);
         agent.getAgentDeployments().remove(deployment);
-        scheduledFlows.remove(deployment);
     }
+        
+    private void removeFromRunning(AgentDeployment deployment, FlowRuntime flowRuntime) {
+        List<FlowRuntime> flows = runningFlows.get(deployment);
+        if (flows != null) {
+            flows.remove(flowRuntime);
+        }        
+    }
+    
+    private void addToRunning (AgentDeployment deployment, FlowRuntime flowRuntime) {
+        List<FlowRuntime> flows = runningFlows.get(deployment);
+        if (flows == null) {
+            synchronized (runningFlows) {
+                flows = new ArrayList<>();
+                runningFlows.put(deployment, flows);                
+            }
+        }
+        flows.add(flowRuntime);        
+    }
+    
+    
+    private final String createExecutionId() {
+        return UUID.randomUUID().toString();
+    }    
 
     class FlowRunner implements Runnable {
-
-        FlowRuntime flowRuntime;
 
         String executionId;
         
         Map<String, String> runtimeParameters;
+        
+        AgentDeployment deployment;
 
-        public FlowRunner(AgentDeployment deployment, String executionId) {
-        	this(deployment, executionId, null);
+        public FlowRunner(AgentDeployment deployment) {
+        	this(deployment, null, null);
+        }
+        
+        public FlowRunner(AgentDeployment deployment, Map<String, String> runtimeParameters) {
+            this(deployment, runtimeParameters, null);            
         }
 
-        public FlowRunner(AgentDeployment deployment, String executionId, Map<String, String> runtimeParameters) {
+        public FlowRunner(AgentDeployment deployment, Map<String, String> runtimeParameters, String executionId) {
             this.executionId = executionId;
             this.runtimeParameters = runtimeParameters;
+            this.deployment = deployment;
             if (agent.isAutoRefresh()) {
                 deployment = configurationService.findAgentDeployment(deployment.getId());
                 deployment.setFlow(configurationService.findFlow(deployment.getFlowId()));
             }
-            this.flowRuntime = new FlowRuntime(deployment, componentRuntimeFactory, componentDefinitionFactory,
-                    resourceFactory,
-                    flowStepsExecutionThreads, configurationService, executionService);
-            scheduledFlows.get(deployment).add(flowRuntime);
         }
 
         @Override
@@ -522,21 +515,22 @@ public class AgentRuntime {
             if (isBlank(executionId)) {
                 executionId = createExecutionId();
             }
-            AgentDeployment deployment = flowRuntime.getDeployment();
+            FlowRuntime flowRuntime = null;
             try {
                 log.info("Deployment '{}' is running on the '{}' agent", deployment.getName(),
-                        agent.getName());                
-                configurationService.refreshAgentParameters(agent);
+                        agent.getName());
                 List<Notification> notifications = configurationService.findNotificationsForDeployment(deployment);
-                flowRuntime.start(executionId, deployedResources, agent, notifications, globalSettings, runtimeParameters);
+                flowRuntime = new FlowRuntime(executionId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
+                        resourceFactory,
+                        flowStepsExecutionThreads, configurationService, executionService, deployedResources, notifications, globalSettings, runtimeParameters);
+                addToRunning(deployment, flowRuntime);                
+                flowRuntime.execute();
             } catch (Exception e) {
                 log.error("Error while waiting for the flow to complete", e);
             } finally {
-                flowRuntime.waitForFlowCompletion();
-                flowRuntime.notifyStepsTheFlowIsComplete();
+                removeFromRunning(deployment, flowRuntime);
                 log.info("Scheduled '{}' on '{}' is finished", deployment.getFlow().toString(),
                         agent.getName());
-                scheduledFlows.get(deployment).remove(flowRuntime);
                 executionId = null;
             }
         }

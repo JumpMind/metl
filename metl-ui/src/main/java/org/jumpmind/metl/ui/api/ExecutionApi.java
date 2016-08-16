@@ -96,7 +96,7 @@ public class ExecutionApi {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public final Object get(HttpServletRequest req, HttpServletResponse res) throws Exception {
-        return executeFlow(req, null, res);
+        return executeFlow(req, res, null);
     }
 
     @ApiIgnore
@@ -105,7 +105,7 @@ public class ExecutionApi {
     @ResponseBody
     public final Object put(HttpServletRequest req, HttpServletResponse res,
             @RequestBody(required=false) String payload) throws Exception {
-        return executeFlow(req, payload, res);
+        return executeFlow(req, res, payload);
     }
 
     @ApiIgnore
@@ -114,7 +114,7 @@ public class ExecutionApi {
     @ResponseBody
     public final Object delete(HttpServletRequest req, HttpServletResponse res,
             @RequestBody(required=false) String payload) throws Exception {
-        return executeFlow(req, payload, res);
+        return executeFlow(req, res, payload);
     }
 
     @ApiIgnore
@@ -123,12 +123,11 @@ public class ExecutionApi {
     @ResponseBody
     public final Object post(HttpServletRequest req, HttpServletResponse res,
             @RequestBody(required=false) String payload) throws Exception {
-        return executeFlow(req, payload, res);
+        return executeFlow(req, res, payload);
     }
 
-    private Object executeFlow(HttpServletRequest req, String payload, HttpServletResponse res)
+    private Object executeFlow(HttpServletRequest req, HttpServletResponse res, String payload)
             throws Exception {
-
         String requestType = req.getMethod();
         String restOfTheUrl = ((String) req
                 .getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE))

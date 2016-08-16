@@ -76,9 +76,9 @@ public class FlowRuntimeTest {
     	
     	Flow flow = createSimpleTwoStepNoOpFlow(folder);
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);	
-    	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentRuntimeFactory, componentDefinitionFactory, resourceFactory, 
-    			 threadService, null, null);
-    	flowRuntime.start("", new HashMap<String, IResourceRuntime>(), agent, new ArrayList<Notification>(), new HashMap<String, String>());
+    	FlowRuntime flowRuntime = new FlowRuntime("", deployment, agent, componentRuntimeFactory, componentDefinitionFactory, resourceFactory, 
+    			 threadService, null, null, new HashMap<String, IResourceRuntime>(), new ArrayList<Notification>(), new HashMap<String, String>());
+    	flowRuntime.start();
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step").getNumberInboundMessages(1));
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Step").getNumberInboundMessages(1));
@@ -88,9 +88,9 @@ public class FlowRuntimeTest {
     public void singleSrcToTwoTarget() throws Exception {
     	Flow flow = createSrcToTwoTargetFlow(folder);
     	AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
-    	FlowRuntime flowRuntime = new FlowRuntime(deployment, componentRuntimeFactory, componentDefinitionFactory, resourceFactory, 
-    			 threadService, null, null);
-    	flowRuntime.start("", new HashMap<String, IResourceRuntime>(), agent, new ArrayList<Notification>(), new HashMap<String, String>());
+        FlowRuntime flowRuntime = new FlowRuntime("", deployment, agent, componentRuntimeFactory, componentDefinitionFactory, resourceFactory, 
+                threadService, null, null, new HashMap<String, IResourceRuntime>(), new ArrayList<Notification>(), new HashMap<String, String>());
+    	flowRuntime.start();
     	flowRuntime.waitForFlowCompletion();
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step").getNumberInboundMessages(1));
     	Assert.assertEquals(1, flowRuntime.getComponentStatistics("Target Step 1").getNumberInboundMessages(1));
@@ -101,9 +101,9 @@ public class FlowRuntimeTest {
     public void twoSrcOneTarget() throws Exception {
         Flow flow = createTwoSrcToOneTargetFlow(folder);
         AgentDeployment deployment = TestUtils.createAgentDeployment("TestAgentDeploy", agent, flow);
-        FlowRuntime flowRuntime = new FlowRuntime(deployment, componentRuntimeFactory, componentDefinitionFactory,  resourceFactory
-                , threadService, null, null);
-        flowRuntime.start("", new HashMap<String, IResourceRuntime>(), agent, new ArrayList<Notification>(), new HashMap<String, String>());
+        FlowRuntime flowRuntime = new FlowRuntime("", deployment, agent, componentRuntimeFactory, componentDefinitionFactory, resourceFactory, 
+                threadService, null, null, new HashMap<String, IResourceRuntime>(), new ArrayList<Notification>(), new HashMap<String, String>());
+        flowRuntime.start();
         flowRuntime.waitForFlowCompletion();
         Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step 1").getNumberInboundMessages(1));
         Assert.assertEquals(1, flowRuntime.getComponentStatistics("Src Step 2").getNumberInboundMessages(1));
