@@ -409,7 +409,6 @@ public class AgentRuntime {
         FlowRuntime flowRuntime = new FlowRuntime(executionId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
                 resourceFactory,
                 flowStepsExecutionThreads, configurationService, executionService, deployedResources, null, globalSettings, runtimeParameters);
-        flowRuntime.start();
         return flowRuntime.execute();
     }
 
