@@ -369,7 +369,6 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class, settingParams, null, null,
                 tableName(AgentDeployment.class));
         List<AgentDeployment> list = new ArrayList<>(deployments.size());
-        agent.setAgentDeployments(list);
         for (AgentDeployment agentDeployment : deployments) {
             refreshAgentDeploymentRelations(agentDeployment, true);
             /* If the flow has been deleted out from under the deployment, then don't add it */
@@ -379,6 +378,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
                 log.warn("Not adding the deployment '{}' to the '{}' agent because the flow has been deleted", agentDeployment.getName(), agent.getName());
             }
         }
+        agent.setAgentDeployments(list);
     }
 
     protected void refreshAgentDeploymentRelations(AgentDeployment agentDeployment,
