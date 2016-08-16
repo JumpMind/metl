@@ -405,7 +405,6 @@ public class AgentRuntime {
         String executionId = createExecutionId();
         if (agent.isAutoRefresh()) {
             deployment = configurationService.findAgentDeployment(deployment.getId());
-            deployment.setFlow(configurationService.findFlow(deployment.getFlowId()));
         }
         FlowRuntime flowRuntime = new FlowRuntime(deployment, componentRuntimeFactory, componentDefinitionFactory,
                 resourceFactory,
