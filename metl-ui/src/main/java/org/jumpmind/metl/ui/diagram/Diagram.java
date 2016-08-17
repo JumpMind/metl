@@ -24,12 +24,13 @@ import java.util.List;
 
 import com.vaadin.annotations.JavaScript;
 import com.vaadin.annotations.StyleSheet;
+import com.vaadin.server.Page;
 import com.vaadin.ui.AbstractJavaScriptComponent;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
-@JavaScript({ "jquery-2.2.0.min.js", "dom.jsPlumb-1.7.5-min.js", "diagram.js" })
+@JavaScript({ "jquery-2.2.0.min.js", "dom.jsPlumb-1.7.5-min.js", "diagram.js", "html2canvas.js", "canvg.js"})
 @StyleSheet({ "diagram.css" })
 public class Diagram extends AbstractJavaScriptComponent {
 
@@ -195,4 +196,24 @@ public class Diagram extends AbstractJavaScriptComponent {
     public List<Node> getNodes() {
         return getState().nodes;
     }
+    
+    public void export() {
+        // Lookup how large the canvas needs to be based on node positions.
+        int maxHeight = 0;
+        int maxWidth = 0;
+        for (Node node : getState().nodes) {
+            if (node.getX() > maxWidth) {
+                maxWidth = node.getX();
+            }
+            if (node.getY() > maxHeight) {
+                maxHeight = node.getY();
+            }
+        }
+        // Pad Boundary to include text and margins.
+        maxWidth += 200;
+        maxHeight += 200;
+        // Call client side code to create the canvas and display it.
+        Page.getCurrent().getJavaScript().execute("exportDiagram("+maxWidth+","+maxHeight+");");
+    }
+    
 }
