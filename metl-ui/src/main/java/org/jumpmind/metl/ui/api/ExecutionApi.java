@@ -47,6 +47,7 @@ import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.component.HttpRequest;
 import org.jumpmind.metl.core.runtime.component.Results;
+import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.web.HttpMethod;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMapping;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
@@ -96,7 +97,7 @@ public class ExecutionApi {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public final Object get(HttpServletRequest req, HttpServletResponse res) throws Exception {
-        return executeFlow(req, null, res);
+        return executeFlow(req, res, null);
     }
 
     @ApiIgnore
@@ -105,7 +106,7 @@ public class ExecutionApi {
     @ResponseBody
     public final Object put(HttpServletRequest req, HttpServletResponse res,
             @RequestBody(required=false) String payload) throws Exception {
-        return executeFlow(req, payload, res);
+        return executeFlow(req, res, payload);
     }
 
     @ApiIgnore
@@ -114,7 +115,7 @@ public class ExecutionApi {
     @ResponseBody
     public final Object delete(HttpServletRequest req, HttpServletResponse res,
             @RequestBody(required=false) String payload) throws Exception {
-        return executeFlow(req, payload, res);
+        return executeFlow(req, res, payload);
     }
 
     @ApiIgnore
@@ -123,12 +124,11 @@ public class ExecutionApi {
     @ResponseBody
     public final Object post(HttpServletRequest req, HttpServletResponse res,
             @RequestBody(required=false) String payload) throws Exception {
-        return executeFlow(req, payload, res);
+        return executeFlow(req, res, payload);
     }
 
-    private Object executeFlow(HttpServletRequest req, String payload, HttpServletResponse res)
+    private Object executeFlow(HttpServletRequest req, HttpServletResponse res, String payload)
             throws Exception {
-
         String requestType = req.getMethod();
         String restOfTheUrl = ((String) req
                 .getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE))
@@ -151,7 +151,8 @@ public class ExecutionApi {
             }
             AgentDeployment deployment = mapping.getDeployment();
             AgentRuntime agentRuntime = agentManager.getAgentRuntime(deployment.getAgentId());
-            Results results = agentRuntime.execute(deployment, params);
+            FlowRuntime flowRuntime = agentRuntime.createFlowRuntime(deployment, params);
+            Results results = flowRuntime.execute();
             if (results != null) {
                 String contentType = results.getContentType();
                 if (isNotBlank(contentType)) {

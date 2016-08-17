@@ -78,6 +78,13 @@ public class Lookup extends AbstractComponentRuntime {
     public boolean supportsStartupMessages() {
         return false;
     }
+    
+    @Override
+    public void flowCompleted(boolean cancelled) {
+        if (!cancelled && !lookupInitialized) {
+            throw new MisconfiguredException("The flow completed without the lookup datasource being populated.  Please make sure that the lookup datasource is sending a control message");
+        }
+    }
 
     @Override
     public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {

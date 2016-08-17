@@ -71,11 +71,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FlowRuntime {
-    
+
     final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     private static final String DATE_FORMAT = "yyyy-MM-dd";
-    
+
     private static final String TIME_FORMAT = "HH:mm:ss";
 
     AgentDeployment deployment;
@@ -85,7 +85,7 @@ public class FlowRuntime {
     Map<String, IResourceRuntime> resourceRuntimes = new HashMap<String, IResourceRuntime>();
 
     IComponentRuntimeFactory componentRuntimeFactory;
-    
+
     IComponentDefinitionFactory componentDefinitionFactory;
 
     IResourceFactory resourceFactory;
@@ -95,35 +95,71 @@ public class FlowRuntime {
     ExecutorService threadService;
 
     Map<String, StepRuntime> stepRuntimes;
-    
+
     Agent agent;
-    
+
     Map<String, String> flowParameters;
-    
+
     List<Notification> notifications;
-    
+
     MailSession mailSession;
-    
+
     IConfigurationService configurationService;
+
+    IExecutionService executionService;
+
+    String executionId;
+
+    Map<String, String> globalSettings;
     
-    IExecutionService executionService;    
-    
-    public FlowRuntime(AgentDeployment deployment, IComponentRuntimeFactory componentRuntimeFactory, IComponentDefinitionFactory componentDefinitionFactory,
-            IResourceFactory resourceFactory, 
-            ExecutorService threadService, IConfigurationService configurationService, IExecutionService executionService) {
+    Map<String, IResourceRuntime> deployedResources;
+
+    public FlowRuntime(String executionId, AgentDeployment deployment, Agent agent,
+            IComponentRuntimeFactory componentRuntimeFactory,
+            IComponentDefinitionFactory componentDefinitionFactory,
+            IResourceFactory resourceFactory, ExecutorService threadService,
+            IConfigurationService configurationService, IExecutionService executionService,
+            Map<String, IResourceRuntime> deployedResources, List<Notification> notifications,
+            Map<String, String> globalSettings) {
+        this(executionId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
+                resourceFactory, threadService, configurationService, executionService,
+                deployedResources, notifications, globalSettings, null);
+    }
+
+    public FlowRuntime(String executionId, AgentDeployment deployment, Agent agent,
+            IComponentRuntimeFactory componentRuntimeFactory,
+            IComponentDefinitionFactory componentDefinitionFactory,
+            IResourceFactory resourceFactory, ExecutorService threadService,
+            IConfigurationService configurationService, IExecutionService executionService,
+            Map<String, IResourceRuntime> deployedResources, List<Notification> notifications,
+            Map<String, String> globalSettings, Map<String, String> runtimeParameters) {
+        if (agent.isAutoRefresh() && configurationService != null) {
+            deployment = configurationService.findAgentDeployment(deployment.getId());
+            configurationService.refreshAgentParameters(agent);
+        }
+        this.executionId = executionId;
         this.deployment = deployment;
+        this.agent = agent;
+        this.notifications = notifications;
         this.componentRuntimeFactory = componentRuntimeFactory;
         this.componentDefinitionFactory = componentDefinitionFactory;
         this.resourceFactory = resourceFactory;
         this.threadService = threadService;
         this.configurationService = configurationService;
         this.executionService = executionService;
+        this.mailSession = new MailSession(globalSettings);
+        this.deployedResources = deployedResources;
+        this.globalSettings = globalSettings;
+        this.flowParameters = getFlowParameters(agent, deployment);
+        if (runtimeParameters != null) {
+            this.flowParameters.putAll(runtimeParameters);
+        }
     }
-    
+
     public AgentDeployment getDeployment() {
         return deployment;
     }
-    
+
     public Results getResult() {
         Results response = null;
         Collection<StepRuntime> steps = stepRuntimes.values();
@@ -131,56 +167,74 @@ public class FlowRuntime {
             List<IComponentRuntime> runtimes = stepRuntime.getComponentRuntimes();
             for (IComponentRuntime runtime : runtimes) {
                 if (runtime instanceof IHasResults) {
-                    response = ((IHasResults)runtime).getResults();
+                    response = ((IHasResults) runtime).getResults();
                 }
             }
         }
         return response;
     }
-    
 
-    public void start(String executionId, Map<String, IResourceRuntime> deployedResources, Agent agent, List<Notification> notifications,
-            Map<String, String> globalSettings) throws InterruptedException {    
-    	start(executionId, deployedResources, agent, notifications, globalSettings, null);
+    public Results execute() throws Exception {
+        try {
+            start();
+        } catch (Exception ex) {
+            if (ex instanceof RuntimeException) {
+                throw (RuntimeException) ex;
+            } else {
+                throw new RuntimeException(ex);
+            }
+        } finally {
+            waitForFlowCompletion();
+            notifyStepsTheFlowIsComplete();
+        }
+
+        List<Throwable> errors = getAllErrors();
+        if (errors.size() == 0) {
+            return getResult();
+        } else {
+            if (errors.size() == 1) {
+                Throwable throwable = errors.get(0);
+                if (throwable instanceof Exception) {
+                    throw (Exception) throwable;
+                } else if (throwable instanceof Error) {
+                    throw (Error) throwable;
+                } else {
+                    throw new RuntimeException(throwable);
+                }
+            }
+            throw new Exception(getErrorText(errors));
+        }
     }
 
-    public void start(String executionId, Map<String, IResourceRuntime> deployedResources, Agent agent, List<Notification> notifications,
-            Map<String, String> globalSettings, Map<String, String> runtimeParameters) throws InterruptedException {    
-        
+    public void start() throws InterruptedException {
         if (threadService != null && executionService != null) {
-            this.executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService, executionService);
+            this.executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService,
+                    executionService);
         } else {
             this.executionTracker = new ExecutionTrackerLogger(deployment);
         }
         this.stepRuntimes = new HashMap<String, StepRuntime>();
-        this.agent = agent;
-        this.notifications = notifications;
-        this.mailSession = new MailSession(globalSettings);
-        
-        Map<String, String> parameters = getFlowParameters(agent, deployment);
-        
-        flowParameters = new HashMap<String, String>();
-        flowParameters.putAll(parameters);
-        if (runtimeParameters != null) {
-            flowParameters.putAll(runtimeParameters);
-        }
-        
+
         Flow manipulatedFlow = manipulateFlow(deployment.getFlow());
 
         executionTracker.beforeFlow(executionId, flowParameters);
+
         sendNotifications(Notification.EventType.FLOW_START);
 
         /* create a step runtime for every component in the flow */
         for (FlowStep flowStep : manipulatedFlow.getFlowSteps()) {
-            boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED, true);
+            boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED,
+                    true);
             if (enabled) {
-                ComponentContext context = new ComponentContext(deployment, flowStep, manipulatedFlow, executionTracker, 
-                        deployedResources, flowParameters, globalSettings);
-                StepRuntime stepRuntime = new StepRuntime(componentRuntimeFactory, componentDefinitionFactory, context, this);
+                ComponentContext context = new ComponentContext(deployment, flowStep,
+                        manipulatedFlow, executionTracker, deployedResources, flowParameters,
+                        globalSettings);
+                StepRuntime stepRuntime = new StepRuntime(componentRuntimeFactory,
+                        componentDefinitionFactory, context, this);
                 stepRuntimes.put(flowStep.getId(), stepRuntime);
             }
         }
-        
+
         List<FlowStepLink> links = manipulatedFlow.getFlowStepLinks();
 
         /* for each step runtime, set their list of msgTarget step runtimes */
@@ -208,9 +262,8 @@ public class FlowRuntime {
             }
         }
 
-        
         List<StepRuntime> startSteps = findStartSteps();
-        
+
         /* start up each step runtime */
         manipulatedFlow.calculateApproximateOrder();
         List<FlowStep> flowSteps = manipulatedFlow.getFlowSteps();
@@ -225,7 +278,7 @@ public class FlowRuntime {
                 }
             }
         }
-        
+
         /* each step is started as a thread */
         for (StepRuntime stepRuntime : stepRuntimes.values()) {
             stepRuntime.startRunning();
@@ -241,13 +294,14 @@ public class FlowRuntime {
             stepRuntime.queue(startMessage);
         }
     }
-    
+
     protected Flow manipulateFlow(Flow flow) {
         for (FlowStep flowStep : new ArrayList<>(flow.getFlowSteps())) {
             XMLComponent componentDefintion = componentDefinitionFactory.getDefinition(flow.getProjectVersionId(), flowStep.getComponent().getType());
             if (isNotBlank(componentDefintion.getFlowManipulatorClassName())) {
                 try {
-                    IFlowManipulator flowManipulator = (IFlowManipulator) Class.forName(componentDefintion.getFlowManipulatorClassName())
+                    IFlowManipulator flowManipulator = (IFlowManipulator) Class
+                            .forName(componentDefintion.getFlowManipulatorClassName())
                             .newInstance();
                     flow = flowManipulator.manipulate(flow, flowStep, configurationService);
                 } catch (RuntimeException e) {
@@ -259,8 +313,9 @@ public class FlowRuntime {
         }
         return flow;
     }
-    
-    public static Map<String, String> getFlowParameters(Flow flow, Agent agent, AgentDeployment agentDeployment) {
+
+    public static Map<String, String> getFlowParameters(Flow flow, Agent agent,
+            AgentDeployment agentDeployment) {
         Map<String, String> params = new HashMap<String, String>();
         List<FlowParameter> flowParameters = flow.getFlowParameters();
         for (FlowParameter flowParameter : flowParameters) {
@@ -269,13 +324,16 @@ public class FlowRuntime {
         return getFlowParameters(params, agent, agentDeployment);
     }
 
-    public static Map<String, String> getFlowParameters(Agent agent, AgentDeployment agentDeployment) {
+    public static Map<String, String> getFlowParameters(Agent agent,
+            AgentDeployment agentDeployment) {
         Map<String, String> params = new HashMap<String, String>();
         return getFlowParameters(params, agent, agentDeployment);
     }
-    
-    public static Map<String, String> getFlowParameters(Map<String, String> params, Agent agent, AgentDeployment agentDeployment) {
-        List<AgentDeploymentParameter> deployParameters = agentDeployment.getAgentDeploymentParameters();
+
+    public static Map<String, String> getFlowParameters(Map<String, String> params, Agent agent,
+            AgentDeployment agentDeployment) {
+        List<AgentDeploymentParameter> deployParameters = agentDeployment
+                .getAgentDeploymentParameters();
         List<AgentParameter> agentParameters = agent.getAgentParameters();
         if (agentParameters != null) {
             for (AgentParameter agentParameter : agentParameters) {
@@ -306,10 +364,10 @@ public class FlowRuntime {
     public void waitForFlowCompletion() {
         while (isRunning()) {
             AppUtils.sleep(5);
-        }        
+        }
     }
-    
-    public void notifyStepsTheFlowIsComplete() {        
+
+    public void notifyStepsTheFlowIsComplete() {
         List<Throwable> allErrors = getAllErrors();
 
         Collection<StepRuntime> allSteps = stepRuntimes.values();
@@ -320,28 +378,29 @@ public class FlowRuntime {
                 stepRuntime.flowCompletedWithoutError();
             }
         }
-        
+
         executionTracker.afterFlow();
-        
-        // Check getAllErrors here to make sure any new errors are trapped from the flowCompleted methods
+
+        // Check getAllErrors here to make sure any new errors are trapped from
+        // the flowCompleted methods
         if (getAllErrors().size() > 0) {
             flowParameters.put("_errorText", getErrorText(allErrors));
-            sendNotifications(Notification.EventType.FLOW_ERROR);    
+            sendNotifications(Notification.EventType.FLOW_ERROR);
         }
         sendNotifications(Notification.EventType.FLOW_END);
     }
-    
+
     public List<Throwable> getAllErrors() {
         Collection<StepRuntime> allSteps = stepRuntimes.values();
         List<Throwable> allErrors = new ArrayList<Throwable>();
         for (StepRuntime stepRuntime : allSteps) {
             if (stepRuntime.getError() != null) {
-               allErrors.add(stepRuntime.getError());
+                allErrors.add(stepRuntime.getError());
             }
         }
         return allErrors;
     }
-    
+
     public String getErrorText(List<Throwable> allErrors) {
         StringBuilder sb = new StringBuilder();
         int count = 0;
@@ -350,6 +409,7 @@ public class FlowRuntime {
                 sb.append(ExceptionUtils.getStackTrace(error)).append("\n");
             } else {
                 sb.append("\n...and ").append(allErrors.size() - 10).append(" more errors...");
+                break;
             }
         }
         return sb.toString();
@@ -371,11 +431,10 @@ public class FlowRuntime {
     protected List<StepRuntime> findStartSteps() {
         List<StepRuntime> starterSteps = new ArrayList<StepRuntime>();
         for (String stepId : stepRuntimes.keySet()) {
-            List<FlowStepLink> links = deployment.getFlow()
-                    .getFlowStepLinks();
+            List<FlowStepLink> links = deployment.getFlow().getFlowStepLinks();
             boolean isTargetStep = false;
             for (FlowStepLink flowStepLink : links) {
-                if (stepRuntimes.get(flowStepLink.getSourceStepId()) != null 
+                if (stepRuntimes.get(flowStepLink.getSourceStepId()) != null
                         && stepId.equals(flowStepLink.getTargetStepId())) {
                     isTargetStep = true;
                 }
@@ -394,18 +453,19 @@ public class FlowRuntime {
                 if (stepRuntime.isRunning()) {
                     try {
                         stepRuntime.inQueue.clear();
-                        stepRuntime.queue(new ShutdownMessage(stepRuntime.getComponentContext().getFlowStep().getId(), true));
+                        stepRuntime.queue(new ShutdownMessage(
+                                stepRuntime.getComponentContext().getFlowStep().getId(), true));
                     } catch (InterruptedException e) {
                     }
-                } else  {
+                } else {
                     stepRuntime.cancel();
                 }
             }
         }
     }
 
-    protected void sendNotifications(Notification.EventType eventType) {        
-        if (notifications != null && notifications.size() > 0) {                
+    protected void sendNotifications(Notification.EventType eventType) {
+        if (notifications != null && notifications.size() > 0) {
             Transport transport = null;
             Date date = new Date();
             flowParameters.put("_date", DateFormatUtils.format(date, DATE_FORMAT));
@@ -414,14 +474,17 @@ public class FlowRuntime {
             try {
                 for (Notification notification : notifications) {
                     if (notification.getEventType().equals(eventType.toString())) {
-                        log.info("Sending notification '" + notification.getName() + "' of level '" + notification.getLevel() +
-                                "' and type '" + notification.getNotifyType() + "'");
+                        log.info("Sending notification '" + notification.getName() + "' of level '"
+                                + notification.getLevel() + "' and type '"
+                                + notification.getNotifyType() + "'");
                         transport = mailSession.getTransport();
                         MimeMessage message = new MimeMessage(mailSession.getSession());
                         message.setSentDate(new Date());
                         message.setRecipients(RecipientType.BCC, notification.getRecipients());
-                        message.setSubject(FormatUtils.replaceTokens(notification.getSubject(), flowParameters, true));
-                        message.setText(FormatUtils.replaceTokens(notification.getMessage(), flowParameters, true));
+                        message.setSubject(FormatUtils.replaceTokens(notification.getSubject(),
+                                flowParameters, true));
+                        message.setText(FormatUtils.replaceTokens(notification.getMessage(),
+                                flowParameters, true));
                         try {
                             transport.sendMessage(message, message.getAllRecipients());
                         } catch (MessagingException e) {
@@ -440,11 +503,11 @@ public class FlowRuntime {
     public ComponentStatistics getComponentStatistics(String flowStepId) {
         return stepRuntimes.get(flowStepId).getComponentContext().getComponentStatistics();
     }
-    
+
     public String getExecutionId() {
-        return executionTracker != null ? executionTracker.getExecutionId() : null;
+        return executionId;
     }
-    
+
     public Agent getAgent() {
         return agent;
     }

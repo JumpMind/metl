@@ -20,22 +20,48 @@
  */
 package org.jumpmind.metl;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Constructor;
+import java.net.InetAddress;
 import java.net.URL;
+import java.security.KeyStore;
+import java.security.KeyStore.Entry;
+import java.security.PrivateKey;
 import java.security.ProtectionDomain;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.DispatcherType;
 import javax.websocket.server.ServerContainer;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.jmx.MBeanContainer;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.AllowSymLinkAliasChecker;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.util.log.JavaUtilLog;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.Configuration.ClassList;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -43,13 +69,299 @@ import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainer
 
 public class StartWebServer {
 
-    public static final int PORT = 42000;
+    private final static String DEFAULT_HTTP_PORT = "42000";
+    private final static String DEFAULT_HTTPS_PORT = "42443";
+
+    private final static String HTTP_ENABLE = "http.enable";
+    private final static String HTTP_PORT = "http.port";
+    private final static String HTTP_HOST_BIND_NAME = "http.host.bind.name";
+
+    private final static String HTTPS_ENABLE = "https.enable";
+    private final static String HTTPS_PORT = "https.port";
+    private final static String HTTPS_HOST_BIND_NAME = "https.host.bind.name";
+
+    private final static String SERVER_ALLOW_DIR_LISTING = "server.allow.dir.list";
+    private final static String SERVER_ALLOW_HTTP_METHODS = "server.allow.http.methods";
+    private final static String SERVER_DISALLOW_HTTP_METHODS = "server.disallow.http.methods";
+
+    private final static String SSL_KEYSTORE_FILE = "metl.keystore.file";
+    private final static String SSL_TRUSTSTORE_FILE = "javax.net.ssl.trustStore";
+    private final static String SSL_KEYSTORE_PASSWORD = "javax.net.ssl.keyStorePassword";
+    private final static String SSL_TRUSTSTORE_PASSWORD = "javax.net.ssl.trustStorePassword";
+    private final static String SSL_IGNORE_PROTOCOLS = "metl.ssl.ignore.protocols";
+    private final static String SSL_IGNORE_CIPHERS = "metl.ssl.ignore.ciphers";
+    private final static String SSL_KEYSTORE_CERT_ALIAS = "metl.keystore.ssl.cert.alias";
+    private final static String SSL_DEFAULT_ALIAS_PRIVATE_KEY = "metl";
+    private final static String SSL_KEYSTORE_TYPE = "metl.ssl.keystore.type";
+    private final static String SSL_DEFAULT_KEYSTORE_TYPE = "JKS";
 
     public static void main(String[] args) throws Exception {
         runWebServer();
     }
 
-    protected static void disableJettyLogging() {
+    public static void runWebServer() throws Exception {
+        disableJettyLogging();
+
+        System.out.println(IOUtils.toString(StartWebServer.class.getResource("/Metl.asciiart")));
+
+        Server server = new Server();
+        server.setConnectors(getConnectors(server));
+
+        ClassList classlist = Configuration.ClassList.setServerDefault(server);
+        classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
+                "org.eclipse.jetty.annotations.AnnotationConfiguration");
+
+        MBeanContainer mbContainer = new MBeanContainer(ManagementFactory.getPlatformMBeanServer());
+        server.addBean(mbContainer);
+
+        ProtectionDomain protectionDomain = StartWebServer.class.getProtectionDomain();
+        URL location = protectionDomain.getCodeSource().getLocation();
+        File locationDir = new File(location.getFile()).getParentFile();
+
+        String allowDirListing = System.getProperty(SERVER_ALLOW_DIR_LISTING, "false");
+        String allowedMethods = System.getProperty(SERVER_ALLOW_HTTP_METHODS, "");
+        String disallowedMethods = System.getProperty(SERVER_DISALLOW_HTTP_METHODS, "OPTIONS");
+
+        WebAppContext webapp = new WebAppContext();
+        webapp.setContextPath("/metl");
+        webapp.setWar(location.toExternalForm());
+        webapp.addAliasCheck(new AllowSymLinkAliasChecker());
+        webapp.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", allowDirListing);
+
+        FilterHolder filterHolder = new FilterHolder(HttpMethodFilter.class);
+        filterHolder.setInitParameter("server.allow.http.methods", allowedMethods);
+        filterHolder.setInitParameter("server.disallow.http.methods", disallowedMethods);
+        webapp.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST));
+
+        String extraClasspath = getPluginClasspath(locationDir);
+        webapp.setExtraClasspath(extraClasspath);
+        if (extraClasspath.length() > 0) {
+            getLogger().info("Adding extra classpath of: " + extraClasspath.toString());
+        }
+
+        server.setHandler(webapp);
+
+        ServerContainer webSocketServer = WebSocketServerContainerInitializer
+                .configureContext(webapp);
+
+        webSocketServer.setDefaultMaxSessionIdleTimeout(10000000);
+
+        server.start();
+
+        server.join();
+    }
+
+    private static Connector[] getConnectors(Server server) throws IOException {
+        boolean httpEnabled = System.getProperty(HTTP_ENABLE, "true").equals("true");
+
+        int httpPort = Integer.parseInt(System.getProperty(HTTP_PORT, DEFAULT_HTTP_PORT));
+        String httpHostBindName = System.getProperty(HTTP_HOST_BIND_NAME);
+        int httpsPort = Integer.parseInt(System.getProperty(HTTPS_PORT, DEFAULT_HTTPS_PORT));
+
+        boolean httpsEnabled = System.getProperty(HTTPS_ENABLE, "true").equals("true");
+        String httpsHostBindName = System.getProperty(HTTPS_HOST_BIND_NAME);
+
+        HttpConfiguration httpConfig = new HttpConfiguration();
+        httpConfig.setOutputBufferSize(32768);
+
+        List<Connector> connectors = new ArrayList<>(2);
+
+        if (httpEnabled) {
+            ServerConnector http = new ServerConnector(server,
+                    new HttpConnectionFactory(httpConfig));
+            http.setPort(httpPort);
+            http.setHost(httpHostBindName);
+            connectors.add(http);
+            
+            getLogger()
+            .info(String.format("Metl can be reached on http://%s:%d/metl", httpHostBindName != null ? httpHostBindName : "localhost", httpPort ));
+        }
+
+        if (httpsEnabled) {
+            String keyStorePassword = System.getProperty(SSL_KEYSTORE_PASSWORD, "changeit");
+
+            installSslCertIfNecessary(keyStorePassword);
+
+            SslContextFactory sslConnectorFactory = new SslContextFactory();
+            sslConnectorFactory.setKeyManagerPassword(keyStorePassword);
+
+            /* Prevent POODLE attack */
+            String ignoredProtocols = System.getProperty(SSL_IGNORE_PROTOCOLS);
+            if (ignoredProtocols != null && ignoredProtocols.length() > 0) {
+                String[] protocols = ignoredProtocols.split(",");
+                sslConnectorFactory.addExcludeProtocols(protocols);
+            } else {
+                sslConnectorFactory.addExcludeProtocols("SSLv3");
+            }
+
+            String ignoredCiphers = System.getProperty(SSL_IGNORE_CIPHERS);
+            if (ignoredCiphers != null && ignoredCiphers.length() > 0) {
+                String[] ciphers = ignoredCiphers.split(",");
+                sslConnectorFactory.addExcludeCipherSuites(ciphers);
+            }
+
+            sslConnectorFactory.setCertAlias(
+                    System.getProperty(SSL_KEYSTORE_CERT_ALIAS, SSL_DEFAULT_ALIAS_PRIVATE_KEY));
+            sslConnectorFactory.setKeyStore(getKeyStore(keyStorePassword));
+            sslConnectorFactory.setTrustStore(getTrustStore());
+
+            httpConfig.setSecureScheme("https");
+            httpConfig.setSecurePort(httpsPort);
+
+            HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
+            httpsConfig.addCustomizer(new SecureRequestCustomizer());
+
+            ServerConnector https = new ServerConnector(server,
+                    new SslConnectionFactory(sslConnectorFactory, HttpVersion.HTTP_1_1.asString()),
+                    new HttpConnectionFactory(httpsConfig));
+            https.setPort(httpsPort);
+            https.setHost(httpsHostBindName);
+            connectors.add(https);
+            
+            getLogger()
+            .info(String.format("Metl can be reached on https://%s:%d/metl", httpsHostBindName != null ? httpsHostBindName : "localhost", httpsPort ));
+
+        }
+
+        return connectors.toArray(new Connector[connectors.size()]);
+    }
+
+    private static File getTrustStoreFile() {
+        return new File(System.getProperty(SSL_TRUSTSTORE_FILE, "security/cacerts"));
+    }
+
+    private static File getKeyStoreFile() {
+        return new File(System.getProperty(SSL_KEYSTORE_FILE, "security/keystore"));
+
+    }
+    
+    private static String getHostName(String property) {
+        final String UNKNOWN = "unknown";
+        String hostName = System.getProperty(property, UNKNOWN);
+        if (UNKNOWN.equals(hostName)) {
+            try {
+                hostName = System.getenv("HOSTNAME");
+                
+                if (isBlank(hostName)) {
+                    hostName = System.getenv("COMPUTERNAME");
+                }
+
+                if (isBlank(hostName)) {
+                    try {
+                        hostName = IOUtils.toString(Runtime.getRuntime().exec("hostname").getInputStream());
+                    } catch (Exception ex) {}
+                }
+                
+                if (isBlank(hostName)) {
+                    hostName = InetAddress.getByName(
+                            InetAddress.getLocalHost().getHostAddress()).getHostName();
+                }
+                
+                if (isNotBlank(hostName)) {
+                    hostName = hostName.trim();
+                }
+
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return hostName;
+    }
+
+    private static KeyStore getTrustStore() {
+        try {
+            String keyStoreType = System.getProperty(SSL_KEYSTORE_TYPE, SSL_DEFAULT_KEYSTORE_TYPE);
+            KeyStore ks = KeyStore.getInstance(keyStoreType);
+            File trustStoreFile = getTrustStoreFile();
+            char[] password = System.getProperty(SSL_TRUSTSTORE_PASSWORD) != null ? System.getProperty(SSL_TRUSTSTORE_PASSWORD).toCharArray() : null;
+            if (trustStoreFile.exists()) {
+                FileInputStream is = new FileInputStream(trustStoreFile);
+                ks.load(is, password);
+                is.close();
+            } else {
+                ks.load(null, password);
+            }
+            return ks;
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static KeyStore getKeyStore(String keyPass) {
+        try {
+            String keyStoreType = System.getProperty(SSL_KEYSTORE_TYPE, SSL_DEFAULT_KEYSTORE_TYPE);
+            KeyStore ks = KeyStore.getInstance(keyStoreType);
+            File keyStoreFile = getKeyStoreFile();
+            if (keyStoreFile.exists()) {
+                FileInputStream is = new FileInputStream(keyStoreFile);
+                ks.load(is, keyPass.toCharArray());
+                is.close();
+            } else {
+                ks.load(null, keyPass.toCharArray());
+            }
+            return ks;
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void installSslCertIfNecessary(String keyPass) {
+        try {
+            String hostName = getHostName(HTTPS_HOST_BIND_NAME);
+            KeyStore keyStore = getKeyStore(keyPass);
+            String alias = System.getProperty(SSL_KEYSTORE_CERT_ALIAS,
+                    SSL_DEFAULT_ALIAS_PRIVATE_KEY);
+            KeyStore.ProtectionParameter param = new KeyStore.PasswordProtection(
+                    keyPass.toCharArray());
+            Entry entry = keyStore.getEntry(alias, param);
+            if (entry == null) {
+                Class<?> keyPairClazz = Class.forName("sun.security.tools.keytool.CertAndKeyGen");
+                Constructor<?> constructor = keyPairClazz.getConstructor(String.class,
+                        String.class);
+                Object keypair = constructor.newInstance("RSA", "SHA1WithRSA");
+
+                Class<?> x500NameClazz = Class.forName("sun.security.x509.X500Name");
+                constructor = x500NameClazz.getConstructor(String.class, String.class, String.class,
+                        String.class, String.class, String.class);
+                Object x500Name = constructor.newInstance(hostName, "Metl", "JumpMind", "Unknown",
+                        "Unknown", "Unknown");
+
+                keyPairClazz.getMethod("generate", Integer.TYPE).invoke(keypair, 1024);
+
+                PrivateKey privKey = (PrivateKey) keyPairClazz.getMethod("getPrivateKey")
+                        .invoke(keypair);
+
+                X509Certificate[] chain = new X509Certificate[1];
+
+                Date startDate = new Date(System.currentTimeMillis() - (1000 * 60 * 60 * 24));
+                long validTimeInMs = 100 * 365 * 24 * 60 * 60;
+                chain[0] = (X509Certificate) keyPairClazz
+                        .getMethod("getSelfCertificate", x500NameClazz, Date.class, Long.TYPE)
+                        .invoke(keypair, x500Name, startDate, validTimeInMs);
+
+                keyStore.setKeyEntry(alias, privKey, keyPass.toCharArray(), chain);
+
+                File keyStoreFile = getKeyStoreFile();
+                keyStoreFile.getParentFile().mkdirs();
+                FileOutputStream fos = new FileOutputStream(keyStoreFile);
+                keyStore.store(fos, keyPass.toCharArray());
+                fos.close();
+            }
+
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void disableJettyLogging() {
         System.setProperty("org.eclipse.jetty.util.log.class", JavaUtilLog.class.getName());
         Logger.getLogger(JavaUtilLog.class.getName()).setLevel(Level.SEVERE);
         Logger rootLogger = Logger.getLogger("org.eclipse.jetty");
@@ -59,41 +371,8 @@ public class StartWebServer {
         rootLogger.setLevel(Level.SEVERE);
     }
 
-    public static void runWebServer() throws Exception {
 
-        disableJettyLogging();
-
-        System.out.println(IOUtils.toString(StartWebServer.class.getResource("/Metl.asciiart")));
-
-        Server server = new Server(PORT);
-
-        ClassList classlist = Configuration.ClassList.setServerDefault(server);
-        classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration", "org.eclipse.jetty.annotations.AnnotationConfiguration");
-
-        MBeanContainer mbContainer = new MBeanContainer(ManagementFactory.getPlatformMBeanServer());
-        server.addBean(mbContainer);
-
-        ProtectionDomain protectionDomain = StartWebServer.class.getProtectionDomain();
-        URL location = protectionDomain.getCodeSource().getLocation();
-        File warFile = new File(location.getFile());
-        File locationDir = warFile.getParentFile();
-
-        WebAppContext webapp = new WebAppContext();
-
-        // HashSessionManager sessionManager = new HashSessionManager();
-        // File storeDir = new File(locationDir, "sessions");
-        // storeDir.mkdirs();
-        // sessionManager.setStoreDirectory(storeDir);
-        // sessionManager.setLazyLoad(true);
-        // sessionManager.setSavePeriod(5);
-        // sessionManager.setDeleteUnrestorableSessions(true);
-        // SessionHandler sessionHandler = new SessionHandler(sessionManager);
-        // webapp.setSessionHandler(sessionHandler);
-
-        webapp.setContextPath("/metl");
-        webapp.setWar(location.toExternalForm());
-        webapp.addAliasCheck(new AllowSymLinkAliasChecker());
-
+    private static String getPluginClasspath(File locationDir) throws Exception {
         File pluginsDir = new File(locationDir, "plugins");
         pluginsDir.mkdirs();
         StringBuilder extraClasspath = new StringBuilder();
@@ -104,21 +383,7 @@ public class StartWebServer {
                 extraClasspath.append(file.toURI().toURL().toExternalForm()).append(",");
             }
         }
-        webapp.setExtraClasspath(extraClasspath.toString());
-
-        server.setHandler(webapp);
-
-        ServerContainer webSocketServer = WebSocketServerContainerInitializer.configureContext(webapp);
-        webSocketServer.setDefaultMaxSessionIdleTimeout(10000000);
-
-        server.start();
-
-        if (extraClasspath.length() > 0) {
-            getLogger().info("Adding extra classpath of: " + extraClasspath.toString());
-        }
-        getLogger().info("To use Metl, navigate to http://localhost:" + PORT + "/metl");
-
-        server.join();
+        return extraClasspath.toString();
     }
 
     private final static Logger getLogger() {

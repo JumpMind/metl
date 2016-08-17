@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.core.persist;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,5 +51,7 @@ public interface IExecutionService {
     public void deleteExecution(String executionId);
     
     public List<String> findExecutedFlowIds();
+
+    public File getExecutionStepLog(String executionStepId);
     	
 }

@@ -94,6 +94,7 @@ public class ButtonBar extends HorizontalLayout {
 
     public void addRight(Component component) {
         right.addComponent(component);
+        right.setComponentAlignment(component, Alignment.BOTTOM_RIGHT);
     }
 
     public void addLeft(Component component) {
