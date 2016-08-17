@@ -133,6 +133,10 @@ public class FlowRuntime {
             IConfigurationService configurationService, IExecutionService executionService,
             Map<String, IResourceRuntime> deployedResources, List<Notification> notifications,
             Map<String, String> globalSettings, Map<String, String> runtimeParameters) {
+        if (agent.isAutoRefresh()) {
+            deployment = configurationService.findAgentDeployment(deployment.getId());
+            configurationService.refreshAgentParameters(agent);
+        }
         this.executionId = executionId;
         this.deployment = deployment;
         this.agent = agent;
@@ -203,7 +207,6 @@ public class FlowRuntime {
     }
 
     public void start() throws InterruptedException {
-
         if (threadService != null && executionService != null) {
             this.executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService,
                     executionService);

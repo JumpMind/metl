@@ -47,6 +47,7 @@ import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.component.HttpRequest;
 import org.jumpmind.metl.core.runtime.component.Results;
+import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.web.HttpMethod;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMapping;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
@@ -150,7 +151,8 @@ public class ExecutionApi {
             }
             AgentDeployment deployment = mapping.getDeployment();
             AgentRuntime agentRuntime = agentManager.getAgentRuntime(deployment.getAgentId());
-            Results results = agentRuntime.execute(deployment, params);
+            FlowRuntime flowRuntime = agentRuntime.createFlowRuntime(deployment, params);
+            Results results = flowRuntime.execute();
             if (results != null) {
                 String contentType = results.getContentType();
                 if (isNotBlank(contentType)) {
