@@ -133,7 +133,7 @@ public class FlowRuntime {
             IConfigurationService configurationService, IExecutionService executionService,
             Map<String, IResourceRuntime> deployedResources, List<Notification> notifications,
             Map<String, String> globalSettings, Map<String, String> runtimeParameters) {
-        if (agent.isAutoRefresh()) {
+        if (agent.isAutoRefresh() && configurationService != null) {
             deployment = configurationService.findAgentDeployment(deployment.getId());
             configurationService.refreshAgentParameters(agent);
         }
