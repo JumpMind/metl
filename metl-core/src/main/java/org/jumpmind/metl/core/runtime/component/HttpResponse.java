@@ -27,7 +27,7 @@ public class HttpResponse extends AbstractHttpRequestResponse implements IHasRes
     }
 
     @Override
-    protected void start() {
+    public void start() {
         init();
         if (getInputModel() == null) {
             response = new StringBuilder();

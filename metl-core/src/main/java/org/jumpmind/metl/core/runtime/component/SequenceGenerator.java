@@ -58,7 +58,7 @@ public class SequenceGenerator extends AbstractRdbmsComponentRuntime {
     static final Map<String, Long> sharedSequence = new HashMap<String, Long>();
 
     @Override
-    protected void start() {
+    public void start() {
         Component component = getComponent();
         String sequenceAttributeName = component.get(SEQ_ATTRIBUTE);
 

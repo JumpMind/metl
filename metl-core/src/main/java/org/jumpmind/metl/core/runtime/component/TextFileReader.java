@@ -55,7 +55,7 @@ public class TextFileReader extends AbstractFileReader {
     String encoding = "UTF-8";
     
     @Override
-    protected void start() {
+    public void start() {
     	init();
         TypedProperties properties = getTypedProperties();
         textHeaderLinesToSkip = properties.getInt(SETTING_HEADER_LINES_TO_SKIP, textHeaderLinesToSkip);

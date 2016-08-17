@@ -60,7 +60,7 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
     List<AttributeFormat> attributesList;
 
     @Override
-    protected void start() {
+    public void start() {
         TypedProperties properties = getTypedProperties();
         useHeader = properties.is(FIXED_LENGTH_FORMATTER_WRITE_HEADER);
         convertAttributeSettingsToAttributeFormat();

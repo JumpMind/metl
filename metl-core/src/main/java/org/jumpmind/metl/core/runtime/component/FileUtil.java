@@ -84,7 +84,7 @@ public class FileUtil extends AbstractComponentRuntime {
     }
 
     @Override
-    protected void start() {
+    public void start() {
         TypedProperties typedProperties = getTypedProperties();
         
         directory = getResourceReference();

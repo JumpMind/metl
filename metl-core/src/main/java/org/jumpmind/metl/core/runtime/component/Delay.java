@@ -36,7 +36,7 @@ public class Delay extends AbstractComponentRuntime {
     long delay = 1000;
 
     @Override
-    protected void start() {        
+    public void start() {        
         delay = getComponent().getLong(DELAY_TIME, 1000l);
         runWhen = getComponent().get(RUN_WHEN, PER_UNIT_OF_WORK);
     }

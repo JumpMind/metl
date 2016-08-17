@@ -76,7 +76,7 @@ public class DelimitedParser extends AbstractComponentRuntime {
     List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
 
     @Override
-    protected void start() {
+    public void start() {
         delimiter = StringEscapeUtils.unescapeJava(getComponent().get(SETTING_DELIMITER, delimiter));
         quoteCharacter = getComponent().get(SETTING_QUOTE_CHARACTER, quoteCharacter);
         encoding = getComponent().get(SETTING_ENCODING, encoding);

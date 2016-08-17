@@ -93,7 +93,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     String lastPreparedDml;
 
     @Override
-    protected void start() {
+    public void start() {
 
         inboundEntityDataCount = 0;
         error = null;

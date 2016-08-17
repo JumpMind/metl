@@ -19,7 +19,7 @@ public class JsonFormatter extends AbstractComponentRuntime {
     StringBuilder buffer;
 
     @Override
-    protected void start() {
+    public void start() {
         TypedProperties properties = getTypedProperties();
         runWhen = properties.get(RUN_WHEN);
         if (getInputModel() == null) {

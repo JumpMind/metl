@@ -34,7 +34,7 @@ public class Union extends AbstractComponentRuntime {
     ArrayList<EntityData> dataToSend = new ArrayList<EntityData>();
 
     @Override
-    protected void start() {
+    public void start() {
     }
         
     @Override

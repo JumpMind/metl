@@ -75,7 +75,7 @@ public class XmlReader extends AbstractComponentRuntime {
     int readTagsPerMessage = 1;
 
     @Override
-    protected void start() {
+    public void start() {
         TypedProperties properties = getTypedProperties();
         getFileNameFromMessage = properties.is(SETTING_GET_FILE_FROM_MESSAGE, getFileNameFromMessage);
         relativePathAndFile = properties.get(SETTING_RELATIVE_PATH, relativePathAndFile);

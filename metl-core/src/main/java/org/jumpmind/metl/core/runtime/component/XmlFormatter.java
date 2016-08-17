@@ -94,7 +94,7 @@ public class XmlFormatter extends AbstractXMLComponentRuntime {
     String runWhen;
 
     @Override
-    protected void start() {
+    public void start() {
         super.start();
         TypedProperties properties = getTypedProperties();
         ignoreNamespace = properties.is(IGNORE_NAMESPACE);

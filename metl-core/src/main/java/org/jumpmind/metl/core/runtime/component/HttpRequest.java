@@ -91,7 +91,7 @@ public class HttpRequest extends AbstractHttpRequestResponse {
     }
 
     @Override
-    protected void start() {
+    public void start() {
         init();
     }
 

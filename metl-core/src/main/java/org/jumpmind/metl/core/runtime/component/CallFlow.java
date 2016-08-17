@@ -33,7 +33,7 @@ public class CallFlow extends AbstractComponentRuntime {
     }
 
     @Override
-    protected void start() {
+    public void start() {
     }
 
     @Override

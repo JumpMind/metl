@@ -17,7 +17,7 @@ public class BinaryFileWriter extends AbstractFileWriter {
     public static final String TYPE = "Binary File Writer";
 
     @Override
-    protected void start() {
+    public void start() {
         init();
     }
 

@@ -85,7 +85,7 @@ public class XsltProcessor extends AbstractComponentRuntime {
     String xmlFormat;
     
     @Override
-    protected void start() {
+    public void start() {
         TypedProperties properties = getTypedProperties();
         outputAllAttributes = properties.is(OUTPUT_ALL_ATTRIBUTES);
         useParameterReplacement = properties.is(PARAMETER_REPLACEMENT);

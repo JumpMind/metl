@@ -108,7 +108,7 @@ public class StepRuntime implements Runnable {
 
     Map<Integer, IComponentRuntime> componentRuntimeByThread = new HashMap<>();
 
-    Boolean startStep = null;
+    boolean startStep;
 
     Set<String> liveSourceStepIds;
 
@@ -131,7 +131,14 @@ public class StepRuntime implements Runnable {
         this.targetStepRuntimeUnitOfWorkSent = new HashSet<String>();
         this.componentRuntimeFactory = componentFactory;
         this.componentDefintionFactory = componentDefinitionFactory;
-        this.componentDefintion = componentDefintionFactory.getDefinition(getComponentType());
+        this.componentDefintion = componentDefintionFactory.getDefinition(getComponentType());        
+        Component component = componentContext.getFlowStep().getComponent();
+        this.threadCount = component.getInt(StepRuntime.THREAD_COUNT, 1);        
+        
+        for (int threadNumber = 1; threadNumber <= threadCount; threadNumber++) {
+            createComponentRuntime(threadNumber);
+        }
+
     }
 
     private String getComponentType() {
@@ -165,6 +172,7 @@ public class StepRuntime implements Runnable {
         for (StepRuntime stepRuntime : sourceStepRuntimes) {
             this.liveSourceStepIds.add(stepRuntime.getComponentContext().getFlowStep().getId());
         }
+        this.startStep = sourceStepRuntimes == null || sourceStepRuntimes.size() == 0;
     }
 
     public List<StepRuntime> getSourceStepRuntimes() {
@@ -182,17 +190,19 @@ public class StepRuntime implements Runnable {
 
     public void start(IResourceFactory resourceFactory) {
         try {
-            componentContext.setComponentStatistics(new ComponentStatistics());
-            startStep = sourceStepRuntimes == null || sourceStepRuntimes.size() == 0;
-            Component component = componentContext.getFlowStep().getComponent();
-            threadCount = component.getInt(StepRuntime.THREAD_COUNT, 1);            
+            componentContext.setComponentStatistics(new ComponentStatistics());    
             if (threadCount > 1) {
                 String prefix = String.format("%s-%s", LogUtils.normalizeName(flowRuntime.getAgent().getName()),
                         LogUtils.normalizeName(componentContext.getFlowStep().getName()));
                 this.componentRuntimeExecutor = ThreadUtils.createFixedThreadPool(prefix, queueCapacity, threadCount);
             }
-            for (int threadNumber = 1; threadNumber <= threadCount; threadNumber++) {
-                createComponentRuntime(threadNumber);
+            for(IComponentRuntime componentRuntime:componentRuntimeByThread.values()) {
+                if (sourceStepRuntimes.size() == 0 && !componentRuntime.supportsStartupMessages()) {
+                    throw new MisconfiguredException("%s must have an inbound connection from another component",
+                            componentRuntime.getComponentDefintion().getName());
+                }
+                componentContext.getExecutionTracker().flowStepStarted(componentRuntime.getThreadNumber(), componentContext);
+                componentRuntime.start();                
             }
         } catch (RuntimeException ex) {
             recordError(1, ex);
@@ -202,15 +212,8 @@ public class StepRuntime implements Runnable {
 
     protected void createComponentRuntime(int threadNumber) {
         String type = getComponentType();
-        IComponentRuntime componentRuntime = componentRuntimeFactory.create(type);
+        IComponentRuntime componentRuntime = componentRuntimeFactory.create(type, componentContext, threadNumber);
         componentRuntimeByThread.put(threadNumber, componentRuntime);
-        if (sourceStepRuntimes.size() == 0 && !componentRuntime.supportsStartupMessages()) {
-            throw new MisconfiguredException("%s must have an inbound connection from another component",
-                    componentRuntime.getComponentDefintion().getName());
-        } else {
-            componentContext.getExecutionTracker().flowStepStarted(threadNumber, componentContext);
-            componentRuntime.start(threadNumber, componentContext);
-        }
     }
 
     protected void recordError(int threadNumber, Throwable ex) {
