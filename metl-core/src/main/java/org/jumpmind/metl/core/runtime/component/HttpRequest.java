@@ -17,7 +17,7 @@ import org.springframework.util.MimeTypeUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
-public class HttpRequest extends AbstractHttpRequestResponse {
+public class HttpRequest extends AbstractHttpRequestResponse implements IHasSecurity {
 
     public static final String REQUEST_PAYLOAD = HttpRequest.class.getName() + ".REQUEST_PAYLOAD";
 
@@ -27,7 +27,29 @@ public class HttpRequest extends AbstractHttpRequestResponse {
 
     public static final String HTTP_METHOD = "http.method";
     
+    public static final String SECURITY_SCHEME = "security.scheme";
+    
+    public static final String SECURE_USERNAME = "secure.username";
+    
+    public static final String SECURE_PASSWORD = "secure.password";
+    
+    
     public HttpRequest() {
+    }
+
+    @Override
+    public SecurityType getSecurityType() {
+        return SecurityType.valueOf(properties.get(SECURITY_SCHEME, SecurityType.NONE.name()));
+    }
+    
+    @Override
+    public String getPassword() {
+        return properties.get(SECURE_PASSWORD);
+    }
+    
+    @Override
+    public String getUsername() {
+        return properties.get(SECURE_USERNAME);
     }
 
     @Override

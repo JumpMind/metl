@@ -22,6 +22,7 @@ package org.jumpmind.metl.ui.api;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
@@ -30,10 +31,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.binary.Base64;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.DeploymentStatus;
@@ -46,6 +49,7 @@ import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.component.HttpRequest;
+import org.jumpmind.metl.core.runtime.component.IHasSecurity;
 import org.jumpmind.metl.core.runtime.component.Results;
 import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
 import org.jumpmind.metl.core.runtime.web.HttpMethod;
@@ -105,7 +109,7 @@ public class ExecutionApi {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public final Object put(HttpServletRequest req, HttpServletResponse res,
-            @RequestBody(required=false) String payload) throws Exception {
+            @RequestBody(required = false) String payload) throws Exception {
         return executeFlow(req, res, payload);
     }
 
@@ -114,7 +118,7 @@ public class ExecutionApi {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public final Object delete(HttpServletRequest req, HttpServletResponse res,
-            @RequestBody(required=false) String payload) throws Exception {
+            @RequestBody(required = false) String payload) throws Exception {
         return executeFlow(req, res, payload);
     }
 
@@ -123,14 +127,15 @@ public class ExecutionApi {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public final Object post(HttpServletRequest req, HttpServletResponse res,
-            @RequestBody(required=false) String payload) throws Exception {
+            @RequestBody(required = false) String payload) throws Exception {
         return executeFlow(req, res, payload);
     }
 
-    private Object executeFlow(HttpServletRequest req, HttpServletResponse res, String payload)
-            throws Exception {
-        String requestType = req.getMethod();
-        String restOfTheUrl = ((String) req
+    private Object executeFlow(HttpServletRequest request, HttpServletResponse response,
+            String payload) throws Exception {
+        Object resultPayload = null;
+        String requestType = request.getMethod();
+        String restOfTheUrl = ((String) request
                 .getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE))
                         .substring(WS.length());
         log.info(String.format("Attempting to find a service uri match for %s with request type %s",
@@ -138,35 +143,103 @@ public class ExecutionApi {
         HttpRequestMapping mapping = requestRegistry.findBestMatch(HttpMethod.valueOf(requestType),
                 restOfTheUrl);
         if (mapping != null) {
-            Map<String, String> params = toMap(req);
+            Map<String, String> params = toMap(request);
             params.putAll(
                     patternMatcher.extractUriTemplateVariables(mapping.getPath(), restOfTheUrl));
             if (isNotBlank(payload)) {
                 params.put(HttpRequest.REQUEST_PAYLOAD, payload.toString());
             }
-            Enumeration<String> headerNames = req.getHeaderNames();
+            Enumeration<String> headerNames = request.getHeaderNames();
             while (headerNames.hasMoreElements()) {
                 String headerName = headerNames.nextElement();
-                params.put(headerName, req.getHeader(headerName));
+                params.put(headerName, request.getHeader(headerName));
             }
             AgentDeployment deployment = mapping.getDeployment();
             AgentRuntime agentRuntime = agentManager.getAgentRuntime(deployment.getAgentId());
             FlowRuntime flowRuntime = agentRuntime.createFlowRuntime(deployment, params);
-            Results results = flowRuntime.execute();
-            if (results != null) {
-                String contentType = results.getContentType();
-                if (isNotBlank(contentType)) {
-                    res.setContentType(contentType);
+            IHasSecurity security = flowRuntime.getHasSecurity();
+            if (enforceSecurity(security, request, response)) {
+                Results results = flowRuntime.execute();
+                if (results != null) {
+                    String contentType = results.getContentType();
+                    if (isNotBlank(contentType)) {
+                        response.setContentType(contentType);
+                    }
+                    resultPayload = results.getValue();
                 }
-                return results.getValue();
-            } else {
-                return null;
             }
+            return resultPayload;
+
         } else {
             throw new CouldNotFindDeploymentException(
                     "Could not find a deployed web request that matches " + restOfTheUrl
                             + " for an HTTP " + requestType);
         }
+    }
+
+    protected boolean enforceSecurity(IHasSecurity security, HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+        boolean secured = true;
+        if (security != null) {
+            switch (security.getSecurityType()) {
+                case BASIC:
+                    secured = enforceBasicAuth(security, request, response);
+                    break;
+                case NONE:
+                default:
+                    break;
+            }
+        }
+        return secured;
+    }
+
+    protected boolean enforceBasicAuth(IHasSecurity security, HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+        boolean secured = true;
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null) {
+            StringTokenizer st = new StringTokenizer(authHeader);
+            if (st.hasMoreTokens()) {
+                String basic = st.nextToken();
+
+                if (basic.equalsIgnoreCase("Basic")) {
+                    try {
+                        String credentials = new String(Base64.decodeBase64(st.nextToken()),
+                                "UTF-8");
+                        int p = credentials.indexOf(":");
+                        if (p != -1) {
+                            String _username = credentials.substring(0, p).trim();
+                            String _password = credentials.substring(p + 1).trim();
+                            if (!security.getUsername().equals(_username)
+                                    || !security.getPassword().equals(_password)) {
+                                unauthorized(response, "Bad credentials");
+                                secured = false;
+                            }
+
+                        } else {
+                            unauthorized(response, "Invalid authentication token");
+                            secured = false;
+                        }
+                    } catch (UnsupportedEncodingException e) {
+                        throw new RuntimeException("Couldn't retrieve authentication", e);
+                    }
+                }
+            }
+        } else {
+            unauthorized(response);
+            secured = false;
+        }
+        return secured;
+    }
+
+    private void unauthorized(HttpServletResponse response, String message) throws IOException {
+        response.setHeader("WWW-Authenticate", "Basic realm=\"Protected\"");
+        response.sendError(401, message);
+    }
+
+    private void unauthorized(HttpServletResponse response) throws IOException {
+        unauthorized(response, "Unauthorized");
     }
 
     @ApiOperation(value = "Invoke a flow that is deployed to an agent by name")

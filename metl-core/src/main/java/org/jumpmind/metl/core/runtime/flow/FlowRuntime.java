@@ -59,6 +59,7 @@ import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.IHasResults;
+import org.jumpmind.metl.core.runtime.component.IHasSecurity;
 import org.jumpmind.metl.core.runtime.component.Results;
 import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
@@ -113,6 +114,8 @@ public class FlowRuntime {
     Map<String, String> globalSettings;
     
     Map<String, IResourceRuntime> deployedResources;
+    
+    Flow manipulatedFlow;
 
     public FlowRuntime(String executionId, AgentDeployment deployment, Agent agent,
             IComponentRuntimeFactory componentRuntimeFactory,
@@ -154,10 +157,78 @@ public class FlowRuntime {
         if (runtimeParameters != null) {
             this.flowParameters.putAll(runtimeParameters);
         }
+        
+        if (threadService != null && executionService != null) {
+            this.executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService,
+                    executionService);
+        } else {
+            this.executionTracker = new ExecutionTrackerLogger(deployment);
+        }
+        this.stepRuntimes = new HashMap<String, StepRuntime>();
+
+        manipulatedFlow = manipulateFlow(deployment.getFlow());
+        
+        /* create a step runtime for every component in the flow */
+        for (FlowStep flowStep : manipulatedFlow.getFlowSteps()) {
+            boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED,
+                    true);
+            if (enabled) {
+                ComponentContext context = new ComponentContext(deployment, flowStep,
+                        manipulatedFlow, executionTracker, deployedResources, flowParameters,
+                        globalSettings);
+                StepRuntime stepRuntime = new StepRuntime(componentRuntimeFactory,
+                        componentDefinitionFactory, context, this);
+                stepRuntimes.put(flowStep.getId(), stepRuntime);
+            }
+        }
+
+        List<FlowStepLink> links = manipulatedFlow.getFlowStepLinks();
+
+        /* for each step runtime, set their list of msgTarget step runtimes */
+        for (String stepId : stepRuntimes.keySet()) {
+            List<StepRuntime> targetStepRuntimes = new ArrayList<StepRuntime>();
+            List<StepRuntime> sourceStepRuntimes = new ArrayList<StepRuntime>();
+            for (FlowStepLink flowStepLink : links) {
+                if (stepId.equals(flowStepLink.getSourceStepId())) {
+                    StepRuntime runtime = stepRuntimes.get(flowStepLink.getTargetStepId());
+                    if (runtime != null) {
+                        targetStepRuntimes.add(runtime);
+                    }
+                }
+                if (stepId.equals(flowStepLink.getTargetStepId())) {
+                    StepRuntime runtime = stepRuntimes.get(flowStepLink.getSourceStepId());
+                    if (runtime != null) {
+                        sourceStepRuntimes.add(runtime);
+                    }
+                }
+            }
+            StepRuntime runtime = stepRuntimes.get(stepId);
+            if (runtime != null) {
+                runtime.setTargetStepRuntimes(targetStepRuntimes);
+                runtime.setSourceStepRuntimes(sourceStepRuntimes);
+            }
+        }
+
+        /* start up each step runtime */
+        manipulatedFlow.calculateApproximateOrder();        
     }
 
     public AgentDeployment getDeployment() {
         return deployment;
+    }
+    
+    public IHasSecurity getHasSecurity() {
+        IHasSecurity security = null;
+        Collection<StepRuntime> steps = stepRuntimes.values();
+        for (StepRuntime stepRuntime : steps) {
+            List<IComponentRuntime> runtimes = stepRuntime.getComponentRuntimes();
+            for (IComponentRuntime runtime : runtimes) {
+                if (runtime instanceof IHasSecurity) {
+                    security = ((IHasSecurity) runtime);
+                }
+            }            
+        }
+        return security;
     }
 
     public Results getResult() {
@@ -207,65 +278,13 @@ public class FlowRuntime {
     }
 
     public void start() throws InterruptedException {
-        if (threadService != null && executionService != null) {
-            this.executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService,
-                    executionService);
-        } else {
-            this.executionTracker = new ExecutionTrackerLogger(deployment);
-        }
-        this.stepRuntimes = new HashMap<String, StepRuntime>();
-
-        Flow manipulatedFlow = manipulateFlow(deployment.getFlow());
 
         executionTracker.beforeFlow(executionId, flowParameters);
 
         sendNotifications(Notification.EventType.FLOW_START);
 
-        /* create a step runtime for every component in the flow */
-        for (FlowStep flowStep : manipulatedFlow.getFlowSteps()) {
-            boolean enabled = flowStep.getComponent().getBoolean(AbstractComponentRuntime.ENABLED,
-                    true);
-            if (enabled) {
-                ComponentContext context = new ComponentContext(deployment, flowStep,
-                        manipulatedFlow, executionTracker, deployedResources, flowParameters,
-                        globalSettings);
-                StepRuntime stepRuntime = new StepRuntime(componentRuntimeFactory,
-                        componentDefinitionFactory, context, this);
-                stepRuntimes.put(flowStep.getId(), stepRuntime);
-            }
-        }
-
-        List<FlowStepLink> links = manipulatedFlow.getFlowStepLinks();
-
-        /* for each step runtime, set their list of msgTarget step runtimes */
-        for (String stepId : stepRuntimes.keySet()) {
-            List<StepRuntime> targetStepRuntimes = new ArrayList<StepRuntime>();
-            List<StepRuntime> sourceStepRuntimes = new ArrayList<StepRuntime>();
-            for (FlowStepLink flowStepLink : links) {
-                if (stepId.equals(flowStepLink.getSourceStepId())) {
-                    StepRuntime runtime = stepRuntimes.get(flowStepLink.getTargetStepId());
-                    if (runtime != null) {
-                        targetStepRuntimes.add(runtime);
-                    }
-                }
-                if (stepId.equals(flowStepLink.getTargetStepId())) {
-                    StepRuntime runtime = stepRuntimes.get(flowStepLink.getSourceStepId());
-                    if (runtime != null) {
-                        sourceStepRuntimes.add(runtime);
-                    }
-                }
-            }
-            StepRuntime runtime = stepRuntimes.get(stepId);
-            if (runtime != null) {
-                runtime.setTargetStepRuntimes(targetStepRuntimes);
-                runtime.setSourceStepRuntimes(sourceStepRuntimes);
-            }
-        }
-
         List<StepRuntime> startSteps = findStartSteps();
 
-        /* start up each step runtime */
-        manipulatedFlow.calculateApproximateOrder();
         List<FlowStep> flowSteps = manipulatedFlow.getFlowSteps();
         for (FlowStep flowStep : flowSteps) {
             StepRuntime stepRuntime = stepRuntimes.get(flowStep.getId());

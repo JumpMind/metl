@@ -1741,7 +1741,25 @@
                 <name>Path</name>
                 <defaultValue>/$(_agentName)/$(_deploymentName)/$(_versionName)</defaultValue>
                 <description></description>
-            </setting>    
+            </setting>
+            <setting id='security.scheme' required='false' type='choice'>
+                <name>Security Scheme</name>
+                <defaultValue>NONE</defaultValue>
+                <choices>
+                    <choice>NONE</choice>
+                    <choice>BASIC</choice>
+                </choices>
+            </setting>  
+            <setting id='secure.username'
+               required='false'
+               type='text'>
+               <name>Secure Username</name>
+            </setting>
+            <setting id='secure.password'
+               required='false'
+               type='password'>
+               <name>Secure Password</name>
+            </setting>            
             <setting id='payload.format' required='false' type='choice'>
                 <name>Automatic Payload Format</name>
                 <defaultValue>BY_INBOUND_ROW</defaultValue>

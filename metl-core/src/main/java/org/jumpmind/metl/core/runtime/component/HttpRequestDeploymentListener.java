@@ -32,7 +32,6 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
         if (!requestMapping.getPath().substring(0,1).equalsIgnoreCase("/")) {
             requestMapping.setPath("/" + requestMapping.getPath());
         }
-        logger.info("Registering: {}", requestMapping);
         httpRequestMappingRegistry.register(requestMapping);
     }
 
@@ -51,6 +50,12 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
         
         String path = properties.get(HttpRequest.PATH);
         Map<String, String> replacements = FlowRuntime.getFlowParameters(flow, agent, deployment);
+        for(String key: replacements.keySet()) {
+            String value = replacements.get(key);
+            value = value.replaceAll("[\\s]", "_");
+            value = value.replaceAll("[^a-zA-Z0-9_\\.]", "");
+            replacements.put(key, value);
+        }
         path = FormatUtils.replaceTokens(path, replacements, true);
         
         String method = properties.get(HttpRequest.HTTP_METHOD, HttpMethod.GET.name());
