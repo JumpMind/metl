@@ -694,6 +694,8 @@ public class DesignNavigator extends VerticalLayout {
             treeTable.setItemIcon(model, Icons.MODEL);
             treeTable.setParent(model, treeTable.getParent(object));
             treeTable.setChildrenAllowed(model, false);
+            treeTable.setValue(model);
+            startEditingItem((AbstractObject) treeTable.getValue());
         } else if (object instanceof FlowName) {
             Flow oldFlow = configurationService.findFlow(((FlowName) object).getId());
             Flow newFlow = configurationService.copy((Flow) oldFlow);
@@ -710,7 +712,8 @@ public class DesignNavigator extends VerticalLayout {
             treeTable.setItemIcon(flow, Icons.FLOW);
             treeTable.setParent(flow, treeTable.getParent(object));
             treeTable.setChildrenAllowed(flow, false);
-
+            treeTable.setValue(flow);
+            startEditingItem((AbstractObject) treeTable.getValue());
         }
     }
 
