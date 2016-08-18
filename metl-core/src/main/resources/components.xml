@@ -1707,21 +1707,7 @@
     <className>org.jumpmind.metl.core.runtime.component.Union</className>
     <description></description>
   </component>
-    <component category='PROCESSOR' id='JsonFormatter' inputMessageType='entity' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='none'>
-        <name>JSON Formatter</name>
-        <className>org.jumpmind.metl.core.runtime.component.JsonFormatter</className>
-        <settings>
-            <setting id='run.when' required='false' type='choice'>
-                <name>Run When</name>
-                <defaultValue>PER UNIT OF WORK</defaultValue>
-                <choices>
-                    <choice>PER UNIT OF WORK</choice>
-                    <choice>PER MESSAGE</choice>
-                </choices>
-            </setting>
-        </settings>
-    </component>  
-    <component category='SERVICE' id='HttpRequest' inputMessageType='none' inputOutputModelsMatch='false' outputMessageType='any' resourceCategory='none'>
+    <component category='SERVICE' id='HttpRequest' inputMessageType='none' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='none'>
         <name>Http Request</name>
         <className>org.jumpmind.metl.core.runtime.component.HttpRequest</className>
         <deploymentListenerClassName>org.jumpmind.metl.core.runtime.component.HttpRequestDeploymentListener</deploymentListenerClassName>
@@ -1759,15 +1745,7 @@
                required='false'
                type='password'>
                <name>Secure Password</name>
-            </setting>            
-            <setting id='payload.format' required='false' type='choice'>
-                <name>Automatic Payload Format</name>
-                <defaultValue>BY_INBOUND_ROW</defaultValue>
-                <choices>
-                    <choice>BY_INBOUND_ROW</choice>
-                    <choice>BY_TABLE</choice>
-                </choices>
-            </setting>            
+            </setting>         
         </settings>
     </component>
     <component category='SERVICE' id='16170152-eee5-11e5-9ce9-5e5517507c66'
@@ -1777,11 +1755,31 @@
         <className>org.jumpmind.metl.core.runtime.component.HttpResponse</className>
         <description></description>
         <settings>
-            <setting id='content.type' required='false' type='text'>
-                <name>Content Type</name>
+            <setting id='returns.data'
+               required='true'
+               type='boolean'>
+                <name>Returns Data</name>
+                <defaultValue>true</defaultValue>
             </setting>
-            <setting id='payload.format' required='false' type='choice'>
-                <name>Automatic Payload Format</name>
+        </settings>
+    </component>  
+    <component category='SERVICE' id='10887396-9d14-4a42-8212-66b4ce53cef2'
+        inputMessageType='text' inputOutputModelsMatch='false'
+        outputMessageType='entity' resourceCategory='none'>
+        <name>Deserializer</name>
+        <className>org.jumpmind.metl.core.runtime.component.Deserializer</className>
+        <settings>
+            <setting id='format' required='false' type='choice'>
+                <name>Format</name>
+                <defaultValue>AUTOMATIC</defaultValue>
+                <choices>
+                    <choice>AUTOMATIC</choice>
+                    <choice>JSON</choice>
+                    <choice>XML</choice>
+                </choices>
+            </setting>
+            <setting id='structure' required='false' type='choice'>
+                <name>Structure</name>
                 <defaultValue>BY_INBOUND_ROW</defaultValue>
                 <choices>
                     <choice>BY_INBOUND_ROW</choice>
@@ -1789,5 +1787,30 @@
                 </choices>
             </setting>            
         </settings>
-    </component>  
+    </component>      
+    <component category='SERVICE' id='4e810250-d937-4223-9d50-6322b35c0527'
+        inputMessageType='entity' inputOutputModelsMatch='false'
+        outputMessageType='text' resourceCategory='none'>
+        <name>Serializer</name>
+        <className>org.jumpmind.metl.core.runtime.component.Serializer</className>
+        <settings>
+            <setting id='format' required='false' type='choice'>
+                <name>Format</name>
+                <defaultValue>AUTOMATIC</defaultValue>
+                <choices>
+                    <choice>AUTOMATIC</choice>
+                    <choice>JSON</choice>
+                    <choice>XML</choice>
+                </choices>
+            </setting>
+            <setting id='structure' required='false' type='choice'>
+                <name>Structure</name>
+                <defaultValue>BY_INBOUND_ROW</defaultValue>
+                <choices>
+                    <choice>BY_INBOUND_ROW</choice>
+                    <choice>BY_TABLE</choice>
+                </choices>
+            </setting>            
+        </settings>
+    </component>            
 </components>

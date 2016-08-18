@@ -21,6 +21,7 @@
 package org.jumpmind.metl.ui.api;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.jumpmind.metl.core.runtime.FlowConstants.REQUEST_VALUE_PARAMETER;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -48,7 +49,6 @@ import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.AgentRuntime;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.LogLevel;
-import org.jumpmind.metl.core.runtime.component.HttpRequest;
 import org.jumpmind.metl.core.runtime.component.IHasSecurity;
 import org.jumpmind.metl.core.runtime.component.Results;
 import org.jumpmind.metl.core.runtime.flow.FlowRuntime;
@@ -147,7 +147,7 @@ public class ExecutionApi {
             params.putAll(
                     patternMatcher.extractUriTemplateVariables(mapping.getPath(), restOfTheUrl));
             if (isNotBlank(payload)) {
-                params.put(HttpRequest.REQUEST_PAYLOAD, payload.toString());
+                params.put(REQUEST_VALUE_PARAMETER, payload.toString());
             }
             Enumeration<String> headerNames = request.getHeaderNames();
             while (headerNames.hasMoreElements()) {
