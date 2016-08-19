@@ -69,7 +69,7 @@ public class ContentRouter extends AbstractComponentRuntime {
     Set<String> targetStepsThatNeedControlMessages = new HashSet<>();
 
     @Override
-    protected void start() {
+    public void start() {
         ScriptEngineManager factory = new ScriptEngineManager();
         scriptEngine = factory.getEngineByName("groovy");
         TypedProperties properties = getTypedProperties();

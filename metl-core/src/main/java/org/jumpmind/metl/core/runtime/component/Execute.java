@@ -56,7 +56,7 @@ public class Execute extends AbstractComponentRuntime {
     int successCode = 0;
 
     @Override
-    protected void start() {
+    public void start() {
         String line = FormatUtils.replaceTokens(getComponent().get(COMMAND, null), context.getFlowParameters(), true);
         continueOnError = getComponent().getBoolean(CONTINUE_ON_ERROR, continueOnError);
         successCode = getComponent().getInt(SUCCESS_CODE, successCode);

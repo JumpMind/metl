@@ -32,12 +32,12 @@ public class ComponentRuntimeFactory implements IComponentRuntimeFactory {
     }
 
     @Override
-    synchronized public IComponentRuntime create(String projectVersionId, String id) {
+    synchronized public IComponentRuntime create(String projectVersionId, String id, ComponentContext context, int threadNumber) {
         try {
             XMLComponent definition = componentDefinitionFactory.getDefinition(projectVersionId, id);
             if (definition != null) {
                 IComponentRuntime component = (IComponentRuntime) Class.forName(definition.getClassName().trim(), true, definition.getClassLoader()).newInstance();
-                component.create(definition);
+                component.create(definition, context, threadNumber);
                 return component;
             } else {
                 throw new IllegalStateException("Could not find a class associated with the component id of " + id);

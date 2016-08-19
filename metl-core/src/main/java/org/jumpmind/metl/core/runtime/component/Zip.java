@@ -76,7 +76,7 @@ public class Zip extends AbstractComponentRuntime {
     List<String> fileNames;
 
     @Override
-    protected void start() {
+    public void start() {
         
         TypedProperties properties = getTypedProperties();
 

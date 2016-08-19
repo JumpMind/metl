@@ -58,7 +58,7 @@ public class Lookup extends AbstractComponentRuntime {
     List<Message> queuedWhileWaitingForLookup = new ArrayList<Message>();
 
     @Override
-    protected void start() {
+    public void start() {
         lookupInitialized = false;
         TypedProperties properties = getTypedProperties();
         sourceStepId = properties.get(SOURCE_STEP);

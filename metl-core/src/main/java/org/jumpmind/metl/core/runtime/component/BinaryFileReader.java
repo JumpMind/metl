@@ -22,7 +22,7 @@ public class BinaryFileReader extends AbstractFileReader {
 
     int sizePerMessage = 100;
     @Override
-    protected void start() {
+    public void start() {
     	init();
         Component component = getComponent();
         sizePerMessage = component.getInt(SETTING_SIZE_PER_MESSAGE, sizePerMessage);

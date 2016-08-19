@@ -70,7 +70,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
     List<AttributeFormat> attributes = new ArrayList<AttributeFormat>();
 
     @Override
-    protected void start() {
+    public void start() {
         TypedProperties properties = getTypedProperties();
         delimiter = properties.get(DELIMITED_FORMATTER_DELIMITER);
         quoteCharacter = properties.get(DELIMITED_FORMATTER_QUOTE_CHARACTER);

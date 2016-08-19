@@ -65,7 +65,7 @@ public class XmlParser extends AbstractXMLComponentRuntime {
     int rowsPerMessage;
 
     @Override
-    protected void start() {
+    public void start() {
         super.start();
         TypedProperties properties = getTypedProperties();
         optimizeForSpeed = properties.is("optimize.for.speed");

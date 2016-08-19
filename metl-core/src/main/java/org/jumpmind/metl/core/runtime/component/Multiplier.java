@@ -49,7 +49,7 @@ public class Multiplier extends AbstractComponentRuntime {
     List<Message> queuedWhileWaitingForMultiplier = new ArrayList<Message>();
 
     @Override
-    protected void start() {
+    public void start() {
         multipliersInitialized = false;
 
         sourceStepId = getComponent().get(MULTIPLIER_SOURCE_STEP);

@@ -18,20 +18,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.core.runtime.component.helpers;
+package org.jumpmind.metl.core.runtime;
 
-import org.jumpmind.metl.core.runtime.ContentMessage;
-import org.jumpmind.metl.core.runtime.Message;
-import org.jumpmind.metl.core.utils.TestUtils;
-import org.junit.Assert;
-
-public class MessageAssert extends Assert {
-
-    public static void assertMessage(int callbackNumber, int messageNumber, Message expected, Message actual, boolean isPayloadXML) {
-        TestUtils.assertNullNotNull(expected, actual);
-        if (expected != null && actual != null && expected instanceof ContentMessage<?> && actual instanceof ContentMessage<?>) {
-            PayloadAssert.assertPayload(callbackNumber, messageNumber, ((ContentMessage<?>) expected).getPayload(),
-                    ((ContentMessage<?>) expected).getPayload(), isPayloadXML);
-        }
+final public class FlowConstants {
+    
+    private FlowConstants() {
     }
+    
+    public static final String REQUEST_VALUE_PARAMETER = "_requestValue";
 }

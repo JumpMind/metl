@@ -113,7 +113,7 @@ public class FilePoller extends AbstractComponentRuntime {
     ArrayList<FileInfo> filesSent = new ArrayList<FileInfo>();
 
     @Override
-    protected void start() {
+    public void start() {
         Component component = getComponent();
         Resource resource = component.getResource();
         if (resource == null) {

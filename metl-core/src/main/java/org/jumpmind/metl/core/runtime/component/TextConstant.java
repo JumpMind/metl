@@ -49,7 +49,7 @@ public class TextConstant extends AbstractComponentRuntime {
     String constantText;
     
     @Override
-    protected void start() {
+    public void start() {
     	textRowsPerMessage = context.getFlowStep().getComponent().getInt(ROWS_PER_MESSAGE, 1000);
         splitOnLineFeed = context.getFlowStep().getComponent().getBoolean(SETTING_SPLIT_ON_LINE_FEED, false);
         constantText = context.getFlowStep().getComponent().get(SETTING_TEXT, "");

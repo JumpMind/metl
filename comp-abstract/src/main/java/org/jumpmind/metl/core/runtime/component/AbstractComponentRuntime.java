@@ -53,6 +53,10 @@ import org.jumpmind.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is moving to comp-abstract.  There are two versions right now.
+ */
+@Deprecated
 abstract public class AbstractComponentRuntime implements IComponentRuntime {
     
     protected final Logger log = LoggerFactory.getLogger(getClass());
@@ -84,31 +88,37 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
     protected TypedProperties properties;
     
     @Override
-    public void create(XMLComponent definition) {
+    public void create(XMLComponent definition, ComponentContext context, int threadNumber) {
         this.componentDefinition = definition;
+        this.context = context;
+        this.threadNumber = threadNumber;
+        this.properties = getTypedProperties();        
     }
     
     @Override
     public XMLComponent getComponentDefintion() {
         return componentDefinition;
     }
-
+    
     @Override
-    final public void start(int threadNumber, ComponentContext context) {
-        this.context = context;
-        this.threadNumber = threadNumber;
-        this.properties = getTypedProperties();
-        start();
+    public void start() {
     }
     
-    abstract protected void start();
-    
     protected TypedProperties getTypedProperties() {
-        List<XMLSetting> settings = componentDefinition != null ? componentDefinition.getSettings().getSetting() : null;
-        if (settings == null) {
-            settings = Collections.emptyList();
+        if (properties == null) {
+            List<XMLSetting> settings = componentDefinition != null
+                    ? componentDefinition.getSettings().getSetting() : null;
+            if (settings == null) {
+                settings = Collections.emptyList();
+            }
+            Component component = getComponent();
+            if (component != null) {
+                properties = component.toTypedProperties(settings);
+            } else {
+                properties = new TypedProperties();
+            }
         }
-        return getComponent().toTypedProperties(settings);
+        return properties;
     }
     
     @Override
@@ -133,15 +143,28 @@ abstract public class AbstractComponentRuntime implements IComponentRuntime {
     }
             
     protected String getFlowStepId() {
-        return context.getFlowStep().getId();
+        if (context != null) {
+            return context.getFlowStep().getId();
+        } else {
+            return null;
+        }
     }
-    
+
     protected FlowStep getFlowStep() {
-        return context.getFlowStep();
+        if (context != null) {
+            return context.getFlowStep();
+        } else {
+            return null;
+        }
     }
     
     protected Component getComponent() {
-        return context.getFlowStep().getComponent();
+        FlowStep flowStep = getFlowStep();
+        if (flowStep != null) {
+            return getFlowStep().getComponent();
+        } else {
+            return null;
+        }
     }
     
     protected IResourceRuntime getResourceRuntime() {

@@ -38,6 +38,7 @@ public class HttpRequestMappingRegistry implements IHttpRequestMappingRegistry {
             mappings = new TreeSet<>();
             mappingsByHttpMethod.put(request.getMethod(), mappings);
         }
+        log.info("Registering REST service: {}", request);
         mappings.add(request);        
     }
     
@@ -45,6 +46,7 @@ public class HttpRequestMappingRegistry implements IHttpRequestMappingRegistry {
     public void unregister(HttpRequestMapping request) {
         Set<HttpRequestMapping> mappings = mappingsByHttpMethod.get(request.getMethod());
         if (mappings != null) {
+            log.info("Unregistering REST service: {}", request);
             mappings.remove(request);
         }
     }

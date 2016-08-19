@@ -158,4 +158,10 @@
     <component-ui id="Http Response UI" componentId="16170152-eee5-11e5-9ce9-5e5517507c66">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-web-48x48-color.png</iconImage>
     </component-ui>      
+    <component-ui id="Serializer UI" componentId="4e810250-d937-4223-9d50-6322b35c0527">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/testtube-orange-48.png</iconImage>
+    </component-ui>      
+    <component-ui id="Deserializer UI" componentId="10887396-9d14-4a42-8212-66b4ce53cef2">
+        <iconImage>/org/jumpmind/metl/core/runtime/component/testtube-green-48.png</iconImage>
+    </component-ui>  
 </ui>

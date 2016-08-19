@@ -65,7 +65,7 @@ public class TextFileWriter extends AbstractFileWriter {
     BufferedWriter bufferedWriter = null;
 
     @Override
-    protected void start() {
+    public void start() {
     	init();
         TypedProperties properties = getTypedProperties();
         lineTerminator = properties.get(SETTING_TEXT_LINE_TERMINATOR);

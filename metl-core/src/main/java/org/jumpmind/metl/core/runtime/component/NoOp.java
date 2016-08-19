@@ -28,7 +28,7 @@ public class NoOp extends AbstractComponentRuntime {
     public static final String TYPE = "No Op";
 
     @Override
-    protected void start() {
+    public void start() {
     }
         
     @Override

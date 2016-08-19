@@ -48,7 +48,7 @@ public class Gate extends AbstractComponentRuntime {
     List<Message> queuedWhileWaitingForGateController = new ArrayList<Message>();
     
     @Override
-    protected void start() {
+    public void start() {
     	gateOpened = false;
         TypedProperties typedProperties = getTypedProperties();
         gateControlSourceStepId = typedProperties.get(SOURCE_STEP); 

@@ -22,6 +22,6 @@ package org.jumpmind.metl.core.runtime.component;
 
 public interface IComponentRuntimeFactory {
 
-    public IComponentRuntime create(String projectVersionId, String componentId);
+    public IComponentRuntime create(String projectVersionId, String type, ComponentContext context, int threadNumber);
 
 }

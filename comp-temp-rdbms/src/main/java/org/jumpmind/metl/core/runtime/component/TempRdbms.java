@@ -51,7 +51,7 @@ public class TempRdbms extends AbstractRdbmsComponentRuntime  {
     int rowReadDuringHandle;
 
     @Override
-    protected void start() {
+    public void start() {
         TypedProperties properties = getTypedProperties();
         sqls = getSqlStatements(true);
 
