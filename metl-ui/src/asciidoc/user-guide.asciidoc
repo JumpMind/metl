@@ -95,3 +95,7 @@ include::admin/rest.asciidoc[]
 include::admin/mailserver.asciidoc[]
 include::admin/notifications.asciidoc[] 
 include::admin/logging.asciidoc[]
+
+include::examples/examples.asciidoc[]
+include::examples/create-restful-services.asciidoc[]
+
