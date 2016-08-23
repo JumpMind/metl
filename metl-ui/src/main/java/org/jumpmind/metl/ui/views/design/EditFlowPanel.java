@@ -195,12 +195,24 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             delButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
             delButton.addClickListener((event)->deleteSelected());
             delButton.setEnabled(false);
+
+            Button exportButton = buttonBar.addButtonRight("Export", FontAwesome.PICTURE_O, (event)->export());
+            exportButton.setId("exportButton");
         }
 
         parametersButton = buttonBar.addButton("Parameters", FontAwesome.LIST_OL);
         parametersButton.addClickListener((event) -> new EditParametersDialog(context, flow, readOnly).showAtSize(.75));
 
         return buttonBar;
+    }
+    
+    private void export() {
+        // There is an issue with the html2canvas library not writing 
+        // component anchors correctly when the scroll panel is scrolled down.
+        // Reset scrolling first.
+        flowPanel.setScrollLeft(0);
+        flowPanel.setScrollTop(0);
+        new ImagePreviewDialog(diagram).showAtSize(.75);
     }
     
     protected void selectAll() {
