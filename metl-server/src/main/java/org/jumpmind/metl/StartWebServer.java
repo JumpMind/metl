@@ -155,11 +155,11 @@ public class StartWebServer {
         boolean httpEnabled = System.getProperty(HTTP_ENABLE, "true").equals("true");
 
         int httpPort = Integer.parseInt(System.getProperty(HTTP_PORT, DEFAULT_HTTP_PORT));
-        String httpHostBindName = System.getProperty(HTTP_HOST_BIND_NAME);
+        String httpHostBindName = System.getProperty(HTTP_HOST_BIND_NAME,"0.0.0.0");
         int httpsPort = Integer.parseInt(System.getProperty(HTTPS_PORT, DEFAULT_HTTPS_PORT));
 
         boolean httpsEnabled = System.getProperty(HTTPS_ENABLE, "true").equals("true");
-        String httpsHostBindName = System.getProperty(HTTPS_HOST_BIND_NAME);
+        String httpsHostBindName = System.getProperty(HTTPS_HOST_BIND_NAME,"0.0.0.0");
 
         HttpConfiguration httpConfig = new HttpConfiguration();
         httpConfig.setOutputBufferSize(32768);
