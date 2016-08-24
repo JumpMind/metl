@@ -63,7 +63,7 @@ public class Script extends AbstractComponentRuntime {
     ScriptEngine engine;
 
     @Override
-    protected void start() {
+    public void start() {
         String importStatements = getComponent().get(IMPORTS);
         String initScript = getComponent().get(INIT_SCRIPT);
         String handleMessageScript = getComponent().get(HANDLE_SCRIPT);

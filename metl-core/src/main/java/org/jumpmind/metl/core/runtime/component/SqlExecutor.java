@@ -55,7 +55,7 @@ public class SqlExecutor extends AbstractRdbmsComponentRuntime {
     String file;
 
     @Override
-    protected void start() {
+    public void start() {
         TypedProperties properties = getTypedProperties();
         file = properties.get(FILE);
         sqls = getExecutorSqlStatements();

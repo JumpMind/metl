@@ -84,7 +84,7 @@ public class Sorter extends AbstractComponentRuntime {
     boolean entitySort = true;
     
     @Override
-    protected void start() {
+    public void start() {
         TypedProperties properties = getTypedProperties();
         rowsPerMessage = properties.getInt(ROWS_PER_MESSAGE);
         String sortAttribute = properties.get(SORT_ATTRIBUTE);

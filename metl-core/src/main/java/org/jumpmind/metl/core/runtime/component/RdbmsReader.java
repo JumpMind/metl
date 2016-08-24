@@ -93,7 +93,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     String unitOfWork = COMPONENT_LIFETIME;
 
     @Override
-    protected void start() {
+    public void start() {
         TypedProperties properties = getTypedProperties();
         sqls = getSqlStatements(true);
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);

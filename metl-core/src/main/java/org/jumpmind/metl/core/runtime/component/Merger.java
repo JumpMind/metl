@@ -45,7 +45,7 @@ public class Merger extends AbstractComponentRuntime {
     List<String> attributesToMergeOn = new ArrayList<String>();
 
     @Override
-    protected void start() {
+    public void start() {
         Component component = getComponent();
         Model inputModel = component.getInputModel();
         if (inputModel == null) {

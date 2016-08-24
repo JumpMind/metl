@@ -434,4 +434,56 @@ window.org_jumpmind_metl_ui_diagram_Diagram = function() {
             sendSelected();
         }
     }
+    
+}
+
+// Client side conversion from design view to image.
+function exportDiagram(width, height) {
+    html2canvas($('#diagram'),
+	    {
+	    	onrendered: function(canvas) {
+	    		var svgList = $('#diagram').find( 'svg' );
+	    		svgList.each(function(index, value) {
+			        try {
+			        	var svgExample = this;
+			            var serializer = new XMLSerializer();
+			            var svgMarkup = serializer.serializeToString(svgExample);
+			
+			            if(svgMarkup.indexOf('_jsPlumb_connector') > -1) {
+			            	var left = parseInt($(svgExample).css('left'),10);
+			            	var top = parseInt($(svgExample).css('top'),10);
+			            
+			            	svgMarkup = svgMarkup.replace('xmlns=\"http://www.w3.org/2000/svg\"','');
+			            
+			            	var connectorCanvas = document.createElement('canvas');
+			            	canvg(connectorCanvas, svgMarkup);
+			            
+			            	var context = canvas.getContext('2d');
+			            	context.drawImage(connectorCanvas, left, top);
+			            }
+			        } catch(err) {
+			            log.error('Error converting SVG link to the canvas: ' + err);
+			        }
+				});
+	        
+			    var tempCanvas = document.createElement('canvas');
+			    tempCanvas.width = canvas.width;
+			    tempCanvas.height = canvas.height;
+			
+			    tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
+			    canvas.width = width;
+			    canvas.height = height;
+			    
+			    canvas.getContext('2d').drawImage(tempCanvas, 0, 0);
+			    
+			    // Keep the download link if it doesn't work on IE?
+//			    $('#downloadLink a').attr('href', canvas.toDataURL().replace('image/png', 'image/octet-stream'));
+//			    $('#downloadLink a').attr('download', 'design.png');
+			    $('#canvasContainer .v-panel-content').append('<img src='+canvas.toDataURL()+' />');
+			},
+		    logging: false,
+		    // View port used by html2canvas. Use the full canvas.
+		    width: 10000,
+		    height: 10000
+	    });
 }

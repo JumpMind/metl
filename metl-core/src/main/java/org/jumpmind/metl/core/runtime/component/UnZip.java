@@ -87,7 +87,7 @@ public class UnZip extends AbstractComponentRuntime {
     String targetRelativePath;
 
     @Override
-    protected void start() {
+    public void start() {
         TypedProperties properties = getTypedProperties();
 
         deleteOnComplete = properties.is(SETTING_DELETE_ON_COMPLETE, deleteOnComplete);

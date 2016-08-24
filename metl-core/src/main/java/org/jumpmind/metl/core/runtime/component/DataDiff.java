@@ -95,7 +95,7 @@ public class DataDiff extends AbstractComponentRuntime {
     Throwable error;
 
     @Override
-    protected void start() {
+    public void start() {
         error = null;
         TypedProperties properties = getTypedProperties();
         this.sourceStep1Id = properties.get(SOURCE_1);

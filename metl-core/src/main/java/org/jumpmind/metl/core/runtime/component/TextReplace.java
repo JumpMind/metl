@@ -43,7 +43,7 @@ public class TextReplace extends AbstractComponentRuntime {
     String replaceWith;
 
     @Override
-    protected void start() {
+    public void start() {
         Component component = getComponent();
         searchFor = component.get(SETTING_SEARCH_FOR, "");
         replaceWith = component.get(SETTING_REPLACE_WITH, "");

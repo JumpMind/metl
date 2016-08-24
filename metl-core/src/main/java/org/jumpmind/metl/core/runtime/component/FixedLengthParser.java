@@ -55,7 +55,7 @@ public class FixedLengthParser extends AbstractComponentRuntime {
     List<AttributeFormat> attributesList;
 
     @Override
-    protected void start() {
+    public void start() {
         if (getComponent().getOutputModel() == null) {
             throw new IllegalStateException("This component requires an output model.  Please select one.");
         }

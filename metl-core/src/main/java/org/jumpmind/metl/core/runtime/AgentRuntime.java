@@ -398,18 +398,18 @@ public class AgentRuntime {
     	return scheduleNow(deployment, null);
     }
     
+    public FlowRuntime createFlowRuntime(AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
+        String executionId = createExecutionId();
+        return new FlowRuntime(executionId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
+                resourceFactory,
+                flowStepsExecutionThreads, configurationService, executionService, deployedResources, null, globalSettings, runtimeParameters);
+        
+    }
+    
     public Results execute(AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
         log.info("Executing '{}' on '{}' for now", new Object[] {
                 deployment.getName(), agent.getName() });
-        String executionId = createExecutionId();
-        if (agent.isAutoRefresh()) {
-            deployment = configurationService.findAgentDeployment(deployment.getId());
-            configurationService.refreshAgentParameters(agent);
-        }
-        FlowRuntime flowRuntime = new FlowRuntime(executionId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
-                resourceFactory,
-                flowStepsExecutionThreads, configurationService, executionService, deployedResources, null, globalSettings, runtimeParameters);
-        return flowRuntime.execute();
+        return createFlowRuntime(deployment, runtimeParameters).execute();
     }
 
     public String scheduleNow(AgentDeployment deployment, Map<String, String> runtimeParameters) {
@@ -503,10 +503,6 @@ public class AgentRuntime {
             this.executionId = executionId;
             this.runtimeParameters = runtimeParameters;
             this.deployment = deployment;
-            if (agent.isAutoRefresh()) {
-                deployment = configurationService.findAgentDeployment(deployment.getId());
-                deployment.setFlow(configurationService.findFlow(deployment.getFlowId()));
-            }
         }
 
         @Override

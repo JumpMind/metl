@@ -68,7 +68,7 @@ public class Assert extends AbstractComponentRuntime {
     int entityCountPerMessage = 0;
 
     @Override
-    protected void start() {
+    public void start() {
         TypedProperties properties = getTypedProperties();
         expectedControlMessageCount = properties.getInt(EXPECTED_CONTROL_MESSAGE_COUNT,
                 expectedEntityMessageCount);

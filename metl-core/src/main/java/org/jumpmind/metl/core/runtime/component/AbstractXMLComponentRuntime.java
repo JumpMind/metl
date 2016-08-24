@@ -46,7 +46,7 @@ abstract public class AbstractXMLComponentRuntime extends AbstractComponentRunti
     
 
     @Override
-    protected void start() {
+    public void start() {
         TypedProperties properties = getTypedProperties();
         ignoreNamespace = properties.is(IGNORE_NAMESPACE);
 

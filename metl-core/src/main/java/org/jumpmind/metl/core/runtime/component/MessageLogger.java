@@ -37,7 +37,7 @@ public class MessageLogger extends AbstractComponentRuntime {
     public static String SETTING_QUALIFY_WITH_ENTITY_NAME = "qualify.with.entity.name";
 
     @Override
-    protected void start() {
+    public void start() {
     }
 
     @Override

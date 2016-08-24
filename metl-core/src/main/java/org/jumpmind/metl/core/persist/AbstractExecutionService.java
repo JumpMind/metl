@@ -91,10 +91,15 @@ abstract public class AbstractExecutionService extends AbstractService implement
         return findExecutionStepLogs(executionStepIds, limit, null);
     }
     
+    @Override
+    public File getExecutionStepLog(String executionStepId) {
+        return new File(LogUtils.getLogDir(), executionStepId + ".log");
+    }
+    
     protected List<ExecutionStepLog> findExecutionStepLogs(Set<String> executionStepIds, int limit, Set<String> statuses) {
         List<ExecutionStepLog> executionStepLogs = new ArrayList<>();
         for (String executionStepId : executionStepIds) {
-            File file = new File(LogUtils.getLogDir(), executionStepId + ".log");
+            File file = getExecutionStepLog(executionStepId);
             if (file.exists()) {
                 CsvReader reader = null;
                 try {
@@ -106,14 +111,16 @@ abstract public class AbstractExecutionService extends AbstractService implement
                             if (values != null && values.length > 2 && isNotBlank(values[0]) && isNotBlank(values[1])
                                     && isNotBlank(values[2])) {
                                 String level = values[0];
-                                if (statuses == null || statuses.size() == 0 || statuses.contains(level)) {
-                                ExecutionStepLog stepLog = new ExecutionStepLog();
-                                stepLog.setExecutionStepId(executionStepId);
-                                stepLog.setCreateTime(FormatUtils.parseDate(values[1], FormatUtils.TIMESTAMP_PATTERNS));
-                                stepLog.setLevel(level);
-                                stepLog.setLogText(values[2]);
-                                stepLog.setId(Long.toString(id++));
-                                executionStepLogs.add(stepLog);
+                                if (statuses == null || statuses.size() == 0
+                                        || statuses.contains(level)) {
+                                    ExecutionStepLog stepLog = new ExecutionStepLog();
+                                    stepLog.setExecutionStepId(executionStepId);
+                                    stepLog.setCreateTime(FormatUtils.parseDate(values[1],
+                                            FormatUtils.TIMESTAMP_PATTERNS));
+                                    stepLog.setLevel(level);
+                                    stepLog.setLogText(values[2]);
+                                    stepLog.setId(Long.toString(id++));
+                                    executionStepLogs.add(stepLog);
                                 }
                             }
                             limit--;

@@ -28,7 +28,7 @@ public class LastUnitOfWork extends AbstractComponentRuntime {
     public static final String TYPE = "Last Unit of Work";
     
     @Override
-    protected void start() {        
+    public void start() {        
     }
     
     @Override

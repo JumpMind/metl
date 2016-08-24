@@ -59,7 +59,7 @@ public class Transformer extends AbstractComponentRuntime {
     long totalCalls = 0;
     
     @Override
-    protected void start() {
+    public void start() {
         transformsByAttributeId.clear();
         
         List<ComponentAttributeSetting> settings = getComponent().getAttributeSettings();

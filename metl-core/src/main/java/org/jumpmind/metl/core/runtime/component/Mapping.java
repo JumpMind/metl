@@ -57,7 +57,7 @@ public class Mapping extends AbstractComponentRuntime {
     boolean entityPerRecord;
 
     @Override
-    protected void start() {
+    public void start() {
 
         validate();
 

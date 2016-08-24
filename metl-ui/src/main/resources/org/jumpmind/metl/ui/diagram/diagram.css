@@ -1,5 +1,6 @@
 .diagram {
 	position: absolute;
+	background-color: white;
 }
 
 .diagram-node-wrapper {
