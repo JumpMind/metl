@@ -124,6 +124,7 @@ public class Lookup extends AbstractComponentRuntime {
                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                 EntityData oldData = datas.get(j);
                 EntityData newData = new EntityData();
+                newData.setChangeType(oldData.getChangeType());
                 newData.putAll(oldData);
                 newData.put(replacementValueAttributeId, lookup.get(oldData.get(replacementKeyAttributeId)));
                 payload.add(newData);
