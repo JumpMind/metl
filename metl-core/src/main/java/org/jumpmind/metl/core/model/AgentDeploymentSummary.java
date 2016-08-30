@@ -44,6 +44,8 @@ public class AgentDeploymentSummary extends AbstractObject {
     String startType = StartType.MANUAL.name();
 
     String startExpression;
+    
+    String url;
 
     public AgentDeploymentSummary() {
     }

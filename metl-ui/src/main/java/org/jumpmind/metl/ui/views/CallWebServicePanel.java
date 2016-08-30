@@ -28,7 +28,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import com.vaadin.data.Container.Indexed;
@@ -200,7 +200,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
                 responseTabs.setHeader(key, headerMap.get(key));
             }
             responseStatusArea.setValue(response.getStatusCode().toString() + " " + response.getStatusCode().getReasonPhrase());
-        } catch (HttpClientErrorException e) {
+        } catch (HttpStatusCodeException e) {
             responseTabs.getPayload().setValue(e.getResponseBodyAsString());
             headerMap = e.getResponseHeaders().toSingleValueMap();
             for(String key : headerMap.keySet()) {
