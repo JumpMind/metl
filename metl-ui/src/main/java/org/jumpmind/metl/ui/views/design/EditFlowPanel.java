@@ -435,7 +435,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         }
 
         if (flow.isWebService()) {
-            CallWebServicePanel panel = new CallWebServicePanel(deployment, context);
+            CallWebServicePanel panel = new CallWebServicePanel(deployment, context, tabs);
             tabs.addCloseableTab(deployment.getId(), "Call " + flow.getName(), Icons.RUN, panel);
         } else {
             String executionId = agentManager.getAgentRuntime(myDesignAgent).scheduleNow(deployment,

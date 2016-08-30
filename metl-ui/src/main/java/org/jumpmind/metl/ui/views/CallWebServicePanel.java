@@ -1,6 +1,7 @@
 package org.jumpmind.metl.ui.views;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.net.MalformedURLException;
 import java.util.Collection;
@@ -13,12 +14,14 @@ import javax.servlet.ServletContext;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
-import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMapping;
+import org.jumpmind.metl.ui.api.ApiConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.Icons;
+import org.jumpmind.metl.ui.common.TabbedPanel;
+import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -54,8 +57,6 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
     AgentDeployment deployment;
 
-    boolean readOnly;
-
     ReqRespTabSheet requestTabs;
 
     ReqRespTabSheet responseTabs;
@@ -67,22 +68,26 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
     VerticalLayout responseStatusAreaLayout;
     
     TextArea responseStatusArea;
+    
+    Button viewExecutionLogButton;
+    
+    String executionId;
+    
+    TabbedPanel tabs;
 
-    public CallWebServicePanel(AgentDeployment deployment, ApplicationContext context) {
+    public CallWebServicePanel(AgentDeployment deployment, ApplicationContext context, TabbedPanel tabs) {
         this.deployment = deployment;
         this.context = context;
+        this.tabs = tabs;
         IConfigurationService configurationService = context.getConfigurationService();
         Flow flow = deployment.getFlow();
         configurationService.refresh(flow);
-        this.readOnly = context.isReadOnly(
-                configurationService.findProjectVersion(flow.getProjectVersionId()),
-                Privilege.DESIGN);
 
         ButtonBar buttonBar = new ButtonBar();
-        if (!readOnly) {
-            Button runButton = buttonBar.addButton("Call Service", Icons.RUN);
-            runButton.addClickListener((event) -> runFlow());
-        }
+        buttonBar.addButton("Call Service", Icons.RUN, (e) -> runFlow());
+        
+        viewExecutionLogButton = buttonBar.addButton("View Log", Icons.LOG, (e) -> openExecution());
+        viewExecutionLogButton.setEnabled(false);
 
         addComponent(buttonBar);
 
@@ -166,37 +171,55 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         }
 
     }
+    
+    protected void openExecution() {
+        if (isNotBlank(executionId)) {
+            ExecutionRunPanel logPanel = new ExecutionRunPanel(executionId, context, tabs,
+                    this);
+            logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
+            tabs.addCloseableTab(executionId, "Run " + deployment.getFlow().getName(), Icons.LOG, logPanel);
+        }
+    }
 
     @Override
     public void runFlow() {
+        Map<String, String> headerMap;
         try {
+            viewExecutionLogButton.setEnabled(false);
             RestTemplate template = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
-            Map<String, String> map = requestTabs.getHeaders();
-            for(String key : map.keySet()) {
-                headers.add(key, map.get(key));
+            headerMap = requestTabs.getHeaders();
+            for(String key : headerMap.keySet()) {
+                headers.add(key, headerMap.get(key));
             }
             HttpEntity<String> entity = new HttpEntity<>(requestTabs.getPayload().getValue(), headers);
             ResponseEntity<String> response = template.exchange(urlField.getValue(), HttpMethod.valueOf((String)methodGroup.getValue()), entity, String.class);
             responseTabs.getPayload().setValue(response.getBody());
-            map = response.getHeaders().toSingleValueMap();
-            for(String key : map.keySet()) {
-                responseTabs.setHeader(key, map.get(key));
+            headerMap = response.getHeaders().toSingleValueMap();
+            for(String key : headerMap.keySet()) {
+                responseTabs.setHeader(key, headerMap.get(key));
             }
             responseStatusArea.setValue(response.getStatusCode().toString() + " " + response.getStatusCode().getReasonPhrase());
         } catch (HttpClientErrorException e) {
             responseTabs.getPayload().setValue(e.getResponseBodyAsString());
-            Map<String, String> map = e.getResponseHeaders().toSingleValueMap();
-            for(String key : map.keySet()) {
-                responseTabs.setHeader(key, map.get(key));
+            headerMap = e.getResponseHeaders().toSingleValueMap();
+            for(String key : headerMap.keySet()) {
+                responseTabs.setHeader(key, headerMap.get(key));
             }   
             responseStatusArea.setValue(e.getStatusCode().toString() + " " + e.getStatusCode().getReasonPhrase());
         }
         
+        if (headerMap != null) {
+            executionId = headerMap.get(ApiConstants.HEADER_EXECUTION_ID);
+            if (isNotBlank(executionId)) {
+                viewExecutionLogButton.setEnabled(true);
+            }
+        }
+        
         if (isBlank(responseTabs.getPayload().getValue())) {
-            responseTabs.setSelectedTab(responseStatusAreaLayout);
+            responseTabs.setSelectedTab(0);
         } else {
-            responseTabs.setSelectedTab(requestTabs.getPayloadLayout());
+            responseTabs.setSelectedTab(1);
         }
         
     }

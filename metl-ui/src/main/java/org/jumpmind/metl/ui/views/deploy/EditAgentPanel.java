@@ -468,7 +468,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
             AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
             IAgentManager agentManager = context.getAgentManager();
             if (deployment.getFlow().isWebService()) {
-                CallWebServicePanel panel = new CallWebServicePanel(deployment, context);
+                CallWebServicePanel panel = new CallWebServicePanel(deployment, context, tabbedPanel);
                 tabbedPanel.addCloseableTab(deployment.getId(), "Call " + deployment.getName(), Icons.RUN, panel);
             } else {
                 String executionId = agentManager.getAgentRuntime(deployment.getAgentId())

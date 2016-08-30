@@ -1,17 +1,14 @@
 package org.jumpmind.metl.ui.views.design;
 
 import org.jumpmind.metl.ui.diagram.Diagram;
-import org.jumpmind.metl.ui.views.design.EditParametersDialog.CloseClickListener;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
 
-import com.vaadin.server.ExternalResource;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Link;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.themes.ValoTheme;
 
 

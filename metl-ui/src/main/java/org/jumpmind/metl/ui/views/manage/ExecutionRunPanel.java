@@ -162,6 +162,11 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     List<SortOrder> lastSortOrder;
 
     Label status;
+    
+    public ExecutionRunPanel(String executionId, ApplicationContext context,
+            TabbedPanel parentTabSheet) {
+        this(executionId, context, parentTabSheet, null);
+    }
 
     public ExecutionRunPanel(String executionId, ApplicationContext context,
             TabbedPanel parentTabSheet, IFlowRunnable flowRunnable) {
