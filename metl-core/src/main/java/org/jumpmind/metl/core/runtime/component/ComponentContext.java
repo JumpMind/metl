@@ -20,8 +20,9 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.Flow;
@@ -57,7 +58,7 @@ public class ComponentContext {
         this.manipulatedFlow = manipulatedFlow;
         this.executionTracker = executionTracker;
         this.deployedResources = deployedResources;
-        this.flowParameters = flowParameters == null ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(flowParameters);
+        this.flowParameters = flowParameters == null ? Collections.synchronizedMap(new HashMap<>()) : Collections.synchronizedMap(new HashMap<>(flowParameters));
         this.globalSettings = globalSettings;
         this.context = new LinkedCaseInsensitiveMap<Object>();
     }
