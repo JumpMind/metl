@@ -58,7 +58,7 @@ import org.jumpmind.metl.ui.diagram.NodeMovedEvent;
 import org.jumpmind.metl.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.metl.ui.views.DesignNavigator;
 import org.jumpmind.metl.ui.views.IFlowRunnable;
-import org.jumpmind.metl.ui.views.RunWebServicePanel;
+import org.jumpmind.metl.ui.views.CallWebServicePanel;
 import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
@@ -435,7 +435,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         }
 
         if (flow.isWebService()) {
-            RunWebServicePanel panel = new RunWebServicePanel(deployment, context);
+            CallWebServicePanel panel = new CallWebServicePanel(deployment, context);
             tabs.addCloseableTab(deployment.getId(), "Call " + flow.getName(), Icons.RUN, panel);
         } else {
             String executionId = agentManager.getAgentRuntime(myDesignAgent).scheduleNow(deployment,

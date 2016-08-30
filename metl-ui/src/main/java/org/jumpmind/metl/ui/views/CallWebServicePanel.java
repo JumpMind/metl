@@ -23,7 +23,6 @@ import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.client.HttpClientErrorException;
@@ -47,7 +46,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class RunWebServicePanel extends VerticalLayout implements IUiPanel, IFlowRunnable {
+public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFlowRunnable {
 
     private static final long serialVersionUID = 1L;
 
@@ -69,7 +68,7 @@ public class RunWebServicePanel extends VerticalLayout implements IUiPanel, IFlo
     
     TextArea responseStatusArea;
 
-    public RunWebServicePanel(AgentDeployment deployment, ApplicationContext context) {
+    public CallWebServicePanel(AgentDeployment deployment, ApplicationContext context) {
         this.deployment = deployment;
         this.context = context;
         IConfigurationService configurationService = context.getConfigurationService();

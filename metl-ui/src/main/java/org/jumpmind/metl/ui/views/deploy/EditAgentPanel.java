@@ -54,7 +54,7 @@ import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
 import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
-import org.jumpmind.metl.ui.views.RunWebServicePanel;
+import org.jumpmind.metl.ui.views.CallWebServicePanel;
 import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
@@ -468,7 +468,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
             AgentDeployment deployment = context.getConfigurationService().findAgentDeployment(summary.getId());
             IAgentManager agentManager = context.getAgentManager();
             if (deployment.getFlow().isWebService()) {
-                RunWebServicePanel panel = new RunWebServicePanel(deployment, context);
+                CallWebServicePanel panel = new CallWebServicePanel(deployment, context);
                 tabbedPanel.addCloseableTab(deployment.getId(), "Call " + deployment.getName(), Icons.RUN, panel);
             } else {
                 String executionId = agentManager.getAgentRuntime(deployment.getAgentId())
