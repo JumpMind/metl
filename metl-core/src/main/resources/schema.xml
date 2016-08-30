@@ -117,7 +117,7 @@
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="model_id" type="CHAR" size="36" required="true" description="A version number" />
         <column name="name" type="VARCHAR" size="255" description="" />
-        <column name="description" type="LONGVARCHAR" description="" />
+        <column name="description" type="CLOB" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -131,7 +131,7 @@
         <column name="id" primaryKey="true" required="true" type="CHAR" size="36" />
         <column name="entity_id" type="CHAR" size="36" required="true"  />
         <column name="name" type="VARCHAR" size="255" required="true"  />
-        <column name="description" type="LONGVARCHAR" DESCRIPTION=""  />        
+        <column name="description" type="CLOB" DESCRIPTION=""  />        
         <column name="type" type="VARCHAR" size="50" required="true" description="INTEGER, STRING, LONG, BOOLEAN, DECIMAL, ENUM, COMPLEX, SEQUENCE" />
         <column name="type_entity_id" type="CHAR" size="36" description="Must be filled out when type is COMPLEX or SEQUENCE" />
         <column name="pk" type="BOOLEANINT" size="1" required="true" default="0" description="Indicates whether this is a primary key."/>
@@ -170,7 +170,7 @@
     <table name="resource_setting" description="">
         <column name="resource_id" type="CHAR" size="36" required="true" primaryKey="true" description="A version number" />
         <column name="name" type="VARCHAR" size="255" primaryKey="true" required="true" description="" />
-        <column name="value" type="VARCHAR" size="255" description="" />
+        <column name="value" type="CLOB" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -217,7 +217,7 @@
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="component_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
-        <column name="value" type="LONGVARCHAR" description="" />
+        <column name="value" type="CLOB" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -232,7 +232,7 @@
         <column name="component_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="entity_id" type="CHAR" size="36" required="true" description="A version number" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
-        <column name="value" type="VARCHAR" size="255" description="" />
+        <column name="value" type="CLOB" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -250,7 +250,7 @@
         <column name="component_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="attribute_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
-        <column name="value" type="VARCHAR" size="255" description="" />
+        <column name="value" type="CLOB" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -288,7 +288,7 @@
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="flow_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
-        <column name="default_value" type="LONGVARCHAR" description="" />
+        <column name="default_value" type="CLOB" description="" />
         <column name="position" type="INTEGER" default="1" required="true" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
@@ -358,7 +358,7 @@
         <column name="agent_id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="resource_id" type="CHAR" size="36" required="true" primaryKey="true" description="A version number" />
         <column name="name" type="VARCHAR" size="255" primaryKey="true" required="true" description="" />
-        <column name="value" type="VARCHAR" size="255" description="" />
+        <column name="value" type="CLOB" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -369,7 +369,7 @@
     	<column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="agent_id" type="CHAR" size="36" required="true"  description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
-        <column name="value" type="LONGVARCHAR" description="" />
+        <column name="value" type="CLOB" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -403,7 +403,7 @@
         <column name="flow_parameter_id" type="CHAR" size="36" required="true" description="A unique identifier referencing a flow parameter" />
         <column name="agent_deployment_id" type="CHAR" size="36" required="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
-        <column name="value" type="LONGVARCHAR" description="" />
+        <column name="value" type="CLOB" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -506,7 +506,7 @@
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="user_id" type="CHAR" size="36" required="true" description="The user id" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
-        <column name="value" type="VARCHAR" size="255" description="" />
+        <column name="value" type="CLOB" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
@@ -519,7 +519,7 @@
     <table name="global_setting" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="name" type="VARCHAR" size="255" required="true" description="" />
-        <column name="value" type="VARCHAR" size="255" description="" />
+        <column name="value" type="CLOB" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
