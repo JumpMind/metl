@@ -63,6 +63,8 @@ public class HttpRequestDeploymentListener implements IComponentDeploymentListen
         HttpRequestMapping mapping = new HttpRequestMapping();        
         mapping.setPath(path);
         mapping.setMethod(HttpMethod.valueOf(method));
+        mapping.setSecurityScheme(SecurityType.valueOf(properties.get(HttpRequest.SECURITY_SCHEME, SecurityType.NONE.name())));
+        mapping.setSecurityUsername(properties.get(HttpRequest.SECURE_USERNAME));
         mapping.setDeployment(deployment);
         return mapping;
     }

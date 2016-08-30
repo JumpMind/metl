@@ -36,6 +36,7 @@ import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.runtime.component.IComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
+import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
 import org.jumpmind.metl.ui.init.BackgroundRefresherService;
 import org.jumpmind.metl.ui.views.IUIFactory;
 import org.jumpmind.vaadin.ui.common.UiComponent;
@@ -77,6 +78,9 @@ public class ApplicationContext implements Serializable {
     
     @Autowired
     IDatabasePlatform configDatabasePlatform;
+    
+    @Autowired
+    IHttpRequestMappingRegistry httpRequestMappingRegistry;
     
     @Autowired
     String configDir;
@@ -141,6 +145,10 @@ public class ApplicationContext implements Serializable {
         
     public IUIFactory getUiFactory() {
         return uiFactory;
+    }
+    
+    public IHttpRequestMappingRegistry getHttpRequestMappingRegistry() {
+        return httpRequestMappingRegistry;
     }
     
     public void setShowRunDiagram(boolean showRunDiagram) {

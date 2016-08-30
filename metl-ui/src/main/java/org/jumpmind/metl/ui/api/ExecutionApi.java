@@ -22,6 +22,7 @@ package org.jumpmind.metl.ui.api;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.jumpmind.metl.core.runtime.FlowConstants.REQUEST_VALUE_PARAMETER;
+import static org.jumpmind.metl.ui.api.ApiConstants.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -159,6 +160,8 @@ public class ExecutionApi {
             FlowRuntime flowRuntime = agentRuntime.createFlowRuntime(deployment, params);
             IHasSecurity security = flowRuntime.getHasSecurity();
             if (enforceSecurity(security, request, response)) {
+                String executionId = flowRuntime.getExecutionId();
+                response.setHeader(HEADER_EXECUTION_ID, executionId);
                 Results results = flowRuntime.execute();
                 if (results != null) {
                     String contentType = results.getContentType();
@@ -166,7 +169,7 @@ public class ExecutionApi {
                         response.setContentType(contentType);
                     }
                     resultPayload = results.getValue();
-                }
+                }                
             }
             return resultPayload;
 

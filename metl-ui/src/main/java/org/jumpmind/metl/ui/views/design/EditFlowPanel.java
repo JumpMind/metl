@@ -58,6 +58,7 @@ import org.jumpmind.metl.ui.diagram.NodeMovedEvent;
 import org.jumpmind.metl.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.metl.ui.views.DesignNavigator;
 import org.jumpmind.metl.ui.views.IFlowRunnable;
+import org.jumpmind.metl.ui.views.RunWebServicePanel;
 import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
@@ -433,11 +434,18 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             runtime.deployResources(flow);
         }
 
-        String executionId = agentManager.getAgentRuntime(myDesignAgent).scheduleNow(deployment, flow.toFlowParametersAsString());
-        if (executionId != null) {
-            ExecutionRunPanel logPanel = new ExecutionRunPanel(executionId, context, tabs, this);
-            tabs.addCloseableTab(executionId, "Run " + flow.getName(), Icons.LOG, logPanel);
-            logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
+        if (flow.isWebService()) {
+            RunWebServicePanel panel = new RunWebServicePanel(deployment, context);
+            tabs.addCloseableTab(deployment.getId(), "Call " + flow.getName(), Icons.RUN, panel);
+        } else {
+            String executionId = agentManager.getAgentRuntime(myDesignAgent).scheduleNow(deployment,
+                    flow.toFlowParametersAsString());
+            if (executionId != null) {
+                ExecutionRunPanel logPanel = new ExecutionRunPanel(executionId, context, tabs,
+                        this);
+                tabs.addCloseableTab(executionId, "Run " + flow.getName(), Icons.LOG, logPanel);
+                logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
+            }
         }
     }
 
