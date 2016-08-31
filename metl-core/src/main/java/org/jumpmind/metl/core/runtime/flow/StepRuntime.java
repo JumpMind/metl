@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -188,9 +189,9 @@ public class StepRuntime implements Runnable {
                     + " not sufficient to handle inbound messages from other components in addition to inbound messages from itself.");
         }
         if (running) {
-            while (!inQueue.offer(message, 5, TimeUnit.MILLISECONDS)) {
+            while (!inQueue.offer(message, 500, TimeUnit.MILLISECONDS)) {
                 if (cancelling) {
-                    break;
+                    throw new CancellationException();
                 }
             }
         }
