@@ -52,7 +52,6 @@ import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerLogger;
 import org.jumpmind.metl.core.runtime.ExecutionTrackerRecorder;
 import org.jumpmind.metl.core.runtime.IExecutionTracker;
-import org.jumpmind.metl.core.runtime.ShutdownMessage;
 import org.jumpmind.metl.core.runtime.component.AbstractComponentRuntime;
 import org.jumpmind.metl.core.runtime.component.ComponentContext;
 import org.jumpmind.metl.core.runtime.component.ComponentStatistics;
@@ -470,16 +469,7 @@ public class FlowRuntime {
     public void cancel() {
         if (stepRuntimes != null) {
             for (StepRuntime stepRuntime : stepRuntimes.values()) {
-                if (stepRuntime.isRunning()) {
-                    try {
-                        stepRuntime.inQueue.clear();
-                        stepRuntime.queue(new ShutdownMessage(
-                                stepRuntime.getComponentContext().getFlowStep().getId(), true));
-                    } catch (InterruptedException e) {
-                    }
-                } else {
-                    stepRuntime.cancel();
-                }
+                stepRuntime.cancel();
             }
         }
     }

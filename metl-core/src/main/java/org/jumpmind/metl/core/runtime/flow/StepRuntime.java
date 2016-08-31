@@ -81,6 +81,8 @@ public class StepRuntime implements Runnable {
     protected Executor componentRuntimeExecutor;
 
     boolean running = false;
+    
+    boolean cancelling = false;
 
     boolean cancelled = false;
 
@@ -185,7 +187,15 @@ public class StepRuntime implements Runnable {
             throw new RuntimeException("Inbound queue capacity on " + componentContext.getFlowStep().getName()
                     + " not sufficient to handle inbound messages from other components in addition to inbound messages from itself.");
         }
-        inQueue.put(message);
+        while (!inQueue.offer(message, 1, TimeUnit.SECONDS)) {
+            if (!running || cancelling) {
+                if (message instanceof ShutdownMessage) {
+                    inQueue.clear();
+                } else {
+                    break;
+                }
+            }
+        }
     }
 
     public void start(IResourceFactory resourceFactory) {
@@ -489,10 +499,19 @@ public class StepRuntime implements Runnable {
     }
 
     public void cancel() {
-        shutdownThreads(true);
-        if (!finished) {
-            this.cancelled = true;
-            recordFlowStepFinished();
+        cancelling = true;
+        if (isRunning()) {
+            try {
+                inQueue.clear();
+                queue(new ShutdownMessage(componentContext.getFlowStep().getId(), true));
+            } catch (InterruptedException e) {
+            }
+        } else {
+            shutdownThreads(true);
+            if (!finished) {
+                this.cancelled = true;
+                recordFlowStepFinished();
+            }
         }
     }
 
