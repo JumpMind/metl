@@ -187,11 +187,9 @@ public class StepRuntime implements Runnable {
             throw new RuntimeException("Inbound queue capacity on " + componentContext.getFlowStep().getName()
                     + " not sufficient to handle inbound messages from other components in addition to inbound messages from itself.");
         }
-        while (!inQueue.offer(message, 1, TimeUnit.SECONDS)) {
-            if (!running || cancelling) {
-                if (message instanceof ShutdownMessage) {
-                    inQueue.clear();
-                } else {
+        if (running) {
+            while (!inQueue.offer(message, 5, TimeUnit.MILLISECONDS)) {
+                if (cancelling) {
                     break;
                 }
             }
