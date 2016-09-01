@@ -82,6 +82,8 @@ import com.vaadin.ui.themes.ValoTheme;
 public class PropertySheet extends AbsoluteLayout {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
+    
+    protected static final String DUMMY_PASSWORD = "*****";
 
     ApplicationContext context;
 
@@ -557,10 +559,15 @@ public class PropertySheet extends AbsoluteLayout {
                         private static final long serialVersionUID = 1L;
 
                         protected void save(String text) {
-                            saveSetting(definition.getId(), text, obj);
+                            if (!DUMMY_PASSWORD.equals(text)) {
+                                saveSetting(definition.getId(), text, obj);
+                            }
                         };
                     };
-                    passwordField.setValue(obj.get(definition.getId(), definition.getDefaultValue()));
+                    boolean isPasswordSet = isNotBlank(obj.get(definition.getId()));
+                    if (isPasswordSet) {
+                        passwordField.setValue(DUMMY_PASSWORD);
+                    }
                     passwordField.setRequired(required);
                     passwordField.setDescription(description);
                     passwordField.setReadOnly(readOnly);

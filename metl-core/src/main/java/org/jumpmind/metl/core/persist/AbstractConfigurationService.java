@@ -74,6 +74,8 @@ import org.jumpmind.metl.core.model.UserGroup;
 import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
+import org.jumpmind.metl.core.security.ISecurityService;
+import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.util.NameValue;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.util.FormatUtils;
@@ -81,10 +83,13 @@ import org.jumpmind.util.FormatUtils;
 abstract class AbstractConfigurationService extends AbstractService implements IConfigurationService {
 
     IComponentDefinitionFactory componentDefinitionFactory;
+    
+    ISecurityService securityService;
 
-    AbstractConfigurationService(IComponentDefinitionFactory componentDefinitionFactory, IPersistenceManager persistenceManager,
+    AbstractConfigurationService(ISecurityService securityService, IComponentDefinitionFactory componentDefinitionFactory, IPersistenceManager persistenceManager,
             String tablePrefix) {
         super(persistenceManager, tablePrefix);
+        this.securityService = securityService;
         this.componentDefinitionFactory = componentDefinitionFactory;
     }
 
@@ -303,7 +308,6 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         return findAgents(params);
     }
 
-    // TODO this should return agent name as it doesn't fill out deployments
     @Override
     public List<Agent> findAgents() {
         return persistenceManager.find(Agent.class, null, null, tableName(Agent.class));
@@ -353,13 +357,32 @@ abstract class AbstractConfigurationService extends AbstractService implements I
                 tableName(AgentParameter.class));
         agent.setAgentParameters(parameters);
     }
+    
+    protected List<? extends Setting> findSettings(Class<? extends Setting> clazz, Map<String,Object> params) {
+        List<? extends Setting> settings = persistenceManager.find(clazz, params, null, null,
+                tableName(clazz));
+        for (Setting setting : settings) {
+            if (isPassword(setting)) {
+                String value = setting.getValue();
+                if (value.startsWith(SecurityConstants.PREFIX_ENC)) {
+                    try {
+                        setting.setValue(securityService.decrypt(value.substring(SecurityConstants.PREFIX_ENC.length()-1)));
+                    } catch (Exception ex) {
+                        setting.setValue(null);
+                        log.error("Failed to decrypt password for the setting: " + setting.getName() + ".  The encrypted value was: " + value + ".  Please check your keystore.", ex);
+                    }
+                }
+            }
+        }
+        AbstractObjectLastUpdateTimeDescSorter.sort(settings);
+        return settings;
+    }
 
     protected void refreshAgentResourceSettings(Agent agent) {
         Map<String, Object> settingParams = new HashMap<String, Object>();
         settingParams.put("agentId", agent.getId());
-        List<AgentResourceSetting> settings = persistenceManager.find(AgentResourceSetting.class, settingParams, null, null,
-                tableName(AgentResourceSetting.class));
-        AbstractObjectLastUpdateTimeDescSorter.sort(settings);
+        @SuppressWarnings("unchecked")
+        List<AgentResourceSetting> settings = (List<AgentResourceSetting>)findSettings(AgentResourceSetting.class, settingParams);
         agent.setAgentResourceSettings(settings);
     }
 
@@ -423,8 +446,8 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("agentId", agentId);
         params.put("resourceId", resourceId);
-        List<AgentResourceSetting> settings = persistenceManager.find(AgentResourceSetting.class, params, null, null,
-                tableName(AgentResourceSetting.class));
+        @SuppressWarnings("unchecked")
+        List<AgentResourceSetting> settings = (List<AgentResourceSetting>)findSettings(AgentResourceSetting.class, params);
 
         Resource resource = findResource(resourceId);
         for (Setting resourceSetting : resource.getSettings()) {
@@ -489,17 +512,18 @@ abstract class AbstractConfigurationService extends AbstractService implements I
             }
         }
 
-        List<ComponentSetting> settings = find(ComponentSetting.class, new NameValue("componentId", component.getId()));
-        AbstractObjectLastUpdateTimeDescSorter.sort(settings);
+        @SuppressWarnings("unchecked")
+        List<ComponentSetting> settings = (List<ComponentSetting>)findSettings(ComponentSetting.class, new NameValue("componentId", component.getId()));
         component.setSettings(settings);
 
-        List<ComponentEntitySetting> entitySettings = find(ComponentEntitySetting.class, new NameValue("componentId", component.getId()));
-        AbstractObjectLastUpdateTimeDescSorter.sort(entitySettings);
+
+        @SuppressWarnings("unchecked")
+        List<ComponentEntitySetting> entitySettings = (List<ComponentEntitySetting>)findSettings(ComponentEntitySetting.class, new NameValue("componentId", component.getId()));
         component.setEntitySettings(entitySettings);
 
-        List<ComponentAttributeSetting> attributeSettings = find(ComponentAttributeSetting.class,
-                new NameValue("componentId", component.getId()));
-        AbstractObjectLastUpdateTimeDescSorter.sort(attributeSettings);
+        
+        @SuppressWarnings("unchecked")
+        List<ComponentAttributeSetting> attributeSettings = (List<ComponentAttributeSetting>)findSettings(ComponentAttributeSetting.class, new NameValue("componentId", component.getId()));
         component.setAttributeSettings(attributeSettings);
 
         if (readRelations) {
@@ -546,7 +570,8 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         for (Resource resource : resources) {
             Map<String, Object> settingParams = new HashMap<String, Object>();
             settingParams.put("resourceId", resource.getId());
-            List<ResourceSetting> settings = find(ResourceSetting.class, settingParams);
+            @SuppressWarnings("unchecked")
+            List<ResourceSetting> settings = (List<ResourceSetting>)findSettings(ResourceSetting.class, settingParams);            
             resource.setSettings(settings);
             list.add(resource);
         }
@@ -748,7 +773,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
 
         Map<String, Object> settingParams = new HashMap<String, Object>();
         settingParams.put("resourceId", resource.getId());
-        List<? extends Setting> settings = find(ResourceSetting.class, settingParams);
+        List<? extends Setting> settings = findSettings(ResourceSetting.class, settingParams);
         resource.setSettings(settings);
     }
 
@@ -774,7 +799,10 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         Map<String, Object> params = new HashMap<String, Object>();
         params = new HashMap<String, Object>();
         params.put("userId", user.getId());
-        user.setSettings(persistenceManager.find(UserSetting.class, params, null, null, tableName(UserSetting.class)));
+        
+        @SuppressWarnings("unchecked")
+        List<UserSetting> settings = (List<UserSetting>)findSettings(UserSetting.class, params);        
+        user.setSettings(settings);
 
         List<Group> groups = new ArrayList<Group>();
         List<UserGroup> userGroups = persistenceManager.find(UserGroup.class, params, null, null, tableName(UserGroup.class));
@@ -925,6 +953,24 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     public void save(Flow flow) {
         save(flow, false);
     }
+    
+    protected boolean isPassword(Setting setting) {
+        return setting.getName().contains("password");
+    }
+    
+    @Override
+    public void save(Setting setting) {
+        boolean isPassword = isPassword(setting); 
+        String unencrypted = setting.getValue();
+          if (isPassword) {              
+              String encrypted = SecurityConstants.PREFIX_ENC + securityService.encrypt(unencrypted);
+              setting.setValue(encrypted);
+          }
+          save((AbstractObject)setting);
+          if (isPassword) {
+              setting.setValue(unencrypted);
+          }
+    }
 
     protected void save(Flow flow, boolean newProjectVersion) {
         save((AbstractObject) flow);
@@ -1042,16 +1088,18 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         refresh((AbstractObject) notification);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<GlobalSetting> findGlobalSettings() {
-        return persistenceManager.find(GlobalSetting.class, null, null, tableName(GlobalSetting.class));
+        return (List<GlobalSetting>)findSettings(GlobalSetting.class, null);
     }
 
     @Override
     public GlobalSetting findGlobalSetting(String name) {
         Map<String, Object> param = new HashMap<String, Object>();
         param.put("name", name);
-        List<GlobalSetting> settings = persistenceManager.find(GlobalSetting.class, param, null, null, tableName(GlobalSetting.class));
+        @SuppressWarnings("unchecked")
+        List<GlobalSetting> settings = (List<GlobalSetting>)findSettings(GlobalSetting.class, param);
         if (settings.size() > 0) {
             return settings.get(0);
         }

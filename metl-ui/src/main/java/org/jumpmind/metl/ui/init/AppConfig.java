@@ -65,6 +65,9 @@ import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMappingRegistry;
 import org.jumpmind.metl.core.runtime.web.IHttpRequestMappingRegistry;
+import org.jumpmind.metl.core.security.ISecurityService;
+import org.jumpmind.metl.core.security.SecurityConstants;
+import org.jumpmind.metl.core.security.SecurityService;
 import org.jumpmind.metl.core.util.EnvConstants;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.ui.views.IUIFactory;
@@ -108,11 +111,11 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     IDatabasePlatform databasePlatform;
 
     IConfigurationService configurationService;
-    
+
     IImportExportService importExportService;
 
     IComponentRuntimeFactory componentRuntimeFactory;
-    
+
     IComponentDefinitionFactory componentDefinitionFactory;
 
     IResourceFactory resourceFactory;
@@ -120,29 +123,33 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     IPersistenceManager persistenceManager;
 
     IExecutionService executionService;
-    
+
+    ISecurityService securityService;
+
     IHttpRequestMappingRegistry httpRequestMappingRegistry;
-    
+
     IUIFactory uiFactory;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("swagger-ui.html").addResourceLocations(
-                "classpath:/META-INF/resources/");
+        registry.addResourceHandler("swagger-ui.html")
+                .addResourceLocations("classpath:/META-INF/resources/");
 
-        registry.addResourceHandler("/webjars/**").addResourceLocations(
-                "classpath:/META-INF/resources/webjars/");
+        registry.addResourceHandler("/webjars/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
-    
+
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-        configurer.defaultContentType(MediaType.APPLICATION_JSON).favorParameter(true).mediaType("xml", MediaType.APPLICATION_XML);
+        configurer.defaultContentType(MediaType.APPLICATION_JSON).favorParameter(true)
+                .mediaType("xml", MediaType.APPLICATION_XML);
     }
 
     @Bean
     public Docket swaggerSpringMvcPlugin() {
-      return new Docket(DocumentationType.SWAGGER_2).pathMapping("/api").produces(contentTypes()).consumes(contentTypes()).
-              apiInfo(new ApiInfo("Metl API", "This is the REST API for Metl", null, null, null, null, null));
+        return new Docket(DocumentationType.SWAGGER_2).pathMapping("/api").produces(contentTypes())
+                .consumes(contentTypes()).apiInfo(new ApiInfo("Metl API",
+                        "This is the REST API for Metl", null, null, null, null, null));
     }
 
     protected Set<String> contentTypes() {
@@ -174,8 +181,9 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         properties.put(DB_POOL_INIT_SQL, env.getProperty(DB_POOL_INIT_SQL));
         properties.put(DB_POOL_CONNECTION_PROPERTIES,
                 env.getProperty(DB_POOL_CONNECTION_PROPERTIES));
-        log.info("About to initialize the configuration datasource using the following driver:"
-                + " '{}' and the following url: '{}' and the following user: '{}'",
+        log.info(
+                "About to initialize the configuration datasource using the following driver:"
+                        + " '{}' and the following url: '{}' and the following user: '{}'",
                 new Object[] { properties.get(DB_POOL_DRIVER), properties.get(DB_POOL_URL),
                         properties.get(DB_POOL_USER) });
 
@@ -200,18 +208,17 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         String tablePrefix = env.getProperty(EnvConstants.TABLE_PREFIX, "METL");
         return configDatabasePlatform().alterCaseToMatchDatabaseDefaultCase(tablePrefix);
     }
-    
+
     @Bean
     @Scope(value = "singleton")
     public String configDir() {
         return env.getProperty(EnvConstants.CONFIG_DIR);
     }
-    
+
     @Bean
     @Scope(value = "singleton")
     public boolean logToFileEnabled() {
-        return Boolean.parseBoolean(env.getProperty(
-                EnvConstants.LOG_TO_FILE_ENABLED, "true"));
+        return Boolean.parseBoolean(env.getProperty(EnvConstants.LOG_TO_FILE_ENABLED, "true"));
     }
 
     @Bean
@@ -219,7 +226,6 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     public String logFile() {
         return env.getProperty(EnvConstants.LOG_FILE, LogUtils.getLogFilePath());
     }
-
 
     @Bean
     @Scope(value = "singleton")
@@ -241,8 +247,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IConfigurationService configurationService() {
         if (configurationService == null) {
-            configurationService = new ConfigurationSqlService(componentDefinitionFactory(), configDatabasePlatform(),
-                    persistenceManager(), tablePrefix());
+            configurationService = new ConfigurationSqlService(securityService(), componentDefinitionFactory(),
+                    configDatabasePlatform(), persistenceManager(), tablePrefix());
         }
         return configurationService;
     }
@@ -256,7 +262,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         }
         return importExportService;
     }
-    
+
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IExecutionService executionService() {
@@ -266,7 +272,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         }
         return executionService;
     }
-    
+
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IComponentDefinitionFactory componentDefinitionFactory() {
@@ -284,7 +290,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         }
         return componentRuntimeFactory;
     }
-    
+
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IUIFactory uiFactory() {
@@ -307,10 +313,11 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IAgentManager agentManager() {
         IAgentManager agentManager = new AgentManager(configurationService(), executionService(),
-                componentRuntimeFactory(), componentDefinitionFactory(), resourceFactory(), httpRequestMappingRegistry());
+                componentRuntimeFactory(), componentDefinitionFactory(), resourceFactory(),
+                httpRequestMappingRegistry());
         return agentManager;
     }
-    
+
     @Bean
     @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
     public IHttpRequestMappingRegistry httpRequestMappingRegistry() {
@@ -320,10 +327,28 @@ public class AppConfig extends WebMvcConfigurerAdapter {
         return httpRequestMappingRegistry;
     }
 
+    @Bean
+    @Scope(value = "singleton", proxyMode = ScopedProxyMode.INTERFACES)
+    public ISecurityService securityService() {
+        if (securityService == null) {
+            try {
+                securityService = (ISecurityService) Class
+                        .forName(System.getProperty(SecurityConstants.CLASS_NAME_SECURITY_SERVICE,
+                                SecurityService.class.getName()))
+                        .newInstance();
+                securityService.setConfigDir(configDir());
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return securityService;
+    }
 
     @Bean
     static UIScope uiScope() {
         return new UIScope();
     }
-    
+
 }

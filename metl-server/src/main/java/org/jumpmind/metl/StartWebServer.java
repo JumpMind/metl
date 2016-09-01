@@ -116,7 +116,6 @@ public class StartWebServer {
 
         ProtectionDomain protectionDomain = StartWebServer.class.getProtectionDomain();
         URL location = protectionDomain.getCodeSource().getLocation();
-        File locationDir = new File(location.getFile()).getParentFile();
 
         String allowDirListing = System.getProperty(SERVER_ALLOW_DIR_LISTING, "false");
         String allowedMethods = System.getProperty(SERVER_ALLOW_HTTP_METHODS, "");
@@ -133,7 +132,7 @@ public class StartWebServer {
         filterHolder.setInitParameter("server.disallow.http.methods", disallowedMethods);
         webapp.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST));
 
-        String extraClasspath = getPluginClasspath(locationDir);
+        String extraClasspath = getPluginClasspath(new File(Wrapper.getConfigDir(null, false)));
         webapp.setExtraClasspath(extraClasspath);
         if (extraClasspath.length() > 0) {
             getLogger().info("Adding extra classpath of: " + extraClasspath.toString());

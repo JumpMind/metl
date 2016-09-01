@@ -49,6 +49,7 @@ import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
+import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.User;
 
 public interface IConfigurationService {
@@ -222,6 +223,8 @@ public interface IConfigurationService {
     public List<Flow> findAffectedFlowsByFlow(String flowId);
     
     public ProjectVersion saveNewVersion(String newVersionLabel, ProjectVersion original);
+    
+    public void save(Setting setting);
 
     public FlowStep copy(FlowStep original);
 

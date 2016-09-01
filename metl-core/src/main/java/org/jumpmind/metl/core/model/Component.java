@@ -21,9 +21,7 @@
 package org.jumpmind.metl.core.model;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.jumpmind.db.sql.Row;
@@ -300,22 +298,6 @@ public class Component extends AbstractObjectWithSettings {
             return model.toRow(data, qualifyWithEntityName);
         }
         return row;
-    }
-
-    public Set<String> getEntityNames(EntityData data, boolean input) {
-        Set<String> names = new HashSet<String>();
-        Model model = input ? inputModel : outputModel;
-        if (model != null) {
-            Set<String> attributeIds = data.keySet();
-            for (String attributeId : attributeIds) {
-                ModelAttribute attribute = model.getAttributeById(attributeId);
-                if (attribute != null) {
-                    ModelEntity entity = model.getEntityById(attribute.getEntityId());
-                    names.add(entity.getName());
-                }
-            }
-        }
-        return names;
     }
     
 }

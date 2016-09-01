@@ -61,7 +61,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 public class AppInitializer implements WebApplicationInitializer, ServletContextListener {
 
-    protected static final String SYS_CONFIG_DIR = AppInitializer.class.getPackage().getName() + ".config.dir";
+    protected static final String SYS_CONFIG_DIR = "org.jumpmind.metl.ui.init.config.dir";
 
     public static ThreadLocal<AnnotationConfigWebApplicationContext> applicationContextRef = new ThreadLocal<>();
 
