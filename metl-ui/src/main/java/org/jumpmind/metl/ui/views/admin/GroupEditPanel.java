@@ -49,6 +49,10 @@ public class GroupEditPanel extends VerticalLayout implements IUiPanel {
     Group group;
     
     Set<String> lastPrivs;
+    
+    CheckBox readOnly;
+    
+    TwinColSelect privSelect;
         
     public GroupEditPanel(ApplicationContext context, Group group) {
         this.context = context;
@@ -61,13 +65,15 @@ public class GroupEditPanel extends VerticalLayout implements IUiPanel {
         layout.addComponent(nameField);
         nameField.focus();
         
-        CheckBox readOnly = new CheckBox("Read Only");
+        readOnly = new CheckBox("Read Only");
+        readOnly.setEnabled(isNotBlank(group.getName()));
         readOnly.setImmediate(true);
         readOnly.setValue(group.isReadOnly());
         readOnly.addValueChangeListener(new ReadOnlyChangeListener());
         layout.addComponent(readOnly);
         
-        TwinColSelect privSelect = new TwinColSelect();
+        privSelect = new TwinColSelect();
+        privSelect.setEnabled(isNotBlank(group.getName()));
         for (Privilege priv : Privilege.values()) {
             privSelect.addItem(priv.name());
         }
@@ -107,6 +113,8 @@ public class GroupEditPanel extends VerticalLayout implements IUiPanel {
             group.setName((String) event.getProperty().getValue());
             if (isNotBlank(group.getName())) {
                 context.getConfigurationService().save(group);
+                privSelect.setEnabled(true);
+                readOnly.setEnabled(true);
             }
         }        
     }
