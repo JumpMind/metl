@@ -80,6 +80,8 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     
     protected TypedProperties properties;
     
+    private EntityNameLookup entityNameLookup;
+    
     @Override
     public void create(XMLComponent definition, ComponentContext context, int threadNumber) {
         this.componentDefinition = definition;
@@ -260,11 +262,14 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
     }
     
     protected Bindings bindEntityData(ScriptEngine scriptEngine, Message inputMessage, EntityData entityData) {
+        if (entityNameLookup == null) {
+            entityNameLookup = new EntityNameLookup(context.getFlowStep().getComponent().getInputModel());
+        }
         Bindings bindings = scriptEngine.createBindings();       
         bindHeadersAndFlowParameters(bindings, inputMessage);
         Model model = getInputModel();
         bindings.put("CHANGE_TYPE", entityData.getChangeType().name());
-        bindings.put("ENTITY_NAMES", context.getFlowStep().getComponent().getEntityNames(entityData, true));                
+        bindings.put("ENTITY_NAMES", entityNameLookup.getEntityNames(entityData));                
         Set<String> attributeIds = entityData.keySet();
         for (String attributeId : attributeIds) {
             ModelAttribute attribute = model.getAttributeById(attributeId);
