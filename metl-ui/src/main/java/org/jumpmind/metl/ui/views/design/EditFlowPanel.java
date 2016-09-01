@@ -197,9 +197,10 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             delButton.addClickListener((event)->deleteSelected());
             delButton.setEnabled(false);
 
-            Button exportButton = buttonBar.addButtonRight("Export", FontAwesome.PICTURE_O, (event)->export());
-            exportButton.setId("exportButton");
         }
+
+        Button exportButton = buttonBar.addButtonRight("Capture", FontAwesome.CAMERA, (event)->export());
+        exportButton.setId("exportButton");
 
         parametersButton = buttonBar.addButton("Parameters", FontAwesome.LIST_OL);
         parametersButton.addClickListener((event) -> new EditParametersDialog(context, flow, readOnly).showAtSize(.75));
@@ -546,19 +547,26 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             WrapperTransferable t = (WrapperTransferable) event.getTransferable();
             WrapperTargetDetails details = (WrapperTargetDetails) event.getTargetDetails();
             DragAndDropWrapper wrapper = (DragAndDropWrapper) t.getSourceComponent();
-            FlowPaletteItem flowPaletteItem = (FlowPaletteItem) wrapper.iterator().next();
-            if (flowPaletteItem.isShared()) {
-                Component component = new Component();
-                component.setId(flowPaletteItem.getComponentId());
-                configurationService.refresh(component, true);
-                addComponent(flowPaletteItem.getCaption(), details.getMouseEvent().getClientX() - details.getAbsoluteLeft(),
-                        details.getMouseEvent().getClientY() - details.getAbsoluteTop(), component);
-            } else {
-                Component component = new Component();
-                component.setType(flowPaletteItem.getComponentType());
-                component.setShared(false);
-                addComponent(flowPaletteItem.getCaption(), details.getMouseEvent().getClientX() - details.getAbsoluteLeft(),
-                        details.getMouseEvent().getClientY() - details.getAbsoluteTop(), component);
+            Object object = wrapper.iterator().next();
+            if (object instanceof FlowPaletteItem && !readOnly) {
+                FlowPaletteItem flowPaletteItem = (FlowPaletteItem) object;
+                if (flowPaletteItem.isShared()) {
+                    Component component = new Component();
+                    component.setId(flowPaletteItem.getComponentId());
+                    configurationService.refresh(component, true);
+                    addComponent(flowPaletteItem.getCaption(),
+                            details.getMouseEvent().getClientX() - details.getAbsoluteLeft(),
+                            details.getMouseEvent().getClientY() - details.getAbsoluteTop(),
+                            component);
+                } else {
+                    Component component = new Component();
+                    component.setType(flowPaletteItem.getComponentType());
+                    component.setShared(false);
+                    addComponent(flowPaletteItem.getCaption(),
+                            details.getMouseEvent().getClientX() - details.getAbsoluteLeft(),
+                            details.getMouseEvent().getClientY() - details.getAbsoluteTop(),
+                            component);
+                }
             }
         }
 
