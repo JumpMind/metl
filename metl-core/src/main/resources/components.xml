@@ -1082,6 +1082,18 @@
         <name>In Memory Db</name>
         <defaultValue>true</defaultValue>
       </setting>
+      <setting id='continue.on.error'
+               required='true'
+               type='boolean'>
+        <name>Continue On Error</name>
+        <defaultValue>false</defaultValue>
+      </setting>
+      <setting id='batch.mode'
+               required='true'
+               type='boolean'>
+        <name>Batch Mode</name>
+        <defaultValue>false</defaultValue>
+      </setting>
     </settings>
   </component>
   <component category='READER'

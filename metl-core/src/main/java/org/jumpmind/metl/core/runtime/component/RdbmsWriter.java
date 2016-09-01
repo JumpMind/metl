@@ -506,6 +506,14 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     public void setUpdateFirst(boolean updateFirst) {
         this.updateFirst = updateFirst;
     }
+
+    public boolean isContinueOnError() {
+        return continueOnError;
+    }
+
+    public void setContinueOnError(boolean continueOnError) {
+        this.continueOnError = continueOnError;
+    }
     
     public Throwable getError() {
         return error;
