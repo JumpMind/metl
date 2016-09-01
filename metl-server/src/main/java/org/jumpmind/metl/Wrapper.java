@@ -86,7 +86,7 @@ public class Wrapper {
 
         String configDir = "";
         
-        if (args.length > 1 && !args[1].equalsIgnoreCase("INSTALL")) {
+        if (args != null && args.length > 1 && !args[1].equalsIgnoreCase("INSTALL")) {
             int index = args[1].lastIndexOf(File.separator);
             if (index != -1) {
                 configDir = args[1].substring(0, index + 1);
