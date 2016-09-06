@@ -4,6 +4,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -11,10 +12,22 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.Flow;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.runtime.component.SecurityScheme;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMapping;
 import org.jumpmind.metl.ui.api.ApiConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -27,6 +40,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
@@ -43,6 +57,7 @@ import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
@@ -60,22 +75,29 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
     ReqRespTabSheet requestTabs;
 
     ReqRespTabSheet responseTabs;
-    
+
     TextField urlField;
-    
+
     OptionGroup methodGroup;
-    
+
     VerticalLayout responseStatusAreaLayout;
-    
+
     TextArea responseStatusArea;
-    
+
     Button viewExecutionLogButton;
-    
+
     String executionId;
-    
+
     TabbedPanel tabs;
 
-    public CallWebServicePanel(AgentDeployment deployment, ApplicationContext context, TabbedPanel tabs) {
+    ComboBox securitySchemeCombo;
+
+    TextField userField;
+
+    PasswordField passwordField;
+
+    public CallWebServicePanel(AgentDeployment deployment, ApplicationContext context,
+            TabbedPanel tabs) {
         this.deployment = deployment;
         this.context = context;
         this.tabs = tabs;
@@ -85,7 +107,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
         ButtonBar buttonBar = new ButtonBar();
         buttonBar.addButton("Call Service", Icons.RUN, (e) -> runFlow());
-        
+
         viewExecutionLogButton = buttonBar.addButton("View Log", Icons.LOG, (e) -> openExecution());
         viewExecutionLogButton.setEnabled(false);
 
@@ -118,9 +140,27 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         ComboBox contentType = new ComboBox("Content Type");
         contentType.addItem(MimeTypeUtils.APPLICATION_JSON.toString());
         contentType.addItem(MimeTypeUtils.APPLICATION_XML.toString());
-
         contentType.setNullSelectionAllowed(false);
         formLayout.addComponent(contentType);
+
+        securitySchemeCombo = new ComboBox("Security Scheme");
+        securitySchemeCombo.setNullSelectionAllowed(false);
+        SecurityScheme[] types = SecurityScheme.values();
+        for (SecurityScheme securityType : types) {
+            securitySchemeCombo.addItem(securityType);
+        }
+        securitySchemeCombo.addValueChangeListener((e) -> securityMethodChanged());
+        formLayout.addComponent(securitySchemeCombo);
+
+        userField = new TextField("Security Username");
+        userField.setNullRepresentation("");
+        userField.setVisible(false);
+        formLayout.addComponent(userField);
+
+        passwordField = new PasswordField("Security Password");
+        passwordField.setNullRepresentation("");
+        passwordField.setVisible(false);
+        formLayout.addComponent(passwordField);
 
         requestTabs = new ReqRespTabSheet("Request", true);
         formLayout.addComponent(requestTabs);
@@ -150,9 +190,15 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
                 String pageUrl = Page.getCurrent().getLocation().toURL().toExternalForm();
                 String url = pageUrl.substring(0,
                         pageUrl.indexOf(contextPath) + contextPath.length());
-                urlField.setValue(String.format("%s/api/ws%s", url, mapping.getPath().startsWith("/") ? mapping.getPath() : ("/" + mapping.getPath())));
+                urlField.setValue(
+                        String.format("%s/api/ws%s", url, mapping.getPath().startsWith("/")
+                                ? mapping.getPath() : ("/" + mapping.getPath())));
             } catch (MalformedURLException e1) {
             }
+
+            securitySchemeCombo.setValue(mapping.getSecurityScheme());
+            userField.setValue(mapping.getSecurityUsername());
+            passwordField.setValue(mapping.getSecurityPassword());
 
             methodGroup.setValue(mapping.getMethod().name());
 
@@ -165,19 +211,26 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
                     break;
                 }
             }
-            
+
         } else {
             contentType.select(contentType.getItemIds().iterator().next());
         }
 
     }
-    
+
+    protected void securityMethodChanged() {
+        SecurityScheme scheme = (SecurityScheme) securitySchemeCombo.getValue();
+        boolean visible = scheme != SecurityScheme.NONE;
+        userField.setVisible(visible);
+        passwordField.setVisible(visible);
+    }
+
     protected void openExecution() {
         if (isNotBlank(executionId)) {
-            ExecutionRunPanel logPanel = new ExecutionRunPanel(executionId, context, tabs,
-                    this);
+            ExecutionRunPanel logPanel = new ExecutionRunPanel(executionId, context, tabs, this);
             logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
-            tabs.addCloseableTab(executionId, "Run " + deployment.getFlow().getName(), Icons.LOG, logPanel);
+            tabs.addCloseableTab(executionId, "Run " + deployment.getFlow().getName(), Icons.LOG,
+                    logPanel);
         }
     }
 
@@ -186,42 +239,51 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         Map<String, String> headerMap;
         try {
             viewExecutionLogButton.setEnabled(false);
-            RestTemplate template = new RestTemplate();
+            RestTemplate template = null;            
+            if (securitySchemeCombo.getValue() == SecurityScheme.BASIC) {
+                template = new RestTemplate(new BasicRequestFactory(userField.getValue(), passwordField.getValue()));
+            } else {
+                template = new RestTemplate();
+            }
             HttpHeaders headers = new HttpHeaders();
             headerMap = requestTabs.getHeaders();
-            for(String key : headerMap.keySet()) {
+            for (String key : headerMap.keySet()) {
                 headers.add(key, headerMap.get(key));
             }
-            HttpEntity<String> entity = new HttpEntity<>(requestTabs.getPayload().getValue(), headers);
-            ResponseEntity<String> response = template.exchange(urlField.getValue(), HttpMethod.valueOf((String)methodGroup.getValue()), entity, String.class);
+            HttpEntity<String> entity = new HttpEntity<>(requestTabs.getPayload().getValue(),
+                    headers);
+            ResponseEntity<String> response = template.exchange(urlField.getValue(),
+                    HttpMethod.valueOf((String) methodGroup.getValue()), entity, String.class);
             responseTabs.getPayload().setValue(response.getBody());
             headerMap = response.getHeaders().toSingleValueMap();
-            for(String key : headerMap.keySet()) {
+            for (String key : headerMap.keySet()) {
                 responseTabs.setHeader(key, headerMap.get(key));
             }
-            responseStatusArea.setValue(response.getStatusCode().toString() + " " + response.getStatusCode().getReasonPhrase());
+            responseStatusArea.setValue(response.getStatusCode().toString() + " "
+                    + response.getStatusCode().getReasonPhrase());
         } catch (HttpStatusCodeException e) {
             responseTabs.getPayload().setValue(e.getResponseBodyAsString());
             headerMap = e.getResponseHeaders().toSingleValueMap();
-            for(String key : headerMap.keySet()) {
+            for (String key : headerMap.keySet()) {
                 responseTabs.setHeader(key, headerMap.get(key));
-            }   
-            responseStatusArea.setValue(e.getStatusCode().toString() + " " + e.getStatusCode().getReasonPhrase());
+            }
+            responseStatusArea.setValue(
+                    e.getStatusCode().toString() + " " + e.getStatusCode().getReasonPhrase());
         }
-        
+
         if (headerMap != null) {
             executionId = headerMap.get(ApiConstants.HEADER_EXECUTION_ID);
             if (isNotBlank(executionId)) {
                 viewExecutionLogButton.setEnabled(true);
             }
         }
-        
+
         if (isBlank(responseTabs.getPayload().getValue())) {
             responseTabs.setSelectedTab(0);
         } else {
             responseTabs.setSelectedTab(1);
         }
-        
+
     }
 
     @Override
@@ -284,7 +346,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             requestHeadersLayout.setExpandRatio(headersGrid, 1);
             addTab(requestHeadersLayout, "Headers");
         }
-        
+
         public VerticalLayout getPayloadLayout() {
             return payloadLayout;
         }
@@ -309,15 +371,16 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
                 item.getItemProperty("headerName").setValue(name);
                 item.getItemProperty("headerValue").setValue(value);
             }
-        }        
-        
+        }
+
         protected Map<String, String> getHeaders() {
-            Map<String,String> headers = new HashMap<String, String>();
+            Map<String, String> headers = new HashMap<String, String>();
             Indexed container = headersGrid.getContainerDataSource();
             Collection<?> itemIds = container.getItemIds();
             for (Object itemId : itemIds) {
                 Item item = container.getItem(itemId);
-                headers.put((String)item.getItemProperty("headerName").getValue(), (String)item.getItemProperty("headerValue").getValue());
+                headers.put((String) item.getItemProperty("headerName").getValue(),
+                        (String) item.getItemProperty("headerValue").getValue());
             }
             return headers;
         }
@@ -339,6 +402,27 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
         public Grid getHeadersGrid() {
             return headersGrid;
+        }
+
+    }
+    
+    public class BasicRequestFactory extends HttpComponentsClientHttpRequestFactory {
+
+        public BasicRequestFactory(String username, String password) {
+            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
+            setHttpClient(HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsProvider).build());
+        }
+
+        @Override
+        protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
+            HttpHost targetHost = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
+            AuthCache authCache = new BasicAuthCache();
+            BasicScheme basicAuth = new BasicScheme();
+            authCache.put(targetHost, basicAuth);
+            BasicHttpContext localContext = new BasicHttpContext();
+            localContext.setAttribute(HttpClientContext.AUTH_CACHE, authCache);
+            return localContext;
         }
 
     }

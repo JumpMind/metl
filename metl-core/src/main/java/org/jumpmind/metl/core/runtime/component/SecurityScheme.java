@@ -1,6 +1,6 @@
 package org.jumpmind.metl.core.runtime.component;
 
-public enum SecurityType {
+public enum SecurityScheme {
 
     NONE, BASIC
     
