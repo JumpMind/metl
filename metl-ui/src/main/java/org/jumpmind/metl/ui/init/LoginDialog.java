@@ -171,17 +171,16 @@ public class LoginDialog extends Window {
                         .findUserHist(context.getUser().getId());
                 if (prohibitNPreviousPasswords < 0) {
                     prohibitNPreviousPasswords = histories.size();
-                    for (int i = 0; i < histories.size() && i < prohibitNPreviousPasswords; i++) {
-                        UserHist hist = histories.get(i);
-                        String toCompare = securityService.hash(hist.getSalt(),
-                                passwordField.getValue());
-                        if (toCompare.equals(hist.getPassword())) {
-                            passedTest = false;
-                            notify("Password Repeated",
-                                    "You have used this password in the past.  Please choose a different password.");
-                            break;
-                        }
-
+                }
+                for (int i = 0; i < histories.size() && i < prohibitNPreviousPasswords; i++) {
+                    UserHist hist = histories.get(i);
+                    String toCompare = securityService.hash(hist.getSalt(),
+                            passwordField.getValue());
+                    if (toCompare.equals(hist.getPassword())) {
+                        passedTest = false;
+                        notify("Password Repeated",
+                                "You have used this password in the past.  Please choose a different password.");
+                        break;
                     }
                 }
             }
