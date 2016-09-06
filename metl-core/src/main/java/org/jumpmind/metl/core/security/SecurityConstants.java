@@ -15,6 +15,10 @@ public class SecurityConstants {
     public static final String SYSPROP_KEYSTORE_PASSWORD = "javax.net.ssl.keyStorePassword";  
     
     public final static String CLASS_NAME_SECURITY_SERVICE = "security.service.class.name";
+    
+    public final static String PASSWORD_AUTH_METHOD_SHASH = "SHASH";
+    
+    public final static String PASSWORD_AUTH_METHOD_HASH = "HASH";
    
     public static final String PREFIX_ENC = "enc:";
     

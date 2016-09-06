@@ -19,6 +19,8 @@ public interface ISecurityService {
     
     public KeyStore getKeyStore();
     
+    public String hash(String salt, String password);
+    
     public void setConfigDir(String dir);
     
 }

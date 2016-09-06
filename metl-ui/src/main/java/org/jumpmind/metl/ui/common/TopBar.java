@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.metl.core.model.GlobalSetting;
+import org.jumpmind.metl.ui.init.ChangePasswordDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,8 +87,7 @@ public class TopBar extends HorizontalLayout implements ViewChangeListener {
         addComponent(helpButton);
 
         Button settingsButton = new Button(context.getUser().getLoginId(), FontAwesome.GEAR);
-        settingsButton.addClickListener((event) -> {
-        });
+        settingsButton.addClickListener((e) -> ChangePasswordDialog.show(context));
         addComponent(settingsButton);
 
         Button logoutButton = new Button("Logout", FontAwesome.SIGN_OUT);

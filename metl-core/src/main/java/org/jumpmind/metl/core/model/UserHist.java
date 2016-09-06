@@ -20,29 +20,67 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class GlobalSetting extends Setting {
+import org.jumpmind.metl.core.security.SecurityConstants;
+
+public class UserHist extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
-    
-    public static final String SYSTEM_TEXT = "system.text";
-    
-    public static final String PASSWORD_MIN_LENGTH = "password.min.length";
-    
-    public static final String PASSWORD_PROHIBIT_PREVIOUS = "password.prohibit.previous";
-    
-    public static final String PASSWORD_PROHIBIT_COMMON_WORDS = "password.prohibit.common.words";
-    
-    public static final String PASSWORD_REQUIRE_ALPHANUMERIC = "password.require.alphanumeric";
-    
-    public static final String PASSWORD_REQUIRE_SYMBOL = "password.require.symbol";
-    
-    public static final String PASSWORD_REQUIRE_MIXED_CASE = "password.require.mixed.case";
-    
-    public static final String PASSWORD_EXPIRE_DAYS = "password.expire.days";
+
+    String userId;
+
+    String password;
+
+    String authMethod = SecurityConstants.PASSWORD_AUTH_METHOD_SHASH;
+
+    String salt;
+
+    public UserHist() {
+    }
+
+    @Override
+    public void setName(String name) {
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String loginId) {
+        this.userId = loginId;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setAuthMethod(String authMethod) {
+        this.authMethod = authMethod;
+    }
+
+    public String getAuthMethod() {
+        return authMethod;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
+
+    public String getSalt() {
+        return salt;
+    }
 
     @Override
     public String toString() {
-        return "global setting {" + name + ":" + value + "}";
+        return userId;
     }
-    
+
 }

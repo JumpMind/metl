@@ -438,17 +438,32 @@
         <column name="handle_duration" type="INTEGER" default="0" required="true" />
     </table>   
 
-    <table name="user" description="">
+    <table name="user_hist" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
-        <column name="login_id" type="VARCHAR" size="50" required="true" description="" />
-        <column name="name" type="VARCHAR" size="255" required="false" description="" />
+        <column name="user_id" type="CHAR" size="36" required="true" description="" />
 		<column name="password" type="VARCHAR" size="255" required="false" description="" />
-		<column name="last_login_time" type="TIMESTAMP" description="" />
+        <column name="salt" type="VARCHAR" size="255" required="false" description="" />
+        <column name="auth_method" type="VARCHAR" size="255" default="HASH" required="true" description="" />
         <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
         <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
         <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />               
     </table>
+    
+    <table name="user" description="">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="login_id" type="VARCHAR" size="50" required="true" description="" />
+        <column name="name" type="VARCHAR" size="255" required="false" description="" />
+        <column name="password" type="VARCHAR" size="255" required="false" description="" />
+        <column name="salt" type="VARCHAR" size="255" required="false" description="" />
+        <column name="auth_method" type="VARCHAR" size="255" default="HASH" required="true" description="" />        
+        <column name="last_login_time" type="TIMESTAMP" description="" />
+        <column name="last_password_time" type="TIMESTAMP" default="CURRENT_TIMESTAMP" description="" />
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />               
+    </table>    
 
     <table name="group" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />

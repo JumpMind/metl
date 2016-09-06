@@ -71,6 +71,7 @@ import org.jumpmind.metl.core.model.ResourceSetting;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserGroup;
+import org.jumpmind.metl.core.model.UserHist;
 import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
@@ -750,6 +751,11 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         for (Group group : user.getGroups()) {
             persistenceManager.delete(new UserGroup(user.getId(), group.getId()), null, null, tableName(UserGroup.class));
         }
+        
+        List<UserHist> history = findUserHist(user.getId());
+        for (UserHist userHist : history) {
+            persistenceManager.delete(userHist, null, null, tableName(UserHist.class));
+        }
 
         persistenceManager.delete(user, null, null, tableName(User.class));
     }
@@ -1167,6 +1173,32 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         }
 
         return newVersion;
+    }
+    
+    @Override
+    public List<UserHist> findUserHist(String id) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("userId", id);
+        List<UserHist> list = find(UserHist.class, params);
+        AbstractObjectLastUpdateTimeDescSorter.sort(list);
+        return list;
+    }
+    
+    @Override
+    public void savePassword(User user, String newPassword) {
+        UserHist hist = new UserHist();
+        hist.setUserId(user.getId());
+        hist.setLastUpdateTime(user.getLastPasswordTime());
+        hist.setPassword(user.getPassword());
+        hist.setSalt(user.getSalt());
+        hist.setAuthMethod(user.getAuthMethod());
+        save(hist);
+        
+        user.setAuthMethod(SecurityConstants.PASSWORD_AUTH_METHOD_SHASH);
+        user.setSalt(securityService.nextSecureHexString(10));  
+        user.setLastPasswordTime(new Date());
+        user.setPassword(securityService.hash(user.getSalt(), newPassword));
+        save(user);
     }
 
     @Override

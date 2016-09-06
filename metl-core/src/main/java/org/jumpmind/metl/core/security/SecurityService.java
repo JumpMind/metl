@@ -1,5 +1,7 @@
 package org.jumpmind.metl.core.security;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,6 +20,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -188,7 +191,16 @@ public class SecurityService implements ISecurityService {
         }
         return secRand;
     }
+    
+    @Override
+    public String hash(String salt, String password) {
+        if (isNotBlank(salt)) {
+            password = salt+password;
+        }
+        return DigestUtils.sha256Hex(password.getBytes());
+    }
 
+    @Override
     public String nextSecureHexString(int len) {
         if (len <= 0)
             throw new IllegalArgumentException("length must be positive");

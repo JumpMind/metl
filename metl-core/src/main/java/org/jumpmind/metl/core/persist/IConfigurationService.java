@@ -51,185 +51,190 @@ import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.User;
+import org.jumpmind.metl.core.model.UserHist;
 
 public interface IConfigurationService {
     
-    public boolean isInstalled();
+    public Flow copy(Flow original);
         
-    public List<FolderName> findFoldersInProject(String projectVersionId);
+    public FlowStep copy(FlowStep original);
     
-    public List<ComponentName> findComponentsInProject(String projectVersionId);
+    public Model copy(Model original);
     
-    public List<ModelName> findModelsInProject(String projectVersionId);
+    public void delete(AbstractObject obj);
     
-    public List<ResourceName> findResourcesInProject(String projectVersionId);
-    
-    public List<ComponentName> findSharedComponentsInProject(String projectVersionId);
-    
-    public List<FlowName> findFlowsInProject(String projectVersionId, boolean testFlows);
-
-    public List<Folder> findFolders(String projectVersionId, FolderType type);
-    
-    public Folder findFirstFolderWithName(String name, FolderType type);
-    
-    public Flow findFlow(String id);
-    
-    public String getLastKnownVersion();
-    
-    public Model findModel(String id);
-    
-    public boolean isModelUsed(String id);
-    
-    public User findUser(String id);
-    
-    public User findUserByLoginId(String loginId);
-    
-    public List<User> findUsersByGroup(String groupId);
-    
-    public List<User> findUsers();
-    
-    public Group findGroup(String id);
-
-    public List<Group> findGroups();
-
-    public void delete(Folder folder);
-
     public void delete(Agent agent);
     
     public void delete(AgentDeployment agentDeployment);
     
     public void delete(Flow flow, FlowStep flowStep);
-    
+
     public boolean delete(FlowStepLink link);
     
-    public void delete(Resource resource);    
+    public void delete(Folder folder);
     
-    public boolean isDeployed(Flow flow);
-    
-    public List<FlowName> findFlows();
-           
-    public Resource findResource(String id);
-    
-    public List<Resource> findResourcesByTypes(String projectVersionId, String ... types);
-        
-    public List<Agent> findAgents();
-    
-    public Agent findAgent(String agentId);
-    
-    public List<AgentName> findAgentsInFolder(Folder folder);
-    
-    public List<Agent> findAgentsForHost(String hostName);
-    
-    public List<AgentDeployment> findAgentDeploymentsFor(Flow flow);
-    
-    public AgentDeployment findAgentDeployment(String id);
-    
-    public List<AgentDeploymentSummary> findAgentDeploymentSummary(String agentId);
-
-    public AgentResource findAgentResource(String agentId, String resourceId);
-    
-    public void deleteFlow(Flow flow);
-    
-    public void refresh(Project project);
-
-    public void refresh(Flow flow);
-    
-    public void refresh(ProjectVersion projectVersion);
-    
-    public void refresh(Agent agent);
-    
-    public void refreshAgentParameters(Agent agent);
-    
-    public void refresh(Resource resource);
-    
-    public void refresh(Component component, boolean readRelations);
-    
-    public void refresh(User user);
-    
-    public void refresh(Group group);
-
-    public void save(AgentDeployment agentDeployment);
-    
-    public void save(Resource resource);
-    
-    public void save(FlowStep flowStep);    
-
-    public void save(AbstractObject obj);
-    
-    public void save(Component component);
-
-    public void save(Flow flow);
-    
-    public void save(Project project);
-    
-    public void save(ProjectVersion projectVersion);
-    
-    public void delete(AbstractObject obj);
+    public void delete(Group group);
     
     public void delete(Model model);
     
+    public void delete(ModelAttribute modelAttribute);
+    
     public void delete(ModelEntity modelEntity);
     
-    public void delete(ModelAttribute modelAttribute);
+    public void delete(Resource resource);
     
     public void delete(User user);
     
-    public void delete(Group group);
-
-    public void refresh(Model model);
-    
-    public void save(Model model);
-    
-    public void save(ModelEntity modelEntity);
-    
-    public ProjectVersion findProjectVersion(String projectVersionId);
-
-    public List<Project> findProjects();
-    
-    public String export(ProjectVersion projectVersion);
-    
-    public String export(ProjectVersion projectVersion, Flow flow);
+    public void deleteFlow(Flow flow);
     
     public String export(Agent agent);
     
-    public boolean isUserLoginEnabled();
-    
-    public List<Notification> findNotifications();
+    public String export(ProjectVersion projectVersion);
 
-    public List<Notification> findNotificationsForAgent(String agentId);
+    public String export(ProjectVersion projectVersion, Flow flow);
 
-    public List<Notification> findNotificationsForDeployment(AgentDeployment deployment);
-    
-    public void refresh(Notification notification);
+    public List<Flow> findAffectedFlowsByFlow(String flowId);
 
-    public List<GlobalSetting> findGlobalSettings();
-
-    public Map<String, String> findGlobalSettingsAsMap();
+    public List<Flow> findAffectedFlowsByModel(String modelId);
     
-    public GlobalSetting findGlobalSetting(String name);
+    public List<Flow> findAffectedFlowsByResource(String resourceId);
     
-    public List<Component> findDependentSharedComponents(String flowId);
+    public Agent findAgent(String agentId);
+    
+    public AgentDeployment findAgentDeployment(String id);
+    
+    public List<AgentDeployment> findAgentDeploymentsFor(Flow flow);    
+    
+    public List<AgentDeploymentSummary> findAgentDeploymentSummary(String agentId);
+    
+    public AgentResource findAgentResource(String agentId, String resourceId);
+           
+    public List<Agent> findAgents();
+    
+    public List<Agent> findAgentsForHost(String hostName);
+        
+    public List<AgentName> findAgentsInFolder(Folder folder);
+    
+    public List<ComponentName> findComponentsInProject(String projectVersionId);
+    
+    public List<Flow> findDependentFlows(String projectVersionId);
     
     public List<Model> findDependentModels(String flowId);
     
     public List<Resource> findDependentResources(String flowId);
     
-    public List<Flow> findDependentFlows(String projectVersionId);
+    public List<Component> findDependentSharedComponents(String flowId);
     
-    public List<Flow> findAffectedFlowsByModel(String modelId);
+    public Folder findFirstFolderWithName(String name, FolderType type);
+
+    public Flow findFlow(String id);
     
-    public List<Flow> findAffectedFlowsByResource(String resourceId);
+    public List<FlowName> findFlows();
     
-    public List<Flow> findAffectedFlowsByFlow(String flowId);
+    public List<FlowName> findFlowsInProject(String projectVersionId, boolean testFlows);
+
+    public List<Folder> findFolders(String projectVersionId, FolderType type);
     
-    public ProjectVersion saveNewVersion(String newVersionLabel, ProjectVersion original);
+    public List<FolderName> findFoldersInProject(String projectVersionId);
     
+    public GlobalSetting findGlobalSetting(String name);
+    
+    public List<GlobalSetting> findGlobalSettings();
+    
+    public Map<String, String> findGlobalSettingsAsMap();
+    
+    public Group findGroup(String id);
+    
+    public List<Group> findGroups();
+    
+    public Model findModel(String id);
+
+    public List<ModelName> findModelsInProject(String projectVersionId);
+    
+    public List<Notification> findNotifications();
+    
+    public List<Notification> findNotificationsForAgent(String agentId);    
+
+    public List<Notification> findNotificationsForDeployment(AgentDeployment deployment);
+    
+    public List<Project> findProjects();
+
+    public ProjectVersion findProjectVersion(String projectVersionId);
+    
+    public Resource findResource(String id);
+    
+    public List<Resource> findResourcesByTypes(String projectVersionId, String ... types);
+    
+    public List<ResourceName> findResourcesInProject(String projectVersionId);
+    
+    public List<ComponentName> findSharedComponentsInProject(String projectVersionId);
+    
+    public User findUser(String id);
+    
+    public User findUserByLoginId(String loginId);
+    
+    public List<UserHist> findUserHist(String id);
+    
+    public List<User> findUsers();
+    
+    public List<User> findUsersByGroup(String groupId);
+
+    public String getLastKnownVersion();
+    
+    public boolean isDeployed(Flow flow);
+    
+    public boolean isInstalled();
+    
+    public boolean isModelUsed(String id);
+
+    public boolean isUserLoginEnabled();
+    
+    public void refresh(Agent agent);
+    
+    public void refresh(Component component, boolean readRelations);
+    
+    public void refresh(Flow flow);
+    
+    public void refresh(Group group);
+    
+    public void refresh(Model model);
+
+    public void refresh(Notification notification);
+
+    public void refresh(Project project);
+    
+    public void refresh(ProjectVersion projectVersion);
+
+    public void refresh(Resource resource);
+
+    public void refresh(User user);
+    
+    public void refreshAgentParameters(Agent agent);
+    
+    public void save(AbstractObject obj);
+    
+    public void save(AgentDeployment agentDeployment);
+    
+    public void save(Component component);
+    
+    public void save(Flow flow);
+    
+    public void save(FlowStep flowStep);
+    
+    public void save(Model model);
+    
+    public void save(ModelEntity modelEntity);
+    
+    public void save(Project project);
+    
+    public void save(ProjectVersion projectVersion);
+
+    public void save(Resource resource);
+
     public void save(Setting setting);
 
-    public FlowStep copy(FlowStep original);
-
-    public Flow copy(Flow original);
-
-    public Model copy(Model original);
+    public ProjectVersion saveNewVersion(String newVersionLabel, ProjectVersion original);
+    
+    public void savePassword(User user, String newPassword);
     
 }
