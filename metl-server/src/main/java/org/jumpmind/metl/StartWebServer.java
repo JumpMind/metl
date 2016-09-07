@@ -92,8 +92,8 @@ public class StartWebServer {
     private final static String SSL_IGNORE_CIPHERS = "metl.ssl.ignore.ciphers";
     private final static String SSL_KEYSTORE_CERT_ALIAS = "metl.keystore.ssl.cert.alias";
     private final static String SSL_DEFAULT_ALIAS_PRIVATE_KEY = "metl";
-    private final static String SSL_KEYSTORE_TYPE = "metl.ssl.keystore.type";
-    private final static String SSL_DEFAULT_KEYSTORE_TYPE = "JKS";
+    private final static String SSL_KEYSTORE_TYPE = "metl.keystore.type";
+    private final static String SSL_DEFAULT_KEYSTORE_TYPE = "JCEKS";
 
     public static void main(String[] args) throws Exception {
         runWebServer();
