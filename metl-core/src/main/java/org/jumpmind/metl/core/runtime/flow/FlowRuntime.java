@@ -22,6 +22,8 @@ package org.jumpmind.metl.core.runtime.flow;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -366,6 +368,10 @@ public class FlowRuntime {
         }
         Date date = new Date();
         params.put("_agentName", agent.getName());
+        try {
+            params.put("_agentNameUrlEncoded", URLEncoder.encode(agent.getName(), "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+        }
         params.put("_deploymentName", agentDeployment.getName());
         params.put("_versionName", agentDeployment.getProjectVersion().getVersionLabel());
         params.put("_flowName", agentDeployment.getFlow().getName());
