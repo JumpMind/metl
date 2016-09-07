@@ -125,7 +125,7 @@ public class Web extends AbstractComponentRuntime {
                                 }
                             }
                         } else {
-                            InputStream is = streamable.getInputStream(relativePath, false);
+                            InputStream is = streamable.getInputStream(resolveParamsAndHeaders(relativePath,inputMessage), false);
                             try {
                                 String response = IOUtils.toString(is);
                                 if (response != null) {
