@@ -39,6 +39,7 @@ import org.jumpmind.metl.core.runtime.resource.Http;
 import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
 import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
+import org.jumpmind.util.FormatUtils;
 
 public class Web extends AbstractComponentRuntime {
 
@@ -74,7 +75,8 @@ public class Web extends AbstractComponentRuntime {
         }
 
         Component component = getComponent();
-        relativePath = component.get(RELATIVE_PATH);
+        relativePath = FormatUtils.replaceTokens(component.get(RELATIVE_PATH),
+                context.getFlowParameters(), true);
         bodyFrom = component.get(BODY_FROM, "Message");
         bodyText = component.get(BODY_TEXT);
         parameterReplacement = component.getBoolean(PARAMETER_REPLACEMENT, false);
