@@ -45,23 +45,27 @@ public class ComponentStatistics {
     }
     
     public void incrementTimeSpentInHandle(int thread, long amount) {
-        Long number = timeSpentInHandle.get(thread);
-        if (number != null) {
-            number = number + amount;
-        } else {
-            number = amount;
+        if (amount > 0) {
+            Long number = timeSpentInHandle.get(thread);
+            if (number != null) {
+                number = number + amount;
+            } else {
+                number = amount;
+            }
+            timeSpentInHandle.put(thread, number);
         }
-        timeSpentInHandle.put(thread, number);
     }
-    
+
     public void incrementTimeSpentWaiting(int thread, long amount) {
-        Long number = timeSpentWaiting.get(thread);
-        if (number != null) {
-            number = number + amount;
-        } else {
-            number = amount;
+        if (amount > 0) {
+            Long number = timeSpentWaiting.get(thread);
+            if (number != null) {
+                number = number + amount;
+            } else {
+                number = amount;
+            }
+            timeSpentWaiting.put(thread, number);
         }
-        timeSpentWaiting.put(thread, number);
     }
 
     public int getNumberInboundMessages(int thread) {
