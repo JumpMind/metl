@@ -72,7 +72,7 @@ public class Script extends AbstractComponentRuntime {
         String onError = getComponent().get(ON_FLOW_ERROR);
 
         ScriptEngineManager factory = new ScriptEngineManager();
-        ScriptEngine engine = factory.getEngineByName("groovy");
+        engine = factory.getEngineByName("groovy");
 
         engine.put("component", this);        
         StringBuilder script = new StringBuilder();
@@ -129,7 +129,6 @@ public class Script extends AbstractComponentRuntime {
             log(LogLevel.DEBUG, script.toString());
             script.append("helper.onInit();");
             engine.eval(script.toString());
-            this.engine = engine;
         } catch (ScriptException e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (rootCause != null) {
