@@ -730,7 +730,11 @@ public class StepRuntime implements Runnable {
         }
         
         protected long getQueueTime(int threadNumber) {
-            return this.queueTime.get(threadNumber);
+            Long time = this.queueTime.get(threadNumber);
+            if (time == null) {
+                time = 0l;
+            } 
+            return time;
         }
         
         private void validateEntityData(ArrayList<EntityData> payload) {
