@@ -1449,6 +1449,7 @@
              inputMessageType='text'
              inputOutputModelsMatch='false'
              outputMessageType='text'
+             supportsMultipleThreads='true'
              resourceCategory='streamable'>
     <name>Web</name>
     <className>org.jumpmind.metl.core.runtime.component.Web</className>
