@@ -310,16 +310,17 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    protected void processOnAnotherThread(Message inputMessage, boolean unitOfWorkBoundaryReached, SendMessageCallback target) {
+    protected void processOnAnotherThread(Message inputMessage, boolean unitOfWorkBoundaryReached, SendMessageCallback callback) {
         int threadNumber = ThreadUtils.getThreadNumber(threadCount);
         try {
-            componentContext.getComponentStatistics().incrementInboundMessages(threadNumber);
+            ComponentStatistics statistics = componentContext.getComponentStatistics();
+            statistics.incrementInboundMessages(threadNumber);
             if (inputMessage instanceof ContentMessage<?>) {
                 Object payload = ((ContentMessage<?>)inputMessage).getPayload();
                 if (payload instanceof Collection<?>) {
-                    componentContext.getComponentStatistics().incrementNumberInboundPayload(threadNumber, ((Collection<?>)payload).size());
+                    statistics.incrementNumberInboundPayload(threadNumber, ((Collection<?>)payload).size());
                 } else if (payload != null) {
-                    componentContext.getComponentStatistics().incrementNumberInboundPayload(threadNumber);
+                    statistics.incrementNumberInboundPayload(threadNumber);
                 }
             }
             
@@ -331,23 +332,25 @@ public class StepRuntime implements Runnable {
             boolean logInput = component.getBoolean(AbstractComponentRuntime.LOG_INPUT, false);
 
             if (logInput) {
-                logInput(inputMessage, target, unitOfWorkBoundaryReached);
+                logInput(inputMessage, callback, unitOfWorkBoundaryReached);
             }
-            target.setCurrentInputMessage(threadNumber, inputMessage);
-            componentRuntime.handle(inputMessage, target, unitOfWorkBoundaryReached);
+            callback.setCurrentInputMessage(threadNumber, inputMessage);
+            long ts = System.currentTimeMillis();
+            componentRuntime.handle(inputMessage, callback, unitOfWorkBoundaryReached);
+            statistics.incrementTimeSpentInHandle(threadNumber, System.currentTimeMillis()-ts-callback.getQueueTime(threadNumber));
 
             boolean recursionDone = liveSourceStepIds.size() == 1 && liveSourceStepIds.contains(componentContext.getFlowStep().getId())
                     && getActiveCountPlusQueueSize() == 1;
             
             if ((unitOfWorkBoundaryReached || recursionDone) && componentRuntime.getComponentDefintion().isAutoSendControlMessages()) {
-                verifyAndSendControlMessageToTargets(target, inputMessage);
+                verifyAndSendControlMessageToTargets(callback, inputMessage);
             }
 
             /*
              * Detect shutdown condition
              */
             if (startStep || recursionDone) {
-                shutdown(threadNumber, target, false);
+                shutdown(threadNumber, callback, false);
             }
         } catch (Exception ex) {
             recordError(ThreadUtils.getThreadNumber(threadCount), ex);
@@ -630,6 +633,7 @@ public class StepRuntime implements Runnable {
     class SendMessageCallback implements ISendMessageCallback {
 
         Map<Integer, Message> currentInputMessages = new HashMap<>();
+        Map<Integer, Long> queueTime = new HashMap<>();
 
         private void setCurrentInputMessage(int threadNumber, Message currentInputMessage) {
             currentInputMessages.put(threadNumber, currentInputMessage);
@@ -692,6 +696,8 @@ public class StepRuntime implements Runnable {
             if (logOutput) {
                 logOutput(message, targetFlowStepIds);
             }
+            
+            long ts = System.currentTimeMillis();
 
             Collection<String> targetStepIds = targetFlowStepIds != null ? Arrays.asList(targetFlowStepIds) : Collections.emptyList();
 
@@ -717,6 +723,14 @@ public class StepRuntime implements Runnable {
                     }
                 }
             }
+            
+            long queueTime = System.currentTimeMillis() -ts;
+            this.queueTime.put(threadNumber, queueTime);
+            statistics.incrementTimeSpentWaiting(threadNumber, queueTime);
+        }
+        
+        protected long getQueueTime(int threadNumber) {
+            return this.queueTime.get(threadNumber);
         }
         
         private void validateEntityData(ArrayList<EntityData> payload) {

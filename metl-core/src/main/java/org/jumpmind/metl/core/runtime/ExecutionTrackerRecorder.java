@@ -20,8 +20,6 @@
  */
 package org.jumpmind.metl.core.runtime;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,8 +49,6 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     
     Map<ExecutionStep, Date> lastStatUpdate = new HashMap<ExecutionStep, Date>();
     
-    Map<ExecutionStep, Instant> startHandle = new HashMap<ExecutionStep, Instant>();
-
     Date startTime;
 
     public ExecutionTrackerRecorder(Agent agent, AgentDeployment agentDeployment,  ExecutorService threadService, IExecutionService executionService) {
@@ -138,7 +134,6 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
 
         ExecutionStep step = getExecutionStep(threadNumber, context);
         Date lastUpdateTime = step.getLastUpdateTime();
-        startHandle.put(step, Instant.now());
         if (step.getStatus().equals(ExecutionStatus.READY.name()) || lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             if (step.getStartTime() == null) {
                 step.setStartTime(new Date());
@@ -164,6 +159,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                 step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
                 step.setPayloadProduced(stats.getNumberOutboundPayload(threadNumber));
                 step.setPayloadReceived(stats.getNumberInboundPayload(threadNumber));
+                step.setHandleDuration(stats.getTimeSpentInHandle(threadNumber));
+                step.setQueueDuration(stats.getTimeSpentWaiting(threadNumber));                
                 lastStatUpdate.put(step, new Date());
             }
             step.setLastUpdateTime(new Date());
@@ -176,10 +173,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         super.afterHandle(threadNumber, context, error);
         ExecutionStep step = getExecutionStep(threadNumber, context);
         Date lastUpdateTime = lastStatUpdate.get(step);
-        Instant startInstant = startHandle.get(step);
-        if (startInstant != null) {
-            step.incrementHandleDuration(Duration.between(startInstant,Instant.now()).toMillis());
-        }
+          
         if (lastUpdateTime == null || (System.currentTimeMillis() - lastUpdateTime.getTime() > TIME_BETWEEN_MESSAGE_UPDATES_IN_MS)) {
             step.setStatus(error != null ? ExecutionStatus.ERROR.name() : ExecutionStatus.READY.name());
             ComponentStatistics stats = context.getComponentStatistics();
@@ -189,6 +183,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
                 step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
                 step.setPayloadProduced(stats.getNumberOutboundPayload(threadNumber));
                 step.setPayloadReceived(stats.getNumberInboundPayload(threadNumber));
+                step.setHandleDuration(stats.getTimeSpentInHandle(threadNumber));
+                step.setQueueDuration(stats.getTimeSpentWaiting(threadNumber));
                 lastStatUpdate.put(step, new Date());
             }
             step.setLastUpdateTime(new Date());
@@ -220,6 +216,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
             step.setMessagesProduced(stats.getNumberOutboundMessages(threadNumber));
             step.setPayloadProduced(stats.getNumberOutboundPayload(threadNumber));
             step.setPayloadReceived(stats.getNumberInboundPayload(threadNumber));
+            step.setHandleDuration(stats.getTimeSpentInHandle(threadNumber));
+            step.setQueueDuration(stats.getTimeSpentWaiting(threadNumber));            
             lastStatUpdate.put(step, new Date());
         }
         step.setLastUpdateTime(new Date());

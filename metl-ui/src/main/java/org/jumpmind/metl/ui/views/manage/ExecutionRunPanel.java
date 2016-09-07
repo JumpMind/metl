@@ -274,10 +274,10 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         stepTable.setSizeFull();
         stepTable.setVisibleColumns(new Object[] { "componentName", "threadNumber", "status",
                 "payloadReceived", "messagesReceived", "messagesProduced", "payloadProduced",
-                "startTime", "endTime", "handleDurationString" });
+                "startTime", "endTime", "handleDurationString", "queueDurationString" });
         stepTable.setColumnHeaders(
                 new String[] { "Component Name", "Thread", "Status", "Payload Recvd", "Msgs Recvd",
-                        "Msgs Sent", "Payload Sent", "Start", "End", "Run Duration" });
+                        "Msgs Sent", "Payload Sent", "Start", "End", "Run Duration", "Wait Duration" });
         stepTable.setColumnWidth("status", 100);
         stepTable.setColumnWidth("messagesReceived", 100);
         stepTable.setColumnWidth("messagesProduced", 100);
@@ -286,7 +286,8 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         stepTable.setColumnWidth("threadNumber", 100);
         stepTable.setColumnWidth("startTime", 170);
         stepTable.setColumnWidth("endTime", 170);
-        stepTable.setColumnExpandRatio("handleDurationString", 1);
+        stepTable.setColumnWidth("handleDurationString", 140);
+        stepTable.setColumnExpandRatio("queueDurationString", 1);
         stepTable.addValueChangeListener(event -> {
             @SuppressWarnings("unchecked")
             Set<String> executionStepIds = (Set<String>) event.getProperty().getValue();

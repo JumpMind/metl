@@ -230,7 +230,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     @Bean
     @Scope(value = "singleton")
     public ConfigDatabaseUpgrader configDatabaseUpgrader() {
-        return new ConfigDatabaseUpgrader("/schema-v1.xml", configDatabasePlatform(), true,
+        return new ConfigDatabaseUpgrader("/schema.xml", configDatabasePlatform(), true,
                 tablePrefix());
     }
 
