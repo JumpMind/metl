@@ -43,6 +43,7 @@ import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.runtime.resource.SMB;
 import org.jumpmind.metl.core.runtime.resource.Datasource;
 import org.jumpmind.metl.core.runtime.resource.Ftp;
 import org.jumpmind.metl.core.runtime.resource.Http;
@@ -229,6 +230,7 @@ public class DesignNavigator extends VerticalLayout {
 
         // file - new - resource
         resourceMenu = newMenu.addItem("Resource", null);
+        newDataSource = resourceMenu.addItem("SMB", selectedItem -> addNewSMBFileSystem());
         newDataSource = resourceMenu.addItem("Database", selectedItem -> addNewDatabase());
         newFtpResource = resourceMenu.addItem("FTP", selectedItem -> addNewFtpResource());
         newFileResource = resourceMenu.addItem("Local File System",
@@ -781,8 +783,6 @@ public class DesignNavigator extends VerticalLayout {
         }
     }
     
-    
-
     protected void addNewFlow(boolean testFlow) {
         FolderName folder = findFolderWithName(testFlow ? "Tests" : "Flows");
         if (folder != null) {
@@ -826,6 +826,10 @@ public class DesignNavigator extends VerticalLayout {
 
     protected void addNewJMSFileSystem() {
         addNewResource(JMS.TYPE, "JMS", Icons.QUEUE);
+    }
+
+    protected void addNewSMBFileSystem() {
+        addNewResource(SMB.TYPE, "SMB Directory", Icons.FILE_SYSTEM);
     }
 
     protected void addNewHttpResource() {
