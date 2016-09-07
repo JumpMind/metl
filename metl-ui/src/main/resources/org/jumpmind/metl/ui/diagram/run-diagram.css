@@ -50,11 +50,11 @@
 }
 
 .diagram-node.CANCELLED {
-    border: 3px solid red;
+    border: 3px solid dimgray;
 }
 
 .diagram-node.ABANDONED {
-    border: 3px solid red;
+    border: 3px solid dimgray;
 }
 
 .diagram-node.RUNNING {
