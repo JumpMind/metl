@@ -73,7 +73,9 @@ import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
@@ -215,52 +217,39 @@ public class PropertySheet extends AbsoluteLayout {
     protected void addCommonComponentSettings(FormLayout formLayout, Object obj) {
         List<Object> list = (List<Object>) obj;
         List<Component> components = new ArrayList<Component>(list.size());
-
-        // Check if all selected components support the enabled property
-        // TODO: Support more than the enable component.
-        // Look for all common parameters.
-        boolean supportEnable = true;
-        boolean enabled = true;
-        for (Object o : list) {
-            if (o instanceof FlowStep) {
-                Component component = ((FlowStep) o).getComponent();
-                if (!hasSetting(component, AbstractComponentRuntime.ENABLED)) {
-                    supportEnable = false;
-                    break;
-                }
-                if (enabled && !component.getBoolean(AbstractComponentRuntime.ENABLED, true)) {
-                    enabled = false;
-                }
-                components.add(component);
-            } else {
-                supportEnable = false;
-                break;
+        for (Object object : list) {
+            if (object instanceof FlowStep) {
+                components.add(((FlowStep) object).getComponent());
+            } else if (object instanceof Component) {
+                components.add((Component) object);
             }
         }
-
-        // Create the enabled field if all selected components support the
-        // enabled setting.
-        if (components.size() != 0 && supportEnable) {
-            final CheckBox checkBox = new CheckBox("Enabled");
-            checkBox.setImmediate(true);
-            checkBox.setRequired(true);
-            checkBox.setValue(enabled);
-            checkBox.addValueChangeListener((event) -> {
-                for (final Component component : components) {
-                    saveSetting(AbstractComponentRuntime.ENABLED, checkBox.getValue().toString(), component);
-                }
-                if (listener != null) {
-                    listener.componentChanged(components);
-                }
-            });
-            checkBox.setReadOnly(readOnly);
-            formLayout.addComponent(checkBox);
+        if (components.size() != 0 && !readOnly) {
+            formLayout.addComponent(buildOptionGroup("Enabled", AbstractComponentRuntime.ENABLED, components));
+            formLayout.addComponent(buildOptionGroup("Log Input", AbstractComponentRuntime.LOG_INPUT, components));
+            formLayout.addComponent(buildOptionGroup("Log Output", AbstractComponentRuntime.LOG_OUTPUT, components));
         }
     }
+    
+    protected OptionGroup buildOptionGroup(String caption, String name, List<Component> components) {
+        OptionGroup optionGroup = new OptionGroup(caption);
+        optionGroup.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
+        optionGroup.setImmediate(true);
+        optionGroup.addItem("ON");
+        optionGroup.addItem("OFF");
+        optionGroup
+                .addValueChangeListener((event) -> saveSetting(name,
+                        optionGroup, components));
+        return optionGroup;
+    }
 
-    private boolean hasSetting(Component component, String setting) {
-        XMLComponent componentDefinition = context.getComponentDefinitionFactory().getDefinition(component.getType());
-        return (componentDefinition.findXMLSetting(setting) != null);
+    protected void saveSetting(String name,  Field<?> field, List<Component> components) {
+        for (final Component component : components) {
+            saveSetting(name, field.getValue() != null ? Boolean.valueOf(field.getValue().toString().equals("ON")).toString() : null, component);
+        }
+        if (listener != null) {
+            listener.componentChanged(components);
+        }
     }
 
     protected void addResourceProperties(FormLayout formLayout, Resource resource) {
