@@ -365,7 +365,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         for (Setting setting : settings) {
             if (isPassword(setting)) {
                 String value = setting.getValue();
-                if (value.startsWith(SecurityConstants.PREFIX_ENC)) {
+                if (value != null && value.startsWith(SecurityConstants.PREFIX_ENC)) {
                     try {
                         setting.setValue(securityService.decrypt(value.substring(SecurityConstants.PREFIX_ENC.length()-1)));
                     } catch (Exception ex) {
