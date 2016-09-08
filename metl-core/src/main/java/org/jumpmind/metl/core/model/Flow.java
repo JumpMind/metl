@@ -54,8 +54,6 @@ public class Flow extends AbstractObject {
     
     boolean test = false;
     
-    boolean webService = false;
-
     public Flow() {
         this.flowSteps = new ArrayList<FlowStep>();
         this.flowStepLinks = new ArrayList<FlowStepLink>();
@@ -73,17 +71,15 @@ public class Flow extends AbstractObject {
     }
     
     public void setWebService(boolean webService) {
-        this.webService = webService;
     }
     
     public boolean isWebService() {
         for (FlowStep flowStep : flowSteps) {
             if (HTTP_REQUEST.equals(flowStep.getComponent().getType())) {
-                webService = true;
-                break;
+                return true;
             }
         }
-        return webService;
+        return false;
     }
 
     public void setFolder(Folder folder) {

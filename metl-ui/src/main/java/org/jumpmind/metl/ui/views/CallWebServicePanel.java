@@ -199,7 +199,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
             securitySchemeCombo.setValue(mapping.getSecurityScheme());
             userField.setValue(mapping.getSecurityUsername());
             passwordField.setValue(mapping.getSecurityPassword());
-
+            
             methodGroup.setValue(mapping.getMethod().name());
 
             List<FlowStep> steps = flow.getFlowSteps();
@@ -214,6 +214,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
 
         } else {
             contentType.select(contentType.getItemIds().iterator().next());
+            methodGroup.setValue("GET");
         }
 
     }
