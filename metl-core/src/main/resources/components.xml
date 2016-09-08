@@ -755,19 +755,19 @@
                type='integer'>
         <name>Rows/Msg</name>
         <defaultValue>1000</defaultValue>
-      </setting>    
+      </setting>
       <setting id='optimize.for.speed'
                required='false'
                type='boolean'>
-        <name>Optimize for speed.  Supports only basic XPath</name>
+        <name>Optimize for speed. Supports only basic XPath</name>
         <defaultValue>false</defaultValue>
-      </setting>    
+      </setting>
       <setting id='xml.formatter.ignore.namespace'
                required='false'
                type='boolean'>
         <name>Ignore namespaces for XPath matching</name>
         <defaultValue>true</defaultValue>
-      </setting>        
+      </setting>
     </settings>
   </component>
   <component category='READER'
@@ -784,7 +784,7 @@
                required='true'
                type='multiline_text'>
         <name>Sql</name>
-      </setting> 
+      </setting>
       <setting id='run.when'
                required='false'
                type='choice'>
@@ -806,7 +806,7 @@
           <choice>SQL SCRIPT</choice>
           <choice>SQL STATEMENT</choice>
         </choices>
-      </setting>                 
+      </setting>
       <setting id='rows.per.message'
                required='true'
                type='integer'>
@@ -896,6 +896,12 @@
         <name>Batch Mode</name>
         <defaultValue>false</defaultValue>
       </setting>
+      <setting id='table.auto.create'
+               required='false'
+               type='boolean'>
+        <name>Create table if missing</name>
+        <defaultValue>false</defaultValue>
+      </setting>
       <setting id='table.prefix'
                required='false'
                type='text'>
@@ -929,7 +935,7 @@
                type='script'
                visible='false'>
         <name>Additional Methods</name>
-      </setting>      
+      </setting>
       <setting id='init.script'
                required='true'
                type='script'
@@ -1137,7 +1143,7 @@
                type='boolean'>
         <name>Send Control Message on Text Send</name>
         <defaultValue>false</defaultValue>
-      </setting>      
+      </setting>
     </settings>
   </component>
   <component category='READER'
@@ -1449,8 +1455,8 @@
              inputMessageType='text'
              inputOutputModelsMatch='false'
              outputMessageType='text'
-             supportsMultipleThreads='true'
-             resourceCategory='streamable'>
+             resourceCategory='streamable'
+             supportsMultipleThreads='true'>
     <name>Web</name>
     <className>org.jumpmind.metl.core.runtime.component.Web</className>
     <description></description>
@@ -1720,110 +1726,138 @@
     <className>org.jumpmind.metl.core.runtime.component.Union</className>
     <description></description>
   </component>
-    <component category='SERVICE' id='HttpRequest' inputMessageType='none' inputOutputModelsMatch='false' outputMessageType='text' resourceCategory='none'>
-        <name>Http Request</name>
-        <className>org.jumpmind.metl.core.runtime.component.HttpRequest</className>
-        <deploymentListenerClassName>org.jumpmind.metl.core.runtime.component.HttpRequestDeploymentListener</deploymentListenerClassName>
+  <component category='SERVICE'
+             id='HttpRequest'
+             inputMessageType='none'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='none'>
+    <name>Http Request</name>
+    <className>org.jumpmind.metl.core.runtime.component.HttpRequest</className>
+    <deploymentListenerClassName>org.jumpmind.metl.core.runtime.component.HttpRequestDeploymentListener</deploymentListenerClassName>
+    <description></description>
+    <settings>
+      <setting id='http.method'
+               required='true'
+               type='choice'>
+        <name>HTTP Method</name>
+        <defaultValue>GET</defaultValue>
+        <choices>
+          <choice>GET</choice>
+          <choice>POST</choice>
+          <choice>PUT</choice>
+          <choice>DELETE</choice>
+        </choices>
+      </setting>
+      <setting id='path'
+               required='true'
+               type='text'>
+        <name>Path</name>
+        <defaultValue>/$(_agentName)/$(_deploymentName)/$(_versionName)</defaultValue>
         <description></description>
-        <settings>
-            <setting id='http.method' required='true' type='choice'>
-                <name>HTTP Method</name>
-                <defaultValue>GET</defaultValue>
-                <choices>
-                    <choice>GET</choice>
-                    <choice>POST</choice>
-                    <choice>PUT</choice>
-                    <choice>DELETE</choice>
-                </choices>
-            </setting>
-            <setting id='path' required='true' type='text'>
-                <name>Path</name>
-                <defaultValue>/$(_agentName)/$(_deploymentName)/$(_versionName)</defaultValue>
-                <description></description>
-            </setting>
-            <setting id='security.scheme' required='false' type='choice'>
-                <name>Security Scheme</name>
-                <defaultValue>NONE</defaultValue>
-                <choices>
-                    <choice>NONE</choice>
-                    <choice>BASIC</choice>
-                </choices>
-            </setting>  
-            <setting id='secure.username'
+      </setting>
+      <setting id='security.scheme'
+               required='false'
+               type='choice'>
+        <name>Security Scheme</name>
+        <defaultValue>NONE</defaultValue>
+        <choices>
+          <choice>NONE</choice>
+          <choice>BASIC</choice>
+        </choices>
+      </setting>
+      <setting id='secure.username'
                required='false'
                type='text'>
-               <name>Secure Username</name>
-            </setting>
-            <setting id='secure.password'
+        <name>Secure Username</name>
+      </setting>
+      <setting id='secure.password'
                required='false'
                type='password'>
-               <name>Secure Password</name>
-            </setting>         
-        </settings>
-    </component>
-    <component category='SERVICE' id='16170152-eee5-11e5-9ce9-5e5517507c66'
-        inputMessageType='any' inputOutputModelsMatch='true'
-        outputMessageType='none' resourceCategory='none'>
-        <name>Http Response</name>
-        <className>org.jumpmind.metl.core.runtime.component.HttpResponse</className>
-        <description></description>
-        <settings>
-            <setting id='returns.data'
+        <name>Secure Password</name>
+      </setting>
+    </settings>
+  </component>
+  <component category='SERVICE'
+             id='16170152-eee5-11e5-9ce9-5e5517507c66'
+             inputMessageType='any'
+             inputOutputModelsMatch='true'
+             outputMessageType='none'
+             resourceCategory='none'>
+    <name>Http Response</name>
+    <className>org.jumpmind.metl.core.runtime.component.HttpResponse</className>
+    <description></description>
+    <settings>
+      <setting id='returns.data'
                required='true'
                type='boolean'>
-                <name>Returns Data</name>
-                <defaultValue>true</defaultValue>
-            </setting>
-        </settings>
-    </component>  
-    <component category='SERVICE' id='10887396-9d14-4a42-8212-66b4ce53cef2'
-        inputMessageType='text' inputOutputModelsMatch='false'
-        outputMessageType='entity' resourceCategory='none'>
-        <name>Deserializer</name>
-        <className>org.jumpmind.metl.core.runtime.component.Deserializer</className>
-        <settings>
-            <setting id='format' required='false' type='choice'>
-                <name>Format</name>
-                <defaultValue>AUTOMATIC</defaultValue>
-                <choices>
-                    <choice>AUTOMATIC</choice>
-                    <choice>JSON</choice>
-                    <choice>XML</choice>
-                </choices>
-            </setting>
-            <setting id='structure' required='false' type='choice'>
-                <name>Structure</name>
-                <defaultValue>BY_INBOUND_ROW</defaultValue>
-                <choices>
-                    <choice>BY_INBOUND_ROW</choice>
-                    <choice>BY_TABLE</choice>
-                </choices>
-            </setting>            
-        </settings>
-    </component>      
-    <component category='SERVICE' id='4e810250-d937-4223-9d50-6322b35c0527'
-        inputMessageType='entity' inputOutputModelsMatch='false'
-        outputMessageType='text' resourceCategory='none'>
-        <name>Serializer</name>
-        <className>org.jumpmind.metl.core.runtime.component.Serializer</className>
-        <settings>
-            <setting id='format' required='false' type='choice'>
-                <name>Format</name>
-                <defaultValue>AUTOMATIC</defaultValue>
-                <choices>
-                    <choice>AUTOMATIC</choice>
-                    <choice>JSON</choice>
-                    <choice>XML</choice>
-                </choices>
-            </setting>
-            <setting id='structure' required='false' type='choice'>
-                <name>Structure</name>
-                <defaultValue>BY_INBOUND_ROW</defaultValue>
-                <choices>
-                    <choice>BY_INBOUND_ROW</choice>
-                    <choice>BY_TABLE</choice>
-                </choices>
-            </setting>            
-        </settings>
-    </component>            
+        <name>Returns Data</name>
+        <defaultValue>true</defaultValue>
+      </setting>
+    </settings>
+  </component>
+  <component category='SERVICE'
+             id='10887396-9d14-4a42-8212-66b4ce53cef2'
+             inputMessageType='text'
+             inputOutputModelsMatch='false'
+             outputMessageType='entity'
+             resourceCategory='none'>
+    <name>Deserializer</name>
+    <className>org.jumpmind.metl.core.runtime.component.Deserializer</className>
+    <settings>
+      <setting id='format'
+               required='false'
+               type='choice'>
+        <name>Format</name>
+        <defaultValue>AUTOMATIC</defaultValue>
+        <choices>
+          <choice>AUTOMATIC</choice>
+          <choice>JSON</choice>
+          <choice>XML</choice>
+        </choices>
+      </setting>
+      <setting id='structure'
+               required='false'
+               type='choice'>
+        <name>Structure</name>
+        <defaultValue>BY_INBOUND_ROW</defaultValue>
+        <choices>
+          <choice>BY_INBOUND_ROW</choice>
+          <choice>BY_TABLE</choice>
+        </choices>
+      </setting>
+    </settings>
+  </component>
+  <component category='SERVICE'
+             id='4e810250-d937-4223-9d50-6322b35c0527'
+             inputMessageType='entity'
+             inputOutputModelsMatch='false'
+             outputMessageType='text'
+             resourceCategory='none'>
+    <name>Serializer</name>
+    <className>org.jumpmind.metl.core.runtime.component.Serializer</className>
+    <settings>
+      <setting id='format'
+               required='false'
+               type='choice'>
+        <name>Format</name>
+        <defaultValue>AUTOMATIC</defaultValue>
+        <choices>
+          <choice>AUTOMATIC</choice>
+          <choice>JSON</choice>
+          <choice>XML</choice>
+        </choices>
+      </setting>
+      <setting id='structure'
+               required='false'
+               type='choice'>
+        <name>Structure</name>
+        <defaultValue>BY_INBOUND_ROW</defaultValue>
+        <choices>
+          <choice>BY_INBOUND_ROW</choice>
+          <choice>BY_TABLE</choice>
+        </choices>
+      </setting>
+    </settings>
+  </component>
 </components>

@@ -23,6 +23,7 @@ package org.jumpmind.metl.core.runtime.component;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,6 +44,7 @@ import org.jumpmind.db.sql.SqlException;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.sql.UniqueKeyException;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
+import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
 import org.jumpmind.metl.core.model.ModelEntity;
@@ -53,6 +55,7 @@ import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
+import org.jumpmind.metl.core.util.ComponentUtils;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
@@ -73,6 +76,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     public final static String CONTINUE_ON_ERROR = "continue.on.error";
     public final static String TABLE_SUFFIX = "table.suffix";
     public final static String TABLE_PREFIX = "table.prefix";
+    public final static String AUTO_CREATE_TABLE = "table.auto.create";
 
     boolean continueOnError = false;
     boolean replaceRows = false;
@@ -80,6 +84,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     boolean insertFallback = false;
     boolean quoteIdentifiers = false;
     boolean fitToColumn = false;
+    boolean autoCreateTable = false;
     String catalogName;
     String schemaName;
     String tableSuffix = "";
@@ -114,6 +119,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         quoteIdentifiers = properties.is(QUOTE_IDENTIFIERS);
         fitToColumn = properties.is(FIT_TO_COLUMN);
         tableSuffix = properties.get(TABLE_SUFFIX, "");
+        autoCreateTable = properties.is(AUTO_CREATE_TABLE, false);
 
         if (tableSuffix == null) {
             tableSuffix = "";
@@ -158,6 +164,11 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     for (ModelEntity entity : model.getModelEntities()) {
                         String tableName = tablePrefix + entity.getName() + tableSuffix;
                         Table table = databasePlatform.getTableFromCache(catalogName, schemaName, tableName, true);
+                        if (table == null && autoCreateTable) {
+                            table = createTableFromEntity(entity, tableName);
+                            log(LogLevel.INFO, "Creating table: " + table.getName() + "  on db: " + databasePlatform.getDataSource().toString());
+                            databasePlatform.createTables(false, false, table);
+                        }
                         if (table != null) {
                             targetTables.add(new TargetTableDefintion(entity, new TargetTable(DmlType.UPDATE, entity, table.copy()),
                                     new TargetTable(DmlType.INSERT, entity, table.copy()),
@@ -199,6 +210,31 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             }
         }
     }
+    
+    protected Table createTableFromEntity(ModelEntity entity, String tableName) {
+        Table table = new Table();
+        table.setName(tableName);
+        List<ModelAttribute> attributes = entity.getModelAttributes();
+        for (ModelAttribute attribute : attributes) {
+            DataType dataType = attribute.getDataType();
+            Column column = new Column(attribute.getName());
+            if (dataType.isNumeric()) {
+                column.setTypeCode(Types.DECIMAL);
+            } else if (dataType.isBoolean()) {
+                column.setTypeCode(Types.BOOLEAN);
+            } else if (dataType.isTimestamp()) {
+                column.setTypeCode(Types.TIMESTAMP);
+            } else if (dataType.isBinary()) {
+                column.setTypeCode(Types.BLOB);
+            } else {
+                column.setTypeCode(Types.LONGVARCHAR);
+            }
+
+            column.setPrimaryKey(attribute.isPk());
+            table.addColumn(column);
+        }
+        return table;
+    }
 
     private Object[] getValues(boolean isUpdate, TargetTable modelTable, EntityData inputRow) {
         ArrayList<Object> data = new ArrayList<Object>();
@@ -228,6 +264,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         boolean processedRow = false;
         int order = 0;
         for (EntityData inputRow : inputRows) {
+            //asdf
             for (TargetTableDefintion targetTableDefinition : targetTables) {
                 if (inputRow.getChangeType() == ChangeType.DEL) {
                     modelTable = targetTableDefinition.getDeleteTable();
