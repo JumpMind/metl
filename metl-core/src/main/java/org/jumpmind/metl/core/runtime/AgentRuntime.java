@@ -280,60 +280,68 @@ public class AgentRuntime {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void deployResources(Flow flow) {
-        List<ResourceName> flowResourceNames = 
-        configurationService.findResourcesInProject(flow.getProjectVersionId());
+        List<ResourceName> flowResourceNames = configurationService
+                .findResourcesInProject(flow.getProjectVersionId());
         for (ResourceName flowResourceName : flowResourceNames) {
-            
-        	Resource flowResource = configurationService.findResource(flowResourceName.getId());
-            IResourceRuntime alreadyDeployed = deployedResources.get(flowResource.getId());
-    
-            Map<String, SettingDefinition> settings = resourceFactory
-                    .getSettingDefinitionsForResourceType(flowResource.getType());
-            TypedProperties defaultSettings = flowResource.toTypedProperties(settings);
-            TypedProperties overrideSettings = agent.toTypedProperties(flowResource);
-            TypedProperties combined = new TypedProperties(defaultSettings);
-            combined.putAll(overrideSettings);
-            Set<Entry<Object, Object>> entries = combined.entrySet();
-            for (Entry<Object, Object> entry : entries) {
-                String value = (String)entry.getValue();
-                if (value != null) {
-                    value = FormatUtils.replaceTokens(value, (Map)System.getProperties(), true);
-                    entry.setValue(value);
-                }
-            }
-    
-            boolean deploy = true;
-            if (alreadyDeployed != null) {
-                deploy = false;
-                Resource deployedResource = alreadyDeployed.getResource();
-                TypedProperties alreadyDeployedOverrides = alreadyDeployed.getResourceRuntimeSettings();
-                
-                // TODO the runtime is already combined.  change this
-                TypedProperties alreadyDeployedDefaultSettings = deployedResource
-                        .toTypedProperties(settings);
-                TypedProperties alreadyDeployedCombined = new TypedProperties(
-                        alreadyDeployedDefaultSettings);
-                alreadyDeployedCombined.putAll(alreadyDeployedOverrides);
-    
-                for (Object key : combined.keySet()) {
-                    Object newObj = combined.get(key);
-                    Object oldObj = alreadyDeployedCombined.get(key);
-                    if (!ObjectUtils.equals(newObj, oldObj)) {
-                        deploy = true;
-                        break;
+            try {
+                Resource flowResource = configurationService.findResource(flowResourceName.getId());
+                IResourceRuntime alreadyDeployed = deployedResources.get(flowResource.getId());
+
+                Map<String, SettingDefinition> settings = resourceFactory
+                        .getSettingDefinitionsForResourceType(flowResource.getType());
+                TypedProperties defaultSettings = flowResource.toTypedProperties(settings);
+                TypedProperties overrideSettings = agent.toTypedProperties(flowResource);
+                TypedProperties combined = new TypedProperties(defaultSettings);
+                combined.putAll(overrideSettings);
+                Set<Entry<Object, Object>> entries = combined.entrySet();
+                for (Entry<Object, Object> entry : entries) {
+                    String value = (String) entry.getValue();
+                    if (value != null) {
+                        value = FormatUtils.replaceTokens(value, (Map) System.getProperties(),
+                                true);
+                        entry.setValue(value);
                     }
                 }
-    
-                if (deploy) {
-                    log.info("Undeploying the {} resource to the {} agent", flowResource.getName(), agent.getName());
-                    alreadyDeployed.stop();
+
+                boolean deploy = true;
+                if (alreadyDeployed != null) {
+                    deploy = false;
+                    Resource deployedResource = alreadyDeployed.getResource();
+                    TypedProperties alreadyDeployedOverrides = alreadyDeployed
+                            .getResourceRuntimeSettings();
+
+                    // TODO the runtime is already combined. change this
+                    TypedProperties alreadyDeployedDefaultSettings = deployedResource
+                            .toTypedProperties(settings);
+                    TypedProperties alreadyDeployedCombined = new TypedProperties(
+                            alreadyDeployedDefaultSettings);
+                    alreadyDeployedCombined.putAll(alreadyDeployedOverrides);
+
+                    for (Object key : combined.keySet()) {
+                        Object newObj = combined.get(key);
+                        Object oldObj = alreadyDeployedCombined.get(key);
+                        if (!ObjectUtils.equals(newObj, oldObj)) {
+                            deploy = true;
+                            break;
+                        }
+                    }
+
+                    if (deploy) {
+                        log.info("Undeploying the {} resource to the {} agent",
+                                flowResource.getName(), agent.getName());
+                        alreadyDeployed.stop();
+                    }
                 }
-            }
-    
-            if (deploy) {
-                log.info("Deploying the {} resource to the {} agent", flowResource.getName(), agent.getName());
-                IResourceRuntime resource = resourceFactory.create(flowResource, combined);
-                deployedResources.put(flowResource.getId(), resource);
+
+                if (deploy) {
+                    log.info("Deploying the {} resource to the {} agent", flowResource.getName(),
+                            agent.getName());
+                    IResourceRuntime resource = resourceFactory.create(flowResource, combined);
+                    deployedResources.put(flowResource.getId(), resource);
+                }
+            } catch (Exception e) {
+                log.error("Failed to deploy resource '" + flowResourceName.getName()
+                        + "' with an id of " + flowResourceName.getId() + " to the '" + agent.getName() + "' agent", e);
             }
         }
     }
