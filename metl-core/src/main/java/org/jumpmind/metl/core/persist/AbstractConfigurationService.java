@@ -399,7 +399,8 @@ abstract class AbstractConfigurationService extends AbstractService implements I
             if (isNotBlank(agentDeployment.getFlow().getProjectVersionId()) || agentDeployment.getFlow().isDeleted()) {
                 list.add(agentDeployment);
             } else {
-                log.warn("Not adding the deployment '{}' to the '{}' agent because the flow has been deleted", agentDeployment.getName(), agent.getName());
+                log.warn("Invalid agent deployment '{}' on the '{}' agent. The flow has been deleted.  Cleaning up the deployment", agentDeployment.getName(), agent.getName());
+                delete(agentDeployment);
             }
         }
         agent.setAgentDeployments(list);
