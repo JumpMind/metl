@@ -266,7 +266,7 @@ public class StepRuntime implements Runnable {
                  */
                 Message inputMessage = null;
                 synchronized (this) {
-                    inputMessage = inQueue.poll(50, TimeUnit.MILLISECONDS);
+                    inputMessage = inQueue.poll();
                     if (inputMessage != null && !(inputMessage instanceof ShutdownMessage)) {
                         activeCount++;
                     }
@@ -278,7 +278,9 @@ public class StepRuntime implements Runnable {
                         } else {
                             process(inputMessage, target);
                         }
-                    } 
+                    } else {
+                        AppUtils.sleep(50);
+                    }
                 }
             }
         } catch (Exception ex) {
