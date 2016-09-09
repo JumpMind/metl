@@ -357,9 +357,7 @@ public class AgentRuntime {
 
                 doComponentDeploymentEvent(deployment, (l, f, s, c) -> l.onDeploy(agent, deployment, f, s, c));
 
-                if (deployment.asStartType() == StartType.ON_DEPLOY) {
-                    scheduleNow(deployment);
-                } else if (deployment.asStartType() == StartType.SCHEDULED_CRON) {
+                if (deployment.asStartType() == StartType.SCHEDULED_CRON) {
                     String cron = deployment.getStartExpression();
                     log.info(
                             "Scheduling '{}' on '{}' with a cron expression of '{}'  The next run time should be at: {}",
@@ -367,7 +365,7 @@ public class AgentRuntime {
                                     new CronSequenceGenerator(cron).next(new Date()) });
     
                     ScheduledFuture<?> future = this.flowExecutionScheduler.schedule(
-                            new FlowRunner(deployment), new CronTrigger(cron));
+                            new FlowRunner("metl cron", deployment), new CronTrigger(cron));
                     scheduledDeployments.put(deployment, future);
                 }
     
@@ -402,29 +400,29 @@ public class AgentRuntime {
         }
     }
 
-    public String scheduleNow(AgentDeployment deployment) {
-    	return scheduleNow(deployment, null);
+    public String scheduleNow(String userId, AgentDeployment deployment) {
+    	return scheduleNow(userId, deployment, null);
     }
     
-    public FlowRuntime createFlowRuntime(AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
+    public FlowRuntime createFlowRuntime(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
         String executionId = createExecutionId();
-        return new FlowRuntime(executionId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
+        return new FlowRuntime(executionId, userId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
                 resourceFactory,
                 flowStepsExecutionThreads, configurationService, executionService, deployedResources, null, globalSettings, runtimeParameters);
         
     }
     
-    public Results execute(AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
+    public Results execute(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters) throws Exception {
         log.info("Executing '{}' on '{}' for now", new Object[] {
                 deployment.getName(), agent.getName() });
-        return createFlowRuntime(deployment, runtimeParameters).execute();
+        return createFlowRuntime(userId, deployment, runtimeParameters).execute();
     }
 
-    public String scheduleNow(AgentDeployment deployment, Map<String, String> runtimeParameters) {
+    public String scheduleNow(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters) {
             log.info("Scheduling '{}' on '{}' for now", new Object[] {
                     deployment.getName(), agent.getName() });
             String executionId = createExecutionId();
-            this.flowExecutionScheduler.schedule(new FlowRunner(deployment, runtimeParameters, executionId),
+            this.flowExecutionScheduler.schedule(new FlowRunner(userId, deployment, runtimeParameters, executionId),
                     new Date());
             return executionId;
     }
@@ -498,16 +496,19 @@ public class AgentRuntime {
         Map<String, String> runtimeParameters;
         
         AgentDeployment deployment;
+        
+        String userId;
 
-        public FlowRunner(AgentDeployment deployment) {
-        	this(deployment, null, null);
+        public FlowRunner(String userId, AgentDeployment deployment) {
+        	this(userId, deployment, null, null);
         }
         
-        public FlowRunner(AgentDeployment deployment, Map<String, String> runtimeParameters) {
-            this(deployment, runtimeParameters, null);            
+        public FlowRunner(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters) {
+            this(userId, deployment, runtimeParameters, null);            
         }
 
-        public FlowRunner(AgentDeployment deployment, Map<String, String> runtimeParameters, String executionId) {
+        public FlowRunner(String userId, AgentDeployment deployment, Map<String, String> runtimeParameters, String executionId) {
+            this.userId = userId;
             this.executionId = executionId;
             this.runtimeParameters = runtimeParameters;
             this.deployment = deployment;
@@ -523,7 +524,7 @@ public class AgentRuntime {
                 log.info("Deployment '{}' is running on the '{}' agent", deployment.getName(),
                         agent.getName());
                 List<Notification> notifications = configurationService.findNotificationsForDeployment(deployment);
-                flowRuntime = new FlowRuntime(executionId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
+                flowRuntime = new FlowRuntime(executionId, userId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
                         resourceFactory,
                         flowStepsExecutionThreads, configurationService, executionService, deployedResources, notifications, globalSettings, runtimeParameters);
                 addToRunning(deployment, flowRuntime);                

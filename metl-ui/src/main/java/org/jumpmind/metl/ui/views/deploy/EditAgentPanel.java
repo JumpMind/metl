@@ -472,7 +472,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
                 tabbedPanel.addCloseableTab(deployment.getId(), "Call " + deployment.getName(), Icons.RUN, panel);
             } else {
                 String executionId = agentManager.getAgentRuntime(deployment.getAgentId())
-                        .scheduleNow(deployment);
+                        .scheduleNow(context.getUser().getLoginId(), deployment);
                 if (executionId != null) {
                     ExecutionRunPanel logPanel = new ExecutionRunPanel(executionId, context,
                             tabbedPanel, null);

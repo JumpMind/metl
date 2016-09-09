@@ -125,7 +125,7 @@ public class StandaloneFlowRunner {
     
     public String runFlow(FlowName flow, boolean waitFor) {
         AgentDeployment deployment = agentRuntime.deploy(configurationService.findFlow(flow.getId()), new HashMap<>());
-        String executionId = agentRuntime.scheduleNow(deployment);
+        String executionId = agentRuntime.scheduleNow("standalone", deployment);
         Execution execution = findExecution(executionId);
         while (execution == null) {
             AppUtils.sleep(50);

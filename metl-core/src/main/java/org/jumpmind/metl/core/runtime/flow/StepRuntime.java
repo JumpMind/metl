@@ -278,7 +278,7 @@ public class StepRuntime implements Runnable {
                         } else {
                             process(inputMessage, target);
                         }
-                    } else {
+                    } else if (running && !cancelled) {
                         AppUtils.sleep(50);
                     }
                 }

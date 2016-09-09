@@ -20,14 +20,10 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
-import org.apache.commons.lang3.StringUtils;
-import org.jumpmind.metl.core.model.ComponentName;
+import java.util.Collection;
+
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.UiUtils;
@@ -35,11 +31,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.server.ClassResource;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Accordion;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.DragAndDropWrapper.DragStartMode;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -49,69 +49,79 @@ public class EditFlowPalette extends VerticalLayout {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
-    Accordion componentAccordian;
-
     ApplicationContext context;
 
     EditFlowPanel designFlowLayout;
 
-    float splitPosition = 60;
+    VerticalLayout componentLayout;
 
-    Unit splitUnit = Unit.PERCENTAGE;
+    String filterText;
 
+    String projectVersionId;
+    
     public EditFlowPalette(EditFlowPanel designFlowLayout, ApplicationContext context, String projectVersionId) {
         this.context = context;
         this.designFlowLayout = designFlowLayout;
+        this.projectVersionId = projectVersionId;
+
+        final int WIDTH = 150;
+        
         setHeight(100, Unit.PERCENTAGE);
-        setWidth(150, Unit.PIXELS);
+        setWidth(WIDTH, Unit.PIXELS);
 
-        setMargin(new MarginInfo(true, false, false, false));
+        HorizontalLayout top = new HorizontalLayout();
+        top.setMargin(true);
+        addComponent(top);
+        
+        TextField filterField = new TextField();
+        filterField.setWidth(WIDTH-30, Unit.PIXELS);
+        filterField.setInputPrompt("Filter");
+        filterField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
+        filterField.setIcon(FontAwesome.SEARCH);
+        filterField.setImmediate(true);
+        filterField.setTextChangeEventMode(TextChangeEventMode.LAZY);
+        filterField.setTextChangeTimeout(200);
+        filterField.addTextChangeListener((event) -> {
+            filterText = event.getText().toLowerCase();
+            populateComponentPalette();
+        });
+        top.addComponent(filterField);
 
-        componentAccordian = new Accordion();
-        componentAccordian.setSizeFull();
-        addComponent(componentAccordian);
-        setExpandRatio(componentAccordian, 1);
+        Panel panel = new Panel();
+        panel.setSizeFull();
+        panel.addStyleName(ValoTheme.PANEL_BORDERLESS);
+        panel.addStyleName(ValoTheme.PANEL_SCROLL_INDICATOR);
 
-        populateComponentPalette(projectVersionId);
+        componentLayout = new VerticalLayout();
+        componentLayout.setMargin(new MarginInfo(true, false, false, false));
+        componentLayout.addStyleName("scrollable");
+        panel.setContent(componentLayout);
 
-    }
+        addComponent(panel);
+        setExpandRatio(panel, 1);
+
+        populateComponentPalette();
+
+    }  
 
     protected ClassResource getImageResourceForComponentType(String type) {
         return new ClassResource(UiUtils.getImageResourceNameForComponentType(type,context));
-    }
+    }    
 
-    protected void populateComponentPalette(String projectVersionId) {
-        componentAccordian.removeAllComponents();
-        populateComponentTypesInComponentPalette(projectVersionId);
-        populateSharedComponentsInComponentPalette(projectVersionId);
-    }
-
-    protected void populateComponentTypesInComponentPalette(String projectVersionId) {
-        Map<String, List<XMLComponent>> componentDefinitionsByCategory = context.getComponentDefinitionFactory().getDefinitionsByCategory();
-        for (String category : new TreeSet<>(componentDefinitionsByCategory.keySet())) {
-            List<XMLComponent> componentDefinitions = new ArrayList<XMLComponent>(componentDefinitionsByCategory.get(category));
-            Collections.sort(componentDefinitions);
-            VerticalLayout componentLayout = new VerticalLayout();
-            componentAccordian.addTab(componentLayout, StringUtils.isAllUpperCase(category) ? category + "S" : category + "s");
-                for (XMLComponent definition : componentDefinitions) {
-                    ClassResource icon = getImageResourceForComponentType(definition.getId());
-                    addItemToFlowPanelSection(definition.getName(), definition.getId(), componentLayout, icon, null);
-                }
+    protected void populateComponentPalette() {
+        componentLayout.removeAllComponents();
+        Collection<XMLComponent> componentDefinitions = context.getComponentDefinitionFactory().getDefinitions();
+        for (XMLComponent definition : componentDefinitions) {
+            if ((isBlank(filterText) || definition.getName().toLowerCase().contains(filterText)
+                    || definition.getCategory().toLowerCase().contains(filterText))) {
+                ClassResource icon = getImageResourceForComponentType(definition.getId());
+                addItemToFlowPanelSection(definition.getName(), definition.getId(), componentLayout, icon, null);
+            }
         }
     }
 
-    protected void populateSharedComponentsInComponentPalette(String projectVersionId) {
-        VerticalLayout componentLayout = new VerticalLayout();
-        componentAccordian.addTab(componentLayout, "SHARED DEFINITIONS");
-
-        List<ComponentName> components = context.getConfigurationService().findSharedComponentsInProject(projectVersionId);
-        for (ComponentName component : components) {
-            ClassResource icon = getImageResourceForComponentType(component.getType());
-            addItemToFlowPanelSection(component.getName(), null, componentLayout, icon, component.getId());
-        }
-    }
-
-    protected void addItemToFlowPanelSection(String labelName, String componentType, VerticalLayout componentLayout, ClassResource icon, String componentId) {
+    protected void addItemToFlowPanelSection(String labelName, String componentType, VerticalLayout componentLayout, ClassResource icon,
+            String componentId) {
 
         FlowPaletteItem paletteItem = new FlowPaletteItem(labelName);
         if (componentId != null) {

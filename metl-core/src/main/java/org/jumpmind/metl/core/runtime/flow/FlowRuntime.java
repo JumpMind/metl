@@ -118,19 +118,19 @@ public class FlowRuntime {
     
     Flow manipulatedFlow;
 
-    public FlowRuntime(String executionId, AgentDeployment deployment, Agent agent,
+    public FlowRuntime(String executionId, String userId, AgentDeployment deployment, Agent agent,
             IComponentRuntimeFactory componentRuntimeFactory,
             IComponentDefinitionFactory componentDefinitionFactory,
             IResourceFactory resourceFactory, ExecutorService threadService,
             IConfigurationService configurationService, IExecutionService executionService,
             Map<String, IResourceRuntime> deployedResources, List<Notification> notifications,
             Map<String, String> globalSettings) {
-        this(executionId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
+        this(executionId, userId, deployment, agent, componentRuntimeFactory, componentDefinitionFactory,
                 resourceFactory, threadService, configurationService, executionService,
                 deployedResources, notifications, globalSettings, null);
     }
 
-    public FlowRuntime(String executionId, AgentDeployment deployment, Agent agent,
+    public FlowRuntime(String executionId, String userId, AgentDeployment deployment, Agent agent,
             IComponentRuntimeFactory componentRuntimeFactory,
             IComponentDefinitionFactory componentDefinitionFactory,
             IResourceFactory resourceFactory, ExecutorService threadService,
@@ -161,7 +161,7 @@ public class FlowRuntime {
         
         if (threadService != null && executionService != null) {
             this.executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService,
-                    executionService);
+                    executionService, userId);
         } else {
             this.executionTracker = new ExecutionTrackerLogger(deployment);
         }

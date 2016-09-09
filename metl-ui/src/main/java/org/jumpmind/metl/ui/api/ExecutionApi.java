@@ -20,9 +20,11 @@
  */
 package org.jumpmind.metl.ui.api;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang.StringUtils.left;
 import static org.jumpmind.metl.core.runtime.FlowConstants.REQUEST_VALUE_PARAMETER;
-import static org.jumpmind.metl.ui.api.ApiConstants.*;
+import static org.jumpmind.metl.ui.api.ApiConstants.HEADER_EXECUTION_ID;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -157,7 +159,7 @@ public class ExecutionApi {
             }
             AgentDeployment deployment = mapping.getDeployment();
             AgentRuntime agentRuntime = agentManager.getAgentRuntime(deployment.getAgentId());
-            FlowRuntime flowRuntime = agentRuntime.createFlowRuntime(deployment, params);
+            FlowRuntime flowRuntime = agentRuntime.createFlowRuntime(whoAreYou(request), deployment, params);
             IHasSecurity security = flowRuntime.getHasSecurity();
             if (enforceSecurity(security, request, response)) {
                 String executionId = flowRuntime.getExecutionId();
@@ -244,6 +246,17 @@ public class ExecutionApi {
     private void unauthorized(HttpServletResponse response) throws IOException {
         unauthorized(response, "Unauthorized");
     }
+    
+    private String whoAreYou(HttpServletRequest req) {
+        String userId = left(req.getRemoteUser(), 50);
+        if (isBlank(userId)) {
+            userId =  left(req.getRemoteHost(), 50);
+            if (isBlank(userId)) {
+                userId = left(req.getRemoteAddr(), 50);
+            }
+        }
+        return userId;
+    }
 
     @ApiOperation(value = "Invoke a flow that is deployed to an agent by name")
     @RequestMapping(value = "/agents/{agentName}/deployments/{deploymentName}/invoke", method = RequestMethod.GET)
@@ -268,7 +281,7 @@ public class ExecutionApi {
                         foundDeployment = true;
                         if (agentDeployment.getDeploymentStatus() == DeploymentStatus.ENABLED) {
                             AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent);
-                            String executionId = agentRuntime.scheduleNow(agentDeployment,
+                            String executionId = agentRuntime.scheduleNow(whoAreYou(req), agentDeployment,
                                     toMap(req));
                             boolean done = false;
                             do {

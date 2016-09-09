@@ -50,10 +50,13 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     Map<ExecutionStep, Date> lastStatUpdate = new HashMap<ExecutionStep, Date>();
     
     Date startTime;
+    
+    String userId;
 
-    public ExecutionTrackerRecorder(Agent agent, AgentDeployment agentDeployment,  ExecutorService threadService, IExecutionService executionService) {
+    public ExecutionTrackerRecorder(Agent agent, AgentDeployment agentDeployment,  ExecutorService threadService, IExecutionService executionService, String userId) {
         super(agentDeployment);
         this.agent = agent;
+        this.userId = userId;
         this.recorder = new AsyncRecorder(executionService);
         threadService.execute(this.recorder);
     }
@@ -79,6 +82,8 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         execution.setDeploymentName(deployment.getName());
         execution.setDeploymentId(deployment.getId());
         execution.setLastUpdateTime(new Date());
+        execution.setCreateBy(userId);
+        execution.setLastUpdateBy(userId);
         return execution;
     }
 

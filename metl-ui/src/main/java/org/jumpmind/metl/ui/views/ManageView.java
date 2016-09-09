@@ -201,8 +201,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                 }
             }
         });
-        table.setVisibleColumns(new Object[] { "agentName", "deploymentName", "hostName", "status", "startTime", "endTime" });
-        table.setColumnHeaders(new String[] { "Agent", "Deployment", "Host", "Status", "Start", "End" });
+        table.setVisibleColumns(new Object[] { "agentName", "deploymentName", "hostName", "status", "startTime", "endTime", "createBy" });
+        table.setColumnHeaders(new String[] { "Agent", "Deployment", "Host", "Status", "Start", "End", "Caller" });
         table.setSortContainerPropertyId("startTime");
         table.setSortAscending(false);
         table.addValueChangeListener(new ValueChangeListener() {
