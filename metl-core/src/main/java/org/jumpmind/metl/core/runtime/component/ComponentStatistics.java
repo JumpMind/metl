@@ -20,18 +20,18 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ComponentStatistics {
 
-    private Map<Integer, Integer> numberInboundMessages = new HashMap<>();
-    private Map<Integer, Integer> numberOutboundMessages = new HashMap<>();
-    private Map<Integer, Integer> numberEntitiesProcessed = new HashMap<>();
-    private Map<Integer, Integer> numberInboundPayload = new HashMap<>();
-    private Map<Integer, Integer> numberOutboundPayload = new HashMap<>();
-    private Map<Integer, Long> timeSpentInHandle = new HashMap<>();
-    private Map<Integer, Long> timeSpentWaiting = new HashMap<>();
+    private Map<Integer, Integer> numberInboundMessages = new ConcurrentHashMap<>();
+    private Map<Integer, Integer> numberOutboundMessages = new ConcurrentHashMap<>();
+    private Map<Integer, Integer> numberEntitiesProcessed = new ConcurrentHashMap<>();
+    private Map<Integer, Integer> numberInboundPayload = new ConcurrentHashMap<>();
+    private Map<Integer, Integer> numberOutboundPayload = new ConcurrentHashMap<>();
+    private Map<Integer, Long> timeSpentInHandle = new ConcurrentHashMap<>();
+    private Map<Integer, Long> timeSpentWaiting = new ConcurrentHashMap<>();
     
     
     public long getTimeSpentInHandle(int thread) {
