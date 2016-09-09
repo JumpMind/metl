@@ -266,7 +266,7 @@ public class StepRuntime implements Runnable {
                  */
                 Message inputMessage = null;
                 synchronized (this) {
-                    inputMessage = inQueue.poll(5, TimeUnit.MILLISECONDS);
+                    inputMessage = inQueue.poll(50, TimeUnit.MILLISECONDS);
                     if (inputMessage != null && !(inputMessage instanceof ShutdownMessage)) {
                         activeCount++;
                     }
