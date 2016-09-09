@@ -1,5 +1,6 @@
 package org.jumpmind.metl.core.runtime.component.definition;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -10,5 +11,7 @@ public interface IComponentDefinitionFactory {
     Map<String, List<String>> getTypesByCategory();
 
     Map<String, List<XMLComponent>> getDefinitionsByCategory();
+
+    Collection<XMLComponent> getDefinitions();
 
 }

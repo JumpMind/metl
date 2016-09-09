@@ -21,17 +21,19 @@
 package org.jumpmind.metl.core.runtime.component.definition;
 
 import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.ENABLED;
+import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.INBOUND_QUEUE_CAPACITY;
 import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_INPUT;
 import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.LOG_OUTPUT;
-import static org.jumpmind.metl.core.runtime.component.definition.ComponentSettingsConstants.INBOUND_QUEUE_CAPACITY;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -47,6 +49,11 @@ public class ComponentXmlDefinitionFactory extends AbstractXMLFactory implements
     Map<String, XMLComponent> componentsById;
 
     Map<String, List<String>> componentIdsByCategory;
+    
+    @Override
+    synchronized public Collection<XMLComponent> getDefinitions() {
+        return new TreeSet<>(componentsById.values());
+    }
 
     @Override
     synchronized public Map<String, List<XMLComponent>> getDefinitionsByCategory() {

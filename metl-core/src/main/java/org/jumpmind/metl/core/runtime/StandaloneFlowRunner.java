@@ -53,6 +53,7 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.definition.ComponentXmlDefinitionFactory;
+import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
 import org.jumpmind.metl.core.runtime.resource.ResourceFactory;
 import org.jumpmind.metl.core.runtime.web.HttpRequestMappingRegistry;
 import org.jumpmind.metl.core.security.SecurityService;
@@ -160,7 +161,7 @@ public class StandaloneFlowRunner {
             databasePlatform = initDatabasePlatform();
             new ConfigDatabaseUpgrader("/schema.xml", databasePlatform, true, "METL").upgrade();
             persistenceManager = new SqlPersistenceManager(databasePlatform);
-            ComponentXmlDefinitionFactory componentDefinitionFactory = new ComponentXmlDefinitionFactory();
+            IComponentDefinitionFactory componentDefinitionFactory = new ComponentXmlDefinitionFactory();
             configurationService = new ConfigurationSqlService(new SecurityService(), componentDefinitionFactory, databasePlatform, persistenceManager, "METL");
             executionService = new ExecutionSqlService(databasePlatform, persistenceManager, "METL", new StandardEnvironment());
             agentRuntime = new AgentRuntime(new Agent("test", AppUtils.getHostName()), configurationService, executionService,

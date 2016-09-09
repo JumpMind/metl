@@ -55,7 +55,6 @@ import org.jumpmind.metl.core.runtime.LogLevel;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
-import org.jumpmind.metl.core.util.ComponentUtils;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;

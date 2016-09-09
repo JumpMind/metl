@@ -266,7 +266,7 @@ public class StepRuntime implements Runnable {
                  */
                 Message inputMessage = null;
                 synchronized (this) {
-                    inputMessage = inQueue.poll();
+                    inputMessage = inQueue.poll(5, TimeUnit.MILLISECONDS);
                     if (inputMessage != null && !(inputMessage instanceof ShutdownMessage)) {
                         activeCount++;
                     }
@@ -278,9 +278,7 @@ public class StepRuntime implements Runnable {
                         } else {
                             process(inputMessage, target);
                         }
-                    } else {
-                        AppUtils.sleep(50);
-                    }
+                    } 
                 }
             }
         } catch (Exception ex) {
@@ -304,7 +302,10 @@ public class StepRuntime implements Runnable {
          * race conditions.
          */
         if (threadCount > 1) {
-            this.componentRuntimeExecutor.execute(() -> processOnAnotherThread(inputMessage, unitOfWorkBoundaryReached, target));
+            while (unitOfWorkBoundaryReached && activeCount > 1) {
+                AppUtils.sleep(5);
+            }
+            this.componentRuntimeExecutor.execute(() -> processOnAnotherThread(inputMessage, unitOfWorkBoundaryReached, target));    
         } else {
             processOnAnotherThread(inputMessage, unitOfWorkBoundaryReached, target);
         }
@@ -342,6 +343,8 @@ public class StepRuntime implements Runnable {
             boolean recursionDone = liveSourceStepIds.size() == 1 && liveSourceStepIds.contains(componentContext.getFlowStep().getId())
                     && getActiveCountPlusQueueSize() == 1;
             
+            /* When multi-threaded, if a unit of work is received we will have waited for all threads to finish before processing the
+               this messsage */
             if ((unitOfWorkBoundaryReached || recursionDone) && componentRuntime.getComponentDefintion().isAutoSendControlMessages()) {
                 verifyAndSendControlMessageToTargets(callback, inputMessage);
             }
@@ -350,7 +353,7 @@ public class StepRuntime implements Runnable {
              * Detect shutdown condition
              */
             if (startStep || recursionDone) {
-                shutdown(threadNumber, callback, false);
+                shutdown(callback, false);
             }
         } catch (Exception ex) {
             recordError(ThreadUtils.getThreadNumber(threadCount), ex);
@@ -381,7 +384,7 @@ public class StepRuntime implements Runnable {
          */
         if (cancelled || fromStepId == null || liveSourceStepIds == null || liveSourceStepIds.size() == 0
                 || fromStepId.equals(componentContext.getFlowStep().getId())) {
-            shutdown(1, target, true);
+            shutdown(target, true);
         }
     }
 
@@ -449,11 +452,11 @@ public class StepRuntime implements Runnable {
         return true;
     }
 
-    private void stop(int threadNumber, IComponentRuntime componentRuntime) {
+    private void stop(IComponentRuntime componentRuntime) {
         try {
             componentRuntime.stop();
         } catch (Exception e) {
-            recordError(threadNumber, e);
+            recordError(componentRuntime.getThreadNumber(), e);
         }
     }
 
@@ -465,7 +468,7 @@ public class StepRuntime implements Runnable {
         }
     }
 
-    private void shutdown(int threadNumber, ISendMessageCallback target, boolean waitForShutdown) {
+    private void shutdown(ISendMessageCallback target, boolean waitForShutdown) {
         shutdownThreads(waitForShutdown);
 
         if (log.isDebugEnabled()) {
@@ -473,7 +476,7 @@ public class StepRuntime implements Runnable {
         }
 
         targetStepRuntimes.forEach(t -> shutdownTargets(t));
-        componentRuntimeByThread.values().forEach(c -> stop(threadNumber, c));
+        componentRuntimeByThread.values().forEach(c -> stop(c));
 
         finished = true;
         running = false;
@@ -494,10 +497,14 @@ public class StepRuntime implements Runnable {
             }
         }
     }
-
+    
     private final void recordFlowStepFinished() {
         componentRuntimeByThread.keySet()
-                .forEach(e -> componentContext.getExecutionTracker().flowStepFinished(e, componentContext, error, cancelled));
+                .forEach(threadNumber -> recordFlowStepFinished(threadNumber));
+    }
+
+    private final void recordFlowStepFinished(int threadNumber) {
+        componentContext.getExecutionTracker().flowStepFinished(threadNumber, componentContext, error, cancelled);
     }
 
     public void cancel() {

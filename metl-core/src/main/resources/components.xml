@@ -175,7 +175,8 @@
              inputMessageType='any'
              inputOutputModelsMatch='false'
              outputMessageType='any'
-             resourceCategory='none'>
+             resourceCategory='none'
+             supportsMultipleThreads='true'>
     <name>Delay</name>
     <className>org.jumpmind.metl.core.runtime.component.Delay</className>
     <description></description>
@@ -669,7 +670,8 @@
              inputMessageType='any'
              inputOutputModelsMatch='false'
              outputMessageType='any'
-             resourceCategory='none'>
+             resourceCategory='none'
+             supportsMultipleThreads='true'>
     <name>No Op</name>
     <className>org.jumpmind.metl.core.runtime.component.NoOp</className>
     <description></description>
@@ -919,7 +921,8 @@
              inputMessageType='any'
              inputOutputModelsMatch='false'
              outputMessageType='any'
-             resourceCategory='any'>
+             resourceCategory='any'
+             supportsMultipleThreads='true'>
     <name>Script</name>
     <className>org.jumpmind.metl.core.runtime.component.Script</className>
     <description></description>
