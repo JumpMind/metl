@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -154,14 +155,16 @@ public class FlowRuntime {
         this.mailSession = new MailSession(globalSettings);
         this.deployedResources = deployedResources;
         this.globalSettings = globalSettings;
-        this.flowParameters = getFlowParameters(agent, deployment);
+        
+        this.flowParameters = new LinkedHashMap<String, String>();         
         if (runtimeParameters != null) {
             this.flowParameters.putAll(runtimeParameters);
         }
+        getFlowParameters(this.flowParameters, agent, deployment);
         
         if (threadService != null && executionService != null) {
             this.executionTracker = new ExecutionTrackerRecorder(agent, deployment, threadService,
-                    executionService, userId);
+                    executionService, userId, flowParameters.toString());
         } else {
             this.executionTracker = new ExecutionTrackerLogger(deployment);
         }
@@ -342,12 +345,6 @@ public class FlowRuntime {
         for (FlowParameter flowParameter : flowParameters) {
             params.put(flowParameter.getName(), flowParameter.getDefaultValue());
         }
-        return getFlowParameters(params, agent, agentDeployment);
-    }
-
-    public static Map<String, String> getFlowParameters(Agent agent,
-            AgentDeployment agentDeployment) {
-        Map<String, String> params = new HashMap<String, String>();
         return getFlowParameters(params, agent, agentDeployment);
     }
 

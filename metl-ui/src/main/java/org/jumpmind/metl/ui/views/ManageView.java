@@ -193,6 +193,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         table.setSelectable(true);
         table.setMultiSelect(false);
         table.setSizeFull();
+        table.setColumnCollapsingAllowed(true);
         table.addItemClickListener(new ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent event) {
@@ -201,8 +202,18 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                 }
             }
         });
-        table.setVisibleColumns(new Object[] { "agentName", "deploymentName", "hostName", "status", "startTime", "endTime", "createBy" });
-        table.setColumnHeaders(new String[] { "Agent", "Deployment", "Host", "Status", "Start", "End", "Caller" });
+        table.setVisibleColumns(new Object[] { "agentName", "deploymentName", "hostName", "status", "startTime", "endTime", "createBy", "parameters" });
+        table.setColumnHeaders(new String[] { "Agent", "Deployment", "Host", "Status", "Start", "End", "Caller", "Parameters" });
+        table.setColumnWidth("agentName", 250);
+        table.setColumnWidth("deploymentName", 250);
+        table.setColumnWidth("hostName", 145);
+        table.setColumnWidth("status", 90);
+        table.setColumnWidth("startTime", 170);
+        table.setColumnWidth("endTime", 170);
+        table.setColumnWidth("createBy", 100);
+        table.setColumnWidth("parameters", 5000);
+        //table.setColumnExpandRatio("parameters", 1);
+        table.setColumnCollapsed("hostName", true);
         table.setSortContainerPropertyId("startTime");
         table.setSortAscending(false);
         table.addValueChangeListener(new ValueChangeListener() {

@@ -405,8 +405,9 @@
         <column name="deployment_id" type="CHAR" size="36" required="true" description="A unique identifier" />
 		<column name="agent_name" type="VARCHAR" size="255" description="" />
 		<column name="host_name" type="VARCHAR" size="255" description="" />
-		<column name="flow_name" type="VARCHAR" size="255" description="" />
+		<column name="flow_name" type="VARCHAR" size="255" description="" />        
         <column name="deployment_name" type="VARCHAR" size="255" description="" />
+        <column name="parameters" type="VARCHAR" size="4000" description="" />
         <column name="status" type="VARCHAR" required="true" default="REQUESTED" size="255" description="" />
         <column name="start_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
         <column name="end_time" type="TIMESTAMP" description="Timestamp when this entry was created." />

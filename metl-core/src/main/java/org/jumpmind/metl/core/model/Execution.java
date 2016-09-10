@@ -41,6 +41,8 @@ public class Execution extends AbstractObject {
     String flowName;
 
     String status;
+    
+    String parameters;
 
     Date startTime;
 
@@ -158,6 +160,14 @@ public class Execution extends AbstractObject {
 	
 	public String getDeploymentName() {
         return deploymentName;
+    }
+	
+	public void setParameters(String parameters) {
+        this.parameters = parameters;
+    }
+	
+	public String getParameters() {
+        return parameters;
     }
 
 }

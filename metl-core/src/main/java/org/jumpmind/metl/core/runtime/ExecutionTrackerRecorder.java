@@ -20,6 +20,8 @@
  */
 package org.jumpmind.metl.core.runtime;
 
+import static org.apache.commons.lang.StringUtils.abbreviate;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,13 +54,16 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
     Date startTime;
     
     String userId;
+    
+    String parameters;
 
-    public ExecutionTrackerRecorder(Agent agent, AgentDeployment agentDeployment,  ExecutorService threadService, IExecutionService executionService, String userId) {
+    public ExecutionTrackerRecorder(Agent agent, AgentDeployment agentDeployment,  ExecutorService threadService, IExecutionService executionService, String userId, String parameters) {
         super(agentDeployment);
         this.agent = agent;
         this.userId = userId;
+        this.parameters = parameters;
         this.recorder = new AsyncRecorder(executionService);
-        threadService.execute(this.recorder);
+        threadService.execute(this.recorder);        
     }
 
     @Override
@@ -84,6 +89,7 @@ public class ExecutionTrackerRecorder extends ExecutionTrackerLogger {
         execution.setLastUpdateTime(new Date());
         execution.setCreateBy(userId);
         execution.setLastUpdateBy(userId);
+        execution.setParameters(abbreviate(parameters, 4000));
         return execution;
     }
 
