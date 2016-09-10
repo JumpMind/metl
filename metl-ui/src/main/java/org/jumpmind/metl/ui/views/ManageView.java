@@ -212,15 +212,10 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         table.setColumnWidth("endTime", 170);
         table.setColumnWidth("createBy", 100);
         table.setColumnWidth("parameters", 5000);
-        //table.setColumnExpandRatio("parameters", 1);
         table.setColumnCollapsed("hostName", true);
         table.setSortContainerPropertyId("startTime");
         table.setSortAscending(false);
-        table.addValueChangeListener(new ValueChangeListener() {
-            public void valueChange(ValueChangeEvent event) {
-                viewButton.setEnabled(table.getValue() != null);
-            }
-        });
+        table.addValueChangeListener((event)->viewButton.setEnabled(table.getValue() != null));
         mainTab.addComponent(table);
         mainTab.setExpandRatio(table, 1.0f);
 
@@ -232,11 +227,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         split.setSplitPosition(AppConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS, false);
 
         manageNavigator = new ManageNavigator(FolderType.AGENT, context);
-        manageNavigator.addValueChangeListener(new ValueChangeListener() {
-            public void valueChange(ValueChangeEvent event) {
-                refreshUI(getBackgroundData());
-            }
-        });
+        manageNavigator.addValueChangeListener((event) ->refreshUI(getBackgroundData()));
         split.setFirstComponent(manageNavigator);
 
         VerticalLayout container = new VerticalLayout();
@@ -280,11 +271,18 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
     }
 
     public Object getBackgroundData() {
+        if (statusSelect.isReadOnly()) {
+            statusSelect.setReadOnly(false);
+            statusSelect.setValue(ANY);
+        }
         Object currentSelection = manageNavigator.getCurrentSelection();
         Object currentSelectionParent = manageNavigator.getCurrentSelectionParent();
-        if (currentSelection != null) {
+        if (currentSelection != null) {            
             Map<String, Object> params = new HashMap<String, Object>();
-            if (currentSelection instanceof Agent) {
+            if (currentSelection.equals(ManageNavigator.CURRENTLY_RUNNING)) {
+                statusSelect.setValue(ExecutionStatus.RUNNING.name());
+                statusSelect.setReadOnly(true);
+            } else if (currentSelection instanceof Agent) {
                 params.put("agentId", ((Agent) currentSelection).getId());
             } else if (currentSelection instanceof AgentName) {
                 params.put("agentId", ((AgentName) currentSelection).getId());
@@ -294,7 +292,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                 params.put("deploymentId", ((AgentDeployment) currentSelection).getId());
             } else if (currentSelection instanceof AgentDeploymentSummary) {
                 params.put("deploymentId", ((AgentDeploymentSummary) currentSelection).getId());
-            }
+            } 
 
             if (currentSelectionParent instanceof Agent) {
                 params.put("agentId", ((Agent) currentSelectionParent).getId());
@@ -302,7 +300,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                 params.put("agentId", ((AgentName) currentSelectionParent).getId());
             }
 
-            if (!statusSelect.getValue().equals("<Any>")) {
+            if (!statusSelect.getValue().equals(ANY)) {
                 params.put("status", statusSelect.getValue());
             }
 

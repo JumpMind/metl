@@ -32,6 +32,7 @@ import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderType;
+import org.jumpmind.metl.core.model.Name;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -39,8 +40,6 @@ import org.jumpmind.metl.ui.common.Icons;
 
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.ui.MenuBar;
@@ -48,14 +47,14 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.ColumnHeaderMode;
-import com.vaadin.ui.Tree.CollapseEvent;
-import com.vaadin.ui.Tree.CollapseListener;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class ManageNavigator extends Panel {
+
+    protected static final Name CURRENTLY_RUNNING = new Name("Currently Running");
 
     TreeTable treeTable;
 
@@ -103,6 +102,11 @@ public class ManageNavigator extends Panel {
         }
 
         treeTable.removeAllItems();
+                
+        treeTable.addItem(CURRENTLY_RUNNING);
+        treeTable.setChildrenAllowed(CURRENTLY_RUNNING, false);
+        treeTable.setItemIcon(CURRENTLY_RUNNING, FontAwesome.GEARS);
+        
         treeTable.addItem(agentsFolder);
         treeTable.setItemIcon(agentsFolder, FontAwesome.FOLDER);
 
@@ -122,6 +126,8 @@ public class ManageNavigator extends Panel {
         treeTable.focus();
         if (treeTable.containsId(selected)) {
             treeTable.setValue(selected);
+        } else {
+            treeTable.setValue(CURRENTLY_RUNNING);
         }
     }
 
@@ -177,25 +183,28 @@ public class ManageNavigator extends Panel {
         table.setVisibleColumns(new Object[] { "name" });
         table.setColumnExpandRatio("name", 1);
 
-        table.addItemClickListener(new ItemClickListener() {
-            public void itemClick(ItemClickEvent event) {
-                if (event.getButton() == MouseButton.LEFT) {
-                    if (event.isDoubleClick()) {
-                        if (treeTable.hasChildren(event.getItemId())) {
-                            treeTable.setCollapsed(event.getItemId(), !treeTable.isCollapsed(event.getItemId()));
-                        }
+        table.addItemClickListener((event) -> {
+            if (event.getButton() == MouseButton.LEFT) {
+                if (event.isDoubleClick()) {
+                    if (treeTable.hasChildren(event.getItemId())) {
+                        treeTable.setCollapsed(event.getItemId(),
+                                !treeTable.isCollapsed(event.getItemId()));
                     }
                 }
             }
         });
 
-        table.addCollapseListener(new CollapseListener() {
-            public void nodeCollapse(CollapseEvent event) {
-                if (event.getItemId() instanceof Folder) {
-                    table.setItemIcon(event.getItemId(), FontAwesome.FOLDER);
-                }
+        table.addCollapseListener((event) -> {
+            if (event.getItemId() instanceof Folder) {
+                table.setItemIcon(event.getItemId(), FontAwesome.FOLDER);
             }
         });
+
+        table.addExpandListener((event) -> {
+            if (event.getItemId() instanceof Folder) {
+                table.setItemIcon(event.getItemId(), FontAwesome.FOLDER_O);
+            }
+        });      
 
         table.setCellStyleGenerator(new CellStyleGenerator() {
             public String getStyle(Table source, Object itemId, Object propertyId) {

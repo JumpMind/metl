@@ -636,6 +636,21 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         }
         return group;
     }
+    
+    @Override
+    public Group findGroupByName(String name) {
+        Group group = null;
+        Map<String, Object> params = new HashMap<String, Object>();
+        params = new HashMap<String, Object>();
+        params.put("name", name);
+        List<Group> groups = persistenceManager.find(Group.class, params, null, null, tableName(Group.class));
+        if (groups.size() > 0) {
+            group = groups.get(0);
+            refresh(group);
+        }
+        return group;
+    }
+
 
     @Override
     public List<Group> findGroups() {

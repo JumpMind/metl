@@ -236,5 +236,7 @@ public interface IConfigurationService {
     public ProjectVersion saveNewVersion(String newVersionLabel, ProjectVersion original);
     
     public void savePassword(User user, String newPassword);
+
+    Group findGroupByName(String name);
     
 }
