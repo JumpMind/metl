@@ -333,7 +333,14 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         @SuppressWarnings("unchecked")
         Collection<Execution> tableValues = (Collection<Execution>) table.getItemIds();
         for (Execution execution : tableValues) {
-            if (!all.remove(execution)) {
+            int index = all.indexOf(execution);
+            if (index >= 0) {
+                Execution toCompare = all.get(index);
+                if (!toCompare.getStatus().equals(execution.getStatus())) {
+                    needsUpdated = true;
+                    break;
+                }
+            } else {
                 needsUpdated = true;
                 break;
             }
