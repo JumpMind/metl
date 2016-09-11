@@ -87,11 +87,11 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.HeaderCell;
 import com.vaadin.ui.Grid.HeaderRow;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
@@ -109,7 +109,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
     VerticalSplitPanel splitPanel;
 
-    Table stepTable = new Table();
+    Grid stepTable = new Grid();
 
     RunDiagram diagram;
 
@@ -162,7 +162,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     List<SortOrder> lastSortOrder;
 
     Label status;
-    
+
     public ExecutionRunPanel(String executionId, ApplicationContext context,
             TabbedPanel parentTabSheet) {
         this(executionId, context, parentTabSheet, null);
@@ -267,37 +267,54 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
         flowPanel.setContent(diagramLayout);
 
-        stepTable.setContainerDataSource(stepContainer);
-        stepTable.setSelectable(true);
-        stepTable.setMultiSelect(true);
+        stepTable.setSelectionMode(SelectionMode.SINGLE);
         stepTable.setImmediate(true);
         stepTable.setSizeFull();
-        stepTable.setVisibleColumns(new Object[] { "componentName", "threadNumber", "status",
-                "payloadReceived", "messagesReceived", "messagesProduced", "payloadProduced",
-                "startTime", "endTime", "handleDurationString", "queueDurationString" });
-        stepTable.setColumnHeaders(
-                new String[] { "Component Name", "Thread", "Status", "Payload Recvd", "Msgs Recvd",
-                        "Msgs Sent", "Payload Sent", "Start", "End", "Run Duration", "Wait Duration" });
-        stepTable.setColumnWidth("status", 100);
-        stepTable.setColumnWidth("messagesReceived", 100);
-        stepTable.setColumnWidth("messagesProduced", 100);
-        stepTable.setColumnWidth("payloadReceived", 100);
-        stepTable.setColumnWidth("payloadProduced", 100);
-        stepTable.setColumnWidth("threadNumber", 100);
-        stepTable.setColumnWidth("startTime", 170);
-        stepTable.setColumnWidth("endTime", 170);
-        stepTable.setColumnWidth("handleDurationString", 140);
-        stepTable.setColumnExpandRatio("queueDurationString", 1);
-        stepTable.addValueChangeListener(event -> {
-            @SuppressWarnings("unchecked")
-            Set<String> executionStepIds = (Set<String>) event.getProperty().getValue();
+        stepTable.addColumn("componentName", String.class).setHeaderCaption("Component Name")
+                .setWidth(200);
+        stepTable.addColumn("threadNumber", Integer.class).setHeaderCaption("Thread").setWidth(100);
+        stepTable.addColumn("status", String.class).setHeaderCaption("Status").setWidth(95);
+        stepTable.addColumn("payloadReceived", Integer.class).setHeaderCaption("Payload Recvd")
+                .setWidth(120);
+        stepTable.addColumn("messagesReceived", Integer.class).setHeaderCaption("Msgs Recvd")
+                .setWidth(100);
+        stepTable.addColumn("messagesProduced", Integer.class).setHeaderCaption("Msgs Sent")
+                .setWidth(100);
+        stepTable.addColumn("payloadProduced", Integer.class).setHeaderCaption("Payload Sent")
+                .setWidth(120);
+        stepTable.addColumn("startTime", Date.class).setHeaderCaption("Start").setWidth(120)
+                .setMaximumWidth(170).setRenderer(new DateRenderer(UiConstants.TIME_FORMAT));
+        stepTable.addColumn("endTime", Date.class).setHeaderCaption("End").setWidth(120)
+                .setMaximumWidth(170).setRenderer(new DateRenderer(UiConstants.TIME_FORMAT));
+        stepTable.addColumn("handleDurationString", String.class).setHeaderCaption("Run Duration")
+                .setWidth(140);
+        stepTable.addColumn("queueDurationString", String.class).setHeaderCaption("Wait Duration")
+                .setWidth(140);
+        stepTable.setContainerDataSource(stepContainer);
+        stepTable.addSelectionListener(event -> {
+            String stepId = (String) stepTable.getSelectedRow();
             logContainer.removeAllItems();
-            List<ExecutionStepLog> logs = executionService.findExecutionStepLogs(executionStepIds,
+            List<ExecutionStepLog> logs = executionService.findExecutionStepLogs(stepId,
                     getMaxToShow());
             logContainer.addAll(logs);
-            downloadLink.setVisible(executionStepIds.size() == 1);
+            downloadLink.setVisible(logs.size() > 0);
             updateStatus();
         });
+        
+        HeaderRow stepTableFilterHeader = stepTable.appendHeaderRow();
+        HeaderCell componentNameFilterCell = stepTableFilterHeader.getCell("componentName");
+        TextField componentNameFilterField = new TextField();
+        componentNameFilterField.setInputPrompt("Filter");
+        componentNameFilterField.addStyleName(ValoTheme.TEXTFIELD_TINY);
+        componentNameFilterField.setWidth("100%");
+        componentNameFilterField.addTextChangeListener(change -> {
+            stepContainer.removeContainerFilters("componentName");
+            if (!change.getText().isEmpty())
+                stepContainer.addContainerFilter(
+                        new SimpleStringFilter("componentName", change.getText(), true, false));
+        });
+        componentNameFilterCell.setComponent(componentNameFilterField);
+
 
         logTable = new Grid();
         logTable.addColumn("level", String.class).setHeaderCaption("Level").setWidth(110)
@@ -388,11 +405,9 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     }
 
     protected void download() {
-        @SuppressWarnings("unchecked")
-        Set<String> selected = (Set<String>) stepTable.getValue();
-        if (selected.size() > 0) {
-            String executionId = selected.iterator().next();
-            final File file = executionService.getExecutionStepLog(executionId);
+        String stepId = (String) stepTable.getSelectedRow();
+        if (stepId != null) {
+            final File file = executionService.getExecutionStepLog(stepId);
             StreamSource ss = new StreamSource() {
                 private static final long serialVersionUID = 1L;
 
@@ -584,14 +599,13 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected ExecutionData getExecutionData() {
         ExecutionData data = new ExecutionData();
         data.execution = executionService.findExecution(executionId);
         data.steps = executionService.findExecutionSteps(executionId);
         this.flow = context.getConfigurationService().findFlow(data.execution.getFlowId());
 
-        Set<String> selected = (Set<String>) stepTable.getValue();
+        String selected = (String) stepTable.getSelectedRow();
         data.logs = executionService.findExecutionStepLogs(selected, getMaxToShow());
         return data;
     }
@@ -652,6 +666,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         return ExecutionStatus.isDone(statusLabel.getValue());
     }
 
+    @SuppressWarnings("unchecked")
     protected void refreshUI(ExecutionData data) {
         if (!lastDataRefreshWasDone) {
             flowLabel.setValue(data.execution.getFlowName());
@@ -680,16 +695,28 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                 redrawFlow();
             }
 
-            @SuppressWarnings("unchecked")
-            Set<String> selected = (Set<String>) stepTable.getValue();
-            stepContainer.removeAllItems();
-            stepContainer.addAll(data.steps);
-            if (selected != null && selected.size() > 0) {
-                stepTable.setValue(selected);
-            } else if (data.steps.size() > 0) {
-                selected = new HashSet<>();
-                selected.add(data.steps.get(0).getId());
-                stepTable.setValue(selected);
+            String selected = (String) stepTable.getSelectedRow();
+            if (stepContainer.size() != data.steps.size()) {
+                stepContainer.removeAllItems();
+                stepContainer.addAll(data.steps);
+            } else {
+                for (ExecutionStep step : data.steps) {
+                    BeanItem<ExecutionStep> item = stepContainer.getItem(step.getId());
+                    item.getItemProperty("status").setValue(step.getStatus());
+                    item.getItemProperty("payloadReceived").setValue(step.getPayloadReceived());
+                    item.getItemProperty("messagesReceived").setValue(step.getMessagesReceived());
+                    item.getItemProperty("messagesProduced").setValue(step.getMessagesProduced());
+                    item.getItemProperty("payloadProduced").setValue(step.getPayloadProduced());
+                    item.getItemProperty("endTime").setValue(step.getEndTime());
+                    item.getItemProperty("startTime").setValue(step.getStartTime());
+                    item.getItemProperty("handleDuration").setValue(step.getHandleDuration());
+                    item.getItemProperty("queueDuration").setValue(step.getQueueDuration());
+
+                }
+            }
+
+            if (selected == null && data.steps.size() > 0) {
+                stepTable.select(selected);
             }
 
             List<ExecutionStepLog> logMessages = new ArrayList<>(logContainer.getItemIds());
