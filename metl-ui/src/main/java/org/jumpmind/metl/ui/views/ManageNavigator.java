@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jumpmind.metl.core.model.AbstractObject;
@@ -33,6 +34,7 @@ import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Folder;
 import org.jumpmind.metl.core.model.FolderType;
 import org.jumpmind.metl.core.model.Name;
+import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -42,6 +44,7 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
@@ -202,7 +205,7 @@ public class ManageNavigator extends Panel {
 
         table.addExpandListener((event) -> {
             if (event.getItemId() instanceof Folder) {
-                table.setItemIcon(event.getItemId(), FontAwesome.FOLDER_O);
+                table.setItemIcon(event.getItemId(), FontAwesome.FOLDER_OPEN);
             }
         });      
 
@@ -213,6 +216,18 @@ public class ManageNavigator extends Panel {
                 } else {
                     return null;
                 }
+            }
+        });
+        
+        table.setItemDescriptionGenerator((Component source, Object itemId, Object propertyId) -> {
+            if (itemId instanceof ProjectVersionFlowName) {
+                ProjectVersionFlowName flow = (ProjectVersionFlowName) itemId;
+                return flow.projectVersion.getName();
+            } else if (itemId instanceof AgentDeploymentSummary) {
+                AgentDeploymentSummary summary = (AgentDeploymentSummary) itemId;
+                return summary.getProjectName();
+            } else {
+                return null;
             }
         });
 
@@ -247,8 +262,10 @@ public class ManageNavigator extends Panel {
         IExecutionService executionService = context.getExecutionService();
         List<String> executedFlowIds = executionService.findExecutedFlowIds();
         List<FlowName> flows = configurationService.findFlows();
+        Map<String, ProjectVersion> projectVersions = configurationService.findProjectVersions();
         for (FlowName flow : flows) {
             if (executedFlowIds.contains(flow.getId())) {
+                flow = new ProjectVersionFlowName(projectVersions.get(flow.getProjectVersionId()), flow);
                 treeTable.addItem(flow);
                 treeTable.setItemIcon(flow, Icons.FLOW);
                 treeTable.setParent(flow, folder);
@@ -271,6 +288,17 @@ public class ManageNavigator extends Panel {
         } else {
             return null;
         }
+    }
+    
+    class ProjectVersionFlowName extends FlowName {
+        
+        ProjectVersion projectVersion;
+        
+        public ProjectVersionFlowName(ProjectVersion projectVersion, FlowName flowName) {
+            super(flowName);
+            this.projectVersion = projectVersion;
+        }
+        
     }
 
 }

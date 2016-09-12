@@ -270,6 +270,19 @@ abstract class AbstractConfigurationService extends AbstractService implements I
             projectVersion.setProject(project);
         }
     }
+    
+    @Override
+    public Map<String, ProjectVersion> findProjectVersions() {
+        Map<String, ProjectVersion> projectVersionMap = new HashMap<>();
+        List<Project> projects = findProjects();
+        for (Project project : projects) {
+            List<ProjectVersion> projectVersions = project.getProjectVersions();
+            for (ProjectVersion projectVersion : projectVersions) {
+                projectVersionMap.put(projectVersion.getId(), projectVersion);
+            }
+        }
+        return projectVersionMap;
+    }
 
     @Override
     public List<Project> findProjects() {

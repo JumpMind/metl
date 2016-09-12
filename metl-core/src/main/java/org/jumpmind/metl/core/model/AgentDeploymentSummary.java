@@ -56,6 +56,7 @@ public class AgentDeploymentSummary extends AbstractObject {
 
     public void copy(AgentDeployment agentDeployment) {
         setId(agentDeployment.getId());
+        projectName = agentDeployment.getProjectVersion().getName();
         name = agentDeployment.getName();
         type = TYPE_FLOW;
         status = agentDeployment.getStatus();
