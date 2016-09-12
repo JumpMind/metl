@@ -28,9 +28,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import javax.mail.Message.RecipientType;
@@ -353,14 +355,22 @@ public class FlowRuntime {
         List<AgentDeploymentParameter> deployParameters = agentDeployment
                 .getAgentDeploymentParameters();
         List<AgentParameter> agentParameters = agent.getAgentParameters();
+        Set<String> overridable = new HashSet<>();
         if (agentParameters != null) {
             for (AgentParameter agentParameter : agentParameters) {
-                params.put(agentParameter.getName(), agentParameter.getValue());
+                String name = agentParameter.getName();
+                if (!params.containsKey(name)) {
+                    params.put(name, agentParameter.getValue());
+                    overridable.add(name);
+                }
             }
         }
         if (deployParameters != null) {
             for (AgentDeploymentParameter deployParameter : deployParameters) {
-                params.put(deployParameter.getName(), deployParameter.getValue());
+                String name = deployParameter.getName();
+                if (!params.containsKey(name) || overridable.contains(name)) {
+                    params.put(deployParameter.getName(), deployParameter.getValue());
+                }
             }
         }
         Date date = new Date();
