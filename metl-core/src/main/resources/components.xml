@@ -28,6 +28,7 @@
              resourceCategory='none'>
     <name>Assert</name>
     <className>org.jumpmind.metl.core.runtime.component.Assert</className>
+    <keywords>test</keywords>
     <settings>
       <setting id='expected.entity.messages.count'
                required='false'
@@ -90,6 +91,7 @@
              resourceCategory='none'>
     <name>Call Flow</name>
     <className>org.jumpmind.metl.core.runtime.component.CallFlow</className>
+    <keywords>subflow,execute</keywords>
     <flowManipulatorClassName>org.jumpmind.metl.core.runtime.component.CallFlowFlowManipulator</flowManipulatorClassName>
     <settings>
       <setting id='flow.id'
@@ -107,6 +109,7 @@
              resourceCategory='none'>
     <name>Model Data Diff</name>
     <className>org.jumpmind.metl.core.runtime.component.DataDiff</className>
+    <keywords>change</keywords>
     <settings>
       <setting id='source.1'
                required='true'
@@ -140,6 +143,7 @@
              resourceCategory='none'>
     <name>Deduper</name>
     <className>org.jumpmind.metl.core.runtime.component.Deduper</className>
+    <keywords>unique</keywords>
     <description></description>
     <settings>
       <setting id='dedupe.type'
@@ -178,6 +182,7 @@
              resourceCategory='none'
              supportsMultipleThreads='true'>
     <name>Delay</name>
+    <keywords>sleep,wait</keywords>
     <className>org.jumpmind.metl.core.runtime.component.Delay</className>
     <description></description>
     <settings>
@@ -209,6 +214,7 @@
              shareable='false'>
     <name>Content Router</name>
     <className>org.jumpmind.metl.core.runtime.component.ContentRouter</className>
+    <keywords>target</keywords>
     <description></description>
     <settings>
       <setting id='rows.per.message'
@@ -233,6 +239,7 @@
              resourceCategory='none'>
     <name>Execute</name>
     <className>org.jumpmind.metl.core.runtime.component.Execute</className>
+    <keywords>launch,process</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -272,12 +279,13 @@
              resourceCategory='streamable'>
     <name>File Poller</name>
     <className>org.jumpmind.metl.core.runtime.component.FilePoller</className>
+    <keywords>files</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
                required='false'
                type='choice'>
-        <name>Run Whennn</name>
+        <name>Run When</name>
         <defaultValue>PER UNIT OF WORK</defaultValue>
         <choices>
           <choice>PER UNIT OF WORK</choice>
@@ -388,6 +396,7 @@
              resourceCategory='streamable'>
     <name>File Util</name>
     <className>org.jumpmind.metl.core.runtime.component.FileUtil</className>
+    <keywords>files,copy,move</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -453,6 +462,7 @@
              resourceCategory='none'>
     <name>Format Delimited</name>
     <className>org.jumpmind.metl.core.runtime.component.DelimitedFormatter</className>
+    <keywords>csv,generate,file,files,text</keywords>
     <description></description>
     <settings>
       <setting id='delimited.formatter.delimiter'
@@ -483,6 +493,7 @@
              resourceCategory='none'>
     <name>Format Fixed</name>
     <className>org.jumpmind.metl.core.runtime.component.FixedLengthFormatter</className>
+    <keywords>file,files,text,generate</keywords>
     <description></description>
     <settings>
       <setting id='fixed.length.formatter.header'
@@ -501,6 +512,7 @@
              resourceCategory='none'>
     <name>Format XML</name>
     <className>org.jumpmind.metl.core.runtime.component.XmlFormatter</className>
+    <keywords>files</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -551,6 +563,7 @@
              resourceCategory='none'>
     <name>Merger</name>
     <className>org.jumpmind.metl.core.runtime.component.Merger</className>
+    <keywords>merge,join</keywords>
     <description></description>
     <settings>
       <setting id='rows.per.message'
@@ -570,6 +583,7 @@
              shareable='false'>
     <name>Lookup</name>
     <className>org.jumpmind.metl.core.runtime.component.Lookup</className>
+    <keywords>find,enhance</keywords>
     <description></description>
     <settings>
       <setting id='lookup.data.source.step'
@@ -607,6 +621,7 @@
              resourceCategory='none'>
     <name>Mapping</name>
     <className>org.jumpmind.metl.core.runtime.component.Mapping</className>
+    <keywords>map</keywords>
     <description></description>
     <settings>
       <setting id='set.unmapped.attributes.to.null'
@@ -631,6 +646,7 @@
              resourceCategory='none'>
     <name>Message Logger</name>
     <className>org.jumpmind.metl.core.runtime.component.MessageLogger</className>
+    <keywords>log</keywords>
     <description></description>
     <settings>
       <setting id='qualify.with.entity.name'
@@ -650,6 +666,7 @@
              shareable='false'>
     <name>Multiplier</name>
     <className>org.jumpmind.metl.core.runtime.component.Multiplier</className>
+    <keywords>generate,multiply</keywords>
     <description></description>
     <settings>
       <setting id='multiplier.source.step'
@@ -674,6 +691,7 @@
              supportsMultipleThreads='true'>
     <name>No Op</name>
     <className>org.jumpmind.metl.core.runtime.component.NoOp</className>
+    <keywords>nothing</keywords>
     <description></description>
     <settings></settings>
   </component>
@@ -685,6 +703,7 @@
              resourceCategory='none'>
     <name>Parse Delimited</name>
     <className>org.jumpmind.metl.core.runtime.component.DelimitedParser</className>
+    <keywords>parse,files,file,csv</keywords>
     <description></description>
     <settings>
       <setting id='delimiter'
@@ -725,6 +744,7 @@
              outputMessageType='entity'>
     <name>Parse Fixed Length</name>
     <className>org.jumpmind.metl.core.runtime.component.FixedLengthParser</className>
+    <keywords>parse,file,files</keywords>
     <description></description>
     <settings>
       <setting id='header.lines.to.skip'
@@ -750,6 +770,7 @@
              supportsMultipleThreads='true'>
     <name>Parse XML</name>
     <className>org.jumpmind.metl.core.runtime.component.XmlParser</className>
+    <keywords>parse,file,files,xml</keywords>
     <description></description>
     <settings>
       <setting id='rows.per.message'
@@ -780,6 +801,7 @@
              resourceCategory='datasource'>
     <name>RDBMS Reader</name>
     <className>org.jumpmind.metl.core.runtime.component.RdbmsReader</className>
+    <keywords>database,db,sql</keywords>
     <description></description>
     <settings>
       <setting id='sql'
@@ -844,6 +866,7 @@
              supportsMultipleThreads='true'>
     <name>RDBMS Writer</name>
     <className>org.jumpmind.metl.core.runtime.component.RdbmsWriter</className>
+    <keywords>database,db,dml,insert,update,delete,crud</keywords>
     <description></description>
     <settings>
       <setting id='catalog'
@@ -925,6 +948,7 @@
              supportsMultipleThreads='true'>
     <name>Script</name>
     <className>org.jumpmind.metl.core.runtime.component.Script</className>
+    <keywords>groovy,logic,java</keywords>
     <description></description>
     <settings>
       <setting id='imports'
@@ -1030,6 +1054,7 @@
              resourceCategory='datasource'>
     <name>Sql Executor</name>
     <className>org.jumpmind.metl.core.runtime.component.SqlExecutor</className>
+    <keywords>database,db,sql</keywords>
     <description></description>
     <extraUnitOfWorkOptions>
       <extraUnitOfWorkOption>SQL Statement</extraUnitOfWorkOption>
@@ -1063,6 +1088,7 @@
              resourceCategory='none'>
     <name>Temp RDBMS</name>
     <className>org.jumpmind.metl.core.runtime.component.TempRdbms</className>
+    <keywords>database,db,sql</keywords>
     <settings>
       <setting id='run.when'
                required='false'
@@ -1112,6 +1138,7 @@
              outputMessageType='text'>
     <name>Text Constant</name>
     <className>org.jumpmind.metl.core.runtime.component.TextConstant</className>
+    <keywords>hardcode</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -1157,6 +1184,7 @@
              resourceCategory='streamable'>
     <name>Text File Reader</name>
     <className>org.jumpmind.metl.core.runtime.component.TextFileReader</className>
+    <keywords>file,files</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -1250,6 +1278,7 @@
              resourceCategory='streamable'>
     <name>Binary File Reader</name>
     <className>org.jumpmind.metl.core.runtime.component.BinaryFileReader</className>
+    <keywords>files</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -1331,6 +1360,7 @@
              resourceCategory='streamable'>
     <name>Text File Writer</name>
     <className>org.jumpmind.metl.core.runtime.component.TextFileWriter</className>
+    <keywords>files</keywords>
     <description></description>
     <settings>
       <setting id='relative.path'
@@ -1388,6 +1418,7 @@
              resourceCategory='streamable'>
     <name>Binary File Writer</name>
     <className>org.jumpmind.metl.core.runtime.component.BinaryFileWriter</className>
+    <keywords>files</keywords>
     <description></description>
     <settings>
       <setting id='relative.path'
@@ -1462,6 +1493,7 @@
              supportsMultipleThreads='true'>
     <name>Web</name>
     <className>org.jumpmind.metl.core.runtime.component.Web</className>
+    <keywords>invoke,rest,http</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -1510,6 +1542,7 @@
              resourceCategory='none'>
     <name>XSLT Processor</name>
     <className>org.jumpmind.metl.core.runtime.component.XsltProcessor</className>
+    <keywords>xml</keywords>
     <description></description>
     <settings>
       <setting id='xslt.processor.output.all.attributes'
@@ -1551,6 +1584,7 @@
              resourceCategory='none'>
     <name>Zip</name>
     <className>org.jumpmind.metl.core.runtime.component.Zip</className>
+    <keywords>compress</keywords>
     <description></description>
     <settings>
       <setting id='source.resource'
@@ -1596,6 +1630,7 @@
              resourceCategory='none'>
     <name>UnZip</name>
     <className>org.jumpmind.metl.core.runtime.component.UnZip</className>
+    <keywords>compress</keywords>
     <description></description>
     <settings>
       <setting id='source.resource'
@@ -1652,6 +1687,7 @@
              resourceCategory='streamable'>
     <name>XML Reader</name>
     <className>org.jumpmind.metl.core.runtime.component.XmlReader</className>
+    <keywords>files,file</keywords>
     <description></description>
     <settings>
       <setting id='run.when'
@@ -1738,6 +1774,7 @@
     <name>Http Request</name>
     <className>org.jumpmind.metl.core.runtime.component.HttpRequest</className>
     <deploymentListenerClassName>org.jumpmind.metl.core.runtime.component.HttpRequestDeploymentListener</deploymentListenerClassName>
+    <keywords>REST,ws,webservice,web</keywords>
     <description></description>
     <settings>
       <setting id='http.method'
@@ -1789,6 +1826,7 @@
              resourceCategory='none'>
     <name>Http Response</name>
     <className>org.jumpmind.metl.core.runtime.component.HttpResponse</className>
+    <keywords>REST,ws,webservice,web</keywords>
     <description></description>
     <settings>
       <setting id='returns.data'
@@ -1807,6 +1845,7 @@
              resourceCategory='none'>
     <name>Deserializer</name>
     <className>org.jumpmind.metl.core.runtime.component.Deserializer</className>
+    <keywords>REST,ws,webservice,web</keywords>
     <settings>
       <setting id='format'
                required='false'
@@ -1839,6 +1878,7 @@
              resourceCategory='none'>
     <name>Serializer</name>
     <className>org.jumpmind.metl.core.runtime.component.Serializer</className>
+    <keywords>REST,ws,webservice,web</keywords>
     <settings>
       <setting id='format'
                required='false'

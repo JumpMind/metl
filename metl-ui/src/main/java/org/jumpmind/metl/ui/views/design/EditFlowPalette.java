@@ -113,7 +113,7 @@ public class EditFlowPalette extends VerticalLayout {
         Collection<XMLComponent> componentDefinitions = context.getComponentDefinitionFactory().getDefinitions();
         for (XMLComponent definition : componentDefinitions) {
             if ((isBlank(filterText) || definition.getName().toLowerCase().contains(filterText)
-                    || definition.getCategory().toLowerCase().contains(filterText))) {
+                    || definition.getCategory().toLowerCase().contains(filterText) || definition.getKeywords().toLowerCase().contains(filterText))) {
                 ClassResource icon = getImageResourceForComponentType(definition.getId());
                 addItemToFlowPanelSection(definition.getName(), definition.getId(), componentLayout, icon, null);
             }
