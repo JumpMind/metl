@@ -20,8 +20,8 @@
  */
 package org.jumpmind.metl.ui.init;
 
-import static org.jumpmind.metl.ui.common.AppConstants.DEFAULT_USER;
 import static org.jumpmind.metl.ui.common.AppConstants.DEFAULT_GROUP;
+import static org.jumpmind.metl.ui.common.AppConstants.DEFAULT_USER;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -30,6 +30,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.GroupPrivilege;
@@ -66,7 +68,9 @@ import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.server.VaadinServletRequest;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -79,22 +83,24 @@ import com.vaadin.ui.VerticalLayout;
 @Theme("apptheme")
 @Title("Metl")
 @PreserveOnRefresh
-@Push(value=PushMode.AUTOMATIC)
+@Push(value = PushMode.AUTOMATIC)
 public class AppUI extends UI implements LoginListener {
 
     private static final long serialVersionUID = 1L;
-    
+
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     ViewManager viewManager;
-    
+
     BackgroundRefresherService backgroundRefresherService;
+    
+    AppSession appSession;
 
     @SuppressWarnings("serial")
-	@Override
-    protected void init(VaadinRequest request) {       
+    @Override
+    protected void init(VaadinRequest request) {
         WebApplicationContext ctx = getWebApplicationContext();
-        
+
         backgroundRefresherService = ctx.getBean(BackgroundRefresherService.class);
         backgroundRefresherService.init(this);
 
@@ -104,22 +110,23 @@ public class AppUI extends UI implements LoginListener {
                 String message = "";
                 for (Throwable t = event.getThrowable(); t != null; t = t.getCause()) {
                     if (t.getCause() == null) {
-                        intro += t.getClass().getName() + "</b> with the following message:<br/><br/>";
+                        intro += t.getClass().getName()
+                                + "</b> with the following message:<br/><br/>";
                         message = t.getMessage();
                     }
                 }
                 ErrorWindow window = new ErrorWindow(intro, message);
                 window.show();
-                
+
                 Throwable ex = event.getThrowable();
                 if (ex != null) {
                     log.error(ex.getMessage(), ex);
                 } else {
                     log.error("An unexpected error occurred");
                 }
-            } 
+            }
         });
-        
+
         VaadinSession.getCurrent().setConverterFactory(new DefaultConverterFactory() {
             private static final long serialVersionUID = 1L;
 
@@ -127,7 +134,7 @@ public class AppUI extends UI implements LoginListener {
             protected Converter<Date, ?> createDateConverter(Class<?> sourceType) {
                 return super.createDateConverter(sourceType);
             }
-            
+
             protected Converter<String, ?> createStringConverter(Class<?> sourceType) {
                 if (Double.class.isAssignableFrom(sourceType)) {
                     return new StringToDoubleConverter();
@@ -135,24 +142,26 @@ public class AppUI extends UI implements LoginListener {
                     return new StringToFloatConverter();
                 } else if (Integer.class.isAssignableFrom(sourceType)) {
                     return new StringToIntegerConverter() {
-                      private static final long serialVersionUID = 1L;
-                    @Override
+                        private static final long serialVersionUID = 1L;
+
+                        @Override
                         protected NumberFormat getFormat(Locale locale) {
                             NumberFormat format = super.getFormat(locale);
                             format.setGroupingUsed(false);
                             return format;
-                        }  
+                        }
                     };
                 } else if (Long.class.isAssignableFrom(sourceType)) {
                     return new StringToLongConverter() {
                         private static final long serialVersionUID = 1L;
-                      @Override
-                          protected NumberFormat getFormat(Locale locale) {
-                              NumberFormat format = super.getFormat(locale);
-                              format.setGroupingUsed(false);
-                              return format;
-                          }  
-                      };
+
+                        @Override
+                        protected NumberFormat getFormat(Locale locale) {
+                            NumberFormat format = super.getFormat(locale);
+                            format.setGroupingUsed(false);
+                            return format;
+                        }
+                    };
                 } else if (BigDecimal.class.isAssignableFrom(sourceType)) {
                     return new StringToBigDecimalConverter();
                 } else if (Boolean.class.isAssignableFrom(sourceType)) {
@@ -173,8 +182,7 @@ public class AppUI extends UI implements LoginListener {
                 }
             }
 
-            
-        });        
+        });
 
         Responsive.makeResponsive(this);
         ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
@@ -188,7 +196,7 @@ public class AppUI extends UI implements LoginListener {
                 user = new User();
                 user.setLoginId(DEFAULT_USER);
                 configurationService.save(user);
-                
+
                 Group group = configurationService.findGroupByName(DEFAULT_GROUP);
                 if (group == null) {
                     group = new Group(DEFAULT_GROUP);
@@ -200,9 +208,9 @@ public class AppUI extends UI implements LoginListener {
                         configurationService.save(groupPriv);
                     }
                 }
-                
+
                 UserGroup userGroup = new UserGroup(user.getId(), group.getId());
-                configurationService.save(userGroup);                
+                configurationService.save(userGroup);
             }
             appCtx.setUser(user);
             login(user);
@@ -210,52 +218,59 @@ public class AppUI extends UI implements LoginListener {
     }
 
     public WebApplicationContext getWebApplicationContext() {
-        return WebApplicationContextUtils.getRequiredWebApplicationContext(VaadinServlet
-                .getCurrent().getServletContext());
+        return WebApplicationContextUtils
+                .getRequiredWebApplicationContext(VaadinServlet.getCurrent().getServletContext());
     }
-    
+
     @Override
     public void detach() {
         if (backgroundRefresherService != null) {
             backgroundRefresherService.destroy();
         }
+        if (appSession != null) {
+            AppSession.remove(appSession);
+        }
         super.detach();
 
     }
-    
+
     @SuppressWarnings({ "serial" })
     class ErrorWindow extends ResizableWindow {
-    	public ErrorWindow(String intro, String message) {
-    		super("Error");
-    		setWidth(600f, Unit.PIXELS);
-    		setHeight(300f, Unit.PIXELS);
-    		content.setMargin(true);
-    		
-    		HorizontalLayout layout = new HorizontalLayout();
-    		Label icon = new Label();
-    		icon.setIcon(new ThemeResource("images/error.png"));
-    		icon.setWidth(70f, Unit.PIXELS);
-    		layout.addComponent(icon);
-    		
-    		Label labelIntro = new Label(intro, ContentMode.HTML);
-    		labelIntro.setStyleName("large");
-    		labelIntro.setWidth(530f, Unit.PIXELS);
-    		layout.addComponent(labelIntro);
-    		addComponent(layout);
+        public ErrorWindow(String intro, String message) {
+            super("Error");
+            setWidth(600f, Unit.PIXELS);
+            setHeight(300f, Unit.PIXELS);
+            content.setMargin(true);
+
+            HorizontalLayout layout = new HorizontalLayout();
+            Label icon = new Label();
+            icon.setIcon(new ThemeResource("images/error.png"));
+            icon.setWidth(70f, Unit.PIXELS);
+            layout.addComponent(icon);
+
+            Label labelIntro = new Label(intro, ContentMode.HTML);
+            labelIntro.setStyleName("large");
+            labelIntro.setWidth(530f, Unit.PIXELS);
+            layout.addComponent(labelIntro);
+            addComponent(layout);
 
             TextArea textField = new TextArea();
             textField.setSizeFull();
             textField.setWordwrap(false);
             textField.setValue(message);
-    		addComponent(textField);
-    		content.setExpandRatio(textField, 1.0f);
-    		
-    		addComponent(buildButtonFooter(buildCloseButton()));
-    	}
+            addComponent(textField);
+            content.setExpandRatio(textField, 1.0f);
+
+            addComponent(buildButtonFooter(buildCloseButton()));
+        }
     }
 
     @Override
     public void login(User user) {
+        HttpServletRequest req = ((VaadinServletRequest) VaadinService.getCurrentRequest()).getHttpServletRequest();
+        appSession = new AppSession(user, req.getRemoteUser(), req.getRemoteAddr(), req.getRemoteHost(),
+                VaadinSession.getCurrent(), req.getHeader("User-Agent"), new Date());
+        AppSession.addAppSession(appSession);
         WebApplicationContext ctx = getWebApplicationContext();
 
         VerticalLayout root = new VerticalLayout();
@@ -267,31 +282,32 @@ public class AppUI extends UI implements LoginListener {
 
         ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
         appCtx.setUser(user);
-        
+
         List<ProjectVersion> openProjects = appCtx.getOpenProjects();
         openProjects.clear();
-        
+
         List<String> projectIds = user.getList(UserSetting.SETTING_CURRENT_PROJECT_ID_LIST);
         for (String projectId : projectIds) {
-            ProjectVersion projectVersion = appCtx.getConfigurationService().findProjectVersion(projectId);
+            ProjectVersion projectVersion = appCtx.getConfigurationService()
+                    .findProjectVersion(projectId);
             if (projectVersion != null) {
                 openProjects.add(projectVersion);
             }
         }
 
         viewManager = ctx.getBean(ViewManager.class);
-        viewManager.init(this, contentArea);                
+        viewManager.init(this, contentArea);
 
         TopBar menu = new TopBar(viewManager, appCtx);
 
-//        HorizontalLayout bottom = new HorizontalLayout();
-//        bottom.setWidth(100, Unit.PERCENTAGE);
-//        bottom.setMargin(false);
-//        Embedded right = new Embedded(null, new ThemeResource(
-//                "../apptheme/images/powered-by-jumpmind.png"));
-//        bottom.addComponents(right);
-//        bottom.setComponentAlignment(right, Alignment.BOTTOM_RIGHT);
-        
+        // HorizontalLayout bottom = new HorizontalLayout();
+        // bottom.setWidth(100, Unit.PERCENTAGE);
+        // bottom.setMargin(false);
+        // Embedded right = new Embedded(null, new ThemeResource(
+        // "../apptheme/images/powered-by-jumpmind.png"));
+        // bottom.addComponents(right);
+        // bottom.setComponentAlignment(right, Alignment.BOTTOM_RIGHT);
+
         root.addComponents(menu, contentArea);
         root.setExpandRatio(contentArea, 1);
     }

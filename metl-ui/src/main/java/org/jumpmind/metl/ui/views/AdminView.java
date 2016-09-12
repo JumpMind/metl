@@ -29,6 +29,7 @@ import org.jumpmind.metl.ui.common.Icons;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.TopBarLink;
 import org.jumpmind.metl.ui.views.admin.AboutPanel;
+import org.jumpmind.metl.ui.views.admin.ActiveUsersPanel;
 import org.jumpmind.metl.ui.views.admin.ApiPanel;
 import org.jumpmind.metl.ui.views.admin.GeneralSettingsPanel;
 import org.jumpmind.metl.ui.views.admin.GroupPanel;
@@ -110,6 +111,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
         addItem("Mail Server", Icons.EMAIL);
         addItem("Notifications", Icons.NOTIFICATION);
         addItem("Logging", Icons.LOGGING);
+        addItem("Active Users", FontAwesome.USERS);
         addItem("About", FontAwesome.QUESTION);
         
         VerticalLayout navigator = new VerticalLayout();
@@ -160,6 +162,8 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
                     panel = new LoggingPanel(context, tabbedPanel);
                 } else if (id.equals("About")) {
                     panel = new AboutPanel(context, tabbedPanel);
+                } else if (id.equals("Active Users")) {
+                    panel = new ActiveUsersPanel(context, tabbedPanel);
                 }
                 tabbedPanel.addCloseableTab(id, id, table.getItemIcon(id), panel);
             }
