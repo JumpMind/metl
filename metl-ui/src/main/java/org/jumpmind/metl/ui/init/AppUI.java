@@ -183,7 +183,7 @@ public class AppUI extends UI implements LoginListener {
                             if (locale == null) {
                                 locale = Locale.getDefault();
                             }
-                            DateFormat f = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                            DateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                             f.setLenient(false);
                             return f;
                         }
