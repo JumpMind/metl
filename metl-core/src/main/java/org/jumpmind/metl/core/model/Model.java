@@ -197,7 +197,7 @@ public class Model extends AbstractObject {
 
             @Override
             public String toString() {
-                return String.format("{{ChangeType=%s}, %s}", data.getChangeType(), super.toString());
+                return String.format("{{ChangeType=%s},\n %s}", data.getChangeType(), super.toString().replace(",", ",\n"));
             }
         };
         Set<String> attributeIds = data.keySet();
