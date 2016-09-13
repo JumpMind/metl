@@ -25,6 +25,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.left;
 import static org.jumpmind.metl.core.runtime.FlowConstants.REQUEST_VALUE_PARAMETER;
 import static org.jumpmind.metl.ui.api.ApiConstants.HEADER_EXECUTION_ID;
+import static org.jumpmind.metl.ui.common.UiUtils.whereAreYou;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -247,13 +248,12 @@ public class ExecutionApi {
         unauthorized(response, "Unauthorized");
     }
     
+
+    
     private String whoAreYou(HttpServletRequest req) {
         String userId = left(req.getRemoteUser(), 50);
         if (isBlank(userId)) {
-            userId =  left(req.getRemoteHost(), 50);
-            if (isBlank(userId)) {
-                userId = left(req.getRemoteAddr(), 50);
-            }
+            userId =  left(whereAreYou(req), 50);
         }
         return userId;
     }

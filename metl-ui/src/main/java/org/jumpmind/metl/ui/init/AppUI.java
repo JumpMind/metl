@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
-
+import static org.jumpmind.metl.ui.common.UiUtils.*;
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.GroupPrivilege;
 import org.jumpmind.metl.core.model.Privilege;
@@ -268,7 +268,7 @@ public class AppUI extends UI implements LoginListener {
     @Override
     public void login(User user) {
         HttpServletRequest req = ((VaadinServletRequest) VaadinService.getCurrentRequest()).getHttpServletRequest();
-        appSession = new AppSession(user, req.getRemoteUser(), req.getRemoteAddr(), req.getRemoteHost(),
+        appSession = new AppSession(user, req.getRemoteUser(), whereAreYou(req), req.getRemoteHost(),
                 VaadinSession.getCurrent(), req.getHeader("User-Agent"), new Date());
         AppSession.addAppSession(appSession);
         WebApplicationContext ctx = getWebApplicationContext();
