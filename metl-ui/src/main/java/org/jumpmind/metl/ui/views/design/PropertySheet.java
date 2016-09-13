@@ -607,6 +607,7 @@ public class PropertySheet extends AbsoluteLayout {
                         sourceStepsCombo.setValue(obj.get(definition.getId()));
                         sourceStepsCombo.setDescription(description);
                         sourceStepsCombo.setNullSelectionAllowed(false);
+                        sourceStepsCombo.setRequired(definition.isRequired());
                         sourceStepsCombo.addValueChangeListener(new ValueChangeListener() {
 
                             private static final long serialVersionUID = 1L;
@@ -636,6 +637,7 @@ public class PropertySheet extends AbsoluteLayout {
                         combo.setValue(obj.get(definition.getId()));
                         combo.setDescription(description);
                         combo.setNullSelectionAllowed(false);
+                        combo.setRequired(definition.isRequired());
                         combo.addValueChangeListener(new ValueChangeListener() {
 
                             private static final long serialVersionUID = 1L;
@@ -685,6 +687,7 @@ public class PropertySheet extends AbsoluteLayout {
                         }
                         entityColumnCombo.setDescription(description);
                         entityColumnCombo.setNullSelectionAllowed(definition.isRequired());
+                        entityColumnCombo.setRequired(definition.isRequired());
                         entityColumnCombo.addValueChangeListener(new ValueChangeListener() {
 
                             private static final long serialVersionUID = 1L;
@@ -749,6 +752,7 @@ public class PropertySheet extends AbsoluteLayout {
         combo.setImmediate(true);
         combo.setDescription(definition.getDescription());
         combo.setNullSelectionAllowed(false);
+        combo.setRequired(definition.isRequired());
         List<String> types = context.getResourceFactory().getResourceTypes(category);
         if (types != null) {
             List<Resource> resources = context.getConfigurationService().findResourcesByTypes(projectVersionId,
