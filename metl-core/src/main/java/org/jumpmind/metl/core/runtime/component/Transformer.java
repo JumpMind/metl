@@ -30,9 +30,9 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
@@ -80,8 +80,7 @@ public class Transformer extends AbstractComponentRuntime {
     @Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (scriptEngine == null) {
-            ScriptEngineManager factory = new ScriptEngineManager();
-            scriptEngine = factory.getEngineByName("groovy");
+            scriptEngine = new GroovyScriptEngineImpl();
         }
         totalTime = 0;
 		if (inputMessage instanceof EntityDataMessage) {

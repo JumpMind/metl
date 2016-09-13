@@ -26,11 +26,11 @@ import java.io.File;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.jumpmind.metl.core.runtime.BinaryMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -71,8 +71,7 @@ public class Script extends AbstractComponentRuntime {
         String onSuccess = getComponent().get(ON_FLOW_SUCCESS);
         String onError = getComponent().get(ON_FLOW_ERROR);
 
-        ScriptEngineManager factory = new ScriptEngineManager();
-        ScriptEngine engine = factory.getEngineByName("groovy");
+        engine = new GroovyScriptEngineImpl();
 
         engine.put("component", this);        
         StringBuilder script = new StringBuilder();
@@ -129,7 +128,6 @@ public class Script extends AbstractComponentRuntime {
             log(LogLevel.DEBUG, script.toString());
             script.append("helper.onInit();");
             engine.eval(script.toString());
-            this.engine = engine;
         } catch (ScriptException e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (rootCause != null) {

@@ -33,9 +33,9 @@ import java.util.Set;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.FlowStepLink;
 import org.jumpmind.metl.core.runtime.ControlMessage;
@@ -70,8 +70,7 @@ public class ContentRouter extends AbstractComponentRuntime {
 
     @Override
     protected void start() {
-        ScriptEngineManager factory = new ScriptEngineManager();
-        scriptEngine = factory.getEngineByName("groovy");
+        scriptEngine = new GroovyScriptEngineImpl();
         TypedProperties properties = getTypedProperties();
         rowsPerMessage = properties.getLong(ROWS_PER_MESSAGE);
         String json = getComponent().get(SETTING_CONFIG);
