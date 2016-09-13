@@ -27,6 +27,7 @@ import java.util.UUID;
 
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.metl.core.runtime.EntityData;
+import org.jumpmind.metl.core.util.LogUtils;
 
 public class Model extends AbstractObject {
 
@@ -197,7 +198,7 @@ public class Model extends AbstractObject {
 
             @Override
             public String toString() {
-                return String.format("{{ChangeType=%s},\n %s}", data.getChangeType(), super.toString().replace(",", ",\n"));
+                return LogUtils.toJson(data.getChangeType().name(), this);
             }
         };
         Set<String> attributeIds = data.keySet();
