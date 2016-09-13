@@ -95,21 +95,9 @@ public class Transformer extends AbstractComponentRuntime {
 					outDatas.add(outData);
 
 					Set<String> attributeIds = new HashSet<String>();
-					Set<ModelEntity> processedEntities = new HashSet<ModelEntity>();
-					for (String attributeId : inData.keySet()) {
-						ModelAttribute attribute = inputModel.getAttributeById(attributeId);
-						if (attribute != null) {
-							ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
-							if (entity != null && !processedEntities.contains(entity)) {
-								List<ModelAttribute> attributes = entity.getModelAttributes();
-								for (ModelAttribute modelAttribute : attributes) {
-									attributeIds.add(modelAttribute.getId());
-								}
-								processedEntities.add(entity);
-							}
-						}
-					}
-
+					attributeIds.addAll(inData.keySet());
+					attributeIds.addAll(transformsByAttributeId.keySet());
+					
 					for (String attributeId : attributeIds) {
 						String transform = transformsByAttributeId.get(attributeId);
 						Object value = inData.get(attributeId);
