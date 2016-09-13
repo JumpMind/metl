@@ -41,15 +41,18 @@ public class AppSession implements Serializable {
 
     Date loginTime;
 
-    public AppSession(User user, String remoteUser, String remoteAddress, String remoteHost,
+    public AppSession(String remoteUser, String remoteAddress, String remoteHost,
             VaadinSession vaadinSession, String userAgent, Date createTime) {
-        this.user = user;
         this.remoteUser = remoteUser;
         this.remoteAddress = remoteAddress;
         this.remoteHost = remoteHost;
         this.vaadinSession = vaadinSession;
         this.loginTime = createTime;
         this.userAgent = userAgent;
+    }
+    
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getLoginId() {

@@ -22,6 +22,7 @@ package org.jumpmind.metl.ui.init;
 
 import static org.jumpmind.metl.ui.common.AppConstants.DEFAULT_GROUP;
 import static org.jumpmind.metl.ui.common.AppConstants.DEFAULT_USER;
+import static org.jumpmind.metl.ui.common.UiUtils.whereAreYou;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -32,7 +33,7 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
-import static org.jumpmind.metl.ui.common.UiUtils.*;
+
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.GroupPrivilege;
 import org.jumpmind.metl.core.model.Privilege;
@@ -41,6 +42,7 @@ import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserGroup;
 import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.persist.IConfigurationService;
+import org.jumpmind.metl.core.util.VersionUtils;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.TopBar;
 import org.jumpmind.metl.ui.common.ViewManager;
@@ -73,12 +75,16 @@ import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinServletRequest;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.communication.PushMode;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Embedded;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 @Theme("apptheme")
 @Title("Metl")
@@ -93,12 +99,17 @@ public class AppUI extends UI implements LoginListener {
     ViewManager viewManager;
 
     BackgroundRefresherService backgroundRefresherService;
-    
+
     AppSession appSession;
 
     @SuppressWarnings("serial")
     @Override
     protected void init(VaadinRequest request) {
+        HttpServletRequest req = ((VaadinServletRequest) VaadinService.getCurrentRequest())
+                .getHttpServletRequest();
+        appSession = new AppSession(req.getRemoteUser(), whereAreYou(req), req.getRemoteHost(),
+                VaadinSession.getCurrent(), req.getHeader("User-Agent"), new Date());
+
         WebApplicationContext ctx = getWebApplicationContext();
 
         backgroundRefresherService = ctx.getBean(BackgroundRefresherService.class);
@@ -267,9 +278,7 @@ public class AppUI extends UI implements LoginListener {
 
     @Override
     public void login(User user) {
-        HttpServletRequest req = ((VaadinServletRequest) VaadinService.getCurrentRequest()).getHttpServletRequest();
-        appSession = new AppSession(user, req.getRemoteUser(), whereAreYou(req), req.getRemoteHost(),
-                VaadinSession.getCurrent(), req.getHeader("User-Agent"), new Date());
+        appSession.setUser(user);
         AppSession.addAppSession(appSession);
         WebApplicationContext ctx = getWebApplicationContext();
 
@@ -300,15 +309,25 @@ public class AppUI extends UI implements LoginListener {
 
         TopBar menu = new TopBar(viewManager, appCtx);
 
-        // HorizontalLayout bottom = new HorizontalLayout();
-        // bottom.setWidth(100, Unit.PERCENTAGE);
-        // bottom.setMargin(false);
-        // Embedded right = new Embedded(null, new ThemeResource(
-        // "../apptheme/images/powered-by-jumpmind.png"));
-        // bottom.addComponents(right);
-        // bottom.setComponentAlignment(right, Alignment.BOTTOM_RIGHT);
+        HorizontalLayout bottom = new HorizontalLayout();
+        bottom.addStyleName(ValoTheme.LAYOUT_WELL);
+        bottom.setWidth(100, Unit.PERCENTAGE);
+        bottom.setMargin(new MarginInfo(false, true, false, true));
 
-        root.addComponents(menu, contentArea);
+        HorizontalLayout left = new HorizontalLayout();
+        left.setSpacing(true);
+
+        Embedded logo = new Embedded(null,
+                new ThemeResource("../apptheme/images/powered-by-jumpmind.png"));
+        bottom.addComponents(logo);
+
+        Label version = new Label("version " + VersionUtils.getCurrentVersion());
+        left.addComponent(version);
+
+        bottom.addComponent(left);
+        bottom.setComponentAlignment(left, Alignment.MIDDLE_RIGHT);
+
+        root.addComponents(menu, contentArea, bottom);
         root.setExpandRatio(contentArea, 1);
     }
 
