@@ -26,6 +26,7 @@ import java.util.Collection;
 
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,9 +70,14 @@ public class EditFlowPalette extends VerticalLayout {
         setHeight(100, Unit.PERCENTAGE);
         setWidth(WIDTH, Unit.PIXELS);
 
+        HorizontalLayout topWrapper = new HorizontalLayout();
+        topWrapper.setMargin(new MarginInfo(true, false, false, false));
         HorizontalLayout top = new HorizontalLayout();
+        top.addStyleName(ButtonBar.STYLE);
         top.setMargin(true);
-        addComponent(top);
+        topWrapper.addComponent(top);
+        
+        addComponent(topWrapper);
         
         TextField filterField = new TextField();
         filterField.setWidth(WIDTH-30, Unit.PIXELS);

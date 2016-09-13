@@ -37,7 +37,7 @@ public class ButtonBar extends HorizontalLayout {
 
     private static final long serialVersionUID = 1L;
 
-    static final String STYLE = "button-bar";
+    public static final String STYLE = "button-bar";
 
     HorizontalLayout bar;
 
