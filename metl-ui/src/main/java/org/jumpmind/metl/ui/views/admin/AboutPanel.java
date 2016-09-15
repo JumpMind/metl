@@ -26,6 +26,7 @@ import org.apache.commons.lang.time.FastDateFormat;
 import org.jumpmind.metl.core.runtime.AgentManager;
 import org.jumpmind.metl.core.util.VersionUtils;
 import org.jumpmind.metl.ui.common.ApplicationContext;
+import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.common.Table;
 import org.jumpmind.util.AppUtils;
@@ -34,9 +35,11 @@ import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.ui.Button;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
-public class AboutPanel extends VerticalLayout implements IUiPanel {
+public class AboutPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -44,13 +47,37 @@ public class AboutPanel extends VerticalLayout implements IUiPanel {
 
     Table table;
 
+    ApplicationContext context;
+
     public AboutPanel(ApplicationContext context, TabbedPanel tabbedPanel) {
+        this.context = context;
+
         setSizeFull();
         setMargin(true);
+        setSpacing(true);
+
+        Button gcCollect = new Button("Garbage Collect", (e) -> {
+            Runtime.getRuntime().gc();
+            refresh();
+        });
+        gcCollect.addStyleName(ValoTheme.BUTTON_TINY);
+        addComponent(gcCollect);
+
+        table = new Table();
+        table.setSizeFull();
+        table.addStyleName("noscroll");
+        table.addContainerProperty("Name", String.class, null);
+        table.setColumnWidth("Name", 200);
+        table.addContainerProperty("Value", String.class, null);
+        addComponent(table);
+        setExpandRatio(table, 1);
+        refresh();
+        context.getBackgroundRefresherService().register(this);
     }
 
     @Override
     public boolean closing() {
+        context.getBackgroundRefresherService().unregister(this);
         return true;
     }
 
@@ -60,34 +87,45 @@ public class AboutPanel extends VerticalLayout implements IUiPanel {
 
     @Override
     public void selected() {
-        if (table != null) {
-            removeComponent(table);
-        }
-        table = new Table();
-        table.setSizeFull();
-        table.addStyleName("noscroll");
-        table.addContainerProperty("Name", String.class, null);
-        table.setColumnWidth("Name", 200);
-        table.addContainerProperty("Value", String.class, null);
+        onBackgroundDataRefresh();
+    }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T onBackgroundDataRefresh() {
+        return (T) new Object();
+    }
+
+    @Override
+    public <T> void onBackgroundUIRefresh(T backgroundData) {
+        refresh();
+    }
+
+    protected void refresh() {
+        table.removeAllItems();
         int itemId = 0;
-        table.addItem(new Object[] { "Application Version", VersionUtils.getCurrentVersion() }, itemId++);
+        table.addItem(new Object[] { "Application Version", VersionUtils.getCurrentVersion() },
+                itemId++);
         table.addItem(new Object[] { "Build Time", VersionUtils.getBuildTime() }, itemId++);
         table.addItem(new Object[] { "SCM Revision", VersionUtils.getScmVersion() }, itemId++);
         table.addItem(new Object[] { "SCM Branch", VersionUtils.getScmBranch() }, itemId++);
 
         table.addItem(new Object[] { "Host Name", AppUtils.getHostName() }, itemId++);
         table.addItem(new Object[] { "IP Address", AppUtils.getIpAddress() }, itemId++);
-        table.addItem(new Object[] { "Java Version", System.getProperty("java.version") }, itemId++);
-        table.addItem(new Object[] { "System Time", FastDateFormat.getTimeInstance(FastDateFormat.MEDIUM).format(new Date()) }, itemId++);
-        table.addItem(new Object[] { "Used Heap", Long.toString(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) },
+        table.addItem(new Object[] { "Java Version", System.getProperty("java.version") },
                 itemId++);
-        table.addItem(new Object[] { "Heap Size", Long.toString(Runtime.getRuntime().maxMemory()) }, itemId++);
-        table.addItem(new Object[] { "Last Restart", CommonUiUtils.formatDateTime(AgentManager.lastRestartTime) }, itemId++);
-
-        addComponent(table);
-        setExpandRatio(table, 1);
-
+        table.addItem(
+                new Object[] { "System Time",
+                        FastDateFormat.getTimeInstance(FastDateFormat.MEDIUM).format(new Date()) },
+                itemId++);
+        table.addItem(
+                new Object[] { "Used Heap", Long.toString(
+                        Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) },
+                itemId++);
+        table.addItem(new Object[] { "Heap Size", Long.toString(Runtime.getRuntime().maxMemory()) },
+                itemId++);
+        table.addItem(new Object[] { "Last Restart",
+                CommonUiUtils.formatDateTime(AgentManager.lastRestartTime) }, itemId++);
     }
 
 }
