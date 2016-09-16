@@ -40,8 +40,9 @@ if (new Boolean(publishJar)) {
 // vaadin.gwt.style = "PRETTY"
 vaadin.version = vaadinVersion
 vaadin.widgetset = 'org.jumpmind.metl.ui.AppWidgetSet'
-vaadin.manageWidgetset = false
-vaadin.manageDependencies = false
+vaadin.manageDependencies = true
+vaadin.manageRepositories = false
+//vaadin.mainSourceSet = 'src/main/webapp'
 vaadin.push = true
 sourceSets.main.compileClasspath += [configurations.provided]
 
@@ -60,13 +61,6 @@ dependencies {
        exclude group:'com.googlecode.guava-osgi'
     }
     compile "jlibs:jlibs-xml:1.0"
-    compile "com.vaadin:vaadin-server:$vaadinVersion"    
-    compile "com.vaadin:vaadin-push:$vaadinVersion"    
-    compile "com.vaadin:vaadin-themes:$vaadinVersion"    
-    provided ("com.vaadin:vaadin-client-compiler:$vaadinVersion")  {
-       exclude group:'org.eclipse.jetty'
-    }
-
     compile "javax.servlet:javax.servlet-api:$servletVersion"
     compile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
     provided "javax.servlet.jsp:jsp-api:$jspVersion"
@@ -88,7 +82,7 @@ task copyJavaDocsToWebapp(type: Copy) {
     }    
 }
 
-develop.dependsOn vaadinCompileWidgetset
+develop.dependsOn tasks.getByPath(':metl-ui:vaadinCompile')
 develop.dependsOn copyJavaDocsToWebapp
 assemble.dependsOn copyJavaDocsToWebapp
 assemble.dependsOn(jar)
