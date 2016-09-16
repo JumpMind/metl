@@ -26,6 +26,9 @@ repositories {
     mavenCentral()
 }
 
+subprojects {
+    task allDeps(type: DependencyReportTask) {}
+}
 
 configurations {
     sshAntTask
@@ -68,4 +71,6 @@ task publishMetl {
             localFile: '../metl-ui/build/libs/metl.war',
             remoteTofile: "${targetScpSite}/metl-${version}.war")
     }
+    
+   
 }
