@@ -495,6 +495,7 @@ public class ScriptHelper {
     }
 
     protected void onHandle() {
+        
     }
 
     protected void onError(Throwable myError) {
