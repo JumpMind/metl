@@ -21,7 +21,7 @@
 package org.jumpmind.metl.core.runtime;
 
 import java.io.File;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +30,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import org.jumpmind.db.sql.SqlPersistenceManager;
@@ -51,6 +52,8 @@ import org.jumpmind.metl.core.persist.ConfigurationSqlService;
 import org.jumpmind.metl.core.persist.ExecutionSqlService;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IExecutionService;
+import org.jumpmind.metl.core.persist.IImportExportService;
+import org.jumpmind.metl.core.persist.ImportExportService;
 import org.jumpmind.metl.core.runtime.component.ComponentRuntimeFactory;
 import org.jumpmind.metl.core.runtime.component.definition.ComponentXmlDefinitionFactory;
 import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionFactory;
@@ -155,31 +158,45 @@ public class StandaloneFlowRunner {
 
     protected void init() {
         if (agentRuntime == null) {
-            logDir.delete();
-            logDir.mkdirs();
-            LogUtils.setLogDir(logDir);
-            databasePlatform = initDatabasePlatform();
-            new ConfigDatabaseUpgrader("/schema.xml", databasePlatform, true, "METL").upgrade();
-            persistenceManager = new SqlPersistenceManager(databasePlatform);
-            IComponentDefinitionFactory componentDefinitionFactory = new ComponentXmlDefinitionFactory();
-            configurationService = new ConfigurationSqlService(new SecurityService(), componentDefinitionFactory, databasePlatform, persistenceManager, "METL");
-            executionService = new ExecutionSqlService(databasePlatform, persistenceManager, "METL", new StandardEnvironment());
-            agentRuntime = new AgentRuntime(new Agent("test", AppUtils.getHostName()), configurationService, executionService,
-                    new ComponentRuntimeFactory(componentDefinitionFactory), componentDefinitionFactory, new ResourceFactory(), new HttpRequestMappingRegistry());
-            agentRuntime.start();
-            URL configSqlScriptURL = null;
-            File configSqlScriptFile = new File(configSqlScript);
             try {
+                logDir.delete();
+                logDir.mkdirs();
+                LogUtils.setLogDir(logDir);
+                databasePlatform = initDatabasePlatform();
+                new ConfigDatabaseUpgrader("/schema.xml", databasePlatform, true, "METL").upgrade();
+                persistenceManager = new SqlPersistenceManager(databasePlatform);
+                IComponentDefinitionFactory componentDefinitionFactory = new ComponentXmlDefinitionFactory();
+                configurationService = new ConfigurationSqlService(new SecurityService(),
+                        componentDefinitionFactory, databasePlatform, persistenceManager, "METL");
+                executionService = new ExecutionSqlService(databasePlatform, persistenceManager,
+                        "METL", new StandardEnvironment());
+                IImportExportService importService = new ImportExportService(databasePlatform,
+                        persistenceManager, "METL", configurationService);
+                agentRuntime = new AgentRuntime(new Agent("test", AppUtils.getHostName()),
+                        configurationService, executionService,
+                        new ComponentRuntimeFactory(componentDefinitionFactory),
+                        componentDefinitionFactory, new ResourceFactory(),
+                        new HttpRequestMappingRegistry());
+                agentRuntime.start();
+                URL configSqlScriptURL = null;
+                File configSqlScriptFile = new File(configSqlScript);
+
                 if (configSqlScriptFile.exists()) {
                     configSqlScriptURL = configSqlScriptFile.toURI().toURL();
                 } else {
                     configSqlScriptURL = getClass().getResource(configSqlScript);
                 }
-            } catch (MalformedURLException e) {
+
+                if (configSqlScript.toLowerCase().endsWith(".sql")) {
+                    SqlScript script = new SqlScript(configSqlScriptURL,
+                            databasePlatform.getSqlTemplate());
+                    script.execute();
+                } else {
+                    importService.importConfiguration(IOUtils.toString(configSqlScriptURL));
+                }
+            } catch (IOException e) {
                 throw new IoException(e);
             }
-            SqlScript script = new SqlScript(configSqlScriptURL, databasePlatform.getSqlTemplate());
-            script.execute();
         }
     }
 

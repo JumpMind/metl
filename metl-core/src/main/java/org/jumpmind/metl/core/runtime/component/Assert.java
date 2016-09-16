@@ -23,9 +23,12 @@ package org.jumpmind.metl.core.runtime.component;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
+import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.runtime.BinaryMessage;
 import org.jumpmind.metl.core.runtime.ControlMessage;
 import org.jumpmind.metl.core.runtime.EntityData;
@@ -44,12 +47,16 @@ public class Assert extends AbstractComponentRuntime {
     public static final String EXPECTED_TEXT_MESSAGE_COUNT = "expected.text.messages.count";
     public static final String EXPECTED_BINARY_MESSAGE_COUNT = "expected.binary.messages.count";
     public static final String EXPECTED_CONTROL_MESSAGE_COUNT = "expected.control.messages.count";
+    public static final String EXPECTED_DISTINCT_ENTITY_TYPE_COUNT = "expected.distinct.entities.count";
+    public static final String EXPECTED_DISTINCT_ATTRIBUTE_TYPE_COUNT = "expected.distinct.attributes.count";
     public static final String EXPECTED_EMPTY_PAYLOAD_MESSAGE_COUNT = "expected.empty.payload.messages.count";
     public static final String EXPECTED_SQL_COUNT = "expected.sql.count";
     public static final String ASSERT_SQL = "sql";
     public static final String ASSERT_SQL_DATASOURCE = "sql.datasource";
 
     int expectedEntityMessageCount = 0;
+    int expectedDistinctEntityTypeCount = 0;
+    int expectedDistinctAttributeTypeCount = 0;
     int expectedTextMessageCount = 0;
     int expectedBinaryMessageCount = 0;
     int expectedControlMessageCount = 0;
@@ -66,10 +73,15 @@ public class Assert extends AbstractComponentRuntime {
     int controlMessageCount = 0;
     int emptyPayloadMessageCount = 0;
     int entityCountPerMessage = 0;
+    
+    Set<String> distinctEntityIds = new HashSet<>();
+    Set<String> distinctAttributeIds = new HashSet<>();
 
     @Override
     public void start() {
         TypedProperties properties = getTypedProperties();
+        expectedDistinctAttributeTypeCount = properties.getInt(EXPECTED_DISTINCT_ATTRIBUTE_TYPE_COUNT, -1);
+        expectedDistinctEntityTypeCount = properties.getInt(EXPECTED_DISTINCT_ENTITY_TYPE_COUNT, -1);
         expectedControlMessageCount = properties.getInt(EXPECTED_CONTROL_MESSAGE_COUNT,
                 expectedEntityMessageCount);
         expectedTextMessageCount = properties.getInt(EXPECTED_TEXT_MESSAGE_COUNT,
@@ -95,6 +107,16 @@ public class Assert extends AbstractComponentRuntime {
             ArrayList<EntityData> payload = ((EntityDataMessage) inputMessage).getPayload();
             entityCountPerMessage = payload.size();
             entityMessageCount++;
+            Model inputModel = getInputModel();
+            if (inputModel != null) {
+                for (EntityData entityData : payload) {
+                    Set<String> attributeIds = entityData.keySet();
+                    for (String attributeId : attributeIds) {
+                        distinctEntityIds.add(inputModel.getAttributeById(attributeId).getEntityId());                        
+                    }
+                    distinctAttributeIds.addAll(attributeIds);
+                }
+            }
         } else if (inputMessage instanceof TextMessage) {
             textMessageCount++;
         } else if (inputMessage instanceof BinaryMessage) {
@@ -138,6 +160,17 @@ public class Assert extends AbstractComponentRuntime {
             assertFailed.append(String.format("\nExpected %d binary messages but received %s.",
                     expectedBinaryMessageCount, binaryMessageCount));
         }
+        
+        if (expectedDistinctAttributeTypeCount != -1 && expectedDistinctAttributeTypeCount != distinctAttributeIds.size()) {
+            assertFailed.append(String.format("\nExpected %d distinct attribute types but received %s.",
+                   expectedDistinctAttributeTypeCount, distinctAttributeIds.size()));
+        }
+        
+        if (expectedDistinctEntityTypeCount != -1 && expectedDistinctEntityTypeCount != distinctEntityIds.size()) {
+            assertFailed.append(String.format("\nExpected %d distinct entity types but received %s.",
+                    expectedDistinctEntityTypeCount, distinctEntityIds.size()));
+        }
+
 
         if (expectedEntityCountPerMessage.intValue() != -1
                 && expectedEntityCountPerMessage.intValue() != entityCountPerMessage) {

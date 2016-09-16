@@ -41,6 +41,18 @@
                type='integer'>
         <name>Expected Number of Entities Per Entity Message</name>
       </setting>
+      <setting id='expected.distinct.entities.count'
+               required='false'
+               type='integer'>
+        <name>Expected Distinct Types of Entities</name>
+        <defaultValue></defaultValue>
+      </setting>
+      <setting id='expected.distinct.attributes.count'
+               required='false'
+               type='integer'>
+        <name>Expected Distinct Types of Attributes</name>
+        <defaultValue></defaultValue>
+      </setting>            
       <setting id='expected.text.messages.count'
                required='false'
                type='integer'>

@@ -32,6 +32,7 @@ import java.util.Set;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.Model;
@@ -76,7 +77,23 @@ public class Transformer extends AbstractComponentRuntime {
     public boolean supportsStartupMessages() {
         return false;
     }   
+    
+    protected Set<String> getAllAttributesForIncludedEntities(EntityData data) {
+        Set<String> allAttributesForIncludedEntities = new HashSet<>();
+        Model inputModel = getComponent().getInputModel();
+        Set<String> attributeIds = data.keySet();
+        for (String attributeId : attributeIds) {
+            ModelAttribute attribute = inputModel.getAttributeById(attributeId);
+            ModelEntity entity = inputModel.getEntityById(attribute.getEntityId());
+            List<ModelAttribute> attributes = entity.getModelAttributes();
+            for (ModelAttribute modelAttribute : attributes) {
+                allAttributesForIncludedEntities.add(modelAttribute.getId());
+            }
+        }
+        return allAttributesForIncludedEntities;
+    }
 
+    @SuppressWarnings("unchecked")
     @Override
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (scriptEngine == null) {
@@ -95,8 +112,8 @@ public class Transformer extends AbstractComponentRuntime {
 					outDatas.add(outData);
 
 					Set<String> attributeIds = new HashSet<String>();
-					attributeIds.addAll(inData.keySet());
-					attributeIds.addAll(transformsByAttributeId.keySet());
+					attributeIds.addAll(inData.keySet());					
+					attributeIds.addAll(CollectionUtils.intersection(getAllAttributesForIncludedEntities(inData), transformsByAttributeId.keySet()));
 					
 					for (String attributeId : attributeIds) {
 						String transform = transformsByAttributeId.get(attributeId);
