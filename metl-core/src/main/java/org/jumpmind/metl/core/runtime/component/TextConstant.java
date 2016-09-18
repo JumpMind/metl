@@ -51,7 +51,7 @@ public class TextConstant extends AbstractComponentRuntime {
     @Override
     public void start() {
     	textRowsPerMessage = context.getFlowStep().getComponent().getInt(ROWS_PER_MESSAGE, 1000);
-        splitOnLineFeed = context.getFlowStep().getComponent().getBoolean(SETTING_SPLIT_ON_LINE_FEED, false);
+        splitOnLineFeed = context.getFlowStep().getComponent().getBoolean(SETTING_SPLIT_ON_LINE_FEED, true);
         constantText = context.getFlowStep().getComponent().get(SETTING_TEXT, "");
         controlMessageOnTextSend = context.getFlowStep().getComponent().getBoolean(SETTING_CONTROL_MESSAGE_ON_TEXT_SEND, false);
         runWhen = getComponent().get(RUN_WHEN, PER_UNIT_OF_WORK);

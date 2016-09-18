@@ -24,6 +24,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -50,6 +51,7 @@ public class Assert extends AbstractComponentRuntime {
     public static final String EXPECTED_DISTINCT_ENTITY_TYPE_COUNT = "expected.distinct.entities.count";
     public static final String EXPECTED_DISTINCT_ATTRIBUTE_TYPE_COUNT = "expected.distinct.attributes.count";
     public static final String EXPECTED_EMPTY_PAYLOAD_MESSAGE_COUNT = "expected.empty.payload.messages.count";
+    public static final String EXPECTED_TEXT_PAYLOAD = "expected.text.payload";
     public static final String EXPECTED_SQL_COUNT = "expected.sql.count";
     public static final String ASSERT_SQL = "sql";
     public static final String ASSERT_SQL_DATASOURCE = "sql.datasource";
@@ -63,6 +65,7 @@ public class Assert extends AbstractComponentRuntime {
     int expectedEmptyPayloadMessageCount = 0;
     int expectedSqlCount = 0;
     Long expectedEntityCountPerMessage;
+    String expectedTextPayload;
 
     String sql;
     String dataSourceId;
@@ -73,6 +76,7 @@ public class Assert extends AbstractComponentRuntime {
     int controlMessageCount = 0;
     int emptyPayloadMessageCount = 0;
     int entityCountPerMessage = 0;
+    StringBuilder textPayload = new StringBuilder();
     
     Set<String> distinctEntityIds = new HashSet<>();
     Set<String> distinctAttributeIds = new HashSet<>();
@@ -94,6 +98,7 @@ public class Assert extends AbstractComponentRuntime {
                 expectedBinaryMessageCount);
         expectedSqlCount = properties.getInt(EXPECTED_SQL_COUNT, expectedSqlCount);
         expectedEntityCountPerMessage = properties.getLong(EXPECTED_ENTITY_COUNT_PER_MESSAGE);
+        expectedTextPayload = properties.get(EXPECTED_TEXT_PAYLOAD, null);
         sql = properties.get(ASSERT_SQL);
         dataSourceId = properties.get(ASSERT_SQL_DATASOURCE);
     }
@@ -118,7 +123,13 @@ public class Assert extends AbstractComponentRuntime {
                 }
             }
         } else if (inputMessage instanceof TextMessage) {
+            TextMessage textMessage = (TextMessage)inputMessage;
+            List<String> payload = textMessage.getPayload();
+            for (String string : payload) {
+                textPayload.append(string).append("\n");
+            }
             textMessageCount++;
+            
         } else if (inputMessage instanceof BinaryMessage) {
             binaryMessageCount++;
         } else {
@@ -171,11 +182,15 @@ public class Assert extends AbstractComponentRuntime {
                     expectedDistinctEntityTypeCount, distinctEntityIds.size()));
         }
 
-
         if (expectedEntityCountPerMessage.intValue() != -1
                 && expectedEntityCountPerMessage.intValue() != entityCountPerMessage) {
             assertFailed.append(String.format("\nExpected %d entities per message but received %s.",
                     expectedEntityCountPerMessage.intValue(), entityCountPerMessage));
+        }
+        
+        if (isNotBlank(expectedTextPayload) &&! expectedTextPayload.trim().equals(textPayload.toString().trim())) {
+            assertFailed.append(String.format("\nExpected text payload of:\n%s \nReceived:\n%s",
+                    expectedTextPayload, textPayload.toString().trim()));       
         }
 
         if (isNotBlank(sql)) {

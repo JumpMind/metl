@@ -77,6 +77,11 @@
         <name>Expected Number of Empty Payload Messages</name>
         <defaultValue>0</defaultValue>
       </setting>
+      <setting id='expected.text.payload'
+               required='false'
+               type='multiline_text'>
+        <name>Expected Text Payload</name>
+      </setting>      
       <setting id='sql.datasource'
                required='false'
                type='datasource_resource'>
@@ -1175,7 +1180,7 @@
                required='false'
                type='boolean'>
         <name>Split On Line Feed</name>
-        <defaultValue>false</defaultValue>
+        <defaultValue>true</defaultValue>
       </setting>
       <setting id='rows.per.message'
                required='false'

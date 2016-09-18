@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jumpmind.exception.IoException;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
@@ -72,7 +73,7 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
     @Override
     public void start() {
         TypedProperties properties = getTypedProperties();
-        delimiter = properties.get(DELIMITED_FORMATTER_DELIMITER);
+        delimiter = StringEscapeUtils.unescapeJava(getComponent().get(DELIMITED_FORMATTER_DELIMITER, delimiter));
         quoteCharacter = properties.get(DELIMITED_FORMATTER_QUOTE_CHARACTER);
         useHeader = properties.is(DELIMITED_FORMATTER_WRITE_HEADER);
         convertAttributeSettingsToAttributeFormat();
