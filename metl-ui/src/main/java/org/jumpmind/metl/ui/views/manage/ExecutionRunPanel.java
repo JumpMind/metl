@@ -162,6 +162,11 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     List<SortOrder> lastSortOrder;
 
     Label status;
+    
+    float lastPosition = 50;
+    
+    // Must be set to 99. Not sure why 100 doesn't work.
+    final static float MAX_PANEL_POSITION = 99;
 
     public ExecutionRunPanel(String executionId, ApplicationContext context,
             TabbedPanel parentTabSheet) {
@@ -298,6 +303,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                     getMaxToShow());
             logContainer.addAll(logs);
             downloadLink.setVisible(logs.size() > 0);
+            setLogMinimized(logContainer.size()==0);
             updateStatus();
         });
         
@@ -390,7 +396,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         splitPanel = new VerticalSplitPanel();
         splitPanel.setFirstComponent(flowPanel);
         splitPanel.setSecondComponent(logLayout);
-        splitPanel.setSplitPosition(50f);
+        splitPanel.setSplitPosition(50, Unit.PERCENTAGE);
         splitPanel.setSizeFull();
         addComponent(splitPanel);
         setExpandRatio(splitPanel, 1.0f);
@@ -436,6 +442,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         diagram.setSizeFull();
         diagram.addListener(new RunDiagramChangedListener());
         diagram.setNodes(getNodes());
+        setLogMinimized(diagram.getSelectedNodeIds().size()==0);
         diagramLayout.addComponent(diagram);
     }
 
@@ -575,10 +582,10 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
     protected void showDetails() {
         splitPanel.setFirstComponent(stepTable);
+        setLogMinimized(stepTable.getSelectedRows().isEmpty());
         Setting setting = context.getUser().findSetting(UserSetting.SETTING_SHOW_RUN_DIAGRAM);
         setting.setValue("false");
         context.getConfigurationService().save(setting);
-
     }
 
     @SuppressWarnings("unchecked")
@@ -644,8 +651,19 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
                 List<ExecutionStepLog> logs = executionService.findExecutionStepLogs(stepIds,
                         getMaxToShow());
                 logContainer.addAll(logs);
+                setLogMinimized(logContainer.size()==0);
                 updateStatus();
             }
+        }
+    }
+    
+    protected void setLogMinimized(boolean minimize) {
+        float position = splitPanel.getSplitPosition();
+        if (minimize && position != MAX_PANEL_POSITION) {
+            lastPosition = position;
+            splitPanel.setSplitPosition(MAX_PANEL_POSITION, Unit.PERCENTAGE);
+        } else if (!minimize && position == MAX_PANEL_POSITION) {
+            splitPanel.setSplitPosition(lastPosition, Unit.PERCENTAGE);
         }
     }
 
