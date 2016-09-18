@@ -1165,7 +1165,6 @@ abstract class AbstractConfigurationService extends AbstractService implements I
 
     @Override
     public ProjectVersion saveNewVersion(String newVersionLabel, ProjectVersion original) {
-        // TODO: Make transactional
         Map<String, AbstractObject> oldToNewUUIDMapping = new HashMap<>();
         ProjectVersion newVersion = copyWithNewUUID(oldToNewUUIDMapping, original);
         newVersion.setVersionLabel(newVersionLabel);

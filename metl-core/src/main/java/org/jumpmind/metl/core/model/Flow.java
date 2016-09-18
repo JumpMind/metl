@@ -261,6 +261,11 @@ public class Flow extends AbstractObject {
 
     public void setProjectVersionId(String projectVersionId) {
         this.projectVersionId = projectVersionId;
+        if (this.flowSteps != null) {
+            for (FlowStep flowStep : flowSteps) {
+                flowStep.getComponent().setProjectVersionId(projectVersionId);
+            }
+        }
     }
 
     public String getProjectVersionId() {
