@@ -90,7 +90,7 @@
     </component-ui>
     <component-ui id="Parse XML UI" componentId="Parse XML">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xml-formatter-in-48x48-color.png</iconImage>
-        <className>org.jumpmind.metl.ui.views.design.EditXmlParserPanel</className>
+        <className>org.jumpmind.metl.ui.views.design.EditXmlFormatPanel</className>
     </component-ui>
     <component-ui id="XSLT Processor UI" componentId="XSLT Processor">
         <iconImage>/org/jumpmind/metl/core/runtime/component/metl-xslt-48x48-color.png</iconImage>

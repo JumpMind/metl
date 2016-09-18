@@ -110,7 +110,7 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
       ignoreDerivedResources(provider.asNode())
     }
  
-    def ignoreDerivedResources(projectDescription, directories = ["build", "target", "test-output"]) {
+    def ignoreDerivedResources(projectDescription, directories = ["target", "test-output"]) {
       def count = directories.count { file(it).exists() }
       if (count > 0) {
         def filter = projectDescription
