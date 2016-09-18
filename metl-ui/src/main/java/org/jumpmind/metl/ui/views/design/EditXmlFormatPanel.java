@@ -107,7 +107,7 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
         grid = new Grid();
         grid.setSelectionMode(SelectionMode.NONE);
         grid.setSizeFull();
-        grid.setEditorEnabled(true);
+        grid.setEditorEnabled(!readOnly);
         container = new BeanItemContainer<Record>(Record.class);
         grid.setContainerDataSource(container);
         grid.setColumnOrder("entityName", "attributeName", "xpath");
@@ -310,6 +310,7 @@ public class EditXmlFormatPanel extends AbstractComponentEditPanel {
 
             Setting templateSetting = component.findSetting(XmlFormatter.XML_FORMATTER_TEMPLATE);
             editor.setValue(templateSetting.getValue());
+            editor.setReadOnly(readOnly);
 
             addComponent(buildButtonFooter(buildCloseButton()));
         }
