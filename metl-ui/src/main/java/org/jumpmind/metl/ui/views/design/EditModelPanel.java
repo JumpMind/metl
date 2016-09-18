@@ -305,25 +305,13 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         collapseAll.addStyleName(ValoTheme.BUTTON_LINK);
         collapseAll.addStyleName(ValoTheme.BUTTON_SMALL);
         hlayout.addComponent(collapseAll);
-        collapseAll.addClickListener(new ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                for (Object itemId : treeTable.getItemIds()) {
-                    treeTable.setCollapsed(itemId, true);
-                }
-            }
-        });
+        collapseAll.addClickListener(e->collapseAll());
 
         Button expandAll = new Button("Expand All");
         expandAll.addStyleName(ValoTheme.BUTTON_LINK);
         expandAll.addStyleName(ValoTheme.BUTTON_SMALL);
         hlayout.addComponent(expandAll);
-        expandAll.addClickListener(new ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                for (Object itemId : treeTable.getItemIds()) {
-                    treeTable.setCollapsed(itemId, false);
-                }
-            }
-        });
+        expandAll.addClickListener(e->expandAll());
 
         addAll("", model.getModelEntities());
 
@@ -332,6 +320,22 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         table.setContainerDataSource(container);
         table.setVisibleColumns(new Object[] { "entityName", "attributeName", "description", "type", "pk" });
         table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Description", "Type", "PK" });
+        
+        if (model.getModelEntities().size() > 10) {
+            collapseAll();
+        }
+    }
+    
+    protected void collapseAll() {
+        for (Object itemId : treeTable.getItemIds()) {
+            treeTable.setCollapsed(itemId, true);
+        }
+    }
+    
+    protected void expandAll() {
+        for (Object itemId : treeTable.getItemIds()) {
+            treeTable.setCollapsed(itemId, false);
+        }
     }
 
     protected void export() {
