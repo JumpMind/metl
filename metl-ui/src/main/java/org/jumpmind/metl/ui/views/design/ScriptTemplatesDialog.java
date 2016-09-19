@@ -30,6 +30,8 @@ import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.ResizableWindow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -43,6 +45,8 @@ import com.vaadin.ui.themes.ValoTheme;
 class ScriptTemplatesDialog extends ResizableWindow {
 
     private static final long serialVersionUID = 1L;
+    
+    final Logger logger = LoggerFactory.getLogger(getClass());
 
     ApplicationContext context;
 
@@ -70,16 +74,16 @@ class ScriptTemplatesDialog extends ResizableWindow {
 
         try {
             ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(
-                    Thread.currentThread().getContextClassLoader());
+                    ScriptTemplatesDialog.class.getClassLoader());
             Resource[] resources = resolver
-                    .getResources("classpath*:/org/jumpmind/metl/ui/examples/scripts/*.groovy");
+                    .getResources("classpath:/org/jumpmind/metl/ui/examples/scripts/*.groovy");
             for (Resource resource : resources) {
                 templates.addItem(new Template(resource.getFilename()));
             }
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            logger.error("", e);
         }
 
         templates.addValueChangeListener(

@@ -992,8 +992,7 @@
                visible='false'>
         <name>Handle Msg Script</name>
         <defaultValue>
-        
-        
+forwardMessage()        
         </defaultValue>
       </setting>
       <setting id='on.flow.success.script'
