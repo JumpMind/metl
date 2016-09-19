@@ -240,9 +240,10 @@ abstract public class AbstractComponentRuntime extends AbstractRuntimeObject imp
             bindings.put(key, flowParameters.get(key));            
         }
         
+        bindings.put("inputMessage", inputMessage);
         bindings.put("text", null);
         bindings.put("CHANGE_TYPE", null);
-        bindings.put("ENTITY_NAMES", new ArrayList<>());  
+        bindings.put("ENTITY_NAMES", Collections.emptyList());  
     }
     
     protected void bindModelEntities(Bindings bindings) {
