@@ -385,6 +385,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
 
         status = new Label("", ContentMode.HTML);
         statusBar.addComponent(status);
+        statusBar.setComponentAlignment(status, Alignment.MIDDLE_LEFT);
         logLayout.addComponent(statusBar);
 
         downloadLink = new Button("Download", FontAwesome.DOWNLOAD);
