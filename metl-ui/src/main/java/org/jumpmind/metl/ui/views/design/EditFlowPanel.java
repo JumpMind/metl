@@ -188,7 +188,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             runButton.addClickListener((event)->runFlow());
             
             Button selectAllButton = buttonBar.addButton("Select All", FontAwesome.CROSSHAIRS);
-            selectAllButton.addClickListener((event)->selectAll());
+            selectAllButton.addClickListener((event)->setSelectedAll());
 
             copyButton = buttonBar.addButton("Copy", FontAwesome.COPY);
             copyButton.addClickListener((event)->copySelected());
@@ -215,15 +215,6 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         flowPanel.setScrollLeft(0);
         flowPanel.setScrollTop(0);
         new ImagePreviewDialog(diagram).showAtSize(.75);
-    }
-    
-    protected void selectAll() {
-        selected = new ArrayList<>();
-        for (FlowStep step : flow.getFlowSteps()) {
-            selected.add(step);
-        }
-        propertySheet.setSource(selected);
-        redrawFlow();
     }
 
     protected Button createToolButton(String name, Resource icon) {
@@ -457,6 +448,16 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
         } else if (!minimize && position == MAX_PANEL_POSITION) {
             splitPanel.setSplitPosition(lastPosition, Unit.PERCENTAGE);
         }
+    }
+    
+    protected void setSelectedAll() {
+        setPropertiesMinimized(flow.getFlowSteps().size()==0);
+        selected = new ArrayList<>();
+        for (FlowStep step : flow.getFlowSteps()) {
+            selected.add(step);
+        }
+        propertySheet.setSource(selected);
+        redrawFlow();
     }
     
     protected void setSelectedNodes(List<AbstractObject> nodes) {
