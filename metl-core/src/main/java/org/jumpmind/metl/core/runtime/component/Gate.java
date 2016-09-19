@@ -63,9 +63,10 @@ public class Gate extends AbstractComponentRuntime {
     public void handle( Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
         if (gateControlSourceStepId.equals(inputMessage.getHeader().getOriginatingStepId())) {
 
-            gateOpened = inputMessage instanceof ControlMessage;
+            gateOpened = !gateOpened && inputMessage instanceof ControlMessage;
 
             if (gateOpened) {
+                info("The gate was just opened.  Releasing %d queue'd messages and every message from sources after this", queuedWhileWaitingForGateController.size());
                 Iterator<Message> messages = queuedWhileWaitingForGateController.iterator();
                 while (messages.hasNext()) {
                     Message message = messages.next();
