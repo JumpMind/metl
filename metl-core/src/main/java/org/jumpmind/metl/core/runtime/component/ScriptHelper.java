@@ -139,6 +139,18 @@ public class ScriptHelper {
         this.scriptContext = new HashMap<String, Object>();
     }
     
+    /** 
+     * @return the name of flow step from which the input message came from
+     * 
+     */
+    protected String getInputMessageSourceName() {
+        if (inputMessage != null) {
+            return context.getManipulatedFlow().findFlowStepWithId(inputMessage.getHeader().getOriginatingStepId()).getName();
+        } else {
+            return null;
+        }
+    }
+    
     /**
      * Test whether the inputMessage is an EntityDataMessage
      * 
