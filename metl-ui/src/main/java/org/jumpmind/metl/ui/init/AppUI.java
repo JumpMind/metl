@@ -317,8 +317,8 @@ public class AppUI extends UI implements LoginListener {
         HorizontalLayout left = new HorizontalLayout();
         left.setSpacing(true);
 
-        Embedded logo = new Embedded(null,
-                new ThemeResource("../apptheme/images/powered-by-jumpmind.png"));
+        Label logo = new Label("<a href='http://www.jumpmind.com'><img src='VAADIN/themes/apptheme/images/powered-by-jumpmind.png'/></a>",
+                ContentMode.HTML);
         bottom.addComponents(logo);
 
         Label version = new Label("version " + VersionUtils.getCurrentVersion());
