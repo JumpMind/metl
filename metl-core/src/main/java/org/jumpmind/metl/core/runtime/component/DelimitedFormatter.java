@@ -62,9 +62,9 @@ public class DelimitedFormatter extends AbstractComponentRuntime {
 
     public final static String DELIMITED_FORMATTER_ATTRIBUTE_ORDINAL = "delimited.formatter.attribute.ordinal";
 
-    String delimiter;
+    String delimiter = ",";
 
-    String quoteCharacter;
+    String quoteCharacter = "\"";
 
     boolean useHeader;
 
