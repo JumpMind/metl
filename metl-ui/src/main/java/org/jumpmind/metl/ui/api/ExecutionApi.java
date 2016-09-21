@@ -289,7 +289,7 @@ public class ExecutionApi {
                                 done = execution != null
                                         && ExecutionStatus.isDone(execution.getExecutionStatus());
                                 if (!done) {
-                                    AppUtils.sleep(5000);
+                                    AppUtils.sleep(500);
                                 }
                             } while (!done);
                             break;
@@ -316,6 +316,8 @@ public class ExecutionApi {
                         }
                     }
                 }
+                
+                throw new FailureException(result);
             }
             return result;
         } else {

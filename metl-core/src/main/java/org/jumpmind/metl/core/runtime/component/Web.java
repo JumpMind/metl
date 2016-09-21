@@ -104,6 +104,7 @@ public class Web extends AbstractComponentRuntime {
 
 			if (inputPayload != null) {
 				try {
+				    String path = resolveParamsAndHeaders(relativePath,inputMessage);
 					for (String requestContent : inputPayload) {
 						getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
 						if (parameterReplacement) {
@@ -111,8 +112,9 @@ public class Web extends AbstractComponentRuntime {
 						}
 						
                         if (isNotBlank(requestContent)) {
+                            info("sending content to %s", path);
                             HttpOutputStream os = (HttpOutputStream) streamable
-                                    .getOutputStream(relativePath, false);
+                                    .getOutputStream(path, false);
                             BufferedWriter writer = new BufferedWriter(
                                     new OutputStreamWriter(os, DEFAULT_CHARSET));
                             try {
@@ -125,7 +127,8 @@ public class Web extends AbstractComponentRuntime {
                                 }
                             }
                         } else {
-                            InputStream is = streamable.getInputStream(resolveParamsAndHeaders(relativePath,inputMessage), false);
+                            info("getting content from %s", path);
+                            InputStream is = streamable.getInputStream(path, false);
                             try {
                                 String response = IOUtils.toString(is);
                                 if (response != null) {
