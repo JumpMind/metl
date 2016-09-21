@@ -282,6 +282,9 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
             if (currentSelection.equals(ManageNavigator.CURRENTLY_RUNNING)) {
                 statusSelect.setValue(ExecutionStatus.RUNNING.name());
                 statusSelect.setReadOnly(true);
+            } else if (currentSelection.equals(ManageNavigator.IN_ERROR)) {
+                statusSelect.setValue(ExecutionStatus.ERROR.name());
+                statusSelect.setReadOnly(true);
             } else if (currentSelection instanceof Agent) {
                 params.put("agentId", ((Agent) currentSelection).getId());
             } else if (currentSelection instanceof AgentName) {

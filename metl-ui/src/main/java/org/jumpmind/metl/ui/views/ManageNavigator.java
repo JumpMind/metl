@@ -58,6 +58,8 @@ import com.vaadin.ui.themes.ValoTheme;
 public class ManageNavigator extends Panel {
 
     protected static final Name CURRENTLY_RUNNING = new Name("Currently Running");
+    
+    protected static final Name IN_ERROR = new Name("In Error");
 
     TreeTable treeTable;
 
@@ -109,6 +111,11 @@ public class ManageNavigator extends Panel {
         treeTable.addItem(CURRENTLY_RUNNING);
         treeTable.setChildrenAllowed(CURRENTLY_RUNNING, false);
         treeTable.setItemIcon(CURRENTLY_RUNNING, FontAwesome.GEARS);
+        
+        treeTable.addItem(IN_ERROR);
+        treeTable.setChildrenAllowed(IN_ERROR, false);
+        treeTable.setItemIcon(IN_ERROR, FontAwesome.WARNING);
+
         
         treeTable.addItem(agentsFolder);
         treeTable.setItemIcon(agentsFolder, FontAwesome.FOLDER);
