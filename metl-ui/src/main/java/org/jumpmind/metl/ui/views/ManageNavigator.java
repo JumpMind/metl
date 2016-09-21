@@ -222,7 +222,7 @@ public class ManageNavigator extends Panel {
         table.setItemDescriptionGenerator((Component source, Object itemId, Object propertyId) -> {
             if (itemId instanceof ProjectVersionFlowName) {
                 ProjectVersionFlowName flow = (ProjectVersionFlowName) itemId;
-                return flow.projectVersion.getName();
+                return flow.projectVersion != null ? flow.projectVersion.getName() : "";
             } else if (itemId instanceof AgentDeploymentSummary) {
                 AgentDeploymentSummary summary = (AgentDeploymentSummary) itemId;
                 return summary.getProjectName();
