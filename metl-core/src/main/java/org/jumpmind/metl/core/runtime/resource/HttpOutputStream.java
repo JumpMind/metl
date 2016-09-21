@@ -71,22 +71,24 @@ public class HttpOutputStream extends OutputStream {
         int responseCode = -1;
         try {
             responseCode = httpUrlConnection.getResponseCode();
-            boolean isError = (httpUrlConnection.getResponseCode() >= 400);
+            boolean isError = (responseCode >= 400);
+            
             if (isError) {
-                in = new BufferedReader(new InputStreamReader(httpUrlConnection.getErrorStream(), "UTF-8"));
+                if (httpUrlConnection.getErrorStream() != null) {
+                    in = new BufferedReader(new InputStreamReader(httpUrlConnection.getErrorStream(), "UTF-8"));
+                }
             } else {
                 in = new BufferedReader(new InputStreamReader(httpUrlConnection.getInputStream(), "UTF-8"));
             }
-            if (isError) {
-                log.warn("Error Response:");
+            
+            if (in != null) {
+                String line = in.readLine();
+                while (line != null) {
+                    response.append(line);
+                    response.append(System.getProperty("line.separator"));
+                    line = in.readLine();
+                }
             }
-            String line = in.readLine();
-            while (line != null) {
-                response.append(line);
-                response.append(System.getProperty("line.separator"));
-                line = in.readLine();
-            }
-
         } catch (IOException e) {
             throw new IoException(e);
         } finally {
