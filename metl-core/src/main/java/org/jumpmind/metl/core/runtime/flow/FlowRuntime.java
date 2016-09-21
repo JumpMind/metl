@@ -375,11 +375,12 @@ public class FlowRuntime {
         }
         Date date = new Date();
         params.put("_agentName", agent.getName());
+        params.put("_deploymentName", agentDeployment.getName());        
         try {
             params.put("_agentNameUrlEncoded", URLEncoder.encode(agent.getName(), "utf-8"));
+            params.put("_deploymentNameUrlEncoded", URLEncoder.encode(agentDeployment.getName(), "utf-8"));
         } catch (UnsupportedEncodingException e) {
         }
-        params.put("_deploymentName", agentDeployment.getName());
         params.put("_versionName", agentDeployment.getProjectVersion().getVersionLabel());
         params.put("_flowName", agentDeployment.getFlow().getName());
         params.put("_host", agent.getHost());
