@@ -474,6 +474,7 @@ public class FlowRuntime {
             }
 
             if (!isTargetStep) {
+                stepRuntimes.get(stepId).getComponentContext().setStartStep(true);
                 starterSteps.add(stepRuntimes.get(stepId));
             }
         }

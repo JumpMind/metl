@@ -49,7 +49,9 @@ public class ComponentContext {
 
     ComponentStatistics componentStatistics = new ComponentStatistics();
 
-    LinkedCaseInsensitiveMap<Object> context;    
+    LinkedCaseInsensitiveMap<Object> context;  
+    
+    boolean startStep = false;
 
     public ComponentContext(AgentDeployment deployment, FlowStep flowStep, Flow manipulatedFlow, IExecutionTracker executionTracker,
             Map<String, IResourceRuntime> deployedResources, Map<String, String> flowParameters, Map<String, String> globalSettings) {
@@ -109,6 +111,14 @@ public class ComponentContext {
 
     public Map<String, String> getGlobalSettings() {
         return globalSettings;
+    }
+    
+    public void setStartStep(boolean startStep) {
+        this.startStep = startStep;
+    }
+    
+    public boolean isStartStep() {
+        return startStep;
     }
 
 }

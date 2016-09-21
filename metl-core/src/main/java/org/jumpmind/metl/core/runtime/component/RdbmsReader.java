@@ -92,8 +92,6 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
     int rowReadDuringHandle;
     
     String unitOfWork = COMPONENT_LIFETIME;
-    
-    boolean firstMessage = true;
 
     @Override
     public void start() {
@@ -105,7 +103,6 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         passInputRowsThrough = properties.is(PASS_INPUT_ROWS_THROUGH, false);
         runWhen = properties.get(RUN_WHEN, runWhen);
         unitOfWork = properties.get(UNIT_OF_WORK, unitOfWork);
-        firstMessage = true;
     }
 
     @Override
@@ -125,7 +122,7 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         if (PER_ENTITY.equals(runWhen) && inputMessage instanceof ContentMessage<?>) {
             inboundPayload = ((Collection<?>) ((ContentMessage<?>) inputMessage).getPayload()).iterator();
             inboundRecordCount = ((Collection<?>) ((ContentMessage<?>) inputMessage).getPayload()).size();
-        } else if (PER_MESSAGE.equals(runWhen) && (!(inputMessage instanceof ControlMessage) || firstMessage)) {
+        } else if (PER_MESSAGE.equals(runWhen) && (!(inputMessage instanceof ControlMessage) || context.isStartStep())) {
             inboundPayload = null;
             inboundRecordCount = 1;
         } else if (PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage) {
@@ -167,7 +164,6 @@ public class RdbmsReader extends AbstractRdbmsComponentRuntime {
         }
         sendLeftOverRows(callback, outboundPayload);
         
-        firstMessage = false;
     }
 
     private void sendLeftOverRows(final ISendMessageCallback callback, ArrayList<EntityData> outboundPayload) {
