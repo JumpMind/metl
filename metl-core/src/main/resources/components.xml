@@ -944,6 +944,12 @@
         <name>Create table if missing</name>
         <defaultValue>false</defaultValue>
       </setting>
+      <setting id='use.cached.table.metadata'
+               required='false'
+               type='boolean'>
+        <name>Use Previously Cached Table Metadata</name>
+        <defaultValue>false</defaultValue>
+      </setting>      
       <setting id='table.prefix'
                required='false'
                type='text'>

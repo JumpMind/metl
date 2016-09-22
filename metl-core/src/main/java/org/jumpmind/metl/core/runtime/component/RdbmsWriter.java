@@ -76,7 +76,9 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     public final static String TABLE_SUFFIX = "table.suffix";
     public final static String TABLE_PREFIX = "table.prefix";
     public final static String AUTO_CREATE_TABLE = "table.auto.create";
+    public final static String USE_CACHED_METADATA = "use.cached.table.metadata";
 
+    boolean useCachedMetadata = false;
     boolean continueOnError = false;
     boolean replaceRows = false;
     boolean updateFirst = false;
@@ -111,6 +113,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
 
         TypedProperties properties = getTypedProperties();
         batchMode = properties.is(BATCH_MODE, batchMode);
+        useCachedMetadata = properties.is(USE_CACHED_METADATA, useCachedMetadata);
         replaceRows = properties.is(REPLACE);
         continueOnError = properties.is(CONTINUE_ON_ERROR, continueOnError);
         updateFirst = properties.is(UPDATE_FIRST);
@@ -162,7 +165,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     targetTables = new ArrayList<TargetTableDefintion>();
                     for (ModelEntity entity : model.getModelEntities()) {
                         String tableName = tablePrefix + entity.getName() + tableSuffix;
-                        Table table = databasePlatform.getTableFromCache(catalogName, schemaName, tableName, true);
+                        Table table = databasePlatform.getTableFromCache(catalogName, schemaName, tableName, !useCachedMetadata);
                         if (table == null && autoCreateTable) {
                             table = createTableFromEntity(entity, tableName);
                             log(LogLevel.INFO, "Creating table: " + table.getName() + "  on db: " + databasePlatform.getDataSource().toString());
