@@ -53,9 +53,6 @@
         <foreign-key foreignTable="project" name="fk_v_2_prj">
             <reference local="project_id" foreign="id" />
         </foreign-key>
-        <foreign-key foreignTable="project_version" name="fk_v_2_v">
-            <reference local="orig_version_id" foreign="id" />
-        </foreign-key>
     </table>
 
     <table name="folder" description="">
