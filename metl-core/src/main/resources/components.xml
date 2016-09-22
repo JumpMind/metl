@@ -717,7 +717,8 @@
              inputMessageType='text'
              inputOutputModelsMatch='false'
              outputMessageType='entity'
-             resourceCategory='none'>
+             resourceCategory='none'
+             supportsMultipleThreads='true'>
     <name>Parse Delimited</name>
     <className>org.jumpmind.metl.core.runtime.component.DelimitedParser</className>
     <keywords>parse,files,file,csv</keywords>
