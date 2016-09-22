@@ -1,7 +1,12 @@
 apply from: '../metl-assemble/common.gradle'
 
 dependencies {
-    compile project(":metl-ui")
+    compile (project(":metl-ui")) {
+       exclude group:'org.eclipse.jetty'
+       exclude group:'javax.websocket'
+       exclude group:'javax.servlet.jsp'
+       exclude group:'javax.servlet'
+    }
     testCompile "javax.servlet:javax.servlet-api:$servletVersion"
     testCompile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
     testCompile "javax.servlet.jsp:jsp-api:$jspVersion"
