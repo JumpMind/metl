@@ -72,37 +72,40 @@ public class AsyncRecorder implements Runnable {
     public void run() {
         running = true;
 
-        while (!stopping || inQueue.size() > 0) {
-            try {
-                AbstractObject object = inQueue.poll(100, TimeUnit.MILLISECONDS);
-                if (object instanceof ExecutionStepLog) {
-                    ExecutionStepLog stepLog = (ExecutionStepLog) object;
-                    String executionStepId = stepLog.getExecutionStepId();
-                    CsvWriter writer = logWriters.get(executionStepId);
-                    if (writer == null) {
-                        File logFile = new File(LogUtils.getLogDir(), executionStepId + ".log");
-                        writer = new CsvWriter(logFile.getAbsolutePath(),'"',Charset.forName("UTF-8"));
-                        logWriters.put(executionStepId, writer);                        
+        try {
+            while (!stopping || inQueue.size() > 0) {
+                try {
+                    AbstractObject object = inQueue.poll(100, TimeUnit.MILLISECONDS);
+                    if (object instanceof ExecutionStepLog) {
+                        ExecutionStepLog stepLog = (ExecutionStepLog) object;
+                        String executionStepId = stepLog.getExecutionStepId();
+                        CsvWriter writer = logWriters.get(executionStepId);
+                        if (writer == null) {
+                            File logFile = new File(LogUtils.getLogDir(), executionStepId + ".log");
+                            writer = new CsvWriter(logFile.getAbsolutePath(), '"',
+                                    Charset.forName("UTF-8"));
+                            logWriters.put(executionStepId, writer);
+                        }
+                        try {
+                            writer.writeRecord(new String[] { stepLog.getLevel(),
+                                    FormatUtils.TIMESTAMP_FORMATTER.format(stepLog.getCreateTime()),
+                                    StringUtils.abbreviate(stepLog.getLogText(), 100000) });
+                            writer.flush();
+                        } catch (IOException e) {
+                            writer.close();
+                            logWriters.remove(executionStepId);
+                            log.error("", e);
+                        }
+                    } else if (object != null) {
+                        executionService.save(object);
                     }
-                    try {
-                        writer.writeRecord(new String[] { stepLog.getLevel(), FormatUtils.TIMESTAMP_FORMATTER.format(stepLog.getCreateTime()), 
-                                StringUtils.abbreviate(stepLog.getLogText(), 100000) });
-                        writer.flush();
-                    } catch (IOException e) {
-                        writer.close();
-                        logWriters.remove(executionStepId);
-                        log.error("", e);
-                    }
-
-                    // TODO log to file
-                } else if (object != null) {
-                    executionService.save(object);
+                } catch (InterruptedException e) {
                 }
-            } catch (InterruptedException e) {
             }
-        }
 
-        running = false;
+        } finally {
+            running = false;
+        }
     }
 
     public void shutdown() {

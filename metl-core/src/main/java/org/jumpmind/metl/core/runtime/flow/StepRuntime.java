@@ -340,7 +340,7 @@ public class StepRuntime implements Runnable {
             callback.setCurrentInputMessage(threadNumber, inputMessage);
             long ts = System.currentTimeMillis();
             componentRuntime.handle(inputMessage, callback, unitOfWorkBoundaryReached);
-            statistics.incrementTimeSpentInHandle(threadNumber, System.currentTimeMillis()-ts-callback.getQueueTime(threadNumber));
+            statistics.incrementTimeSpentInHandle(threadNumber, System.currentTimeMillis()-ts-callback.useQueueTime(threadNumber));
 
             boolean recursionDone = liveSourceStepIds.size() == 1 && liveSourceStepIds.contains(componentContext.getFlowStep().getId())
                     && getActiveCountPlusQueueSize() == 1;
@@ -733,16 +733,21 @@ public class StepRuntime implements Runnable {
                 }
             }
             
-            long queueTime = System.currentTimeMillis() -ts;
-            this.queueTime.put(threadNumber, queueTime);
+            long queueTime = System.currentTimeMillis()-ts;
+            Long totalQueueTime = this.queueTime.get(threadNumber);
+            if (totalQueueTime == null) {
+                totalQueueTime = 0l;
+            }
+            totalQueueTime += queueTime;
+            this.queueTime.put(threadNumber, totalQueueTime);
             statistics.incrementTimeSpentWaiting(threadNumber, queueTime);
         }
         
-        protected long getQueueTime(int threadNumber) {
-            Long time = this.queueTime.get(threadNumber);
+        protected long useQueueTime(int threadNumber) {
+            Long time = this.queueTime.remove(threadNumber);
             if (time == null) {
                 time = 0l;
-            } 
+            }             
             return time;
         }
         
