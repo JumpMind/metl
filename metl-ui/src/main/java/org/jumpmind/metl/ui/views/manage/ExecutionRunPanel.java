@@ -681,7 +681,17 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
     }
 
     protected boolean isDone() {
-        return ExecutionStatus.isDone(statusLabel.getValue());
+        boolean done = ExecutionStatus.isDone(statusLabel.getValue());
+        if (done) {
+            List<String> ids = stepContainer.getItemIds();
+            for (String id : ids) {
+                ExecutionStep step = stepContainer.getItem(id).getBean();
+                if (!ExecutionStatus.isDone(step.getStatus())) {
+                    done = false;
+                }
+            }
+        }
+        return done;
     }
 
     @SuppressWarnings("unchecked")
