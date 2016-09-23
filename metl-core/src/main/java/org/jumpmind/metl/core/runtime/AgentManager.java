@@ -185,11 +185,6 @@ public class AgentManager implements IAgentManager {
     }
 
     @Override
-    public AgentRuntime getAgentRuntime(Agent agent) {
-        return engines.get(agent);
-    }
-
-    @Override
     public AgentRuntime getAgentRuntime(String agentId) {
         return engines.get(agentId);
     }

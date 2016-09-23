@@ -71,7 +71,7 @@ public class DbProvider implements IDbProvider, Serializable {
         IAgentManager agentManager = context.getAgentManager();
         Collection<Agent> agents = agentManager.getAvailableAgents();
         for (Agent agent : agents) {
-            AgentRuntime runtime = agentManager.getAgentRuntime(agent);
+            AgentRuntime runtime = agentManager.getAgentRuntime(agent.getId());
             Collection<IResourceRuntime> resources = runtime.getDeployedResources();
             for (IResourceRuntime iResource : resources) {
                 if (iResource.getResource().getType().equals(Datasource.TYPE)) {

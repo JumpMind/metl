@@ -213,7 +213,7 @@ public class ExploreDirectoryView extends VerticalLayout implements View {
         IAgentManager agentManager = context.getAgentManager();
         Collection<Agent> agents = agentManager.getAvailableAgents();
         for (Agent agent : agents) {
-            AgentRuntime runtime = agentManager.getAgentRuntime(agent);
+            AgentRuntime runtime = agentManager.getAgentRuntime(agent.getId());
             Collection<IResourceRuntime> resources = runtime.getDeployedResources();
             for (IResourceRuntime resource : resources) {
                 ResourceDefinition definition = resource.getClass().getAnnotation(ResourceDefinition.class);

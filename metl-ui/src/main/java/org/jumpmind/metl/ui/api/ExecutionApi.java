@@ -280,7 +280,7 @@ public class ExecutionApi {
                     if (agentDeployment.getName().equals(deploymentName)) {
                         foundDeployment = true;
                         if (agentDeployment.getDeploymentStatus() == DeploymentStatus.ENABLED) {
-                            AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent);
+                            AgentRuntime agentRuntime = agentManager.getAgentRuntime(agent.getId());
                             String executionId = agentRuntime.scheduleNow(whoAreYou(req), agentDeployment,
                                     toMap(req));
                             boolean done = false;

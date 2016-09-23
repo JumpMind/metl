@@ -429,7 +429,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
             CallWebServicePanel panel = new CallWebServicePanel(deployment, context, tabs);
             tabs.addCloseableTab(deployment.getId(), "Call " + flow.getName(), Icons.RUN, panel);
         } else {
-            String executionId = agentManager.getAgentRuntime(myDesignAgent).scheduleNow(context.getUser().getLoginId(), deployment,
+            String executionId = agentManager.getAgentRuntime(myDesignAgent.getId()).scheduleNow(context.getUser().getLoginId(), deployment,
                     flow.toFlowParametersAsString());
             if (executionId != null) {
                 ExecutionRunPanel logPanel = new ExecutionRunPanel(executionId, context, tabs,
