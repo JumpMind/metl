@@ -22,8 +22,11 @@ package org.jumpmind.metl.ui.init;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -32,7 +35,6 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.atmosphere.container.JSR356AsyncSupport;
 import org.eclipse.jetty.servlet.DefaultServlet;
@@ -176,8 +178,11 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
                 System.out.println("Could not find the " + configFile.getAbsolutePath() + " configuration file.  A default version will be written.");
                 String propContent = IOUtils.toString(getClass().getResourceAsStream("/" + configFile.getName()));
                 propContent = FormatUtils.replaceToken(propContent, "configDir", configDir, true);
-                FileUtils.write(configFile, propContent);
-                properties = new TypedProperties(configFile);
+                properties = new TypedProperties(new ByteArrayInputStream(propContent.getBytes()));
+                properties.put("log.to.console.enabled", "false");
+                FileWriter writer = new FileWriter(configFile);
+                properties.store(writer , "Generated on " + new Date());
+                IOUtils.closeQuietly(writer);                
             } catch (IOException e) {
                 throw new IoException(e);
             }
