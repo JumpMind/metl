@@ -98,8 +98,9 @@ public class AsyncRecorder implements Runnable {
                         }
                     } else if (object != null) {
                         executionService.save(object);
-                    }
-                } catch (InterruptedException e) {
+                    }                    
+                } catch (Throwable e) {
+                    log.error("Failed to persist log message", e);
                 }
             }
 
