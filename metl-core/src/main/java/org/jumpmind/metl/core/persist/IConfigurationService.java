@@ -103,8 +103,6 @@ public interface IConfigurationService {
     
     public AgentDeployment findAgentDeployment(String id);
     
-    public List<AgentDeployment> findAgentDeploymentsFor(Flow flow);    
-    
     public List<AgentDeploymentSummary> findAgentDeploymentSummary(String agentId);
     
     public AgentResource findAgentResource(String agentId, String resourceId);
@@ -190,8 +188,6 @@ public interface IConfigurationService {
     public boolean isUserLoginEnabled();
     
     public void refresh(Component component, boolean readRelations);
-    
-    public void refresh(Flow flow);
     
     public void refresh(Group group);
     

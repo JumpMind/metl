@@ -102,8 +102,7 @@ public class CallWebServicePanel extends VerticalLayout implements IUiPanel, IFl
         this.context = context;
         this.tabs = tabs;
         IConfigurationService configurationService = context.getConfigurationService();
-        Flow flow = deployment.getFlow();
-        configurationService.refresh(flow);
+        Flow flow = configurationService.findFlow(deployment.getFlow().getId());
 
         ButtonBar buttonBar = new ButtonBar();
         buttonBar.addButton("Call Service", Icons.RUN, (e) -> runFlow());

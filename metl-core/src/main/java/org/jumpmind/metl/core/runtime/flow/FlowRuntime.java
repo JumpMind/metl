@@ -320,8 +320,16 @@ public class FlowRuntime {
         }
     }
 
-    protected Flow manipulateFlow(Flow flow) {
-        for (FlowStep flowStep : new ArrayList<>(flow.getFlowSteps())) {
+    protected Flow manipulateFlow(Flow flow) {        
+        Flow clone = (Flow)flow.clone();
+        clone.setFlowParameters(new ArrayList<>());
+        clone.getFlowParameters().addAll(flow.getFlowParameters());
+        clone.setFlowSteps(new ArrayList<>());
+        clone.getFlowSteps().addAll(flow.getFlowSteps());
+        clone.setFlowStepLinks(new ArrayList<>());
+        clone.getFlowStepLinks().addAll(flow.getFlowStepLinks());
+
+        for (FlowStep flowStep : clone.getFlowSteps()) {
             XMLComponent componentDefintion = componentDefinitionFactory
                     .getDefinition(flowStep.getComponent().getType());
             if (isNotBlank(componentDefintion.getFlowManipulatorClassName())) {
@@ -329,7 +337,7 @@ public class FlowRuntime {
                     IFlowManipulator flowManipulator = (IFlowManipulator) Class
                             .forName(componentDefintion.getFlowManipulatorClassName())
                             .newInstance();
-                    flow = flowManipulator.manipulate(flow, flowStep, configurationService);
+                    clone = flowManipulator.manipulate(clone, flowStep, configurationService);
                 } catch (RuntimeException e) {
                     throw e;
                 } catch (Exception e) {
@@ -337,7 +345,7 @@ public class FlowRuntime {
                 }
             }
         }
-        return flow;
+        return clone;
     }
 
     public static Map<String, String> getFlowParameters(Flow flow, Agent agent,

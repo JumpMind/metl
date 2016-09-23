@@ -97,6 +97,8 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     List<TargetTableDefintion> targetTables;
     Throwable error;
     String lastPreparedDml;
+    Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<>();
+    long lastStatsLogTime = System.currentTimeMillis();
 
     @Override
     public void start() {
@@ -138,6 +140,9 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         if (isBlank(schemaName)) {
             schemaName = null;
         }
+        
+        statsMap = new HashMap<TargetTableDefintion, WriteStats>();
+        lastStatsLogTime = System.currentTimeMillis();
     }
 
     @Override
@@ -210,6 +215,8 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                     targetTable.getUpdateTable().getRowValues().clear();
                 }
             }
+        } else {
+            writeStats(true);
         }
     }
     
@@ -266,7 +273,6 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         boolean processedRow = false;
         int order = 0;
         for (EntityData inputRow : inputRows) {
-            //asdf
             for (TargetTableDefintion targetTableDefinition : targetTables) {
                 if (inputRow.getChangeType() == ChangeType.DEL) {
                     modelTable = targetTableDefinition.getDeleteTable();
@@ -303,17 +309,16 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         Collections.sort(targetTables);
     }
 
-    private void executeSqlByTableAndOperation(ISqlTransaction transaction, Map<TargetTableDefintion, WriteStats> statsMap) {
+    private void executeSqlByTableAndOperation(ISqlTransaction transaction) {
         for (TargetTableDefintion targetTableDefinition : targetTables) {
-            WriteStats stats = getStats(targetTableDefinition, statsMap);
+            WriteStats stats = getStats(targetTableDefinition);
             executeSqlDeletes(targetTableDefinition.getDeleteTable(), transaction, stats);
             executeSqlChanges(targetTableDefinition, transaction, stats);
             executeSqlInserts(targetTableDefinition, transaction, stats);
         }
     }
 
-    private WriteStats getStats(TargetTableDefintion targetTableDefinition, Map<TargetTableDefintion, WriteStats> statsMap) {
-
+    private WriteStats getStats(TargetTableDefintion targetTableDefinition) {
         WriteStats stats = statsMap.get(targetTableDefinition);
         if (stats == null) {
             stats = new WriteStats();
@@ -355,7 +360,6 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     }
 
     private void executeSqlInserts(TargetTableDefintion targetTableDefinition, ISqlTransaction transaction, WriteStats stats) {
-
         TargetTable targetUpdateTable = targetTableDefinition.getUpdateTable();
         TargetTable targetInsertTable = targetTableDefinition.getInsertTable();
 
@@ -391,72 +395,75 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     }
 
     private void write(ISqlTransaction transaction, EntityDataMessage inputMessage, ISendMessageCallback callback, boolean unitOfWorkLastMessage) {
-
-        long ts = System.currentTimeMillis();
-        Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<TargetTableDefintion, WriteStats>();
         sortAndStoreRowsByTableAndOperation(inputMessage.getPayload());
-        executeSqlByTableAndOperation(transaction, statsMap);
-        int totalStatementCount = writeStats(statsMap);       
-        info("Ran a total of %d statements in %s", totalStatementCount, LogUtils.formatDuration(System.currentTimeMillis() - ts));
+        executeSqlByTableAndOperation(transaction);
+        writeStats(false);       
     }
 
-    private int writeStats(Map<TargetTableDefintion, WriteStats> statsMap) {
-        int rowCount = 0;
-        for (TargetTableDefintion table : targetTables) {
-            WriteStats stats = statsMap.get(table);
-            if (stats != null) {
-                StringBuilder msg = new StringBuilder();
-                if (stats.insertCount > 0) {
-                    msg.append("Inserted: ");
-                    msg.append(stats.insertCount);
-                    rowCount += stats.insertCount;
-                }
-                if (stats.fallbackUpdateCount > 0) {
-                    if (msg.length() > 0) {
-                        msg.append(", ");
+    private void writeStats(boolean force) {
+        if (force || System.currentTimeMillis() - lastStatsLogTime > 5 * 60 * 1000) {
+            int rowCount = 0;
+            for (TargetTableDefintion table : targetTables) {
+                WriteStats stats = statsMap.get(table);
+                if (stats != null) {
+                    StringBuilder msg = new StringBuilder();
+                    if (stats.insertCount > 0) {
+                        msg.append("Inserted: ");
+                        msg.append(stats.insertCount);
+                        rowCount += stats.insertCount;
                     }
-                    msg.append("Fallback Updates: ");
-                    msg.append(stats.fallbackUpdateCount);
-                    rowCount += stats.fallbackUpdateCount * 2;
-                }
-                if (stats.updateCount > 0) {
-                    if (msg.length() > 0) {
-                        msg.append(", ");
+                    if (stats.fallbackUpdateCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append("Fallback Updates: ");
+                        msg.append(stats.fallbackUpdateCount);
+                        rowCount += stats.fallbackUpdateCount * 2;
                     }
-                    msg.append("Updated: ");
-                    msg.append(stats.updateCount);
-                    rowCount += stats.updateCount;
-                }
-                if (stats.deleteCount > 0) {
-                    if (msg.length() > 0) {
-                        msg.append(", ");
+                    if (stats.updateCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append("Updated: ");
+                        msg.append(stats.updateCount);
+                        rowCount += stats.updateCount;
                     }
-                    msg.append("Deleted: ");
-                    msg.append(stats.deleteCount);
-                    rowCount += stats.deleteCount;
-                }
-                if (stats.fallbackInsertCount > 0) {
-                    if (msg.length() > 0) {
-                        msg.append(", ");
+                    if (stats.deleteCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append("Deleted: ");
+                        msg.append(stats.deleteCount);
+                        rowCount += stats.deleteCount;
                     }
-                    msg.append("Fallback Inserts: ");
-                    msg.append(stats.fallbackInsertCount);
-                    rowCount += stats.fallbackInsertCount * 2;
-                }
-                if (stats.ignoredCount > 0) {
-                    if (msg.length() > 0) {
-                        msg.append(", ");
+                    if (stats.fallbackInsertCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append("Fallback Inserts: ");
+                        msg.append(stats.fallbackInsertCount);
+                        rowCount += stats.fallbackInsertCount * 2;
                     }
-                    msg.append("Ignored Count: ");
-                    msg.append(stats.ignoredCount);
-                    rowCount += stats.ignoredCount;
-                }
-                if (msg.length() > 0) {
-                    log(LogLevel.INFO, "%s: %s", table.getInsertTable().getTable().getFullyQualifiedTableName(), msg.toString());
+                    if (stats.ignoredCount > 0) {
+                        if (msg.length() > 0) {
+                            msg.append(", ");
+                        }
+                        msg.append("Ignored Count: ");
+                        msg.append(stats.ignoredCount);
+                        rowCount += stats.ignoredCount;
+                    }
+                    if (msg.length() > 0) {
+                        log(LogLevel.INFO, "%s: %s",
+                                table.getInsertTable().getTable().getFullyQualifiedTableName(),
+                                msg.toString());
+                    }
                 }
             }
+            info("Ran a total of %d statements in %s", rowCount,
+                    LogUtils.formatDuration(System.currentTimeMillis() - lastStatsLogTime));
+            statsMap.clear();
+            lastStatsLogTime = System.currentTimeMillis();
         }
-        return rowCount;
     }
 
     private int execute(ISqlTransaction transaction, DmlStatement dmlStatement, Object marker, Object[] data) {

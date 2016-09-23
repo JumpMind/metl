@@ -452,17 +452,6 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     }
 
     @Override
-    public List<AgentDeployment> findAgentDeploymentsFor(Flow flow) {
-        List<AgentDeployment> deployments = persistenceManager.find(AgentDeployment.class, new NameValue("flowId", flow.getId()), null, null,
-                tableName(AgentDeployment.class));
-        for (AgentDeployment agentDeployment : deployments) {
-            agentDeployment.setFlow(flow);
-            refreshAgentDeploymentRelations(agentDeployment, false);
-        }
-        return deployments;
-    }
-
-    @Override
     public AgentResource findAgentResource(String agentId, String resourceId) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("agentId", agentId);
@@ -563,7 +552,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     abstract protected List<ModelAttribute> findAllAttributesForModel(String modelId);
 
     protected Model refreshModelRelations(Model model) {
-        model.getModelEntities().clear();
+        model.setModelEntities(new ArrayList<>());
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("modelId", model.getId());
         List<ModelEntity> entities = persistenceManager.find(ModelEntity.class, params, null, null, tableName(ModelEntity.class));
@@ -818,18 +807,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         resource.setSettings(settings);
     }
 
-//    public void refresh(Agent agent) {
-//        refresh((AbstractObject) agent);
-//        if (agent.getFolder() != null) {
-//            refresh(agent.getFolder());
-//        }
-//        refreshAgentParameters(agent);
-//        refreshAgentResourceSettings(agent);
-//        refreshAgentDeployments(agent);
-//    }
-
-    @Override
-    public void refresh(Flow flow) {
+    protected void refresh(Flow flow) {
         refresh((AbstractObject) flow);
         refreshFlowRelations(flow);
     }
@@ -860,8 +838,8 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     }
 
     private void refreshFlowRelations(Flow flow) {
-        flow.getFlowSteps().clear();
-        flow.getFlowStepLinks().clear();
+        flow.setFlowSteps(new ArrayList<>());
+        flow.setFlowStepLinks(new ArrayList<>());
         Map<String, Object> versionParams = new HashMap<String, Object>();
         versionParams.put("flowId", flow.getId());
 
