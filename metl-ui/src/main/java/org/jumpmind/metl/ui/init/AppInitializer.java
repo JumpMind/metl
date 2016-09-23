@@ -35,6 +35,7 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.atmosphere.container.JSR356AsyncSupport;
 import org.eclipse.jetty.servlet.DefaultServlet;
@@ -99,13 +100,32 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     public void contextInitialized(ServletContextEvent sce) {
         WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce.getServletContext());
         LogUtils.initLogging(getConfigDir(false), ctx);
+        cleanTempJettyDirectories();
         initDatabase(ctx);
         initAgentRuntime(ctx);
+    }
+    
+    protected void cleanTempJettyDirectories() {
+        File tempDir = new File(System.getProperty("java.io.tmpdir"));
+        if (tempDir.exists() && tempDir.isDirectory()) {
+            File[] files = tempDir.listFiles();
+            for (File file : files) {
+                if (file.isDirectory() && file.getName().startsWith("jetty") && file.getName().contains("metl") && file.lastModified() < (System.currentTimeMillis()-24*60*60*1000)) {
+                    try {
+                        LoggerFactory.getLogger(getClass()).info("Purging " + file.getAbsolutePath());
+                        FileUtils.deleteDirectory(file);
+                    } catch (IOException e) {
+                    }                    
+                }
+            }
+        }
     }
 
     protected void initAgentRuntime(WebApplicationContext ctx) {
         IAgentManager agentManger = ctx.getBean(IAgentManager.class);
-        agentManger.start();
+        Thread startupThread = new Thread(()->agentManger.start());
+        startupThread.setName("agent-manager-startup");
+        startupThread.start();
     }
 
     protected void initDatabase(WebApplicationContext ctx) {
