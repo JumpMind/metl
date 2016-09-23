@@ -99,7 +99,7 @@ public interface IConfigurationService {
     
     public List<Flow> findAffectedFlowsByResource(String resourceId);
     
-    public Agent findAgent(String agentId);
+    public Agent findAgent(String agentId, boolean includeDeployments);
     
     public AgentDeployment findAgentDeployment(String id);
     
@@ -188,8 +188,6 @@ public interface IConfigurationService {
     public boolean isModelUsed(String id);
 
     public boolean isUserLoginEnabled();
-    
-    public void refresh(Agent agent);
     
     public void refresh(Component component, boolean readRelations);
     

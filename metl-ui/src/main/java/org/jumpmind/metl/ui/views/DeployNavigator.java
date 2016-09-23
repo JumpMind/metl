@@ -442,7 +442,7 @@ public class DeployNavigator extends VerticalLayout {
     protected void openItem(Object item) {
         if (item instanceof AgentName) {
             AgentName agentName = (AgentName) item;
-            Agent agent = context.getConfigurationService().findAgent(agentName.getId());
+            Agent agent = context.getConfigurationService().findAgent(agentName.getId(), false);
             tabbedPanel.addCloseableTab(agent.getId(), agent.getName(), Icons.AGENT,
                     new EditAgentPanel(context, tabbedPanel, agent));
         }
@@ -582,7 +582,7 @@ public class DeployNavigator extends VerticalLayout {
     protected void deleteTreeItems(AbstractObject obj) {
         if (obj instanceof AgentName) {
             AgentName agentName = (AgentName) obj;
-            Agent agent = context.getConfigurationService().findAgent(agentName.getId());
+            Agent agent = context.getConfigurationService().findAgent(agentName.getId(), false);
             context.getConfigurationService().delete(agent);
             context.getAgentManager().refresh(agent);
             refresh();

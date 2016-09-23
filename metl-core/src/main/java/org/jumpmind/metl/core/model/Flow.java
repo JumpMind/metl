@@ -378,7 +378,7 @@ public class Flow extends AbstractObject {
             }
         }
         return finalSteps;
-    }
+    }    
 
     static public class XSorter implements Comparator<FlowStep> {
         @Override

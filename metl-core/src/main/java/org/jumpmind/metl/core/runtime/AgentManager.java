@@ -61,7 +61,7 @@ public class AgentManager implements IAgentManager {
     
     IHttpRequestMappingRegistry httpRequestMappingRegistry;
 
-    Map<Agent, AgentRuntime> engines = new HashMap<Agent, AgentRuntime>();
+    Map<String, AgentRuntime> engines = new HashMap<String, AgentRuntime>();
 
     public AgentManager(IConfigurationService configurationService, IExecutionService executionService,
             IComponentRuntimeFactory componentFactory, IComponentDefinitionFactory componentDefinitionFactory, IResourceFactory resourceFactory, IHttpRequestMappingRegistry httpRequestMappingRegistry) {
@@ -75,7 +75,11 @@ public class AgentManager implements IAgentManager {
     
     @Override
     public Set<Agent> getAvailableAgents() {
-        return new HashSet<Agent>(engines.keySet());
+        Set<Agent> agents = new HashSet<Agent>(engines.size());
+        for (AgentRuntime runtime : engines.values()) {
+            agents.add(runtime.agent);
+        }
+        return agents;
     }
 
     public void start() {
@@ -140,7 +144,7 @@ public class AgentManager implements IAgentManager {
     protected AgentRuntime createAndStartRuntime(Agent agent) {
         AgentRuntime engine = new AgentRuntime(agent, configurationService, executionService, componentRuntimeFactory, componentDefinitionFactory,
                 resourceFactory, httpRequestMappingRegistry);
-        engines.put(agent, engine);
+        engines.put(agent.getId(), engine);
         if (agent.getAgentStartMode() == AgentStartMode.AUTO) {
             engine.start();
         } else {
@@ -187,13 +191,7 @@ public class AgentManager implements IAgentManager {
 
     @Override
     public AgentRuntime getAgentRuntime(String agentId) {
-        Set<Agent> agents = engines.keySet();
-        for (Agent agent : agents) {
-            if (agent.getId().equals(agentId)) {
-                return getAgentRuntime(agent);
-            }
-        }
-        return null;
+        return engines.get(agentId);
     }
 
 }

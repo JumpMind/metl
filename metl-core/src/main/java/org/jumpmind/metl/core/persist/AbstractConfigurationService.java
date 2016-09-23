@@ -328,10 +328,16 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     }
 
     @Override
-    public Agent findAgent(String agentId) {
+    public Agent findAgent(String agentId, boolean includeDeployments) {
         Agent agent = findOne(Agent.class, new NameValue("id", agentId));
+        if (agent.getFolder() != null) {
+          refresh(agent.getFolder());
+        }
         refreshAgentParameters(agent);
         refreshAgentResourceSettings(agent);
+        if (includeDeployments) {
+            refreshAgentDeployments(agent);
+        }
         return agent;
     }
 
@@ -812,16 +818,15 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         resource.setSettings(settings);
     }
 
-    @Override
-    public void refresh(Agent agent) {
-        refresh((AbstractObject) agent);
-        if (agent.getFolder() != null) {
-            refresh(agent.getFolder());
-        }
-        refreshAgentParameters(agent);
-        refreshAgentResourceSettings(agent);
-        refreshAgentDeployments(agent);
-    }
+//    public void refresh(Agent agent) {
+//        refresh((AbstractObject) agent);
+//        if (agent.getFolder() != null) {
+//            refresh(agent.getFolder());
+//        }
+//        refreshAgentParameters(agent);
+//        refreshAgentResourceSettings(agent);
+//        refreshAgentDeployments(agent);
+//    }
 
     @Override
     public void refresh(Flow flow) {

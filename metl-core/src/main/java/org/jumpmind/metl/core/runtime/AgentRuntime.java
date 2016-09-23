@@ -544,7 +544,7 @@ public class AgentRuntime {
         @Override
         public void run() {
             synchronized (AgentRuntime.this) {
-                configurationService.refresh(agent);
+                agent = configurationService.findAgent(agent.getId(), true);
                 for (AgentDeployment deployment : new HashSet<AgentDeployment>(agent.getAgentDeployments())) {
                     DeploymentStatus status = deployment.getDeploymentStatus();
                     if (status.equals(DeploymentStatus.REQUEST_ENABLE)) {
