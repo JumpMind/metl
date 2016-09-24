@@ -84,6 +84,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.DragAndDropWrapper;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.HeaderCell;
 import com.vaadin.ui.Grid.HeaderRow;
@@ -269,8 +270,11 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         flowPanel = new Panel();
         flowPanel.setSizeFull();
         flowPanel.addStyleName(ValoTheme.PANEL_WELL);
-
-        flowPanel.setContent(diagramLayout);
+        
+        // Wrapper fixes issue with the diagram not expanding inside the scroll panel.
+        DragAndDropWrapper wrapper = new DragAndDropWrapper(diagramLayout);
+        wrapper.setSizeUndefined();
+        flowPanel.setContent(wrapper);
 
         stepTable.setSelectionMode(SelectionMode.SINGLE);
         stepTable.setImmediate(true);
