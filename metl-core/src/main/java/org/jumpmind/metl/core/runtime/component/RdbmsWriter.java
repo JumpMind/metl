@@ -99,6 +99,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     String lastPreparedDml;
     Map<TargetTableDefintion, WriteStats> statsMap = new HashMap<>();
     long lastStatsLogTime = System.currentTimeMillis();
+    long sqlDuration = 0;
 
     @Override
     public void start() {
@@ -473,7 +474,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                 }
             }
             info("Ran a total of %d statements in %s", rowCount,
-                    LogUtils.formatDuration(System.currentTimeMillis() - lastStatsLogTime));
+                    LogUtils.formatDuration(sqlDuration));
             statsMap.clear();
             lastStatsLogTime = System.currentTimeMillis();
         }
@@ -493,6 +494,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
         if (log.isDebugEnabled()) {
             log.debug("Submitting data {} with types {}", Arrays.toString(data), Arrays.toString(dmlStatement.getTypes()));
         }
+        long ts = System.currentTimeMillis();
         try {
             return transaction.addRow(marker, data, dmlStatement.getTypes());
         } catch (SqlException ex) {
@@ -510,6 +512,8 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             } else {
                 throw ex;
             }
+        } finally {
+            sqlDuration += System.currentTimeMillis()-ts;
         }
     }
 
