@@ -81,6 +81,9 @@ public class ApplicationContext implements Serializable {
     IDatabasePlatform configDatabasePlatform;
     
     @Autowired
+    IDatabasePlatform executionDatabasePlatform;
+    
+    @Autowired
     IHttpRequestMappingRegistry httpRequestMappingRegistry;
     
     @Autowired
@@ -145,6 +148,10 @@ public class ApplicationContext implements Serializable {
 
     public IDatabasePlatform getConfigDatabasePlatform() {
         return configDatabasePlatform;
+    }
+    
+    public IDatabasePlatform getExecutionDatabasePlatform() {
+        return executionDatabasePlatform;
     }
         
     public IUIFactory getUiFactory() {

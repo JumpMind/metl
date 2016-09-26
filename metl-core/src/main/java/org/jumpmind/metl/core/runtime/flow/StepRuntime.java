@@ -109,8 +109,6 @@ public class StepRuntime implements Runnable {
 
     FlowRuntime flowRuntime;
 
-    Map<Integer, IComponentRuntime> componentRuntimeByThread = new HashMap<>();
-
     boolean startStep;
 
     Set<String> liveSourceStepIds;
@@ -205,7 +203,7 @@ public class StepRuntime implements Runnable {
                         LogUtils.normalizeName(componentContext.getFlowStep().getName()));
                 this.componentRuntimeExecutor = ThreadUtils.createFixedThreadPool(prefix, queueCapacity, threadCount);
             }
-            for(IComponentRuntime componentRuntime:componentRuntimeByThread.values()) {
+            for(IComponentRuntime componentRuntime:componentContext.getComponentRuntimeByThread().values()) {
                 if (sourceStepRuntimes.size() == 0 && !componentRuntime.supportsStartupMessages()) {
                     throw new MisconfiguredException("%s must have an inbound connection from another component",
                             componentRuntime.getComponentDefintion().getName());
@@ -222,7 +220,7 @@ public class StepRuntime implements Runnable {
     protected void createComponentRuntime(int threadNumber) {
         String type = getComponentType();
         IComponentRuntime componentRuntime = componentRuntimeFactory.create(type, componentContext, threadNumber);
-        componentRuntimeByThread.put(threadNumber, componentRuntime);
+        componentContext.getComponentRuntimeByThread().put(threadNumber, componentRuntime);
     }
 
     protected void recordError(int threadNumber, Throwable ex) {
@@ -329,7 +327,7 @@ public class StepRuntime implements Runnable {
             
             componentContext.getExecutionTracker().beforeHandle(threadNumber, componentContext);            
 
-            IComponentRuntime componentRuntime = componentRuntimeByThread.get(threadNumber);
+            IComponentRuntime componentRuntime = componentContext.getComponentRuntimeByThread().get(threadNumber);
 
             Component component = componentContext.getFlowStep().getComponent();
             boolean logInput = component.getBoolean(AbstractComponentRuntime.LOG_INPUT, false);
@@ -478,7 +476,7 @@ public class StepRuntime implements Runnable {
         }
 
         targetStepRuntimes.forEach(t -> shutdownTargets(t));
-        componentRuntimeByThread.values().forEach(c -> stop(c));
+        componentContext.getComponentRuntimeByThread().values().forEach(c -> stop(c));
 
         finished = true;
         running = false;
@@ -501,7 +499,7 @@ public class StepRuntime implements Runnable {
     }
     
     private final void recordFlowStepFinished() {
-        componentRuntimeByThread.keySet()
+        componentContext.getComponentRuntimeByThread().keySet()
                 .forEach(threadNumber -> recordFlowStepFinished(threadNumber));
     }
 
@@ -535,11 +533,11 @@ public class StepRuntime implements Runnable {
     }
     
     public List<IComponentRuntime> getComponentRuntimes() {
-        return new ArrayList<>(componentRuntimeByThread.values());
+        return new ArrayList<>(componentContext.getComponentRuntimeByThread().values());
     }
 
     public void flowCompletedWithoutError() {
-        componentRuntimeByThread.values().forEach(c -> flowCompletedWithoutError(c));
+        componentContext.getComponentRuntimeByThread().values().forEach(c -> flowCompletedWithoutError(c));
     }
 
     private void flowCompletedWithoutError(IComponentRuntime componentRuntime) {
@@ -554,7 +552,7 @@ public class StepRuntime implements Runnable {
     }
 
     public void flowCompletedWithErrors(Throwable myError, List<Throwable> allErrors) {
-        componentRuntimeByThread.values().forEach(c -> flowCompletedWithErrors(c, myError, allErrors));
+        componentContext.getComponentRuntimeByThread().values().forEach(c -> flowCompletedWithErrors(c, myError, allErrors));
     }
 
     private void flowCompletedWithErrors(IComponentRuntime componentRuntime, Throwable myError, List<Throwable> allErrors) {

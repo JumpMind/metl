@@ -51,6 +51,8 @@ public class ComponentContext {
 
     LinkedCaseInsensitiveMap<Object> context;  
     
+    Map<Integer, IComponentRuntime> componentRuntimeByThread = new HashMap<>();
+    
     boolean startStep = false;
 
     public ComponentContext(AgentDeployment deployment, FlowStep flowStep, Flow manipulatedFlow, IExecutionTracker executionTracker,
@@ -119,6 +121,10 @@ public class ComponentContext {
     
     public boolean isStartStep() {
         return startStep;
+    }
+    
+    public Map<Integer, IComponentRuntime> getComponentRuntimeByThread() {
+        return componentRuntimeByThread;
     }
 
 }

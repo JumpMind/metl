@@ -129,17 +129,18 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     }
 
     protected void initDatabase(WebApplicationContext ctx) {
-        IDatabasePlatform platform = ctx.getBean(IDatabasePlatform.class);
+        IDatabasePlatform platform = ctx.getBean("configDatabasePlatform", IDatabasePlatform.class);
         IConfigurationService configurationService = ctx.getBean(IConfigurationService.class);
         boolean isInstalled = configurationService.isInstalled();
-        DatabaseScriptContainer dbUpgradeScripts = new DatabaseScriptContainer("/org/jumpmind/metl/core/upgrade", platform);
-        ConfigDatabaseUpgrader dbUpgrader = ctx.getBean(ConfigDatabaseUpgrader.class);
+        DatabaseScriptContainer dbUpgradeScripts = new DatabaseScriptContainer("/org/jumpmind/metl/core/upgrade", platform);        
         String fromVersion = configurationService.getLastKnownVersion();
         String toVersion = VersionUtils.getCurrentVersion();
         if (fromVersion != null && !fromVersion.equals(toVersion)) {
             dbUpgradeScripts.executePreInstallScripts(fromVersion, toVersion);
         }
-        dbUpgrader.upgrade();
+        ctx.getBean("configDatabaseUpgrader", ConfigDatabaseUpgrader.class).upgrade();        
+        ctx.getBean("executionDatabaseUpgrader", ConfigDatabaseUpgrader.class).upgrade();
+        
         if (fromVersion != null && !fromVersion.equals(toVersion)) {
             dbUpgradeScripts.executePostInstallScripts(fromVersion, toVersion);            
         } 
@@ -199,7 +200,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
                 String propContent = IOUtils.toString(getClass().getResourceAsStream("/" + configFile.getName()));
                 propContent = FormatUtils.replaceToken(propContent, "configDir", configDir, true);
                 properties = new TypedProperties(new ByteArrayInputStream(propContent.getBytes()));
-                properties.put("log.to.console.enabled", "false");
+                properties.put("log.to.console.enabled", System.getProperty("log.to.console.enabled", "false"));
                 FileWriter writer = new FileWriter(configFile);
                 properties.store(writer , "Generated on " + new Date());
                 IOUtils.closeQuietly(writer);                

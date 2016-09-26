@@ -395,48 +395,6 @@
         </foreign-key>
     </table>     
     
-    <table name="execution" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
-        <column name="agent_id" type="CHAR" size="36" required="true" description="A unique identifier" />
-        <column name="flow_id" type="CHAR" size="36" required="true" description="A unique identifier" />
-        <column name="deployment_id" type="CHAR" size="36" required="true" description="A unique identifier" />
-		<column name="agent_name" type="VARCHAR" size="255" description="" />
-		<column name="host_name" type="VARCHAR" size="255" description="" />
-		<column name="flow_name" type="VARCHAR" size="255" description="" />        
-        <column name="deployment_name" type="VARCHAR" size="255" description="" />
-        <column name="parameters" type="VARCHAR" size="4000" description="" />
-        <column name="status" type="VARCHAR" required="true" default="REQUESTED" size="255" description="" />
-        <column name="start_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
-        <column name="end_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
-        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
-        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
-        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
-        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />    
-        <index name="idx_ex_sts_time">
-            <index-column name="status"/>
-            <index-column name="last_update_time"/>
-        </index>           
-    </table>    
-
-     <table name="execution_step" description="">
-        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
-        <column name="execution_id" type="CHAR" size="36" required="true" description="A unique identifier" />
-        <column name="thread_number" type="INTEGER" required="true" default="0" description="The thread number" />
-        <column name="flow_step_id" type="CHAR" size="36" required="true" description="A unique identifier" />
-        <column name="component_name" type="VARCHAR" required="true" size="255" description="" />
-        <column name="approximate_order" type="INTEGER" default="0" required="true" />
-        <column name="status" type="VARCHAR" size="255" description="" />
-        <column name="messages_received" type="INTEGER" default="0" required="true" />
-        <column name="messages_produced" type="INTEGER" default="0" required="true" />
-        <column name="payload_received" type="INTEGER" default="0" required="true" />
-        <column name="payload_produced" type="INTEGER" default="0" required="true" />        
-        <column name="entities_processed" type="INTEGER" default="0" required="true" />
-        <column name="start_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
-        <column name="end_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
-        <column name="handle_duration" type="BIGINT" default="0" required="true" />
-        <column name="queue_duration" type="BIGINT" default="0" required="true" />
-    </table>   
-
     <table name="user_hist" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
         <column name="user_id" type="CHAR" size="36" required="true" description="" />

@@ -163,7 +163,7 @@ public class ExecutionSqlService extends AbstractExecutionService implements IEx
                 log.info("Purged {} execution records", new Object[] { count });                
             }
         } else {
-            log.info("Could not run execution purge because table had not been created yet");
+            log.info("Could not run execution purge for status '{}' because table had not been created yet", status);
         }
     }
 
