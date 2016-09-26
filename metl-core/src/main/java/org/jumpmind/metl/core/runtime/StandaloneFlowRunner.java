@@ -164,6 +164,7 @@ public class StandaloneFlowRunner {
                 LogUtils.setLogDir(logDir);
                 databasePlatform = initDatabasePlatform();
                 new ConfigDatabaseUpgrader("/schema.xml", databasePlatform, true, "METL").upgrade();
+                new ConfigDatabaseUpgrader("/schema-exec.xml", databasePlatform, true, "METL").upgrade();
                 persistenceManager = new SqlPersistenceManager(databasePlatform);
                 IComponentDefinitionFactory componentDefinitionFactory = new ComponentXmlDefinitionFactory();
                 configurationService = new ConfigurationSqlService(new SecurityService(),
