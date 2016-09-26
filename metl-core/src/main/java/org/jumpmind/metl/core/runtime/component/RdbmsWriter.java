@@ -216,7 +216,20 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
                 }
             }
         } else {
-            writeStats(true);
+            Map<Integer, IComponentRuntime> all = context.getComponentRuntimeByThread();
+            boolean called = false;
+            if (all != null && all.size() > 0) {
+                for (IComponentRuntime runtime : all.values()) {
+                    if (runtime instanceof RdbmsWriter) {
+                        ((RdbmsWriter) runtime).writeStats(true);
+                        called = true;
+                    }
+                }
+            } 
+            
+            if (!called) {
+                writeStats(true);
+            }
         }
     }
     
@@ -401,7 +414,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
     }
 
     private void writeStats(boolean force) {
-        if (force || System.currentTimeMillis() - lastStatsLogTime > 5 * 60 * 1000) {
+        if (targetTables != null && (force || System.currentTimeMillis() - lastStatsLogTime > 5 * 60 * 1000)) {
             int rowCount = 0;
             for (TargetTableDefintion table : targetTables) {
                 WriteStats stats = statsMap.get(table);
