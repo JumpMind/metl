@@ -475,6 +475,7 @@ public class RdbmsWriter extends AbstractRdbmsComponentRuntime {
             }
             info("Ran a total of %d statements in %s", rowCount,
                     LogUtils.formatDuration(sqlDuration));
+            sqlDuration = 0;
             statsMap.clear();
             lastStatsLogTime = System.currentTimeMillis();
         }
