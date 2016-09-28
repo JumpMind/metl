@@ -82,7 +82,7 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
         table.setSelectable(true);
         table.setSortEnabled(false);
         table.setImmediate(true);
-        table.setSizeFull();
+        table.setSizeFull(); 
         table.setVisibleColumns(new Object[] { "matchExpression", "targetStepId" });
         table.setColumnHeaders(new String[] { "Expression", "Target Step" });
         table.setTableFieldFactory(new EditFieldFactory());        
@@ -99,6 +99,12 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
         addComponent(table);
         setExpandRatio(table, 1.0f);
 
+
+    }    
+    
+    @Override
+    public void selected() {
+        table.removeAllItems();
         String json = flowStep.getComponent().get(ContentRouter.SETTING_CONFIG);
         if (isNotBlank(json)) {
             try {
@@ -144,6 +150,7 @@ public class EditContentRouterPanel extends AbstractFlowStepAwareComponentEditPa
             } else if (propertyId.equals("targetStepId")) {
                 final ComboBox combo = new ComboBox();
                 combo.setWidth(100, Unit.PERCENTAGE);
+                flow = context.getConfigurationService().findFlow(flow.getId());
                 List<FlowStepLink> stepLinks = flow.findFlowStepLinksWithSource(flowStep.getId());
                 for (FlowStepLink flowStepLink : stepLinks) {
                     FlowStep comboStep = flow.findFlowStepWithId(flowStepLink.getTargetStepId());

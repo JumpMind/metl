@@ -234,6 +234,7 @@ public class EditFlowPanel extends HorizontalLayout implements IUiPanel, IFlowRu
 
     @Override
     public void selected() {
+        propertySheet.setSource(propertySheet.getValue());
     }
 
     public Flow getFlow() {
