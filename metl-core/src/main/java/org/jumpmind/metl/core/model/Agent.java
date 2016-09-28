@@ -55,6 +55,8 @@ public class Agent extends AbstractObject {
     List<AgentParameter> agentParameters;
 
     boolean deleted;
+    
+    int execThreadCount = 10;
 
     public Agent(String name, String host) {
         this();
@@ -228,6 +230,14 @@ public class Agent extends AbstractObject {
 
     public boolean isAutoRefresh() {
         return autoRefresh;
+    }
+    
+    public void setExecThreadCount(int execThreadCount) {
+        this.execThreadCount = execThreadCount;
+    }
+    
+    public int getExecThreadCount() {
+        return execThreadCount;
     }
 
 }

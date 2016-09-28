@@ -176,7 +176,7 @@ public class AgentRuntime {
              * the entire pool is used.
              * A common Linux thread limit is 1024 per user.
              */
-            this.flowExecutionScheduler.setPoolSize(100);
+            this.flowExecutionScheduler.setPoolSize(agent.getExecThreadCount());
             this.flowExecutionScheduler.initialize();
 
             this.globalSettings = configurationService.findGlobalSettingsAsMap();

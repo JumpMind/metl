@@ -59,6 +59,8 @@ import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.vaadin.ui.common.CommonUiUtils;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
+import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
+import org.jumpmind.vaadin.ui.common.NotifyDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,7 +165,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         hostNameField.setImmediate(true);
         hostNameField.setTextChangeEventMode(TextChangeEventMode.LAZY);
         hostNameField.setTextChangeTimeout(100);
-        hostNameField.setWidth(20, Unit.EM);
+        hostNameField.setWidth(15, Unit.EM);
         hostNameField.setNullRepresentation("");
         hostNameField.setValue(agent.getHost());
         hostNameField.addValueChangeListener(event -> {
@@ -171,7 +173,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
             EditAgentPanel.this.context.getConfigurationService().save((AbstractObject) agent);
             EditAgentPanel.this.context.getAgentManager().refresh(agent);
         });
-        
+                
         buttonGroup.addComponent(hostNameField);
         buttonGroup.setComponentAlignment(hostNameField, Alignment.BOTTOM_LEFT);
 
@@ -182,8 +184,31 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
 
         editAgentLayout.addComponent(buttonGroup);
         editAgentLayout.setComponentAlignment(buttonGroup, Alignment.BOTTOM_LEFT);
+        
+        TextField executionThreadsField = new ImmediateUpdateTextField("Execution Threads") {            
+            private static final long serialVersionUID = 1L;
 
-        Button exportButton = new Button("Export Agent Config", event -> exportConfiguration());
+            @Override
+            protected void save(String text) {
+                try {
+                    int value = Integer.parseInt(text);
+                    agent.setExecThreadCount(value);
+                    context.getConfigurationService().save((AbstractObject) agent);
+                    EditAgentPanel.this.context.getAgentManager().refresh(agent);
+                } catch (NumberFormatException ex) {
+                    NotifyDialog.show("Number required", "Please enter a valid number", null,
+                            Type.WARNING_MESSAGE);
+                }
+            }
+        };
+        executionThreadsField.setValue(Integer.toString(agent.getExecThreadCount()));
+        editAgentLayout.addComponent(executionThreadsField);
+        editAgentLayout.setComponentAlignment(executionThreadsField, Alignment.BOTTOM_LEFT);
+
+
+        Button exportButton = new Button(FontAwesome.DOWNLOAD);
+        exportButton.addClickListener(event -> exportConfiguration());
+        exportButton.setDescription("Export Agent Configuration");
         editAgentLayout.addComponent(exportButton);
         editAgentLayout.setComponentAlignment(exportButton, Alignment.BOTTOM_LEFT);
 
