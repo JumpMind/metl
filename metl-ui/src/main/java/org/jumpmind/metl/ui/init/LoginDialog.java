@@ -296,31 +296,27 @@ public class LoginDialog extends Window {
         ISecurityService securityService = context.getSecurityService();
         IConfigurationService configurationService = context.getConfigurationService();
         User user = configurationService.findUserByLoginId(userNameField.getValue());
-        String password = securityService.hash(user.getSalt(), passwordField.getValue());
-        if (isNewPasswordMode()) {
-            if (testPassword(passwordField, validatePasswordField, context)) {
-                configurationService.savePassword(user, passwordField.getValue());
-                login = true;
-            }
-        } else if (user != null && user.getPassword() != null
-                && user.getPassword().equals(password)) {
-            Date expireTime = DateUtils.addDays(new Date(), -passwordExpiresInDays);
-            if (user.getLastPasswordTime() == null
-                    || user.getLastPasswordTime().before(expireTime)) {
-                userNameField.setVisible(false);
-                passwordField.setValue(null);
-                setCaption(PASSWORD_EXPIRED);
-                passwordField.setCaption("New Password");
-                validatePasswordField.setVisible(true);
-            } else {
-                login = true;
-            }
-        } else {
-            String address = Page.getCurrent().getWebBrowser().getAddress();
-            log.warn("Invalid login attempt for user " + userNameField.getValue() + " from address "
-                    + address);
-            notify("Invalid Login", "You specified an invalid login or password");
-            userNameField.selectAll();
+        if (user != null) {
+            String password = securityService.hash(user.getSalt(), passwordField.getValue());            
+            if (isNewPasswordMode()) {
+                if (testPassword(passwordField, validatePasswordField, context)) {
+                    configurationService.savePassword(user, passwordField.getValue());
+                    login = true;
+                }
+            } else if (user.getPassword() != null
+                    && user.getPassword().equals(password)) {
+                Date expireTime = DateUtils.addDays(new Date(), -passwordExpiresInDays);
+                if (user.getLastPasswordTime() == null
+                        || user.getLastPasswordTime().before(expireTime)) {
+                    userNameField.setVisible(false);
+                    passwordField.setValue(null);
+                    setCaption(PASSWORD_EXPIRED);
+                    passwordField.setCaption("New Password");
+                    validatePasswordField.setVisible(true);
+                } else {
+                    login = true;
+                }
+            } 
         }
 
         if (login) {
@@ -328,6 +324,12 @@ public class LoginDialog extends Window {
             user.setLastLoginTime(new Date());
             context.getConfigurationService().save(user);
             loginListener.login(user);
+        } else {
+            String address = Page.getCurrent().getWebBrowser().getAddress();
+            log.warn("Invalid login attempt for user " + userNameField.getValue() + " from address "
+                    + address);
+            notify("Invalid Login", "You specified an invalid login or password");
+            userNameField.selectAll();
         }
     }
 
