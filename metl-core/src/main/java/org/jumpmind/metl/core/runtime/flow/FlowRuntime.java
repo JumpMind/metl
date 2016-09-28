@@ -329,7 +329,7 @@ public class FlowRuntime {
         clone.setFlowStepLinks(new ArrayList<>());
         clone.getFlowStepLinks().addAll(flow.getFlowStepLinks());
 
-        for (FlowStep flowStep : clone.getFlowSteps()) {
+        for (FlowStep flowStep : new ArrayList<>(clone.getFlowSteps())) {
             XMLComponent componentDefintion = componentDefinitionFactory
                     .getDefinition(flowStep.getComponent().getType());
             if (isNotBlank(componentDefintion.getFlowManipulatorClassName())) {
