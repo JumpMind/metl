@@ -980,7 +980,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     public void save(Setting setting) {
         boolean isPassword = isPassword(setting); 
         String unencrypted = setting.getValue();
-          if (isPassword) {              
+          if (isPassword && isNotBlank(unencrypted)) {              
               String encrypted = SecurityConstants.PREFIX_ENC + securityService.encrypt(unencrypted);
               setting.setValue(encrypted);
           }
