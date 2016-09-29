@@ -308,8 +308,13 @@ public class FtpDirectory implements IDirectory {
 
         @Override
         public void close() throws IOException {
-            super.close();
-            FtpDirectory.this.close(ftpClient);
+            try {
+                super.close();
+            } catch (Exception ex) {
+                log.debug("", ex);
+            } finally {
+                FtpDirectory.this.close(ftpClient);
+            }
         }
     }
 
