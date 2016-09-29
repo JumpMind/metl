@@ -227,9 +227,14 @@ public class AppUI extends UI implements LoginListener {
         }
     }
 
-    public WebApplicationContext getWebApplicationContext() {
+    public static WebApplicationContext getWebApplicationContext() {
+        VaadinServlet servlet = VaadinServlet.getCurrent();
+        if (servlet != null) {
         return WebApplicationContextUtils
-                .getRequiredWebApplicationContext(VaadinServlet.getCurrent().getServletContext());
+                .getRequiredWebApplicationContext(servlet.getServletContext());
+        } else {
+            return null;
+        }
     }
 
     @Override

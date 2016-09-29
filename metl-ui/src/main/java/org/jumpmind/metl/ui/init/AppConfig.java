@@ -49,6 +49,7 @@ import org.jumpmind.db.sql.SqlPersistenceManager;
 import org.jumpmind.db.sql.SqlTemplateSettings;
 import org.jumpmind.db.util.BasicDataSourceFactory;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
+import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.persist.ConfigurationSqlService;
 import org.jumpmind.metl.core.persist.ExecutionSqlService;
 import org.jumpmind.metl.core.persist.IConfigurationService;
@@ -70,6 +71,7 @@ import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.security.SecurityService;
 import org.jumpmind.metl.core.util.EnvConstants;
 import org.jumpmind.metl.core.util.LogUtils;
+import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.views.IUIFactory;
 import org.jumpmind.metl.ui.views.UIXMLFactory;
 import org.jumpmind.persist.IPersistenceManager;
@@ -85,6 +87,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -327,7 +330,17 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     public IConfigurationService configurationService() {
         if (configurationService == null) {
             configurationService = new ConfigurationSqlService(securityService(), componentDefinitionFactory(),
-                    configDatabasePlatform(), persistenceManager(), tablePrefix());
+                    configDatabasePlatform(), persistenceManager(), tablePrefix()) {
+                @Override
+                public void save(AbstractObject data) {
+                    WebApplicationContext context = AppUI.getWebApplicationContext();
+                    if (context != null) {
+                        data.setLastUpdateBy(
+                                context.getBean(ApplicationContext.class).getUser().getLoginId());
+                    }
+                    super.save(data);
+                }
+            };
         }
         return configurationService;
     }
