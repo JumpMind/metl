@@ -42,6 +42,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentDeploymentParameter;
+import org.jumpmind.metl.core.model.AgentResourceSetting;
 import org.jumpmind.metl.core.model.AgentStatus;
 import org.jumpmind.metl.core.model.DeploymentStatus;
 import org.jumpmind.metl.core.model.Flow;
@@ -286,6 +287,21 @@ public class AgentRuntime {
             try {
                 Resource flowResource = configurationService.findResource(flowResourceName.getId());
                 IResourceRuntime alreadyDeployed = deployedResources.get(flowResource.getId());
+                
+                if (alreadyDeployed == null) {
+                    Resource previousResource = configurationService.findPreviousVersionResource(flowResource);
+                    if (previousResource != null) {
+                        log.info("Found a previous version of the '{}' resource.  Using it's agent settings during deployment", flowResource.getName());
+                        TypedProperties previouslyOverriddenSettings = agent.toTypedProperties(previousResource);
+                        for (Object key : previouslyOverriddenSettings.keySet()) {
+                            AgentResourceSetting setting = new AgentResourceSetting(flowResource.getId(), agent.getId());
+                            setting.setName((String)key);
+                            setting.setValue((String)previouslyOverriddenSettings.get(key));
+                            configurationService.save(setting);
+                            agent.getAgentResourceSettings().add(setting);
+                        }                        
+                    }
+                }
 
                 Map<String, SettingDefinition> settings = resourceFactory
                         .getSettingDefinitionsForResourceType(flowResource.getType());
@@ -331,7 +347,7 @@ public class AgentRuntime {
                                 flowResource.getName(), agent.getName());
                         alreadyDeployed.stop();
                     }
-                }
+                } 
 
                 if (deploy) {
                     log.info("Deploying the {} resource to the {} agent", flowResource.getName(),

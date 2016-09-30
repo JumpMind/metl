@@ -1412,5 +1412,21 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         oldToNewUUIDMapping.put(original.getId(), copy);
         return copy;
     }
+    
+    @Override
+    public Resource findPreviousVersionResource(Resource currentResource) {
+        Resource previousResource = null;
+        ProjectVersion version = findProjectVersion(currentResource.getProjectVersionId());
+        if (isNotBlank(version.getOrigVersionId())) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("rowId", currentResource.getRowId());
+            params.put("projectVersionId", version.getOrigVersionId());
+            ResourceName name = findOne(ResourceName.class, params, Resource.class);
+            if (name != null) {
+                previousResource = findResource(name.getId());
+            }
+        }
+        return previousResource;
+    }
 
 }

@@ -165,6 +165,8 @@ public interface IConfigurationService {
     
     public List<ResourceName> findResourcesInProject(String projectVersionId);
     
+    public Resource findPreviousVersionResource(Resource currentResource);
+    
     public List<ComponentName> findSharedComponentsInProject(String projectVersionId);
     
     public User findUser(String id);
