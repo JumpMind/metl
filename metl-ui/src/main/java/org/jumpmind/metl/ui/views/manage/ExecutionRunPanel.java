@@ -282,7 +282,7 @@ public class ExecutionRunPanel extends VerticalLayout implements IUiPanel, IBack
         stepTable.addColumn("componentName", String.class).setHeaderCaption("Component Name")
                 .setWidth(250);
         stepTable.addColumn("threadNumber", Integer.class).setHeaderCaption("Thread").setWidth(100);
-        stepTable.addColumn("status", String.class).setHeaderCaption("Status").setWidth(105);
+        stepTable.addColumn("status", String.class).setHeaderCaption("Status").setWidth(120);
         stepTable.addColumn("payloadReceived", Integer.class).setHeaderCaption("Payload Recvd")
                 .setWidth(120);
         stepTable.addColumn("messagesReceived", Integer.class).setHeaderCaption("Msgs Recvd")
