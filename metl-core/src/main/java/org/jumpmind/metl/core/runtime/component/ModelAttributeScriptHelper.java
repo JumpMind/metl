@@ -192,8 +192,11 @@ public class ModelAttributeScriptHelper {
     }
 
     public String replace(String searchString, String replacement) {
-        String text = value != null ? value.toString() : "";
-        return StringUtils.replace(text, searchString, replacement);
+        if (value != null) {
+            return StringUtils.replace(value.toString(), searchString, replacement);
+        } else {
+            return null;
+        }
     }
 
     public Date daysFromNow(int days) {
