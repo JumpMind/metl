@@ -587,9 +587,15 @@ public class SftpDirectory implements IDirectory {
 
         @Override
         public void close() throws IOException {
-            super.close();
             if (closeSession) {
-                SftpDirectory.this.close();
+                try {
+                    super.close();
+                } catch (Exception ex) {
+                    log.debug("", ex);
+                } finally {
+                    SftpDirectory.this.close();
+                }
+                super.close();
             }
         }
     }
