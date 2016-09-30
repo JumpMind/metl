@@ -42,6 +42,7 @@ import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.AgentParameter;
 import org.jumpmind.metl.core.model.AgentResource;
 import org.jumpmind.metl.core.model.AgentResourceSetting;
+import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentAttributeSetting;
 import org.jumpmind.metl.core.model.ComponentEntitySetting;
@@ -325,6 +326,13 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     @Override
     public List<Agent> findAgents() {
         return persistenceManager.find(Agent.class, null, null, tableName(Agent.class));
+    }
+    
+    @Override
+    public List<AuditEvent> findAuditEvents(int limit) {
+        List<AuditEvent> list = persistenceManager.find(AuditEvent.class, null, null, tableName(AuditEvent.class));
+        AbstractObjectCreateTimeDescSorter.sort(list);
+        return list;
     }
 
     @Override

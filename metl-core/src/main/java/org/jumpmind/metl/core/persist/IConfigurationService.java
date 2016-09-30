@@ -29,6 +29,7 @@ import org.jumpmind.metl.core.model.AgentDeployment;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
 import org.jumpmind.metl.core.model.AgentName;
 import org.jumpmind.metl.core.model.AgentResource;
+import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Component;
 import org.jumpmind.metl.core.model.ComponentName;
 import org.jumpmind.metl.core.model.Flow;
@@ -154,6 +155,8 @@ public interface IConfigurationService {
     public List<Notification> findNotificationsForAgent(String agentId);    
 
     public List<Notification> findNotificationsForDeployment(AgentDeployment deployment);
+    
+    public List<AuditEvent> findAuditEvents(int limit);
     
     public List<Project> findProjects();
 

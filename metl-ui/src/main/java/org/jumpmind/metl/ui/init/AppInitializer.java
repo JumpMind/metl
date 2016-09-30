@@ -152,7 +152,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             try {
                 IImportExportService importExportService = ctx.getBean(IImportExportService.class);
                 LoggerFactory.getLogger(getClass()).info("Installing Metl samples");
-                importExportService.importConfiguration(IOUtils.toString(getClass().getResourceAsStream("/metl-samples.json")));
+                importExportService.importConfiguration(IOUtils.toString(getClass().getResourceAsStream("/metl-samples.json")), "system");
             } catch (Exception e) {
                 LoggerFactory.getLogger(getClass()).error("Failed to install Metl samples", e);
             }

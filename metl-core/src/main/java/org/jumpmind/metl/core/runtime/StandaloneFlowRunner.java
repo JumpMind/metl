@@ -193,7 +193,7 @@ public class StandaloneFlowRunner {
                             databasePlatform.getSqlTemplate());
                     script.execute();
                 } else {
-                    importService.importConfiguration(IOUtils.toString(configSqlScriptURL));
+                    importService.importConfiguration(IOUtils.toString(configSqlScriptURL), "standalone");
                 }
             } catch (IOException e) {
                 throw new IoException(e);
