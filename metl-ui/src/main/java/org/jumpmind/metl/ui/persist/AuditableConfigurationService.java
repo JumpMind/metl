@@ -106,7 +106,7 @@ public class AuditableConfigurationService extends ConfigurationSqlService {
         for (String userId : saved.keySet()) {
             int changes = saved.get(userId).size();
             int minutes = (int) (System.currentTimeMillis() - lastAuditTimeInMs) / 60000;
-            AuditEvent event = new AuditEvent(EventType.CONFIG_CHANGE,
+            AuditEvent event = new AuditEvent(EventType.CONFIG,
                     String.format("%d changes were made in the last %d minutes", changes, minutes),
                     userId);
             save(event);

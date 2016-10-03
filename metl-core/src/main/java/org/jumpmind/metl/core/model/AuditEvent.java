@@ -4,7 +4,7 @@ public class AuditEvent extends AbstractObject {
 
     private static final long serialVersionUID = 1L;
     
-    public enum EventType { IMPORT, EXPORT, CONFIG_CHANGE };
+    public enum EventType { IMPORT, EXPORT, CONFIG };
     
     String name;
     
