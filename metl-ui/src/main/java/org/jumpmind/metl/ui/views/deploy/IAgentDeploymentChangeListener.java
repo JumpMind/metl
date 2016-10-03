@@ -22,7 +22,7 @@ package org.jumpmind.metl.ui.views.deploy;
 
 import org.jumpmind.metl.core.model.AgentDeployment;
 
-public interface AgentDeploymentChangeListener {
+public interface IAgentDeploymentChangeListener {
 
     public void changed(AgentDeployment agentDeployment);
 

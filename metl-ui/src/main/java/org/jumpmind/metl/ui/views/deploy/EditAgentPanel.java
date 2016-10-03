@@ -94,7 +94,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable, AgentDeploymentChangeListener {
+public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgroundRefreshable, IAgentDeploymentChangeListener {
 
     private static final long serialVersionUID = 1L;
 
