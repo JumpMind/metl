@@ -83,7 +83,7 @@ final public class Icons {
     
     public static final FontAwesome SETTINGS = FontAwesome.GEARS;
     
-    public static final FontAwesome LOGGING = FontAwesome.REORDER;
+    public static final FontAwesome LOGGING = FontAwesome.PENCIL;
     
     public static final FontAwesome NOTIFICATION = FontAwesome.COMMENT;
     
