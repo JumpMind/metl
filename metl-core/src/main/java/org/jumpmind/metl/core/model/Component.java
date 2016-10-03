@@ -28,7 +28,7 @@ import org.jumpmind.db.sql.Row;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.util.LogUtils;
 
-public class Component extends AbstractObjectWithSettings {
+public class Component extends AbstractObjectWithSettings implements IAuditable {
 
     private static final long serialVersionUID = 1L;
 

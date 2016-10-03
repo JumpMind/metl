@@ -22,7 +22,7 @@ package org.jumpmind.metl.core.model;
 
 import java.util.UUID;
 
-public class Resource extends AbstractObjectWithSettings {
+public class Resource extends AbstractObjectWithSettings implements IAuditable {
 
     private static final long serialVersionUID = 1L;
 

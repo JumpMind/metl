@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class ComponentAttributeSetting extends Setting {
+public class ComponentAttributeSetting extends Setting implements IAuditable {
 
     private static final long serialVersionUID = 1L;
 

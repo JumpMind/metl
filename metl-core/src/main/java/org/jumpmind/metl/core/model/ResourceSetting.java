@@ -21,7 +21,7 @@
 package org.jumpmind.metl.core.model;
 
 
-public class ResourceSetting extends Setting {
+public class ResourceSetting extends Setting implements IAuditable {
 
     private static final long serialVersionUID = 1L;
     

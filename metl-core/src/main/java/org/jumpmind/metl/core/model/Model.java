@@ -29,7 +29,7 @@ import org.jumpmind.db.sql.Row;
 import org.jumpmind.metl.core.runtime.EntityData;
 import org.jumpmind.metl.core.util.LogUtils;
 
-public class Model extends AbstractObject {
+public class Model extends AbstractObject implements IAuditable {
 
     private static final long serialVersionUID = 1L;
 
