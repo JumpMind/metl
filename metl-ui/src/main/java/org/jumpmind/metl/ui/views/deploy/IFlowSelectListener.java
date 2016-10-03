@@ -24,7 +24,7 @@ import java.util.Collection;
 
 import org.jumpmind.metl.core.model.FlowName;
 
-public interface FlowSelectListener {
+public interface IFlowSelectListener {
 
     public void selected(Collection<FlowName> flowCollection);
 

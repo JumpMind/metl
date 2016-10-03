@@ -57,7 +57,7 @@ public class FlowSelectWindow extends ResizableWindow {
     
     Map<Object, IDatabasePlatform> platformByItemId = new HashMap<Object, IDatabasePlatform>();
     
-    FlowSelectListener listener;
+    IFlowSelectListener listener;
     
     @SuppressWarnings({ "serial" })
     public FlowSelectWindow(ApplicationContext context, String caption, String introText,
@@ -169,7 +169,7 @@ public class FlowSelectWindow extends ResizableWindow {
         tree.setChildrenAllowed(itemId, areChildrenAllowed);
     }
     
-    public void setFlowSelectListener(FlowSelectListener listener) {
+    public void setFlowSelectListener(IFlowSelectListener listener) {
         this.listener = listener;
     }
 

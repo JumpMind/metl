@@ -428,7 +428,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         }
     }
 
-    class AddDeploymentClickListener implements ClickListener, FlowSelectListener {
+    class AddDeploymentClickListener implements ClickListener, IFlowSelectListener {
         private static final long serialVersionUID = 1L;
 
         public void buttonClick(ClickEvent event) {
