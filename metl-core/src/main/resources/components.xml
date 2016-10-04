@@ -106,10 +106,10 @@
              inputMessageType='any'
              outputMessageType='any'
              resourceCategory='none'>
-    <name>Call Flow</name>
-    <className>org.jumpmind.metl.core.runtime.component.CallFlow</className>
-    <keywords>subflow,execute</keywords>
-    <flowManipulatorClassName>org.jumpmind.metl.core.runtime.component.CallFlowFlowManipulator</flowManipulatorClassName>
+    <name>Embed Flow</name>
+    <className>org.jumpmind.metl.core.runtime.component.EmbedFlow</className>
+    <keywords>subflow,execute,embed</keywords>
+    <flowManipulatorClassName>org.jumpmind.metl.core.runtime.component.EmbedFlowFlowManipulator</flowManipulatorClassName>
     <settings>
       <setting id='flow.id'
                required='true'

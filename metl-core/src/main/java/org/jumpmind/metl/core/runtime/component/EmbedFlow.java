@@ -23,13 +23,13 @@ package org.jumpmind.metl.core.runtime.component;
 import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 
-public class CallFlow extends AbstractComponentRuntime {
+public class EmbedFlow extends AbstractComponentRuntime {
 
     public final static String SETTING_FLOW_ID = "flow.id";
 
     String flowId;
 
-    public CallFlow() {
+    public EmbedFlow() {
     }
 
     @Override

@@ -32,9 +32,9 @@ import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.runtime.MisconfiguredException;
 import org.jumpmind.metl.core.runtime.flow.IFlowManipulator;
 
-public class CallFlowFlowManipulator implements IFlowManipulator {
+public class EmbedFlowFlowManipulator implements IFlowManipulator {
 
-    public CallFlowFlowManipulator() {
+    public EmbedFlowFlowManipulator() {
     }
 
     @Override
@@ -42,7 +42,7 @@ public class CallFlowFlowManipulator implements IFlowManipulator {
 
         Component comp = flowStep.getComponent();
         if (comp.getBoolean(AbstractComponentRuntime.ENABLED, true)) {
-            String flowId = comp.get(CallFlow.SETTING_FLOW_ID);
+            String flowId = comp.get(EmbedFlow.SETTING_FLOW_ID);
             if (isBlank(flowId)) {
                 throw new MisconfiguredException(
                         "When using the 'Call Flow' component you must specify the flow you want to call.  It is currently blank");
