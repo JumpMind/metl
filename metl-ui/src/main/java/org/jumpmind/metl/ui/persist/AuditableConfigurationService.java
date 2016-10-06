@@ -111,7 +111,7 @@ public class AuditableConfigurationService extends ConfigurationSqlService {
         scheduler.setThreadNamePrefix("audit-job-");
         scheduler.setPoolSize(1);
         scheduler.initialize();
-        scheduler.scheduleAtFixedRate(() -> doInBackground(), 300000);
+        scheduler.scheduleAtFixedRate(() -> doInBackground(), 600000);
     }
     
     protected void doInBackground() {
