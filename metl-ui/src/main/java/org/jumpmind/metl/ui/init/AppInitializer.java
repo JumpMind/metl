@@ -42,13 +42,16 @@ import org.eclipse.jetty.servlet.DefaultServlet;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Version;
+import org.jumpmind.metl.core.model.AuditEvent.EventType;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IImportExportService;
 import org.jumpmind.metl.core.runtime.IAgentManager;
 import org.jumpmind.metl.core.util.DatabaseScriptContainer;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.VersionUtils;
+import org.jumpmind.metl.ui.common.AppConstants;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 import org.slf4j.LoggerFactory;
@@ -102,7 +105,13 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         LogUtils.initLogging(getConfigDir(false), ctx);
         cleanTempJettyDirectories();
         initDatabase(ctx);
+        auditStartup(ctx);
         initAgentRuntime(ctx);
+    }
+    
+    protected void auditStartup(WebApplicationContext ctx) {
+        IConfigurationService service = ctx.getBean(IConfigurationService.class);
+        service.save(new AuditEvent(EventType.RESTART, "Server starting...", AppConstants.SYSTEM_USER));
     }
     
     protected void cleanTempJettyDirectories() {
@@ -152,12 +161,14 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
             try {
                 IImportExportService importExportService = ctx.getBean(IImportExportService.class);
                 LoggerFactory.getLogger(getClass()).info("Installing Metl samples");
-                importExportService.importConfiguration(IOUtils.toString(getClass().getResourceAsStream("/metl-samples.json")), "system");
+                importExportService.importConfiguration(IOUtils.toString(getClass().getResourceAsStream("/metl-samples.json")), AppConstants.SYSTEM_USER);
             } catch (Exception e) {
                 LoggerFactory.getLogger(getClass()).error("Failed to install Metl samples", e);
             }
-        }        
-        LoggerFactory.getLogger(getClass()).info("The configuration database has been initialized");
+        }
+        
+        LoggerFactory.getLogger(getClass()).info("The configuration database has been initialized");                
+        
     }
 
     @Override
