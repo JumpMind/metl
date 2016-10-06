@@ -155,7 +155,9 @@ public class AuditableConfigurationService extends ConfigurationSqlService {
         int deleted = template.update(String.format(
                 "delete from %1$s_audit_event where create_time < ? ",
                 tablePrefix), cutOff);
-        log.info("Purged {} audit events", deleted);
+        if (deleted > 0) {
+            log.info("Purged {} audit events", deleted);
+        }
     }
 
     @PreDestroy
