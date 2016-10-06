@@ -45,7 +45,7 @@ import org.jumpmind.symmetric.io.data.DbExport.Format;
 
 public class ConfigurationSqlService extends AbstractConfigurationService {
 
-    IDatabasePlatform databasePlatform;
+    protected IDatabasePlatform databasePlatform;
 
     public ConfigurationSqlService(ISecurityService securityService, IComponentDefinitionFactory componentDefinitionFactory, IDatabasePlatform databasePlatform,
             IPersistenceManager persistenceManager, String tablePrefix) {

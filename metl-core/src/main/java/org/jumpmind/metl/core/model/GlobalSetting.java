@@ -26,6 +26,8 @@ public class GlobalSetting extends Setting {
     
     public static final String SYSTEM_TEXT = "system.text";
     
+    public static final String AUDIT_EVENT_RETENTION_IN_DAYS = "audit.event.retention.days";
+    
     public static final String PASSWORD_MIN_LENGTH = "password.min.length";
     
     public static final String PASSWORD_PROHIBIT_PREVIOUS = "password.prohibit.previous";
@@ -39,6 +41,8 @@ public class GlobalSetting extends Setting {
     public static final String PASSWORD_REQUIRE_MIXED_CASE = "password.require.mixed.case";
     
     public static final String PASSWORD_EXPIRE_DAYS = "password.expire.days";
+    
+    public static final int DEFAULT_AUDIT_EVENT_RETENTION_IN_DAYS = 30;
 
     @Override
     public String toString() {

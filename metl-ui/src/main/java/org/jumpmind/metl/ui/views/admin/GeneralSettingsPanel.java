@@ -64,6 +64,15 @@ public class GeneralSettingsPanel extends VerticalLayout implements IUiPanel {
                 "Set HTML content to be displayed in the top bar that can identify a particular environment")
                         .focus();
 
+        section = new Label("Purge Settings");
+        section.addStyleName(ValoTheme.LABEL_H3);
+        section.addStyleName(ValoTheme.LABEL_COLORED);
+        form.addComponent(section);
+
+        addSetting("Audit Event Retention in Days", GlobalSetting.AUDIT_EVENT_RETENTION_IN_DAYS,
+                Integer.toString(GlobalSetting.DEFAULT_AUDIT_EVENT_RETENTION_IN_DAYS), "",
+                Integer.class);
+
         section = new Label("User Password Settings");
         section.addStyleName(ValoTheme.LABEL_H3);
         section.addStyleName(ValoTheme.LABEL_COLORED);
@@ -76,7 +85,7 @@ public class GeneralSettingsPanel extends VerticalLayout implements IUiPanel {
 
         addSetting("Expiration in Days", GlobalSetting.PASSWORD_EXPIRE_DAYS, "60", "",
                 Integer.class);
-        
+
         addSetting("Prohibit Common Words", GlobalSetting.PASSWORD_PROHIBIT_COMMON_WORDS, "true",
                 "", Boolean.class);
 
@@ -106,7 +115,8 @@ public class GeneralSettingsPanel extends VerticalLayout implements IUiPanel {
             final CheckBox checkbox = new CheckBox(text);
             checkbox.setImmediate(true);
             checkbox.setValue(Boolean.parseBoolean(setting.getValue()));
-            checkbox.addValueChangeListener((e) -> saveSetting(setting, checkbox.getValue().toString()));
+            checkbox.addValueChangeListener(
+                    (e) -> saveSetting(setting, checkbox.getValue().toString()));
             field = checkbox;
         } else {
             field = new ImmediateUpdateTextField(text) {

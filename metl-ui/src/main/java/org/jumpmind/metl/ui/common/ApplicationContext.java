@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
+import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.ProjectVersion;
@@ -95,6 +96,8 @@ public class ApplicationContext implements Serializable {
     User user = new User();
     
     boolean showRunDiagram = true;
+    
+    FlowName currentFlow;
     
     List<ProjectVersion> openProjects = new ArrayList<ProjectVersion>();
 
@@ -169,6 +172,14 @@ public class ApplicationContext implements Serializable {
     public void setShowRunDiagram(boolean showRunDiagram) {
         this.showRunDiagram = showRunDiagram;
     }
+    
+    public void setCurrentFlow(FlowName currentFlow) {
+        this.currentFlow = currentFlow;
+    }
+    
+    public FlowName getCurrentFlow() {
+        return currentFlow;
+    }    
     
     public boolean isReadOnly(ProjectVersion projectVersion, Privilege privilege) {
         boolean readOnly = projectVersion.isReadOnly();
