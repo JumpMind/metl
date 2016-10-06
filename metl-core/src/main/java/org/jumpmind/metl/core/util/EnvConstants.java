@@ -20,6 +20,9 @@
  */
 package org.jumpmind.metl.core.util;
 
+/**
+ * These are environment properties definitions that can be set in the metl.properties at startup
+ */
 public final class EnvConstants {
 
     private EnvConstants() {

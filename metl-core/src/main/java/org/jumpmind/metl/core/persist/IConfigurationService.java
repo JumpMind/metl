@@ -53,6 +53,7 @@ import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserHist;
+import org.jumpmind.properties.TypedProperties;
 
 public interface IConfigurationService {
     
@@ -139,6 +140,8 @@ public interface IConfigurationService {
     public GlobalSetting findGlobalSetting(String name);
     
     public List<GlobalSetting> findGlobalSettings();
+    
+    public TypedProperties findGlobalSetttingsAsProperties();
     
     public Map<String, String> findGlobalSettingsAsMap();
     

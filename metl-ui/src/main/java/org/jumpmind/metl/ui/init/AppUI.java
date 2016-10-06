@@ -20,8 +20,8 @@
  */
 package org.jumpmind.metl.ui.init;
 
-import static org.jumpmind.metl.ui.common.AppConstants.DEFAULT_GROUP;
-import static org.jumpmind.metl.ui.common.AppConstants.DEFAULT_USER;
+import static org.jumpmind.metl.core.util.AppConstants.DEFAULT_GROUP;
+import static org.jumpmind.metl.core.util.AppConstants.DEFAULT_USER;
 import static org.jumpmind.metl.ui.common.UiUtils.whereAreYou;
 
 import java.math.BigDecimal;

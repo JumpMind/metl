@@ -42,6 +42,18 @@ public class GlobalSetting extends Setting {
     
     public static final String PASSWORD_EXPIRE_DAYS = "password.expire.days";
     
+    public static final String CONFIG_BACKUP_ENABLED = "config.backup.enabled";
+    
+    public static final String CONFIG_BACKUP_CRON = "config.backup.cron";
+    
+    public static final String CONFIG_BACKUP_RETENTION_IN_DAYS = "config.backup.retention.days";
+    
+    public static final boolean DEFAULT_CONFIG_BACKUP_ENABLED = true;
+    
+    public static final String DEFAULT_CONFIG_BACKUP_CRON = "0 0 0 * * *";
+    
+    public static final int DEFAULT_CONFIG_BACKUP_RETENTION_IN_DAYS = 30;
+    
     public static final int DEFAULT_AUDIT_EVENT_RETENTION_IN_DAYS = 30;
 
     @Override

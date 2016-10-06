@@ -18,12 +18,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.core.util;
+package org.jumpmind.metl.ui.common;
 
-import java.util.concurrent.Executor;
+final public class UIConstants {
 
-public class CurrentThreadExecutor implements Executor {
-    public void execute(Runnable r) {
-        r.run();
+    private UIConstants() {
     }
+    
+    public static final float DEFAULT_LEFT_SPLIT = 300;
+    
 }

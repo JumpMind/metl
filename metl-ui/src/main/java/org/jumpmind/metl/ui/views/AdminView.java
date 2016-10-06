@@ -22,7 +22,7 @@ package org.jumpmind.metl.ui.views;
 
 import javax.annotation.PostConstruct;
 
-import org.jumpmind.metl.ui.common.AppConstants;
+import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.Icons;
@@ -82,7 +82,7 @@ public class AdminView extends HorizontalLayout implements View, IUiPanel, ItemC
 
         HorizontalSplitPanel leftSplit = new HorizontalSplitPanel();
         leftSplit.setSizeFull();
-        leftSplit.setSplitPosition(AppConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS);
+        leftSplit.setSplitPosition(UIConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS);
 
         VerticalLayout container = new VerticalLayout();
         container.setSizeFull();

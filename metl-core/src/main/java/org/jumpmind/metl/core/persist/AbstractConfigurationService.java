@@ -80,6 +80,7 @@ import org.jumpmind.metl.core.security.ISecurityService;
 import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.util.NameValue;
 import org.jumpmind.persist.IPersistenceManager;
+import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 
 abstract class AbstractConfigurationService extends AbstractService implements IConfigurationService {
@@ -1130,6 +1131,15 @@ abstract class AbstractConfigurationService extends AbstractService implements I
             return settings.get(0);
         }
         return null;
+    }
+    
+    @Override
+    public TypedProperties findGlobalSetttingsAsProperties() {
+        TypedProperties properties = new TypedProperties();
+        for (GlobalSetting setting : findGlobalSettings()) {
+            properties.put(setting.getName(), setting.getValue());
+        }
+        return properties;
     }
 
     @Override

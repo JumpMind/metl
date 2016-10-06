@@ -21,6 +21,10 @@
 package org.jumpmind.metl.ui.init;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.jumpmind.metl.core.model.GlobalSetting.CONFIG_BACKUP_CRON;
+import static org.jumpmind.metl.core.model.GlobalSetting.CONFIG_BACKUP_ENABLED;
+import static org.jumpmind.metl.core.model.GlobalSetting.DEFAULT_CONFIG_BACKUP_CRON;
+import static org.jumpmind.metl.core.model.GlobalSetting.DEFAULT_CONFIG_BACKUP_ENABLED;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -42,21 +46,24 @@ import org.eclipse.jetty.servlet.DefaultServlet;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.util.ConfigDatabaseUpgrader;
 import org.jumpmind.exception.IoException;
+import org.jumpmind.metl.core.job.BackupJob;
 import org.jumpmind.metl.core.model.AuditEvent;
-import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.model.AuditEvent.EventType;
+import org.jumpmind.metl.core.model.Version;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.persist.IImportExportService;
 import org.jumpmind.metl.core.runtime.IAgentManager;
+import org.jumpmind.metl.core.util.AppConstants;
 import org.jumpmind.metl.core.util.DatabaseScriptContainer;
 import org.jumpmind.metl.core.util.LogUtils;
 import org.jumpmind.metl.core.util.VersionUtils;
-import org.jumpmind.metl.ui.common.AppConstants;
 import org.jumpmind.properties.TypedProperties;
 import org.jumpmind.util.FormatUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
@@ -70,6 +77,8 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
     protected static final String SYS_CONFIG_DIR = "org.jumpmind.metl.ui.init.config.dir";
 
     public static ThreadLocal<AnnotationConfigWebApplicationContext> applicationContextRef = new ThreadLocal<>();
+    
+    ThreadPoolTaskScheduler backupJobScheduler;
 
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
@@ -107,6 +116,34 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         initDatabase(ctx);
         auditStartup(ctx);
         initAgentRuntime(ctx);
+        initBackupJob(ctx);
+    }
+    
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        if (backupJobScheduler != null) {
+            backupJobScheduler.destroy();
+        }
+    }
+    
+    protected void initBackupJob(WebApplicationContext ctx) {
+        try {
+            IConfigurationService configurationService = ctx.getBean(IConfigurationService.class);
+            IImportExportService importExportService = ctx.getBean(IImportExportService.class);
+            TypedProperties properties = configurationService.findGlobalSetttingsAsProperties();
+            if (properties.is(CONFIG_BACKUP_ENABLED, DEFAULT_CONFIG_BACKUP_ENABLED)) {
+                backupJobScheduler = new ThreadPoolTaskScheduler();
+                backupJobScheduler.setDaemon(true);
+                backupJobScheduler.setThreadNamePrefix("backup-job-");
+                backupJobScheduler.setPoolSize(1);
+                backupJobScheduler.initialize();
+                backupJobScheduler.schedule(new BackupJob(importExportService, configurationService, getConfigDir(false)),
+                        new CronTrigger(
+                                properties.get(CONFIG_BACKUP_CRON, DEFAULT_CONFIG_BACKUP_CRON)));
+            }
+        } catch (Exception e) {
+            LoggerFactory.getLogger(getClass()).info("Failed to schedule  the backup job", e);
+        }
     }
     
     protected void auditStartup(WebApplicationContext ctx) {
@@ -169,10 +206,6 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         
         LoggerFactory.getLogger(getClass()).info("The configuration database has been initialized");                
         
-    }
-
-    @Override
-    public void contextDestroyed(ServletContextEvent sce) {
     }
 
     protected String getConfigDir(boolean printInstructions) {

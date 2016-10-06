@@ -37,7 +37,7 @@ import org.jumpmind.metl.core.model.Execution;
 import org.jumpmind.metl.core.model.ExecutionStatus;
 import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.FolderType;
-import org.jumpmind.metl.ui.common.AppConstants;
+import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.IBackgroundRefreshable;
@@ -224,7 +224,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
         HorizontalSplitPanel split = new HorizontalSplitPanel();
         split.setSizeFull();
-        split.setSplitPosition(AppConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS, false);
+        split.setSplitPosition(UIConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS, false);
 
         manageNavigator = new ManageNavigator(FolderType.AGENT, context);
         manageNavigator.addValueChangeListener((event) ->refreshUI(getBackgroundData()));

@@ -22,7 +22,7 @@ package org.jumpmind.metl.ui.views;
 
 import javax.annotation.PostConstruct;
 
-import org.jumpmind.metl.ui.common.AppConstants;
+import org.jumpmind.metl.ui.common.UIConstants;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.TabbedPanel;
@@ -60,7 +60,7 @@ public class DesignView extends HorizontalLayout implements View {
 
         HorizontalSplitPanel leftSplit = new HorizontalSplitPanel();
         leftSplit.setSizeFull();
-        leftSplit.setSplitPosition(AppConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS);
+        leftSplit.setSplitPosition(UIConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS);
 
         projectNavigator = new DesignNavigator(context, tabbedPanel);
 

@@ -137,8 +137,6 @@ public class AppConfig extends WebMvcConfigurerAdapter {
     DataSource configDataSource;
     
     DataSource executionDataSource;
-    
-    
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

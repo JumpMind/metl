@@ -21,9 +21,12 @@ import org.jumpmind.db.sql.ISqlTransaction;
 import org.jumpmind.db.sql.Row;
 import org.jumpmind.metl.core.model.AuditEvent;
 import org.jumpmind.metl.core.model.Flow;
+import org.jumpmind.metl.core.model.FlowName;
 import org.jumpmind.metl.core.model.Model;
+import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
+import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.persist.IPersistenceManager;
 import org.jumpmind.util.LinkedCaseInsensitiveMap;
 
@@ -128,11 +131,37 @@ public class ImportExportService extends AbstractService implements IImportExpor
     protected String exportProject(String projectVersionId) {
         return exportConfig(ExportType.PROJECT, projectVersionId, null);
     }
+    
+    @Override
+    public String export(String projectVersionId, String userId) {
+        List<FlowName> flows = new ArrayList<>();
+        flows.addAll(configurationService.findFlowsInProject(projectVersionId, true));
+        flows.addAll(configurationService.findFlowsInProject(projectVersionId, false));
+        List<String> flowIds = new ArrayList<>();
+        for (FlowName flowName : flows) {
+            flowIds.add(flowName.getId());
+        }
+
+        List<ModelName> models = configurationService.findModelsInProject(projectVersionId);
+        List<String> modelIds = new ArrayList<>();
+        for (ModelName modelName : models) {
+            modelIds.add(modelName.getId());
+        }
+
+        List<ResourceName> resources = configurationService
+                .findResourcesInProject(projectVersionId);
+        List<String> resourceIds = new ArrayList<>();
+        for (ResourceName resource : resources) {
+            resourceIds.add(resource.getId());
+        }
+
+        return export(projectVersionId, flowIds, modelIds, resourceIds, userId);
+
+    }
 
     @Override
     public String export(String projectVersionId, List<String> flowIds, List<String> modelIds,
-            List<String> resourceIds, String userId) {
-        
+            List<String> resourceIds, String userId) {        
         ProjectVersion version = configurationService.findProjectVersion(projectVersionId);
         save(new AuditEvent(AuditEvent.EventType.EXPORT, String.format("%s, flows: %d, models %d, resources: %d", version.getName(), flowIds.size(), modelIds.size(), resourceIds.size()), userId));
 
