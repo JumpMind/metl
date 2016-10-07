@@ -30,13 +30,13 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
-public class FixedLengthFormatterTest {
+public class FixedLengthFormatterFlowTest {
 
     static StandaloneTestFlowRunner standaloneFlowRunner;
 
     FlowName flow;
 
-    public FixedLengthFormatterTest(FlowName flow) {
+    public FixedLengthFormatterFlowTest(FlowName flow) {
         this.flow = flow;
     }
 
