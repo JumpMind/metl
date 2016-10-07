@@ -1,5 +1,6 @@
 package org.jumpmind.metl.ui.persist;
 
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -132,11 +133,8 @@ public class AuditableConfigurationService extends ConfigurationSqlService {
                     projectVersions.put(projectVersion.getId(), projectVersion);
                 }
                 int changes = byUser.get(flow).size();
-                int minutes = (int) Math
-                        .ceil(((double) (System.currentTimeMillis() - lastAuditTimeInMs))
-                                / (double) 60000);
                 AuditEvent event = new AuditEvent(EventType.CONFIG, String.format(
-                        "%d changes were made in the last %d minutes to '%s' in '%s'", changes, minutes, flow.getName(), projectVersion.getName()), userId);
+                        "%d changes were made since %s to '%s' in '%s'", changes, SimpleDateFormat.getTimeInstance().format(new Date(lastAuditTimeInMs)), flow.getName(), projectVersion.getName()), userId);
                 save(event);
             }
         }
