@@ -119,7 +119,9 @@ public class FixedLengthFormatter extends AbstractComponentRuntime {
                         inputRow, attribute.getFormatFunction());
             }
             if (value != null) {
-                value = StringUtils.trim(value.toString(), true, true, PAD_CHAR);
+                if (value.toString().length() > attribute.getLength()) {
+                    value = value.toString().substring(0, attribute.getLength());
+                }
             } else {
                 value = "";
             }
