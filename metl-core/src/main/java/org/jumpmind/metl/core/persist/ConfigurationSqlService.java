@@ -54,6 +54,10 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
     }
     
     @Override
+    public void doInBackground() {
+    }
+    
+    @Override
     public boolean isInstalled() {
         return databasePlatform.getTableFromCache(tableName(Component.class), false) != null;
     }

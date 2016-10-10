@@ -57,6 +57,8 @@ import org.jumpmind.properties.TypedProperties;
 
 public interface IConfigurationService {
     
+    public void doInBackground();
+    
     public Flow copy(Flow original);
         
     public FlowStep copy(FlowStep original);

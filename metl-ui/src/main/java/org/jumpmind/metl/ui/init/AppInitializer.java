@@ -78,7 +78,7 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
 
     public static ThreadLocal<AnnotationConfigWebApplicationContext> applicationContextRef = new ThreadLocal<>();
     
-    ThreadPoolTaskScheduler backupJobScheduler;
+    ThreadPoolTaskScheduler jobScheduler;
 
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
@@ -116,31 +116,34 @@ public class AppInitializer implements WebApplicationInitializer, ServletContext
         initDatabase(ctx);
         auditStartup(ctx);
         initAgentRuntime(ctx);
-        initBackupJob(ctx);
+        initBackgroundJobs(ctx);
     }
     
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        if (backupJobScheduler != null) {
-            backupJobScheduler.destroy();
+        if (jobScheduler != null) {
+            jobScheduler.destroy();
         }
     }
     
-    protected void initBackupJob(WebApplicationContext ctx) {
+    protected void initBackgroundJobs(WebApplicationContext ctx) {
         try {
             IConfigurationService configurationService = ctx.getBean(IConfigurationService.class);
             IImportExportService importExportService = ctx.getBean(IImportExportService.class);
+            
+            jobScheduler = new ThreadPoolTaskScheduler();
+            jobScheduler.setDaemon(true);
+            jobScheduler.setThreadNamePrefix("background-job-");
+            jobScheduler.setPoolSize(2);
+            jobScheduler.initialize();
+
             TypedProperties properties = configurationService.findGlobalSetttingsAsProperties();
             if (properties.is(CONFIG_BACKUP_ENABLED, DEFAULT_CONFIG_BACKUP_ENABLED)) {
-                backupJobScheduler = new ThreadPoolTaskScheduler();
-                backupJobScheduler.setDaemon(true);
-                backupJobScheduler.setThreadNamePrefix("backup-job-");
-                backupJobScheduler.setPoolSize(1);
-                backupJobScheduler.initialize();
-                backupJobScheduler.schedule(new BackupJob(importExportService, configurationService, getConfigDir(false)),
+                jobScheduler.schedule(new BackupJob(importExportService, configurationService, getConfigDir(false)),
                         new CronTrigger(
                                 properties.get(CONFIG_BACKUP_CRON, DEFAULT_CONFIG_BACKUP_CRON)));
             }
+            jobScheduler.scheduleAtFixedRate(() -> configurationService.doInBackground(), 600000);
         } catch (Exception e) {
             LoggerFactory.getLogger(getClass()).info("Failed to schedule  the backup job", e);
         }

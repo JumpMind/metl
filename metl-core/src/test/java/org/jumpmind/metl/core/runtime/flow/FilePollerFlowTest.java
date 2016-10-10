@@ -47,7 +47,7 @@ public class FilePollerFlowTest {
 
     @Parameters(name = "{0}")
     public static Collection<Object[]> getFlows() throws Exception {
-        standaloneFlowRunner = new StandaloneTestFlowRunner("/filepoller-flow-test-config.sql");
+        standaloneFlowRunner = new StandaloneTestFlowRunner("/filepoller-flow-test-config.json");
         return standaloneFlowRunner.getFlowAsTestParams();
     }
 

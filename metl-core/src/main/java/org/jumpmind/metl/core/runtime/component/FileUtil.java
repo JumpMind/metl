@@ -41,6 +41,7 @@ public class FileUtil extends AbstractComponentRuntime {
 
     public static final String ACTION_COPY = "Copy";
     public static final String ACTION_MOVE = "Move";
+    public static final String ACTION_DELETE = "Delete";
 
     public final static String SETTING_ACTION = "action";
 
@@ -130,7 +131,9 @@ public class FileUtil extends AbstractComponentRuntime {
 							    targetFile = copyFile(inputMessage, fileName);
 							} else if (action.equals(ACTION_MOVE)) {
 							    targetFile = moveFile(inputMessage, fileName);
-							}
+                            } else if (action.equals(ACTION_DELETE)) {
+                                targetFile = deleteFile(inputMessage, fileName);
+                            }
 							if (isNotBlank(targetFile)) {
                                 getComponentStatistics().incrementNumberEntitiesProcessed(threadNumber);
                                 filesProcessed.add(targetFile);
@@ -144,6 +147,20 @@ public class FileUtil extends AbstractComponentRuntime {
 			callback.sendTextMessage(null, filesProcessed);
 		}
 	}
+	
+    protected String deleteFile(Message inputMessage, String sourceFileName) throws Exception {
+        sourceFileName = resolveFlowParams(sourceFileName);
+        FileInfo sourceFileInfo = directory.listFile(sourceFileName, false);
+        String deletedFileName = null;
+
+        if (mustExist && sourceFileInfo == null) {
+            throw new FileNotFoundException("Unable to locate file " + sourceFileName);
+        } else if (sourceFileInfo != null) {
+            directory.delete(sourceFileName);
+            deletedFileName = sourceFileName;
+        }
+        return deletedFileName;
+    }
 	
 	protected String moveFile(Message inputMessage, String sourceFileName) throws Exception {
         FileInfo sourceFileInfo = directory.listFile(sourceFileName, false);

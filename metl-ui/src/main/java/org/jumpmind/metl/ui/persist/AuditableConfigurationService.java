@@ -8,9 +8,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.apache.commons.lang.time.DateUtils;
 import org.jumpmind.db.platform.IDatabasePlatform;
 import org.jumpmind.db.sql.ISqlTemplate;
@@ -104,18 +101,9 @@ public class AuditableConfigurationService extends ConfigurationSqlService {
             }
         }
     }
-
-    @PostConstruct
-    protected void startAuditJob() {
-        scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setDaemon(true);
-        scheduler.setThreadNamePrefix("audit-job-");
-        scheduler.setPoolSize(1);
-        scheduler.initialize();
-        scheduler.scheduleAtFixedRate(() -> doInBackground(), 600000);
-    }
-    
-    protected void doInBackground() {
+   
+    @Override
+    public void doInBackground() {
         recordAudit();
         purgeAudit();
     }
@@ -156,12 +144,6 @@ public class AuditableConfigurationService extends ConfigurationSqlService {
         if (deleted > 0) {
             log.info("Purged {} audit events", deleted);
         }
-    }
-
-    @PreDestroy
-    protected void stopAuditJob() {
-        recordAudit();
-        scheduler.destroy();
     }
 
 }
