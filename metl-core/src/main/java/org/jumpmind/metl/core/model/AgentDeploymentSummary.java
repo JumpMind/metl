@@ -23,7 +23,7 @@ package org.jumpmind.metl.core.model;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.jumpmind.metl.core.runtime.LogLevel;
 
-public class AgentDeploymentSummary extends AbstractObject {
+public class AgentDeploymentSummary extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 
@@ -78,10 +78,12 @@ public class AgentDeploymentSummary extends AbstractObject {
         return type.equals(TYPE_RESOURCE);
     }
     
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }

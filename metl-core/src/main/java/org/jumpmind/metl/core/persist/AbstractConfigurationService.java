@@ -289,9 +289,11 @@ abstract class AbstractConfigurationService extends AbstractService implements I
     @Override
     public List<Project> findProjects() {
         List<Project> list = persistenceManager.find(Project.class, new NameValue("deleted", 0), null, null, tableName(Project.class));
-
+        AbstractObjectNameBasedSorter.sort(list);
+        
         List<ProjectVersion> versions = persistenceManager.find(ProjectVersion.class, new NameValue("deleted", 0), null, null,
                 tableName(ProjectVersion.class));
+        AbstractObjectCreateTimeDescSorter.sort(versions);
         for (ProjectVersion projectVersion : versions) {
             for (Project project : list) {
                 if (project.getId().equals(projectVersion.getProjectId())) {
@@ -301,6 +303,7 @@ abstract class AbstractConfigurationService extends AbstractService implements I
                 }
             }
         }
+        
         return list;
     }
 

@@ -122,7 +122,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
 
     Button runButton;
 
-    FlowSelectWindow flowSelectWindow;
+    FlowSelectDialog flowSelectWindow;
 
     BackgroundRefresherService backgroundRefresherService;
 
@@ -437,7 +437,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
             } else {
                 if (flowSelectWindow == null) {
                     String introText = "Select one or more flows for deployment to this agent.";
-                    flowSelectWindow = new FlowSelectWindow(context, "Add Deployment", introText, agent.isAllowTestFlows());
+                    flowSelectWindow = new FlowSelectDialog(context, "Add Deployment", introText, agent.isAllowTestFlows());
                     flowSelectWindow.setFlowSelectListener(this);
                 }
                 UI.getCurrent().addWindow(flowSelectWindow);
@@ -626,7 +626,7 @@ public class EditAgentPanel extends VerticalLayout implements IUiPanel, IBackgro
         private static final long serialVersionUID = 1L;
 
         public void buttonClick(ClickEvent event) {
-            EditAgentParametersWindow window = new EditAgentParametersWindow(context, agent);
+            EditAgentParametersDialog window = new EditAgentParametersDialog(context, agent);
             window.showAtSize(0.5);
         }
     }

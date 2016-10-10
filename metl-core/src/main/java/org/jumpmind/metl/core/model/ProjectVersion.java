@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class ProjectVersion extends AbstractObject {
+public class ProjectVersion extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 
@@ -53,9 +53,14 @@ public class ProjectVersion extends AbstractObject {
     public String getVersionLabel() {
         return versionLabel;
     }
+    
+    @Override
+    public void setName(String name) {
+    }
 
+    @Override
     public String getName() {
-        return String.format("%s (%s)", project.getName(), versionLabel);
+        return versionLabel;
     }
 
     public void setProjectId(String projectId) {

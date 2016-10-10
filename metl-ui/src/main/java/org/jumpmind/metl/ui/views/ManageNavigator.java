@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.AgentDeploymentSummary;
 import org.jumpmind.metl.core.model.AgentName;
@@ -124,6 +125,8 @@ public class ManageNavigator extends Panel {
         for (Folder folder : folders) {
             addChildFolder(folder, agentsFolder);
         }
+        
+        addAgentsToFolder(null);
 
         treeTable.addItem(flowsFolder);
         treeTable.setItemIcon(flowsFolder, FontAwesome.FOLDER);
@@ -189,7 +192,7 @@ public class ManageNavigator extends Panel {
         table.setImmediate(true);
         table.setSelectable(true);
         table.setEditable(false);
-        table.setContainerDataSource(new BeanItemContainer<AbstractObject>(AbstractObject.class));
+        table.setContainerDataSource(new BeanItemContainer<AbstractNamedObject>(AbstractNamedObject.class));
         table.setVisibleColumns(new Object[] { "name" });
         table.setColumnExpandRatio("name", 1);
 
@@ -251,7 +254,7 @@ public class ManageNavigator extends Panel {
             treeTable.addItem(agent);
             treeTable.setItemIcon(agent, Icons.AGENT);
             treeTable.setChildrenAllowed(agent, deployments.size() > 0);
-            treeTable.setParent(agent, folder);
+            treeTable.setParent(agent, folder != null ? folder : agentsFolder);
 
             for (AgentDeploymentSummary agentDeployment : deployments) {
                 if (agentDeployment.getType().equals(AgentDeploymentSummary.TYPE_FLOW)) {

@@ -54,6 +54,22 @@
             <reference local="project_id" foreign="id" />
         </foreign-key>
     </table>
+    
+    <table name="project_version_dependency" description="">
+        <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />
+        <column name="source_project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />
+        <column name="target_project_version_id" type="CHAR" size="36" description="A unique identifier for the version this row belongs to" />        
+        <column name="create_time" type="TIMESTAMP" description="Timestamp when this entry was created." />
+        <column name="create_by" type="VARCHAR" size="50" description="The user who last updated this entry." />
+        <column name="last_update_by" type="VARCHAR" size="50" description="The user who created this entry." />
+        <column name="last_update_time" type="TIMESTAMP" description="Timestamp when a user last updated this entry." />    
+        <foreign-key foreignTable="project_version" name="fk_dep_src_2_v">
+            <reference local="source_project_version_id" foreign="id" />
+        </foreign-key>
+        <foreign-key foreignTable="project_version" name="fk_dep_tgt_2_v">
+            <reference local="target_project_version_id" foreign="id" />
+        </foreign-key>                
+    </table>    
 
     <table name="folder" description="">
         <column name="id" type="CHAR" size="36" required="true" primaryKey="true" description="A unique identifier" />

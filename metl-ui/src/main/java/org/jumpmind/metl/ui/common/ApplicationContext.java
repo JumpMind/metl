@@ -21,7 +21,6 @@
 package org.jumpmind.metl.ui.common;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.jumpmind.db.platform.IDatabasePlatform;
@@ -99,8 +98,6 @@ public class ApplicationContext implements Serializable {
     
     FlowName currentFlow;
     
-    List<ProjectVersion> openProjects = new ArrayList<ProjectVersion>();
-
     public IConfigurationService getConfigurationService() {
         return configurationService;
     }
@@ -143,10 +140,6 @@ public class ApplicationContext implements Serializable {
 
     public User getUser() {
         return user;
-    }
-    
-    public List<ProjectVersion> getOpenProjects() {
-        return openProjects;
     }
 
     public IDatabasePlatform getConfigDatabasePlatform() {

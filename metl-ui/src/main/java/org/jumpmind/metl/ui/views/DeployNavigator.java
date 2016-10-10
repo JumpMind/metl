@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.AbstractObject;
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentName;
@@ -272,7 +273,7 @@ public class DeployNavigator extends VerticalLayout {
         table.setImmediate(true);
         table.setSelectable(true);
         table.setEditable(true);
-        table.setContainerDataSource(new BeanItemContainer<AbstractObject>(AbstractObject.class));
+        table.setContainerDataSource(new BeanItemContainer<AbstractNamedObject>(AbstractNamedObject.class));
         table.setTableFieldFactory(new DefaultFieldFactory() {
             @Override
             public Field<?> createField(Container container, Object itemId, Object propertyId,

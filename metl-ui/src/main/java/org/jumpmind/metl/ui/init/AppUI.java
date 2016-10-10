@@ -29,7 +29,6 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,10 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.GroupPrivilege;
 import org.jumpmind.metl.core.model.Privilege;
-import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.User;
 import org.jumpmind.metl.core.model.UserGroup;
-import org.jumpmind.metl.core.model.UserSetting;
 import org.jumpmind.metl.core.persist.IConfigurationService;
 import org.jumpmind.metl.core.util.VersionUtils;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -295,18 +292,6 @@ public class AppUI extends UI implements LoginListener {
 
         ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
         appCtx.setUser(user);
-
-        List<ProjectVersion> openProjects = appCtx.getOpenProjects();
-        openProjects.clear();
-
-        List<String> projectIds = user.getList(UserSetting.SETTING_CURRENT_PROJECT_ID_LIST);
-        for (String projectId : projectIds) {
-            ProjectVersion projectVersion = appCtx.getConfigurationService()
-                    .findProjectVersion(projectId);
-            if (projectVersion != null) {
-                openProjects.add(projectVersion);
-            }
-        }
 
         viewManager = ctx.getBean(ViewManager.class);
         viewManager.init(this, contentArea);

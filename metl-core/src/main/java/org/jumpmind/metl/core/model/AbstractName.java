@@ -44,11 +44,6 @@ abstract public class AbstractName extends AbstractNamedObject {
     public String getName() {
         return name;
     }
-    
-    @Override
-    public String toString() {
-        return name;
-    }
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;

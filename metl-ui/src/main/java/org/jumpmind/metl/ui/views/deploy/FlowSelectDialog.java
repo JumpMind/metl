@@ -47,7 +47,7 @@ import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class FlowSelectWindow extends ResizableWindow {
+public class FlowSelectDialog extends ResizableWindow {
     
     private static final long serialVersionUID = 1L;
 
@@ -60,7 +60,7 @@ public class FlowSelectWindow extends ResizableWindow {
     IFlowSelectListener listener;
     
     @SuppressWarnings({ "serial" })
-    public FlowSelectWindow(ApplicationContext context, String caption, String introText,
+    public FlowSelectDialog(ApplicationContext context, String caption, String introText,
     		boolean includeTestFlows) {
         super(caption);
         this.context = context;

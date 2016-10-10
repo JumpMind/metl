@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class Folder extends AbstractObject {
+public class Folder extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 
@@ -86,10 +86,12 @@ public class Folder extends AbstractObject {
         this.type = type;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }

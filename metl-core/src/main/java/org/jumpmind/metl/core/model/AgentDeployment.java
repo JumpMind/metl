@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.jumpmind.metl.core.runtime.LogLevel;
 
-public class AgentDeployment extends AbstractObject {
+public class AgentDeployment extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 
@@ -106,10 +106,12 @@ public class AgentDeployment extends AbstractObject {
         return DeploymentStatus.valueOf(status);
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }

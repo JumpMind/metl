@@ -46,7 +46,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-class EditAgentParametersWindow extends ResizableWindow implements ValueChangeListener {
+class EditAgentParametersDialog extends ResizableWindow implements ValueChangeListener {
 
     ApplicationContext context;
 
@@ -56,7 +56,7 @@ class EditAgentParametersWindow extends ResizableWindow implements ValueChangeLi
 
     Button removeButton;
 
-    public EditAgentParametersWindow(final ApplicationContext context, final Agent agent) {
+    public EditAgentParametersDialog(final ApplicationContext context, final Agent agent) {
         super("Agent Parameters");
         this.context = context;
         this.agent = agent;
@@ -118,7 +118,7 @@ class EditAgentParametersWindow extends ResizableWindow implements ValueChangeLi
 
     class CloseClickListener implements ClickListener {
         public void buttonClick(ClickEvent event) {
-            EditAgentParametersWindow.this.close();
+            EditAgentParametersDialog.this.close();
         }
     }
 

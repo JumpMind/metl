@@ -26,7 +26,7 @@ import java.util.List;
 
 import org.jumpmind.properties.TypedProperties;
 
-public class Agent extends AbstractObject {
+public class Agent extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 
@@ -94,10 +94,12 @@ public class Agent extends AbstractObject {
         return folder;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
