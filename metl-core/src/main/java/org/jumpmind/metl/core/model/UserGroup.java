@@ -36,15 +36,6 @@ public class UserGroup extends AbstractObject {
         this.userId = userId;
         this.groupId = groupId;
     }
-    
-    @Override
-    public void setName(String name) {
-    }
-
-    @Override
-    public String getName() {
-        return null;
-    }
 
     public String getUserId() {
         return userId;

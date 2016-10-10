@@ -37,15 +37,6 @@ public class UserHist extends AbstractObject {
     public UserHist() {
     }
 
-    @Override
-    public void setName(String name) {
-    }
-
-    @Override
-    public String getName() {
-        return null;
-    }
-
     public String getUserId() {
         return userId;
     }

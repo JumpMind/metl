@@ -24,14 +24,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class AbstractObjectNameBasedSorter implements Comparator<AbstractObject> {
+public class AbstractObjectNameBasedSorter implements Comparator<AbstractNamedObject> {
 
     @Override
-    public int compare(AbstractObject o1, AbstractObject o2) {
+    public int compare(AbstractNamedObject o1, AbstractNamedObject o2) {
         return o1.getName().compareTo(o2.getName());
     }
     
-    public static void sort(List<? extends AbstractObject> list) {
+    public static void sort(List<? extends AbstractNamedObject> list) {
         Collections.sort(list, new AbstractObjectNameBasedSorter());
     }
 

@@ -89,15 +89,6 @@ public class ExecutionStep extends AbstractObject {
         return threadNumber;
     }
 
-    @Override
-    public void setName(String name) {
-    }
-
-    @Override
-    public String getName() {
-        return getId();
-    }
-
     public String getExecutionId() {
         return executionId;
     }

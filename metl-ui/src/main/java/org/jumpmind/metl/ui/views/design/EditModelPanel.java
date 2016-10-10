@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jumpmind.metl.core.model.AbstractObject;
+import org.jumpmind.metl.core.model.AbstractNamedObject;
 import org.jumpmind.metl.core.model.DataType;
 import org.jumpmind.metl.core.model.Model;
 import org.jumpmind.metl.core.model.ModelAttribute;
@@ -147,7 +147,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         treeTable.setMultiSelect(true);
         treeTable.addGeneratedColumn("name", new ColumnGenerator() {
             public Object generateCell(Table source, Object itemId, Object columnId) {
-                final AbstractObject obj = (AbstractObject) itemId;
+                final AbstractNamedObject obj = (AbstractNamedObject) itemId;
                 if (lastEditItemIds.contains(itemId) && !readOnly) {
                     ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
                         protected void save(String text) {

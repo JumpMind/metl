@@ -30,7 +30,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting;
 import org.jumpmind.properties.TypedProperties;
 
-abstract public class AbstractObjectWithSettings extends AbstractObject {
+abstract public class AbstractObjectWithSettings extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 

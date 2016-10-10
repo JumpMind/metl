@@ -1,6 +1,6 @@
 package org.jumpmind.metl.core.model;
 
-public class AuditEvent extends AbstractObject {
+public class AuditEvent extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
     

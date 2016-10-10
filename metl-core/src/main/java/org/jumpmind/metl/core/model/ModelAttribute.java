@@ -20,7 +20,7 @@
  */
 package org.jumpmind.metl.core.model;
 
-public class ModelAttribute extends AbstractObject implements IAuditable {
+public class ModelAttribute extends AbstractNamedObject implements IAuditable {
 
     private static final long serialVersionUID = 1L;
     
