@@ -205,7 +205,7 @@ public class Assert extends AbstractComponentRuntime {
         }
 
         if (assertFailed.length() > 0) {
-            throw new AssertException(assertFailed.toString());
+            throw new AssertException("\nFlow Step: " + this.context.flowStep.getName() + assertFailed.toString());
         }
     }
 }
