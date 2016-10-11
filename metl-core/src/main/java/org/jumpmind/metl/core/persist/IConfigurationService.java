@@ -48,6 +48,7 @@ import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
@@ -108,6 +109,8 @@ public interface IConfigurationService {
     public AgentDeployment findAgentDeployment(String id);
     
     public List<AgentDeploymentSummary> findAgentDeploymentSummary(String agentId);
+    
+    public List<ProjectVersionDependency> findProjectDependencies(String projectVersionId);
     
     public AgentResource findAgentResource(String agentId, String resourceId);
            

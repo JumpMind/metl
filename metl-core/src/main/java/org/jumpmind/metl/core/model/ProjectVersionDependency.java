@@ -1,25 +1,50 @@
 package org.jumpmind.metl.core.model;
 
-public class ProjectVersionDependency extends AbstractObject {
+import java.util.UUID;
+
+public class ProjectVersionDependency extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 
-    String sourceProjectVersionId;
+    String projectVersionId;
     
-    String targetProjectVersionId;    
+    String targetProjectVersionId;
+    
+    String rowId;
+    
+    transient ProjectVersion targetProjectVersion;
+    
+    @Override
+    public void setName(String name) {
+    }
+    
+    @Override
+    public String getName() {
+        if (targetProjectVersion != null) {
+            return String.format("%s (%s)", targetProjectVersion.getProject().getName(),
+                    targetProjectVersion.getName());
+        } else {
+            return targetProjectVersionId;
+        }
+    }
+    
+    public void setTargetProjectVersion(ProjectVersion targetProjectVersion) {
+        this.targetProjectVersion = targetProjectVersion;
+        this.targetProjectVersionId = targetProjectVersion.getId();
+    }
 
     /**
      * @return the sourceProjectVersionId
      */
-    public String getSourceProjectVersionId() {
-        return sourceProjectVersionId;
+    public String getProjectVersionId() {
+        return projectVersionId;
     }
 
     /**
      * @param sourceProjectVersionId the sourceProjectVersionId to set
      */
-    public void setSourceProjectVersionId(String sourceProjectVersionId) {
-        this.sourceProjectVersionId = sourceProjectVersionId;
+    public void setProjectVersionId(String sourceProjectVersionId) {
+        this.projectVersionId = sourceProjectVersionId;
     }
 
     /**
@@ -36,6 +61,16 @@ public class ProjectVersionDependency extends AbstractObject {
         this.targetProjectVersionId = targetProjectVersionId;
     }
     
+
+    public void setRowId(String rowId) {
+        this.rowId = rowId;
+    }
     
+    public String getRowId() {
+        if (rowId == null) {
+            rowId = UUID.randomUUID().toString();
+        }
+        return rowId;
+    }
 
 }

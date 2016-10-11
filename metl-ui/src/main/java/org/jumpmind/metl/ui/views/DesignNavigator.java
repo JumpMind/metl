@@ -38,6 +38,7 @@ import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Privilege;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.Setting;
 import org.jumpmind.metl.core.model.UserSetting;
@@ -52,6 +53,7 @@ import org.jumpmind.metl.core.runtime.resource.Sftp;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.EnableFocusTextField;
 import org.jumpmind.metl.ui.common.Icons;
+import org.jumpmind.metl.ui.common.SelectProjectVersionDialog;
 import org.jumpmind.metl.ui.common.TabbedPanel;
 import org.jumpmind.metl.ui.views.ImportDialog.IImportListener;
 import org.jumpmind.metl.ui.views.design.EditFlowPanel;
@@ -106,6 +108,12 @@ import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 public class DesignNavigator extends VerticalLayout {
 
+    private static final String LABEL_DEPENDENCIES = "Dependencies";
+
+    private static final String LABEL_MODELS = "Models";
+
+    private static final String LABEL_RESOURCES = "Resources";
+
     final Logger log = LoggerFactory.getLogger(getClass());
 
     ApplicationContext context;
@@ -123,7 +131,7 @@ public class DesignNavigator extends VerticalLayout {
     MenuItem editMenu;
 
     MenuItem newFlow;
-    
+
     MenuItem newTestFlow;
 
     MenuItem newModel;
@@ -146,6 +154,12 @@ public class DesignNavigator extends VerticalLayout {
 
     MenuItem newFtpResource;
 
+    MenuItem open;
+    
+    MenuItem rename;
+    
+    MenuItem copy;
+    
     MenuItem delete;
 
     MenuItem search;
@@ -201,9 +215,13 @@ public class DesignNavigator extends VerticalLayout {
 
             if (!(selected instanceof FolderName)) {
                 if (!(selected instanceof Project)) {
-                    exportMenu.setEnabled(true);
+                    exportMenu.setEnabled(true);                    
                     if (!(selected instanceof ProjectVersion)) {
                         editMenu.setEnabled(true);
+                        boolean removeOnly = selected instanceof ProjectVersionDependency;
+                        open.setVisible(!removeOnly);
+                        copy.setVisible(!removeOnly);
+                        rename.setVisible(!removeOnly);
                     }
                 }
             }
@@ -224,6 +242,7 @@ public class DesignNavigator extends VerticalLayout {
 
         // file - new
         newMenu = fileMenu.addItem("New", null);
+        newMenu.addItem("Dependency", selectedItem -> promptForNewDependency());
         newFlow = newMenu.addItem("Flow", selectedItem -> addNewFlow(false));
         newTestFlow = newMenu.addItem("Test Flow", selectedItem -> addNewFlow(true));
         newModel = newMenu.addItem("Model", selectedItem -> addNewModel());
@@ -247,10 +266,10 @@ public class DesignNavigator extends VerticalLayout {
 
         // edit menu
         editMenu = leftMenuBar.addItem("Edit", null);
-        editMenu.addItem("Open", selectedItem -> open(treeTable.getValue()));
-        editMenu.addItem("Rename",
+        open = editMenu.addItem("Open", selectedItem -> open(treeTable.getValue()));
+        rename = editMenu.addItem("Rename",
                 selectedItem -> startEditingItem((AbstractObject) treeTable.getValue()));
-        editMenu.addItem("Copy", selectedItem -> copySelected());
+        copy = editMenu.addItem("Copy", selectedItem -> copySelected());
         delete = editMenu.addItem("Remove", selectedItem -> handleDelete());
 
         // project menu
@@ -299,7 +318,8 @@ public class DesignNavigator extends VerticalLayout {
         table.setImmediate(true);
         table.setSelectable(true);
         table.setEditable(true);
-        table.setContainerDataSource(new BeanItemContainer<AbstractNamedObject>(AbstractNamedObject.class));
+        table.setContainerDataSource(
+                new BeanItemContainer<AbstractNamedObject>(AbstractNamedObject.class));
 
         table.setTableFieldFactory(new DefaultFieldFactory() {
             @Override
@@ -362,8 +382,9 @@ public class DesignNavigator extends VerticalLayout {
                     } else if (itemId instanceof Project) {
                         return "project";
                     } else if (itemId instanceof ProjectVersion) {
-                        ProjectVersion version = (ProjectVersion)itemId;
-                        return version.isReadOnly() ? "project-version-read-only" : "project-version";
+                        ProjectVersion version = (ProjectVersion) itemId;
+                        return version.isReadOnly() ? "project-version-read-only"
+                                : "project-version";
                     }
                 }
                 return null;
@@ -509,11 +530,11 @@ public class DesignNavigator extends VerticalLayout {
         treeTable.removeAllItems();
         for (Project project : projects) {
             List<ProjectVersion> versions = project.getProjectVersions();
-            
+
             treeTable.addItem(project);
             treeTable.setItemIcon(project, Icons.PROJECT);
             treeTable.setChildrenAllowed(project, versions.size() > 0);
-            
+
             for (ProjectVersion projectVersion : versions) {
                 treeTable.addItem(projectVersion);
                 treeTable.setItemIcon(projectVersion, Icons.PROJECT_VERSION);
@@ -521,8 +542,10 @@ public class DesignNavigator extends VerticalLayout {
                 treeTable.setParent(projectVersion, project);
                 addFlowsToFolder(addVirtualFolder("Flows", projectVersion), projectVersion, false);
                 addFlowsToFolder(addVirtualFolder("Tests", projectVersion), projectVersion, true);
-                addModelsToFolder(addVirtualFolder("Models", projectVersion), projectVersion);
-                addResourcesToFolder(addVirtualFolder("Resources", projectVersion), projectVersion);
+                addModelsToFolder(addVirtualFolder(LABEL_MODELS, projectVersion), projectVersion);
+                addResourcesToFolder(addVirtualFolder(LABEL_RESOURCES, projectVersion), projectVersion);
+                addDependenciesToFolder(addVirtualFolder(LABEL_DEPENDENCIES, projectVersion),
+                        projectVersion);                
             }
         }
     }
@@ -559,6 +582,10 @@ public class DesignNavigator extends VerticalLayout {
             this.treeTable.setChildrenAllowed(resource, false);
             this.treeTable.setParent(resource, folder);
         }
+        
+        if (resources.size() == 0) {
+            this.treeTable.removeItem(folder);
+        }
 
     }
 
@@ -574,6 +601,29 @@ public class DesignNavigator extends VerticalLayout {
             this.treeTable.setParent(component, folder);
             this.treeTable.setChildrenAllowed(component, false);
         }
+        
+        if (components.size() == 0) {
+            this.treeTable.removeItem(folder);
+        }
+    }
+
+    protected void addDependenciesToFolder(FolderName folder, ProjectVersion projectVersion) {
+        IConfigurationService configurationService = context.getConfigurationService();
+        List<ProjectVersionDependency> dependencies = configurationService
+                .findProjectDependencies(projectVersion.getId());
+        AbstractObjectNameBasedSorter.sort(dependencies);
+        for (ProjectVersionDependency dependency : dependencies) {
+            this.treeTable.setChildrenAllowed(folder, true);
+            this.treeTable.addItem(dependency);
+            this.treeTable.setItemIcon(dependency, Icons.DEPENDENCY);
+            this.treeTable.setParent(dependency, folder);
+            this.treeTable.setChildrenAllowed(dependency, false);
+        }
+        
+        if (dependencies.size() == 0) {
+            this.treeTable.removeItem(folder);
+        }
+
     }
 
     protected void addFlowsToFolder(FolderName folder, ProjectVersion projectVersion,
@@ -589,6 +639,11 @@ public class DesignNavigator extends VerticalLayout {
             this.treeTable.setParent(flow, folder);
             this.treeTable.setChildrenAllowed(flow, false);
         }
+        
+        if (flows.size() == 0) {
+            this.treeTable.removeItem(folder);
+        }
+
     }
 
     protected void addModelsToFolder(FolderName folder, ProjectVersion projectVersion) {
@@ -602,6 +657,11 @@ public class DesignNavigator extends VerticalLayout {
             this.treeTable.setParent(model, folder);
             this.treeTable.setChildrenAllowed(model, false);
         }
+        
+        if (models.size() == 0) {
+            this.treeTable.removeItem(folder);
+        }
+
     }
 
     protected void selectionChanged() {
@@ -625,12 +685,14 @@ public class DesignNavigator extends VerticalLayout {
         } else if (item instanceof ModelName) {
             ModelName model = (ModelName) item;
             ProjectVersion projectVersion = findProjectVersion(model);
-            EditModelPanel editModel = new EditModelPanel(context, model.getId(), context.isReadOnly(projectVersion, Privilege.DESIGN));
+            EditModelPanel editModel = new EditModelPanel(context, model.getId(),
+                    context.isReadOnly(projectVersion, Privilege.DESIGN));
             tabs.addCloseableTab(model.getId(), model.getName(), Icons.MODEL, editModel);
         } else if (item instanceof ResourceName) {
             ResourceName resource = (ResourceName) item;
             ProjectVersion projectVersion = findProjectVersion(resource);
-            PropertySheet sheet = new PropertySheet(context, tabs, context.isReadOnly(projectVersion, Privilege.DESIGN));            
+            PropertySheet sheet = new PropertySheet(context, tabs,
+                    context.isReadOnly(projectVersion, Privilege.DESIGN));
             sheet.setSource(context.getConfigurationService().findResource(resource.getId()));
             tabs.addCloseableTab(resource.getId(), resource.getName(), treeTable.getItemIcon(item),
                     sheet);
@@ -715,6 +777,9 @@ public class DesignNavigator extends VerticalLayout {
                 CommonUiUtils.notify("The model is currently in use.  It cannot be deleted.",
                         Type.WARNING_MESSAGE);
             }
+        } else if (object instanceof ProjectVersionDependency) {
+            context.getConfigurationService().delete((ProjectVersionDependency)object);
+            treeTable.removeItem(object);
         }
 
     }
@@ -743,7 +808,7 @@ public class DesignNavigator extends VerticalLayout {
         Object value = treeTable.getValue();
         return findProjectVersion(value);
     }
-    
+
     protected ProjectVersion findProjectVersion(Object value) {
         while (!(value instanceof ProjectVersion) && value != null) {
             value = treeTable.getParent(value);
@@ -755,30 +820,74 @@ public class DesignNavigator extends VerticalLayout {
             return null;
         }
     }
-    
-    protected void addNewFlow(boolean testFlow) {
-        FolderName folder = findFolderWithName(testFlow ? "Tests" : "Flows");
-        if (folder != null) {
+
+    protected void promptForNewDependency() {
+        SelectProjectVersionDialog.show(context, findProjectVersion().getProject(),
+                v -> addNewDependency(v),
+                "Please select a project version that this project depends upon.");
+    }
+
+    protected void addNewDependency(ProjectVersion targetVersion) {
+        ProjectVersion projectVersion = findProjectVersion();
+        IConfigurationService configurationService = context.getConfigurationService();
+        List<ProjectVersionDependency> dependencies = configurationService
+                .findProjectDependencies(projectVersion.getId());
+        boolean add = true;
+        for (ProjectVersionDependency projectVersionDependency : dependencies) {
+            if (projectVersionDependency.getTargetProjectVersionId()
+                    .equals(targetVersion.getId())) {
+                add = false;
+            }
+        }
+
+        if (add) {
+            ProjectVersionDependency dependency = new ProjectVersionDependency();
+            dependency.setProjectVersionId(projectVersion.getId());
+            dependency.setTargetProjectVersion(targetVersion);
+            configurationService.save(dependency);
+            
+            FolderName folder = findFolderWithName(LABEL_DEPENDENCIES);
+            if (folder == null) {
+                folder = addVirtualFolder(LABEL_DEPENDENCIES, projectVersion);
+            }
             treeTable.setChildrenAllowed(folder, true);
 
-            ProjectVersion projectVersion = findProjectVersion();
-            FlowName flow = new FlowName();
-            flow.setProjectVersionId(projectVersion.getId());
-            flow.setName("New Flow");
-            flow.setTest(testFlow);
-            context.getConfigurationService().save(flow);
-
-            treeTable.addItem(flow);
-            treeTable.setItemIcon(flow, Icons.FLOW);
-            treeTable.setParent(flow, folder);
-            treeTable.setChildrenAllowed(flow, false);
+            treeTable.addItem(dependency);
+            treeTable.setItemIcon(dependency, Icons.DEPENDENCY);
+            treeTable.setParent(dependency, folder);
+            treeTable.setChildrenAllowed(dependency, false);
 
             treeTable.setCollapsed(folder, false);
             treeTable.setCollapsed(projectVersion, false);
-            treeTable.setValue(flow);
-
-            startEditingItem(flow);
+            treeTable.setValue(dependency);
         }
+    }
+
+    protected void addNewFlow(boolean testFlow) {
+        ProjectVersion projectVersion = findProjectVersion();
+        String name = testFlow ? "Tests" : "Flows";
+        FolderName folder = findFolderWithName(name);
+        if (folder == null) {
+            folder = addVirtualFolder(name, projectVersion);
+        }
+        treeTable.setChildrenAllowed(folder, true);
+
+        FlowName flow = new FlowName();
+        flow.setProjectVersionId(projectVersion.getId());
+        flow.setName("New Flow");
+        flow.setTest(testFlow);
+        context.getConfigurationService().save(flow);
+
+        treeTable.addItem(flow);
+        treeTable.setItemIcon(flow, Icons.FLOW);
+        treeTable.setParent(flow, folder);
+        treeTable.setChildrenAllowed(flow, false);
+
+        treeTable.setCollapsed(folder, false);
+        treeTable.setCollapsed(projectVersion, false);
+        treeTable.setValue(flow);
+
+        startEditingItem(flow);
     }
 
     protected void addNewDatabase() {
@@ -810,55 +919,58 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {
-        FolderName folder = findFolderWithName("Resources");
-        if (folder != null) {
-            treeTable.setChildrenAllowed(folder, true);
-
-            ProjectVersion projectVersion = findProjectVersion();
-            ResourceName resource = new ResourceName();
-            resource.setName(defaultName);
-            resource.setProjectVersionId(projectVersion.getId());
-            resource.setType(type);
-            context.getConfigurationService().save(resource);
-
-            treeTable.addItem(resource);
-            treeTable.setItemIcon(resource, icon);
-            treeTable.setParent(resource, folder);
-            treeTable.setChildrenAllowed(resource, false);
-
-            treeTable.setCollapsed(folder, false);
-
-            startEditingItem(resource);
+        ProjectVersion projectVersion = findProjectVersion();
+        FolderName folder = findFolderWithName(LABEL_RESOURCES);
+        if (folder == null) {
+            folder = addVirtualFolder(LABEL_RESOURCES, projectVersion);
         }
+        treeTable.setChildrenAllowed(folder, true);
+
+        ResourceName resource = new ResourceName();
+        resource.setName(defaultName);
+        resource.setProjectVersionId(projectVersion.getId());
+        resource.setType(type);
+        context.getConfigurationService().save(resource);
+
+        treeTable.addItem(resource);
+        treeTable.setItemIcon(resource, icon);
+        treeTable.setParent(resource, folder);
+        treeTable.setChildrenAllowed(resource, false);
+
+        treeTable.setCollapsed(folder, false);
+
+        startEditingItem(resource);
     }
 
     protected void addNewModel() {
-        FolderName folder = findFolderWithName("Models");
-        if (folder != null) {
-            treeTable.setChildrenAllowed(folder, true);
-
-            ProjectVersion projectVersion = findProjectVersion();
-            ModelName model = new ModelName();
-            model.setName("New Model");
-            model.setProjectVersionId(projectVersion.getId());
-            context.getConfigurationService().save(model);
-
-            treeTable.addItem(model);
-            treeTable.setItemIcon(model, Icons.MODEL);
-            treeTable.setParent(model, folder);
-            treeTable.setChildrenAllowed(model, false);
-
-            treeTable.setCollapsed(folder, false);
-
-            startEditingItem(model);
+        ProjectVersion projectVersion = findProjectVersion();
+        FolderName folder = findFolderWithName(LABEL_MODELS);
+        if (folder == null) {
+            folder = addVirtualFolder(LABEL_MODELS, projectVersion);
         }
+        treeTable.setChildrenAllowed(folder, true);
+
+        ModelName model = new ModelName();
+        model.setName("New Model");
+        model.setProjectVersionId(projectVersion.getId());
+        context.getConfigurationService().save(model);
+
+        treeTable.addItem(model);
+        treeTable.setItemIcon(model, Icons.MODEL);
+        treeTable.setParent(model, folder);
+        treeTable.setChildrenAllowed(model, false);
+
+        treeTable.setCollapsed(folder, false);
+
+        startEditingItem(model);
     }
 
     class ImportConfigurationListener implements IImportListener {
 
         @Override
         public void onFinished(String dataToImport) {
-            context.getImportExportService().importConfiguration(dataToImport, context.getUser().getLoginId());
+            context.getImportExportService().importConfiguration(dataToImport,
+                    context.getUser().getLoginId());
             refresh();
         }
 

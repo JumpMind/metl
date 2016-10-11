@@ -66,6 +66,7 @@ import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.core.model.Project;
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.ResourceSetting;
@@ -94,6 +95,17 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         super(persistenceManager, tablePrefix);
         this.securityService = securityService;
         this.componentDefinitionFactory = componentDefinitionFactory;
+    }
+    
+    @Override
+    public List<ProjectVersionDependency> findProjectDependencies(String projectVersionId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("projectVersionId", projectVersionId);
+        List<ProjectVersionDependency> list = find(ProjectVersionDependency.class, params, ProjectVersionDependency.class);
+        for (ProjectVersionDependency projectVersionDependency : list) {
+            projectVersionDependency.setTargetProjectVersion(findProjectVersion(projectVersionDependency.getTargetProjectVersionId()));
+        }
+        return list;        
     }
 
     @Override
@@ -1175,6 +1187,13 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         newVersion.setCreateTime(new Date());
         newVersion.setOrigVersionId(original.getId());
         save(newVersion);
+        
+        List<ProjectVersionDependency> dependencies = findProjectDependencies(original.getId());
+        for (ProjectVersionDependency origProjectVersionDependency : dependencies) {
+            ProjectVersionDependency newDependency = copyWithNewUUID(oldToNewUUIDMapping, origProjectVersionDependency);
+            newDependency.setProjectVersionId(newVersion.getId());
+            save(newDependency);
+        }
 
         List<ModelName> models = findModelsInProject(original.getId());
         for (ModelName modelName : models) {

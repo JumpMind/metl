@@ -101,6 +101,16 @@ public abstract class AbstractService {
         data.setLastUpdateTime(new Date());
         persistenceManager.save(data, null, null, tableName(data.getClass()));
     }
+    
+    protected void rethrow(Throwable error) {
+        if (error instanceof RuntimeException) {
+            throw (RuntimeException)error;
+        } else if (error instanceof Error) {
+            throw (Error)error;
+        } else {
+            throw new RuntimeException(error);
+        }
+    }
 
     
 }

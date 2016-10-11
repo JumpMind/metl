@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 import static org.jumpmind.metl.core.runtime.component.ComponentTypeIdConstants.*;
 
-public class Flow extends AbstractObject implements IAuditable {
+public class Flow extends AbstractNamedObject implements IAuditable {
 
     private static final long serialVersionUID = 1L;
 
@@ -90,10 +90,12 @@ public class Flow extends AbstractObject implements IAuditable {
         return folder;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }

@@ -409,7 +409,7 @@ public class FlowRuntime {
     }
 
     public void notifyStepsTheFlowIsComplete() {
-        List<Throwable> allErrors = getAllErrors();
+        List<Throwable> allErrors = getAllErrors(); 
 
         Collection<StepRuntime> allSteps = stepRuntimes.values();
         for (StepRuntime stepRuntime : allSteps) {

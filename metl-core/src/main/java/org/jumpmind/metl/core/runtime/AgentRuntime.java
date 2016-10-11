@@ -50,6 +50,7 @@ import org.jumpmind.metl.core.model.FlowParameter;
 import org.jumpmind.metl.core.model.FlowStep;
 import org.jumpmind.metl.core.model.Notification;
 import org.jumpmind.metl.core.model.ProjectVersion;
+import org.jumpmind.metl.core.model.ProjectVersionDependency;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
 import org.jumpmind.metl.core.model.SettingDefinition;
@@ -281,8 +282,13 @@ public class AgentRuntime {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void deployResources(Flow flow) {
-        List<ResourceName> flowResourceNames = configurationService
-                .findResourcesInProject(flow.getProjectVersionId());
+        List<ResourceName> flowResourceNames = new ArrayList<>(configurationService
+                .findResourcesInProject(flow.getProjectVersionId()));
+        List<ProjectVersionDependency> dependencies = configurationService.findProjectDependencies(flow.getProjectVersionId());
+        for (ProjectVersionDependency projectVersionDependency : dependencies) {
+            flowResourceNames.addAll(configurationService.findResourcesInProject(projectVersionDependency.getTargetProjectVersionId()));
+        }
+        
         for (ResourceName flowResourceName : flowResourceNames) {
             try {
                 Resource flowResource = configurationService.findResource(flowResourceName.getId());
