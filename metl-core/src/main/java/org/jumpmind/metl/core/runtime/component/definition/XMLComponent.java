@@ -61,9 +61,14 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
     @XmlEnum
     public enum ResourceCategory {
         @XmlEnumValue("datasource")
-        DATASOURCE, @XmlEnumValue("streamable")
-        STREAMABLE, @XmlEnumValue("none")
-        NONE, @XmlEnumValue("any")
+        DATASOURCE, 
+        @XmlEnumValue("streamable")
+        STREAMABLE,
+        @XmlEnumValue("mailsession")
+        MAIL_SESSION,
+        @XmlEnumValue("none")
+        NONE, 
+        @XmlEnumValue("any")
         ANY
     }
 

@@ -48,6 +48,7 @@ import org.jumpmind.metl.core.runtime.resource.Ftp;
 import org.jumpmind.metl.core.runtime.resource.Http;
 import org.jumpmind.metl.core.runtime.resource.JMS;
 import org.jumpmind.metl.core.runtime.resource.LocalFile;
+import org.jumpmind.metl.core.runtime.resource.MailSessionResource;
 import org.jumpmind.metl.core.runtime.resource.SMB;
 import org.jumpmind.metl.core.runtime.resource.Sftp;
 import org.jumpmind.metl.ui.common.ApplicationContext;
@@ -249,14 +250,15 @@ public class DesignNavigator extends VerticalLayout {
 
         // file - new - resource
         resourceMenu = newMenu.addItem("Resource", null);
-        newDataSource = resourceMenu.addItem("SMB", selectedItem -> addNewSMBFileSystem());
-        newDataSource = resourceMenu.addItem("Database", selectedItem -> addNewDatabase());
-        newFtpResource = resourceMenu.addItem("FTP", selectedItem -> addNewFtpFileSystem());
-        newFileResource = resourceMenu.addItem("Local File System",
-                selectedItem -> addNewLocalFileSystem());
-        newSSHResource = resourceMenu.addItem("SFTP", selectedItem -> addNewSftpFileSystem());
-        newWebResource = resourceMenu.addItem("Web Resource", selectedItem -> addNewHttpResource());
-        newJMSResource = resourceMenu.addItem("JMS", selectedItem -> addNewJMSFileSystem());
+        newDataSource = resourceMenu.addItem("Database", i -> addNewDatabase());
+        MenuItem directory = resourceMenu.addItem("Directory", null);
+        newFtpResource = directory.addItem("FTP", i -> addNewFtpFileSystem());
+        newJMSResource = directory.addItem("JMS", i -> addNewJMSFileSystem());
+        newFileResource = directory.addItem("Local File System", i -> addNewLocalFileSystem());
+        newSSHResource = directory.addItem("SFTP", i -> addNewSftpFileSystem());
+        directory.addItem("SMB", i -> addNewSMBFileSystem());
+        newWebResource = directory.addItem("Web Resource", i -> addNewHttpResource());
+        resourceMenu.addItem("Mail Session", i -> addNewMailSession());
 
         // file - export
         exportMenu = fileMenu.addItem("Export...", selectedItem -> export());
@@ -525,6 +527,7 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void refreshProjects() {
+        Object selected = treeTable.getValue();
         IConfigurationService configurationService = context.getConfigurationService();
         List<Project> projects = configurationService.findProjects();
         treeTable.removeAllItems();
@@ -548,6 +551,8 @@ public class DesignNavigator extends VerticalLayout {
                         projectVersion);                
             }
         }
+        
+        treeTable.select(selected);
     }
 
     protected FolderName addVirtualFolder(String name, ProjectVersion projectVersion) {
@@ -826,7 +831,7 @@ public class DesignNavigator extends VerticalLayout {
                 v -> addNewDependency(v),
                 "Please select a project version that this project depends upon.");
     }
-
+    
     protected void addNewDependency(ProjectVersion targetVersion) {
         ProjectVersion projectVersion = findProjectVersion();
         IConfigurationService configurationService = context.getConfigurationService();
@@ -895,7 +900,7 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void addNewFtpFileSystem() {
-        addNewResource(Ftp.TYPE, "FTP Site", Icons.FILE_SYSTEM);
+        addNewResource(Ftp.TYPE, "FTP Directory", Icons.FILE_SYSTEM);
     }
 
     protected void addNewLocalFileSystem() {
@@ -907,7 +912,7 @@ public class DesignNavigator extends VerticalLayout {
     }
 
     protected void addNewJMSFileSystem() {
-        addNewResource(JMS.TYPE, "JMS", Icons.QUEUE);
+        addNewResource(JMS.TYPE, "JMS Directory", Icons.QUEUE);
     }
 
     protected void addNewSMBFileSystem() {
@@ -917,6 +922,10 @@ public class DesignNavigator extends VerticalLayout {
     protected void addNewHttpResource() {
         addNewResource(Http.TYPE, "Http", Icons.WEB);
     }
+    
+    protected void addNewMailSession() {
+        addNewResource(MailSessionResource.TYPE, "Mail Session", Icons.EMAIL);
+    }    
 
     protected void addNewResource(String type, String defaultName, FontAwesome icon) {
         ProjectVersion projectVersion = findProjectVersion();

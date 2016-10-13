@@ -21,7 +21,9 @@
 package org.jumpmind.metl.core.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -210,6 +212,24 @@ public class Model extends AbstractNamedObject implements IAuditable {
                     row.put(entity.getName() + "." + attribute.getName(), data.get(attributeId));
                 } else {
                     row.put(attribute.getName(), data.get(attributeId));
+                }
+            }
+        }
+        return row;
+    }
+    
+    public Map<String,String> toStringMap(EntityData data, boolean qualifyWithEntityName) {
+        Map<String,String> row = new HashMap<>(data.size());
+        Set<String> attributeIds = data.keySet();
+        for (String attributeId : attributeIds) {
+            ModelAttribute attribute = getAttributeById(attributeId);
+            if (attribute != null) {
+                ModelEntity entity = getEntityById(attribute.getEntityId());
+                Object value = data.get(attributeId);
+                if (qualifyWithEntityName) {                    
+                    row.put(entity.getName() + "." + attribute.getName(), value != null ? value.toString() : null);
+                } else {
+                    row.put(attribute.getName(), value != null ? value.toString() : null);
                 }
             }
         }

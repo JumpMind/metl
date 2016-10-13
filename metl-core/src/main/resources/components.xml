@@ -77,6 +77,11 @@
         <name>Expected Number of Empty Payload Messages</name>
         <defaultValue>0</defaultValue>
       </setting>
+      <setting id='expected.custom.header.pairs'
+               required='false'
+               type='multiline_text'>
+        <name>Expected Custom Header Pairs</name>
+      </setting>      
       <setting id='expected.text.payload'
                required='false'
                type='multiline_text'>
@@ -218,6 +223,82 @@
                type='integer'>
         <name>Delay (ms)</name>
         <defaultValue>1000</defaultValue>
+      </setting>
+    </settings>
+  </component>
+  <component category='Writer'
+             id='35c4c0ae-b040-4f93-b212-5b92619c4064'
+             inputMessageType='any'
+             inputOutputModelsMatch='false'
+             outputMessageType='any'
+             resourceCategory='mailsession'>
+    <name>Email Writer</name>
+    <keywords>send,email,smtp,write</keywords>
+    <className>org.jumpmind.metl.core.runtime.component.EmailWriter</className>
+    <description></description>
+    <settings>    
+      <setting id='subject'
+               required='true'
+               type='text'>
+        <name>Subject</name>
+      </setting>
+      <setting id='body'
+               required='true'
+               type='multiline_text'>
+        <name>Body</name>
+      </setting>
+      <setting id='from.line'
+               required='true'
+               type='text'>
+        <name>From:</name>
+      </setting>      
+      <setting id='to.line'
+               required='false'
+               type='text'>
+        <name>To:</name>
+      </setting>
+      <setting id='cc.line'
+               required='false'
+               type='text'>
+        <name>CC:</name>
+      </setting>
+      <setting id='bcc.line'
+               required='false'
+               type='text'>
+        <name>BCC:</name>
+      </setting>
+      <setting id='source.step.email.addresses'
+               required='false'
+               type='source_step'>
+        <name>Source Step For Email Addresses</name>
+      </setting>
+      <setting id='source.step.email.addresses.type'
+               required='false'
+               type='choice'>
+        <name>Source Step Email Addresses Type</name>
+        <defaultValue>TO</defaultValue>
+        <choices>
+          <choice>TO</choice>
+          <choice>CC</choice>
+          <choice>BCC</choice>
+        </choices>
+      </setting>       
+      <setting id='one.email.per.recipient'
+               required='false'
+               type='boolean'>
+        <name>One Email per Recipient</name>
+        <defaultValue>false</defaultValue>
+      </setting>          
+      <setting id='run.when'
+               required='false'
+               type='choice'>
+        <name>Run When</name>
+        <defaultValue>PER UNIT OF WORK</defaultValue>
+        <choices>
+          <choice>PER UNIT OF WORK</choice>
+          <choice>PER MESSAGE</choice>
+          <choice>PER ENTITY</choice>
+        </choices>
       </setting>
     </settings>
   </component>

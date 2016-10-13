@@ -1,0 +1,228 @@
+{
+  "versionNumber" : "1.4.6",
+  "hostName" : "chenson42.loc",
+  "projectData" : [ {
+    "tableName" : "METL_PROJECT",
+    "tableData" : {
+      "f979ec13-06f8-44e7-bd39-748d5629cfca" : {
+        "ID" : "f979ec13-06f8-44e7-bd39-748d5629cfca",
+        "NAME" : "Email Flow Test",
+        "DESCRIPTION" : null,
+        "DELETED" : 0,
+        "WORKING_VERSION" : null
+      }
+    }
+  }, {
+    "tableName" : "METL_PROJECT_VERSION",
+    "tableData" : {
+      "4161b978-875d-4864-ad44-bb852e7a9019" : {
+        "ID" : "4161b978-875d-4864-ad44-bb852e7a9019",
+        "VERSION_LABEL" : "1.0.0",
+        "PROJECT_ID" : "f979ec13-06f8-44e7-bd39-748d5629cfca",
+        "ORIG_VERSION_ID" : null,
+        "DESCRIPTION" : "",
+        "READ_ONLY" : 0,
+        "ARCHIVED" : 0,
+        "DELETED" : 0
+      }
+    }
+  }, {
+    "tableName" : "METL_PROJECT_VERSION_DEPENDENCY",
+    "tableData" : { }
+  } ],
+  "resourceData" : [ {
+    "tableName" : "METL_RESOURCE",
+    "tableData" : {
+      "966eee5d-da25-4073-9887-efd325874fe2" : {
+        "ID" : "966eee5d-da25-4073-9887-efd325874fe2",
+        "ROW_ID" : "df92325d-0412-43d9-8ae3-1f6714400c6c",
+        "PROJECT_VERSION_ID" : "4161b978-875d-4864-ad44-bb852e7a9019",
+        "DELETED" : 0,
+        "NAME" : "Mail Session",
+        "TYPE" : "MailSession",
+        "FOLDER_ID" : null
+      }
+    }
+  }, {
+    "tableName" : "METL_RESOURCE_SETTING",
+    "tableData" : {
+      "966eee5d-da25-4073-9887-efd325874fe2mail.user" : {
+        "RESOURCE_ID" : "966eee5d-da25-4073-9887-efd325874fe2",
+        "NAME" : "mail.user",
+        "VALUE" : ""
+      },
+      "966eee5d-da25-4073-9887-efd325874fe2mail.transport" : {
+        "RESOURCE_ID" : "966eee5d-da25-4073-9887-efd325874fe2",
+        "NAME" : "mail.transport",
+        "VALUE" : "mock_smtp"
+      },
+      "966eee5d-da25-4073-9887-efd325874fe2mail.password" : {
+        "RESOURCE_ID" : "966eee5d-da25-4073-9887-efd325874fe2",
+        "NAME" : "mail.password",
+        "VALUE" : ""
+      }
+    }
+  } ],
+  "modelData" : [ {
+    "tableName" : "METL_MODEL",
+    "tableData" : { }
+  }, {
+    "tableName" : "METL_MODEL_ENTITY",
+    "tableData" : { }
+  }, {
+    "tableName" : "METL_MODEL_ATTRIBUTE",
+    "tableData" : { }
+  } ],
+  "flowData" : [ {
+    "tableName" : "METL_COMPONENT",
+    "tableData" : {
+      "c5449a3e-edbd-4570-97f7-ef1d3378299a" : {
+        "ID" : "c5449a3e-edbd-4570-97f7-ef1d3378299a",
+        "ROW_ID" : "1d28af5c-c04a-404c-8f36-b6192b5ef2a8",
+        "PROJECT_VERSION_ID" : "4161b978-875d-4864-ad44-bb852e7a9019",
+        "DELETED" : 0,
+        "NAME" : "Assert 1",
+        "TYPE" : "Assert",
+        "FOLDER_ID" : null,
+        "SHARED" : 0,
+        "INPUT_MODEL_ID" : null,
+        "OUTPUT_MODEL_ID" : null,
+        "RESOURCE_ID" : null
+      },
+      "5f549a26-e214-43bc-b067-62a25a1515ad" : {
+        "ID" : "5f549a26-e214-43bc-b067-62a25a1515ad",
+        "ROW_ID" : "797dbbeb-8e0a-4653-992d-c25021aeeab4",
+        "PROJECT_VERSION_ID" : "4161b978-875d-4864-ad44-bb852e7a9019",
+        "DELETED" : 0,
+        "NAME" : "Simple Email",
+        "TYPE" : "35c4c0ae-b040-4f93-b212-5b92619c4064",
+        "FOLDER_ID" : null,
+        "SHARED" : 0,
+        "INPUT_MODEL_ID" : null,
+        "OUTPUT_MODEL_ID" : null,
+        "RESOURCE_ID" : "966eee5d-da25-4073-9887-efd325874fe2"
+      }
+    }
+  }, {
+    "tableName" : "METL_COMPONENT_SETTING",
+    "tableData" : {
+      "7d69225d-b788-456c-a131-b97a21a3ebd3" : {
+        "ID" : "7d69225d-b788-456c-a131-b97a21a3ebd3",
+        "COMPONENT_ID" : "c5449a3e-edbd-4570-97f7-ef1d3378299a",
+        "NAME" : "expected.text.payload",
+        "VALUE" : "this is a test of the emergency broadcast system"
+      },
+      "cc71d365-4d08-4b21-8f90-9e6110a269aa" : {
+        "ID" : "cc71d365-4d08-4b21-8f90-9e6110a269aa",
+        "COMPONENT_ID" : "5f549a26-e214-43bc-b067-62a25a1515ad",
+        "NAME" : "subject",
+        "VALUE" : "test"
+      },
+      "ab1a07e6-f9a3-4510-aafc-0c866861a8ee" : {
+        "ID" : "ab1a07e6-f9a3-4510-aafc-0c866861a8ee",
+        "COMPONENT_ID" : "c5449a3e-edbd-4570-97f7-ef1d3378299a",
+        "NAME" : "expected.custom.header.pairs",
+        "VALUE" : "cc=cc@test.com,bcc=bcc@test.com,subject=test,from=tester@gmail.com,to=somebody@test.com"
+      },
+      "63cc1287-81fb-4acb-b993-4a335238bbd3" : {
+        "ID" : "63cc1287-81fb-4acb-b993-4a335238bbd3",
+        "COMPONENT_ID" : "c5449a3e-edbd-4570-97f7-ef1d3378299a",
+        "NAME" : "expected.text.messages.count",
+        "VALUE" : "1"
+      },
+      "db37a138-f8b2-4f0f-92d8-0d75cb243b9d" : {
+        "ID" : "db37a138-f8b2-4f0f-92d8-0d75cb243b9d",
+        "COMPONENT_ID" : "5f549a26-e214-43bc-b067-62a25a1515ad",
+        "NAME" : "body",
+        "VALUE" : "this is a test of the emergency broadcast system"
+      },
+      "4c7912ec-bad8-4369-8201-8b0d795e18c1" : {
+        "ID" : "4c7912ec-bad8-4369-8201-8b0d795e18c1",
+        "COMPONENT_ID" : "c5449a3e-edbd-4570-97f7-ef1d3378299a",
+        "NAME" : "expected.control.messages.count",
+        "VALUE" : "1"
+      },
+      "4d8735d6-cc19-4378-bf90-310cee005920" : {
+        "ID" : "4d8735d6-cc19-4378-bf90-310cee005920",
+        "COMPONENT_ID" : "5f549a26-e214-43bc-b067-62a25a1515ad",
+        "NAME" : "cc.line",
+        "VALUE" : "cc@test.com"
+      },
+      "39d77ed8-ceff-43cd-8b88-78ec45203986" : {
+        "ID" : "39d77ed8-ceff-43cd-8b88-78ec45203986",
+        "COMPONENT_ID" : "5f549a26-e214-43bc-b067-62a25a1515ad",
+        "NAME" : "from.line",
+        "VALUE" : "tester@gmail.com"
+      },
+      "0cbab1ae-7bfb-48ef-91d4-5caf581b74ad" : {
+        "ID" : "0cbab1ae-7bfb-48ef-91d4-5caf581b74ad",
+        "COMPONENT_ID" : "c5449a3e-edbd-4570-97f7-ef1d3378299a",
+        "NAME" : "logInput",
+        "VALUE" : "true"
+      },
+      "2e29517f-3e5b-41f7-b123-de209ce5286d" : {
+        "ID" : "2e29517f-3e5b-41f7-b123-de209ce5286d",
+        "COMPONENT_ID" : "5f549a26-e214-43bc-b067-62a25a1515ad",
+        "NAME" : "to.line",
+        "VALUE" : "somebody@test.com"
+      },
+      "882c603b-30d4-492a-9675-0a64df898bd8" : {
+        "ID" : "882c603b-30d4-492a-9675-0a64df898bd8",
+        "COMPONENT_ID" : "5f549a26-e214-43bc-b067-62a25a1515ad",
+        "NAME" : "bcc.line",
+        "VALUE" : "bcc@test.com"
+      }
+    }
+  }, {
+    "tableName" : "METL_COMPONENT_ENTITY_SETTING",
+    "tableData" : { }
+  }, {
+    "tableName" : "METL_COMPONENT_ATTRIBUTE_SETTING",
+    "tableData" : { }
+  }, {
+    "tableName" : "METL_FLOW",
+    "tableData" : {
+      "5ecda8e4-66c5-49ed-8c0f-783534bb1598" : {
+        "ID" : "5ecda8e4-66c5-49ed-8c0f-783534bb1598",
+        "ROW_ID" : "15fb9bd1-dc62-4ba4-9638-5fe394811e56",
+        "PROJECT_VERSION_ID" : "4161b978-875d-4864-ad44-bb852e7a9019",
+        "DELETED" : 0,
+        "TEST" : 1,
+        "WEB_SERVICE" : 0,
+        "NAME" : "Test Simple Email Send",
+        "FOLDER_ID" : null
+      }
+    }
+  }, {
+    "tableName" : "METL_FLOW_PARAMETER",
+    "tableData" : { }
+  }, {
+    "tableName" : "METL_FLOW_STEP",
+    "tableData" : {
+      "5ead1205-e39f-4bef-a883-88bb30634d0b" : {
+        "ID" : "5ead1205-e39f-4bef-a883-88bb30634d0b",
+        "FLOW_ID" : "5ecda8e4-66c5-49ed-8c0f-783534bb1598",
+        "COMPONENT_ID" : "c5449a3e-edbd-4570-97f7-ef1d3378299a",
+        "X" : 290,
+        "Y" : 60,
+        "APPROXIMATE_ORDER" : 1
+      },
+      "bee89008-66ec-455c-bb35-770660892c29" : {
+        "ID" : "bee89008-66ec-455c-bb35-770660892c29",
+        "FLOW_ID" : "5ecda8e4-66c5-49ed-8c0f-783534bb1598",
+        "COMPONENT_ID" : "5f549a26-e214-43bc-b067-62a25a1515ad",
+        "X" : 90,
+        "Y" : 60,
+        "APPROXIMATE_ORDER" : 0
+      }
+    }
+  }, {
+    "tableName" : "METL_FLOW_STEP_LINK",
+    "tableData" : {
+      "bee89008-66ec-455c-bb35-770660892c295ead1205-e39f-4bef-a883-88bb30634d0b" : {
+        "SOURCE_STEP_ID" : "bee89008-66ec-455c-bb35-770660892c29",
+        "TARGET_STEP_ID" : "5ead1205-e39f-4bef-a883-88bb30634d0b"
+      }
+    }
+  } ]
+}

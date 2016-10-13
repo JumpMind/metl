@@ -25,6 +25,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -51,6 +52,7 @@ public class Assert extends AbstractComponentRuntime {
     public static final String EXPECTED_DISTINCT_ENTITY_TYPE_COUNT = "expected.distinct.entities.count";
     public static final String EXPECTED_DISTINCT_ATTRIBUTE_TYPE_COUNT = "expected.distinct.attributes.count";
     public static final String EXPECTED_EMPTY_PAYLOAD_MESSAGE_COUNT = "expected.empty.payload.messages.count";
+    public static final String EXPECTED_CUSTOM_HEADER_PAIRS = "expected.custom.header.pairs";
     public static final String EXPECTED_TEXT_PAYLOAD = "expected.text.payload";
     public static final String EXPECTED_SQL_COUNT = "expected.sql.count";
     public static final String ASSERT_SQL = "sql";
@@ -64,6 +66,7 @@ public class Assert extends AbstractComponentRuntime {
     int expectedControlMessageCount = 0;
     int expectedEmptyPayloadMessageCount = 0;
     int expectedSqlCount = 0;
+    String expectedCustomHeaderPairs;
     Long expectedEntityCountPerMessage;
     String expectedTextPayload;
 
@@ -77,6 +80,7 @@ public class Assert extends AbstractComponentRuntime {
     int emptyPayloadMessageCount = 0;
     int entityCountPerMessage = 0;
     StringBuilder textPayload = new StringBuilder();
+    StringBuilder messageHeaders = new StringBuilder();
     
     Set<String> distinctEntityIds = new HashSet<>();
     Set<String> distinctAttributeIds = new HashSet<>();
@@ -84,6 +88,7 @@ public class Assert extends AbstractComponentRuntime {
     @Override
     public void start() {
         TypedProperties properties = getTypedProperties();
+        expectedCustomHeaderPairs = properties.get(EXPECTED_CUSTOM_HEADER_PAIRS, null);
         expectedDistinctAttributeTypeCount = properties.getInt(EXPECTED_DISTINCT_ATTRIBUTE_TYPE_COUNT, -1);
         expectedDistinctEntityTypeCount = properties.getInt(EXPECTED_DISTINCT_ENTITY_TYPE_COUNT, -1);
         expectedControlMessageCount = properties.getInt(EXPECTED_CONTROL_MESSAGE_COUNT,
@@ -128,12 +133,28 @@ public class Assert extends AbstractComponentRuntime {
             for (String string : payload) {
                 textPayload.append(string).append("\n");
             }
-            textMessageCount++;
-            
+            textMessageCount++;            
         } else if (inputMessage instanceof BinaryMessage) {
             binaryMessageCount++;
         } else {
             emptyPayloadMessageCount++;
+        }
+        
+        if (!(inputMessage instanceof ControlMessage)) {
+            Map<String,String> headerValues = inputMessage.getHeader().getAsStrings();
+            boolean first = true;
+            for (String key : headerValues.keySet()) {
+                if (!key.startsWith("_")) {
+                    if (!first) {
+                        messageHeaders.append(",");
+                    }
+                    messageHeaders.append(key).append("=").append(headerValues.get(key));
+                    first = false;
+                }
+            }
+            if (!first) {
+                messageHeaders.append("\n");
+            }
         }
 
         callback.forward(inputMessage);
@@ -188,9 +209,14 @@ public class Assert extends AbstractComponentRuntime {
                     expectedEntityCountPerMessage.intValue(), entityCountPerMessage));
         }
         
-        if (isNotBlank(expectedTextPayload) &&! expectedTextPayload.trim().equals(textPayload.toString().trim())) {
+        if (isNotBlank(expectedTextPayload) && !expectedTextPayload.trim().equals(textPayload.toString().trim())) {
             assertFailed.append(String.format("\nExpected text payload of:\n%s \nReceived:\n%s",
                     expectedTextPayload, textPayload.toString().trim()));       
+        }
+        
+        if (isNotBlank(expectedCustomHeaderPairs) && !expectedCustomHeaderPairs.trim().equals(messageHeaders.toString().trim())) {
+            assertFailed.append(String.format("\nExpected the following headers of:\n%s \nReceived:\n%s",
+                    expectedCustomHeaderPairs.trim(), messageHeaders.toString().trim()));                   
         }
 
         if (isNotBlank(sql)) {

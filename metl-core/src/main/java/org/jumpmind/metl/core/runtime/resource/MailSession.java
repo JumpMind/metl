@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jumpmind.metl.core.util;
+package org.jumpmind.metl.core.runtime.resource;
 
 import java.util.Map;
 import java.util.Properties;
@@ -77,7 +77,7 @@ public class MailSession {
         return transport;
     }
     
-    public void closeTransport(Transport transport) {
+    public void closeTransport() {
         try {
             if (transport != null) {
                 transport.close();

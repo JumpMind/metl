@@ -160,8 +160,7 @@ public class FilePoller extends AbstractComponentRuntime {
     }
 
 	@Override
-	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
-	    
+	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {	    
         List<String> filePatternsToPoll = getFilePatternsToPoll(inputMessage);
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {

@@ -69,7 +69,7 @@ import org.jumpmind.metl.core.runtime.component.definition.IComponentDefinitionF
 import org.jumpmind.metl.core.runtime.component.definition.XMLComponent;
 import org.jumpmind.metl.core.runtime.resource.IResourceFactory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
-import org.jumpmind.metl.core.util.MailSession;
+import org.jumpmind.metl.core.runtime.resource.MailSession;
 import org.jumpmind.util.AppUtils;
 import org.jumpmind.util.FormatUtils;
 import org.slf4j.Logger;
@@ -529,7 +529,7 @@ public class FlowRuntime {
             } catch (MessagingException e) {
                 log.error("Failure while preparing notification", e);
             } finally {
-                mailSession.closeTransport(transport);
+                mailSession.closeTransport();
             }
         }
     }
