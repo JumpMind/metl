@@ -22,7 +22,6 @@ package org.jumpmind.metl.ui.views.admin;
 
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
-import javax.mail.Transport;
 
 import org.jumpmind.metl.core.model.Agent;
 import org.jumpmind.metl.core.model.AgentStatus;
