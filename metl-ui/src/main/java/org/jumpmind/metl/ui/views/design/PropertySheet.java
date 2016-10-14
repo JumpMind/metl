@@ -204,7 +204,6 @@ public class PropertySheet extends AbsoluteLayout {
                 Component component = (Component) obj;
                 XMLComponent componentDefintion = context.getComponentDefinitionFactory().getDefinition(component.getType());
                 addThreadCount(componentDefintion, formLayout, component);
-                addComponentShared(formLayout, component);
             }
 
             if (obj instanceof List<?>) {
@@ -344,37 +343,6 @@ public class PropertySheet extends AbsoluteLayout {
         textField.setRequired(true);
         textField.setDescription("Name for the component on the flow");
         formLayout.addComponent(textField);
-    }
-
-    protected void addComponentShared(FormLayout formLayout, final Component component) {
-
-        final CheckBox checkBox = new CheckBox("Shared");
-        checkBox.setImmediate(true);
-
-        if (component.isShared()) {
-            checkBox.setValue(true);
-        } else {
-            checkBox.setValue(false);
-        }
-        checkBox.setRequired(true);
-        checkBox.setDescription("Whether this component can be reused");
-        checkBox.addValueChangeListener(new ValueChangeListener() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
-                // TODO: Don't allow unshare if component is already on more
-                // than 1 flow?
-                // TODO: Refresh palette for the existing flow to have this item
-                // display in shared definitions
-                component.setShared((boolean) event.getProperty().getValue());
-                context.getConfigurationService().save(component);
-            }
-        });
-        checkBox.setReadOnly(readOnly);
-        formLayout.addComponent(checkBox);
-
     }
 
     protected void addInputModelCombo(XMLComponent componentDefintion, FormLayout formLayout, final Component component) {
