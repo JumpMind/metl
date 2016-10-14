@@ -122,7 +122,8 @@ public class EmailWriter extends AbstractComponentRuntime {
             throws MessagingException {
         String runWhen = properties.get(RUN_WHEN);
         if ((PER_UNIT_OF_WORK.equals(runWhen) && unitOfWorkBoundaryReached)
-                || PER_MESSAGE.equals(runWhen) || PER_ENTITY.equals(runWhen)) {
+                || (PER_MESSAGE.equals(runWhen) && !(inputMessage instanceof ControlMessage)) || 
+                PER_ENTITY.equals(runWhen)) {
             StringBuilder to = new StringBuilder(properties.get(TO_LINE, ""));
             StringBuilder from = new StringBuilder(properties.get(FROM_LINE, ""));
             StringBuilder cc = new StringBuilder(properties.get(CC_LINE, ""));
