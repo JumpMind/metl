@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.jumpmind.exception.IoException;
@@ -36,8 +38,8 @@ import org.jumpmind.metl.core.runtime.Message;
 import org.jumpmind.metl.core.runtime.TextMessage;
 import org.jumpmind.metl.core.runtime.flow.ISendMessageCallback;
 import org.jumpmind.metl.core.runtime.resource.Http;
+import org.jumpmind.metl.core.runtime.resource.HttpDirectory;
 import org.jumpmind.metl.core.runtime.resource.HttpOutputStream;
-import org.jumpmind.metl.core.runtime.resource.IDirectory;
 import org.jumpmind.metl.core.runtime.resource.IResourceRuntime;
 import org.jumpmind.util.FormatUtils;
 
@@ -53,6 +55,8 @@ public class Web extends AbstractComponentRuntime {
     
     public static final String BODY_TEXT = "body.text";
     
+    public static final String HTTP_HEADERS = "http.headers";
+    
     public static final String PARAMETER_REPLACEMENT = "parameter.replacement";
     
     String runWhen;
@@ -62,6 +66,8 @@ public class Web extends AbstractComponentRuntime {
     String bodyFrom;
     
     String bodyText;
+    
+    Map<String,String> httpHeaders = new HashMap<>();
     
     boolean parameterReplacement;
     
@@ -92,8 +98,18 @@ public class Web extends AbstractComponentRuntime {
 	public void handle(Message inputMessage, ISendMessageCallback callback, boolean unitOfWorkBoundaryReached) {
 		if ((PER_UNIT_OF_WORK.equals(runWhen) && inputMessage instanceof ControlMessage)
 				|| (!PER_UNIT_OF_WORK.equals(runWhen) && !(inputMessage instanceof ControlMessage))) {
-			IDirectory streamable = getResourceReference();
+			HttpDirectory streamable = getResourceReference();
 
+			String headersText = resolveParamsAndHeaders(properties.get(HTTP_HEADERS), inputMessage);
+			String[] headers = headersText.split(System.getProperty("line.separator"));
+			if (headers != null) {
+			    for (String header : headers) {
+                    String[] pair = header.split(":");
+                    if (pair != null && pair.length > 1) {
+                        httpHeaders.put(pair[0], pair[1]);
+                    }
+                }
+			}
 			ArrayList<String> outputPayload = new ArrayList<String>();
 			ArrayList<String> inputPayload = new ArrayList<String>();
 			if (bodyFrom.equals("Message") && inputMessage instanceof TextMessage) {
@@ -114,7 +130,7 @@ public class Web extends AbstractComponentRuntime {
                         if (isNotBlank(requestContent)) {
                             info("sending content to %s", path);
                             HttpOutputStream os = (HttpOutputStream) streamable
-                                    .getOutputStream(path, false);
+                                    .getOutputStream(path, httpHeaders);
                             BufferedWriter writer = new BufferedWriter(
                                     new OutputStreamWriter(os, DEFAULT_CHARSET));
                             try {
@@ -128,7 +144,7 @@ public class Web extends AbstractComponentRuntime {
                             }
                         } else {
                             info("getting content from %s", path);
-                            InputStream is = streamable.getInputStream(path, false);
+                            InputStream is = streamable.getInputStream(path, httpHeaders);
                             try {
                                 String response = IOUtils.toString(is);
                                 if (response != null) {

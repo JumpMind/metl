@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.codec.binary.Base64;
@@ -142,8 +143,12 @@ public class HttpDirectory implements IDirectory {
     
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist) {
+        return getInputStream(relativePath, null);
+    }
+    
+    public InputStream getInputStream(String relativePath, Map<String,String> headers) {
         try {
-            HttpURLConnection httpConnection = buildHttpUrlConnection(relativePath);
+            HttpURLConnection httpConnection = buildHttpUrlConnection(relativePath, headers);
             int responseCode = httpConnection.getResponseCode();
             if (responseCode == 200) {
                 String type = httpConnection.getContentEncoding();
@@ -168,8 +173,12 @@ public class HttpDirectory implements IDirectory {
 
     @Override
     public OutputStream getOutputStream(String relativePath, boolean mustExist) {
-        HttpURLConnection httpUrlConnection = buildHttpUrlConnection(relativePath);
-        return new HttpOutputStream(httpUrlConnection);
+        return getOutputStream(relativePath, null);
+    }
+    
+    public OutputStream getOutputStream(String relativePath, Map<String,String> headers) {
+        HttpURLConnection httpUrlConnection = buildHttpUrlConnection(relativePath, headers);
+        return new HttpOutputStream(httpUrlConnection);        
     }
 
     @Override
@@ -177,7 +186,7 @@ public class HttpDirectory implements IDirectory {
         return getOutputStream(relativePath, mustExist);
     }
 
-    protected HttpURLConnection buildHttpUrlConnection(String relativePath) {
+    protected HttpURLConnection buildHttpUrlConnection(String relativePath, Map<String,String> headers) {
         try {
             String fullUrl = url;
             if (isNotBlank(relativePath)) {
@@ -187,6 +196,11 @@ public class HttpDirectory implements IDirectory {
             setBasicAuthIfNeeded(httpUrlConnection);
             if (isNotBlank(contentType)) {
                 httpUrlConnection.setRequestProperty("Content-Type", contentType);
+            }
+            if (headers != null) {
+                for(String key:headers.keySet()) {
+                    httpUrlConnection.setRequestProperty(key, headers.get(key));
+                }
             }
             httpUrlConnection.setConnectTimeout(timeout);
             httpUrlConnection.setReadTimeout(timeout);

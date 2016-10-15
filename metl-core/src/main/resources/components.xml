@@ -1634,12 +1634,18 @@ forwardMessage()
           <choice>Message</choice>
           <choice>Provided</choice>
         </choices>
-      </setting>
+      </setting>      
       <setting id='body.text'
                required='false'
                type='multiline_text'>
         <name>Body Text</name>
       </setting>
+      <setting id='http.headers'
+               required='false'
+               type='multiline_text'>
+        <name>Http Headers</name>
+        <defaultValue>User-Agent:Metl</defaultValue>
+      </setting>      
       <setting id='parameter.replacement'
                required='false'
                type='boolean'>
