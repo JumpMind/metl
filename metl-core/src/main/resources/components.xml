@@ -1645,7 +1645,12 @@ forwardMessage()
                type='multiline_text'>
         <name>Http Headers</name>
         <defaultValue>User-Agent:Metl</defaultValue>
-      </setting>      
+      </setting>
+      <setting id='http.parameters'
+         required='false'
+         type='multiline_text'>
+         <name>Http Parameters</name>
+      </setting>                  
       <setting id='parameter.replacement'
                required='false'
                type='boolean'>
