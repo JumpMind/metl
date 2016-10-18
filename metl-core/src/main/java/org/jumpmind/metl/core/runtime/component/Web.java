@@ -64,7 +64,7 @@ public class Web extends AbstractComponentRuntime {
     public static final String PARAMETER_REPLACEMENT = "parameter.replacement";
     
     String runWhen;
-
+    
     String relativePath;
     
     String bodyFrom;
@@ -187,8 +187,9 @@ public class Web extends AbstractComponentRuntime {
     
     private void assembleRelativePathPlusParameters() {
         Component component = getComponent();
-        relativePath = FormatUtils.replaceTokens(component.get(RELATIVE_PATH),
+        String basePath = FormatUtils.replaceTokens(component.get(RELATIVE_PATH),
                 context.getFlowParameters(), true);
+        relativePath = basePath;
         int parmCount = 0;
         for (Map.Entry<String, String> entry : httpParameters.entrySet()) {
             parmCount++;

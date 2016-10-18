@@ -49,6 +49,8 @@ public class HttpDirectory implements IDirectory {
 
     final Logger log = LoggerFactory.getLogger(getClass());
 
+    public static final String DEFAULT_CHARSET = "UTF-8";
+
     public static final String HTTP_METHOD_GET = "GET";
     public static final String HTTP_METHOD_PUT = "PUT";
     public static final String HTTP_METHOD_POST = "POST";
@@ -71,14 +73,14 @@ public class HttpDirectory implements IDirectory {
     String oa1Version;
     String oa1Realm;
     String oa1Token;
-    String oa1TokenSecret;    
+    String oa1TokenSecret;
     int timeout;
     int contentLength;
 
-    public HttpDirectory(String url, String httpMethod, String contentType, int timeout, String security,
-            String username, String password, String token,
-            String oa1ConsumerKey, String oa1ConsumerSecret, String oa1Token, String oa1TokenSecret,
-            String oa1Version, String oa1SignatureMethod, String oa1Realm) {
+    public HttpDirectory(String url, String httpMethod, String contentType, int timeout,
+            String security, String username, String password, String token, String oa1ConsumerKey,
+            String oa1ConsumerSecret, String oa1Token, String oa1TokenSecret, String oa1Version,
+            String oa1SignatureMethod, String oa1Realm) {
         this.url = url;
         this.httpMethod = httpMethod;
         this.contentType = contentType;
@@ -95,7 +97,7 @@ public class HttpDirectory implements IDirectory {
         this.oa1SignatureMethod = oa1SignatureMethod;
         this.oa1Realm = oa1Realm;
     }
-    
+
     @Override
     public FileInfo listFile(String relativePath) {
         throw new UnsupportedOperationException();
@@ -105,7 +107,7 @@ public class HttpDirectory implements IDirectory {
     public FileInfo listFile(String relativePath, boolean closeSession) {
         return listFile(relativePath);
     }
-    
+
     @Override
     public List<FileInfo> listFiles(String... relativePaths) {
         throw new UnsupportedOperationException();
@@ -115,7 +117,7 @@ public class HttpDirectory implements IDirectory {
     public List<FileInfo> listFiles(boolean closeSession, String... relativePaths) {
         return listFiles(relativePaths);
     }
-    
+
     @Override
     public void copyToDir(String fromFilePath, String toDirPath) {
         throw new UnsupportedOperationException();
@@ -125,17 +127,17 @@ public class HttpDirectory implements IDirectory {
     public void copyToDir(String fromFilePath, String toDirPath, boolean closeSession) {
         copyToDir(fromFilePath, toDirPath);
     }
-    
+
     @Override
     public void moveToDir(String fromFilePath, String toDirPath) {
         throw new UnsupportedOperationException();
-    }    
+    }
 
     @Override
     public void moveToDir(String fromFilePath, String toDirPath, boolean closeSession) {
         moveToDir(fromFilePath, toDirPath);
     }
-    
+
     @Override
     public void copyFile(String fromFilePath, String toFilePath) {
         throw new UnsupportedOperationException();
@@ -145,7 +147,7 @@ public class HttpDirectory implements IDirectory {
     public void copyFile(String fromFilePath, String toFilePath, boolean closeSession) {
         copyFile(fromFilePath, toFilePath);
     }
-    
+
     @Override
     public void moveFile(String fromFilePath, String toFilePath) {
         throw new UnsupportedOperationException();
@@ -155,26 +157,27 @@ public class HttpDirectory implements IDirectory {
     public void moveFile(String fromFilePath, String toFilePath, boolean closeSession) {
         moveFile(fromFilePath, toFilePath);
     }
-    
+
     @Override
     public boolean renameFile(String fromFilePath, String toFilePath) {
         throw new UnsupportedOperationException();
-    }   
+    }
 
     @Override
     public boolean renameFile(String fromFilePath, String toFilePath, boolean closeSession) {
         return renameFile(fromFilePath, toFilePath);
-    } 
-    
+    }
+
     @Override
     public InputStream getInputStream(String relativePath, boolean mustExist) {
         return getInputStream(relativePath, null, null);
     }
-    
-    public InputStream getInputStream(String relativePath, Map<String,String> headers, 
-            Map<String,String> parameters) {
+
+    public InputStream getInputStream(String relativePath, Map<String, String> headers,
+            Map<String, String> parameters) {
         try {
-            HttpURLConnection httpConnection = buildHttpUrlConnection(relativePath, headers, parameters);
+            HttpURLConnection httpConnection = buildHttpUrlConnection(relativePath, headers,
+                    parameters);
             int responseCode = httpConnection.getResponseCode();
             if (responseCode == 200) {
                 String type = httpConnection.getContentEncoding();
@@ -193,7 +196,8 @@ public class HttpDirectory implements IDirectory {
     }
 
     @Override
-    public InputStream getInputStream(String relativePath, boolean mustExist, boolean closeSession) {
+    public InputStream getInputStream(String relativePath, boolean mustExist,
+            boolean closeSession) {
         return getInputStream(relativePath, mustExist);
     }
 
@@ -201,33 +205,31 @@ public class HttpDirectory implements IDirectory {
     public OutputStream getOutputStream(String relativePath, boolean mustExist) {
         return getOutputStream(relativePath, null, null);
     }
-    
-    public OutputStream getOutputStream(String relativePath, Map<String,String> headers,
-            Map<String,String> parameters) {
-        HttpURLConnection httpUrlConnection = buildHttpUrlConnection(relativePath, headers, parameters);
-        return new HttpOutputStream(httpUrlConnection);        
+
+    public OutputStream getOutputStream(String relativePath, Map<String, String> headers,
+            Map<String, String> parameters) {
+        HttpURLConnection httpUrlConnection = buildHttpUrlConnection(relativePath, headers,
+                parameters);
+        return new HttpOutputStream(httpUrlConnection);
     }
 
     @Override
-    public OutputStream getOutputStream(String relativePath, boolean mustExist, boolean closeSession, boolean append) {
+    public OutputStream getOutputStream(String relativePath, boolean mustExist,
+            boolean closeSession, boolean append) {
         return getOutputStream(relativePath, mustExist);
     }
 
-    protected HttpURLConnection buildHttpUrlConnection(String relativePath, Map<String,String> headers,
-            Map<String,String> parameters) {
+    protected HttpURLConnection buildHttpUrlConnection(String relativePath,
+            Map<String, String> headers, Map<String, String> parameters) {
         try {
             String fullUrl = url;
             if (isNotBlank(relativePath)) {
                 fullUrl += relativePath;
             }
-            HttpURLConnection httpUrlConnection = (HttpURLConnection) new URL(fullUrl).openConnection();
-            setBasicAuthIfNeeded(httpUrlConnection);
-            setOAuth10IfNeeded(httpUrlConnection, headers, parameters);
-            if (isNotBlank(contentType)) {
-                httpUrlConnection.setRequestProperty("Content-Type", contentType);
-            }
+            HttpURLConnection httpUrlConnection = (HttpURLConnection) new URL(fullUrl)
+                    .openConnection();
             if (headers != null) {
-                for(String key:headers.keySet()) {
+                for (String key : headers.keySet()) {
                     httpUrlConnection.setRequestProperty(key, headers.get(key));
                 }
             }
@@ -235,15 +237,19 @@ public class HttpDirectory implements IDirectory {
             httpUrlConnection.setReadTimeout(timeout);
             httpUrlConnection.setRequestMethod(httpMethod);
             httpUrlConnection.setDoOutput(true);
-            httpUrlConnection.setDoInput(true);            
+            httpUrlConnection.setDoInput(true);
+            if (isNotBlank(contentType)) {
+                httpUrlConnection.setRequestProperty("Content-Type", contentType);
+            }
+            setBasicAuthIfNeeded(httpUrlConnection);
+            setOAuth10IfNeeded(httpUrlConnection, parameters);
             return httpUrlConnection;
         } catch (Exception e) {
             throw new IoException(e);
         }
     }
 
-    protected void setOAuth10IfNeeded(HttpURLConnection conn, Map<String,String> headers,
-            Map<String,String> parameters) {
+    protected void setOAuth10IfNeeded(HttpURLConnection conn, Map<String, String> parameters) {
         if (SECURITY_OAUTH_10.equals(security)) {
             OAuthParameters parms = new OAuthParameters();
             parms.setConsumerKey(oa1ConsumerKey);
@@ -252,35 +258,27 @@ public class HttpDirectory implements IDirectory {
             parms.setRealm(oa1Realm);
             parms.setNonce();
             parms.setTimestamp();
-            parms.setToken(oa1Token);            
+            parms.setToken(oa1Token);
             OAuthSecrets secrets = new OAuthSecrets();
             secrets.setConsumerSecret(oa1ConsumerSecret);
             secrets.setTokenSecret(oa1TokenSecret);
-            OAuthReq req = new OAuthReq(headers, parameters);
-            try {        
-                String signature = OAuthSignature.generate(req, parms, secrets);
-                String authHdr = String.format("OAuth realm=\"%s\",oauth_consumer_key=\"%s\","
-                        + "oauth_token=\"%s\",oauth_signature_method=\"%s\","
-                        + "oauth_timestamp=\"%s\",oauth_nonce=\"%s\","
-                        + "oauth_version=\"%s\",oauth_signature=\"%s\"", 
-                        oa1Realm, oa1ConsumerKey, oa1Token, oa1SignatureMethod,
-                        parms.getTimestamp(), parms.getNonce(),
-                        oa1Version, signature);
-                conn.setRequestProperty("Authorization", authHdr);
+            OAuthReq req = new OAuthReq(conn, parameters, url);
+            try {
+                OAuthSignature.sign(req, parms, secrets);
             } catch (Exception e) {
                 log.error(e.getMessage());
                 throw new RuntimeException(e);
             }
         }
     }
-    
+
     protected void setBasicAuthIfNeeded(HttpURLConnection conn) {
         if (SECURITY_BASIC.equals(security)) {
             String userpassword = String.format("%s:%s", username, password);
             String encodedAuthorization = new String(Base64.encodeBase64(userpassword.getBytes()));
             conn.setRequestProperty("Authorization", "Basic " + encodedAuthorization);
         } else if (SECURITY_TOKEN.equals(security)) {
-        	conn.setRequestProperty("Authorization", "Bearer " + token);
+            conn.setRequestProperty("Authorization", "Bearer " + token);
         }
     }
 
@@ -322,7 +320,7 @@ public class HttpDirectory implements IDirectory {
     public boolean supportsDelete() {
         return false;
     }
-    
+
     @Override
     public String toString() {
         return url;
@@ -331,30 +329,34 @@ public class HttpDirectory implements IDirectory {
     @Override
     public void connect() {
     }
-    
+
     private class OAuthReq implements OAuthRequest {
 
-        Map<String,String> headers;
-        Map<String,String> parameters;
-        
-        public OAuthReq(Map<String,String> headers, Map<String,String> parameters) {
-            this.headers = headers;
+        HttpURLConnection conn;
+        Map<String, String> parameters;
+        String baseURL;
+
+        public OAuthReq(HttpURLConnection conn, Map<String, String> parameters, String baseURL) {
+            this.conn = conn;
             this.parameters = parameters;
+            this.baseURL = baseURL;
         }
-        
+
         @Override
         public String getRequestMethod() {
-            return httpMethod;
+            return conn.getRequestMethod();
         }
 
         @Override
         public URL getRequestURL() {
+            URL url;
             try {
-                return new URL(url);
+                url = new URL(baseURL + conn.getURL().getPath());
             } catch (Exception e) {
-                log.error(e.getMessage());
+                log.error("Error creating base URL " + e.getMessage());
                 throw new RuntimeException(e);
             }
+            return url;
         }
 
         @Override
@@ -364,22 +366,31 @@ public class HttpDirectory implements IDirectory {
 
         @Override
         public List<String> getParameterValues(String name) {
-            List<String>parmValues = new ArrayList<String>();
-            parmValues.add(parameters.get(name));
-            return parmValues;
+            String value = parameters.get(name);
+            if (value != null) {
+                List<String> values = new ArrayList<String>();
+                values.add(value);
+                return values;
+            } else {
+                return null;
+            }
         }
 
         @Override
         public List<String> getHeaderValues(String name) {
-            List<String>headerValues = new ArrayList<String>();
-            headerValues.add(parameters.get(name));
-            return headerValues;
-            
+            String headerVal = conn.getHeaderField(name);
+            if (headerVal != null) {
+                List<String> headerVals = new ArrayList<String>();
+                headerVals.add(headerVal);
+                return headerVals;
+            } else {
+                return null;
+            }
         }
 
         @Override
         public void addHeaderValue(String name, String value) throws IllegalStateException {
-            headers.put(name, value);
+            conn.addRequestProperty(name, value);
         }
     }
 }
