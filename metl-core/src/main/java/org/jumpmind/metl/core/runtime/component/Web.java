@@ -125,7 +125,7 @@ public class Web extends AbstractComponentRuntime {
                         if (isNotBlank(requestContent)) {
                             info("sending content to %s", path);
                             HttpOutputStream os = (HttpOutputStream) streamable
-                                    .getOutputStream(path, httpHeaders);
+                                    .getOutputStream(path, httpHeaders, httpParameters);
                             BufferedWriter writer = new BufferedWriter(
                                     new OutputStreamWriter(os, DEFAULT_CHARSET));
                             try {
@@ -139,7 +139,7 @@ public class Web extends AbstractComponentRuntime {
                             }
                         } else {
                             info("getting content from %s", path);
-                            InputStream is = streamable.getInputStream(path, httpHeaders);
+                            InputStream is = streamable.getInputStream(path, httpHeaders, httpParameters);
                             try {
                                 String response = IOUtils.toString(is);
                                 if (response != null) {
@@ -173,15 +173,15 @@ public class Web extends AbstractComponentRuntime {
     
     private Map<String, String> parseDelimitedMultiLineParamsToMap(String parametersText, Message inputMessage) {
         Map<String, String> parsedMap = new HashMap<>();
-        String[] parameters = parametersText.split(System.getProperty("line.separator"));
-        if (parameters != null) {
+        if (parametersText != null) {
+            String[] parameters = parametersText.split(System.getProperty("line.separator"));
             for (String parameter : parameters) {
                 String[] pair = parameter.split(":");
                 if (pair != null && pair.length > 1) {
                     parsedMap.put(pair[0], pair[1]);
                 }
             }
-        }        
+        }
         return parsedMap;
     }
     

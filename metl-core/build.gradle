@@ -51,6 +51,7 @@ dependencies {
     compile "com.googlecode.json-simple:json-simple:1.1.1"
     compile "kxml2:kxml2:$kxmlVersion"
     compile "de.saly:javamail-mock2-halfmock:0.5-beta4"
+    compile group: 'com.sun.jersey.contribs.jersey-oauth', name: 'oauth-signature', version: '1.19.2'
     testCompile "org.mockito:mockito-all:$mockitoVersion"
     testCompile "org.powermock:powermock-api-mockito:$powerMockVersion"
     testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"    
