@@ -33,6 +33,8 @@ import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.jumpmind.metl.core.model.AuditEvent;
+import org.jumpmind.metl.core.model.AuditEvent.EventType;
 import org.jumpmind.metl.core.model.Group;
 import org.jumpmind.metl.core.model.GroupPrivilege;
 import org.jumpmind.metl.core.model.Privilege;
@@ -292,6 +294,8 @@ public class AppUI extends UI implements LoginListener {
 
         ApplicationContext appCtx = ctx.getBean(ApplicationContext.class);
         appCtx.setUser(user);
+        
+        appCtx.getConfigurationService().save(new AuditEvent(EventType.LOGIN, "Logged in", user.getLoginId()));
 
         viewManager = ctx.getBean(ViewManager.class);
         viewManager.init(this, contentArea);
