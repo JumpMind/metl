@@ -82,4 +82,9 @@ public class Project extends AbstractNamedObject {
         }
         return version;
     }
+    
+    @Override
+    public boolean isSettingNameAllowed() {
+        return true;
+    }
 }

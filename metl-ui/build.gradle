@@ -52,6 +52,7 @@ dependencies {
        exclude group:'org.jumpmind.symmetric'
        exclude group:'com.vaadin'
     }
+    compile "com.vaadin.addon:vaadin-context-menu:0.7.4"
     compile "com.cybercom:spring-ui-scope:0.0.2"
     compile "org.springframework:spring-webmvc:$springVersion"
     compile (group:"org.peimari", name:"maddon", version:"1.20") {

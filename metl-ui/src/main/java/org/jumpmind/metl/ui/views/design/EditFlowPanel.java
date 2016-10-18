@@ -57,7 +57,6 @@ import org.jumpmind.metl.ui.diagram.NodeDoubleClickedEvent;
 import org.jumpmind.metl.ui.diagram.NodeMovedEvent;
 import org.jumpmind.metl.ui.diagram.NodeSelectedEvent;
 import org.jumpmind.metl.ui.views.CallWebServicePanel;
-import org.jumpmind.metl.ui.views.DesignNavigator;
 import org.jumpmind.metl.ui.views.IFlowRunnable;
 import org.jumpmind.metl.ui.views.manage.ExecutionRunPanel;
 import org.jumpmind.util.AppUtils;

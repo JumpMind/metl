@@ -20,42 +20,45 @@
  */
 package org.jumpmind.metl.core.model;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class ProjectVersion extends AbstractNamedObject {
 
     private static final long serialVersionUID = 1L;
 
     Project project;
-    
+
     String description = "";
 
     String origVersionId;
-    
-    String versionLabel;   
+
+    String versionLabel;
 
     boolean readOnly;
 
     boolean archived;
-    
+
     boolean deleted;
-    
+
     public ProjectVersion(String id) {
         setId(id);
     }
-    
+
     public ProjectVersion() {
     }
-    
-    
+
     public void setVersionLabel(String versionLabel) {
         this.versionLabel = versionLabel;
     }
-    
+
     public String getVersionLabel() {
         return versionLabel;
     }
-    
+
     @Override
     public void setName(String name) {
+        this.versionLabel = name;
     }
 
     @Override
@@ -71,11 +74,11 @@ public class ProjectVersion extends AbstractNamedObject {
             project = null;
         }
     }
-    
+
     public void setProject(Project project) {
         this.project = project;
     }
-    
+
     public Project getProject() {
         return project;
     }
@@ -106,22 +109,52 @@ public class ProjectVersion extends AbstractNamedObject {
 
     public boolean isReadOnly() {
         return readOnly;
-    }   
+    }
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
-    
+
     public boolean isDeleted() {
         return deleted;
     }
-    
+
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
     public String getDescription() {
         return description;
     }
-    
+
+    @Override
+    public boolean isSettingNameAllowed() {
+        return true;
+    }
+
+    public String attemptToCalculateNextVersionLabel() {
+        return attemptToCalculateNextVersionLabel(versionLabel);
+    }
+        
+    public static String attemptToCalculateNextVersionLabel(String versionLabel) {
+        String datetime = new SimpleDateFormat("yyyyMMddmmhhss").format(new Date());
+        String nextVersion = versionLabel + "." + datetime;
+        int index = versionLabel.lastIndexOf(".");
+        if (index >= 0) {
+            String prefix = versionLabel.substring(0, index+1);
+            String suffix = versionLabel.substring(index + 1, versionLabel.length());
+            try {
+                suffix = Integer.toString(Integer.parseInt(suffix) + 1);
+                if (suffix.length() == datetime.length()) {
+                    suffix = datetime;
+                }
+
+            } catch (NumberFormatException e) {
+                suffix = datetime;
+            }
+            nextVersion = prefix + suffix;
+        }
+        return nextVersion;
+    }
+
 }

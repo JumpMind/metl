@@ -28,7 +28,7 @@ public class AbstractObjectNameBasedSorter implements Comparator<AbstractNamedOb
 
     @Override
     public int compare(AbstractNamedObject o1, AbstractNamedObject o2) {
-        return o1.getName().compareTo(o2.getName());
+        return o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase());
     }
     
     public static void sort(List<? extends AbstractNamedObject> list) {

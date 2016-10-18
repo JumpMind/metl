@@ -23,6 +23,7 @@ package org.jumpmind.metl.ui.views;
 import javax.annotation.PostConstruct;
 
 import org.jumpmind.metl.ui.common.UIConstants;
+import org.jumpmind.metl.ui.views.design.DesignNavigator;
 import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.Category;
 import org.jumpmind.metl.ui.common.TabbedPanel;
