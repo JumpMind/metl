@@ -59,7 +59,6 @@ import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DefaultFieldFactory;
 import com.vaadin.ui.Field;
@@ -71,7 +70,6 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.ColumnHeaderMode;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree.CollapseEvent;
 import com.vaadin.ui.Tree.CollapseListener;
 import com.vaadin.ui.Tree.ExpandEvent;
@@ -88,6 +86,10 @@ public class DeployNavigator extends VerticalLayout {
     MenuItem newFolder;
 
     MenuItem delete;
+    
+    MenuItem rename;
+    
+    MenuItem open;
 
     MenuItem newAgent;
 
@@ -101,10 +103,6 @@ public class DeployNavigator extends VerticalLayout {
 
     TabbedPanel tabbedPanel;
 
-    MenuItem search;
-
-    HorizontalLayout searchBarLayout;
-
     public DeployNavigator(ApplicationContext context, TabbedPanel tabbedPanel) {
 
         this.context = context;
@@ -115,9 +113,6 @@ public class DeployNavigator extends VerticalLayout {
         addStyleName(ValoTheme.MENU_ROOT);
 
         addComponent(buildMenuBar());
-
-        searchBarLayout = buildSearchBar();
-        addComponent(searchBarLayout);
 
         treeTable = buildTreeTable();
         treeTable.addStyleName("noselect");
@@ -176,19 +171,6 @@ public class DeployNavigator extends VerticalLayout {
         treeTable.focus();
     }
 
-    protected HorizontalLayout buildSearchBar() {
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.setMargin(new MarginInfo(false, true, true, true));
-        layout.setWidth(100, Unit.PERCENTAGE);
-        layout.setVisible(false);
-        TextField search = new TextField();
-        search.setIcon(Icons.SEARCH);
-        search.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
-        search.setWidth(100, Unit.PERCENTAGE);
-        layout.addComponent(search);
-        return layout;
-    }
-
     protected HorizontalLayout buildMenuBar() {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setWidth(100, Unit.PERCENTAGE);
@@ -217,7 +199,7 @@ public class DeployNavigator extends VerticalLayout {
 
         MenuItem editMenu = leftMenuBar.addItem("Edit", null);
 
-        editMenu.addItem("Open", new Command() {
+        open = editMenu.addItem("Open", new Command() {
 
             @Override
             public void menuSelected(MenuItem selectedItem) {
@@ -225,7 +207,7 @@ public class DeployNavigator extends VerticalLayout {
             }
         });
 
-        editMenu.addItem("Rename", new Command() {
+        rename = editMenu.addItem("Rename", new Command() {
             @Override
             public void menuSelected(MenuItem selectedItem) {
                 startEditingItem((AbstractObject) treeTable.getValue());
@@ -242,16 +224,6 @@ public class DeployNavigator extends VerticalLayout {
 
         MenuBar rightMenuBar = new MenuBar();
         rightMenuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
-
-        search = rightMenuBar.addItem("", Icons.SEARCH, new Command() {
-
-            @Override
-            public void menuSelected(MenuItem selectedItem) {
-                search.setChecked(!search.isChecked());
-                searchBarLayout.setVisible(search.isChecked());
-            }
-        });
-        search.setVisible(false);
 
         layout.addComponent(leftMenuBar);
         layout.addComponent(rightMenuBar);
@@ -475,6 +447,8 @@ public class DeployNavigator extends VerticalLayout {
         newAgent.setEnabled(selectedFolder == null || !selectedFolder.getName().startsWith("<"));
 
         delete.setEnabled(isDeleteButtonEnabled(selected));
+        rename.setEnabled(isDeleteButtonEnabled(selected));
+        open.setEnabled(selected != null && selectedFolder == null);
     }
 
     protected boolean isDeleteButtonEnabled(Object selected) {
