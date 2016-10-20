@@ -28,33 +28,35 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 public abstract class AbstractSerializer extends AbstractComponentRuntime {
 
-    public final String STRUCTURE_BY_INBOUND_ROW = "BY_INBOUND_ROW";
-    public final String STRUCTURE_BY_TABLE = "BY_TABLE";
+    public static final String STRUCTURE = "structure";
+    public static final String FORMAT = "format";
+    public static final String STRUCTURE_BY_INBOUND_ROW = "BY_INBOUND_ROW";
+    public static final String STRUCTURE_BY_TABLE = "BY_TABLE";
 
-    public final String FORMAT_AUTOMATIC = "AUTOMATIC";
-    public final String FORMAT_JSON = "JSON";
-    public final String FORMAT_XML = "XML";
+    public static final String FORMAT_AUTOMATIC = "AUTOMATIC";
+    public static final String FORMAT_JSON = "JSON";
+    public static final String FORMAT_XML = "XML";
 
     protected String format;
     protected String structure;
 
     @Override
     public void start() {
-        format = properties.get("format", FORMAT_AUTOMATIC);
-        structure = properties.get("structure", STRUCTURE_BY_INBOUND_ROW);
+        format = properties.get(FORMAT, FORMAT_AUTOMATIC);
+        structure = properties.get(STRUCTURE, STRUCTURE_BY_INBOUND_ROW);
     }
 
     @Override
     public boolean supportsStartupMessages() {
         return false;
     }
-
-    protected ObjectMapper getObjectMapper() {
+    
+    protected String getDetectedFormat() {
         String detectedFormat = null;
         if (format.equals(FORMAT_AUTOMATIC)) {
-            if (FORMAT_XML.equalsIgnoreCase(context.getFlowParameters().get("format"))) {
+            if (FORMAT_XML.equalsIgnoreCase(context.getFlowParameters().get(FORMAT))) {
                 detectedFormat = FORMAT_XML;
-            } else if (FORMAT_JSON.equalsIgnoreCase(context.getFlowParameters().get("format"))) {
+            } else if (FORMAT_JSON.equalsIgnoreCase(context.getFlowParameters().get(FORMAT))) {
                 detectedFormat = FORMAT_JSON;
             } else if (MimeTypeUtils.APPLICATION_XML.toString()
                     .equals(context.getFlowParameters().get(HttpHeaders.CONTENT_TYPE))) {
@@ -69,6 +71,11 @@ public abstract class AbstractSerializer extends AbstractComponentRuntime {
                 detectedFormat = FORMAT_JSON;
             }
         }
+        return detectedFormat;
+    }
+
+    protected ObjectMapper getObjectMapper() {
+        String detectedFormat = getDetectedFormat();
 
         ObjectMapper mapper = null;
         if (FORMAT_XML.equals(detectedFormat)) {

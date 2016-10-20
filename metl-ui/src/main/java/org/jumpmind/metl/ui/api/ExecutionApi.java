@@ -170,6 +170,8 @@ public class ExecutionApi {
                     String contentType = results.getContentType();
                     if (isNotBlank(contentType)) {
                         response.setContentType(contentType);
+                    } else if (isBlank(response.getContentType())) {
+                        response.setContentType("application/octet-stream;charset=utf-8");
                     }
                     resultPayload = results.getValue();
                 }                
