@@ -90,7 +90,17 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                 "inner join %1$s_project_version v on v.id = f.project_version_id " +
                 "inner join %1$s_project p on p.id = v.project_id " +
                 "inner join %1$s_resource r on r.project_version_id = v.id " +
-                "where d.agent_id = ? and r.deleted=0 order by 5 ",
+                "where d.agent_id = ? and r.deleted=0 " +
+                "union " +
+                "select distinct p.name, v.version_label, '%3$s', " +
+                "r.id, r.name, null, null, null, null " +
+                "from %1$s_agent_deployment d " +
+                "inner join %1$s_flow f on f.id = d.flow_id " +
+                "inner join %1$s_project_version_dependency d on d.project_version_id = f.project_version_id " +
+                "inner join %1$s_project_version v on v.id = d.target_project_version_id " +
+                "inner join %1$s_project p on p.id = v.project_id " +
+                "inner join %1$s_resource r on r.project_version_id = v.id " +
+                "where d.agent_id = ? and r.deleted=0 order by 5 "    ,
                 tablePrefix, AgentDeploymentSummary.TYPE_FLOW, AgentDeploymentSummary.TYPE_RESOURCE), 
                 new ISqlRowMapper<AgentDeploymentSummary>() {
                     public AgentDeploymentSummary mapRow(Row row) {
@@ -105,7 +115,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                         summary.setStartExpression(row.getString("start_expression"));
                         return summary;
                     }
-                }, agentId, agentId);
+                }, agentId, agentId, agentId);
     }
     
     @Override
