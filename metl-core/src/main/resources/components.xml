@@ -1603,7 +1603,7 @@ forwardMessage()
              inputMessageType='text'
              inputOutputModelsMatch='false'
              outputMessageType='text'
-             resourceCategory='streamable'
+             resourceCategory='http'
              supportsMultipleThreads='true'>
     <name>Web</name>
     <className>org.jumpmind.metl.core.runtime.component.Web</className>

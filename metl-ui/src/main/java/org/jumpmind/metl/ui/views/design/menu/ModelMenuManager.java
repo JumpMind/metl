@@ -31,7 +31,7 @@ public class ModelMenuManager extends AbstractDesignSelectedValueMenuManager {
                 "File|New|Resource|Directory|JMS Topic",
                 "File|New|Resource|Directory|SFTP",
                 "File|New|Resource|Directory|SMB",
-                "File|New|Resource|Directory|HTTP Resource",
+                "File|New|Resource|HTTP Resource",
                 "File|New|Resource|Mail Session",
                 "File|Open",
                 "File|Import...",        

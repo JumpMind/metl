@@ -52,7 +52,7 @@ public class AbstractDesignSelectedValueMenuManager extends AbstractSelectedValu
             } else if ("File|New|Resource|Directory|SMB".equals(menuSelected)) {
                 navigator.addNewSMBFileSystem();
                 return true;
-            } else if ("File|New|Resource|Directory|HTTP Resource".equals(menuSelected)) {
+            } else if ("File|New|Resource|HTTP Resource".equals(menuSelected)) {
                 navigator.addNewHttpResource();
                 return true;
             } else if ("File|New|Resource|Mail Session".equals(menuSelected)) {

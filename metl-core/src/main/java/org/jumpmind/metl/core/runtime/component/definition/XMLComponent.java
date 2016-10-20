@@ -66,6 +66,8 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
         STREAMABLE,
         @XmlEnumValue("mailsession")
         MAIL_SESSION,
+        @XmlEnumValue("http")
+        HTTP,        
         @XmlEnumValue("none")
         NONE, 
         @XmlEnumValue("any")

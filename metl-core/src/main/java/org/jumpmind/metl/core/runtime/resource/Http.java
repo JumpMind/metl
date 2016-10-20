@@ -33,7 +33,7 @@ import org.jumpmind.metl.core.runtime.component.definition.XMLComponent.Resource
 import org.jumpmind.metl.core.runtime.component.definition.XMLSetting.Type;
 import org.jumpmind.properties.TypedProperties;
 
-@ResourceDefinition(typeName = Http.TYPE, resourceCategory = ResourceCategory.STREAMABLE)
+@ResourceDefinition(typeName = Http.TYPE, resourceCategory = ResourceCategory.HTTP)
 public class Http extends AbstractResourceRuntime {
 
     public static final String TYPE = "Http";
