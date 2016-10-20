@@ -1120,10 +1120,15 @@ forwardMessage()
         <name>Sequence Attribute Name</name>
       </setting>
       <setting id='sequence.sql'
-               required='true'
+               required='false'
                type='multiline_text'>
         <name>Select Starting Sequence Sql</name>
       </setting>
+      <setting id='sequence.start.value'
+               required='false'
+               type='integer'>            
+        <name>Starting Sequence Value</name>
+      </setting>      
       <setting id='shared'
                required='true'
                type='boolean'>
@@ -1135,6 +1140,17 @@ forwardMessage()
                type='text'>
         <name>Shared Name</name>
       </setting>
+      <setting id='reset.on.attribute.change'
+               required='true'
+               type='boolean'>
+        <defaultValue>false</defaultValue>
+        <name>Reset on Attribute Change?</name>
+      </setting>
+      <setting id='reset.attribute'
+               required='false'
+               type='entity_column'>
+        <name>Reset Attribute Name</name>
+      </setting>      
     </settings>
   </component>
   <component category='PROCESSOR'
