@@ -1,5 +1,7 @@
 package org.jumpmind.metl.core.persist;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -28,6 +30,8 @@ import org.jumpmind.metl.core.model.ModelName;
 import org.jumpmind.metl.core.model.ProjectVersion;
 import org.jumpmind.metl.core.model.Resource;
 import org.jumpmind.metl.core.model.ResourceName;
+import org.jumpmind.metl.core.security.ISecurityService;
+import org.jumpmind.metl.core.security.SecurityConstants;
 import org.jumpmind.metl.core.util.MessageException;
 import org.jumpmind.metl.core.util.VersionUtils;
 import org.jumpmind.persist.IPersistenceManager;
@@ -93,14 +97,16 @@ public class ImportExportService extends AbstractService implements IImportExpor
     
     private IDatabasePlatform databasePlatform;
     private IConfigurationService configurationService;
+    private ISecurityService securityService;
     private String tablePrefix;
     private String[] columnsToExclude;
     private Set<String> importsToAudit = new HashSet<>();
 
     public ImportExportService(IDatabasePlatform databasePlatform,
             IPersistenceManager persistenceManager, String tablePrefix,
-            IConfigurationService configurationService) {
+            IConfigurationService configurationService, ISecurityService securityService) {
         super(persistenceManager, tablePrefix);
+        this.securityService = securityService;
         this.databasePlatform = databasePlatform;
         this.configurationService = configurationService;
         this.tablePrefix = tablePrefix;
@@ -206,6 +212,15 @@ public class ImportExportService extends AbstractService implements IImportExpor
                     tablePrefix, projectVersionId, keyValue));
             
             for (Row row : rows) {
+                if (isPassword(row.getString("NAME", false))) {
+                    String value = row.getString("VALUE", false);
+                    if (isNotBlank(value)) {
+                        if (value.startsWith(SecurityConstants.PREFIX_ENC)) {
+                            row.put("VALUE", securityService.decrypt(
+                                    value.substring(SecurityConstants.PREFIX_ENC.length() - 1)));
+                        }
+                    }
+                }
                 tableData.get(i).rows.put(getPkDataAsString(row, entry[KEY_COLUMNS]), row);
             }
         }
@@ -410,17 +425,33 @@ public class ImportExportService extends AbstractService implements IImportExpor
         }
     }
     
+    private final boolean isPassword(String name) {
+        return isNotBlank(name) && name.contains("password");
+    }
+    
     private void processConfigTableData(ImportConfigData configData, TableData existingData,
             TableData importData, String primaryKeyColumns, ISqlTransaction transaction, String userId) {        
         if (importsToAudit.contains(importData.getTableName().toUpperCase())) {
             for (LinkedCaseInsensitiveMap<Object> row : importData.getTableData().values()) {
-                String name = (String) row.get("name");
+                String name = (String) row.get("name");                
                 if (name == null) {
                     name = (String) row.get("version_label");
                 }
                 save(new AuditEvent(AuditEvent.EventType.IMPORT,
                         String.format("%s: %s from host: %s from Metl version: %s", importData.getTableName(), name, configData.getHostName(), 
                                 configData.getVersionNumber()), userId));
+            }
+        }
+        
+        for (LinkedCaseInsensitiveMap<Object> row : importData.getTableData().values()) {
+            if (isPassword((String)row.get("NAME"))) {
+                String value = (String)row.get("VALUE");
+                if (isNotBlank(value)) {
+                    if (!value.startsWith(SecurityConstants.PREFIX_ENC)) {
+                        row.put("VALUE",
+                                SecurityConstants.PREFIX_ENC + securityService.encrypt(value));
+                    }
+                }
             }
         }
         

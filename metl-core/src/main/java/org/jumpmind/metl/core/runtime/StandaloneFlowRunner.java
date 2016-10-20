@@ -172,7 +172,7 @@ public class StandaloneFlowRunner {
                 executionService = new ExecutionSqlService(databasePlatform, persistenceManager,
                         "METL", new StandardEnvironment());
                 IImportExportService importService = new ImportExportService(databasePlatform,
-                        persistenceManager, "METL", configurationService);
+                        persistenceManager, "METL", configurationService, new SecurityService());
                 agentRuntime = new AgentRuntime(new Agent("test", AppUtils.getHostName()),
                         configurationService, executionService,
                         new ComponentRuntimeFactory(componentDefinitionFactory),
