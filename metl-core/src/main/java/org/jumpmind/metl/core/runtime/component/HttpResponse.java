@@ -39,21 +39,14 @@ public class HttpResponse extends AbstractHttpRequestResponse implements IHasRes
     }
 
     private String getContentType() {
-        String contentType = null;
-        if (response instanceof CharSequence) {
-            /*
-             * content type only means anything if we are providing the output
-             * in string format
-             */
-            contentType = properties.get("content.type");
-            if (isBlank(contentType)) {
-               if (isNotBlank(detectedFormat)) {
-                   if (AbstractSerializer.FORMAT_JSON.equals(detectedFormat)) {
-                       contentType = "application/json;charset=utf-8";
-                   } else if (AbstractSerializer.FORMAT_XML.equals(detectedFormat)) {
-                       contentType = "application/xml;charset=utf-8";
-                   }
-               }
+        String contentType = properties.get("content.type");
+        if (isBlank(contentType)) {
+            if (isNotBlank(detectedFormat)) {
+                if (AbstractSerializer.FORMAT_JSON.equals(detectedFormat)) {
+                    contentType = "application/json;charset=utf-8";
+                } else if (AbstractSerializer.FORMAT_XML.equals(detectedFormat)) {
+                    contentType = "application/xml;charset=utf-8";
+                }
             }
         }
         return contentType;
