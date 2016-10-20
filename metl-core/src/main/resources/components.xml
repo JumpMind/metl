@@ -1621,7 +1621,7 @@ forwardMessage()
              outputMessageType='text'
              resourceCategory='http'
              supportsMultipleThreads='true'>
-    <name>Web</name>
+    <name>Web Request</name>
     <className>org.jumpmind.metl.core.runtime.component.Web</className>
     <keywords>invoke,rest,http</keywords>
     <description></description>
@@ -1976,6 +1976,11 @@ forwardMessage()
         <name>Returns Data</name>
         <defaultValue>true</defaultValue>
       </setting>
+      <setting id='content.type'
+               required='false'
+               type='text'>
+        <name>Content Type</name>
+      </setting>      
     </settings>
   </component>
   <component category='SERVICE'

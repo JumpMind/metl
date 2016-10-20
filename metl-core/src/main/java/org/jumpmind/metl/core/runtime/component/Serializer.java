@@ -20,6 +20,7 @@
  */
 package org.jumpmind.metl.core.runtime.component;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,7 +65,9 @@ public class Serializer extends AbstractSerializer {
                 } else {
                     response = createByInboundRowPayload(payload);
                 }
-                callback.sendTextMessage(inputMessage.getHeader(),
+                Map<String,Serializable> header = new HashMap<>(inputMessage.getHeader());
+                header.put(FORMAT, getDetectedFormat());
+                callback.sendTextMessage(header,
                         getObjectMapper().writeValueAsString(response));
                 payload = new ArrayList<>();
             }
