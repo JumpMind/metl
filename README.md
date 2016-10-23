@@ -15,7 +15,7 @@ Metl was built to solve fairly simple day to day integration tasks without the n
 ## Build Me, Run Me
 
 This project requires the Java JDK to build and run.  The build currently generates a war file 
-which can be deployed to an application server like [Apache Tomcat](http://tomcat.apache.org).  The war file can also be run standalone.
+which can be deployed to an application server like [Apache Tomcat](http://tomcat.apache.org).  The war file can also be run as a standalone application, in which case it uses an embedded [Jetty](http://www.eclipse.org/jetty) web server.
 
 ### Build
 ~~~~~
