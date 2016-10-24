@@ -104,7 +104,6 @@ public class DeployNavigator extends VerticalLayout {
     TabbedPanel tabbedPanel;
 
     public DeployNavigator(ApplicationContext context, TabbedPanel tabbedPanel) {
-
         this.context = context;
         this.tabbedPanel = tabbedPanel;
         setCaption("Navigator");
@@ -118,6 +117,7 @@ public class DeployNavigator extends VerticalLayout {
         treeTable.addStyleName("noselect");
         addComponent(treeTable);
         setExpandRatio(treeTable, 1);
+        selectionChanged(null);
 
     }
 
