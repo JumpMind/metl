@@ -61,7 +61,7 @@ public class ImportExportService extends AbstractService implements IImportExpor
     final static Integer LAST_UPDATE_BY_IDX = new Integer(3);
     
     final String[][] PROJECT_SQL = {
-            {"_PROJECT","SELECT * FROM %1$s_PROJECT WHERE ID IN (SELECT PROJECT_ID FROM %1$s_PROJECT_VERSION WHERE ID='%2$s') ORDER BY ID","ID"},
+            {"_PROJECT","SELECT * FROM %1$s_PROJECT WHERE ID IN (SELECT PROJECT_ID FROM %1$s_PROJECT_VERSION WHERE ID='%2$s') UNION SELECT * FROM %1$s_PROJECT WHERE ID='%3$s' ORDER BY ID","ID"},
             {"_PROJECT_VERSION","SELECT * FROM %1$s_PROJECT_VERSION WHERE ID='%2$s' ORDER BY ID","ID"},
             {"_PROJECT_VERSION_DEPENDENCY","SELECT * FROM %1$s_PROJECT_VERSION_DEPENDENCY WHERE PROJECT_VERSION_ID='%2$s' ORDER BY ID","ID"}
     };
@@ -317,13 +317,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
         
         Iterator<String> itr = importData.getProjectData().get(PROJECT_IDX)
                 .getTableData().keySet().iterator();
-        int index = 0;
         while (itr.hasNext()) {
             String key = itr.next();
             LinkedCaseInsensitiveMap<Object> row = importData.getProjectData().get(PROJECT_IDX).getTableData().get(key);
             addConfigData(existingProjectData, PROJECT_SQL, projectVersionId,
-                    index == 0 ? projectVersionId : (String) row.get(PROJECT_SQL[PROJECT_IDX][KEY_COLUMNS]));
-            index++;
+                    (String) row.get(PROJECT_SQL[PROJECT_IDX][KEY_COLUMNS]));
         }
         
         for (int i = 0; i <= PROJECT_SQL.length - 1; i++) {
