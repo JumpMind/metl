@@ -45,13 +45,13 @@ public class DesignMenuBar extends AbstractMenuBar {
         add("File|Open");
 //        getMenuItem("File").addSeparator();
 //        add("File|Hide");
-        getMenuItem("File").addSeparator();
+        addSeparator("File");
         add("File|Import...");        
         add("File|Export...");
         
         add("Edit|Rename");
         add("Edit|Copy");
-        getMenuItem("Edit").addSeparator();
+        addSeparator("Edit");
         add("Edit|Remove");
         
 //        add("View|Hidden");        
