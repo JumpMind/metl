@@ -216,8 +216,11 @@ public class ImportExportService extends AbstractService implements IImportExpor
                     String value = row.getString("VALUE", false);
                     if (isNotBlank(value)) {
                         if (value.startsWith(SecurityConstants.PREFIX_ENC)) {
-                            row.put("VALUE", securityService.decrypt(
-                                    value.substring(SecurityConstants.PREFIX_ENC.length() - 1)));
+                            try {
+                                row.put("VALUE", securityService.decrypt(
+                                        value.substring(SecurityConstants.PREFIX_ENC.length() - 1)));
+                            } catch (Exception e) {
+                            }
                         }
                     }
                 }
@@ -313,12 +316,14 @@ public class ImportExportService extends AbstractService implements IImportExpor
         initConfigData(existingProjectData, PROJECT_SQL);
         
         Iterator<String> itr = importData.getProjectData().get(PROJECT_IDX)
-                .getTableData().keySet().iterator();        
+                .getTableData().keySet().iterator();
+        int index = 0;
         while (itr.hasNext()) {
             String key = itr.next();
             LinkedCaseInsensitiveMap<Object> row = importData.getProjectData().get(PROJECT_IDX).getTableData().get(key);
             addConfigData(existingProjectData, PROJECT_SQL, projectVersionId,
-                    (String) row.get(PROJECT_SQL[PROJECT_IDX][KEY_COLUMNS]));
+                    index == 0 ? projectVersionId : (String) row.get(PROJECT_SQL[PROJECT_IDX][KEY_COLUMNS]));
+            index++;
         }
         
         for (int i = 0; i <= PROJECT_SQL.length - 1; i++) {
