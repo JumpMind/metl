@@ -1908,7 +1908,7 @@ forwardMessage()
   </component>
   <component category='SERVICE'
              id='HttpRequest'
-             inputMessageType='none'
+             inputMessageType='any'
              inputOutputModelsMatch='false'
              outputMessageType='text'
              resourceCategory='none'>
@@ -1961,7 +1961,7 @@ forwardMessage()
   </component>
   <component category='SERVICE'
              id='16170152-eee5-11e5-9ce9-5e5517507c66'
-             inputMessageType='any'
+             inputMessageType='text'
              inputOutputModelsMatch='true'
              outputMessageType='none'
              resourceCategory='none'>
