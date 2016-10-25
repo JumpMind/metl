@@ -35,6 +35,10 @@ apply from: metlAssembleDir + '/asciidoc.gradle'
       }
     }    
     
+    ext {
+        majorMinorVersion = version.substring(0, version.indexOf(".", version.indexOf(".")+ 1))
+    }    
+    
     repositories {
         // uncomment this if you want to use your local maven repository to test undelivered
         /// changes (like symmetricds changes)
