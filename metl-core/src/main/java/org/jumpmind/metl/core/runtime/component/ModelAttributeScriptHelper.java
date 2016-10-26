@@ -253,7 +253,7 @@ public class ModelAttributeScriptHelper {
         if (value != null) {
             return formatter.format(value);
         } else {
-            return "";
+            return null;
         }
     }
 
