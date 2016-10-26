@@ -43,6 +43,7 @@ import org.jumpmind.metl.ui.views.design.EditFormatPanel.RecordFormat;
 import org.jumpmind.vaadin.ui.common.ExportDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
+import org.jumpmind.vaadin.ui.common.NotifyDialog;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -64,6 +65,7 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.TextField;
@@ -171,8 +173,29 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 if (lastEditItemIds.contains(itemId) && !readOnly) {
                     ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
                         protected void save(String text) {
-                            obj.setName(trim(text));
-                            EditModelPanel.this.context.getConfigurationService().save(obj);
+                            String newName = trim(text);
+                            boolean unique = true;
+                            if (obj instanceof ModelEntity) {
+                                List<ModelEntity> entities = model.getModelEntities();
+                                for (ModelEntity entity : entities) {
+                                    if (!entity.equals(obj) && entity.getName().equals(newName)) {
+                                        unique = false;
+                                    }
+                                }
+                            } else if (obj instanceof ModelAttribute) {
+                                List<ModelAttribute> attributes = model.getEntityById(((ModelAttribute)obj).getEntityId()).getModelAttributes();
+                                for (ModelAttribute attribute : attributes) {
+                                    if (!attribute.equals(obj) && attribute.getName().equals(newName)) {
+                                        unique = false;
+                                    }
+                                }
+                            }
+                            if (unique) {
+                                obj.setName(newName);
+                                EditModelPanel.this.context.getConfigurationService().save(obj);
+                            } else {
+                                NotifyDialog.show("Name needs to be unique", "Name needs to be unique", null, Type.WARNING_MESSAGE);
+                            }
                         };
                     };
                     t.setWidth(100, Unit.PERCENTAGE);
