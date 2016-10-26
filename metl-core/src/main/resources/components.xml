@@ -1612,7 +1612,14 @@ forwardMessage()
     <name>Transformer</name>
     <className>org.jumpmind.metl.core.runtime.component.Transformer</className>
     <description></description>
-    <settings></settings>
+    <settings>
+      <setting id='pass.along.control.messages'
+               required='false'
+               type='boolean'>
+        <name>Pass Along Control Messages</name>
+        <defaultValue>false</defaultValue>
+      </setting>    
+    </settings>
   </component>
   <component category='PROCESSOR'
              id='Web'

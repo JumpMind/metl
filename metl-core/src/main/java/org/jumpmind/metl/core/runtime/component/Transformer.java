@@ -49,6 +49,8 @@ public class Transformer extends AbstractComponentRuntime {
     public static final String TYPE = "Transformer";
     
     public static String TRANSFORM_EXPRESSION = "transform.expression";
+    
+    public static String PASS_ALONG_CONTROL_MESSAGES = "pass.along.control.messages";
 
     Map<String, String> transformsByAttributeId = new HashMap<String, String>();
     
@@ -165,7 +167,7 @@ public class Transformer extends AbstractComponentRuntime {
 			   log.debug("It took " + (totalTime/totalCalls) + "ms on average to call eval");
 			}
 						
-		} else if (inputMessage instanceof ControlMessage) {
+		} else if (inputMessage instanceof ControlMessage && properties.is(PASS_ALONG_CONTROL_MESSAGES, false)) {
 		        callback.sendControlMessage();
 		}
 	}
