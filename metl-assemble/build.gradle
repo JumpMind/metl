@@ -80,7 +80,7 @@ task publishMetl {
             trust: 'true',
             verbose: 'true',
             localFile: '../metl-ui/src/main/webapp/doc/html/user-guide.html',
-            remoteTofile: "$jumpmindUser:$jumpmindPassword@jumpmind.com:~/www/downloads/met/doc/user-guide-$majorMinorVersion.html")      
+            remoteTofile: "$jumpmindUser:$jumpmindPassword@jumpmind.com:~/www/downloads/met/doc/user-guide-${majorMinorVersion}.html")      
     }
     
    
