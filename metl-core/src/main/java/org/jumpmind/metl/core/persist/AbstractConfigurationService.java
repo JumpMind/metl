@@ -590,6 +590,10 @@ abstract class AbstractConfigurationService extends AbstractService implements I
         for (ModelAttribute modelAttribute : attributes) {
             byModelEntityId.get(modelAttribute.getEntityId()).getModelAttributes().add(modelAttribute);
         }
+        
+        for (ModelEntity entity : entities) {
+            Collections.sort(entity.getModelAttributes());
+        }
 
         AbstractObjectNameBasedSorter.sort(entities);
         return model;

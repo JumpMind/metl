@@ -82,9 +82,9 @@ public class AuditableConfigurationService extends ConfigurationSqlService {
         WebApplicationContext context = AppUI.getWebApplicationContext();
         if (context != null) {
             ApplicationContext appContext = context.getBean(ApplicationContext.class);
+            String userId = appContext.getUser().getLoginId();
+            data.setLastUpdateBy(userId);
             if (appContext.getCurrentFlow() != null) {
-                String userId = appContext.getUser().getLoginId();
-                data.setLastUpdateBy(userId);
                 if (data instanceof IAuditable) {
                     Map<FlowName, Set<AbstractObject>> components = changes.get(userId);
                     if (components == null) {

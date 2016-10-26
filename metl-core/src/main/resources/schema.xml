@@ -129,6 +129,7 @@
     <table name="model_attribute" description="">
         <column name="id" primaryKey="true" required="true" type="CHAR" size="36" />
         <column name="entity_id" type="CHAR" size="36" required="true"  />
+        <column name="attribute_order" type="INTEGER" default="0" required="true" />
         <column name="name" type="VARCHAR" size="255" required="true"  />
         <column name="description" type="CLOB" DESCRIPTION=""  />        
         <column name="type" type="VARCHAR" size="50" required="true" description="INTEGER, STRING, LONG, BOOLEAN, DECIMAL, ENUM, COMPLEX, SEQUENCE" />

@@ -20,11 +20,14 @@
  */
 package org.jumpmind.metl.ui.views.design;
 
+import static org.apache.commons.lang.StringUtils.trim;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jumpmind.metl.core.model.AbstractNamedObject;
@@ -75,9 +78,9 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     ApplicationContext context;
 
     TreeTable treeTable = new TreeTable();
-    
+
     Table table = new Table();
-    
+
     Model model;
 
     Set<Object> lastEditItemIds = Collections.emptySet();
@@ -94,43 +97,60 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
 
     Button importButton;
 
+    Button moveUpButton;
+
+    Button moveDownButton;
+
+    Button moveTopButton;
+
+    Button moveBottomButton;
+
     TextField filterField;
 
     ShortcutListener enterKeyListener;
-    
+
     boolean readOnly;
-    
+
     BeanItemContainer<Record> container = new BeanItemContainer<Record>(Record.class);
-    
+
     public EditModelPanel(ApplicationContext context, String modelId, boolean readOnly) {
         this.context = context;
         this.model = new Model(modelId);
         this.readOnly = readOnly;
         context.getConfigurationService().refresh(model);
 
-        ButtonBar buttonBar = new ButtonBar();
-        addComponent(buttonBar);
+        ButtonBar buttonBar1 = new ButtonBar();
+        addComponent(buttonBar1);
+        ButtonBar buttonBar2 = new ButtonBar();
+        addComponent(buttonBar2);
 
         if (!readOnly) {
-            addEntityButton = buttonBar.addButton("Add Entity", FontAwesome.TABLE);
+            addEntityButton = buttonBar1.addButton("Add Entity", FontAwesome.TABLE);
             addEntityButton.addClickListener(new AddEntityClickListener());
 
-            addAttributeButton = buttonBar.addButton("Add Attribute", FontAwesome.COLUMNS);
+            addAttributeButton = buttonBar1.addButton("Add Attr", FontAwesome.COLUMNS);
             addAttributeButton.addClickListener(new AddAttributeClickListener());
 
-            editButton = buttonBar.addButton("Edit", FontAwesome.EDIT);
+            editButton = buttonBar2.addButton("Edit", FontAwesome.EDIT);
             editButton.addClickListener(new EditClickListener());
 
-            removeButton = buttonBar.addButton("Remove", FontAwesome.TRASH_O);
+            removeButton = buttonBar1.addButton("Remove", FontAwesome.TRASH_O);
             removeButton.addClickListener(new RemoveClickListener());
 
-            importButton = buttonBar.addButton("Import ...", FontAwesome.DOWNLOAD);
-            importButton.addClickListener(new ImportClickListener());
+            moveUpButton = buttonBar2.addButton("Up", FontAwesome.ARROW_UP, e -> moveUp());
+            moveDownButton = buttonBar2.addButton("Down", FontAwesome.ARROW_DOWN, e -> moveDown());
+            moveTopButton = buttonBar2.addButton("Top", FontAwesome.ANGLE_DOUBLE_UP,
+                    e -> moveTop());
+            moveBottomButton = buttonBar2.addButton("Bottom", FontAwesome.ANGLE_DOUBLE_DOWN,
+                    e -> moveBottom());
+
+            importButton = buttonBar1.addButtonRight("Import ...", FontAwesome.DOWNLOAD,
+                    new ImportClickListener());
         }
 
-        buttonBar.addButtonRight("Export", FontAwesome.DOWNLOAD, (e)->export());
+        buttonBar1.addButtonRight("Export...", FontAwesome.DOWNLOAD, (e) -> export());
 
-        filterField = buttonBar.addFilter();
+        filterField = buttonBar2.addFilter();
         filterField.addTextChangeListener(new TextChangeListener() {
             public void textChange(TextChangeEvent event) {
                 filterField.setValue(event.getText());
@@ -151,7 +171,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 if (lastEditItemIds.contains(itemId) && !readOnly) {
                     ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
                         protected void save(String text) {
-                            obj.setName(text);
+                            obj.setName(trim(text));
                             EditModelPanel.this.context.getConfigurationService().save(obj);
                         };
                     };
@@ -174,7 +194,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                     if (lastEditItemIds.contains(itemId) && !readOnly) {
                         ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
                             protected void save(String text) {
-                                obj.setDescription(text);
+                                obj.setDescription(trim(text));
                                 EditModelPanel.this.context.getConfigurationService().save(obj);
                             };
                         };
@@ -189,23 +209,23 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                     final ModelEntity obj = (ModelEntity) itemId;
                     if (lastEditItemIds.contains(itemId) && !readOnly) {
                         ImmediateUpdateTextField t = new ImmediateUpdateTextField(null) {
-                            protected void save(String text) {
-                                obj.setDescription(text);
+                            protected void save(String text) {                                
+                                obj.setDescription(trim(text));
                                 EditModelPanel.this.context.getConfigurationService().save(obj);
                             };
                         };
-                        t.setWidth(100, Unit.PERCENTAGE);                        
+                        t.setWidth(100, Unit.PERCENTAGE);
                         t.setValue(obj.getDescription());
                         return t;
                     } else {
                         return UiUtils.getName(filterField.getValue(), obj.getDescription());
                     }
-                }
-                else return null;
+                } else
+                    return null;
             }
         });
         treeTable.setColumnHeader("description", "Description");
-        
+
         treeTable.addGeneratedColumn("type", new ColumnGenerator() {
             public Object generateCell(Table source, Object itemId, Object columnId) {
                 if (itemId instanceof ModelAttribute) {
@@ -305,33 +325,91 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         collapseAll.addStyleName(ValoTheme.BUTTON_LINK);
         collapseAll.addStyleName(ValoTheme.BUTTON_SMALL);
         hlayout.addComponent(collapseAll);
-        collapseAll.addClickListener(e->collapseAll());
+        collapseAll.addClickListener(e -> collapseAll());
 
         Button expandAll = new Button("Expand All");
         expandAll.addStyleName(ValoTheme.BUTTON_LINK);
         expandAll.addStyleName(ValoTheme.BUTTON_SMALL);
         hlayout.addComponent(expandAll);
-        expandAll.addClickListener(e->expandAll());
+        expandAll.addClickListener(e -> expandAll());
 
         addAll("", model.getModelEntities());
 
         setButtonsEnabled();
 
         table.setContainerDataSource(container);
-        table.setVisibleColumns(new Object[] { "entityName", "attributeName", "description", "type", "pk" });
-        table.setColumnHeaders(new String[] { "Entity Name", "Attribute Name", "Description", "Type", "PK" });
-        
+        table.setVisibleColumns(
+                new Object[] { "entityName", "attributeName", "description", "type", "pk" });
+        table.setColumnHeaders(
+                new String[] { "Entity Name", "Attribute Name", "Description", "Type", "PK" });
+
         if (model.getModelEntities().size() > 10) {
             collapseAll();
         }
     }
-    
+
+    protected void move(boolean down, boolean toEnd) {
+        ModelAttribute selected = (ModelAttribute) getSelected();
+        if (selected != null) {
+            ModelEntity entity = (ModelEntity) treeTable.getParent(selected);
+            List<ModelAttribute> attributes = entity.getModelAttributes();
+            int index = attributes.indexOf(selected);
+            if (down && index < attributes.size() - 1 && !toEnd) {
+                attributes.remove(selected);
+                attributes.add(index + 1, selected);
+            } else if (!down && index > 0 && !toEnd) {
+                attributes.remove(selected);
+                attributes.add(index - 1, selected);
+
+            } else if (down) {
+                attributes.remove(selected);
+                attributes.add(0, selected);
+            } else {
+                attributes.remove(selected);
+                attributes.add(selected);
+            }
+
+            index = 0;
+            for (ModelAttribute modelAttribute : attributes) {
+                modelAttribute.setAttributeOrder(index++);
+                context.getConfigurationService().save(modelAttribute);
+            }
+
+            Collection<?> children = new ArrayList<>(treeTable.getChildren(entity));
+            for (Object object : children) {
+                treeTable.removeItem(object);
+            }
+
+            for (ModelAttribute modelAttribute : attributes) {
+                addModelAttribute(entity, modelAttribute);
+            }
+            treeTable.select(selected);
+
+        }
+    }
+
+    protected void moveDown() {
+        move(true, false);
+    }
+
+    protected void moveUp() {
+        move(false, false);
+    }
+
+    protected void moveTop() {
+        move(true, true);
+    }
+
+    protected void moveBottom() {
+        move(false, true);
+    }
+
     protected void collapseAll() {
         for (Object itemId : treeTable.getItemIds()) {
             treeTable.setCollapsed(itemId, true);
         }
     }
-    
+
     protected void expandAll() {
         for (Object itemId : treeTable.getItemIds()) {
             treeTable.setCollapsed(itemId, false);
@@ -339,9 +417,9 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     }
 
     protected void export() {
-    	table.removeAllItems();
-    	updateExportTable(filterField.getValue(), model.getModelEntities());
-    	String fileNamePrefix = model.getName().toLowerCase().replace(' ', '-');
+        table.removeAllItems();
+        updateExportTable(filterField.getValue(), model.getModelEntities());
+        String fileNamePrefix = model.getName().toLowerCase().replace(' ', '-');
         ExportDialog dialog = new ExportDialog(table, fileNamePrefix, model.getName());
         UI.getCurrent().addWindow(dialog);
     }
@@ -357,6 +435,22 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             addAttributeButton.setEnabled(selected.size() > 0);
             removeButton.setEnabled(selected.size() > 0);
             editButton.setEnabled(selected.size() > 0);
+
+            boolean enableMove = selected.size() == 1
+                    && selected.iterator().next() instanceof ModelAttribute;
+            moveBottomButton.setEnabled(enableMove);
+            moveTopButton.setEnabled(enableMove);
+            moveUpButton.setEnabled(enableMove);
+            moveDownButton.setEnabled(enableMove);
+
+        } else {
+            addAttributeButton.setEnabled(false);
+            removeButton.setEnabled(false);
+            editButton.setEnabled(false);
+            moveBottomButton.setEnabled(false);
+            moveTopButton.setEnabled(false);
+            moveUpButton.setEnabled(false);
+            moveDownButton.setEnabled(false);
         }
     }
 
@@ -373,6 +467,14 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     @Override
     public void deselected() {
         treeTable.removeShortcutListener(enterKeyListener);
+    }
+
+    protected Object getSelected() {
+        if (getSelectedItems().size() > 0) {
+            return getSelectedItems().iterator().next();
+        } else {
+            return null;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -515,7 +617,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
             Set<Object> selectedIds = getSelectedItems();
 
             for (Object itemId : selectedIds) {
-                Collection<Object> children = (Collection<Object>) treeTable.getContainerDataSource().getChildren(itemId);
+                Collection<Object> children = (Collection<Object>) treeTable
+                        .getContainerDataSource().getChildren(itemId);
                 if (children != null) {
                     itemIds.addAll(children);
                 }
@@ -586,7 +689,8 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         public void itemClick(ItemClickEvent event) {
             if (event.isDoubleClick()) {
                 editSelectedItem();
-            } else if (System.currentTimeMillis() - lastClick > 1000 && getSelectedItems().size() > 0) {
+            } else if (System.currentTimeMillis() - lastClick > 1000
+                    && getSelectedItems().size() > 0) {
                 treeTable.setValue(null);
             }
             lastClick = System.currentTimeMillis();
@@ -607,9 +711,9 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         ModelAttribute modelAttribute;
 
         String entityName = "";
-        
+
         String attributeName = "";
-        
+
         String description = "";
 
         String type = "";
@@ -628,7 +732,7 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
                 this.attributeName = modelAttribute.getName();
                 this.description = modelAttribute.getDescription();
                 this.type = modelAttribute.getType();
-                this.pk = modelAttribute.isPk()?"PK":"";
+                this.pk = modelAttribute.isPk() ? "PK" : "";
             }
         }
 
@@ -674,5 +778,5 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
         public void setPk(String pk) {
             this.pk = pk;
         }
-    }    
+    }
 }

@@ -52,13 +52,14 @@ public class ButtonBar extends HorizontalLayout {
         setMargin(new MarginInfo(true, false, true, false));
 
         wrapper = new HorizontalLayout();
+        wrapper.setSpacing(true);
         wrapper.setWidth(100, Unit.PERCENTAGE);
         wrapper.addStyleName(STYLE);
         wrapper.setMargin(new MarginInfo(false, true, false, false));
 
-        left = new HorizontalLayout();
-        wrapper.addComponent(left);
-        wrapper.setComponentAlignment(left, Alignment.MIDDLE_RIGHT);
+        left = new HorizontalLayout();       
+        wrapper.addComponent(left);        
+        wrapper.setComponentAlignment(left, Alignment.MIDDLE_LEFT);
 
         bar = new HorizontalLayout();
 
@@ -71,7 +72,7 @@ public class ButtonBar extends HorizontalLayout {
         wrapper.setExpandRatio(spacer, 1);
 
         right = new HorizontalLayout();
-        right.setSpacing(true);
+        right.setSpacing(false);
         right.setMargin(false);
         wrapper.addComponent(right);
         wrapper.setComponentAlignment(right, Alignment.MIDDLE_RIGHT);
@@ -88,7 +89,8 @@ public class ButtonBar extends HorizontalLayout {
         textField.setTextChangeEventMode(TextChangeEventMode.LAZY);
         textField.setTextChangeTimeout(500);
         textField.setNullRepresentation("");
-        addRight(textField);
+        wrapper.addComponent(textField);
+        wrapper.setComponentAlignment(textField, Alignment.MIDDLE_RIGHT);
         return textField;
     }
 
