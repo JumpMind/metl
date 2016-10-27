@@ -176,6 +176,10 @@ public class TabbedPanel extends TabSheet {
         component.setSizeFull();
         this.mainTab = addTab(component, caption, icon, 0);
     }
+    
+    public void mainTabToTop() {
+        this.setSelectedTab(mainTab);
+    }
 
     public boolean closeTab(String id) {
         Tab tab = tabsById.remove(id);

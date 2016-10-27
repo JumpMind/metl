@@ -94,7 +94,8 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
 
     TabbedPanel tabs;
 
-    BeanItemContainer<Execution> executionContainer = new BeanItemContainer<Execution>(Execution.class);
+    BeanItemContainer<Execution> executionContainer = new BeanItemContainer<Execution>(
+            Execution.class);
 
     Table table;
 
@@ -175,8 +176,9 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
             public void textChange(TextChangeEvent event) {
                 executionContainer.removeAllContainerFilters();
                 if (!StringUtils.isBlank(event.getText())) {
-                    executionContainer.addContainerFilter(new MultiPropertyFilter(event.getText(),
-                            new String[] { "agentName", "hostName", "flowName", "status", "startTime", "endTime" }));
+                    executionContainer.addContainerFilter(
+                            new MultiPropertyFilter(event.getText(), new String[] { "agentName",
+                                    "hostName", "flowName", "status", "startTime", "endTime" }));
                 }
             }
         });
@@ -202,8 +204,10 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                 }
             }
         });
-        table.setVisibleColumns(new Object[] { "agentName", "deploymentName", "hostName", "status", "startTime", "endTime", "createBy", "parameters" });
-        table.setColumnHeaders(new String[] { "Agent", "Deployment", "Host", "Status", "Start", "End", "Caller", "Parameters" });
+        table.setVisibleColumns(new Object[] { "agentName", "deploymentName", "hostName", "status",
+                "startTime", "endTime", "createBy", "parameters" });
+        table.setColumnHeaders(new String[] { "Agent", "Deployment", "Host", "Status", "Start",
+                "End", "Caller", "Parameters" });
         table.setColumnWidth("agentName", 250);
         table.setColumnWidth("deploymentName", 250);
         table.setColumnWidth("hostName", 145);
@@ -215,7 +219,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         table.setColumnCollapsed("hostName", true);
         table.setSortContainerPropertyId("startTime");
         table.setSortAscending(false);
-        table.addValueChangeListener((event)->viewButton.setEnabled(table.getValue() != null));
+        table.addValueChangeListener((event) -> viewButton.setEnabled(table.getValue() != null));
         mainTab.addComponent(table);
         mainTab.setExpandRatio(table, 1.0f);
 
@@ -227,7 +231,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         split.setSplitPosition(UIConstants.DEFAULT_LEFT_SPLIT, Unit.PIXELS, false);
 
         manageNavigator = new ManageNavigator(FolderType.AGENT, context);
-        manageNavigator.addValueChangeListener((event) ->refreshUI(getBackgroundData()));
+        manageNavigator.addValueChangeListener((event) -> refreshUI(getBackgroundData()));
         split.setFirstComponent(manageNavigator);
 
         VerticalLayout container = new VerticalLayout();
@@ -277,7 +281,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
         }
         Object currentSelection = manageNavigator.getCurrentSelection();
         Object currentSelectionParent = manageNavigator.getCurrentSelectionParent();
-        if (currentSelection != null) {            
+        if (currentSelection != null) {
             Map<String, Object> params = new HashMap<String, Object>();
             if (currentSelection.equals(ManageNavigator.CURRENTLY_RUNNING)) {
                 statusSelect.setValue(ExecutionStatus.RUNNING.name());
@@ -295,7 +299,7 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                 params.put("deploymentId", ((AgentDeployment) currentSelection).getId());
             } else if (currentSelection instanceof AgentDeploymentSummary) {
                 params.put("deploymentId", ((AgentDeploymentSummary) currentSelection).getId());
-            } 
+            }
 
             if (currentSelectionParent instanceof Agent) {
                 params.put("agentId", ((Agent) currentSelectionParent).getId());
@@ -327,37 +331,40 @@ public class ManageView extends HorizontalLayout implements View, IUiPanel, IBac
                 table.setValue(currentSelection);
             }
             viewButton.setEnabled(table.getValue() != null);
+            tabs.mainTabToTop();
         }
     }
 
     protected boolean needsUpdated(List<Execution> data) {
         boolean needsUpdated = false;
-        List<Execution> all = data != null ? new ArrayList<Execution>(data) : new ArrayList<Execution>(0);
+        List<Execution> all = data != null ? new ArrayList<Execution>(data)
+                : new ArrayList<Execution>(0);
         @SuppressWarnings("unchecked")
         Collection<Execution> tableValues = (Collection<Execution>) table.getItemIds();
-        for (Execution execution : tableValues) {
-            int index = all.indexOf(execution);
-            if (index >= 0) {
-                Execution toCompare = all.get(index);
-                if (!toCompare.getStatus().equals(execution.getStatus())) {
+
+        if (all.size() != tableValues.size()) {
+            needsUpdated = true;
+        }
+
+        if (!needsUpdated) {
+            int index = 0;
+            for (Execution execution : tableValues) {
+                if (all.size() <= index || !all.get(index).equals(execution)) {
                     needsUpdated = true;
                     break;
                 }
-            } else {
-                needsUpdated = true;
-                break;
+                index++;
             }
         }
-        if (all.size() > 0) {
-            needsUpdated = true;
-        }
+
         return needsUpdated;
     }
 
     protected void viewLog(Object item) {
         Execution execution = (Execution) item;
         ExecutionRunPanel logPanel = new ExecutionRunPanel(execution.getId(), context, tabs, null);
-        tabs.addCloseableTab(execution.getId(), "Log " + execution.getFlowName(), Icons.LOG, logPanel);
+        tabs.addCloseableTab(execution.getId(), "Log " + execution.getFlowName(), Icons.LOG,
+                logPanel);
         logPanel.onBackgroundUIRefresh(logPanel.onBackgroundDataRefresh());
     }
 
