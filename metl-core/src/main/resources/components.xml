@@ -80,8 +80,14 @@
       <setting id='expected.custom.header.pairs'
                required='false'
                type='multiline_text'>
-        <name>Expected Custom Header Pairs</name>
+        <name>Expected Custom Content Message Header Pairs</name>
+      </setting>
+      <setting id='expected.custom.control.header.pairs'
+               required='false'
+               type='multiline_text'>
+        <name>Expected Custom Control Message Header Pairs</name>
       </setting>      
+            
       <setting id='expected.text.payload'
                required='false'
                type='multiline_text'>
@@ -796,7 +802,7 @@
              supportsMultipleThreads='true'>
     <name>No Op</name>
     <className>org.jumpmind.metl.core.runtime.component.NoOp</className>
-    <keywords>nothing</keywords>
+    <keywords>nothing,noop</keywords>
     <description></description>
     <settings></settings>
   </component>

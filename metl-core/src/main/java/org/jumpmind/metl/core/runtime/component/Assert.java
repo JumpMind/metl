@@ -53,6 +53,7 @@ public class Assert extends AbstractComponentRuntime {
     public static final String EXPECTED_DISTINCT_ATTRIBUTE_TYPE_COUNT = "expected.distinct.attributes.count";
     public static final String EXPECTED_EMPTY_PAYLOAD_MESSAGE_COUNT = "expected.empty.payload.messages.count";
     public static final String EXPECTED_CUSTOM_HEADER_PAIRS = "expected.custom.header.pairs";
+    public static final String EXPECTED_CUSTOM_CONTROL_HEADER_PAIRS = "expected.custom.control.header.pairs";
     public static final String EXPECTED_TEXT_PAYLOAD = "expected.text.payload";
     public static final String EXPECTED_SQL_COUNT = "expected.sql.count";
     public static final String ASSERT_SQL = "sql";
@@ -67,6 +68,7 @@ public class Assert extends AbstractComponentRuntime {
     int expectedEmptyPayloadMessageCount = 0;
     int expectedSqlCount = 0;
     String expectedCustomHeaderPairs;
+    String expectedCustomControlMsgHeaderPairs;
     Long expectedEntityCountPerMessage;
     String expectedTextPayload;
 
@@ -81,6 +83,7 @@ public class Assert extends AbstractComponentRuntime {
     int entityCountPerMessage = 0;
     StringBuilder textPayload = new StringBuilder();
     StringBuilder messageHeaders = new StringBuilder();
+    StringBuilder controlMessageHeaders = new StringBuilder();
     
     Set<String> distinctEntityIds = new HashSet<>();
     Set<String> distinctAttributeIds = new HashSet<>();
@@ -88,6 +91,7 @@ public class Assert extends AbstractComponentRuntime {
     @Override
     public void start() {
         TypedProperties properties = getTypedProperties();
+        expectedCustomControlMsgHeaderPairs = properties.get(EXPECTED_CUSTOM_CONTROL_HEADER_PAIRS, null);
         expectedCustomHeaderPairs = properties.get(EXPECTED_CUSTOM_HEADER_PAIRS, null);
         expectedDistinctAttributeTypeCount = properties.getInt(EXPECTED_DISTINCT_ATTRIBUTE_TYPE_COUNT, -1);
         expectedDistinctEntityTypeCount = properties.getInt(EXPECTED_DISTINCT_ENTITY_TYPE_COUNT, -1);
@@ -155,6 +159,21 @@ public class Assert extends AbstractComponentRuntime {
             if (!first) {
                 messageHeaders.append("\n");
             }
+        } else {
+            Map<String,String> headerValues = inputMessage.getHeader().getAsStrings();
+            boolean first = true;
+            for (String key : headerValues.keySet()) {
+                if (!key.startsWith("_")) {
+                    if (!first) {
+                        controlMessageHeaders.append(",");
+                    }
+                    controlMessageHeaders.append(key).append("=").append(headerValues.get(key));
+                    first = false;
+                }
+            }
+            if (!first) {
+                controlMessageHeaders.append("\n");
+            }
         }
 
         callback.forward(inputMessage);
@@ -217,6 +236,11 @@ public class Assert extends AbstractComponentRuntime {
         if (isNotBlank(expectedCustomHeaderPairs) && !expectedCustomHeaderPairs.trim().equals(messageHeaders.toString().trim())) {
             assertFailed.append(String.format("\nExpected the following headers of:\n%s \nReceived:\n%s",
                     expectedCustomHeaderPairs.trim(), messageHeaders.toString().trim()));                   
+        }
+        
+        if (isNotBlank(expectedCustomControlMsgHeaderPairs) && !expectedCustomControlMsgHeaderPairs.trim().equals(controlMessageHeaders.toString().trim())) {
+            assertFailed.append(String.format("\nExpected the following control headers of:\n%s \nReceived:\n%s",
+                    expectedCustomControlMsgHeaderPairs.trim(), controlMessageHeaders.toString().trim()));                   
         }
 
         if (isNotBlank(sql)) {

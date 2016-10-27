@@ -43,8 +43,6 @@ public class DesignMenuBar extends AbstractMenuBar {
         add("File|New|Resource|HTTP Resource");
         add("File|New|Resource|Mail Session");
         add("File|Open");
-//        getMenuItem("File").addSeparator();
-//        add("File|Hide");
         addSeparator("File");
         add("File|Import...");        
         add("File|Export...");
@@ -53,8 +51,6 @@ public class DesignMenuBar extends AbstractMenuBar {
         add("Edit|Copy");
         addSeparator("Edit");
         add("Edit|Remove");
-        
-//        add("View|Hidden");        
 
     }
 

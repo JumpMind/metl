@@ -33,12 +33,8 @@ public class FolderMenuManager extends AbstractDesignSelectedValueMenuManager {
                 "File|New|Resource|Directory|SMB",
                 "File|New|Resource|HTTP Resource",
                 "File|New|Resource|Mail Session",
-                "File|Open",
                 "File|Import...",        
                 "File|Export...",                
-                "Edit|Rename",
-                "Edit|Copy",
-                "Edit|Remove",
         });
     }
 }
