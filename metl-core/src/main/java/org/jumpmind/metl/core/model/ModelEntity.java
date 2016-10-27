@@ -54,6 +54,7 @@ public class ModelEntity extends AbstractNamedObject implements IAuditable {
     }
 
     public void addModelAttribute(ModelAttribute modelAttribute) {
+        modelAttribute.setAttributeOrder(modelAttributes.size());
         this.modelAttributes.add(modelAttribute);
     }
 
