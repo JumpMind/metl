@@ -90,7 +90,7 @@ public class ButtonBar extends HorizontalLayout {
         textField.setTextChangeTimeout(500);
         textField.setNullRepresentation("");
         wrapper.addComponent(textField);
-        wrapper.setComponentAlignment(textField, Alignment.MIDDLE_RIGHT);
+        wrapper.setComponentAlignment(textField, Alignment.BOTTOM_RIGHT);
         return textField;
     }
 
