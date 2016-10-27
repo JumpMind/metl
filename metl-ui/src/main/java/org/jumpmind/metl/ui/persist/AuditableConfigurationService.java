@@ -1,5 +1,7 @@
 package org.jumpmind.metl.ui.persist;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -84,6 +86,9 @@ public class AuditableConfigurationService extends ConfigurationSqlService {
             ApplicationContext appContext = context.getBean(ApplicationContext.class);
             String userId = appContext.getUser().getLoginId();
             data.setLastUpdateBy(userId);
+            if (isBlank(data.getCreateBy())) {
+                data.setCreateBy(userId);
+            }
             if (appContext.getCurrentFlow() != null) {
                 if (data instanceof IAuditable) {
                     Map<FlowName, Set<AbstractObject>> components = changes.get(userId);
