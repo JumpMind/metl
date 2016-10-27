@@ -37,7 +37,6 @@ public class ResourceMenuManager extends AbstractDesignSelectedValueMenuManager 
                 "File|Import...",        
                 "File|Export...",                
                 "Edit|Rename",
-                "Edit|Copy",
                 "Edit|Remove",
         });
     }
