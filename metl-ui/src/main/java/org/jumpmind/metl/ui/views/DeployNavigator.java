@@ -557,10 +557,16 @@ public class DeployNavigator extends VerticalLayout {
     protected void deleteTreeItems(AbstractObject obj) {
         if (obj instanceof AgentName) {
             AgentName agentName = (AgentName) obj;
-            Agent agent = context.getConfigurationService().findAgent(agentName.getId(), false);
-            context.getConfigurationService().delete(agent);
-            context.getAgentManager().refresh(agent);
-            refresh();
+            ConfirmDialog.show("Delete Agent?",
+                    "Are you sure you want to delete the '" + agentName.getName() + "' agent?",
+                    () -> {
+                        Agent agent = context.getConfigurationService().findAgent(agentName.getId(),
+                                false);
+                        context.getConfigurationService().delete(agent);
+                        context.getAgentManager().refresh(agent);
+                        refresh();
+                        return true;
+                    });
         }
     }
 

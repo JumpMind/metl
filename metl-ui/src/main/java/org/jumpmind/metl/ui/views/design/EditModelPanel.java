@@ -40,6 +40,7 @@ import org.jumpmind.metl.ui.common.ApplicationContext;
 import org.jumpmind.metl.ui.common.ButtonBar;
 import org.jumpmind.metl.ui.common.UiUtils;
 import org.jumpmind.metl.ui.views.design.EditFormatPanel.RecordFormat;
+import org.jumpmind.vaadin.ui.common.ConfirmDialog;
 import org.jumpmind.vaadin.ui.common.ExportDialog;
 import org.jumpmind.vaadin.ui.common.IUiPanel;
 import org.jumpmind.vaadin.ui.common.ImmediateUpdateTextField;
@@ -636,34 +637,41 @@ public class EditModelPanel extends VerticalLayout implements IUiPanel {
     class RemoveClickListener implements ClickListener {
         @SuppressWarnings("unchecked")
         public void buttonClick(ClickEvent event) {
+
             Set<Object> itemIds = new HashSet<Object>();
             Set<Object> selectedIds = getSelectedItems();
+            
+            ConfirmDialog.show("Delete?",
+                    "Are you sure you want to delete the " + selectedIds.size() + " selected items?",
+                    ()->{
+                        for (Object itemId : selectedIds) {
+                            Collection<Object> children = (Collection<Object>) treeTable
+                                    .getContainerDataSource().getChildren(itemId);
+                            if (children != null) {
+                                itemIds.addAll(children);
+                            }
+                            itemIds.add(itemId);
+                        }
 
-            for (Object itemId : selectedIds) {
-                Collection<Object> children = (Collection<Object>) treeTable
-                        .getContainerDataSource().getChildren(itemId);
-                if (children != null) {
-                    itemIds.addAll(children);
-                }
-                itemIds.add(itemId);
-            }
+                        for (Object itemId : itemIds) {
+                            if (itemId instanceof ModelAttribute) {
+                                ModelAttribute a = (ModelAttribute) itemId;
+                                context.getConfigurationService().delete((ModelAttribute) itemId);
+                                ModelEntity entity = (ModelEntity) treeTable.getParent(itemId);
+                                entity.removeModelAttribute(a);
+                                treeTable.removeItem(itemId);
+                            }
+                        }
+                        for (Object itemId : itemIds) {
+                            if (itemId instanceof ModelEntity) {
+                                context.getConfigurationService().delete((ModelEntity) itemId);
+                                treeTable.removeItem(itemId);
+                                model.getModelEntities().remove(itemId);
+                            }
+                        }
 
-            for (Object itemId : itemIds) {
-                if (itemId instanceof ModelAttribute) {
-                    ModelAttribute a = (ModelAttribute) itemId;
-                    context.getConfigurationService().delete((ModelAttribute) itemId);
-                    ModelEntity entity = (ModelEntity) treeTable.getParent(itemId);
-                    entity.removeModelAttribute(a);
-                    treeTable.removeItem(itemId);
-                }
-            }
-            for (Object itemId : itemIds) {
-                if (itemId instanceof ModelEntity) {
-                    context.getConfigurationService().delete((ModelEntity) itemId);
-                    treeTable.removeItem(itemId);
-                    model.getModelEntities().remove(itemId);
-                }
-            }
+                        return true;
+                    });
         }
     }
 
