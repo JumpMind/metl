@@ -82,7 +82,7 @@ public class ButtonBar extends HorizontalLayout {
 
     public TextField addFilter() {
         TextField textField = new TextField();
-        textField.setColumns(20);
+        textField.setColumns(15);
         textField.addStyleName(ValoTheme.TEXTFIELD_INLINE_ICON);
         textField.setInputPrompt("Filter");
         textField.setIcon(FontAwesome.SEARCH);
