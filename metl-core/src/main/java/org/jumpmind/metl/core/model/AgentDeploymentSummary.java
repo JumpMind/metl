@@ -33,6 +33,8 @@ public class AgentDeploymentSummary extends AbstractNamedObject {
     
     String projectName;
     
+    String artifactId;
+    
     String type;
     
     String name;
@@ -63,6 +65,15 @@ public class AgentDeploymentSummary extends AbstractNamedObject {
         logLevel = agentDeployment.getLogLevel();
         startType = agentDeployment.getStartType();
         startExpression = agentDeployment.getStartExpression();
+        artifactId = agentDeployment.getFlowId();
+    }
+    
+    public void setArtifactId(String rowId) {
+        this.artifactId = rowId;
+    }
+    
+    public String getArtifactId() {
+        return artifactId;
     }
 
     public boolean isChanged(AgentDeploymentSummary o) {

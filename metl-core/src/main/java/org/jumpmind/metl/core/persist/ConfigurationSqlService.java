@@ -76,7 +76,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
         ISqlTemplate template = databasePlatform.getSqlTemplate();
         return template.query(String.format(
                 "select p.name as project_name, v.version_label, '%2$s' as type, " +
-                "d.id, d.name, d.start_type, d.log_level, d.start_expression, d.status " +
+                "d.id, d.name, d.start_type, d.log_level, d.start_expression, d.status, f.id as flow_id " +
                 "from %1$s_agent_deployment d " +
                 "inner join %1$s_flow f on f.id = d.flow_id " +
                 "inner join %1$s_project_version v on v.id = f.project_version_id " +
@@ -84,7 +84,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                 "where d.agent_id = ? " +
                 "union " +
                 "select distinct p.name, v.version_label, '%3$s', " +
-                "r.id, r.name, null, null, null, null " +
+                "r.id, r.name, null, null, null, null, null as flow_id " +
                 "from %1$s_agent_deployment d " +
                 "inner join %1$s_flow f on f.id = d.flow_id " +
                 "inner join %1$s_project_version v on v.id = f.project_version_id " +
@@ -93,7 +93,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                 "where d.agent_id = ? and r.deleted=0 " +
                 "union " +
                 "select distinct p.name, v.version_label, '%3$s', " +
-                "r.id, r.name, null, null, null, null " +
+                "r.id, r.name, null, null, null, null, null as flow_id " +
                 "from %1$s_agent_deployment d " +
                 "inner join %1$s_flow f on f.id = d.flow_id " +
                 "inner join %1$s_project_version_dependency d on d.project_version_id = f.project_version_id " +
@@ -113,6 +113,7 @@ public class ConfigurationSqlService extends AbstractConfigurationService {
                         summary.setStartType(row.getString("start_type"));
                         summary.setLogLevel(row.getString("log_level"));
                         summary.setStartExpression(row.getString("start_expression"));
+                        summary.setArtifactId(row.getString("flow_id", false));
                         return summary;
                     }
                 }, agentId, agentId, agentId);
