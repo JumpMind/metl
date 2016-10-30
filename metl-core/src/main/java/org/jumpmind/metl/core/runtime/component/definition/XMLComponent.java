@@ -111,6 +111,12 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
     protected boolean inputOutputModelsMatch;
 
     @XmlAttribute(required = false)
+    protected boolean showInputModel = false;
+
+    @XmlAttribute(required = false)
+    protected boolean showOutputModel = false;
+    
+    @XmlAttribute(required = false)
     protected MessageType inputMessageType;
 
     @XmlAttribute(required = false)
@@ -265,4 +271,21 @@ public class XMLComponent implements Serializable, Comparable<XMLComponent> {
     public String getKeywords() {
         return keywords;
     }
+    
+    public boolean isShowInputModel() {
+        return showInputModel;
+    }
+    
+    public void setShowInputModel(boolean showInputModel) {
+        this.showInputModel = showInputModel;
+    }
+    
+    public boolean isShowOutputModel() {
+        return showOutputModel;
+    }
+    
+    public void setShowOutputModel(boolean showOutputModel) {
+        this.showOutputModel = showOutputModel;
+    }
+    
 }
