@@ -1064,7 +1064,7 @@
              outputMessageType='any'
              resourceCategory='any'
              supportsMultipleThreads='true'>
-    <name>Script</name>
+    <name>Groovy Script</name>
     <className>org.jumpmind.metl.core.runtime.component.Script</className>
     <keywords>groovy,logic,java</keywords>
     <description></description>
