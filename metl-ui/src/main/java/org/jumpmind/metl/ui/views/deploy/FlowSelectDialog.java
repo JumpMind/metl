@@ -37,13 +37,9 @@ import org.jumpmind.vaadin.ui.common.ResizableWindow;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
-import com.vaadin.ui.Tree.ExpandEvent;
-import com.vaadin.ui.Tree.ExpandListener;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -59,7 +55,6 @@ public class FlowSelectDialog extends ResizableWindow {
     
     IFlowSelectListener listener;
     
-    @SuppressWarnings({ "serial" })
     public FlowSelectDialog(ApplicationContext context, String caption, String introText,
     		boolean includeTestFlows) {
         super(caption);
@@ -69,13 +64,11 @@ public class FlowSelectDialog extends ResizableWindow {
         tree.addContainerProperty("name", String.class, "");
         tree.setItemCaptionPropertyId("name");
         tree.setItemCaptionMode(ItemCaptionMode.PROPERTY);
-        tree.addExpandListener(new ExpandListener() {
-            public void nodeExpand(ExpandEvent event) {
-                Object itemId = event.getItemId();
-                if (itemId instanceof ProjectVersion) {
-                    addFlowsToVersion((ProjectVersion) itemId, includeTestFlows);
-                }
-            }               
+        tree.addExpandListener(event -> {
+            Object itemId = event.getItemId();
+            if (itemId instanceof ProjectVersion) {
+                addFlowsToVersion((ProjectVersion) itemId, includeTestFlows);
+            }
         });
         addProjects();
         
@@ -101,19 +94,17 @@ public class FlowSelectDialog extends ResizableWindow {
         Button selectButton = new Button("Select");
         addComponent(buildButtonFooter(cancelButton, selectButton));
         
-        cancelButton.addClickListener(new ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                close();
-            }
+        cancelButton.addClickListener(event -> {
+            close();
         });
 
-        selectButton.addClickListener(new ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                Collection<FlowName> flowCollection = getFlowCollection(includeTestFlows);
+        selectButton.addClickListener(event -> {
+            Collection<FlowName> flowCollection = getFlowCollection(includeTestFlows);
+            if (flowCollection.size() > 0) {
                 listener.selected(flowCollection);
                 close();
             }
-        });     
+        });
     }
 
     @SuppressWarnings("unchecked")
@@ -127,7 +118,7 @@ public class FlowSelectDialog extends ResizableWindow {
         for (Object itemId : itemIds) {
             if (itemId instanceof FlowName) {
                 flowCollection.add((FlowName) itemId);    
-            } else {
+            } else if (itemId instanceof ProjectVersion){
                 Collection<?> children = tree.getChildren(itemId);
                 if (children == null) {
                     addFlowsToVersion((ProjectVersion) itemId, includeTestFlows);
